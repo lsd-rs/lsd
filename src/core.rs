@@ -31,7 +31,7 @@ impl<'a> Core<'a> {
             } else if path.is_file() {
                 match LongMeta::from_path(path) {
                     Ok(meta) => files.push(meta),
-                    Err(err) => println!("err tu: {}", err),
+                    Err(err) => println!("err : {}", err),
                 };
             } else {
                 match path.metadata() {
@@ -75,8 +75,12 @@ impl<'a> Core<'a> {
         for entry in dir {
             if let Ok(entry) = entry {
                 match LongMeta::from_path(entry.path().as_path()) {
-                    Ok(meta) => content.push(meta),
-                    Err(err) => println!("err tu 2: {}", err),
+                    Ok(meta) => {
+                        if !meta.name.starts_with('.') || self.options.display_all {
+                            content.push(meta);
+                        }
+                    }
+                    Err(err) => println!("err 2: {}", err),
                 }
             }
         }
