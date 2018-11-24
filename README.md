@@ -4,8 +4,8 @@ A ls command with a lot of pretty colors.
 
 ## Description
 
-This project is a rewrite of the super [colorls](https://github.com/athityakumar/colorls)
-project in rust.
+This project is heavily inspired by the super [colorls](https://github.com/athityakumar/colorls)
+project but with some little differences. For example is written is rust and not ruby.
 
 ## Screenshot
 
