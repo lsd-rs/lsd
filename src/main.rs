@@ -7,6 +7,7 @@ extern crate size;
 extern crate time;
 extern crate users;
 
+mod color;
 mod core;
 mod formatter;
 mod logo;
