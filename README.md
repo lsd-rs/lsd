@@ -19,7 +19,7 @@ project in rust. For now it only handle the `-l` format (used by default).
 - [ ] Handle the ls without the `-l` option (indentation included)
 - [ ] Handle the tree (`--tree`) output option
 - [ ] Handle the json (`--json`) output option
-- [ ] Handle Named piped
+- [ ] Handle Named pipes
 - [ ] Handle sockets
 - [ ] Handle block devices
 - [ ] Handle character devices
