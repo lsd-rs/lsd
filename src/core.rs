@@ -27,7 +27,7 @@ pub struct Meta {
 impl<'a> Core<'a> {
     pub fn new(options: &'a Options) -> Core<'a> {
         Core {
-            options: options,
+            options,
             formatter: Formatter::new(),
         }
     }
@@ -59,13 +59,13 @@ impl<'a> Core<'a> {
         files.sort_unstable_by(sort_by_meta);
         dirs.sort_unstable();
 
-        if files.len() > 0 {
-            self.print_long(&mut files);
+        if !files.is_empty() {
+            self.print_long(&files);
         }
 
         for dir in dirs {
             let folder_metas = self.list_folder_content(dir);
-            if folder_metas.len() == 0 {
+            if folder_metas.is_empty() {
                 continue;
             }
 
@@ -114,7 +114,7 @@ impl<'a> Core<'a> {
         }
 
         // Skip the hidden files if the 'display_all' option is not set.
-        if name.unwrap().starts_with(".") && !self.options.display_all {
+        if name.unwrap().starts_with('.') && !self.options.display_all {
             return None;
         }
 
@@ -160,22 +160,22 @@ impl<'a> Core<'a> {
             path: path.to_path_buf(),
             metadata: meta,
             name: String::from(name.unwrap()),
-            user: user,
-            group: group,
-            symlink: symlink,
+            user,
+            group,
+            symlink,
             size_value: size_parts[0].to_string(),
             size_unit: size_parts[1].to_string(),
         })
     }
 
-    fn print_long(&self, metas: &Vec<Meta>) {
-        let max_user_length = self.detect_user_lenght(metas);
-        let max_group_length = self.detect_group_lenght(metas);
-        let (max_size_value_length, max_size_unit_length) = self.detect_size_lenghts(metas);
+    fn print_long(&self, metas: &[Meta]) {
+        let max_user_length = self.detect_user_lenght(&metas);
+        let max_group_length = self.detect_group_lenght(&metas);
+        let (max_size_value_length, max_size_unit_length) = self.detect_size_lenghts(&metas);
 
         for meta in metas {
-            print!(
-                "  {}  {}  {}  {}  {}  {}\n",
+            println!(
+                "  {}  {}  {}  {}  {}  {}",
                 self.formatter.format_permissions(&meta),
                 self.formatter.format_user(&meta.user, max_user_length),
                 self.formatter.format_group(&meta.group, max_group_length),
@@ -187,7 +187,7 @@ impl<'a> Core<'a> {
         }
     }
 
-    fn detect_user_lenght(&self, paths: &Vec<Meta>) -> usize {
+    fn detect_user_lenght(&self, paths: &[Meta]) -> usize {
         let mut max: usize = 0;
 
         for path in paths {
@@ -199,7 +199,7 @@ impl<'a> Core<'a> {
         max
     }
 
-    fn detect_group_lenght(&self, paths: &Vec<Meta>) -> usize {
+    fn detect_group_lenght(&self, paths: &[Meta]) -> usize {
         let mut max: usize = 0;
 
         for path in paths {
@@ -211,7 +211,7 @@ impl<'a> Core<'a> {
         max
     }
 
-    fn detect_size_lenghts(&self, paths: &Vec<Meta>) -> (usize, usize) {
+    fn detect_size_lenghts(&self, paths: &[Meta]) -> (usize, usize) {
         let mut max_value_length: usize = 0;
         let mut max_unit_size: usize = 0;
 

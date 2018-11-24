@@ -71,7 +71,7 @@ lazy_static! {
         m.insert(Elem::FileLarge, Colour::RGB(0xFF, 0xB0, 0x00));
 
         // Link
-        m.insert(Elem::Link, Colour::RGB(0x3B, 0xCE, 0xCe));
+        m.insert(Elem::Link, Colour::RGB(0x3B, 0xCE, 0xCE));
 
         m
     };
@@ -87,15 +87,12 @@ impl Formatter {
     pub fn format_name(&self, meta: &Meta) -> String {
         let mut content = String::new();
 
-        let color = match meta.metadata.is_dir() {
-            true => {
-                content = content + "  " + &meta.name;
-                Colors[&Elem::Dir]
-            }
-            false => {
-                content = content + &self.get_file_logo(&meta.path) + "  " + &meta.name;
-                Colors[&Elem::UnrecognizedFile]
-            }
+        let color = if meta.metadata.is_dir() {
+            content = content + "  " + &meta.name;
+            Colors[&Elem::Dir]
+        } else {
+            content = content + &self.get_file_logo(&meta.path) + "  " + &meta.name;
+            Colors[&Elem::UnrecognizedFile]
         };
 
         content = color.paint(content).to_string();
@@ -149,69 +146,69 @@ impl Formatter {
 
         // User Read Permisssions
         match mode & 0o400 {
-            0 => res = res + no_access.as_str(),
-            _ => res = res + read_perm.as_str(),
+            0 => res += no_access.as_str(),
+            _ => res += read_perm.as_str(),
         }
 
         // User Write Permisssions
         match mode & 0o200 {
-            0 => res = res + no_access.as_str(),
-            _ => res = res + write_perm.as_str(),
+            0 => res += no_access.as_str(),
+            _ => res += write_perm.as_str(),
         }
 
         // User Exec Permisssions
         match mode & 0o100 {
-            0 => res = res + no_access.as_str(),
-            _ => res = res + exec_perm.as_str(),
+            0 => res += no_access.as_str(),
+            _ => res += exec_perm.as_str(),
         }
 
         // Group Read Permisssions
         match mode & 0o040 {
-            0 => res = res + no_access.as_str(),
-            _ => res = res + read_perm.as_str(),
+            0 => res += no_access.as_str(),
+            _ => res += read_perm.as_str(),
         }
 
         // Group Write Permisssions
         match mode & 0o020 {
-            0 => res = res + no_access.as_str(),
-            _ => res = res + write_perm.as_str(),
+            0 => res += no_access.as_str(),
+            _ => res += write_perm.as_str(),
         }
 
         // Group Exec Permisssions
         match mode & 0o010 {
-            0 => res = res + no_access.as_str(),
-            _ => res = res + exec_perm.as_str(),
+            0 => res += no_access.as_str(),
+            _ => res += exec_perm.as_str(),
         }
 
         // Other Read Permisssions
         match mode & 0o040 {
-            0 => res = res + no_access.as_str(),
-            _ => res = res + read_perm.as_str(),
+            0 => res += no_access.as_str(),
+            _ => res += read_perm.as_str(),
         }
 
         // Other Write Permisssions
         match mode & 0o020 {
-            0 => res = res + no_access.as_str(),
-            _ => res = res + write_perm.as_str(),
+            0 => res += no_access.as_str(),
+            _ => res += write_perm.as_str(),
         }
 
         // Other Exec Permisssions
         match mode & 0o010 {
-            0 => res = res + no_access.as_str(),
-            _ => res = res + exec_perm.as_str(),
+            0 => res += no_access.as_str(),
+            _ => res += exec_perm.as_str(),
         }
 
         res.to_string()
     }
 
-    pub fn format_user(&self, user_name: &String, max_user_size: usize) -> String {
+    pub fn format_user(&self, user_name: &str, max_user_size: usize) -> String {
         if user_name.len() == max_user_size {
             return Colors[&Elem::User].paint(user_name).to_string();
         }
 
         let mut content = String::with_capacity(max_user_size);
 
-        content = content + user_name;
+        content += user_name;
 
         for _ in 0..(max_user_size - user_name.len()) {
             content.push(' ');
@@ -220,13 +217,13 @@ impl Formatter {
         content
     }
 
-    pub fn format_group(&self, group_name: &String, max_group_size: usize) -> String {
+    pub fn format_group(&self, group_name: &str, max_group_size: usize) -> String {
         if group_name.len() == max_group_size {
             return Colors[&Elem::Group].paint(group_name).to_string();
         }
 
         let mut content = String::with_capacity(max_group_size);
-        content = content + group_name;
+        content += group_name;
 
         for _ in 0..(max_group_size - group_name.len()) {
             content.push(' ');
@@ -247,20 +244,20 @@ impl Formatter {
             content.push(' ');
         }
 
-        content = content + meta.size_value.as_str();
+        content += meta.size_value.as_str();
         content.push(' ');
-        content = content + meta.size_unit.as_str();
+        content += meta.size_unit.as_str();
 
         for _ in 0..(max_unit_size - meta.size_unit.len()) {
             content.push(' ');
         }
 
         if meta.metadata.len() < 10 * 1044 * 1024 {
-            return Colors[&Elem::FileSmall].paint(content).to_string();
+            Colors[&Elem::FileSmall].paint(content).to_string()
         } else if meta.metadata.len() < 100 * 1044 * 1024 {
-            return Colors[&Elem::FileMedium].paint(content).to_string();
+            Colors[&Elem::FileMedium].paint(content).to_string()
         } else {
-            return Colors[&Elem::FileLarge].paint(content).to_string();
+            Colors[&Elem::FileLarge].paint(content).to_string()
         }
     }
 
