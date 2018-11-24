@@ -8,6 +8,7 @@ extern crate users;
 
 mod core;
 mod formatter;
+mod logo;
 
 use clap::{App, Arg};
 use core::Core;
