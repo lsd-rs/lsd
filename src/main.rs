@@ -2,6 +2,7 @@ extern crate clap;
 #[macro_use]
 extern crate lazy_static;
 extern crate ansi_term;
+extern crate failure;
 extern crate size;
 extern crate time;
 extern crate users;
@@ -9,6 +10,7 @@ extern crate users;
 mod core;
 mod formatter;
 mod logo;
+mod meta;
 
 use clap::{App, Arg};
 use core::Core;
