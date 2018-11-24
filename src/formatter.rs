@@ -2,6 +2,7 @@ use ansi_term::Colour;
 use core::Meta;
 use std::collections::HashMap;
 use std::os::unix::fs::PermissionsExt;
+use std::path::PathBuf;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use time::Timespec;
 
@@ -87,11 +88,17 @@ impl Formatter {
         let mut content = String::new();
 
         let color = match meta.metadata.is_dir() {
-            true => Colors[&Elem::Dir],
-            false => Colors[&Elem::UnrecognizedFile],
+            true => {
+                content = content + "  " + &meta.name;
+                Colors[&Elem::Dir]
+            }
+            false => {
+                content = content + &self.get_file_logo(&meta.path) + "  " + &meta.name;
+                Colors[&Elem::UnrecognizedFile]
+            }
         };
 
-        content = content + &color.paint(meta.name).to_string();
+        content = color.paint(content).to_string();
 
         let color = Colors[&Elem::Link];
         if let Some(ref link) = meta.symlink {
@@ -254,6 +261,80 @@ impl Formatter {
             return Colors[&Elem::FileMedium].paint(content).to_string();
         } else {
             return Colors[&Elem::FileLarge].paint(content).to_string();
+        }
+    }
+
+    fn get_file_logo(&self, name: &PathBuf) -> String {
+        match name.extension().unwrap_or_default().to_str().unwrap() {
+            "ai" => String::from("\u{e7b4}"),
+            "android" => String::from("\u{e70e}"),
+            "apple" => String::from("\u{f179}"),
+            "audio" => String::from("\u{f001}"),
+            "avro" => String::from("\u{e60b}"),
+            "c" => String::from("\u{e61e}"),
+            "clj" => String::from("\u{e768}"),
+            "coffee" => String::from("\u{f0f4}"),
+            "conf" => String::from("\u{e615}"),
+            "cpp" => String::from("\u{e61d}"),
+            "css" => String::from("\u{e749}"),
+            "d" => String::from("\u{e7af}"),
+            "dart" => String::from("\u{e798}"),
+            "db" => String::from("\u{f1c0}"),
+            "diff" => String::from("\u{f440}"),
+            "doc" => String::from("\u{f1c2}"),
+            "ebook" => String::from("\u{e28b}"),
+            "env" => String::from("\u{f462}"),
+            "epub" => String::from("\u{e28a}"),
+            "erl" => String::from("\u{e7b1}"),
+            "file" => String::from("\u{f15b}"),
+            "font" => String::from("\u{f031}"),
+            "gform" => String::from("\u{f298}"),
+            "git" => String::from("\u{f1d3}"),
+            "go" => String::from("\u{e626}"),
+            "gruntfile.js" => String::from("\u{e74c}"),
+            "hs" => String::from("\u{e777}"),
+            "html" => String::from("\u{f13b}"),
+            "image" => String::from("\u{f1c5}"),
+            "iml" => String::from("\u{e7b5}"),
+            "java" => String::from("\u{e204}"),
+            "js" => String::from("\u{e74e}"),
+            "json" => String::from("\u{e60b}"),
+            "jsx" => String::from("\u{e7ba}"),
+            "less" => String::from("\u{e758}"),
+            "log" => String::from("\u{f18d}"),
+            "lua" => String::from("\u{e620}"),
+            "md" => String::from("\u{f48a}"),
+            "mustache" => String::from("\u{e60f}"),
+            "npmignore" => String::from("\u{e71e}"),
+            "pdf" => String::from("\u{f1c1}"),
+            "php" => String::from("\u{e73d}"),
+            "pl" => String::from("\u{e769}"),
+            "ppt" => String::from("\u{f1c4}"),
+            "psd" => String::from("\u{e7b8}"),
+            "py" => String::from("\u{e606}"),
+            "r" => String::from("\u{f25d}"),
+            "rb" => String::from("\u{e21e}"),
+            "rdb" => String::from("\u{e76d}"),
+            "rss" => String::from("\u{f09e}"),
+            "rubydoc" => String::from("\u{e73b}"),
+            "sass" => String::from("\u{e603}"),
+            "scala" => String::from("\u{e737}"),
+            "shell" => String::from("\u{f489}"),
+            "sqlite3" => String::from("\u{e7c4}"),
+            "styl" => String::from("\u{e600}"),
+            "tex" => String::from("\u{e600}"),
+            "ts" => String::from("\u{e628}"),
+            "twig" => String::from("\u{e61c}"),
+            "txt" => String::from("\u{f15c}"),
+            "video" => String::from("\u{f03d}"),
+            "vim" => String::from("\u{e62b}"),
+            "windows" => String::from("\u{f17a}"),
+            "xls" => String::from("\u{f1c3}"),
+            "xml" => String::from("\u{e619}"),
+            "yarn.lock" => String::from("\u{e718}"),
+            "yml" => String::from("\u{f481}"),
+            "zip" => String::from("\u{f410}"),
+            _ => String::from("\u{f15b}"),
         }
     }
 }

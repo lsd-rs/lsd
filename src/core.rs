@@ -15,7 +15,7 @@ pub struct Core<'a> {
 #[derive(Debug)]
 pub struct Meta {
     pub path: PathBuf,
-    pub name: String
+    pub name: String,
     pub metadata: Metadata,
     pub group: String,
     pub user: String,
