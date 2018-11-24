@@ -5,7 +5,8 @@ A ls command with a lot of pretty colors.
 ## Description
 
 This project is heavily inspired by the super [colorls](https://github.com/athityakumar/colorls)
-project but with some little differences. For example is written is rust and not ruby.
+project but with some little differences. For example is written is rust and not ruby
+which make it really faster (around 10 times).
 
 ## Screenshot
 
