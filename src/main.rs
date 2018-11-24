@@ -27,7 +27,10 @@ fn main() {
         display_all: matches.is_present("all"),
     };
 
-    let inputs: Vec<&str> = matches.values_of("FILE").unwrap().collect();
+    let inputs: Vec<&str> = matches
+        .values_of("FILE")
+        .expect("failed to retrieve cli value")
+        .collect();
 
     let core = Core::new(&options);
 

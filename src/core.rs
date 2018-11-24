@@ -42,8 +42,16 @@ impl<'a> Core<'a> {
 
             if path.is_dir() {
                 dirs.push(path);
+            } else if path.is_file() {
+                files.push(
+                    self.path_to_meta(&path)
+                        .expect("failed to convert path to meta"),
+                );
             } else {
-                files.push(self.path_to_meta(&path).unwrap());
+                match path.metadata() {
+                    Ok(_) => panic!("shouldn't failed"),
+                    Err(err) => println!("cannot access '{}': {}", path.display(), err),
+                };
             }
         }
 
@@ -56,6 +64,10 @@ impl<'a> Core<'a> {
 
         for dir in dirs {
             let folder_metas = self.list_folder_content(dir);
+            if folder_metas.len() == 0 {
+                continue;
+            }
+
             if print_folder_name {
                 println!("\n{}:", dir.display())
             }
@@ -66,7 +78,15 @@ impl<'a> Core<'a> {
     pub fn list_folder_content(&self, folder: &Path) -> Vec<Meta> {
         let mut content: Vec<Meta> = Vec::new();
 
-        for entry in folder.read_dir().expect("read_dir call failed") {
+        let dir = match folder.read_dir() {
+            Ok(dir) => dir,
+            Err(err) => {
+                println!("cannot open directory'{}': {}", folder.display(), err);
+                return content;
+            }
+        };
+
+        for entry in dir {
             if let Ok(entry) = entry {
                 if let Some(meta) = self.path_to_meta(entry.path().as_path()) {
                     content.push(meta);
@@ -100,24 +120,36 @@ impl<'a> Core<'a> {
         let meta;
         let mut symlink = None;
         if let Ok(res) = read_link(path) {
-            meta = path.symlink_metadata().unwrap();
-            symlink = Some(res.to_str().unwrap().to_string());
+            meta = path
+                .symlink_metadata()
+                .expect("failed to retrieve symlink metadata");
+            symlink = Some(
+                res.to_str()
+                    .expect("failed to convert symlink to str")
+                    .to_string(),
+            );
         } else {
-            meta = path.metadata().unwrap();
+            meta = match path.metadata() {
+                Ok(meta) => meta,
+                Err(err) => {
+                    println!("err: {}", err);
+                    return None;
+                }
+            }
         }
 
         let user = get_user_by_uid(meta.uid())
-            .unwrap()
+            .expect("failed to get user name")
             .name()
             .to_str()
-            .unwrap()
+            .expect("failed to convert user name to str")
             .to_string();
 
         let group = get_group_by_gid(meta.gid())
-            .unwrap()
+            .expect("failed to get the group name")
             .name()
             .to_str()
-            .unwrap()
+            .expect("failed to convert group name to str")
             .to_string();
 
         let size = Size::Bytes(meta.len()).to_string(Base::Base10, Style::Abbreviated);

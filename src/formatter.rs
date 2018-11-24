@@ -91,7 +91,12 @@ impl Formatter {
             false => Colors[&Elem::UnrecognizedFile],
         };
 
-        let file_name = meta.path.file_name().unwrap().to_str().unwrap();
+        let file_name = meta
+            .path
+            .file_name()
+            .expect("failed to retrieve path filename")
+            .to_str()
+            .expect("failed to convert path name to str");
         content = content + &color.paint(file_name).to_string();
 
         let color = Colors[&Elem::Link];
@@ -104,7 +109,10 @@ impl Formatter {
     }
 
     pub fn format_date(&self, meta: &Meta) -> String {
-        let modified_time = meta.metadata.modified().unwrap();
+        let modified_time = meta
+            .metadata
+            .modified()
+            .expect("failed to retrieve modified date");
 
         let now = SystemTime::now();
 
@@ -117,7 +125,9 @@ impl Formatter {
             color = Colors[&Elem::Older];
         }
 
-        let modified_time_since_epoch = modified_time.duration_since(UNIX_EPOCH).unwrap();
+        let modified_time_since_epoch = modified_time
+            .duration_since(UNIX_EPOCH)
+            .expect("failed to convert modified time to timestamp");
         let time = time::at(Timespec::new(
             modified_time_since_epoch.as_secs() as i64,
             modified_time_since_epoch.subsec_nanos() as i32,
