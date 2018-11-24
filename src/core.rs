@@ -15,6 +15,7 @@ pub struct Core<'a> {
 #[derive(Debug)]
 pub struct Meta {
     pub path: PathBuf,
+    pub name: String
     pub metadata: Metadata,
     pub group: String,
     pub user: String,
@@ -158,6 +159,7 @@ impl<'a> Core<'a> {
         Some(Meta {
             path: path.to_path_buf(),
             metadata: meta,
+            name: String::from(name.unwrap()),
             user: user,
             group: group,
             symlink: symlink,

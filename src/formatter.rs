@@ -91,13 +91,7 @@ impl Formatter {
             false => Colors[&Elem::UnrecognizedFile],
         };
 
-        let file_name = meta
-            .path
-            .file_name()
-            .expect("failed to retrieve path filename")
-            .to_str()
-            .expect("failed to convert path name to str");
-        content = content + &color.paint(file_name).to_string();
+        content = content + &color.paint(meta.name).to_string();
 
         let color = Colors[&Elem::Link];
         if let Some(ref link) = meta.symlink {
