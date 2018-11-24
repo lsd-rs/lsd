@@ -1,6 +1,6 @@
 use ansi_term::Colour;
 use logo::Logo;
-use meta::LongMeta;
+use meta::Meta;
 use std::collections::HashMap;
 use std::os::unix::fs::PermissionsExt;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
@@ -84,7 +84,7 @@ impl Formatter {
         Formatter {}
     }
 
-    pub fn format_name(&self, meta: &LongMeta) -> String {
+    pub fn format_name(&self, meta: &Meta) -> String {
         let mut content = String::new();
 
         let color = if meta.metadata.is_dir() {
@@ -106,7 +106,7 @@ impl Formatter {
         content
     }
 
-    pub fn format_date(&self, meta: &LongMeta) -> String {
+    pub fn format_date(&self, meta: &Meta) -> String {
         let modified_time = meta
             .metadata
             .modified()
@@ -134,7 +134,7 @@ impl Formatter {
         color.paint(time.ctime().to_string()).to_string()
     }
 
-    pub fn format_permissions(&self, meta: &LongMeta) -> String {
+    pub fn format_permissions(&self, meta: &Meta) -> String {
         let mut res = String::with_capacity(10);
 
         let mode = meta.metadata.permissions().mode();
@@ -234,7 +234,7 @@ impl Formatter {
 
     pub fn format_size(
         &self,
-        meta: &LongMeta,
+        meta: &Meta,
         max_value_length: usize,
         max_unit_size: usize,
     ) -> String {

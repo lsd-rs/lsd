@@ -17,7 +17,7 @@ pub enum MetaError {
 }
 
 #[derive(Debug)]
-pub struct LongMeta {
+pub struct Meta {
     pub path: PathBuf,
     pub name: String,
     pub metadata: Metadata,
@@ -28,7 +28,7 @@ pub struct LongMeta {
     pub size_unit: String,
 }
 
-impl LongMeta {
+impl Meta {
     pub fn from_path(path: &Path) -> Result<Self, MetaError> {
         // Retrieve and convert the name into an utf-8 String.
         let name = match path.file_name() {
@@ -100,7 +100,7 @@ impl LongMeta {
         let size = Size::Bytes(meta.len()).to_string(Base::Base10, Style::Abbreviated);
         let size_parts: Vec<&str> = size.split(' ').collect();
 
-        Ok(LongMeta {
+        Ok(Meta {
             path: path.to_path_buf(),
             metadata: meta,
             name: String::from(name),

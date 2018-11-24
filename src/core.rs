@@ -1,5 +1,5 @@
 use formatter::*;
-use meta::LongMeta;
+use meta::Meta;
 use std::cmp::Ordering;
 use std::path::Path;
 use Options;
@@ -29,7 +29,7 @@ impl<'a> Core<'a> {
             if path.is_dir() {
                 dirs.push(path);
             } else if path.is_file() {
-                match LongMeta::from_path(path) {
+                match Meta::from_path(path) {
                     Ok(meta) => files.push(meta),
                     Err(err) => println!("err : {}", err),
                 };
@@ -61,8 +61,8 @@ impl<'a> Core<'a> {
         }
     }
 
-    pub fn list_folder_content(&self, folder: &Path) -> Vec<LongMeta> {
-        let mut content: Vec<LongMeta> = Vec::new();
+    pub fn list_folder_content(&self, folder: &Path) -> Vec<Meta> {
+        let mut content: Vec<Meta> = Vec::new();
 
         let dir = match folder.read_dir() {
             Ok(dir) => dir,
@@ -74,7 +74,7 @@ impl<'a> Core<'a> {
 
         for entry in dir {
             if let Ok(entry) = entry {
-                match LongMeta::from_path(entry.path().as_path()) {
+                match Meta::from_path(entry.path().as_path()) {
                     Ok(meta) => {
                         if !meta.name.starts_with('.') || self.options.display_all {
                             content.push(meta);
@@ -90,7 +90,7 @@ impl<'a> Core<'a> {
         content
     }
 
-    fn print_long(&self, metas: &[LongMeta]) {
+    fn print_long(&self, metas: &[Meta]) {
         let max_user_length = self.detect_user_lenght(&metas);
         let max_group_length = self.detect_group_lenght(&metas);
         let (max_size_value_length, max_size_unit_length) = self.detect_size_lenghts(&metas);
@@ -109,7 +109,7 @@ impl<'a> Core<'a> {
         }
     }
 
-    fn detect_user_lenght(&self, paths: &[LongMeta]) -> usize {
+    fn detect_user_lenght(&self, paths: &[Meta]) -> usize {
         let mut max: usize = 0;
 
         for path in paths {
@@ -121,7 +121,7 @@ impl<'a> Core<'a> {
         max
     }
 
-    fn detect_group_lenght(&self, paths: &[LongMeta]) -> usize {
+    fn detect_group_lenght(&self, paths: &[Meta]) -> usize {
         let mut max: usize = 0;
 
         for path in paths {
@@ -133,7 +133,7 @@ impl<'a> Core<'a> {
         max
     }
 
-    fn detect_size_lenghts(&self, paths: &[LongMeta]) -> (usize, usize) {
+    fn detect_size_lenghts(&self, paths: &[Meta]) -> (usize, usize) {
         let mut max_value_length: usize = 0;
         let mut max_unit_size: usize = 0;
 
@@ -151,7 +151,7 @@ impl<'a> Core<'a> {
     }
 }
 
-fn sort_by_meta(a: &LongMeta, b: &LongMeta) -> Ordering {
+fn sort_by_meta(a: &Meta, b: &Meta) -> Ordering {
     if a.path.is_dir() == b.path.is_dir() {
         a.path.cmp(&b.path)
     } else if a.path.is_dir() && b.path.is_file() {
