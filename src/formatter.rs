@@ -19,13 +19,17 @@ impl Formatter {
         let mut content = String::new();
 
         let color = if meta.metadata.is_dir() {
-            content = content + Logo::folder().as_str() + "  " + &meta.name;
             Colors[&Elem::Dir]
         } else {
-            content = content + Logo::from_pathbuf(&meta.path).as_str() + "  " + &meta.name;
             Colors[&Elem::UnrecognizedFile]
         };
 
+        let mut name = meta.name.clone();
+        if meta.metadata.is_dir() {
+            name.push('/');
+        }
+
+        content = content + Logo::from_meta(&meta).as_str() + "  " + &name;
         content = color.paint(content).to_string();
 
         content
