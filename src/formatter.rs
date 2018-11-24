@@ -19,7 +19,7 @@ impl Formatter {
         let mut content = String::new();
 
         let color = if meta.metadata.is_dir() {
-            content = content + Logo::folder().as_str() + " " + &meta.name;
+            content = content + Logo::folder().as_str() + "  " + &meta.name;
             Colors[&Elem::Dir]
         } else {
             content = content + Logo::from_pathbuf(&meta.path).as_str() + "  " + &meta.name;
@@ -28,10 +28,15 @@ impl Formatter {
 
         content = color.paint(content).to_string();
 
+        content
+    }
+
+    pub fn format_symlink(&self, meta: &Meta) -> String {
+        let mut content = String::new();
+
         let color = Colors[&Elem::Link];
         if let Some(ref link) = meta.symlink_target {
-            content =
-                content + &color.paint(String::from(" ⇒ ") + &color.paint(link).to_string());
+            content += &color.paint(String::from(" ⇒ ") + &color.paint(link).to_string());
         }
 
         content

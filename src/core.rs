@@ -2,6 +2,7 @@ use formatter::*;
 use meta::Meta;
 use std::cmp::Ordering;
 use std::path::Path;
+use terminal_size::terminal_size;
 use Options;
 
 pub struct Core<'a> {
@@ -17,7 +18,7 @@ impl<'a> Core<'a> {
         }
     }
 
-    pub fn print(&self, inputs: Vec<&str>) {
+    pub fn run(&self, inputs: Vec<&str>) {
         let print_folder_name: bool = inputs.len() > 1;
 
         let mut dirs = Vec::new();
@@ -45,7 +46,7 @@ impl<'a> Core<'a> {
         dirs.sort_unstable();
 
         if !files.is_empty() {
-            self.print_long(&files);
+            self.print(&files);
         }
 
         for dir in dirs {
@@ -57,7 +58,72 @@ impl<'a> Core<'a> {
             if print_folder_name {
                 println!("\n{}:", dir.display())
             }
-            self.print_long(&folder_metas);
+            self.print(&folder_metas);
+        }
+    }
+
+    fn print(&self, metas: &[Meta]) {
+        if self.options.display_long {
+            self.print_long(metas)
+        } else {
+            self.print_short(metas)
+        }
+    }
+
+    fn print_short(&self, metas: &[Meta]) {
+        let width = match terminal_size() {
+            Some((w, _)) => w.0 as usize,
+            None => panic!("failed to retrieve terminal size"),
+        };
+
+        let mut max_name_width = 0;
+        for meta in metas {
+            if meta.name.len() > max_name_width {
+                max_name_width = meta.name.len();
+            }
+        }
+
+        let nb_entry_per_row = width / (max_name_width + 4 + 3);
+
+        let mut x = 1;
+        let mut line = String::new();
+        for meta in metas {
+            line += "    ";
+            line += &self.formatter.format_name(&meta);
+            for _ in 0..(max_name_width - meta.name.len()) {
+                line.push(' ');
+            }
+            x += 1;
+
+            if x >= nb_entry_per_row {
+                x = 1;
+                println!("{}", line);
+                line = String::new();
+            }
+        }
+
+        if !line.is_empty() {
+            println!("{}", line);
+        }
+    }
+
+    fn print_long(&self, metas: &[Meta]) {
+        let max_user_length = self.detect_user_lenght(&metas);
+        let max_group_length = self.detect_group_lenght(&metas);
+        let (max_size_value_length, max_size_unit_length) = self.detect_size_lenghts(&metas);
+
+        for meta in metas {
+            println!(
+                "  {}  {}  {}  {}  {}  {}{}",
+                self.formatter.format_permissions(&meta),
+                self.formatter.format_user(&meta.user, max_user_length),
+                self.formatter.format_group(&meta.group, max_group_length),
+                self.formatter
+                    .format_size(&meta, max_size_value_length, max_size_unit_length),
+                self.formatter.format_date(&meta),
+                self.formatter.format_name(&meta),
+                self.formatter.format_symlink(&meta),
+            );
         }
     }
 
@@ -88,25 +154,6 @@ impl<'a> Core<'a> {
         content.sort_unstable_by(sort_by_meta);
 
         content
-    }
-
-    fn print_long(&self, metas: &[Meta]) {
-        let max_user_length = self.detect_user_lenght(&metas);
-        let max_group_length = self.detect_group_lenght(&metas);
-        let (max_size_value_length, max_size_unit_length) = self.detect_size_lenghts(&metas);
-
-        for meta in metas {
-            println!(
-                "  {}  {}  {}  {}  {}  {}",
-                self.formatter.format_permissions(&meta),
-                self.formatter.format_user(&meta.user, max_user_length),
-                self.formatter.format_group(&meta.group, max_group_length),
-                self.formatter
-                    .format_size(&meta, max_size_value_length, max_size_unit_length),
-                self.formatter.format_date(&meta),
-                self.formatter.format_name(&meta),
-            );
-        }
     }
 
     fn detect_user_lenght(&self, paths: &[Meta]) -> usize {

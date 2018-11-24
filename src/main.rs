@@ -4,6 +4,7 @@ extern crate lazy_static;
 extern crate ansi_term;
 extern crate failure;
 extern crate size;
+extern crate terminal_size;
 extern crate time;
 extern crate users;
 
@@ -18,6 +19,7 @@ use core::Core;
 
 pub struct Options {
     pub display_all: bool,
+    pub display_long: bool,
 }
 
 fn main() {
@@ -25,10 +27,12 @@ fn main() {
         .about("A ls comment with a lot of pretty colors and some other stuff.")
         .arg(Arg::with_name("FILE").multiple(true).default_value("."))
         .arg(Arg::with_name("all").short("a"))
+        .arg(Arg::with_name("long").short("l"))
         .get_matches();
 
     let options = Options {
         display_all: matches.is_present("all"),
+        display_long: matches.is_present("long"),
     };
 
     let inputs: Vec<&str> = matches
@@ -38,5 +42,5 @@ fn main() {
 
     let core = Core::new(&options);
 
-    core.print(inputs);
+    core.run(inputs);
 }
