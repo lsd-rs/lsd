@@ -17,13 +17,30 @@ pub enum MetaError {
 }
 
 #[derive(Debug)]
+pub enum Type {
+    Symlink(String),
+    File,
+    Directory,
+}
+
+impl From<Metadata> for Type {
+    fn from(meta: Metadata) -> Self {
+        if meta.is_dir() {
+            Type::Directory
+        } else {
+            Type::File
+        }
+    }
+}
+
+#[derive(Debug)]
 pub struct Meta {
     pub path: PathBuf,
     pub name: String,
     pub metadata: Metadata,
     pub group: String,
     pub user: String,
-    pub symlink_target: Option<String>,
+    pub node_type: Type,
     pub size_value: String,
     pub size_unit: String,
 }
@@ -48,8 +65,8 @@ impl Meta {
         };
 
         // Check if the path is a symlink or not and retrieve the corresponding
-        // metadatas.
-        let (meta, symlink_target) = match read_link(path) {
+        // metadatas, and type.
+        let (meta, node_type) = match read_link(path) {
             Ok(res) => {
                 // This path is a symlink.
                 //
@@ -58,17 +75,17 @@ impl Meta {
                     .symlink_metadata()
                     .expect("failed to retrieve symlink metadata");
 
-                let symlink = res
+                let target = res
                     .to_str()
                     .expect("failed to convert symlink to str")
                     .to_string();
 
-                (meta, Some(symlink))
+                (meta, Type::Symlink(target))
             }
             _ => {
                 // This path is a file.
                 //
-                // Retireve the metadate and return no link target.
+                // Retireve the metadata and return the node_type.
                 let meta = match path.metadata() {
                     Ok(meta) => meta,
                     Err(err) => {
@@ -79,7 +96,7 @@ impl Meta {
                     }
                 };
 
-                (meta, None)
+                (meta, Type::from(meta))
             }
         };
 
@@ -106,7 +123,7 @@ impl Meta {
             name: String::from(name),
             user,
             group,
-            symlink_target,
+            node_type: node_type,
             size_value: size_parts[0].to_string(),
             size_unit: size_parts[1].to_string(),
         })

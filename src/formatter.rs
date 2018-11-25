@@ -1,6 +1,6 @@
 use color::{Colors, Elem};
 use icon;
-use meta::Meta;
+use meta::{Meta, Type};
 use std::os::unix::fs::PermissionsExt;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use time::Timespec;
@@ -38,9 +38,9 @@ impl Formatter {
     pub fn format_symlink(&self, meta: &Meta) -> String {
         let mut content = String::new();
 
-        let color = Colors[&Elem::Link];
-        if let Some(ref link) = meta.symlink_target {
-            content += &color.paint(String::from(" ⇒ ") + &color.paint(link).to_string());
+        if let Type::Symlink(ref target) = meta.node_type {
+            let color = Colors[&Elem::Link];
+            content += &color.paint(String::from(" ⇒ ") + &color.paint(target).to_string());
         }
 
         content
