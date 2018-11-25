@@ -1,5 +1,8 @@
 # LSD
 
+[![license](http://img.shields.io/badge/license-Apache%20v2-orange.svg)](https://raw.githubusercontent.com/Peltoche/ical-rs/master/LICENSE)
+[![Latest version](https://img.shields.io/crates/v/lsd.svg)](https://crates.io/crates/lsd)
+
 # Table of Contents
 
 1. [Description](#description)
