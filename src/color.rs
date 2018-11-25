@@ -4,9 +4,11 @@ use std::collections::HashMap;
 #[allow(dead_code)]
 #[derive(Hash, Debug, Eq, PartialEq, Copy, Clone)]
 pub enum Elem {
-    /// Path Kind
+    /// Node type
+    File,
     UnrecognizedFile,
     RecognizedFile,
+    SymLink,
     Dir,
 
     /// Permissions
@@ -48,9 +50,10 @@ lazy_static! {
         m.insert(Elem::NoAccess, Colour::RGB(0xD7, 0x89, 0x89));
 
         // Path Kind
-        m.insert(Elem::UnrecognizedFile, Colour::RGB(0xFF, 0xFF, 0x04)); // gold
-        m.insert(Elem::RecognizedFile, Colour::RGB(0x04, 0xFF, 0x04)); // limon
-        m.insert(Elem::Dir, Colour::RGB(0x00, 0xAF, 0xFF)); // dodgerblue
+        m.insert(Elem::UnrecognizedFile, Colour::RGB(0xFF, 0xFF, 0x04));
+        m.insert(Elem::RecognizedFile, Colour::RGB(0x04, 0xFF, 0x04));
+        m.insert(Elem::Dir, Colour::RGB(0x00, 0xAF, 0xFF));
+        m.insert(Elem::SymLink, Colour::RGB(0xFF, 0x00, 0x00));
 
         // Last Time Modified
         m.insert(Elem::HourOld, Colour::RGB(0x2C, 0xFF, 0x2C));
@@ -64,6 +67,25 @@ lazy_static! {
 
         // Link
         m.insert(Elem::Link, Colour::RGB(0x3B, 0xCE, 0xCE));
+
+        m
+    };
+}
+
+lazy_static! {
+    pub static ref PrecomputedElems : HashMap<Elem, String> = {
+        let mut m = HashMap::new();
+
+        // Permissions
+        m.insert(Elem::Read, Colors[&Elem::Read].paint(String::from("r")).to_string());
+        m.insert(Elem::Write, Colors[&Elem::Write].paint(String::from("w")).to_string());
+        m.insert(Elem::Exec, Colors[&Elem::Exec].paint(String::from("x")).to_string());
+        m.insert(Elem::NoAccess, Colors[&Elem::NoAccess].paint(String::from("-")).to_string());
+
+        // Note types
+        m.insert(Elem::File , Colors[&Elem::UnrecognizedFile].paint(String::from(".")).to_string());
+        m.insert(Elem::Dir, Colors[&Elem::Dir].paint(String::from("d")).to_string());
+        m.insert(Elem::SymLink, Colors[&Elem::SymLink].paint(String::from("l")).to_string());
 
         m
     };

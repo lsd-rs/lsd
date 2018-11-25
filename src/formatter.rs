@@ -1,4 +1,4 @@
-use color::{Colors, Elem};
+use color::{Colors, Elem, PrecomputedElems};
 use icon;
 use meta::{Meta, Type};
 use std::os::unix::fs::PermissionsExt;
@@ -38,7 +38,7 @@ impl Formatter {
     pub fn format_symlink(&self, meta: &Meta) -> String {
         let mut content = String::new();
 
-        if let Type::Symlink(ref target) = meta.node_type {
+        if let Type::SymLink(ref target) = meta.node_type {
             let color = Colors[&Elem::Link];
             content += &color.paint(String::from(" ⇒ ") + &color.paint(target).to_string());
         }
@@ -75,67 +75,68 @@ impl Formatter {
     }
 
     pub fn format_permissions(&self, meta: &Meta) -> String {
-        let mut res = String::with_capacity(10);
+        let mut res = String::with_capacity(11);
 
         let mode = meta.metadata.permissions().mode();
 
-        let read_perm = Colors[&Elem::Read].paint(String::from("r")).to_string();
-        let write_perm = Colors[&Elem::Write].paint(String::from("w")).to_string();
-        let exec_perm = Colors[&Elem::Exec].paint(String::from("x")).to_string();
-        let no_access = Colors[&Elem::NoAccess].paint(String::from("-")).to_string();
+        match meta.node_type {
+            Type::File => res += PrecomputedElems[&Elem::File].as_str(),
+            Type::Directory => res += PrecomputedElems[&Elem::Dir].as_str(),
+            Type::SymLink(_) => res += PrecomputedElems[&Elem::SymLink].as_str(),
+        }
 
         // User Read Permisssions
         match mode & 0o400 {
-            0 => res += no_access.as_str(),
-            _ => res += read_perm.as_str(),
+            0 => res += PrecomputedElems[&Elem::NoAccess].as_str(),
+            _ => res += PrecomputedElems[&Elem::Read].as_str(),
         }
 
         // User Write Permisssions
         match mode & 0o200 {
-            0 => res += no_access.as_str(),
-            _ => res += write_perm.as_str(),
+            0 => res += PrecomputedElems[&Elem::NoAccess].as_str(),
+            _ => res += PrecomputedElems[&Elem::Write].as_str(),
         }
 
         // User Exec Permisssions
         match mode & 0o100 {
-            0 => res += no_access.as_str(),
-            _ => res += exec_perm.as_str(),
+            0 => res += PrecomputedElems[&Elem::NoAccess].as_str(),
+            _ => res += PrecomputedElems[&Elem::Exec].as_str(),
         }
 
         // Group Read Permisssions
         match mode & 0o040 {
-            0 => res += no_access.as_str(),
-            _ => res += read_perm.as_str(),
+            0 => res += PrecomputedElems[&Elem::NoAccess].as_str(),
+            _ => res += PrecomputedElems[&Elem::Read].as_str(),
         }
 
         // Group Write Permisssions
         match mode & 0o020 {
-            0 => res += no_access.as_str(),
-            _ => res += write_perm.as_str(),
+            0 => res += PrecomputedElems[&Elem::NoAccess].as_str(),
+            _ => res += PrecomputedElems[&Elem::Write].as_str(),
         }
 
         // Group Exec Permisssions
         match mode & 0o010 {
-            0 => res += no_access.as_str(),
-            _ => res += exec_perm.as_str(),
+            0 => res += PrecomputedElems[&Elem::NoAccess].as_str(),
+            _ => res += PrecomputedElems[&Elem::Exec].as_str(),
         }
 
         // Other Read Permisssions
         match mode & 0o040 {
-            0 => res += no_access.as_str(),
-            _ => res += read_perm.as_str(),
+            0 => res += PrecomputedElems[&Elem::NoAccess].as_str(),
+            _ => res += PrecomputedElems[&Elem::Read].as_str(),
         }
 
         // Other Write Permisssions
         match mode & 0o020 {
-            0 => res += no_access.as_str(),
-            _ => res += write_perm.as_str(),
+            0 => res += PrecomputedElems[&Elem::NoAccess].as_str(),
+            _ => res += PrecomputedElems[&Elem::Write].as_str(),
         }
 
         // Other Exec Permisssions
         match mode & 0o010 {
-            0 => res += no_access.as_str(),
-            _ => res += exec_perm.as_str(),
+            0 => res += PrecomputedElems[&Elem::NoAccess].as_str(),
+            _ => res += PrecomputedElems[&Elem::Exec].as_str(),
         }
 
         res.to_string()

@@ -18,7 +18,7 @@ pub enum MetaError {
 
 #[derive(Debug)]
 pub enum Type {
-    Symlink(String),
+    SymLink(String),
     File,
     Directory,
 }
@@ -80,7 +80,7 @@ impl Meta {
                     .expect("failed to convert symlink to str")
                     .to_string();
 
-                (meta, Type::Symlink(target))
+                (meta, Type::SymLink(target))
             }
             _ => {
                 // This path is a file.
