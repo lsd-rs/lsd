@@ -1,6 +1,10 @@
 use meta::Meta;
 use std::collections::HashMap;
 
+// In order to add a new icon, write the unicode value like "\ue5fb" then
+// run the command below in vim:
+//
+// s#\\u[0-9a-f]*#\=eval('"'.submatch(0).'"')#
 lazy_static! {
     pub static ref IconsByName: HashMap<&'static str, &'static str> = {
         let mut m = HashMap::new();
