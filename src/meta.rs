@@ -23,8 +23,8 @@ pub enum Type {
     Directory,
 }
 
-impl From<Metadata> for Type {
-    fn from(meta: Metadata) -> Self {
+impl<'a> From<&'a Metadata> for Type {
+    fn from(meta: &'a Metadata) -> Self {
         if meta.is_dir() {
             Type::Directory
         } else {
@@ -96,7 +96,8 @@ impl Meta {
                     }
                 };
 
-                (meta, Type::from(meta))
+                let node_type = Type::from(&meta);
+                (meta, node_type)
             }
         };
 
