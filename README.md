@@ -12,6 +12,13 @@ which make it really faster (around 10 times).
 
 ![image](https://raw.githubusercontent.com/Peltoche/lsd/assets/screen_lsd.png)
 
+## Installation
+
+1. Install rust
+2. Install the patched fonts of powerline nerd-font and/or font-awesome. Have a look at the [Nerd Font README](https://github.com/ryanoasis/nerd-fonts/blob/master/readme.md) for more installation instructions.
+       *Note for `rbenv` users - In case of load error when using `lc`, please try the below patch.*
+3. Install the lsd package with `cargo install lsd`
+
 ## TODO
 
 - [x] Handle the `-l` option (used by default for now)
