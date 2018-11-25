@@ -14,6 +14,18 @@ which make it really faster (around 10 times).
 
 ## Installation
 
+### Archlinux (AUR)
+
+```
+# With yaourt
+yaourt lsd-git
+
+# With yay
+yay lsd-git
+```
+
+### Other
+
 1. Install rust
 2. Install the patched fonts of powerline nerd-font and/or font-awesome. Have a look at the [Nerd Font README](https://github.com/ryanoasis/nerd-fonts/blob/master/readme.md) for more installation instructions.
        *Note for `rbenv` users - In case of load error when using `lc`, please try the below patch.*
