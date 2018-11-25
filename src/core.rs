@@ -2,6 +2,7 @@ use formatter::*;
 use meta::Meta;
 use std::cmp::Ordering;
 use std::path::Path;
+use term_grid::{Cell, Direction, Filling, Grid, GridOptions};
 use terminal_size::terminal_size;
 use Options;
 
@@ -71,40 +72,30 @@ impl<'a> Core<'a> {
     }
 
     fn print_short(&self, metas: &[Meta]) {
-        let width = match terminal_size() {
+        let term_width = match terminal_size() {
             Some((w, _)) => w.0 as usize,
             None => panic!("failed to retrieve terminal size"),
         };
 
-        let mut max_name_width = 0;
+        let mut grid = Grid::new(GridOptions {
+            filling: Filling::Spaces(1),
+            direction: Direction::LeftToRight,
+        });
+
         for meta in metas {
-            if meta.name.len() > max_name_width {
-                max_name_width = meta.name.len();
-            }
+            let mut content = String::from("    ");
+            content = content + &self.formatter.format_name(&meta);
+            grid.add(Cell {
+                width: content.len(),
+                contents: content,
+            });
         }
 
-        let nb_entry_per_row = width / (max_name_width + 4 + 3);
-
-        let mut x = 1;
-        let mut line = String::new();
-        for meta in metas {
-            line += "    ";
-            line += &self.formatter.format_name(&meta);
-            for _ in 0..(max_name_width - meta.name.len()) {
-                line.push(' ');
-            }
-            x += 1;
-
-            if x >= nb_entry_per_row {
-                x = 1;
-                println!("{}", line);
-                line = String::new();
-            }
-        }
-
-        if !line.is_empty() {
-            println!("{}", line);
-        }
+        println!(
+            "{}",
+            grid.fit_into_width(term_width * 2)
+                .expect("failed to print the grid")
+        );
     }
 
     fn print_long(&self, metas: &[Meta]) {
