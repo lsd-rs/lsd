@@ -49,6 +49,7 @@ lazy_static! {
         m.insert("bmp", "");
         m.insert("bmp", "");
         m.insert("c", "");
+        m.insert("cfg", "");
         m.insert("clj", "");
         m.insert("cls", "");
         m.insert("coffee", "");
