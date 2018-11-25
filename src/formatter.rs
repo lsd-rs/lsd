@@ -1,5 +1,5 @@
 use color::{Colors, Elem};
-use logo::Logo;
+use icon;
 use meta::Meta;
 use std::os::unix::fs::PermissionsExt;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
@@ -29,7 +29,7 @@ impl Formatter {
             name.push('/');
         }
 
-        content = content + Logo::from_meta(&meta).as_str() + "  " + &name;
+        content = content + icon::from_meta(&meta) + "  " + &name;
         content = color.paint(content).to_string();
 
         content

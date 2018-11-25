@@ -11,7 +11,7 @@ extern crate users;
 mod color;
 mod core;
 mod formatter;
-mod logo;
+mod icon;
 mod meta;
 
 use clap::{App, Arg};

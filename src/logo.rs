@@ -3,260 +3,260 @@ use std::collections::HashMap;
 use std::fmt;
 
 lazy_static! {
-    pub static ref LogosByName: HashMap<&'static str, Logo> = {
+    pub static ref IconsByName: HashMap<&'static str, Icon> = {
         let mut m = HashMap::new();
 
-        m.insert(".Trash", Logo(String::from("")));
-        m.insert(".atom", Logo(String::from("")));
-        m.insert(".git", Logo(String::from("")));
-        m.insert(".github", Logo(String::from("")));
-        m.insert(".rvm", Logo(String::from("")));
-        m.insert(".vscode", Logo(String::from("")));
-        m.insert("bin", Logo(String::from("")));
-        m.insert("config", Logo(String::from("")));
-        m.insert("ds_store", Logo(String::from("")));
-        m.insert("folder", Logo(String::from("")));
-        m.insert("gitconfig", Logo(String::from("")));
-        m.insert("gitignore", Logo(String::from("")));
-        m.insert("gitignore_global", Logo(String::from("")));
-        m.insert("gradle", Logo(String::from("")));
-        m.insert("hidden", Logo(String::from("")));
-        m.insert("include", Logo(String::from("")));
-        m.insert("lib", Logo(String::from("")));
-        m.insert("localized", Logo(String::from("")));
-        m.insert("node_modules", Logo(String::from("")));
-        m.insert("npmignore", Logo(String::from("")));
-        m.insert("rubydoc", Logo(String::from("")));
-        m.insert("yarn.lock", Logo(String::from("")));
+        m.insert(".Trash", Icon(String::from("")));
+        m.insert(".atom", Icon(String::from("")));
+        m.insert(".git", Icon(String::from("")));
+        m.insert(".github", Icon(String::from("")));
+        m.insert(".rvm", Icon(String::from("")));
+        m.insert(".vscode", Icon(String::from("")));
+        m.insert("bin", Icon(String::from("")));
+        m.insert("config", Icon(String::from("")));
+        m.insert("ds_store", Icon(String::from("")));
+        m.insert("folder", Icon(String::from("")));
+        m.insert("gitconfig", Icon(String::from("")));
+        m.insert("gitignore", Icon(String::from("")));
+        m.insert("gitignore_global", Icon(String::from("")));
+        m.insert("gradle", Icon(String::from("")));
+        m.insert("hidden", Icon(String::from("")));
+        m.insert("include", Icon(String::from("")));
+        m.insert("lib", Icon(String::from("")));
+        m.insert("localized", Icon(String::from("")));
+        m.insert("node_modules", Icon(String::from("")));
+        m.insert("npmignore", Icon(String::from("")));
+        m.insert("rubydoc", Icon(String::from("")));
+        m.insert("yarn.lock", Icon(String::from("")));
 
         m
     };
 }
 
 lazy_static! {
-    pub static ref LogosByExtension: HashMap<&'static str, Logo> = {
+    pub static ref IconsByExtension: HashMap<&'static str, Icon> = {
         let mut m = HashMap::new();
 
-        m.insert("ai", Logo(String::from("")));
-        m.insert("apk", Logo(String::from("")));
-        m.insert("apk", Logo(String::from("")));
-        m.insert("avi", Logo(String::from("")));
-        m.insert("avro", Logo(String::from("")));
-        m.insert("bash", Logo(String::from("")));
-        m.insert("bash_history", Logo(String::from("")));
-        m.insert("bash_profile", Logo(String::from("")));
-        m.insert("bashrc", Logo(String::from("")));
-        m.insert("bat", Logo(String::from("")));
-        m.insert("bmp", Logo(String::from("")));
-        m.insert("bmp", Logo(String::from("")));
-        m.insert("c", Logo(String::from("")));
-        m.insert("clj", Logo(String::from("")));
-        m.insert("cls", Logo(String::from("")));
-        m.insert("coffee", Logo(String::from("")));
-        m.insert("conf", Logo(String::from("")));
-        m.insert("cpp", Logo(String::from("")));
-        m.insert("css", Logo(String::from("")));
-        m.insert("csv", Logo(String::from("")));
-        m.insert("d", Logo(String::from("")));
-        m.insert("dart", Logo(String::from("")));
-        m.insert("db", Logo(String::from("")));
-        m.insert("diff", Logo(String::from("")));
-        m.insert("doc", Logo(String::from("")));
-        m.insert("docx", Logo(String::from("")));
-        m.insert("docx", Logo(String::from("")));
-        m.insert("ds_store", Logo(String::from("")));
-        m.insert("ds_store", Logo(String::from("")));
-        m.insert("ebook", Logo(String::from("")));
-        m.insert("editorconfig", Logo(String::from("")));
-        m.insert("env", Logo(String::from("")));
-        m.insert("eot", Logo(String::from("")));
-        m.insert("eot", Logo(String::from("")));
-        m.insert("epub", Logo(String::from("")));
-        m.insert("erb", Logo(String::from("")));
-        m.insert("erl", Logo(String::from("")));
-        m.insert("exe", Logo(String::from("")));
-        m.insert("file", Logo(String::from("")));
-        m.insert("fish", Logo(String::from("")));
-        m.insert("flac", Logo(String::from("")));
-        m.insert("flac", Logo(String::from("")));
-        m.insert("flv", Logo(String::from("")));
-        m.insert("font", Logo(String::from("")));
-        m.insert("gdoc", Logo(String::from("")));
-        m.insert("gdoc", Logo(String::from("")));
-        m.insert("gemfile", Logo(String::from("")));
-        m.insert("gemspec", Logo(String::from("")));
-        m.insert("gform", Logo(String::from("")));
-        m.insert("gif", Logo(String::from("")));
-        m.insert("gif", Logo(String::from("")));
-        m.insert("git", Logo(String::from("")));
-        m.insert("go", Logo(String::from("")));
-        m.insert("gradle", Logo(String::from("")));
-        m.insert("gradle", Logo(String::from("")));
-        m.insert("gsheet", Logo(String::from("")));
-        m.insert("gslides", Logo(String::from("")));
-        m.insert("guardfile", Logo(String::from("")));
-        m.insert("gz", Logo(String::from("")));
-        m.insert("hs", Logo(String::from("")));
-        m.insert("htm", Logo(String::from("")));
-        m.insert("html", Logo(String::from("")));
-        m.insert("ico", Logo(String::from("")));
-        m.insert("ico", Logo(String::from("")));
-        m.insert("image", Logo(String::from("")));
-        m.insert("iml", Logo(String::from("")));
-        m.insert("ini", Logo(String::from("")));
-        m.insert("ipynb", Logo(String::from("")));
-        m.insert("jar", Logo(String::from("")));
-        m.insert("jar", Logo(String::from("")));
-        m.insert("java", Logo(String::from("")));
-        m.insert("jpeg", Logo(String::from("")));
-        m.insert("jpeg", Logo(String::from("")));
-        m.insert("jpg", Logo(String::from("")));
-        m.insert("jpg", Logo(String::from("")));
-        m.insert("js", Logo(String::from("")));
-        m.insert("json", Logo(String::from("")));
-        m.insert("jsx", Logo(String::from("")));
-        m.insert("less", Logo(String::from("")));
-        m.insert("lhs", Logo(String::from("")));
-        m.insert("lhs", Logo(String::from("")));
-        m.insert("license", Logo(String::from("")));
-        m.insert("localized", Logo(String::from("")));
-        m.insert("localized", Logo(String::from("")));
-        m.insert("lock", Logo(String::from("")));
-        m.insert("log", Logo(String::from("")));
-        m.insert("lua", Logo(String::from("")));
-        m.insert("m4a", Logo(String::from("")));
-        m.insert("m4a", Logo(String::from("")));
-        m.insert("markdown", Logo(String::from("")));
-        m.insert("md", Logo(String::from("")));
-        m.insert("mkd", Logo(String::from("")));
-        m.insert("mkv", Logo(String::from("")));
-        m.insert("mobi", Logo(String::from("")));
-        m.insert("mobi", Logo(String::from("")));
-        m.insert("mov", Logo(String::from("")));
-        m.insert("mp3", Logo(String::from("")));
-        m.insert("mp3", Logo(String::from("")));
-        m.insert("mp4", Logo(String::from("")));
-        m.insert("mustache", Logo(String::from("")));
-        m.insert("npmignore", Logo(String::from("")));
-        m.insert("ogg", Logo(String::from("")));
-        m.insert("ogg", Logo(String::from("")));
-        m.insert("ogv", Logo(String::from("")));
-        m.insert("otf", Logo(String::from("")));
-        m.insert("otf", Logo(String::from("")));
-        m.insert("pdf", Logo(String::from("")));
-        m.insert("php", Logo(String::from("")));
-        m.insert("pl", Logo(String::from("")));
-        m.insert("png", Logo(String::from("")));
-        m.insert("png", Logo(String::from("")));
-        m.insert("ppt", Logo(String::from("")));
-        m.insert("pptx", Logo(String::from("")));
-        m.insert("procfile", Logo(String::from("")));
-        m.insert("properties", Logo(String::from("")));
-        m.insert("psd", Logo(String::from("")));
-        m.insert("pxm", Logo(String::from("")));
-        m.insert("pxm", Logo(String::from("")));
-        m.insert("py", Logo(String::from("")));
-        m.insert("pyc", Logo(String::from("")));
-        m.insert("r", Logo(String::from("")));
-        m.insert("rakefile", Logo(String::from("")));
-        m.insert("rar", Logo(String::from("")));
-        m.insert("rb", Logo(String::from("")));
-        m.insert("rdata", Logo(String::from("")));
-        m.insert("rdb", Logo(String::from("")));
-        m.insert("rdoc", Logo(String::from("")));
-        m.insert("rdoc", Logo(String::from("")));
-        m.insert("rds", Logo(String::from("")));
-        m.insert("readme", Logo(String::from("")));
-        m.insert("rspec", Logo(String::from("")));
-        m.insert("rspec_parallel", Logo(String::from("")));
-        m.insert("rspec_status", Logo(String::from("")));
-        m.insert("rss", Logo(String::from("")));
-        m.insert("ru", Logo(String::from("")));
-        m.insert("rubydoc", Logo(String::from("")));
-        m.insert("sass", Logo(String::from("")));
-        m.insert("scala", Logo(String::from("")));
-        m.insert("scss", Logo(String::from("")));
-        m.insert("scss", Logo(String::from("")));
-        m.insert("sh", Logo(String::from("")));
-        m.insert("shell", Logo(String::from("")));
-        m.insert("slim", Logo(String::from("")));
-        m.insert("sqlite3", Logo(String::from("")));
-        m.insert("styl", Logo(String::from("")));
-        m.insert("stylus", Logo(String::from("")));
-        m.insert("svg", Logo(String::from("")));
-        m.insert("svg", Logo(String::from("")));
-        m.insert("tar", Logo(String::from("")));
-        m.insert("tex", Logo(String::from("")));
-        m.insert("tiff", Logo(String::from("")));
-        m.insert("tiff", Logo(String::from("")));
-        m.insert("ts", Logo(String::from("")));
-        m.insert("tsx", Logo(String::from("")));
-        m.insert("tsx", Logo(String::from("")));
-        m.insert("ttf", Logo(String::from("")));
-        m.insert("ttf", Logo(String::from("")));
-        m.insert("twig", Logo(String::from("")));
-        m.insert("txt", Logo(String::from("")));
-        m.insert("video", Logo(String::from("")));
-        m.insert("vim", Logo(String::from("")));
-        m.insert("wav", Logo(String::from("")));
-        m.insert("wav", Logo(String::from("")));
-        m.insert("webm", Logo(String::from("")));
-        m.insert("webp", Logo(String::from("")));
-        m.insert("webp", Logo(String::from("")));
-        m.insert("windows", Logo(String::from("")));
-        m.insert("woff", Logo(String::from("")));
-        m.insert("woff", Logo(String::from("")));
-        m.insert("woff2", Logo(String::from("")));
-        m.insert("woff2", Logo(String::from("")));
-        m.insert("xls", Logo(String::from("")));
-        m.insert("xlsx", Logo(String::from("")));
-        m.insert("xml", Logo(String::from("")));
-        m.insert("xul", Logo(String::from("")));
-        m.insert("yaml", Logo(String::from("")));
-        m.insert("yarn.lock", Logo(String::from("")));
-        m.insert("yml", Logo(String::from("")));
-        m.insert("zip", Logo(String::from("")));
-        m.insert("zsh", Logo(String::from("")));
-        m.insert("zsh-theme", Logo(String::from("")));
-        m.insert("zshrc", Logo(String::from("")));
+        m.insert("ai", Icon(String::from("")));
+        m.insert("apk", Icon(String::from("")));
+        m.insert("apk", Icon(String::from("")));
+        m.insert("avi", Icon(String::from("")));
+        m.insert("avro", Icon(String::from("")));
+        m.insert("bash", Icon(String::from("")));
+        m.insert("bash_history", Icon(String::from("")));
+        m.insert("bash_profile", Icon(String::from("")));
+        m.insert("bashrc", Icon(String::from("")));
+        m.insert("bat", Icon(String::from("")));
+        m.insert("bmp", Icon(String::from("")));
+        m.insert("bmp", Icon(String::from("")));
+        m.insert("c", Icon(String::from("")));
+        m.insert("clj", Icon(String::from("")));
+        m.insert("cls", Icon(String::from("")));
+        m.insert("coffee", Icon(String::from("")));
+        m.insert("conf", Icon(String::from("")));
+        m.insert("cpp", Icon(String::from("")));
+        m.insert("css", Icon(String::from("")));
+        m.insert("csv", Icon(String::from("")));
+        m.insert("d", Icon(String::from("")));
+        m.insert("dart", Icon(String::from("")));
+        m.insert("db", Icon(String::from("")));
+        m.insert("diff", Icon(String::from("")));
+        m.insert("doc", Icon(String::from("")));
+        m.insert("docx", Icon(String::from("")));
+        m.insert("docx", Icon(String::from("")));
+        m.insert("ds_store", Icon(String::from("")));
+        m.insert("ds_store", Icon(String::from("")));
+        m.insert("ebook", Icon(String::from("")));
+        m.insert("editorconfig", Icon(String::from("")));
+        m.insert("env", Icon(String::from("")));
+        m.insert("eot", Icon(String::from("")));
+        m.insert("eot", Icon(String::from("")));
+        m.insert("epub", Icon(String::from("")));
+        m.insert("erb", Icon(String::from("")));
+        m.insert("erl", Icon(String::from("")));
+        m.insert("exe", Icon(String::from("")));
+        m.insert("file", Icon(String::from("")));
+        m.insert("fish", Icon(String::from("")));
+        m.insert("flac", Icon(String::from("")));
+        m.insert("flac", Icon(String::from("")));
+        m.insert("flv", Icon(String::from("")));
+        m.insert("font", Icon(String::from("")));
+        m.insert("gdoc", Icon(String::from("")));
+        m.insert("gdoc", Icon(String::from("")));
+        m.insert("gemfile", Icon(String::from("")));
+        m.insert("gemspec", Icon(String::from("")));
+        m.insert("gform", Icon(String::from("")));
+        m.insert("gif", Icon(String::from("")));
+        m.insert("gif", Icon(String::from("")));
+        m.insert("git", Icon(String::from("")));
+        m.insert("go", Icon(String::from("")));
+        m.insert("gradle", Icon(String::from("")));
+        m.insert("gradle", Icon(String::from("")));
+        m.insert("gsheet", Icon(String::from("")));
+        m.insert("gslides", Icon(String::from("")));
+        m.insert("guardfile", Icon(String::from("")));
+        m.insert("gz", Icon(String::from("")));
+        m.insert("hs", Icon(String::from("")));
+        m.insert("htm", Icon(String::from("")));
+        m.insert("html", Icon(String::from("")));
+        m.insert("ico", Icon(String::from("")));
+        m.insert("ico", Icon(String::from("")));
+        m.insert("image", Icon(String::from("")));
+        m.insert("iml", Icon(String::from("")));
+        m.insert("ini", Icon(String::from("")));
+        m.insert("ipynb", Icon(String::from("")));
+        m.insert("jar", Icon(String::from("")));
+        m.insert("jar", Icon(String::from("")));
+        m.insert("java", Icon(String::from("")));
+        m.insert("jpeg", Icon(String::from("")));
+        m.insert("jpeg", Icon(String::from("")));
+        m.insert("jpg", Icon(String::from("")));
+        m.insert("jpg", Icon(String::from("")));
+        m.insert("js", Icon(String::from("")));
+        m.insert("json", Icon(String::from("")));
+        m.insert("jsx", Icon(String::from("")));
+        m.insert("less", Icon(String::from("")));
+        m.insert("lhs", Icon(String::from("")));
+        m.insert("lhs", Icon(String::from("")));
+        m.insert("license", Icon(String::from("")));
+        m.insert("localized", Icon(String::from("")));
+        m.insert("localized", Icon(String::from("")));
+        m.insert("lock", Icon(String::from("")));
+        m.insert("log", Icon(String::from("")));
+        m.insert("lua", Icon(String::from("")));
+        m.insert("m4a", Icon(String::from("")));
+        m.insert("m4a", Icon(String::from("")));
+        m.insert("markdown", Icon(String::from("")));
+        m.insert("md", Icon(String::from("")));
+        m.insert("mkd", Icon(String::from("")));
+        m.insert("mkv", Icon(String::from("")));
+        m.insert("mobi", Icon(String::from("")));
+        m.insert("mobi", Icon(String::from("")));
+        m.insert("mov", Icon(String::from("")));
+        m.insert("mp3", Icon(String::from("")));
+        m.insert("mp3", Icon(String::from("")));
+        m.insert("mp4", Icon(String::from("")));
+        m.insert("mustache", Icon(String::from("")));
+        m.insert("npmignore", Icon(String::from("")));
+        m.insert("ogg", Icon(String::from("")));
+        m.insert("ogg", Icon(String::from("")));
+        m.insert("ogv", Icon(String::from("")));
+        m.insert("otf", Icon(String::from("")));
+        m.insert("otf", Icon(String::from("")));
+        m.insert("pdf", Icon(String::from("")));
+        m.insert("php", Icon(String::from("")));
+        m.insert("pl", Icon(String::from("")));
+        m.insert("png", Icon(String::from("")));
+        m.insert("png", Icon(String::from("")));
+        m.insert("ppt", Icon(String::from("")));
+        m.insert("pptx", Icon(String::from("")));
+        m.insert("procfile", Icon(String::from("")));
+        m.insert("properties", Icon(String::from("")));
+        m.insert("psd", Icon(String::from("")));
+        m.insert("pxm", Icon(String::from("")));
+        m.insert("pxm", Icon(String::from("")));
+        m.insert("py", Icon(String::from("")));
+        m.insert("pyc", Icon(String::from("")));
+        m.insert("r", Icon(String::from("")));
+        m.insert("rakefile", Icon(String::from("")));
+        m.insert("rar", Icon(String::from("")));
+        m.insert("rb", Icon(String::from("")));
+        m.insert("rdata", Icon(String::from("")));
+        m.insert("rdb", Icon(String::from("")));
+        m.insert("rdoc", Icon(String::from("")));
+        m.insert("rdoc", Icon(String::from("")));
+        m.insert("rds", Icon(String::from("")));
+        m.insert("readme", Icon(String::from("")));
+        m.insert("rspec", Icon(String::from("")));
+        m.insert("rspec_parallel", Icon(String::from("")));
+        m.insert("rspec_status", Icon(String::from("")));
+        m.insert("rss", Icon(String::from("")));
+        m.insert("ru", Icon(String::from("")));
+        m.insert("rubydoc", Icon(String::from("")));
+        m.insert("sass", Icon(String::from("")));
+        m.insert("scala", Icon(String::from("")));
+        m.insert("scss", Icon(String::from("")));
+        m.insert("scss", Icon(String::from("")));
+        m.insert("sh", Icon(String::from("")));
+        m.insert("shell", Icon(String::from("")));
+        m.insert("slim", Icon(String::from("")));
+        m.insert("sqlite3", Icon(String::from("")));
+        m.insert("styl", Icon(String::from("")));
+        m.insert("stylus", Icon(String::from("")));
+        m.insert("svg", Icon(String::from("")));
+        m.insert("svg", Icon(String::from("")));
+        m.insert("tar", Icon(String::from("")));
+        m.insert("tex", Icon(String::from("")));
+        m.insert("tiff", Icon(String::from("")));
+        m.insert("tiff", Icon(String::from("")));
+        m.insert("ts", Icon(String::from("")));
+        m.insert("tsx", Icon(String::from("")));
+        m.insert("tsx", Icon(String::from("")));
+        m.insert("ttf", Icon(String::from("")));
+        m.insert("ttf", Icon(String::from("")));
+        m.insert("twig", Icon(String::from("")));
+        m.insert("txt", Icon(String::from("")));
+        m.insert("video", Icon(String::from("")));
+        m.insert("vim", Icon(String::from("")));
+        m.insert("wav", Icon(String::from("")));
+        m.insert("wav", Icon(String::from("")));
+        m.insert("webm", Icon(String::from("")));
+        m.insert("webp", Icon(String::from("")));
+        m.insert("webp", Icon(String::from("")));
+        m.insert("windows", Icon(String::from("")));
+        m.insert("woff", Icon(String::from("")));
+        m.insert("woff", Icon(String::from("")));
+        m.insert("woff2", Icon(String::from("")));
+        m.insert("woff2", Icon(String::from("")));
+        m.insert("xls", Icon(String::from("")));
+        m.insert("xlsx", Icon(String::from("")));
+        m.insert("xml", Icon(String::from("")));
+        m.insert("xul", Icon(String::from("")));
+        m.insert("yaml", Icon(String::from("")));
+        m.insert("yarn.lock", Icon(String::from("")));
+        m.insert("yml", Icon(String::from("")));
+        m.insert("zip", Icon(String::from("")));
+        m.insert("zsh", Icon(String::from("")));
+        m.insert("zsh-theme", Icon(String::from("")));
+        m.insert("zshrc", Icon(String::from("")));
 
         m
     };
 }
 
 #[derive(Debug, Clone)]
-pub struct Logo(String);
+pub struct Icon(String);
 
-impl Into<String> for Logo {
+impl Into<String> for Icon {
     fn into(self) -> String {
         self.0
     }
 }
 
-impl fmt::Display for Logo {
+impl fmt::Display for Icon {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", self)
     }
 }
 
-impl Logo {
+impl Icon {
     pub fn from_meta(meta: &Meta) -> Self {
         // Check the known names.
-        if let Some(res) = LogosByName.get(&meta.name.as_str()) {
+        if let Some(res) = IconsByName.get(&meta.name.as_str()) {
             return res.to_owned();
         }
 
         // Check the known extensions.
         let extension = meta.path.extension().unwrap_or_default().to_str().unwrap();
-        if let Some(res) = LogosByExtension.get(extension) {
+        if let Some(res) = IconsByExtension.get(extension) {
             return res.to_owned();
         }
 
         // Use the default icons.
         if meta.metadata.is_dir() {
-            Logo(String::from(""))
+            Icon(String::from(""))
         } else {
-            Logo(String::from(""))
+            Icon(String::from(""))
         }
     }
 
