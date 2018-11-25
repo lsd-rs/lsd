@@ -2,7 +2,7 @@
 
 # Table of Contents
 
-. [Description](#description)
+1. [Description](#description)
 2. [Screenshot](#screenshot)
 3. [Installation](#installation)
     1. [Archlinux](#archlinux)
