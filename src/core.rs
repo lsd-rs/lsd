@@ -105,7 +105,7 @@ impl<'a> Core<'a> {
 
         for meta in metas {
             println!(
-                "  {}  {}  {}  {}  {}  {}{}",
+                "{}  {}  {}  {}  {}  {}{}",
                 self.formatter.format_permissions(&meta),
                 self.formatter.format_user(&meta.user, max_user_length),
                 self.formatter.format_group(&meta.group, max_group_length),
