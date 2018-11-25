@@ -2,9 +2,11 @@
 
 # Table of Contents
 
-1. [Description](#description)
+. [Description](#description)
 2. [Screenshot](#screenshot)
 3. [Installation](#installation)
+    1. [Archlinux](#archlinux)
+    2. [Other](#other)
 4. [Benchmark](#benchmark)
 4. [Todo](#todo)
 
@@ -20,7 +22,7 @@ which make it really faster ([see the benchmarks](#benchmark)).
 
 ## Installation
 
-### Archlinux (AUR)
+### Archlinux
 
 ```
 # With yaourt
