@@ -1,6 +1,13 @@
 [package]
 authors = ["Peltoche <dev@halium.fr>"]
+categories = ["command-line-utilities"]
+description = "A ls command with a lot of pretty colors."
+homepage = "https://github.com/Peltoche/lsd"
+keywords = ["ls"]
+license-file = "./LICENSE"
 name = "lsd"
+readme = "./README.md"
+repository = "https://github.com/Peltoche/lsd"
 version = "0.1.0"
 
 [dependencies]
