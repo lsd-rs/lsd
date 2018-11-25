@@ -4,7 +4,7 @@ categories = ["command-line-utilities"]
 description = "A ls command with a lot of pretty colors."
 homepage = "https://github.com/Peltoche/lsd"
 keywords = ["ls"]
-license-file = "./LICENSE"
+license = "./LICENSE"
 name = "lsd"
 readme = "./README.md"
 repository = "https://github.com/Peltoche/lsd"
@@ -19,3 +19,14 @@ size = "0.1.1"
 terminal_size = "0.1.8"
 time = "0.1.40"
 users = "0.8.0"
+
+[package.metadata.deb]
+maintainer = "Peltoche <dev@halium.fr>"
+license-file = ["LICENSE", "2"]
+depends = "$auto"
+section = "utility"
+priority = "optional"
+assets = [
+    ["target/release/lsd", "usr/bin/", "755"],
+    ["README.md", "usr/share/doc/cargo-deb/README", "644"],
+]
