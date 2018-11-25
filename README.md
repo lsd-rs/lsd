@@ -1,12 +1,18 @@
 # LSD
 
-A ls command with a lot of pretty colors.
+# Table of Contents
+
+1. [Description](#description)
+2. [Screenshot](#screenshot)
+3. [Installation](#installation)
+4. [Benchmark](#benchmark)
+4. [Todo](#todo)
 
 ## Description
 
 This project is heavily inspired by the super [colorls](https://github.com/athityakumar/colorls)
 project but with some little differences. For example is written is rust and not ruby
-which make it really faster (around 10 times).
+which make it really faster ([see the benchmarks](#benchmark)).
 
 ## Screenshot
 
