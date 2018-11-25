@@ -1,5 +1,5 @@
 use formatter::*;
-use meta::Meta;
+use meta::{Meta, Type};
 use std::cmp::Ordering;
 use std::path::Path;
 use term_grid::{Cell, Direction, Filling, Grid, GridOptions};
@@ -190,11 +190,11 @@ impl<'a> Core<'a> {
 }
 
 fn sort_by_meta(a: &Meta, b: &Meta) -> Ordering {
-    if a.path.is_dir() == b.path.is_dir() {
-        a.path.cmp(&b.path)
-    } else if a.path.is_dir() && b.path.is_file() {
+    if a.node_type == Type::Directory && b.node_type != Type::Directory {
         Ordering::Less
-    } else {
+    } else if b.node_type == Type::Directory && a.node_type != Type::Directory {
         Ordering::Greater
+    } else {
+        a.path.cmp(&b.path)
     }
 }

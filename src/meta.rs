@@ -16,7 +16,7 @@ pub enum MetaError {
     UnreadableMetadatas { path: String, err: io::Error },
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum Type {
     SymLink(String),
     File,
