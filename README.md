@@ -31,6 +31,15 @@ yay lsd-git
        *Note for `rbenv` users - In case of load error when using `lc`, please try the below patch.*
 3. Install the lsd package with `cargo install lsd`
 
+## Benchmark
+
+Result from `hyperfine --warmup 10 'lsd -la /etc/*' 'colorls -la /etc/*' --export-markdown out.md`:
+
+| Command | Mean [ms] | Min…Max [ms] |
+|:---|---:|---:|
+| `lsd -la /etc/*` | 11.0 ± 0.5 | 9.9…13.0 |
+| `colorls -la /etc/*` | 503.3 ± 5.6 | 494.6…513.4 |
+
 ## TODO
 
 - [x] Handle the `-l` option (used by default for now)
