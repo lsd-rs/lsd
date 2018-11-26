@@ -1,0 +1,9 @@
+language: rust
+rust:
+  - stable
+matrix:
+  allow_failures:
+    - rust:
+      - nightly
+      - beta
+script: cargo build
