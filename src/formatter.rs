@@ -21,7 +21,7 @@ impl Formatter {
         let color = if meta.metadata.is_dir() {
             Colors[&Elem::Dir]
         } else {
-            Colors[&Elem::UnrecognizedFile]
+            Colors[&Elem::File]
         };
 
         let mut name = meta.name.clone();
@@ -39,7 +39,7 @@ impl Formatter {
         let mut content = String::new();
 
         if let Type::SymLink(ref target) = meta.node_type {
-            let color = Colors[&Elem::Link];
+            let color = Colors[&Elem::SymLink];
             content += &color.paint(String::from(" ⇒ ") + &color.paint(target).to_string());
         }
 
