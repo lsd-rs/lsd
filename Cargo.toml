@@ -8,7 +8,7 @@ license-file = "./LICENSE"
 name = "lsd"
 readme = "./README.md"
 repository = "https://github.com/Peltoche/lsd"
-version = "0.2.1-pre"
+version = "0.3.0"
 
 [metadata.deb]
 assets = [["target/release/lsd", "usr/bin/", "755"], ["README.md", "usr/share/doc/cargo-deb/README", "644"]]
