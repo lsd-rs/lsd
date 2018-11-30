@@ -171,17 +171,17 @@ impl<'a> Core<'a> {
         max
     }
 
-    fn detect_size_lenghts(&self, paths: &[Meta]) -> (usize, usize) {
+    fn detect_size_lenghts(&self, metas: &[Meta]) -> (usize, usize) {
         let mut max_value_length: usize = 0;
         let mut max_unit_size: usize = 0;
 
-        for path in paths {
-            if path.size_value.len() > max_value_length {
-                max_value_length = path.size_value.len();
+        for meta in metas {
+            if meta.size.render_value().len() > max_value_length {
+                max_value_length = meta.size.render_value().len();
             }
 
-            if path.size_unit.len() > max_unit_size {
-                max_unit_size = path.size_unit.len();
+            if meta.size.render_unit().len() > max_unit_size {
+                max_unit_size = meta.size.render_unit().len();
             }
         }
 

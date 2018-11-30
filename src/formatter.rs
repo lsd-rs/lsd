@@ -181,15 +181,15 @@ impl Formatter {
     ) -> String {
         let mut content = String::with_capacity(max_value_length + max_unit_size + 1);
 
-        for _ in 0..(max_value_length - meta.size_value.len()) {
+        for _ in 0..(max_value_length - meta.size.render_value().len()) {
             content.push(' ');
         }
 
-        content += meta.size_value.as_str();
+        content += meta.size.render_value().as_str();
         content.push(' ');
-        content += meta.size_unit.as_str();
+        content += meta.size.render_unit().as_str();
 
-        for _ in 0..(max_unit_size - meta.size_unit.len()) {
+        for _ in 0..(max_unit_size - meta.size.render_unit().len()) {
             content.push(' ');
         }
 

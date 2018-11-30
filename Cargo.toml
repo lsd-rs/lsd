@@ -10,6 +10,18 @@ readme = "./README.md"
 repository = "https://github.com/Peltoche/lsd"
 version = "0.3.1-pre"
 
+[dependencies]
+ansi_term = "0.11.0"
+clap = "2.32.0"
+failure = "0.1.3"
+lazy_static = "1.2.0"
+term_grid = "0.1.7"
+terminal_size = "0.1.8"
+time = "0.1.40"
+users = "0.8.0"
+
+[metadata]
+
 [metadata.deb]
 assets = [["target/release/lsd", "usr/bin/", "755"], ["README.md", "usr/share/doc/cargo-deb/README", "644"]]
 depends = "$auto"
@@ -17,14 +29,3 @@ license-file = ["LICENSE", "2"]
 maintainer = "Peltoche <dev@halium.fr>"
 priority = "optional"
 section = "utility"
-
-[dependencies]
-ansi_term = "0.11.0"
-clap = "2.32.0"
-failure = "0.1.3"
-lazy_static = "1.2.0"
-size = "0.1.1"
-term_grid = "0.1.7"
-terminal_size = "0.1.8"
-time = "0.1.40"
-users = "0.8.0"

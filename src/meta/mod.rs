@@ -1,10 +1,12 @@
+use self::size::Size;
 use failure::*;
-use size::*;
 use std::fs::{read_link, Metadata};
 use std::io;
 use std::os::unix::fs::MetadataExt;
 use std::path::{Path, PathBuf};
 use users::{get_group_by_gid, get_user_by_uid};
+
+mod size;
 
 #[derive(Debug, Fail)]
 pub enum MetaError {
@@ -41,8 +43,7 @@ pub struct Meta {
     pub group: String,
     pub user: String,
     pub node_type: Type,
-    pub size_value: String,
-    pub size_unit: String,
+    pub size: Size,
 }
 
 impl Meta {
@@ -115,9 +116,7 @@ impl Meta {
             .expect("failed to convert group name to str")
             .to_string();
 
-        let size = Size::Bytes(meta.len()).to_string(Base::Base10, Style::Abbreviated);
-        let size_parts: Vec<&str> = size.split(' ').collect();
-
+        let size = meta.len();
         Ok(Meta {
             path: path.to_path_buf(),
             metadata: meta,
@@ -125,8 +124,7 @@ impl Meta {
             user,
             group,
             node_type: node_type,
-            size_value: size_parts[0].to_string(),
-            size_unit: size_parts[1].to_string(),
+            size: Size::from_bytes(size as usize),
         })
     }
 }
