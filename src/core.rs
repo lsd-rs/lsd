@@ -1,5 +1,5 @@
 use formatter::*;
-use meta::{Meta, Type};
+use meta::{FileType, Meta};
 use std::cmp::Ordering;
 use std::path::Path;
 use term_grid::{Cell, Direction, Filling, Grid, GridOptions};
@@ -104,8 +104,14 @@ impl<'a> Core<'a> {
         let (max_size_value_length, max_size_unit_length) = self.detect_size_lenghts(&metas);
 
         for meta in metas {
+            let mut link_str = String::new();
+            if let Some(ref symlink) = meta.symlink {
+                link_str = symlink.render();
+            }
+
             println!(
-                "{}  {}  {}  {}  {}  {}{}",
+                "{}{}  {}  {}  {}  {}  {}{}",
+                meta.file_type.render(),
                 meta.permissions.render(),
                 self.formatter.format_user(&meta.user, max_user_length),
                 self.formatter.format_group(&meta.group, max_group_length),
@@ -113,7 +119,7 @@ impl<'a> Core<'a> {
                     .render(max_size_value_length, max_size_unit_length),
                 self.formatter.format_date(&meta),
                 self.formatter.format_name(&meta),
-                self.formatter.format_symlink(&meta),
+                link_str,
             );
         }
     }
@@ -190,9 +196,9 @@ impl<'a> Core<'a> {
 }
 
 fn sort_by_meta(a: &Meta, b: &Meta) -> Ordering {
-    if a.node_type == Type::Directory && b.node_type != Type::Directory {
+    if a.file_type == FileType::Directory && b.file_type != FileType::Directory {
         Ordering::Less
-    } else if b.node_type == Type::Directory && a.node_type != Type::Directory {
+    } else if b.file_type == FileType::Directory && a.file_type != FileType::Directory {
         Ordering::Greater
     } else {
         a.path.cmp(&b.path)

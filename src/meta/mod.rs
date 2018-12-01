@@ -1,14 +1,19 @@
-use self::permissions::Permissions;
-use self::size::Size;
+mod filetype;
+mod permissions;
+mod size;
+mod symlink;
+
+pub use self::filetype::FileType;
+pub use self::permissions::Permissions;
+pub use self::size::Size;
+pub use self::symlink::SymLink;
+
 use failure::*;
-use std::fs::{read_link, Metadata};
-use std::io;
+use std::fs::read_link;
+use std::fs::Metadata;
 use std::os::unix::fs::MetadataExt;
 use std::path::{Path, PathBuf};
 use users::{get_group_by_gid, get_user_by_uid};
-
-mod permissions;
-mod size;
 
 #[derive(Debug, Fail)]
 pub enum MetaError {
@@ -16,25 +21,6 @@ pub enum MetaError {
     UnreadableName { path: String },
     #[fail(display = "invalid file name encoding for {}", path)]
     Encoding { path: String },
-    #[fail(display = "unreachable metadatas for {}", path)]
-    UnreadableMetadatas { path: String, err: io::Error },
-}
-
-#[derive(Debug, PartialEq)]
-pub enum Type {
-    SymLink(String),
-    File,
-    Directory,
-}
-
-impl<'a> From<&'a Metadata> for Type {
-    fn from(meta: &'a Metadata) -> Self {
-        if meta.is_dir() {
-            Type::Directory
-        } else {
-            Type::File
-        }
-    }
 }
 
 #[derive(Debug)]
@@ -45,8 +31,9 @@ pub struct Meta {
     pub metadata: Metadata,
     pub group: String,
     pub user: String,
-    pub node_type: Type,
+    pub file_type: FileType,
     pub size: Size,
+    pub symlink: Option<SymLink>,
 }
 
 impl Meta {
@@ -68,51 +55,27 @@ impl Meta {
             }
         };
 
-        // Check if the path is a symlink or not and retrieve the corresponding
-        // metadatas, and type.
-        let (meta, node_type) = match read_link(path) {
-            Ok(res) => {
-                // This path is a symlink.
-                //
-                // Retrieve the symlink metadatas and return the link target.
-                let meta = path
-                    .symlink_metadata()
-                    .expect("failed to retrieve symlink metadata");
+        let mut metadata = path.metadata().expect("failed to retrieve metadata");
+        let mut symlink = None;
+        if let Ok(target) = read_link(path) {
+            // If the file is a link, retrieve the metadata without following
+            // the link.
+            metadata = path
+                .symlink_metadata()
+                .expect("failed to retrieve symlink metadata");
+            symlink = Some(SymLink::from(&target));
+        }
 
-                let target = res
-                    .to_str()
-                    .expect("failed to convert symlink to str")
-                    .to_string();
+        let file_type = FileType::from(&metadata);
 
-                (meta, Type::SymLink(target))
-            }
-            _ => {
-                // This path is a file.
-                //
-                // Retireve the metadata and return the node_type.
-                let meta = match path.metadata() {
-                    Ok(meta) => meta,
-                    Err(err) => {
-                        return Err(MetaError::UnreadableMetadatas {
-                            path: path.display().to_string(),
-                            err,
-                        })
-                    }
-                };
-
-                let node_type = Type::from(&meta);
-                (meta, node_type)
-            }
-        };
-
-        let user = get_user_by_uid(meta.uid())
+        let user = get_user_by_uid(metadata.uid())
             .expect("failed to get user name")
             .name()
             .to_str()
             .expect("failed to convert user name to str")
             .to_string();
 
-        let group = get_group_by_gid(meta.gid())
+        let group = get_group_by_gid(metadata.gid())
             .expect("failed to get the group name")
             .name()
             .to_str()
@@ -120,14 +83,15 @@ impl Meta {
             .to_string();
 
         Ok(Meta {
-            size: Size::from(&meta),
-            permissions: Permissions::from(&meta),
+            symlink,
+            size: Size::from(&metadata),
+            permissions: Permissions::from(&metadata),
             path: path.to_path_buf(),
-            metadata: meta,
+            metadata,
             name: String::from(name),
             user,
             group,
-            node_type,
+            file_type,
         })
     }
 }

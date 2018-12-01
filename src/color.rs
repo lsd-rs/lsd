@@ -2,12 +2,17 @@ use ansi_term::Colour;
 use std::collections::HashMap;
 
 #[allow(dead_code)]
-#[derive(Hash, Debug, Eq, PartialEq, Copy, Clone)]
+#[derive(Hash, Debug, Eq, PartialEq, Clone)]
 pub enum Elem {
     /// Node type
     File,
     SymLink,
     Dir,
+    Pipe,
+    BlockDevice,
+    CharDevice,
+    Socket,
+    Special,
 
     /// Permissions
     Read,
@@ -48,10 +53,15 @@ lazy_static! {
         m.insert(Elem::ExecSticky, Colour::Fixed(13)); // Fuschsia
         m.insert(Elem::NoAccess, Colour::Fixed(168)); // HotPink3
 
-        // Path Kind
+        // File Types
         m.insert(Elem::File , Colour::Fixed(184)); // Yellow3
         m.insert(Elem::Dir, Colour::Fixed(33)); // DodgerBlue1
+        m.insert(Elem::Pipe, Colour::Fixed(44)); // DarkTurquoise
         m.insert(Elem::SymLink, Colour::Fixed(44)); // DarkTurquoise
+        m.insert(Elem::BlockDevice, Colour::Fixed(44)); // DarkTurquoise
+        m.insert(Elem::CharDevice, Colour::Fixed(44)); // DarkTurquoise
+        m.insert(Elem::Socket, Colour::Fixed(44)); // DarkTurquoise
+        m.insert(Elem::Special, Colour::Fixed(44)); // DarkTurquoise
 
         // Last Time Modified
         m.insert(Elem::HourOld, Colour::Fixed(40)); // Green3
