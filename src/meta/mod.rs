@@ -127,7 +127,7 @@ impl Meta {
             name: String::from(name),
             user,
             group,
-            node_type: node_type,
+            node_type,
         })
     }
 }
