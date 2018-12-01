@@ -1,4 +1,5 @@
-use color::{Elem, PrecomputedElems};
+use ansi_term::{ANSIString, Colour};
+use color::{Colors, Elem};
 use std::fs::Metadata;
 use std::os::unix::fs::PermissionsExt;
 
@@ -48,40 +49,45 @@ impl<'a> From<&'a Metadata> for Permissions {
 
 impl Permissions {
     pub fn render(&self) -> String {
-        let mut res = String::with_capacity(11);
+        let mut res = String::with_capacity(10);
 
-        res += &self.render_permission_set(self.user_read, self.user_write, self.user_execute);
-        res += &self.render_permission_set(self.group_read, self.group_write, self.group_execute);
-        res += &self.render_permission_set(self.other_read, self.other_write, self.other_execute);
+        let bit = |bit, chr: &'static str, color: Colour| {
+            if bit {
+                color.paint(chr).to_string()
+            } else {
+                Colors[&Elem::NoAccess].paint("-").to_string()
+            }
+        };
+
+        res += &bit(self.user_read, "r", Colors[&Elem::Read]);
+        res += &bit(self.user_write, "w", Colors[&Elem::Write]);
+        res += &self.execute_bit(self.setuid).to_string();
+        res += &bit(self.group_read, "r", Colors[&Elem::Read]);
+        res += &bit(self.group_write, "w", Colors[&Elem::Write]);
+        res += &self.execute_bit(self.setgid).to_string();
+        res += &bit(self.other_read, "r", Colors[&Elem::Read]);
+        res += &bit(self.other_write, "w", Colors[&Elem::Write]);
+        res += &self.other_execute_bit().to_string();
 
         res
     }
 
-    fn render_permission_set(&self, read: bool, write: bool, exec: bool) -> String {
-        let mut res = String::with_capacity(3);
-
-        // Read Permisssions
-        if read {
-            res += PrecomputedElems[&Elem::Read].as_str();
-        } else {
-            res += PrecomputedElems[&Elem::NoAccess].as_str();
+    fn execute_bit(&self, special: bool) -> ANSIString<'static> {
+        match (self.user_execute, special) {
+            (false, false) => Colors[&Elem::NoAccess].paint("-"),
+            (true, false) => Colors[&Elem::Exec].paint("x"),
+            (false, true) => Colors[&Elem::ExecSticky].paint("S"),
+            (true, true) => Colors[&Elem::ExecSticky].paint("s"),
         }
+    }
 
-        // Write Permisssions
-        if write {
-            res += PrecomputedElems[&Elem::Write].as_str();
-        } else {
-            res += PrecomputedElems[&Elem::NoAccess].as_str();
+    fn other_execute_bit(&self) -> ANSIString<'static> {
+        match (self.other_execute, self.sticky) {
+            (false, false) => Colors[&Elem::NoAccess].paint("-"),
+            (true, false) => Colors[&Elem::Exec].paint("x"),
+            (false, true) => Colors[&Elem::ExecSticky].paint("T"),
+            (true, true) => Colors[&Elem::ExecSticky].paint("t"),
         }
-
-        // Exec Permisssions
-        if exec {
-            res += PrecomputedElems[&Elem::Exec].as_str();
-        } else {
-            res += PrecomputedElems[&Elem::NoAccess].as_str();
-        }
-
-        res
     }
 }
 

@@ -1,4 +1,4 @@
-use color::{Colors, Elem, PrecomputedElems};
+use color::{Colors, Elem};
 use icon;
 use meta::{Meta, Type};
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
@@ -77,9 +77,9 @@ impl Formatter {
         let mut res = String::with_capacity(11);
 
         match meta.node_type {
-            Type::File => res += PrecomputedElems[&Elem::File].as_str(),
-            Type::Directory => res += PrecomputedElems[&Elem::Dir].as_str(),
-            Type::SymLink(_) => res += PrecomputedElems[&Elem::SymLink].as_str(),
+            Type::File => res += &Colors[&Elem::File].paint("."),
+            Type::Directory => res += &Colors[&Elem::Dir].paint("d"),
+            Type::SymLink(_) => res += &Colors[&Elem::SymLink].paint("l"),
         }
 
         res += &meta.permissions.render();

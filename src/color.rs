@@ -13,6 +13,7 @@ pub enum Elem {
     Read,
     Write,
     Exec,
+    ExecSticky,
     NoAccess,
 
     /// Last Time Modified
@@ -44,6 +45,7 @@ lazy_static! {
         m.insert(Elem::Read, Colour::Fixed(40)); // Green3
         m.insert(Elem::Write, Colour::Fixed(192)); // DarkOliveGreen1
         m.insert(Elem::Exec, Colour::Fixed(124)); // Red3
+        m.insert(Elem::ExecSticky, Colour::Fixed(13)); // Fuschsia
         m.insert(Elem::NoAccess, Colour::Fixed(168)); // HotPink3
 
         // Path Kind
@@ -60,25 +62,6 @@ lazy_static! {
         m.insert(Elem::FileSmall, Colour::Fixed(229)); // Wheat1
         m.insert(Elem::FileMedium, Colour::Fixed(216)); // LightSalmon1
         m.insert(Elem::FileLarge, Colour::Fixed(172)); // Orange3
-
-        m
-    };
-}
-
-lazy_static! {
-    pub static ref PrecomputedElems : HashMap<Elem, String> = {
-        let mut m = HashMap::new();
-
-        // Permissions
-        m.insert(Elem::Read, Colors[&Elem::Read].paint(String::from("r")).to_string());
-        m.insert(Elem::Write, Colors[&Elem::Write].paint(String::from("w")).to_string());
-        m.insert(Elem::Exec, Colors[&Elem::Exec].paint(String::from("x")).to_string());
-        m.insert(Elem::NoAccess, Colors[&Elem::NoAccess].paint(String::from("-")).to_string());
-
-        // Note types
-        m.insert(Elem::File , Colors[&Elem::File].paint(String::from(".")).to_string());
-        m.insert(Elem::Dir, Colors[&Elem::Dir].paint(String::from("d")).to_string());
-        m.insert(Elem::SymLink, Colors[&Elem::SymLink].paint(String::from("l")).to_string());
 
         m
     };
