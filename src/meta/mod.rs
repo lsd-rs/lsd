@@ -1,9 +1,11 @@
 mod filetype;
+mod owner;
 mod permissions;
 mod size;
 mod symlink;
 
 pub use self::filetype::FileType;
+pub use self::owner::Owner;
 pub use self::permissions::Permissions;
 pub use self::size::Size;
 pub use self::symlink::SymLink;
@@ -11,9 +13,7 @@ pub use self::symlink::SymLink;
 use failure::*;
 use std::fs::read_link;
 use std::fs::Metadata;
-use std::os::unix::fs::MetadataExt;
 use std::path::{Path, PathBuf};
-use users::{get_group_by_gid, get_user_by_uid};
 
 #[derive(Debug, Fail)]
 pub enum MetaError {
@@ -29,8 +29,7 @@ pub struct Meta {
     pub name: String,
     pub permissions: Permissions,
     pub metadata: Metadata,
-    pub group: String,
-    pub user: String,
+    pub owner: Owner,
     pub file_type: FileType,
     pub size: Size,
     pub symlink: Option<SymLink>,
@@ -67,20 +66,7 @@ impl Meta {
         }
 
         let file_type = FileType::from(&metadata);
-
-        let user = get_user_by_uid(metadata.uid())
-            .expect("failed to get user name")
-            .name()
-            .to_str()
-            .expect("failed to convert user name to str")
-            .to_string();
-
-        let group = get_group_by_gid(metadata.gid())
-            .expect("failed to get the group name")
-            .name()
-            .to_str()
-            .expect("failed to convert group name to str")
-            .to_string();
+        let owner = Owner::from(&metadata);
 
         Ok(Meta {
             symlink,
@@ -89,8 +75,7 @@ impl Meta {
             path: path.to_path_buf(),
             metadata,
             name: String::from(name),
-            user,
-            group,
+            owner,
             file_type,
         })
     }

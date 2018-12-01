@@ -61,35 +61,4 @@ impl Formatter {
 
         color.paint(time.ctime().to_string()).to_string()
     }
-
-    pub fn format_user(&self, user_name: &str, max_user_size: usize) -> String {
-        if user_name.len() == max_user_size {
-            return Colors[&Elem::User].paint(user_name).to_string();
-        }
-
-        let mut content = String::with_capacity(max_user_size);
-
-        content += user_name;
-
-        for _ in 0..(max_user_size - user_name.len()) {
-            content.push(' ');
-        }
-
-        content
-    }
-
-    pub fn format_group(&self, group_name: &str, max_group_size: usize) -> String {
-        if group_name.len() == max_group_size {
-            return Colors[&Elem::Group].paint(group_name).to_string();
-        }
-
-        let mut content = String::with_capacity(max_group_size);
-        content += group_name;
-
-        for _ in 0..(max_group_size - group_name.len()) {
-            content.push(' ');
-        }
-
-        content
-    }
 }

@@ -110,11 +110,10 @@ impl<'a> Core<'a> {
             }
 
             println!(
-                "{}{}  {}  {}  {}  {}  {}{}",
+                "{}{}  {}  {}  {}  {}{}",
                 meta.file_type.render(),
                 meta.permissions.render(),
-                self.formatter.format_user(&meta.user, max_user_length),
-                self.formatter.format_group(&meta.group, max_group_length),
+                meta.owner.render(max_user_length, max_group_length),
                 meta.size
                     .render(max_size_value_length, max_size_unit_length),
                 self.formatter.format_date(&meta),
@@ -153,24 +152,26 @@ impl<'a> Core<'a> {
         content
     }
 
-    fn detect_user_lenght(&self, paths: &[Meta]) -> usize {
+    fn detect_user_lenght(&self, metas: &[Meta]) -> usize {
         let mut max: usize = 0;
 
-        for path in paths {
-            if path.user.len() > max {
-                max = path.user.len();
+        for meta in metas {
+            let user = meta.owner.render_user();
+            if user.len() > max {
+                max = user.len();
             }
         }
 
         max
     }
 
-    fn detect_group_lenght(&self, paths: &[Meta]) -> usize {
+    fn detect_group_lenght(&self, metas: &[Meta]) -> usize {
         let mut max: usize = 0;
 
-        for path in paths {
-            if path.group.len() > max {
-                max = path.group.len();
+        for meta in metas {
+            let group = meta.owner.render_group();
+            if group.len() > max {
+                max = group.len();
             }
         }
 
