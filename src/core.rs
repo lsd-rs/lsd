@@ -109,8 +109,8 @@ impl<'a> Core<'a> {
                 self.formatter.format_permissions(&meta),
                 self.formatter.format_user(&meta.user, max_user_length),
                 self.formatter.format_group(&meta.group, max_group_length),
-                self.formatter
-                    .format_size(&meta, max_size_value_length, max_size_unit_length),
+                meta.size
+                    .render(max_size_value_length, max_size_unit_length),
                 self.formatter.format_date(&meta),
                 self.formatter.format_name(&meta),
                 self.formatter.format_symlink(&meta),

@@ -117,33 +117,4 @@ impl Formatter {
 
         content
     }
-
-    pub fn format_size(
-        &self,
-        meta: &Meta,
-        max_value_length: usize,
-        max_unit_size: usize,
-    ) -> String {
-        let mut content = String::with_capacity(max_value_length + max_unit_size + 1);
-
-        for _ in 0..(max_value_length - meta.size.render_value().len()) {
-            content.push(' ');
-        }
-
-        content += meta.size.render_value().as_str();
-        content.push(' ');
-        content += meta.size.render_unit().as_str();
-
-        for _ in 0..(max_unit_size - meta.size.render_unit().len()) {
-            content.push(' ');
-        }
-
-        if meta.metadata.len() < 10 * 1044 * 1024 {
-            Colors[&Elem::FileSmall].paint(content).to_string()
-        } else if meta.metadata.len() < 100 * 1044 * 1024 {
-            Colors[&Elem::FileMedium].paint(content).to_string()
-        } else {
-            Colors[&Elem::FileLarge].paint(content).to_string()
-        }
-    }
 }

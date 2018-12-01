@@ -1,6 +1,7 @@
+use color::{Colors, Elem};
 use std::fs::Metadata;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum Unit {
     Byte,
     Kilo,
@@ -9,7 +10,7 @@ pub enum Unit {
     Tera,
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct Size {
     value: usize,
     unit: Unit,
@@ -49,6 +50,37 @@ impl<'a> From<&'a Metadata> for Size {
 }
 
 impl Size {
+    pub fn render(&self, value_alignment: usize, unit_alignment: usize) -> String {
+        let mut content = String::with_capacity(value_alignment + unit_alignment + 1);
+
+        let value = self.render_value();
+        let unit = self.render_unit();
+
+        for _ in 0..(value_alignment - value.len()) {
+            content.push(' ');
+        }
+
+        content += &self.render_value();
+        content.push(' ');
+        content += &self.render_unit();
+
+        for _ in 0..(unit_alignment - unit.len()) {
+            content.push(' ');
+        }
+
+        self.paint(content)
+    }
+
+    fn paint(&self, content: String) -> String {
+        if self.unit == Unit::Byte || self.unit == Unit::Kilo {
+            Colors[&Elem::FileSmall].paint(content).to_string()
+        } else if self.unit == Unit::Mega {
+            Colors[&Elem::FileMedium].paint(content).to_string()
+        } else {
+            Colors[&Elem::FileLarge].paint(content).to_string()
+        }
+    }
+
     pub fn render_value(&self) -> String {
         let size_str = (self.value as f32 / 1024.0).to_string();
 
