@@ -3,6 +3,7 @@ extern crate clap;
 extern crate lazy_static;
 extern crate ansi_term;
 extern crate failure;
+extern crate libc;
 extern crate term_grid;
 extern crate terminal_size;
 extern crate time;

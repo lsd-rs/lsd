@@ -1,3 +1,4 @@
+use self::permissions::Permissions;
 use self::size::Size;
 use failure::*;
 use std::fs::{read_link, Metadata};
@@ -6,6 +7,7 @@ use std::os::unix::fs::MetadataExt;
 use std::path::{Path, PathBuf};
 use users::{get_group_by_gid, get_user_by_uid};
 
+mod permissions;
 mod size;
 
 #[derive(Debug, Fail)]
@@ -39,6 +41,7 @@ impl<'a> From<&'a Metadata> for Type {
 pub struct Meta {
     pub path: PathBuf,
     pub name: String,
+    pub permissions: Permissions,
     pub metadata: Metadata,
     pub group: String,
     pub user: String,
@@ -118,6 +121,7 @@ impl Meta {
 
         Ok(Meta {
             size: Size::from(&meta),
+            permissions: Permissions::from(&meta),
             path: path.to_path_buf(),
             metadata: meta,
             name: String::from(name),

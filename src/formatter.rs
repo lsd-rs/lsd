@@ -1,7 +1,6 @@
 use color::{Colors, Elem, PrecomputedElems};
 use icon;
 use meta::{Meta, Type};
-use std::os::unix::fs::PermissionsExt;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use time::Timespec;
 
@@ -77,67 +76,13 @@ impl Formatter {
     pub fn format_permissions(&self, meta: &Meta) -> String {
         let mut res = String::with_capacity(11);
 
-        let mode = meta.metadata.permissions().mode();
-
         match meta.node_type {
             Type::File => res += PrecomputedElems[&Elem::File].as_str(),
             Type::Directory => res += PrecomputedElems[&Elem::Dir].as_str(),
             Type::SymLink(_) => res += PrecomputedElems[&Elem::SymLink].as_str(),
         }
 
-        // User Read Permisssions
-        match mode & 0o400 {
-            0 => res += PrecomputedElems[&Elem::NoAccess].as_str(),
-            _ => res += PrecomputedElems[&Elem::Read].as_str(),
-        }
-
-        // User Write Permisssions
-        match mode & 0o200 {
-            0 => res += PrecomputedElems[&Elem::NoAccess].as_str(),
-            _ => res += PrecomputedElems[&Elem::Write].as_str(),
-        }
-
-        // User Exec Permisssions
-        match mode & 0o100 {
-            0 => res += PrecomputedElems[&Elem::NoAccess].as_str(),
-            _ => res += PrecomputedElems[&Elem::Exec].as_str(),
-        }
-
-        // Group Read Permisssions
-        match mode & 0o040 {
-            0 => res += PrecomputedElems[&Elem::NoAccess].as_str(),
-            _ => res += PrecomputedElems[&Elem::Read].as_str(),
-        }
-
-        // Group Write Permisssions
-        match mode & 0o020 {
-            0 => res += PrecomputedElems[&Elem::NoAccess].as_str(),
-            _ => res += PrecomputedElems[&Elem::Write].as_str(),
-        }
-
-        // Group Exec Permisssions
-        match mode & 0o010 {
-            0 => res += PrecomputedElems[&Elem::NoAccess].as_str(),
-            _ => res += PrecomputedElems[&Elem::Exec].as_str(),
-        }
-
-        // Other Read Permisssions
-        match mode & 0o040 {
-            0 => res += PrecomputedElems[&Elem::NoAccess].as_str(),
-            _ => res += PrecomputedElems[&Elem::Read].as_str(),
-        }
-
-        // Other Write Permisssions
-        match mode & 0o020 {
-            0 => res += PrecomputedElems[&Elem::NoAccess].as_str(),
-            _ => res += PrecomputedElems[&Elem::Write].as_str(),
-        }
-
-        // Other Exec Permisssions
-        match mode & 0o010 {
-            0 => res += PrecomputedElems[&Elem::NoAccess].as_str(),
-            _ => res += PrecomputedElems[&Elem::Exec].as_str(),
-        }
+        res += &meta.permissions.render();
 
         res.to_string()
     }
