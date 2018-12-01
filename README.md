@@ -44,9 +44,6 @@ Result from `hyperfine --warmup 10 'lsd -la /etc/*' 'colorls -la /etc/*' --expor
 - [x] Handle the `-l` option (used by default for now)
 - [x] Handle the `-a` option
 - [x] Add icons before the files names
+- [x] Handle all the file types (block/char/pipe/etc)
 - [ ] Handle the tree (`--tree`) output option
 - [ ] Handle the json (`--json`) output option
-- [ ] Handle Named pipes
-- [ ] Handle sockets
-- [ ] Handle block devices
-- [ ] Handle character devices
