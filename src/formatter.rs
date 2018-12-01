@@ -73,20 +73,6 @@ impl Formatter {
         color.paint(time.ctime().to_string()).to_string()
     }
 
-    pub fn format_permissions(&self, meta: &Meta) -> String {
-        let mut res = String::with_capacity(11);
-
-        match meta.node_type {
-            Type::File => res += &Colors[&Elem::File].paint("."),
-            Type::Directory => res += &Colors[&Elem::Dir].paint("d"),
-            Type::SymLink(_) => res += &Colors[&Elem::SymLink].paint("l"),
-        }
-
-        res += &meta.permissions.render();
-
-        res.to_string()
-    }
-
     pub fn format_user(&self, user_name: &str, max_user_size: usize) -> String {
         if user_name.len() == max_user_size {
             return Colors[&Elem::User].paint(user_name).to_string();

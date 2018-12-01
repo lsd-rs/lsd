@@ -1,3 +1,4 @@
+use super::Type;
 use ansi_term::{ANSIString, Colour};
 use color::{Colors, Elem};
 use std::fs::Metadata;
@@ -5,6 +6,8 @@ use std::os::unix::fs::PermissionsExt;
 
 #[derive(Debug)]
 pub struct Permissions {
+    pub file_type: Type,
+
     pub user_read: bool,
     pub user_write: bool,
     pub user_execute: bool,
@@ -28,6 +31,8 @@ impl<'a> From<&'a Metadata> for Permissions {
         let has_bit = |bit| bits & bit == bit;
 
         Permissions {
+            file_type: Type::from(meta),
+
             user_read: has_bit(modes::USER_READ),
             user_write: has_bit(modes::USER_WRITE),
             user_execute: has_bit(modes::USER_EXECUTE),
@@ -49,7 +54,13 @@ impl<'a> From<&'a Metadata> for Permissions {
 
 impl Permissions {
     pub fn render(&self) -> String {
-        let mut res = String::with_capacity(10);
+        let mut res = String::with_capacity(11);
+
+        match self.file_type {
+            Type::File => res += &Colors[&Elem::File].paint("."),
+            Type::Directory => res += &Colors[&Elem::Dir].paint("d"),
+            Type::SymLink(_) => res += &Colors[&Elem::SymLink].paint("l"),
+        }
 
         let bit = |bit, chr: &'static str, color: Colour| {
             if bit {
