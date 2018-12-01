@@ -2,7 +2,6 @@ extern crate clap;
 #[macro_use]
 extern crate lazy_static;
 extern crate ansi_term;
-extern crate failure;
 extern crate libc;
 extern crate term_grid;
 extern crate terminal_size;
@@ -11,7 +10,6 @@ extern crate users;
 
 mod color;
 mod core;
-mod formatter;
 mod icon;
 mod meta;
 

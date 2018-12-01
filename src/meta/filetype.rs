@@ -2,7 +2,7 @@ use color::{Colors, Elem};
 use std::fs::Metadata;
 use std::os::unix::fs::FileTypeExt;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Eq, Copy, Clone)]
 pub enum FileType {
     BlockDevice,
     CharDevice,
@@ -39,8 +39,8 @@ impl<'a> From<&'a Metadata> for FileType {
 }
 
 impl FileType {
-    pub fn render(&self) -> String {
-        match *self {
+    pub fn render(self) -> String {
+        match self {
             FileType::File => Colors[&Elem::File].paint(".").to_string(),
             FileType::Directory => Colors[&Elem::Dir].paint("d").to_string(),
             FileType::Pipe => Colors[&Elem::Pipe].paint("|").to_string(),

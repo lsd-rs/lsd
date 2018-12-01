@@ -1,5 +1,6 @@
 mod date;
 mod filetype;
+mod name;
 mod owner;
 mod permissions;
 mod size;
@@ -7,30 +8,19 @@ mod symlink;
 
 pub use self::date::Date;
 pub use self::filetype::FileType;
+pub use self::name::Name;
 pub use self::owner::Owner;
 pub use self::permissions::Permissions;
 pub use self::size::Size;
 pub use self::symlink::SymLink;
 
-use failure::*;
 use std::fs::read_link;
-use std::fs::Metadata;
-use std::path::{Path, PathBuf};
-
-#[derive(Debug, Fail)]
-pub enum MetaError {
-    #[fail(display = "file name not readable for {}", path)]
-    UnreadableName { path: String },
-    #[fail(display = "invalid file name encoding for {}", path)]
-    Encoding { path: String },
-}
+use std::path::Path;
 
 #[derive(Debug)]
 pub struct Meta {
-    pub path: PathBuf,
-    pub name: String,
+    pub name: Name,
     pub permissions: Permissions,
-    pub metadata: Metadata,
     pub date: Date,
     pub owner: Owner,
     pub file_type: FileType,
@@ -38,25 +28,8 @@ pub struct Meta {
     pub symlink: Option<SymLink>,
 }
 
-impl Meta {
-    pub fn from_path(path: &Path) -> Result<Self, MetaError> {
-        // Retrieve and convert the name into an utf-8 String.
-        let name = match path.file_name() {
-            Some(os_str_name) => match os_str_name.to_str() {
-                Some(name) => name,
-                None => {
-                    return Err(MetaError::Encoding {
-                        path: path.display().to_string(),
-                    })
-                }
-            },
-            None => {
-                return Err(MetaError::UnreadableName {
-                    path: path.display().to_string(),
-                })
-            }
-        };
-
+impl<'a> From<&'a Path> for Meta {
+    fn from(path: &Path) -> Self {
         let mut metadata = path.metadata().expect("failed to retrieve metadata");
         let mut symlink = None;
         if let Ok(target) = read_link(path) {
@@ -71,16 +44,14 @@ impl Meta {
         let file_type = FileType::from(&metadata);
         let owner = Owner::from(&metadata);
 
-        Ok(Meta {
+        Meta {
             symlink,
             size: Size::from(&metadata),
             permissions: Permissions::from(&metadata),
             date: Date::from(&metadata),
-            path: path.to_path_buf(),
-            metadata,
-            name: String::from(name),
+            name: Name::new(&path, file_type),
             owner,
             file_type,
-        })
+        }
     }
 }

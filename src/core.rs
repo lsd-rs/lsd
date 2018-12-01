@@ -1,4 +1,3 @@
-use formatter::*;
 use meta::{FileType, Meta};
 use std::cmp::Ordering;
 use std::path::Path;
@@ -7,16 +6,12 @@ use terminal_size::terminal_size;
 use Options;
 
 pub struct Core<'a> {
-    formatter: Formatter,
     options: &'a Options,
 }
 
 impl<'a> Core<'a> {
     pub fn new(options: &'a Options) -> Core<'a> {
-        Core {
-            options,
-            formatter: Formatter::new(),
-        }
+        Core { options }
     }
 
     pub fn run(&self, inputs: Vec<&str>) {
@@ -31,10 +26,7 @@ impl<'a> Core<'a> {
             if path.is_dir() {
                 dirs.push(path);
             } else if path.is_file() {
-                match Meta::from_path(path) {
-                    Ok(meta) => files.push(meta),
-                    Err(err) => println!("err : {}", err),
-                };
+                files.push(Meta::from(path));
             } else {
                 match path.metadata() {
                     Ok(_) => panic!("shouldn't failed"),
@@ -84,7 +76,7 @@ impl<'a> Core<'a> {
 
         for meta in metas {
             let mut content = String::from("    ");
-            content = content + &self.formatter.format_name(&meta);
+            content += &meta.name.render();
             grid.add(Cell {
                 width: content.len(),
                 contents: content,
@@ -117,7 +109,7 @@ impl<'a> Core<'a> {
                 meta.size
                     .render(max_size_value_length, max_size_unit_length),
                 meta.date.render(),
-                self.formatter.format_name(&meta),
+                meta.name.render(),
                 link_str,
             );
         }
@@ -136,13 +128,9 @@ impl<'a> Core<'a> {
 
         for entry in dir {
             if let Ok(entry) = entry {
-                match Meta::from_path(entry.path().as_path()) {
-                    Ok(meta) => {
-                        if !meta.name.starts_with('.') || self.options.display_all {
-                            content.push(meta);
-                        }
-                    }
-                    Err(err) => println!("err 2: {}", err),
+                let meta = Meta::from(entry.path().as_path());
+                if !meta.name.is_hidden() || self.options.display_all {
+                    content.push(meta);
                 }
             }
         }
@@ -202,6 +190,6 @@ fn sort_by_meta(a: &Meta, b: &Meta) -> Ordering {
     } else if b.file_type == FileType::Directory && a.file_type != FileType::Directory {
         Ordering::Greater
     } else {
-        a.path.cmp(&b.path)
+        a.name.cmp(&b.name)
     }
 }

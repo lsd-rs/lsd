@@ -1,4 +1,4 @@
-use meta::Meta;
+use meta::Name;
 use std::collections::HashMap;
 
 // In order to add a new icon, write the unicode value like "\ue5fb" then
@@ -228,20 +228,21 @@ lazy_static! {
     };
 }
 
-pub fn from_meta(meta: &Meta) -> &'static str {
+pub fn from_name(name: &Name) -> &'static str {
     // Check the known names.
-    if let Some(res) = IconsByName.get(&meta.name.as_str()) {
+    if let Some(res) = IconsByName.get(name.name().as_str()) {
         return res.to_owned();
     }
 
     // Check the known extensions.
-    let extension = meta.path.extension().unwrap_or_default().to_str().unwrap();
-    if let Some(res) = IconsByExtension.get(extension) {
-        return res.to_owned();
+    if let Some(extension) = name.extension() {
+        if let Some(res) = IconsByExtension.get(extension.as_str()) {
+            return res.to_owned();
+        }
     }
 
     // Use the default icons.
-    if meta.metadata.is_dir() {
+    if name.is_dir() {
         ""
     } else {
         ""
