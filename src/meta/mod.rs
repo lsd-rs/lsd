@@ -116,15 +116,14 @@ impl Meta {
             .expect("failed to convert group name to str")
             .to_string();
 
-        let size = meta.len();
         Ok(Meta {
+            size: Size::from(&meta),
             path: path.to_path_buf(),
             metadata: meta,
             name: String::from(name),
             user,
             group,
             node_type: node_type,
-            size: Size::from_bytes(size as usize),
         })
     }
 }

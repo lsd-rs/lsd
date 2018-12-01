@@ -1,3 +1,5 @@
+use std::fs::Metadata;
+
 #[derive(Debug)]
 pub enum Unit {
     Byte,
@@ -13,36 +15,40 @@ pub struct Size {
     unit: Unit,
 }
 
-impl Size {
-    pub fn from_bytes(bytes: usize) -> Self {
-        if bytes < 1024 {
+impl<'a> From<&'a Metadata> for Size {
+    fn from(meta: &Metadata) -> Self {
+        let len = meta.len() as usize;
+
+        if len < 1024 {
             Size {
-                value: bytes * 1024,
+                value: len * 1024,
                 unit: Unit::Byte,
             }
-        } else if bytes < 1024 * 1024 {
+        } else if len < 1024 * 1024 {
             Size {
-                value: bytes,
+                value: len,
                 unit: Unit::Kilo,
             }
-        } else if bytes < 1024 * 1024 * 1024 {
+        } else if len < 1024 * 1024 * 1024 {
             Size {
-                value: bytes / 1024,
+                value: len / 1024,
                 unit: Unit::Mega,
             }
-        } else if bytes < 1024 * 1024 * 1024 * 1024 {
+        } else if len < 1024 * 1024 * 1024 * 1024 {
             Size {
-                value: bytes / (1024 * 1024),
+                value: len / (1024 * 1024),
                 unit: Unit::Giga,
             }
         } else {
             Size {
-                value: bytes / (1024 * 1024 * 1024),
+                value: len / (1024 * 1024 * 1024),
                 unit: Unit::Tera,
             }
         }
     }
+}
 
+impl Size {
     pub fn render_value(&self) -> String {
         let size_str = (self.value as f32 / 1024.0).to_string();
 
