@@ -116,7 +116,7 @@ impl<'a> Core<'a> {
                 meta.owner.render(max_user_length, max_group_length),
                 meta.size
                     .render(max_size_value_length, max_size_unit_length),
-                self.formatter.format_date(&meta),
+                meta.date.render(),
                 self.formatter.format_name(&meta),
                 link_str,
             );

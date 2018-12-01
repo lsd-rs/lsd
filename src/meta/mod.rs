@@ -1,9 +1,11 @@
+mod date;
 mod filetype;
 mod owner;
 mod permissions;
 mod size;
 mod symlink;
 
+pub use self::date::Date;
 pub use self::filetype::FileType;
 pub use self::owner::Owner;
 pub use self::permissions::Permissions;
@@ -29,6 +31,7 @@ pub struct Meta {
     pub name: String,
     pub permissions: Permissions,
     pub metadata: Metadata,
+    pub date: Date,
     pub owner: Owner,
     pub file_type: FileType,
     pub size: Size,
@@ -72,6 +75,7 @@ impl Meta {
             symlink,
             size: Size::from(&metadata),
             permissions: Permissions::from(&metadata),
+            date: Date::from(&metadata),
             path: path.to_path_buf(),
             metadata,
             name: String::from(name),
