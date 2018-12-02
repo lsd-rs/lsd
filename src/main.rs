@@ -11,6 +11,7 @@ extern crate users;
 mod batch;
 mod color;
 mod core;
+mod display;
 mod icon;
 mod meta;
 

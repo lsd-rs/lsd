@@ -1,4 +1,5 @@
 use batch::Batch;
+use display::Display;
 use meta::Meta;
 use std::path::Path;
 use Options;
@@ -13,6 +14,8 @@ impl<'a> Core<'a> {
     }
 
     pub fn run(&self, inputs: Vec<&str>) {
+        let display = Display::new(self.options);
+
         let mut dirs = Vec::new();
         let mut files = Vec::new();
 
@@ -31,9 +34,11 @@ impl<'a> Core<'a> {
 
         let print_folder_name: bool = dirs.len() + files.len() > 1;
 
-        let mut file_batch = Batch::from(files);
-        file_batch.sort();
-        self.print(&file_batch);
+        if !files.is_empty() {
+            let mut file_batch = Batch::from(files);
+            file_batch.sort();
+            display.print_outputs(self.get_batch_outputs(&file_batch));
+        }
 
         dirs.sort_unstable();
 
@@ -43,16 +48,16 @@ impl<'a> Core<'a> {
                     println!("\n{}:", dir.display())
                 }
 
-                self.print(&folder_batch);
+                display.print_outputs(self.get_batch_outputs(&folder_batch));
             }
         }
     }
 
-    pub fn print<'b>(&self, batch: &'b Batch) {
+    pub fn get_batch_outputs<'b>(&self, batch: &'b Batch) -> Vec<String> {
         if self.options.display_long {
-            batch.print_long();
+            batch.get_long_output()
         } else {
-            batch.print_short();
+            batch.get_short_output()
         }
     }
 

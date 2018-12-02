@@ -1,8 +1,6 @@
 use meta::FileType;
 use meta::Meta;
 use std::cmp::Ordering;
-use term_grid::{Cell, Direction, Filling, Grid, GridOptions};
-use terminal_size::terminal_size;
 
 pub struct Batch(Vec<Meta>);
 
@@ -17,34 +15,19 @@ impl Batch {
         self.0.sort_unstable_by(sort_by_meta);
     }
 
-    pub fn print_short(&self) {
-        let term_width = match terminal_size() {
-            Some((w, _)) => w.0 as usize,
-            None => panic!("failed to retrieve terminal size"),
-        };
-
-        let mut grid = Grid::new(GridOptions {
-            filling: Filling::Spaces(1),
-            direction: Direction::LeftToRight,
-        });
+    pub fn get_short_output(&self) -> Vec<String> {
+        let mut res = Vec::with_capacity(self.0.len());
 
         for meta in &self.0 {
-            let mut content = String::from("    ");
-            content += &meta.name.render();
-            grid.add(Cell {
-                width: content.len(),
-                contents: content,
-            });
+            res.push(meta.name.render());
         }
 
-        println!(
-            "{}",
-            grid.fit_into_width(term_width * 2)
-                .expect("failed to print the grid")
-        );
+        res
     }
 
-    pub fn print_long(&self) {
+    pub fn get_long_output(&self) -> Vec<String> {
+        let mut res = Vec::with_capacity(self.0.len());
+
         let max_user_length = self.detect_user_lenght();
         let max_group_length = self.detect_group_lenght();
         let (max_size_value_length, max_size_unit_length) = self.detect_size_lenghts();
@@ -55,7 +38,7 @@ impl Batch {
                 link_str = symlink.render();
             }
 
-            println!(
+            res.push(format!(
                 "{}{}  {}  {}  {}  {}{}",
                 meta.file_type.render(),
                 meta.permissions.render(),
@@ -65,8 +48,10 @@ impl Batch {
                 meta.date.render(),
                 meta.name.render(),
                 link_str,
-            );
+            ));
         }
+
+        res
     }
 
     fn detect_user_lenght(&self) -> usize {
