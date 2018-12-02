@@ -1,4 +1,4 @@
-use ansi_term::{ANSIString, Colour};
+use ansi_term::{ANSIString, ANSIStrings, Colour};
 use color::{Colors, Elem};
 use std::fs::Metadata;
 use std::os::unix::fs::PermissionsExt;
@@ -48,28 +48,29 @@ impl<'a> From<&'a Metadata> for Permissions {
 }
 
 impl Permissions {
-    pub fn render(&self) -> String {
-        let mut res = String::with_capacity(11);
-
+    pub fn render(&self) -> ANSIString {
         let bit = |bit, chr: &'static str, color: Colour| {
             if bit {
-                color.paint(chr).to_string()
+                color.paint(chr)
             } else {
-                Colors[&Elem::NoAccess].paint("-").to_string()
+                Colors[&Elem::NoAccess].paint("-")
             }
         };
 
-        res += &bit(self.user_read, "r", Colors[&Elem::Read]);
-        res += &bit(self.user_write, "w", Colors[&Elem::Write]);
-        res += &self.execute_bit(self.setuid).to_string();
-        res += &bit(self.group_read, "r", Colors[&Elem::Read]);
-        res += &bit(self.group_write, "w", Colors[&Elem::Write]);
-        res += &self.execute_bit(self.setgid).to_string();
-        res += &bit(self.other_read, "r", Colors[&Elem::Read]);
-        res += &bit(self.other_write, "w", Colors[&Elem::Write]);
-        res += &self.other_execute_bit().to_string();
+        let strings: &[ANSIString<'static>] = &[
+            bit(self.user_read, "r", Colors[&Elem::Read]),
+            bit(self.user_write, "w", Colors[&Elem::Write]),
+            self.execute_bit(self.setuid),
+            bit(self.group_read, "r", Colors[&Elem::Read]),
+            bit(self.group_write, "w", Colors[&Elem::Write]),
+            self.execute_bit(self.setgid),
+            bit(self.other_read, "r", Colors[&Elem::Read]),
+            bit(self.other_write, "w", Colors[&Elem::Write]),
+            self.other_execute_bit(),
+        ];
 
-        res
+        let res = ANSIStrings(strings).to_string();
+        ANSIString::from(res)
     }
 
     fn execute_bit(&self, special: bool) -> ANSIString<'static> {

@@ -1,3 +1,4 @@
+use ansi_term::{ANSIString, ANSIStrings};
 use meta::FileType;
 use meta::Meta;
 use std::cmp::Ordering;
@@ -19,7 +20,7 @@ impl Batch {
         let mut res = Vec::with_capacity(self.0.len());
 
         for meta in &self.0 {
-            res.push(meta.name.render());
+            res.push(meta.name.render().to_string());
         }
 
         res
@@ -33,22 +34,29 @@ impl Batch {
         let (max_size_value_length, max_size_unit_length) = self.detect_size_lenghts();
 
         for meta in &self.0 {
-            let mut link_str = String::new();
+            let mut link_str = ANSIString::from("");
             if let Some(ref symlink) = meta.symlink {
                 link_str = symlink.render();
             }
 
-            res.push(format!(
-                "{}{}  {}  {}  {}  {}{}",
+            let strings: &[ANSIString] = &[
                 meta.file_type.render(),
                 meta.permissions.render(),
-                meta.owner.render(max_user_length, max_group_length),
+                ANSIString::from("  "),
+                meta.owner.render_user(max_user_length),
+                ANSIString::from("  "),
+                meta.owner.render_group(max_group_length),
+                ANSIString::from("  "),
                 meta.size
                     .render(max_size_value_length, max_size_unit_length),
+                ANSIString::from("  "),
                 meta.date.render(),
+                ANSIString::from("  "),
                 meta.name.render(),
                 link_str,
-            ));
+            ];
+
+            res.push(ANSIStrings(strings).to_string());
         }
 
         res
@@ -58,7 +66,7 @@ impl Batch {
         let mut max: usize = 0;
 
         for meta in &self.0 {
-            let user = meta.owner.render_user();
+            let user = meta.owner.user();
             if user.len() > max {
                 max = user.len();
             }
@@ -71,7 +79,7 @@ impl Batch {
         let mut max: usize = 0;
 
         for meta in &self.0 {
-            let group = meta.owner.render_group();
+            let group = meta.owner.group();
             if group.len() > max {
                 max = group.len();
             }

@@ -44,13 +44,13 @@ impl<'a> Display<'a> {
         );
     }
 
-    fn print_one_per_line(&self, outputs: &Vec<String>) {
+    fn print_one_per_line(&self, outputs: &[String]) {
         for output in outputs {
             println!("{}", output);
         }
     }
 
-    fn get_visible_width(&self, input: &String) -> usize {
+    fn get_visible_width(&self, input: &str) -> usize {
         let mut nb_invisible_char = 0;
 
         for (idx, _) in input.match_indices("[38;5;") {

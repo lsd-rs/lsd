@@ -1,3 +1,4 @@
+use ansi_term::ANSIString;
 use color::{Colors, Elem};
 use std::path::PathBuf;
 
@@ -15,9 +16,7 @@ impl<'a> From<&'a PathBuf> for SymLink {
 }
 
 impl SymLink {
-    pub fn render(&self) -> String {
-        Colors[&Elem::SymLink]
-            .paint(String::from(" ⇒ ") + &self.0)
-            .to_string()
+    pub fn render(&self) -> ANSIString {
+        Colors[&Elem::SymLink].paint(String::from(" ⇒ ") + &self.0)
     }
 }

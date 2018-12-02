@@ -1,3 +1,4 @@
+use ansi_term::ANSIString;
 use color::{Colors, Elem};
 use std::fs::Metadata;
 use std::time::UNIX_EPOCH;
@@ -24,7 +25,7 @@ impl<'a> From<&'a Metadata> for Date {
 }
 
 impl Date {
-    pub fn render(&self) -> String {
+    pub fn render(&self) -> ANSIString {
         let now = time::now();
 
         let color;
@@ -36,6 +37,6 @@ impl Date {
             color = Colors[&Elem::Older];
         }
 
-        color.paint(self.0.ctime().to_string()).to_string()
+        color.paint(self.0.ctime().to_string())
     }
 }

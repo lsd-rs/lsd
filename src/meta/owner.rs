@@ -1,3 +1,4 @@
+use ansi_term::ANSIString;
 use color::{Colors, Elem};
 use std::fs::Metadata;
 use std::os::unix::fs::MetadataExt;
@@ -30,31 +31,31 @@ impl<'a> From<&'a Metadata> for Owner {
 }
 
 impl Owner {
-    pub fn render(&self, user_alignment: usize, group_alignment: usize) -> String {
-        let mut content =
-            String::with_capacity(user_alignment + group_alignment + 2 /* spaces */);
-
-        content += &Colors[&Elem::User].paint(&self.user).to_string();
-        for _ in 0..(user_alignment - self.user.len()) {
-            content.push(' ');
-        }
-
-        // the space between the name and the group.
-        content.push(' ');
-
-        content += &Colors[&Elem::Group].paint(&self.group).to_string();
-        for _ in 0..(group_alignment - self.group.len()) {
-            content.push(' ');
-        }
-
-        content
-    }
-
-    pub fn render_user(&self) -> String {
+    pub fn user(&self) -> String {
         self.user.clone()
     }
 
-    pub fn render_group(&self) -> String {
+    pub fn group(&self) -> String {
         self.group.clone()
+    }
+
+    pub fn render_user(&self, user_alignment: usize) -> ANSIString {
+        let mut alignment = String::with_capacity(user_alignment - self.user.len());
+
+        for _ in 0..(user_alignment - self.user.len()) {
+            alignment.push(' ');
+        }
+
+        Colors[&Elem::User].paint(alignment + &self.user)
+    }
+
+    pub fn render_group(&self, group_alignment: usize) -> ANSIString {
+        let mut alignment = String::with_capacity(group_alignment - self.group.len());
+
+        for _ in 0..(group_alignment - self.group.len()) {
+            alignment.push(' ');
+        }
+
+        Colors[&Elem::Group].paint(alignment + &self.group)
     }
 }

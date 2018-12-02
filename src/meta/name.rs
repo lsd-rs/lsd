@@ -1,3 +1,4 @@
+use ansi_term::ANSIString;
 use color::{Colors, Elem};
 use icon;
 use meta::filetype::FileType;
@@ -40,7 +41,7 @@ impl Name {
         }
     }
 
-    pub fn render(&self) -> String {
+    pub fn render(&self) -> ANSIString {
         let mut content = String::with_capacity(self.name.len() + 3 /* spaces */);
 
         let color = if self.file_type == FileType::Directory {
@@ -53,7 +54,7 @@ impl Name {
         content += "  ";
         content += &self.name;
 
-        color.paint(content).to_string()
+        color.paint(content)
     }
 
     pub fn name(&self) -> String {
