@@ -12,7 +12,7 @@ impl<'a> Display<'a> {
     }
 
     pub fn print_outputs(&self, outputs: Vec<String>) {
-        if self.options.display_long {
+        if self.options.display_long || self.options.display_online {
             self.print_one_per_line(&outputs);
         } else {
             self.print_grid(outputs);
