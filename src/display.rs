@@ -45,9 +45,13 @@ impl<'a> Display<'a> {
     }
 
     fn print_one_per_line(&self, outputs: &[String]) {
+        let mut res = String::new();
         for output in outputs {
-            println!("{}", output);
+            res += output;
+            res += "\n";
         }
+
+        println!("{}", res);
     }
 
     fn get_visible_width(&self, input: &str) -> usize {
