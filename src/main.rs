@@ -8,6 +8,7 @@ extern crate terminal_size;
 extern crate time;
 extern crate users;
 
+mod batch;
 mod color;
 mod core;
 mod icon;
