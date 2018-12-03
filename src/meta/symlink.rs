@@ -3,20 +3,31 @@ use color::{Colors, Elem};
 use std::path::PathBuf;
 
 #[derive(Debug)]
-pub struct SymLink(String);
+pub struct SymLink {
+    target: String,
+    valid: bool,
+}
 
 impl<'a> From<&'a PathBuf> for SymLink {
-    fn from(path: &PathBuf) -> Self {
-        SymLink(
-            path.to_str()
+    fn from(target: &PathBuf) -> Self {
+        SymLink {
+            valid: target.exists(),
+            target: target
+                .to_str()
                 .expect("failed to convert symlink to str")
                 .to_string(),
-        )
+        }
     }
 }
 
 impl SymLink {
     pub fn render(&self) -> ANSIString {
-        Colors[&Elem::SymLink].paint(String::from(" ⇒ ") + &self.0)
+        let color = if self.valid {
+            Colors[&Elem::SymLink]
+        } else {
+            Colors[&Elem::BrokenSymLink]
+        };
+
+        color.paint(String::from(" ⇒ ") + &self.target)
     }
 }

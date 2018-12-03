@@ -30,8 +30,9 @@ pub struct Meta {
 
 impl<'a> From<&'a Path> for Meta {
     fn from(path: &Path) -> Self {
-        let mut metadata = path.metadata().expect("failed to retrieve metadata");
+        let metadata;
         let mut symlink = None;
+
         if let Ok(target) = read_link(path) {
             // If the file is a link, retrieve the metadata without following
             // the link.
@@ -39,10 +40,11 @@ impl<'a> From<&'a Path> for Meta {
                 .symlink_metadata()
                 .expect("failed to retrieve symlink metadata");
             symlink = Some(SymLink::from(&target));
+        } else {
+            metadata = path.metadata().expect("failed to retrieve metadata");
         }
 
         let file_type = FileType::from(&metadata);
-        let owner = Owner::from(&metadata);
 
         Meta {
             symlink,
@@ -50,7 +52,7 @@ impl<'a> From<&'a Path> for Meta {
             permissions: Permissions::from(&metadata),
             date: Date::from(&metadata),
             name: Name::new(&path, file_type),
-            owner,
+            owner: Owner::from(&metadata),
             file_type,
         }
     }

@@ -7,6 +7,7 @@ pub enum Elem {
     /// Node type
     File,
     SymLink,
+    BrokenSymLink,
     Dir,
     Pipe,
     BlockDevice,
@@ -58,6 +59,7 @@ lazy_static! {
         m.insert(Elem::Dir, Colour::Fixed(33)); // DodgerBlue1
         m.insert(Elem::Pipe, Colour::Fixed(44)); // DarkTurquoise
         m.insert(Elem::SymLink, Colour::Fixed(44)); // DarkTurquoise
+        m.insert(Elem::BrokenSymLink, Colour::Fixed(124)); // Red3
         m.insert(Elem::BlockDevice, Colour::Fixed(44)); // DarkTurquoise
         m.insert(Elem::CharDevice, Colour::Fixed(44)); // DarkTurquoise
         m.insert(Elem::Socket, Colour::Fixed(44)); // DarkTurquoise
