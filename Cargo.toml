@@ -8,7 +8,7 @@ license-file = "./LICENSE"
 name = "lsd"
 readme = "./README.md"
 repository = "https://github.com/Peltoche/lsd"
-version = "0.6.0"
+version = "0.6.1-pre"
 
 [dependencies]
 ansi_term = "0.11.0"
