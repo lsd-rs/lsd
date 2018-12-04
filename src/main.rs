@@ -29,7 +29,7 @@ pub struct Options {
 
 fn main() {
     let matches = App::new("lsd")
-        .about("A ls comment with a lot of pretty colors and some other stuff.")
+        .about("An ls comment with a lot of pretty colors and some other stuff.")
         .arg(Arg::with_name("FILE").multiple(true).default_value("."))
         .arg(Arg::with_name("all").short("a").long("all"))
         .arg(Arg::with_name("long").short("l").long("long"))
