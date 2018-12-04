@@ -2,12 +2,23 @@ use ansi_term::{ANSIString, ANSIStrings};
 use meta::FileType;
 use meta::Meta;
 use std::cmp::Ordering;
+use std::iter::IntoIterator;
+use std::vec::IntoIter;
 
 pub struct Batch(Vec<Meta>);
 
 impl From<Vec<Meta>> for Batch {
     fn from(metas: Vec<Meta>) -> Self {
         Batch(metas)
+    }
+}
+
+impl IntoIterator for Batch {
+    type Item = Meta;
+    type IntoIter = IntoIter<Meta>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.0.into_iter()
     }
 }
 

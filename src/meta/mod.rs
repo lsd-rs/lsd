@@ -15,11 +15,12 @@ pub use self::size::Size;
 pub use self::symlink::SymLink;
 
 use std::fs::read_link;
-use std::path::Path;
+use std::path::PathBuf;
 
 #[derive(Debug)]
 pub struct Meta {
     pub name: Name,
+    pub path: PathBuf,
     pub permissions: Permissions,
     pub date: Date,
     pub owner: Owner,
@@ -29,7 +30,7 @@ pub struct Meta {
 }
 
 impl Meta {
-    pub fn from_path(path: &Path) -> Option<Self> {
+    pub fn from_path(path: &PathBuf) -> Option<Self> {
         let mut metadata = match path.metadata() {
             Ok(res) => res,
             Err(err) => {
@@ -51,6 +52,7 @@ impl Meta {
         }
 
         Some(Meta {
+            path: path.to_path_buf(),
             symlink: SymLink::from_path(&path),
             size: Size::from(&metadata),
             permissions: Permissions::from(&metadata),

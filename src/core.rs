@@ -1,7 +1,7 @@
 use batch::Batch;
 use display::Display;
-use meta::Meta;
-use std::path::Path;
+use meta::{FileType, Meta};
+use std::path::{Path, PathBuf};
 use Options;
 
 pub struct Core<'a> {
@@ -13,21 +13,17 @@ impl<'a> Core<'a> {
         Core { options }
     }
 
-    pub fn run(&self, inputs: Vec<&str>) {
+    pub fn run(&self, paths: Vec<PathBuf>) {
         let display = Display::new(self.options);
 
         let mut dirs = Vec::new();
         let mut files = Vec::new();
 
-        for input in inputs {
-            let path = Path::new(input);
-
+        for path in paths {
             if path.is_dir() {
                 dirs.push(path);
-            } else {
-                if let Some(meta) = Meta::from_path(path) {
-                    files.push(meta);
-                }
+            } else if let Some(meta) = Meta::from_path(&path) {
+                files.push(meta);
             }
         }
 
@@ -42,12 +38,26 @@ impl<'a> Core<'a> {
         dirs.sort_unstable();
 
         for dir in dirs {
-            if let Some(folder_batch) = self.list_folder_content(dir) {
-                if print_folder_name {
+            if let Some(folder_batch) = self.list_folder_content(dir.as_path()) {
+                if print_folder_name || self.options.recursive {
                     println!("\n{}:", dir.display())
                 }
 
                 display.print_outputs(self.get_batch_outputs(&folder_batch));
+
+                if self.options.recursive {
+                    let folder_dirs = folder_batch
+                        .into_iter()
+                        .filter_map(|x| {
+                            if x.file_type == FileType::Directory {
+                                Some(x.path)
+                            } else {
+                                None
+                            }
+                        }).collect();
+
+                    self.run(folder_dirs);
+                }
             }
         }
     }
@@ -73,7 +83,7 @@ impl<'a> Core<'a> {
 
         for entry in dir {
             if let Ok(entry) = entry {
-                if let Some(meta) = Meta::from_path(entry.path().as_path()) {
+                if let Some(meta) = Meta::from_path(&entry.path()) {
                     if !meta.name.is_hidden() || self.options.display_all {
                         metas.push(meta);
                     }

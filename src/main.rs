@@ -17,11 +17,13 @@ mod meta;
 
 use clap::{App, Arg};
 use core::Core;
+use std::path::PathBuf;
 
 pub struct Options {
     pub display_all: bool,
     pub display_long: bool,
     pub display_online: bool,
+    pub recursive: bool,
 }
 
 fn main() {
@@ -31,17 +33,20 @@ fn main() {
         .arg(Arg::with_name("all").short("a").long("all"))
         .arg(Arg::with_name("long").short("l").long("long"))
         .arg(Arg::with_name("oneline").short("1").long("oneline"))
+        .arg(Arg::with_name("recursive").short("R").long("recursive"))
         .get_matches();
 
     let options = Options {
         display_all: matches.is_present("all"),
         display_long: matches.is_present("long"),
         display_online: matches.is_present("oneline"),
+        recursive: matches.is_present("recursive"),
     };
 
-    let inputs: Vec<&str> = matches
+    let inputs = matches
         .values_of("FILE")
         .expect("failed to retrieve cli value")
+        .map(PathBuf::from)
         .collect();
 
     let core = Core::new(&options);
