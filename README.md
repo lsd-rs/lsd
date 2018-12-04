@@ -11,7 +11,7 @@
 3. [Installation](#installation)
     1. [Archlinux](#archlinux)
     2. [Other](#other)
-4. [Recommended configurations](#recommended configurations)
+4. [Configurations](#configurations)
     1. [Required](#required)
     2. [Optional](#optional)
 5. [Benchmark](#benchmark)
@@ -39,7 +39,7 @@ which make it really faster ([see the benchmarks](#benchmark)).
 2. Install the patched fonts of powerline nerd-font and/or font-awesome. Have a look at the [Nerd Font README](https://github.com/ryanoasis/nerd-fonts/blob/master/readme.md) for more installation instructions.
 3. Install the lsd package with `cargo install lsd`
 
-## Recommended Configurations
+## Configurations
 
 ### Required
 
