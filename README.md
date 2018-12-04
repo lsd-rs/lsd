@@ -26,6 +26,12 @@ which make it really faster ([see the benchmarks](#benchmark)).
 
 ## Installation
 
+### Archlinux
+
+(coming soon)
+
+### Other
+
 1. Install rust
 2. Install the patched fonts of powerline nerd-font and/or font-awesome. Have a look at the [Nerd Font README](https://github.com/ryanoasis/nerd-fonts/blob/master/readme.md) for more installation instructions.
 3. Install the lsd package with `cargo install lsd`
