@@ -46,7 +46,7 @@ which make it really faster ([see the benchmarks](#benchmark)).
 In order to use lsd instead of the default ls you need to add this to you shell
 configuration file  (~/.bashrc, ~/.zshrc, etc.) :
 
-  ```
+  ```sh
   alias ls='lsd'
   ```
 
@@ -55,7 +55,7 @@ configuration file  (~/.bashrc, ~/.zshrc, etc.) :
 Some examples of useful aliases. You can add this to you shell configuration
 file  (~/.bashrc, ~/.zshrc, etc.) just under the alias above :
 
-  ```
+  ```sh
   alias l='ls -l'
   alias la='lsd -a'
   alias lla='ls -la'
