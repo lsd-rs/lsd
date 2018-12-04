@@ -11,8 +11,11 @@
 3. [Installation](#installation)
     1. [Archlinux](#archlinux)
     2. [Other](#other)
-4. [Benchmark](#benchmark)
-4. [Todo](#todo)
+4. [Recommended configurations](#recommended configurations)
+    1. [Required](#required)
+    2. [Optional](#optional)
+5. [Benchmark](#benchmark)
+6. [Todo](#todo)
 
 ## Description
 
@@ -35,6 +38,30 @@ which make it really faster ([see the benchmarks](#benchmark)).
 1. Install rust
 2. Install the patched fonts of powerline nerd-font and/or font-awesome. Have a look at the [Nerd Font README](https://github.com/ryanoasis/nerd-fonts/blob/master/readme.md) for more installation instructions.
 3. Install the lsd package with `cargo install lsd`
+
+## Recommended Configurations
+
+### Required
+
+In order to use lsd instead of the default ls you need to add this to you shell
+configuration file  (~/.bashrc, ~/.zshrc, etc.) :
+
+  ```
+  alias ls='lsd'
+  ```
+
+### Optional
+
+Some examples of useful aliases. You can add this to you shell configuration
+file  (~/.bashrc, ~/.zshrc, etc.) just under the alias above :
+
+  ```
+  alias l='ls -l'
+  alias la='lsd -a'
+  alias lla='ls -la'
+  alias lt='ls --tree'
+  ```
+
 
 ## Benchmark
 
