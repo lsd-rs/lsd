@@ -2,6 +2,10 @@ use term_grid::{Cell, Direction, Filling, Grid, GridOptions};
 use terminal_size::terminal_size;
 use Options;
 
+const EDGE: &'static str = "├──";
+const LINE: &'static str = "│  ";
+const CORNER: &'static str = "└──";
+
 pub struct Display<'a> {
     options: &'a Options,
 }
@@ -42,6 +46,25 @@ impl<'a> Display<'a> {
             grid.fit_into_width(term_width)
                 .expect("failed to print the grid")
         );
+    }
+
+    pub fn print_tree_row(&self, output: String, depth: usize, last: bool) {
+        let mut res = String::new();
+
+        for _ in 0..depth {
+            res += LINE;
+        }
+
+        if last {
+            res += EDGE;
+        } else {
+            res += CORNER;
+        }
+
+        res += " ";
+        res += &output;
+
+        println!("{}", res);
     }
 
     fn print_one_per_line(&self, outputs: &[String]) {

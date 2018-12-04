@@ -23,6 +23,7 @@ pub struct Options {
     pub display_all: bool,
     pub display_long: bool,
     pub display_online: bool,
+    pub display_tree: bool,
     pub recursive: bool,
 }
 
@@ -34,12 +35,14 @@ fn main() {
         .arg(Arg::with_name("long").short("l").long("long"))
         .arg(Arg::with_name("oneline").short("1").long("oneline"))
         .arg(Arg::with_name("recursive").short("R").long("recursive"))
+        .arg(Arg::with_name("tree").long("tree"))
         .get_matches();
 
     let options = Options {
         display_all: matches.is_present("all"),
         display_long: matches.is_present("long"),
         display_online: matches.is_present("oneline"),
+        display_tree: matches.is_present("tree"),
         recursive: matches.is_present("recursive"),
     };
 

@@ -6,16 +6,22 @@ use Options;
 
 pub struct Core<'a> {
     options: &'a Options,
+    display: Display<'a>,
 }
 
 impl<'a> Core<'a> {
     pub fn new(options: &'a Options) -> Core<'a> {
-        Core { options }
+        Core {
+            options,
+            display: Display::new(options),
+        }
     }
 
-    pub fn run(&self, paths: Vec<PathBuf>) {
-        let display = Display::new(self.options);
+    pub fn run(self, paths: Vec<PathBuf>) {
+        self.run_inner(paths, 0);
+    }
 
+    fn run_inner(&self, paths: Vec<PathBuf>, depth: usize) {
         let mut dirs = Vec::new();
         let mut files = Vec::new();
 
@@ -29,23 +35,27 @@ impl<'a> Core<'a> {
 
         let print_folder_name: bool = dirs.len() + files.len() > 1;
 
-        if !files.is_empty() {
+        if !files.is_empty() && !self.options.display_tree {
             let mut file_batch = Batch::from(files);
             file_batch.sort();
-            display.print_outputs(self.get_batch_outputs(&file_batch));
+            self.display
+                .print_outputs(self.get_batch_outputs(&file_batch));
         }
 
         dirs.sort_unstable();
 
         for dir in dirs {
             if let Some(folder_batch) = self.list_folder_content(dir.as_path()) {
-                if print_folder_name || self.options.recursive {
+                if (print_folder_name || self.options.recursive) && !self.options.display_tree {
                     println!("\n{}:", dir.display())
                 }
 
-                display.print_outputs(self.get_batch_outputs(&folder_batch));
+                if self.options.display_tree {
+                    self.display_as_tree(folder_batch, depth);
+                } else if self.options.recursive {
+                    self.display
+                        .print_outputs(self.get_batch_outputs(&folder_batch));
 
-                if self.options.recursive {
                     let folder_dirs = folder_batch
                         .into_iter()
                         .filter_map(|x| {
@@ -56,8 +66,28 @@ impl<'a> Core<'a> {
                             }
                         }).collect();
 
-                    self.run(folder_dirs);
+                    self.run_inner(folder_dirs, depth);
+                } else {
+                    self.display
+                        .print_outputs(self.get_batch_outputs(&folder_batch));
                 }
+            }
+        }
+    }
+
+    pub fn display_as_tree(&self, batch: Batch, depth: usize) {
+        let last_idx = batch.len();
+
+        for (idx, elem) in batch.into_iter().enumerate() {
+            let last = !(idx + 1 == last_idx);
+
+            if elem.file_type == FileType::Directory {
+                self.display
+                    .print_tree_row(elem.name.render().to_string(), depth, last);
+                self.run_inner(vec![elem.path], depth + 1);
+            } else {
+                self.display
+                    .print_tree_row(elem.name.render().to_string(), depth, last);
             }
         }
     }

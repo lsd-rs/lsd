@@ -23,6 +23,10 @@ impl IntoIterator for Batch {
 }
 
 impl Batch {
+    pub fn len(&self) -> usize {
+        self.0.len()
+    }
+
     pub fn sort(&mut self) {
         self.0.sort_unstable_by(sort_by_meta);
     }
