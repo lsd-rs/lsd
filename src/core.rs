@@ -24,11 +24,10 @@ impl<'a> Core<'a> {
 
             if path.is_dir() {
                 dirs.push(path);
-            } else if path.is_file() {
-                files.push(Meta::from(path));
             } else {
-                let err = path.metadata().unwrap_err();
-                println!("cannot access '{}': {}", path.display(), err);
+                if let Some(meta) = Meta::from_path(path) {
+                    files.push(meta);
+                }
             }
         }
 
@@ -74,9 +73,10 @@ impl<'a> Core<'a> {
 
         for entry in dir {
             if let Ok(entry) = entry {
-                let meta = Meta::from(entry.path().as_path());
-                if !meta.name.is_hidden() || self.options.display_all {
-                    metas.push(meta);
+                if let Some(meta) = Meta::from_path(entry.path().as_path()) {
+                    if !meta.name.is_hidden() || self.options.display_all {
+                        metas.push(meta);
+                    }
                 }
             }
         }
