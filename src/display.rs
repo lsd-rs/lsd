@@ -2,9 +2,9 @@ use term_grid::{Cell, Direction, Filling, Grid, GridOptions};
 use terminal_size::terminal_size;
 use Options;
 
-const EDGE: &'static str = "├──";
-const LINE: &'static str = "│  ";
-const CORNER: &'static str = "└──";
+const EDGE: &str = "├──";
+const LINE: &str = "│  ";
+const CORNER: &str = "└──";
 
 pub struct Display<'a> {
     options: &'a Options,
@@ -48,9 +48,8 @@ impl<'a> Display<'a> {
             //are longer or almost as long as term_width
             //print line by line instead!
             let lined_output = grid.fit_into_columns(1);
-            println!("{}", lined_output); 
+            println!("{}", lined_output);
         }
-
     }
 
     pub fn print_tree_row(&self, output: String, depth: usize, last: bool) {
