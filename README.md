@@ -40,9 +40,10 @@ Install the patched fonts of powerline nerd-font and/or font-awesome. Have a loo
 
 ### Other
 
-Install the lsd package with:
+Update your rust toolchain to at least 1.30.1 and install the lsd package with:
 
 ```sh
+rustup update
 cargo install lsd
 ```
 
