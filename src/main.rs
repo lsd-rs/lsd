@@ -19,6 +19,7 @@ use clap::{App, Arg};
 use core::Core;
 use std::path::PathBuf;
 
+#[derive(Clone, Debug, Copy)]
 pub struct Options {
     pub display_all: bool,
     pub display_long: bool,
@@ -52,7 +53,7 @@ fn main() {
         .map(PathBuf::from)
         .collect();
 
-    let core = Core::new(&options);
+    let core = Core::new(options);
 
     core.run(inputs);
 }
