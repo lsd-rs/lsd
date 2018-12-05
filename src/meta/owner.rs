@@ -14,15 +14,13 @@ impl<'a> From<&'a Metadata> for Owner {
         let user = get_user_by_uid(meta.uid())
             .expect("failed to get user name")
             .name()
-            .to_str()
-            .expect("failed to convert user name to str")
+            .to_string_lossy()
             .to_string();
 
         let group = get_group_by_gid(meta.gid())
             .expect("failed to get the group name")
             .name()
-            .to_str()
-            .expect("failed to convert group name to str")
+            .to_string_lossy()
             .to_string();
 
         Owner { user, group }
