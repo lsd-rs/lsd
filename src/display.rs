@@ -41,11 +41,16 @@ impl<'a> Display<'a> {
             });
         }
 
-        println!(
-            "{}",
-            grid.fit_into_width(term_width)
-                .expect("failed to print the grid")
-        );
+        if let Some(gridded_output) = grid.fit_into_width(term_width) {
+            println!("{}", gridded_output);
+        } else {
+            //does not fit into grid, usually because (some) filename(s)
+            //are longer or almost as long as term_width
+            //print line by line instead!
+            let lined_output = grid.fit_into_columns(1);
+            println!("{}", lined_output); 
+        }
+
     }
 
     pub fn print_tree_row(&self, output: String, depth: usize, last: bool) {
