@@ -6,29 +6,35 @@ use std::path::{Path, PathBuf};
 use terminal_size::terminal_size;
 use Options;
 
-pub struct Core<'a> {
-    options: &'a Options,
-    display: Display<'a>,
+pub struct Core {
+    options: Options,
+    display: Display,
     colors: Colors,
 }
 
-impl<'a> Core<'a> {
-    pub fn new(options: &'a Options) -> Core<'a> {
+impl Core {
+    pub fn new(options: Options) -> Core {
         // terminal_size allows us to know if the stdout is a tty or not.
-        // If this it's not the case it means that the output is piped and
-        // the colors characteres can leads to many errors.
-        let handle_term = terminal_size().is_some();
+        let tty_available = terminal_size().is_some();
 
-        let theme = if handle_term {
-            // There is only the "Light" theme for now.
-            Theme::Light
+        let mut inner_options = options;
+
+        let theme;
+        if tty_available {
+            // There is only the "Default" theme for now.
+            theme = Theme::Default;
         } else {
-            Theme::NoColor
+            // The output is not a tty, this means the command is piped. (ex: lsd -l | less)
+            //
+            // Most of the programs does not handle correctly the ansi colors
+            // or require a raw output (like the `wc` command).
+            theme = Theme::NoColor;
+            inner_options.display_online = true;
         };
 
         Core {
             options,
-            display: Display::new(options),
+            display: Display::new(inner_options),
             colors: Colors::new(theme),
         }
     }

@@ -39,9 +39,10 @@ pub enum Elem {
 
 pub type ColoredString<'a> = ANSIString<'a>;
 
+#[derive(Debug, Copy, Clone)]
 pub enum Theme {
     NoColor,
-    Light,
+    Default,
 }
 
 pub struct Colors {
@@ -51,8 +52,8 @@ pub struct Colors {
 impl Colors {
     pub fn new(theme: Theme) -> Self {
         let colors = match theme {
-            Light => Some(Colors::get_light_theme_colour_map()),
-            NoColor => None,
+            Theme::NoColor => None,
+            Theme::Default => Some(Colors::get_light_theme_colour_map()),
         };
 
         Colors { colors }
