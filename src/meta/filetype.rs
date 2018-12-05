@@ -1,5 +1,4 @@
-use ansi_term::ANSIString;
-use color::{Colors, Elem};
+use color::{ColoredString, Colors, Elem};
 use std::fs::Metadata;
 use std::os::unix::fs::FileTypeExt;
 
@@ -40,16 +39,16 @@ impl<'a> From<&'a Metadata> for FileType {
 }
 
 impl FileType {
-    pub fn render(self) -> ANSIString<'static> {
+    pub fn render(self, colors: &Colors) -> ColoredString {
         match self {
-            FileType::File => Colors[&Elem::File].paint("."),
-            FileType::Directory => Colors[&Elem::Dir].paint("d"),
-            FileType::Pipe => Colors[&Elem::Pipe].paint("|"),
-            FileType::SymLink => Colors[&Elem::SymLink].paint("l"),
-            FileType::BlockDevice => Colors[&Elem::BlockDevice].paint("b"),
-            FileType::CharDevice => Colors[&Elem::CharDevice].paint("c"),
-            FileType::Socket => Colors[&Elem::Socket].paint("s"),
-            FileType::Special => Colors[&Elem::Special].paint("?"),
+            FileType::File => colors.colorize(String::from("."), &Elem::File),
+            FileType::Directory => colors.colorize(String::from("d"), &Elem::Dir),
+            FileType::Pipe => colors.colorize(String::from("|"), &Elem::Pipe),
+            FileType::SymLink => colors.colorize(String::from("l"), &Elem::SymLink),
+            FileType::BlockDevice => colors.colorize(String::from("b"), &Elem::BlockDevice),
+            FileType::CharDevice => colors.colorize(String::from("c"), &Elem::CharDevice),
+            FileType::Socket => colors.colorize(String::from("s"), &Elem::Socket),
+            FileType::Special => colors.colorize(String::from("?"), &Elem::Special),
         }
     }
 }

@@ -31,23 +31,20 @@ pub struct Meta {
 
 impl Meta {
     pub fn from_path(path: &PathBuf) -> Option<Self> {
-        let metadata;
-
-        if read_link(path).is_ok() {
+        let metadata = if read_link(path).is_ok() {
             // If the file is a link, retrieve the metadata without following
             // the link.
-            metadata = path
-                .symlink_metadata()
-                .expect("failed to retrieve symlink metadata");
+            path.symlink_metadata()
+                .expect("failed to retrieve symlink metadata")
         } else {
-            metadata = match path.metadata() {
+            match path.metadata() {
                 Ok(res) => res,
                 Err(err) => {
                     println!("cannot access '{}': {}", path.display(), err);
                     return None;
                 }
-            };
-        }
+            }
+        };
 
         let file_type = FileType::from(&metadata);
 

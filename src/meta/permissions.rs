@@ -1,5 +1,5 @@
-use ansi_term::{ANSIString, ANSIStrings, Colour};
-use color::{Colors, Elem};
+use ansi_term::ANSIStrings;
+use color::{ColoredString, Colors, Elem};
 use std::fs::Metadata;
 use std::os::unix::fs::PermissionsExt;
 
@@ -48,46 +48,46 @@ impl<'a> From<&'a Metadata> for Permissions {
 }
 
 impl Permissions {
-    pub fn render(&self) -> ANSIString {
-        let bit = |bit, chr: &'static str, color: Colour| {
+    pub fn render(&self, colors: &Colors) -> ColoredString {
+        let bit = |bit, chr: &'static str, elem: &Elem| {
             if bit {
-                color.paint(chr)
+                colors.colorize(String::from(chr), elem)
             } else {
-                Colors[&Elem::NoAccess].paint("-")
+                colors.colorize(String::from("-"), &Elem::NoAccess)
             }
         };
 
-        let strings: &[ANSIString<'static>] = &[
-            bit(self.user_read, "r", Colors[&Elem::Read]),
-            bit(self.user_write, "w", Colors[&Elem::Write]),
-            self.execute_bit(self.setuid),
-            bit(self.group_read, "r", Colors[&Elem::Read]),
-            bit(self.group_write, "w", Colors[&Elem::Write]),
-            self.execute_bit(self.setgid),
-            bit(self.other_read, "r", Colors[&Elem::Read]),
-            bit(self.other_write, "w", Colors[&Elem::Write]),
-            self.other_execute_bit(),
+        let strings: &[ColoredString] = &[
+            bit(self.user_read, "r", &Elem::Read),
+            bit(self.user_write, "w", &Elem::Write),
+            self.execute_bit(colors, self.setuid),
+            bit(self.group_read, "r", &Elem::Read),
+            bit(self.group_write, "w", &Elem::Write),
+            self.execute_bit(colors, self.setgid),
+            bit(self.other_read, "r", &Elem::Read),
+            bit(self.other_write, "w", &Elem::Write),
+            self.other_execute_bit(colors),
         ];
 
         let res = ANSIStrings(strings).to_string();
-        ANSIString::from(res)
+        ColoredString::from(res)
     }
 
-    fn execute_bit(&self, special: bool) -> ANSIString<'static> {
+    fn execute_bit(&self, colors: &Colors, special: bool) -> ColoredString {
         match (self.user_execute, special) {
-            (false, false) => Colors[&Elem::NoAccess].paint("-"),
-            (true, false) => Colors[&Elem::Exec].paint("x"),
-            (false, true) => Colors[&Elem::ExecSticky].paint("S"),
-            (true, true) => Colors[&Elem::ExecSticky].paint("s"),
+            (false, false) => colors.colorize(String::from("-"), &Elem::NoAccess),
+            (true, false) => colors.colorize(String::from("x"), &Elem::Exec),
+            (false, true) => colors.colorize(String::from("S"), &Elem::ExecSticky),
+            (true, true) => colors.colorize(String::from("s"), &Elem::ExecSticky),
         }
     }
 
-    fn other_execute_bit(&self) -> ANSIString<'static> {
+    fn other_execute_bit(&self, colors: &Colors) -> ColoredString {
         match (self.other_execute, self.sticky) {
-            (false, false) => Colors[&Elem::NoAccess].paint("-"),
-            (true, false) => Colors[&Elem::Exec].paint("x"),
-            (false, true) => Colors[&Elem::ExecSticky].paint("T"),
-            (true, true) => Colors[&Elem::ExecSticky].paint("t"),
+            (false, false) => colors.colorize(String::from("-"), &Elem::NoAccess),
+            (true, false) => colors.colorize(String::from("x"), &Elem::Exec),
+            (false, true) => colors.colorize(String::from("T"), &Elem::ExecSticky),
+            (true, true) => colors.colorize(String::from("t"), &Elem::ExecSticky),
         }
     }
 }

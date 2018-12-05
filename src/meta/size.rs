@@ -1,5 +1,4 @@
-use ansi_term::ANSIString;
-use color::{Colors, Elem};
+use color::{ColoredString, Colors, Elem};
 use std::fs::Metadata;
 
 #[derive(Debug, PartialEq, Eq)]
@@ -55,7 +54,12 @@ impl Size {
         }
     }
 
-    pub fn render(&self, value_alignment: usize, unit_alignment: usize) -> ANSIString {
+    pub fn render(
+        &self,
+        colors: &Colors,
+        value_alignment: usize,
+        unit_alignment: usize,
+    ) -> ColoredString {
         let mut content = String::with_capacity(value_alignment + unit_alignment + 1);
 
         let value = self.render_value();
@@ -73,16 +77,16 @@ impl Size {
             content.push(' ');
         }
 
-        self.paint(content)
+        self.paint(colors, content)
     }
 
-    fn paint(&self, content: String) -> ANSIString {
+    fn paint(&self, colors: &Colors, content: String) -> ColoredString {
         if self.unit == Unit::Byte || self.unit == Unit::Kilo {
-            Colors[&Elem::FileSmall].paint(content)
+            colors.colorize(content, &Elem::FileSmall)
         } else if self.unit == Unit::Mega {
-            Colors[&Elem::FileMedium].paint(content)
+            colors.colorize(content, &Elem::FileMedium)
         } else {
-            Colors[&Elem::FileLarge].paint(content)
+            colors.colorize(content, &Elem::FileLarge)
         }
     }
 

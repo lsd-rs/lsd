@@ -1,4 +1,5 @@
 use batch::Batch;
+use color::Colors;
 use display::Display;
 use meta::{FileType, Meta};
 use std::path::{Path, PathBuf};
@@ -7,6 +8,7 @@ use Options;
 pub struct Core<'a> {
     options: &'a Options,
     display: Display<'a>,
+    colors: Colors,
 }
 
 impl<'a> Core<'a> {
@@ -14,6 +16,7 @@ impl<'a> Core<'a> {
         Core {
             options,
             display: Display::new(options),
+            colors: Colors::new(),
         }
     }
 
@@ -79,24 +82,30 @@ impl<'a> Core<'a> {
         let last_idx = batch.len();
 
         for (idx, elem) in batch.into_iter().enumerate() {
-            let last = !(idx + 1 == last_idx);
+            let last = idx + 1 != last_idx;
 
             if elem.file_type == FileType::Directory {
-                self.display
-                    .print_tree_row(elem.name.render().to_string(), depth, last);
+                self.display.print_tree_row(
+                    elem.name.render(&self.colors).to_string(),
+                    depth,
+                    last,
+                );
                 self.run_inner(vec![elem.path], depth + 1);
             } else {
-                self.display
-                    .print_tree_row(elem.name.render().to_string(), depth, last);
+                self.display.print_tree_row(
+                    elem.name.render(&self.colors).to_string(),
+                    depth,
+                    last,
+                );
             }
         }
     }
 
     pub fn get_batch_outputs<'b>(&self, batch: &'b Batch) -> Vec<String> {
         if self.options.display_long {
-            batch.get_long_output()
+            batch.get_long_output(&self.colors)
         } else {
-            batch.get_short_output()
+            batch.get_short_output(&self.colors)
         }
     }
 

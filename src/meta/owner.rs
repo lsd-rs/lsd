@@ -1,5 +1,4 @@
-use ansi_term::ANSIString;
-use color::{Colors, Elem};
+use color::{ColoredString, Colors, Elem};
 use std::fs::Metadata;
 use std::os::unix::fs::MetadataExt;
 use users::{get_group_by_gid, get_user_by_uid};
@@ -39,23 +38,25 @@ impl Owner {
         self.group.clone()
     }
 
-    pub fn render_user(&self, user_alignment: usize) -> ANSIString {
-        let mut alignment = String::with_capacity(user_alignment - self.user.len());
+    pub fn render_user(&self, colors: &Colors, user_alignment: usize) -> ColoredString {
+        let mut res = String::with_capacity(user_alignment - self.user.len());
 
         for _ in 0..(user_alignment - self.user.len()) {
-            alignment.push(' ');
+            res.push(' ');
         }
 
-        Colors[&Elem::User].paint(alignment + &self.user)
+        res += &self.user;
+        colors.colorize(res, &Elem::User)
     }
 
-    pub fn render_group(&self, group_alignment: usize) -> ANSIString {
-        let mut alignment = String::with_capacity(group_alignment - self.group.len());
+    pub fn render_group(&self, colors: &Colors, group_alignment: usize) -> ColoredString {
+        let mut res = String::with_capacity(group_alignment - self.group.len());
 
         for _ in 0..(group_alignment - self.group.len()) {
-            alignment.push(' ');
+            res.push(' ');
         }
 
-        Colors[&Elem::Group].paint(alignment + &self.group)
+        res += &self.group;
+        colors.colorize(res, &Elem::Group)
     }
 }

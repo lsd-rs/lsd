@@ -1,4 +1,5 @@
 use ansi_term::{ANSIString, ANSIStrings};
+use color::Colors;
 use meta::FileType;
 use meta::Meta;
 use std::cmp::Ordering;
@@ -31,17 +32,17 @@ impl Batch {
         self.0.sort_unstable_by(sort_by_meta);
     }
 
-    pub fn get_short_output(&self) -> Vec<String> {
+    pub fn get_short_output(&self, colors: &Colors) -> Vec<String> {
         let mut res = Vec::with_capacity(self.0.len());
 
         for meta in &self.0 {
-            res.push(meta.name.render().to_string());
+            res.push(meta.name.render(colors).to_string());
         }
 
         res
     }
 
-    pub fn get_long_output(&self) -> Vec<String> {
+    pub fn get_long_output(&self, colors: &Colors) -> Vec<String> {
         let mut res = Vec::with_capacity(self.0.len());
 
         let max_user_length = self.detect_user_lenght();
@@ -51,23 +52,23 @@ impl Batch {
         for meta in &self.0 {
             let mut link_str = ANSIString::from("");
             if let Some(ref symlink) = meta.symlink {
-                link_str = symlink.render();
+                link_str = symlink.render(colors);
             }
 
             let strings: &[ANSIString] = &[
-                meta.file_type.render(),
-                meta.permissions.render(),
+                meta.file_type.render(colors),
+                meta.permissions.render(colors),
                 ANSIString::from("  "),
-                meta.owner.render_user(max_user_length),
+                meta.owner.render_user(colors, max_user_length),
                 ANSIString::from("  "),
-                meta.owner.render_group(max_group_length),
+                meta.owner.render_group(colors, max_group_length),
                 ANSIString::from("  "),
                 meta.size
-                    .render(max_size_value_length, max_size_unit_length),
+                    .render(colors, max_size_value_length, max_size_unit_length),
                 ANSIString::from("  "),
-                meta.date.render(),
+                meta.date.render(colors),
                 ANSIString::from("  "),
-                meta.name.render(),
+                meta.name.render(colors),
                 link_str,
             ];
 

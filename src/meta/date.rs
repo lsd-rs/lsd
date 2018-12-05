@@ -1,5 +1,4 @@
-use ansi_term::ANSIString;
-use color::{Colors, Elem};
+use color::{ColoredString, Colors, Elem};
 use std::fs::Metadata;
 use std::time::UNIX_EPOCH;
 use time::{Duration, Timespec};
@@ -25,18 +24,18 @@ impl<'a> From<&'a Metadata> for Date {
 }
 
 impl Date {
-    pub fn render(&self) -> ANSIString {
+    pub fn render(&self, colors: &Colors) -> ColoredString {
         let now = time::now();
 
-        let color;
+        let elem;
         if self.0 > now - Duration::hours(1) {
-            color = Colors[&Elem::HourOld];
+            elem = &Elem::HourOld;
         } else if self.0 > now - Duration::days(1) {
-            color = Colors[&Elem::DayOld];
+            elem = &Elem::DayOld;
         } else {
-            color = Colors[&Elem::Older];
+            elem = &Elem::Older;
         }
 
-        color.paint(self.0.ctime().to_string())
+        colors.colorize(self.0.ctime().to_string(), elem)
     }
 }

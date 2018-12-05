@@ -1,5 +1,4 @@
-use ansi_term::ANSIString;
-use color::{Colors, Elem};
+use color::{ColoredString, Colors, Elem};
 use icon;
 use meta::filetype::FileType;
 use std::cmp::{Ordering, PartialOrd};
@@ -41,20 +40,20 @@ impl Name {
         }
     }
 
-    pub fn render(&self) -> ANSIString {
+    pub fn render(&self, colors: &Colors) -> ColoredString {
         let mut content = String::with_capacity(self.name.len() + 3 /* spaces */);
 
-        let color = if self.file_type == FileType::Directory {
-            Colors[&Elem::Dir]
+        let elem = if self.file_type == FileType::Directory {
+            &Elem::Dir
         } else {
-            Colors[&Elem::File]
+            &Elem::File
         };
 
         content += icon::from_name(&self);
         content += "  ";
         content += &self.name;
 
-        color.paint(content)
+        colors.colorize(content, elem)
     }
 
     pub fn name(&self) -> String {

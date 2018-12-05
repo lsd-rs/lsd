@@ -1,5 +1,4 @@
-use ansi_term::ANSIString;
-use color::{Colors, Elem};
+use color::{ColoredString, Colors, Elem};
 use std::fs::read_link;
 use std::path::Path;
 
@@ -34,13 +33,15 @@ impl SymLink {
         None
     }
 
-    pub fn render(&self) -> ANSIString {
-        let color = if self.valid {
-            Colors[&Elem::SymLink]
+    pub fn render(&self, colors: &Colors) -> ColoredString {
+        let elem = if self.valid {
+            &Elem::SymLink
         } else {
-            Colors[&Elem::BrokenSymLink]
+            &Elem::BrokenSymLink
         };
 
-        color.paint(String::from(" ⇒ ") + &self.target)
+        let mut res = String::from(" ⇒ ");
+        res += &self.target;
+        colors.colorize(res, elem)
     }
 }

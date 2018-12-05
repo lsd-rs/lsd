@@ -1,5 +1,6 @@
-use ansi_term::Colour;
+use ansi_term::{ANSIString, Colour, Style};
 use std::collections::HashMap;
+use terminal_size::terminal_size;
 
 #[allow(dead_code)]
 #[derive(Hash, Debug, Eq, PartialEq, Clone)]
@@ -37,11 +38,38 @@ pub enum Elem {
     FileSmall,
 }
 
-// You can find the table for each color, code, and display at:
-//
-//https://jonasjacek.github.io/colors/
-lazy_static! {
-    pub static ref Colors: HashMap<Elem, Colour> = {
+pub type ColoredString<'a> = ANSIString<'a>;
+
+pub struct Colors {
+    colors: Option<HashMap<Elem, Colour>>,
+}
+
+impl Colors {
+    pub fn new() -> Self {
+        // terminal_size allows us to know if the stdout is a tty or not.
+        // If this it's not the case it means that the output is piped and
+        // the colors characteres can leads to many errors.
+        let colors = if terminal_size().is_some() {
+            Some(Colors::get_colour_map())
+        } else {
+            None
+        };
+
+        Colors { colors }
+    }
+
+    pub fn colorize<'a>(&self, input: String, elem: &Elem) -> ColoredString<'a> {
+        if let Some(ref colors) = self.colors {
+            colors[elem].paint(input)
+        } else {
+            Style::default().paint(input)
+        }
+    }
+
+    // You can find the table for each color, code, and display at:
+    //
+    //https://jonasjacek.github.io/colors/
+    fn get_colour_map() -> HashMap<Elem, Colour> {
         let mut m = HashMap::new();
         // User / Group
         m.insert(Elem::User, Colour::Fixed(230)); // Cornsilk1
@@ -55,7 +83,7 @@ lazy_static! {
         m.insert(Elem::NoAccess, Colour::Fixed(168)); // HotPink3
 
         // File Types
-        m.insert(Elem::File , Colour::Fixed(184)); // Yellow3
+        m.insert(Elem::File, Colour::Fixed(184)); // Yellow3
         m.insert(Elem::Dir, Colour::Fixed(33)); // DodgerBlue1
         m.insert(Elem::Pipe, Colour::Fixed(44)); // DarkTurquoise
         m.insert(Elem::SymLink, Colour::Fixed(44)); // DarkTurquoise
@@ -76,5 +104,5 @@ lazy_static! {
         m.insert(Elem::FileLarge, Colour::Fixed(172)); // Orange3
 
         m
-    };
+    }
 }
