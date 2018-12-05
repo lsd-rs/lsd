@@ -21,6 +21,12 @@ impl<'a> From<&'a Metadata> for Size {
     fn from(meta: &Metadata) -> Self {
         let len = meta.len() as usize;
 
+        Size::from_bytes(len)
+    }
+}
+
+impl Size {
+    fn from_bytes(len: usize) -> Self {
         if len < 1024 {
             Size {
                 value: len * 1024,
@@ -48,9 +54,7 @@ impl<'a> From<&'a Metadata> for Size {
             }
         }
     }
-}
 
-impl Size {
     pub fn render(&self, value_alignment: usize, unit_alignment: usize) -> ANSIString {
         let mut content = String::with_capacity(value_alignment + unit_alignment + 1);
 
