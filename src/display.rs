@@ -6,12 +6,12 @@ const EDGE: &str = "├──";
 const LINE: &str = "│  ";
 const CORNER: &str = "└──";
 
-pub struct Display<'a> {
-    options: &'a Options,
+pub struct Display {
+    options: Options,
 }
 
-impl<'a> Display<'a> {
-    pub fn new(options: &'a Options) -> Display<'a> {
+impl Display {
+    pub fn new(options: Options) -> Display {
         Display { options }
     }
 
