@@ -1,6 +1,5 @@
 use ansi_term::{ANSIString, Colour, Style};
 use std::collections::HashMap;
-use terminal_size::terminal_size;
 
 #[allow(dead_code)]
 #[derive(Hash, Debug, Eq, PartialEq, Clone)]
@@ -40,19 +39,20 @@ pub enum Elem {
 
 pub type ColoredString<'a> = ANSIString<'a>;
 
+pub enum Theme {
+    NoColor,
+    Light,
+}
+
 pub struct Colors {
     colors: Option<HashMap<Elem, Colour>>,
 }
 
 impl Colors {
-    pub fn new() -> Self {
-        // terminal_size allows us to know if the stdout is a tty or not.
-        // If this it's not the case it means that the output is piped and
-        // the colors characteres can leads to many errors.
-        let colors = if terminal_size().is_some() {
-            Some(Colors::get_colour_map())
-        } else {
-            None
+    pub fn new(theme: Theme) -> Self {
+        let colors = match theme {
+            Light => Some(Colors::get_light_theme_colour_map()),
+            NoColor => None,
         };
 
         Colors { colors }
@@ -69,7 +69,7 @@ impl Colors {
     // You can find the table for each color, code, and display at:
     //
     //https://jonasjacek.github.io/colors/
-    fn get_colour_map() -> HashMap<Elem, Colour> {
+    fn get_light_theme_colour_map() -> HashMap<Elem, Colour> {
         let mut m = HashMap::new();
         // User / Group
         m.insert(Elem::User, Colour::Fixed(230)); // Cornsilk1

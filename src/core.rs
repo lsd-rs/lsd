@@ -1,8 +1,9 @@
 use batch::Batch;
-use color::Colors;
+use color::{Colors, Theme};
 use display::Display;
 use meta::{FileType, Meta};
 use std::path::{Path, PathBuf};
+use terminal_size::terminal_size;
 use Options;
 
 pub struct Core<'a> {
@@ -13,10 +14,22 @@ pub struct Core<'a> {
 
 impl<'a> Core<'a> {
     pub fn new(options: &'a Options) -> Core<'a> {
+        // terminal_size allows us to know if the stdout is a tty or not.
+        // If this it's not the case it means that the output is piped and
+        // the colors characteres can leads to many errors.
+        let handle_term = terminal_size().is_some();
+
+        let theme = if handle_term {
+            // There is only the "Light" theme for now.
+            Theme::Light
+        } else {
+            Theme::NoColor
+        };
+
         Core {
             options,
             display: Display::new(options),
-            colors: Colors::new(),
+            colors: Colors::new(theme),
         }
     }
 
