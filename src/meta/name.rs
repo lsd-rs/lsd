@@ -16,8 +16,7 @@ impl Name {
         let mut name = path
             .file_name()
             .expect("failed to retrieve file name")
-            .to_str()
-            .expect("failed to encode file name")
+            .to_string_lossy()
             .to_string();
 
         if file_type == FileType::Directory {
