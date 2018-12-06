@@ -81,10 +81,6 @@ make_deb() {
     install -Dm755 "target/$TARGET/release/$PROJECT_NAME" "$tempdir/usr/bin/$PROJECT_NAME"
     strip "$tempdir/usr/bin/$PROJECT_NAME"
 
-    # manpage
-    install -Dm644 "doc/$PROJECT_NAME.1" "$tempdir/usr/share/man/man1/$PROJECT_NAME.1"
-    gzip --best "$tempdir/usr/share/man/man1/$PROJECT_NAME.1"
-
     # readme and license
     install -Dm644 README.md "$tempdir/usr/share/doc/$PROJECT_NAME/README.md"
     install -Dm644 LICENSE-MIT "$tempdir/usr/share/doc/$PROJECT_NAME/LICENSE-MIT"
