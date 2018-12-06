@@ -1,6 +1,6 @@
 language: rust
 cache: cargo
-sudo: false
+sudo: required
 
 matrix:
   allow_failures:
@@ -65,6 +65,7 @@ addons:
     packages:
       # needed for i686-unknown-linux-gnu target
       - gcc-multilib
+      - fakeroot
 
 env:
   global:
