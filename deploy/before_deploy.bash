@@ -33,7 +33,7 @@ pack() {
 
     # manpage, readme and license
     cp README.md "$tempdir/$package_name"
-    c LICENSE "$tempdir/$package_name"
+    cp LICENSE "$tempdir/$package_name"
 
     # various autocomplete
     cp target/"$TARGET"/release/build/"$PROJECT_NAME"-*/out/"$PROJECT_NAME".bash "$tempdir/$package_name/autocomplete/${PROJECT_NAME}.bash-completion"
