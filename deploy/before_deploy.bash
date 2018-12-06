@@ -123,3 +123,4 @@ main() {
     fi
 }
 
+main
