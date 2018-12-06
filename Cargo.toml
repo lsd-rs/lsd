@@ -31,3 +31,6 @@ users = "0.8.0"
 [dependencies.clap]
 version = "2.32.0"
 features = ["suggestions", "color", "wrap_help"]
+
+[package.metadata.release]
+sign-commit = true
