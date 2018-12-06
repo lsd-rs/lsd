@@ -34,3 +34,4 @@ features = ["suggestions", "color", "wrap_help"]
 
 [package.metadata.release]
 sign-commit = true
+no-dev-version = true
