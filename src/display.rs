@@ -52,7 +52,7 @@ impl Display {
         }
     }
 
-    pub fn print_tree_row(&self, output: String, depth: usize, last: bool) {
+    pub fn print_tree_row(&self, output: &str, depth: usize, last: bool) {
         let mut res = String::new();
 
         for _ in 0..depth {
