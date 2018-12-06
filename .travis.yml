@@ -95,15 +95,14 @@ deploy:
   # - encrypt it using: `travis encrypt API_KEY_HERE`
   # - paste the output below
   api_key:
-    secure: "STYiKM9T5cHxIe9S0ocrXQAhxv6gsDbD0iv+EgrKZJCRGZQt/fPu2dx3PGeZXytHq/esigXQ/P76oQU2up4RDU1lh7OKhHBpKA239sTzGTT0oYQ6Rl8LVg2+6PxehYGuTqXUBpTccaOjmLKOI+p7cdm21PXjvu79myF8PJksLHwhTQkJLimTyZmjT1t1m1X6Nbwu9xEjixpa9JIlTyg+UESasPztV52/p1OUhv0koj5hQ2TJLQX5Sjt98C8Q/4fAPtlbUrwthcODZHhoaSGHYYDUHW7sNLx5P4/hYdKp+f+ycKQt59N+eEnTMFCuL4KDzl/X7ITfY6i48I2mHdEpADHF8D0bAu8AkWfbhUEp6345t7sTZyQOgB8Q8ODbIhaDvG8mgYRBJ7EWphE2E6AA7M9HEYSeGgN44z3HfVmny9UkJPwTOr8iYpsmO5hpEWisBeHqwsTPylVuHRa6NRrt4rDEBiJHDYCKPMiM3As6eebzSJ1FaOpMEvp5JghIlq6U4R+AxhnrH5/Hr990u9p6KQxFQ2L1dk+T0c5UH8B8WKbg5BzjbwdDclhAeAKHR56iyX8hCXYwGXty9BOtg7nowyss7smzGdItgJKIZjY2Hftz6GwiEyxQXYnktC9Lm465X89Ou4odEyjgdHsCb8YUWGCaCE0nK+JNySI/TN6EBfg="
-
+    secure: YLFnIMgd75NEL57rEz1Q44EJF62cS56INpflBsh6qC02YbLsSZj46ZfjHIY8MQKFaJZ4UOfZDU6Ae5Z84mVEgniGN5pzMCkNm792ht4e8vZseO+lrwYM4w6xvVoZ4P8uB9SmkidMKUxgpdRPYh9S+m6xEsYVSXqlgiNwAgZ/e/sxvZvg1Y+EQtOLZQ+Egmbj8AAFO8HxFO/QaP1dcgc/FFZVqlsjbqUr17aP1Y98tjjXlDB9ik7SDfv5fIVxplINTCokEtRHeL0Zz0xB8oQtcugC0lH9SQYe7h3ap42m9UqzaamWanZ5XDP7sVjDhAiPCFwK9rIGyWzeBqNQfeJ1R6UtkE8B74M5HfXuxCXjAsTGoK0E6vbU71pUY/tMJxMVxIutrHbWsOFh7Gpa/3f6823LW6blDUBHGH8MkKgL+oYpStO0Qq32RzOPcLgboa1WpFWQ8DcOIRzLDTdOVL3b6Wb/8SAHe/IIKFgjZvz2DTnacL/1NJeTtyc+Dz0H/zXbnxf+fAMmMs+tyxzaTFA/fzvODNtMKekZsvUr2eYdwnz2YtvsCzn62Oe51foPrBu5SJzxcPmwq0Xz417F4czT7gpPXaTbgJZ0Mmpz+PEXta7EOukQ1NPjMsYMfE05t3rSDQunthj6OZV31NBAoKHF29JvwjTjG/5e9lfY5oFWuew=
   # for uploading multiple files
   file_glob: true
   # NOTE explanation on each env variable
   # - PROJECT_NAME: name of the project, set on the `env.global` above
   # - TRAVIS_TAG: tag name that the build is being deployed for, usually the version number
   # - TARGET: target triple of the build
-  file: $PROJECT_NAME-$TRAVIS_TAG-$TARGET.*
+  file: "$PROJECT_NAME-$TRAVIS_TAG-$TARGET.*"
   # don't delete artifacts from previous stage
   skip_cleanup: true
   on:
@@ -111,7 +110,10 @@ deploy:
     tags: true
     # deploy only on stable channel that has TARGET env variable sets
     condition: $TRAVIS_RUST_VERSION = stable && $TARGET != ""
+    repo: Peltoche/lsd
 
 notifications:
   email:
     on_success: never
+
+
