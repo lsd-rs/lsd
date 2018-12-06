@@ -97,13 +97,11 @@ Package: $dpkgname
 Version: $version
 Section: utils
 Priority: optional
-Maintainer: David Peter <mail@david-peter.de>
+Maintainer: Peltoche <peltoche@halium.fr>
 Architecture: $architecture
 Provides: $PROJECT_NAME
 Conflicts: $conflictname
-Description: Simple, fast and user-friendly alternative to find
- While fd does not seek to mirror all of find's powerful functionality, it
- provides sensible (opinionated) defaults for 80% of the use cases.
+Description: A ls command with a lot of pretty colors.
 EOF
 
     fakeroot dpkg-deb --build "$tempdir" "${dpkgname}_${version}_${architecture}.deb"
