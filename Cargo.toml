@@ -9,7 +9,7 @@ license-file = "./LICENSE"
 name = "lsd"
 readme = "./README.md"
 repository = "https://github.com/Peltoche/lsd"
-version = "0.6.4-pre"
+version = "0.6.4"
 
 [[bin]]
 name = "lsd"
