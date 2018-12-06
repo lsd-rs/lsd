@@ -12,20 +12,20 @@ pub enum Unit {
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct Size {
-    value: usize,
+    value: i64,
     unit: Unit,
 }
 
 impl<'a> From<&'a Metadata> for Size {
     fn from(meta: &Metadata) -> Self {
-        let len = meta.len() as usize;
+        let len = meta.len();
 
-        Size::from_bytes(len)
+        Size::from_bytes(len as i64)
     }
 }
 
 impl Size {
-    fn from_bytes(len: usize) -> Self {
+    fn from_bytes(len: i64) -> Self {
         if len < 1024 {
             Size {
                 value: len * 1024,
