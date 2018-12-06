@@ -64,10 +64,10 @@ Some examples of useful aliases. You can add this to you shell configuration
 file  (~/.bashrc, ~/.zshrc, etc.) just under the alias above :
 
   ```sh
-  alias l='lsd -l'
-  alias la='lsd -a'
-  alias lla='lsd -la'
-  alias lt='lsd --tree'
+  alias l='ls -l'
+  alias la='ls -a'
+  alias lla='ls -la'
+  alias lt='ls --tree'
   ```
 
 
