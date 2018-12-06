@@ -93,10 +93,10 @@ deploy:
   # NOTE updating the `api_key.secure`
   # - go to: https://github.com/settings/tokens/new
   # - generate new token using `public_repo` scope
-  # - encrypt it using: `travis encrypt API_KEY_HERE`
+  # - encrypt it using: `travis encrypt --org API_KEY_HERE`
   # - paste the output below
   api_key:
-    secure: YLFnIMgd75NEL57rEz1Q44EJF62cS56INpflBsh6qC02YbLsSZj46ZfjHIY8MQKFaJZ4UOfZDU6Ae5Z84mVEgniGN5pzMCkNm792ht4e8vZseO+lrwYM4w6xvVoZ4P8uB9SmkidMKUxgpdRPYh9S+m6xEsYVSXqlgiNwAgZ/e/sxvZvg1Y+EQtOLZQ+Egmbj8AAFO8HxFO/QaP1dcgc/FFZVqlsjbqUr17aP1Y98tjjXlDB9ik7SDfv5fIVxplINTCokEtRHeL0Zz0xB8oQtcugC0lH9SQYe7h3ap42m9UqzaamWanZ5XDP7sVjDhAiPCFwK9rIGyWzeBqNQfeJ1R6UtkE8B74M5HfXuxCXjAsTGoK0E6vbU71pUY/tMJxMVxIutrHbWsOFh7Gpa/3f6823LW6blDUBHGH8MkKgL+oYpStO0Qq32RzOPcLgboa1WpFWQ8DcOIRzLDTdOVL3b6Wb/8SAHe/IIKFgjZvz2DTnacL/1NJeTtyc+Dz0H/zXbnxf+fAMmMs+tyxzaTFA/fzvODNtMKekZsvUr2eYdwnz2YtvsCzn62Oe51foPrBu5SJzxcPmwq0Xz417F4czT7gpPXaTbgJZ0Mmpz+PEXta7EOukQ1NPjMsYMfE05t3rSDQunthj6OZV31NBAoKHF29JvwjTjG/5e9lfY5oFWuew=
+  secure: "UwCwgVFYe5jALDxZL9d9VQFnCV/1BTpGwwWXS5fOC17OkGD277RIhgMChzJXmHALBJ7o2Jm7ZUxYViEp3/Mk8NlzvMi7sM3wkGaAF0/aAiqsYcxbSyP74j8htjaEDOO99JR9Wp3l74Y52daO4eqlSy3+ZeXIoPVSI9JJlNC1Mhs6bcUvzwCTaCUIU3wc1y9ST4RJizKkSBbtE+OH9CERYZoa1vmDvfAE9BidTu1Fx4kQo0TMpBeFA7+/KAk9BORvGE/97CJ8SdT53oNBozcYluv61pDRcn+Ek6AR7Kh3Z/HJvP6ZWquMygh1G7bVcYZPrSqqB3nTN8t08UZhWMw7QIzqZXd9YuK2WRKVLJaLfbHjm+tkmnaDZpi1OJMMevvdGPuSRTk2rJ/40dAG10sVWd4Ryq9ysLXfsQ2rpqCQdewnrutj9e2X3obO1YDCJzNiONKq+RNiibKWcMf0Rn0B/jFPDdZmPlkJ4M+CVl4mR3vaDMBlPzQkvXmtkWvqkdPn9xrr0CiuItZqEuHcFKtt1mo7MPsgz8FiZ3SzeQ0lYwW5XCsNCEiPWy9l1S/YFNTzpvSyyN3Wtliem5qoCmYVMi3c0mzLGVgTGnO6M1AGme4vD0dptnbov27utWd6sp8PCrxIG4itQxnbTsEYoDQ3EYUBQZX/I3EC0E9fFsmOhzA="
   # for uploading multiple files
   file_glob: true
   # NOTE explanation on each env variable
