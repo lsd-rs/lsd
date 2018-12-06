@@ -1,18 +1,117 @@
 language: rust
-
-rust:
-  - stable
-  - beta
-  - nightly
-
-sudo: false
 cache: cargo
+sudo: false
 
 matrix:
   allow_failures:
-    - rust: nightly
-  fast_finish: true
+  include:
+    # Stable channel.
+    - os: linux
+      rust: stable
+      env: TARGET=x86_64-unknown-linux-gnu
+    - os: linux
+      rust: stable
+      env: TARGET=i686-unknown-linux-gnu
+    - os: osx
+      rust: stable
+      env: TARGET=x86_64-apple-darwin
+
+    # Beta channel.
+    - os: linux
+      rust: beta
+      env: TARGET=x86_64-unknown-linux-gnu
+    # Disabled to reduce total CI time
+    # - os: linux
+    #   rust: beta
+    #   env: TARGET=i686-unknown-linux-gnu
+    # - os: osx
+    #   rust: beta
+    #   env: TARGET=x86_64-apple-darwin
+
+    # Nightly channel.
+    - os: linux
+      rust: nightly
+      env: TARGET=x86_64-unknown-linux-gnu
+    # Disabled to reduce total CI time
+    # - os: linux
+    #   rust: nightly
+    #   env: TARGET=i686-unknown-linux-gnu
+    # - os: osx
+    #   rust: nightly
+    #   env: TARGET=x86_64-apple-darwin
+
+    # Minimum Rust supported channel.
+    - os: linux
+      rust: 1.30.1
+      env: TARGET=x86_64-unknown-linux-gnu
+    - os: linux
+      rust: 1.30.1
+      env: TARGET=i686-unknown-linux-gnu
+    - os: osx
+      rust: 1.30.1
+      env: TARGET=x86_64-apple-darwin
+
+    # Code formatting check
+    - os: linux
+      rust: stable
+      # skip the global install step
+      install:
+        - rustup component add clippy-preview
+      script:
+        - cargo clippy
+
+addons:
+  apt:
+    packages:
+      # needed for i686-unknown-linux-gnu target
+      - gcc-multilib
+
+env:
+  global:
+    # Default target on travis-ci.
+    # Used as conditional check in the install stage
+    - HOST=x86_64-unknown-linux-gnu
+    # Used on the deployment script
+    - PROJECT_NAME=lsd
+
+install:
+  # prevent target re-add error from rustup
+  - if [[ $TRAVIS_OS_NAME = linux && $HOST != $TARGET ]]; then rustup target add $TARGET; fi
 
 script:
-      - cargo build --verbose --all
-      - cargo test --verbose --all
+  # Incorporate TARGET env var to the build and test process
+  - cargo build --target $TARGET --verbose
+  - cargo test --target $TARGET --verbose
+
+
+before_deploy:
+  - bash deploy/before_deploy.bash
+
+deploy:
+  provider: releases
+  # NOTE updating the `api_key.secure`
+  # - go to: https://github.com/settings/tokens/new
+  # - generate new token using `public_repo` scope
+  # - encrypt it using: `travis encrypt API_KEY_HERE`
+  # - paste the output below
+  api_key:
+    secure: "STYiKM9T5cHxIe9S0ocrXQAhxv6gsDbD0iv+EgrKZJCRGZQt/fPu2dx3PGeZXytHq/esigXQ/P76oQU2up4RDU1lh7OKhHBpKA239sTzGTT0oYQ6Rl8LVg2+6PxehYGuTqXUBpTccaOjmLKOI+p7cdm21PXjvu79myF8PJksLHwhTQkJLimTyZmjT1t1m1X6Nbwu9xEjixpa9JIlTyg+UESasPztV52/p1OUhv0koj5hQ2TJLQX5Sjt98C8Q/4fAPtlbUrwthcODZHhoaSGHYYDUHW7sNLx5P4/hYdKp+f+ycKQt59N+eEnTMFCuL4KDzl/X7ITfY6i48I2mHdEpADHF8D0bAu8AkWfbhUEp6345t7sTZyQOgB8Q8ODbIhaDvG8mgYRBJ7EWphE2E6AA7M9HEYSeGgN44z3HfVmny9UkJPwTOr8iYpsmO5hpEWisBeHqwsTPylVuHRa6NRrt4rDEBiJHDYCKPMiM3As6eebzSJ1FaOpMEvp5JghIlq6U4R+AxhnrH5/Hr990u9p6KQxFQ2L1dk+T0c5UH8B8WKbg5BzjbwdDclhAeAKHR56iyX8hCXYwGXty9BOtg7nowyss7smzGdItgJKIZjY2Hftz6GwiEyxQXYnktC9Lm465X89Ou4odEyjgdHsCb8YUWGCaCE0nK+JNySI/TN6EBfg="
+
+  # for uploading multiple files
+  file_glob: true
+  # NOTE explanation on each env variable
+  # - PROJECT_NAME: name of the project, set on the `env.global` above
+  # - TRAVIS_TAG: tag name that the build is being deployed for, usually the version number
+  # - TARGET: target triple of the build
+  file: $PROJECT_NAME-$TRAVIS_TAG-$TARGET.*
+  # don't delete artifacts from previous stage
+  skip_cleanup: true
+  on:
+    # deploy only if we push a tag
+    tags: true
+    # deploy only on stable channel that has TARGET env variable sets
+    condition: $TRAVIS_RUST_VERSION = stable && $TARGET != ""
+
+notifications:
+  email:
+    on_success: never
