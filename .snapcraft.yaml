@@ -2,8 +2,8 @@ name: lsd
 version: git
 summary: A ls command with a lot of pretty colors.
 description: lsd is a ls command including pretty icons based on nerd-font.
-grade: stable
 
+grade: stable
 confinement: devmode
 
 parts:
