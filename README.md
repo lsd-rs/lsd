@@ -12,6 +12,7 @@
 - [Installation](#installation)
   * [Prerequisites](#prerequisites)
   * [On Ubuntu](#on-ubuntu)
+  * [From Snap](#from-snap)
   * [From Sources](#from-sources)
   * [From Binaries](#from-binaries)
 - [Configurations](#configurations)
@@ -43,6 +44,13 @@ Download the latest .deb package from the [release page](https://github.com/Pelt
 
 ```sh
 sudo dpkg -i lsd_7.2.0_amd64.deb  # adapt version number and architecture
+```
+
+### From Snap
+
+```sh
+sudo snap install lsd
+
 ```
 
 ### From Sources
