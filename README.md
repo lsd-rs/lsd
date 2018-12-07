@@ -37,7 +37,7 @@ Install the patched fonts of powerline nerd-font and/or font-awesome. Have a loo
 
 ### On Ubuntu
 
-***... and other Debian-based Linux distributions***
+_... and other Debian-based Linux distributions_
 
 Download the latest .deb package from the [release page](https://github.com/Peltoche/lsd/releases) and install it via:
 
