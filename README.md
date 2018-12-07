@@ -55,10 +55,10 @@ sudo snap install lsd
 
 ### From Sources
 
-With Rust's package manager cargo, you can install fd via:
+With Rust's package manager cargo, you can install lsd via:
 
 ```sh
-cargo install fd-find
+cargo install lsd
 ```
 
 ### From Binaries
