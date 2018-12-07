@@ -3,8 +3,11 @@ version: git
 summary: A ls command with a lot of pretty colors.
 description: lsd is a ls command including pretty icons based on nerd-font.
 
+architectures:
+  - amd64
+  - i386
 grade: stable
-confinement: classic
+confinement: strict
 
 parts:
   lsd:
