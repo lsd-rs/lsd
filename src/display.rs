@@ -31,7 +31,7 @@ impl Display {
 
         let mut grid = Grid::new(GridOptions {
             filling: Filling::Spaces(2),
-            direction: Direction::LeftToRight,
+            direction: Direction::TopToBottom,
         });
 
         for output in outputs {
