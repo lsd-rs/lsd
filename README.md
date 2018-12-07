@@ -7,17 +7,17 @@
 
 # Table of Contents
 
-1. [Description](#description)
-2. [Screenshot](#screenshot)
-3. [Installation](#installation)
-    1. [Prerequisites](#prerequisites)
-    2. [Archlinux](#archlinux)
-    3. [Other](#other)
-4. [Configurations](#configurations)
-    1. [Required](#required)
-    2. [Optional](#optional)
-5. [Benchmark](#benchmark)
-6. [Todo](#todo)
+- [Description](#description)
+- [Screenshot](#screenshot)
+- [Installation](#installation)
+  * [Prerequisites](#prerequisites)
+  * [From Sources](#from-sources)
+  * [From Binaries](#from-binaries)
+- [Configurations](#configurations)
+  * [Required](#required)
+  * [Optional](#optional)
+- [Benchmark](#benchmark)
+- [Todo](#todo)
 
 ## Description
 
@@ -32,20 +32,25 @@ project but with some little differences.  For example it is written in rust and
 
 ### Prerequisites
 
-Install the patched fonts of powerline nerd-font and/or font-awesome. Have a look at the [Nerd Font README](https://github.com/ryanoasis/nerd-fonts/blob/master/readme.md) for more installation instructions.
+Install the patched fonts of powerline nerd-font and/or font-awesome. Have a look at the [Nerd Font README](https://github.com/ryanoasis/nerd-fonts/blob/master/readme.md) for more installation instructions. Don't forget to setup your terminal in order to use the correct font.
 
 ### Archlinux
 
 (coming soon)
 
-### Other
 
-Update your rust toolchain to at least 1.30.1 and install the lsd package with:
+### From Sources
+
+With Rust's package manager cargo, you can install fd via:
 
 ```sh
-rustup update
-cargo install lsd
+cargo install fd-find
 ```
+
+### From Binaries
+
+The [release page](https://github.com/Peltoche/lsd/releases) includes precompiled binaries for Linux and macOS.
+
 
 ## Configurations
 
