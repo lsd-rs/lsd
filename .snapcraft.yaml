@@ -7,7 +7,7 @@ grade: stable
 confinement: devmode
 
 parts:
-  fd:
+  lsd:
     plugin: rust
     source: ./
 
