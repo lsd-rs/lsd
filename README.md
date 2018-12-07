@@ -11,6 +11,7 @@
 - [Screenshot](#screenshot)
 - [Installation](#installation)
   * [Prerequisites](#prerequisites)
+  * [On Ubuntu](#on-ubuntu)
   * [From Sources](#from-sources)
   * [From Binaries](#from-binaries)
 - [Configurations](#configurations)
@@ -34,10 +35,15 @@ project but with some little differences.  For example it is written in rust and
 
 Install the patched fonts of powerline nerd-font and/or font-awesome. Have a look at the [Nerd Font README](https://github.com/ryanoasis/nerd-fonts/blob/master/readme.md) for more installation instructions. Don't forget to setup your terminal in order to use the correct font.
 
-### Archlinux
+### On Ubuntu
 
-(coming soon)
+***... and other Debian-based Linux distributions***
 
+Download the latest .deb package from the [release page](https://github.com/Peltoche/lsd/releases) and install it via:
+
+```sh
+sudo dpkg -i lsd_7.2.0_amd64.deb  # adapt version number and architecture
+```
 
 ### From Sources
 

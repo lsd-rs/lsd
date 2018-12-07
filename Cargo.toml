@@ -35,3 +35,4 @@ features = ["suggestions", "color", "wrap_help"]
 [package.metadata.release]
 sign-commit = true
 no-dev-version = true
+pre-release-replacements = [ {file="README.md", search="lsd_[a-z0-9\\.-]+_amd64.deb", replace="lsd_ {{version}}_amd64.deb"} ]
