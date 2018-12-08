@@ -16,16 +16,16 @@ pub struct Size {
     unit: Unit,
 }
 
-impl<'a> From<&'a Metadata> for Size {
-    fn from(meta: &Metadata) -> Self {
-        let len = meta.len();
-
-        Size::from_bytes(len as i64)
-    }
-}
-
 impl Size {
-    fn from_bytes(len: i64) -> Self {
+    pub fn from_bytes(meta: &Metadata) -> Option<Self> {
+        if !meta.is_file() {
+            return None;
+        }
+
+        Some(Size::get_file_size(meta.len() as i64))
+    }
+
+    fn get_file_size(len: i64) -> Self {
         if len < 1024 {
             Size {
                 value: len * 1024,
@@ -127,7 +127,7 @@ mod tests {
 
     #[test]
     fn render_byte() {
-        let size = Size::from_bytes(42); // == 42 bytes
+        let size = Size::get_file_size(42); // == 42 bytes
 
         assert_eq!(size.render_value().as_str(), "42");
         assert_eq!(size.render_unit().as_str(), "B");
@@ -135,7 +135,7 @@ mod tests {
 
     #[test]
     fn render_kilobyte() {
-        let size = Size::from_bytes(42 * 1024); // 42 kilobytes
+        let size = Size::get_file_size(42 * 1024); // 42 kilobytes
 
         assert_eq!(size.render_value().as_str(), "42");
         assert_eq!(size.render_unit().as_str(), "KB");
@@ -143,7 +143,7 @@ mod tests {
 
     #[test]
     fn render_megabyte() {
-        let size = Size::from_bytes(42 * 1024 * 1024); // 42 megabytes
+        let size = Size::get_file_size(42 * 1024 * 1024); // 42 megabytes
 
         assert_eq!(size.render_value().as_str(), "42");
         assert_eq!(size.render_unit().as_str(), "MB");
@@ -151,7 +151,7 @@ mod tests {
 
     #[test]
     fn render_gigabyte() {
-        let size = Size::from_bytes(42 * 1024 * 1024 * 1024); // 42 gigabytes
+        let size = Size::get_file_size(42 * 1024 * 1024 * 1024); // 42 gigabytes
 
         assert_eq!(size.render_value().as_str(), "42");
         assert_eq!(size.render_unit().as_str(), "GB");
@@ -159,7 +159,7 @@ mod tests {
 
     #[test]
     fn render_terabyte() {
-        let size = Size::from_bytes(42 * 1024 * 1024 * 1024 * 1024); // 42 terabytes
+        let size = Size::get_file_size(42 * 1024 * 1024 * 1024 * 1024); // 42 terabytes
 
         assert_eq!(size.render_value().as_str(), "42");
         assert_eq!(size.render_unit().as_str(), "TB");
@@ -167,7 +167,7 @@ mod tests {
 
     #[test]
     fn render_with_a_fraction() {
-        let size = Size::from_bytes(42 * 1024 + 103); // 42.1 kilobytes
+        let size = Size::get_file_size(42 * 1024 + 103); // 42.1 kilobytes
 
         assert_eq!(size.render_value().as_str(), "42.1");
         assert_eq!(size.render_unit().as_str(), "KB");
@@ -175,7 +175,7 @@ mod tests {
 
     #[test]
     fn render_with_a_truncated_fraction() {
-        let size = Size::from_bytes(42 * 1024 + 1); // 42.001 kilobytes == 42 kilobytes
+        let size = Size::get_file_size(42 * 1024 + 1); // 42.001 kilobytes == 42 kilobytes
 
         assert_eq!(size.render_value().as_str(), "42");
         assert_eq!(size.render_unit().as_str(), "KB");

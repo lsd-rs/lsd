@@ -57,6 +57,20 @@ impl Batch {
         for meta in &self.0 {
             let icon = icons.get(&meta.name);
 
+            let mut size_str;
+            if let Some(ref size) = meta.size {
+                size_str = size.render(colors, max_size_value_length, max_size_unit_length);
+            } else {
+                size_str = ANSIString::from(
+                    " ".repeat(max_size_value_length + max_size_unit_length) + "-",
+                );
+            }
+
+            let mut link_str = ANSIString::from("");
+            if let Some(ref symlink) = meta.symlink {
+                link_str = symlink.render(colors);
+            }
+
             let strings: &[ANSIString] = &[
                 meta.file_type.render(colors),
                 meta.permissions.render(colors),
@@ -65,8 +79,7 @@ impl Batch {
                 ANSIString::from("  "),
                 meta.owner.render_group(colors, max_group_length),
                 ANSIString::from("  "),
-                meta.size
-                    .render(colors, max_size_value_length, max_size_unit_length),
+                size_str,
                 ANSIString::from("  "),
                 meta.date.render(colors),
                 ANSIString::from("  "),
@@ -112,12 +125,14 @@ impl Batch {
         let mut max_unit_size: usize = 0;
 
         for meta in &self.0 {
-            if meta.size.render_value().len() > max_value_length {
-                max_value_length = meta.size.render_value().len();
-            }
+            if let Some(ref size) = meta.size {
+                if size.render_value().len() > max_value_length {
+                    max_value_length = size.render_value().len();
+                }
 
-            if meta.size.render_unit().len() > max_unit_size {
-                max_unit_size = meta.size.render_unit().len();
+                if size.render_unit().len() > max_unit_size {
+                    max_unit_size = size.render_unit().len();
+                }
             }
         }
 
