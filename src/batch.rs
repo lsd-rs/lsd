@@ -57,11 +57,6 @@ impl Batch {
         for meta in &self.0 {
             let icon = icons.get(&meta.name);
 
-            let mut link_str = ANSIString::from("");
-            if let Some(ref symlink) = meta.symlink {
-                link_str = symlink.render(colors);
-            }
-
             let strings: &[ANSIString] = &[
                 meta.file_type.render(colors),
                 meta.permissions.render(colors),
