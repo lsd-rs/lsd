@@ -1,7 +1,7 @@
 use batch::Batch;
 use color::{Colors, Theme};
 use display::Display;
-use flags::Flags;
+use flags::{Flags, WhenFlag};
 use meta::{FileType, Meta};
 use std::path::{Path, PathBuf};
 use terminal_size::terminal_size;
@@ -19,16 +19,18 @@ impl Core {
 
         let mut inner_flags = flags;
 
-        let theme;
-        if tty_available {
-            // There is only the "Default" theme for now.
-            theme = Theme::Default;
-        } else {
+        let theme = match (tty_available, flags.color) {
+            (true, WhenFlag::Never) => Theme::NoColor,
+            (false, WhenFlag::Auto) => Theme::NoColor,
+            (false, WhenFlag::Always) => Theme::Default,
+            _ => Theme::Default,
+        };
+
+        if !tty_available {
             // The output is not a tty, this means the command is piped. (ex: lsd -l | less)
             //
             // Most of the programs does not handle correctly the ansi colors
             // or require a raw output (like the `wc` command).
-            theme = Theme::NoColor;
             inner_flags.display_online = true;
         };
 

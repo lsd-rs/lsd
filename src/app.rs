@@ -11,6 +11,14 @@ pub fn build_app() -> App<'static, 'static> {
                 .long("all")
                 .help("Do not ignore entries starting with ."),
         ).arg(
+            Arg::with_name("color")
+                .long("color")
+                .possible_value("always")
+                .possible_value("auto")
+                .possible_value("never")
+                .default_value("auto")
+                .help("When to use terminal colours"),
+        ).arg(
             Arg::with_name("long")
                 .short("l")
                 .long("long")
