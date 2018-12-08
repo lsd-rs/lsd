@@ -26,8 +26,13 @@ pub struct Meta {
     pub date: Date,
     pub owner: Owner,
     pub file_type: FileType,
+<<<<<<< HEAD
     pub size: Size,
     pub symlink: SymLink,
+=======
+    pub size: Option<Size>,
+    pub symlink: Option<SymLink>,
+>>>>>>> show - for size when if it is not a file
 }
 
 impl Meta {
@@ -53,7 +58,7 @@ impl Meta {
         Some(Meta {
             path: path.to_path_buf(),
             symlink: SymLink::from(path.as_path()),
-            size: Size::from(&metadata),
+            size: Size::from_bytes(&metadata),
             permissions: Permissions::from(&metadata),
             date: Date::from(&metadata),
             owner: Owner::from(&metadata),
