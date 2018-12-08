@@ -60,6 +60,7 @@ impl Icons {
         // Use the default icons.
         let default_icon = match name.file_type() {
             FileType::Directory => &"",
+            FileType::SymLink => &"",
             _ => &"",
         };
 
