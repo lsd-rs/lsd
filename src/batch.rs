@@ -37,7 +37,7 @@ impl Batch {
         let mut res = Vec::with_capacity(self.0.len());
 
         for meta in &self.0 {
-            let icon = icons.from_name(&meta.name);
+            let icon = icons.get(&meta.name);
 
             let strings: &[ANSIString] = &[icon.render(colors), meta.name.render(colors)];
 
@@ -55,7 +55,7 @@ impl Batch {
         let (max_size_value_length, max_size_unit_length) = self.detect_size_lenghts();
 
         for meta in &self.0 {
-            let icon = icons.from_name(&meta.name);
+            let icon = icons.get(&meta.name);
 
             let strings: &[ANSIString] = &[
                 meta.file_type.render(colors),

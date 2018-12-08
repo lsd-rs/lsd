@@ -2,7 +2,7 @@ use color::{ColoredString, Colors, Elem};
 use meta::{FileType, Name};
 use std::collections::HashMap;
 
-const ICON_SPACE: &'static str = "  ";
+const ICON_SPACE: &str = "  ";
 
 pub struct Icon {
     icon: &'static str,
@@ -38,7 +38,7 @@ impl Icons {
         }
     }
 
-    pub fn from_name(&self, name: &Name) -> Icon {
+    pub fn get(&self, name: &Name) -> Icon {
         // Check the known names.
         if let Some(res) = self.icons_by_name.get(name.name().as_str()) {
             return Icon {
