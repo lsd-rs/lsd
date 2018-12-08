@@ -12,44 +12,51 @@ pub enum Unit {
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct Size {
-    value: i64,
-    unit: Unit,
+    value: Option<i64>,
+    unit: Option<Unit>,
+}
+
+impl<'a> From<&'a Metadata> for Size {
+    fn from(meta: &Metadata) -> Self {
+        let len = meta.len();
+
+        if meta.is_file() {
+            Size::from_bytes(len as i64)
+        } else {
+            Size {
+                value: None,
+                unit: None,
+            }
+        }
+    }
 }
 
 impl Size {
-    pub fn from_bytes(meta: &Metadata) -> Option<Self> {
-        if !meta.is_file() {
-            return None;
-        }
-
-        Some(Size::get_file_size(meta.len() as i64))
-    }
-
-    fn get_file_size(len: i64) -> Self {
+    fn from_bytes(len: i64) -> Self {
         if len < 1024 {
             Size {
-                value: len * 1024,
-                unit: Unit::Byte,
+                value: Some(len * 1024),
+                unit: Some(Unit::Byte),
             }
         } else if len < 1024 * 1024 {
             Size {
-                value: len,
-                unit: Unit::Kilo,
+                value: Some(len),
+                unit: Some(Unit::Kilo),
             }
         } else if len < 1024 * 1024 * 1024 {
             Size {
-                value: len / 1024,
-                unit: Unit::Mega,
+                value: Some(len / 1024),
+                unit: Some(Unit::Mega),
             }
         } else if len < 1024 * 1024 * 1024 * 1024 {
             Size {
-                value: len / (1024 * 1024),
-                unit: Unit::Giga,
+                value: Some(len / (1024 * 1024)),
+                unit: Some(Unit::Giga),
             }
         } else {
             Size {
-                value: len / (1024 * 1024 * 1024),
-                unit: Unit::Tera,
+                value: Some(len / (1024 * 1024 * 1024)),
+                unit: Some(Unit::Tera),
             }
         }
     }
@@ -81,17 +88,25 @@ impl Size {
     }
 
     fn paint(&self, colors: &Colors, content: String) -> ColoredString {
-        if self.unit == Unit::Byte || self.unit == Unit::Kilo {
-            colors.colorize(content, &Elem::FileSmall)
-        } else if self.unit == Unit::Mega {
-            colors.colorize(content, &Elem::FileMedium)
-        } else {
-            colors.colorize(content, &Elem::FileLarge)
+        match self.unit {
+            Some(ref unit) => {
+                if unit == &Unit::Byte || unit == &Unit::Kilo {
+                    colors.colorize(content, &Elem::FileSmall)
+                } else if unit == &Unit::Mega {
+                    colors.colorize(content, &Elem::FileMedium)
+                } else {
+                    colors.colorize(content, &Elem::FileLarge)
+                }
+            }
+            None => colors.colorize(content, &Elem::NonFile),
         }
     }
 
     pub fn render_value(&self) -> String {
-        let size_str = (self.value as f32 / 1024.0).to_string();
+        let size_str = match self.value {
+            Some(value) => (value as f32 / 1024.0).to_string(),
+            None => "".to_string(),
+        };
 
         // Check if there is a fraction.
         if let Some(fraction_idx) = size_str.find('.') {
@@ -112,11 +127,14 @@ impl Size {
 
     pub fn render_unit(&self) -> String {
         match self.unit {
-            Unit::Byte => String::from("B"),
-            Unit::Kilo => String::from("KB"),
-            Unit::Mega => String::from("MB"),
-            Unit::Giga => String::from("GB"),
-            Unit::Tera => String::from("TB"),
+            Some(ref unit) => match unit {
+                Unit::Byte => String::from("B"),
+                Unit::Kilo => String::from("KB"),
+                Unit::Mega => String::from("MB"),
+                Unit::Giga => String::from("GB"),
+                Unit::Tera => String::from("TB"),
+            },
+            None => String::from("-"),
         }
     }
 }
@@ -127,7 +145,7 @@ mod tests {
 
     #[test]
     fn render_byte() {
-        let size = Size::get_file_size(42); // == 42 bytes
+        let size = Size::from_bytes(42); // == 42 bytes
 
         assert_eq!(size.render_value().as_str(), "42");
         assert_eq!(size.render_unit().as_str(), "B");
@@ -135,7 +153,7 @@ mod tests {
 
     #[test]
     fn render_kilobyte() {
-        let size = Size::get_file_size(42 * 1024); // 42 kilobytes
+        let size = Size::from_bytes(42 * 1024); // 42 kilobytes
 
         assert_eq!(size.render_value().as_str(), "42");
         assert_eq!(size.render_unit().as_str(), "KB");
@@ -143,7 +161,7 @@ mod tests {
 
     #[test]
     fn render_megabyte() {
-        let size = Size::get_file_size(42 * 1024 * 1024); // 42 megabytes
+        let size = Size::from_bytes(42 * 1024 * 1024); // 42 megabytes
 
         assert_eq!(size.render_value().as_str(), "42");
         assert_eq!(size.render_unit().as_str(), "MB");
@@ -151,7 +169,7 @@ mod tests {
 
     #[test]
     fn render_gigabyte() {
-        let size = Size::get_file_size(42 * 1024 * 1024 * 1024); // 42 gigabytes
+        let size = Size::from_bytes(42 * 1024 * 1024 * 1024); // 42 gigabytes
 
         assert_eq!(size.render_value().as_str(), "42");
         assert_eq!(size.render_unit().as_str(), "GB");
@@ -159,7 +177,7 @@ mod tests {
 
     #[test]
     fn render_terabyte() {
-        let size = Size::get_file_size(42 * 1024 * 1024 * 1024 * 1024); // 42 terabytes
+        let size = Size::from_bytes(42 * 1024 * 1024 * 1024 * 1024); // 42 terabytes
 
         assert_eq!(size.render_value().as_str(), "42");
         assert_eq!(size.render_unit().as_str(), "TB");
@@ -167,7 +185,7 @@ mod tests {
 
     #[test]
     fn render_with_a_fraction() {
-        let size = Size::get_file_size(42 * 1024 + 103); // 42.1 kilobytes
+        let size = Size::from_bytes(42 * 1024 + 103); // 42.1 kilobytes
 
         assert_eq!(size.render_value().as_str(), "42.1");
         assert_eq!(size.render_unit().as_str(), "KB");
@@ -175,7 +193,7 @@ mod tests {
 
     #[test]
     fn render_with_a_truncated_fraction() {
-        let size = Size::get_file_size(42 * 1024 + 1); // 42.001 kilobytes == 42 kilobytes
+        let size = Size::from_bytes(42 * 1024 + 1); // 42.001 kilobytes == 42 kilobytes
 
         assert_eq!(size.render_value().as_str(), "42");
         assert_eq!(size.render_unit().as_str(), "KB");
