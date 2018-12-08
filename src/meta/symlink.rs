@@ -35,10 +35,10 @@ impl<'a> From<&'a Path> for SymLink {
             };
         }
 
-        return SymLink {
+        SymLink {
             target: None,
             valid: false,
-        };
+        }
     }
 }
 
