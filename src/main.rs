@@ -1,7 +1,5 @@
 #[macro_use]
 extern crate clap;
-#[macro_use]
-extern crate lazy_static;
 extern crate ansi_term;
 extern crate libc;
 extern crate term_grid;

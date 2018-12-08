@@ -2,12 +2,14 @@ use batch::Batch;
 use color::{Colors, Theme};
 use display::Display;
 use flags::{Flags, WhenFlag};
+use icon::Icons;
 use meta::{FileType, Meta};
 use std::path::{Path, PathBuf};
 use terminal_size::terminal_size;
 
 pub struct Core {
     flags: Flags,
+    icons: Icons,
     display: Display,
     colors: Colors,
 }
@@ -38,6 +40,7 @@ impl Core {
             flags,
             display: Display::new(inner_flags),
             colors: Colors::new(theme),
+            icons: Icons::new(),
         }
     }
 
@@ -124,9 +127,9 @@ impl Core {
 
     pub fn get_batch_outputs<'b>(&self, batch: &'b Batch) -> Vec<String> {
         if self.flags.display_long {
-            batch.get_long_output(&self.colors)
+            batch.get_long_output(&self.colors, &self.icons)
         } else {
-            batch.get_short_output(&self.colors)
+            batch.get_short_output(&self.colors, &self.icons)
         }
     }
 

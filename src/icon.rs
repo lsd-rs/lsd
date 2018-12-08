@@ -1,12 +1,75 @@
-use meta::Name;
+use color::{ColoredString, Colors, Elem};
+use meta::{FileType, Name};
 use std::collections::HashMap;
+
+const ICON_SPACE: &'static str = "  ";
+
+pub struct Icon {
+    icon: &'static str,
+    file_type: FileType,
+}
+
+impl Icon {
+    pub fn render(&self, colors: &Colors) -> ColoredString {
+        let elem = if self.file_type == FileType::Directory {
+            &Elem::Dir
+        } else {
+            &Elem::File
+        };
+
+        colors.colorize(self.icon.to_string() + ICON_SPACE, elem)
+    }
+}
+
+pub struct Icons {
+    icons_by_name: HashMap<&'static str, &'static str>,
+    icons_by_extension: HashMap<&'static str, &'static str>,
+}
 
 // In order to add a new icon, write the unicode value like "\ue5fb" then
 // run the command below in vim:
 //
 // s#\\u[0-9a-f]*#\=eval('"'.submatch(0).'"')#
-lazy_static! {
-    pub static ref IconsByName: HashMap<&'static str, &'static str> = {
+impl Icons {
+    pub fn new() -> Self {
+        Icons {
+            icons_by_name: Icons::get_default_icons_by_name(),
+            icons_by_extension: Icons::get_default_icons_by_extension(),
+        }
+    }
+
+    pub fn from_name(&self, name: &Name) -> Icon {
+        // Check the known names.
+        if let Some(res) = self.icons_by_name.get(name.name().as_str()) {
+            return Icon {
+                icon: res,
+                file_type: name.file_type(),
+            };
+        }
+
+        // Check the known extensions.
+        if let Some(extension) = name.extension() {
+            if let Some(res) = self.icons_by_extension.get(extension.as_str()) {
+                return Icon {
+                    icon: res,
+                    file_type: name.file_type(),
+                };
+            }
+        }
+
+        // Use the default icons.
+        let default_icon = match name.file_type() {
+            FileType::Directory => &"",
+            _ => &"",
+        };
+
+        Icon {
+            icon: default_icon,
+            file_type: name.file_type(),
+        }
+    }
+
+    fn get_default_icons_by_name() -> HashMap<&'static str, &'static str> {
         let mut m = HashMap::new();
 
         m.insert(".Trash", "");
@@ -33,11 +96,9 @@ lazy_static! {
         m.insert("yarn.lock", "");
 
         m
-    };
-}
+    }
 
-lazy_static! {
-    pub static ref IconsByExtension: HashMap<&'static str, &'static str> = {
+    fn get_default_icons_by_extension() -> HashMap<&'static str, &'static str> {
         let mut m = HashMap::new();
 
         m.insert("ai", "");
@@ -225,26 +286,5 @@ lazy_static! {
         m.insert("zshrc", "");
 
         m
-    };
-}
-
-pub fn from_name(name: &Name) -> &'static str {
-    // Check the known names.
-    if let Some(res) = IconsByName.get(name.name().as_str()) {
-        return res.to_owned();
-    }
-
-    // Check the known extensions.
-    if let Some(extension) = name.extension() {
-        if let Some(res) = IconsByExtension.get(extension.as_str()) {
-            return res.to_owned();
-        }
-    }
-
-    // Use the default icons.
-    if name.is_dir() {
-        ""
-    } else {
-        ""
     }
 }
