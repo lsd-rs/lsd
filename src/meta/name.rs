@@ -41,10 +41,10 @@ impl Name {
     pub fn render(&self, colors: &Colors) -> ColoredString {
         let mut content = String::with_capacity(self.name.len() + 3 /* spaces */);
 
-        let elem = if self.file_type == FileType::Directory {
-            &Elem::Dir
-        } else {
-            &Elem::File
+        let elem = match self.file_type {
+            FileType::Directory => &Elem::Dir,
+            FileType::SymLink => &Elem::SymLink,
+            _ => &Elem::File,
         };
 
         content += &self.name;

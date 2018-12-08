@@ -1,4 +1,4 @@
-use ansi_term::ANSIString;
+use ansi_term::{ANSIString, ANSIStrings};
 use color::{ColoredString, Colors, Elem};
 use std::fs::read_link;
 use std::path::Path;
@@ -51,9 +51,13 @@ impl SymLink {
                 &Elem::BrokenSymLink
             };
 
-            let mut res = String::from(" ⇒ ");
-            res += &target;
-            colors.colorize(res, elem)
+            let strings: &[ColoredString] = &[
+                ColoredString::from(" ⇒ "),
+                colors.colorize(target.to_string(), elem),
+            ];
+
+            let res = ANSIStrings(strings).to_string();
+            ColoredString::from(res)
         } else {
             ANSIString::from("")
         }
