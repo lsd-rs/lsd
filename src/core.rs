@@ -1,23 +1,23 @@
 use batch::Batch;
 use color::{Colors, Theme};
 use display::Display;
+use flags::Flags;
 use meta::{FileType, Meta};
 use std::path::{Path, PathBuf};
 use terminal_size::terminal_size;
-use Options;
 
 pub struct Core {
-    options: Options,
+    flags: Flags,
     display: Display,
     colors: Colors,
 }
 
 impl Core {
-    pub fn new(options: Options) -> Core {
+    pub fn new(flags: Flags) -> Core {
         // terminal_size allows us to know if the stdout is a tty or not.
         let tty_available = terminal_size().is_some();
 
-        let mut inner_options = options;
+        let mut inner_flags = flags;
 
         let theme;
         if tty_available {
@@ -29,12 +29,12 @@ impl Core {
             // Most of the programs does not handle correctly the ansi colors
             // or require a raw output (like the `wc` command).
             theme = Theme::NoColor;
-            inner_options.display_online = true;
+            inner_flags.display_online = true;
         };
 
         Core {
-            options,
-            display: Display::new(inner_options),
+            flags,
+            display: Display::new(inner_flags),
             colors: Colors::new(theme),
         }
     }
@@ -57,7 +57,7 @@ impl Core {
 
         let print_folder_name: bool = dirs.len() + files.len() > 1;
 
-        if !files.is_empty() && !self.options.display_tree {
+        if !files.is_empty() && !self.flags.display_tree {
             let mut file_batch = Batch::from(files);
             file_batch.sort();
             self.display
@@ -68,13 +68,13 @@ impl Core {
 
         for dir in dirs {
             if let Some(folder_batch) = self.list_folder_content(dir.as_path()) {
-                if (print_folder_name || self.options.recursive) && !self.options.display_tree {
+                if (print_folder_name || self.flags.recursive) && !self.flags.display_tree {
                     println!("\n{}:", dir.display())
                 }
 
-                if self.options.display_tree {
+                if self.flags.display_tree {
                     self.display_as_tree(folder_batch, depth);
-                } else if self.options.recursive {
+                } else if self.flags.recursive {
                     self.display
                         .print_outputs(self.get_batch_outputs(&folder_batch));
 
@@ -121,7 +121,7 @@ impl Core {
     }
 
     pub fn get_batch_outputs<'b>(&self, batch: &'b Batch) -> Vec<String> {
-        if self.options.display_long {
+        if self.flags.display_long {
             batch.get_long_output(&self.colors)
         } else {
             batch.get_short_output(&self.colors)
@@ -142,7 +142,7 @@ impl Core {
         for entry in dir {
             if let Ok(entry) = entry {
                 if let Some(meta) = Meta::from_path(&entry.path()) {
-                    if !meta.name.is_hidden() || self.options.display_all {
+                    if !meta.name.is_hidden() || self.flags.display_all {
                         metas.push(meta);
                     }
                 }

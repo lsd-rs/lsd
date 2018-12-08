@@ -1,22 +1,22 @@
+use flags::Flags;
 use term_grid::{Cell, Direction, Filling, Grid, GridOptions};
 use terminal_size::terminal_size;
-use Options;
 
 const EDGE: &str = "├──";
 const LINE: &str = "│  ";
 const CORNER: &str = "└──";
 
 pub struct Display {
-    options: Options,
+    flags: Flags,
 }
 
 impl Display {
-    pub fn new(options: Options) -> Display {
-        Display { options }
+    pub fn new(flags: Flags) -> Display {
+        Display { flags }
     }
 
     pub fn print_outputs(&self, outputs: Vec<String>) {
-        if self.options.display_long || self.options.display_online {
+        if self.flags.display_long || self.flags.display_online {
             self.print_one_per_line(&outputs);
         } else {
             self.print_grid(outputs);
