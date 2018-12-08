@@ -3,6 +3,7 @@ use std::fs::Metadata;
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum Unit {
+    None,
     Byte,
     Kilo,
     Mega,
@@ -12,8 +13,8 @@ pub enum Unit {
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct Size {
-    value: Option<i64>,
-    unit: Option<Unit>,
+    value: i64,
+    unit: Unit,
 }
 
 impl<'a> From<&'a Metadata> for Size {
@@ -24,8 +25,8 @@ impl<'a> From<&'a Metadata> for Size {
             Size::from_bytes(len as i64)
         } else {
             Size {
-                value: None,
-                unit: None,
+                value: 0,
+                unit: Unit::None,
             }
         }
     }
@@ -35,28 +36,28 @@ impl Size {
     fn from_bytes(len: i64) -> Self {
         if len < 1024 {
             Size {
-                value: Some(len * 1024),
-                unit: Some(Unit::Byte),
+                value: len * 1024,
+                unit: Unit::Byte,
             }
         } else if len < 1024 * 1024 {
             Size {
-                value: Some(len),
-                unit: Some(Unit::Kilo),
+                value: len,
+                unit: Unit::Kilo,
             }
         } else if len < 1024 * 1024 * 1024 {
             Size {
-                value: Some(len / 1024),
-                unit: Some(Unit::Mega),
+                value: len / 1024,
+                unit: Unit::Mega,
             }
         } else if len < 1024 * 1024 * 1024 * 1024 {
             Size {
-                value: Some(len / (1024 * 1024)),
-                unit: Some(Unit::Giga),
+                value: len / (1024 * 1024),
+                unit: Unit::Giga,
             }
         } else {
             Size {
-                value: Some(len / (1024 * 1024 * 1024)),
-                unit: Some(Unit::Tera),
+                value: len / (1024 * 1024 * 1024),
+                unit: Unit::Tera,
             }
         }
     }
@@ -88,24 +89,21 @@ impl Size {
     }
 
     fn paint(&self, colors: &Colors, content: String) -> ColoredString {
-        match self.unit {
-            Some(ref unit) => {
-                if unit == &Unit::Byte || unit == &Unit::Kilo {
-                    colors.colorize(content, &Elem::FileSmall)
-                } else if unit == &Unit::Mega {
-                    colors.colorize(content, &Elem::FileMedium)
-                } else {
-                    colors.colorize(content, &Elem::FileLarge)
-                }
-            }
-            None => colors.colorize(content, &Elem::NonFile),
+        if self.unit == Unit::None {
+            colors.colorize(content, &Elem::NonFile)
+        } else if self.unit == Unit::Byte || self.unit == Unit::Kilo {
+            colors.colorize(content, &Elem::FileSmall)
+        } else if self.unit == Unit::Mega {
+            colors.colorize(content, &Elem::FileMedium)
+        } else {
+            colors.colorize(content, &Elem::FileLarge)
         }
     }
 
     pub fn render_value(&self) -> String {
-        let size_str = match self.value {
-            Some(value) => (value as f32 / 1024.0).to_string(),
-            None => "".to_string(),
+        let size_str = match self.unit {
+            Unit::None => "".to_string(),
+            _ => (self.value as f32 / 1024.0).to_string(),
         };
 
         // Check if there is a fraction.
@@ -127,14 +125,12 @@ impl Size {
 
     pub fn render_unit(&self) -> String {
         match self.unit {
-            Some(ref unit) => match unit {
-                Unit::Byte => String::from("B"),
-                Unit::Kilo => String::from("KB"),
-                Unit::Mega => String::from("MB"),
-                Unit::Giga => String::from("GB"),
-                Unit::Tera => String::from("TB"),
-            },
-            None => String::from("-"),
+            Unit::None => String::from("-"),
+            Unit::Byte => String::from("B"),
+            Unit::Kilo => String::from("KB"),
+            Unit::Mega => String::from("MB"),
+            Unit::Giga => String::from("GB"),
+            Unit::Tera => String::from("TB"),
         }
     }
 }
