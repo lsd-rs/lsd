@@ -20,6 +20,8 @@
   * [Optional](#optional)
 - [Benchmark](#benchmark)
 - [Todo](#todo)
+- [Contributors](#contributors)
+- [Credits](#credits)
 
 ## Description
 
@@ -107,3 +109,14 @@ Result from `hyperfine --warmup 10 'lsd -la /etc/*' 'colorls -la /etc/*' --expor
 - [x] Handle all the file types (block/char/pipe/etc)
 - [x] Handle the tree (`--tree`) output option
 - [ ] Handle the json (`--json`) output option
+
+
+## Contributors
+
+Everyone can contribute to this project, improving the code or adding functions. If anyone wants something to be added we will try to do it.
+
+As this is being updated regularly, don't forget to rebase your fork before creating a pull-request.
+
+## Credits
+
+Special thanks to [sharkdp](https://github.com/sharkdp) and his superb [fd](https://github.com/sharkdp/fd) from which I have stolen a lot of stuff.
