@@ -11,10 +11,10 @@ pub struct Icon {
 
 impl Icon {
     pub fn render(&self, colors: &Colors) -> ColoredString {
-        let elem = if self.file_type == FileType::Directory {
-            &Elem::Dir
-        } else {
-            &Elem::File
+        let elem = match self.file_type {
+            FileType::Directory => &Elem::Dir,
+            FileType::SymLink => &Elem::SymLink,
+            _ => &Elem::File,
         };
 
         colors.colorize(self.icon.to_string() + ICON_SPACE, elem)
