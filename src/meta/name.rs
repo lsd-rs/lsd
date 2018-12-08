@@ -1,5 +1,4 @@
 use color::{ColoredString, Colors, Elem};
-use icon;
 use meta::filetype::FileType;
 use std::cmp::{Ordering, PartialOrd};
 use std::path::Path;
@@ -48,8 +47,6 @@ impl Name {
             &Elem::File
         };
 
-        content += icon::from_name(&self);
-        content += "  ";
         content += &self.name;
 
         colors.colorize(content, elem)
@@ -63,8 +60,8 @@ impl Name {
         self.extension.clone()
     }
 
-    pub fn is_dir(&self) -> bool {
-        self.file_type == FileType::Directory
+    pub fn file_type(&self) -> FileType {
+        self.file_type
     }
 
     pub fn is_hidden(&self) -> bool {

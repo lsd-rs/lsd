@@ -13,6 +13,7 @@ pub use self::owner::Owner;
 pub use self::permissions::Permissions;
 pub use self::size::Size;
 pub use self::symlink::SymLink;
+pub use icon::{Icon, Icons};
 
 use std::fs::read_link;
 use std::path::PathBuf;
@@ -47,6 +48,7 @@ impl Meta {
         };
 
         let file_type = FileType::from(&metadata);
+        let name = Name::new(&path, file_type);
 
         Some(Meta {
             path: path.to_path_buf(),
@@ -54,8 +56,8 @@ impl Meta {
             size: Size::from(&metadata),
             permissions: Permissions::from(&metadata),
             date: Date::from(&metadata),
-            name: Name::new(&path, file_type),
             owner: Owner::from(&metadata),
+            name,
             file_type,
         })
     }
