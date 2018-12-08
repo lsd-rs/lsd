@@ -1,47 +1,61 @@
+use ansi_term::ANSIString;
 use color::{ColoredString, Colors, Elem};
 use std::fs::read_link;
 use std::path::Path;
 
 #[derive(Debug)]
 pub struct SymLink {
-    target: String,
+    target: Option<String>,
     valid: bool,
 }
 
-impl SymLink {
-    pub fn from_path(path: &Path) -> Option<Self> {
+impl<'a> From<&'a Path> for SymLink {
+    fn from(path: &'a Path) -> Self {
         if let Ok(target) = read_link(path) {
             if target.is_absolute() || path.parent() == None {
-                return Some(SymLink {
+                return SymLink {
                     valid: target.exists(),
-                    target: target
+                    target: Some(
+                        target
+                            .to_str()
+                            .expect("failed to convert symlink to str")
+                            .to_string(),
+                    ),
+                };
+            }
+
+            return SymLink {
+                target: Some(
+                    target
                         .to_str()
                         .expect("failed to convert symlink to str")
                         .to_string(),
-                });
-            }
-
-            return Some(SymLink {
-                target: target
-                    .to_str()
-                    .expect("failed to convert symlink to str")
-                    .to_string(),
+                ),
                 valid: path.parent().unwrap().join(target).exists(),
-            });
+            };
         }
 
-        None
-    }
-
-    pub fn render(&self, colors: &Colors) -> ColoredString {
-        let elem = if self.valid {
-            &Elem::SymLink
-        } else {
-            &Elem::BrokenSymLink
+        return SymLink {
+            target: None,
+            valid: false,
         };
+    }
+}
 
-        let mut res = String::from(" ⇒ ");
-        res += &self.target;
-        colors.colorize(res, elem)
+impl SymLink {
+    pub fn render(&self, colors: &Colors) -> ColoredString {
+        if let Some(ref target) = self.target {
+            let elem = if self.valid {
+                &Elem::SymLink
+            } else {
+                &Elem::BrokenSymLink
+            };
+
+            let mut res = String::from(" ⇒ ");
+            res += &target;
+            colors.colorize(res, elem)
+        } else {
+            ANSIString::from("")
+        }
     }
 }

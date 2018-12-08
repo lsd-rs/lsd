@@ -26,7 +26,7 @@ pub struct Meta {
     pub owner: Owner,
     pub file_type: FileType,
     pub size: Size,
-    pub symlink: Option<SymLink>,
+    pub symlink: SymLink,
 }
 
 impl Meta {
@@ -50,7 +50,7 @@ impl Meta {
 
         Some(Meta {
             path: path.to_path_buf(),
-            symlink: SymLink::from_path(&path),
+            symlink: SymLink::from(path.as_path()),
             size: Size::from(&metadata),
             permissions: Permissions::from(&metadata),
             date: Date::from(&metadata),

@@ -50,11 +50,6 @@ impl Batch {
         let (max_size_value_length, max_size_unit_length) = self.detect_size_lenghts();
 
         for meta in &self.0 {
-            let mut link_str = ANSIString::from("");
-            if let Some(ref symlink) = meta.symlink {
-                link_str = symlink.render(colors);
-            }
-
             let strings: &[ANSIString] = &[
                 meta.file_type.render(colors),
                 meta.permissions.render(colors),
@@ -69,7 +64,7 @@ impl Batch {
                 meta.date.render(colors),
                 ANSIString::from("  "),
                 meta.name.render(colors),
-                link_str,
+                meta.symlink.render(colors),
             ];
 
             res.push(ANSIStrings(strings).to_string());
