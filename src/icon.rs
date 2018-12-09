@@ -233,6 +233,7 @@ impl Icons {
         m.insert("rdoc", "");
         m.insert("rds", "");
         m.insert("readme", "");
+        m.insert("rs", "");
         m.insert("rspec", "");
         m.insert("rspec_parallel", "");
         m.insert("rspec_status", "");
@@ -251,6 +252,7 @@ impl Icons {
         m.insert("stylus", "");
         m.insert("svg", "");
         m.insert("svg", "");
+        m.insert("swift", "");
         m.insert("tar", "");
         m.insert("tex", "");
         m.insert("tiff", "");
