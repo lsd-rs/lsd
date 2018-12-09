@@ -39,3 +39,100 @@ impl Date {
         colors.colorize(self.0.ctime().to_string(), elem)
     }
 }
+
+#[cfg(test)]
+mod test {
+    use super::Date;
+    use ansi_term::Colour;
+    use color::{Colors, Theme};
+    use std::env;
+    use std::fs;
+    use std::process::Command;
+    use time;
+
+    #[test]
+    fn test_an_hour_old_file_color() {
+        let mut file_path = env::temp_dir();
+        file_path.push("test_an_hour_old_file_color.tmp");
+
+        let creation_date = (time::now() - time::Duration::seconds(4)).to_local();
+
+        let success = Command::new("touch")
+            .arg("-t")
+            .arg(creation_date.strftime("%Y%m%d%H%M.%S").unwrap().to_string())
+            .arg(&file_path)
+            .status()
+            .unwrap()
+            .success();
+        assert_eq!(true, success, "failed to exec touch");
+
+        let colors = Colors::new(Theme::Default);
+        let date = Date::from(&file_path.metadata().unwrap());
+
+        assert_eq!(
+            Colour::Fixed(40).paint(creation_date.ctime().to_string()),
+            date.render(&colors)
+        );
+
+        fs::remove_file(file_path).unwrap();
+    }
+
+    #[test]
+    fn test_a_day_old_file_color() {
+        let mut file_path = env::temp_dir();
+        file_path.push("test_a_day_old_file_color.tmp");
+
+        let creation_date = (time::now() - time::Duration::hours(4)).to_local();
+
+        let success = Command::new("touch")
+            .arg("-t")
+            .arg(creation_date.strftime("%Y%m%d%H%M.%S").unwrap().to_string())
+            .arg(&file_path)
+            .status()
+            .unwrap()
+            .success();
+        assert_eq!(true, success, "failed to exec touch");
+
+        let colors = Colors::new(Theme::Default);
+        let date = Date::from(&file_path.metadata().unwrap());
+
+        assert_eq!(
+            Colour::Fixed(42).paint(creation_date.ctime().to_string()),
+            date.render(&colors)
+        );
+
+        fs::remove_file(file_path).unwrap();
+    }
+
+    #[test]
+    fn test_a_several_days_old_file_color() {
+        let mut file_path = env::temp_dir();
+        file_path.push("test_a_several_days_old_file_color.tmp");
+
+        let creation_date = time::now() - time::Duration::days(2);
+
+        let success = Command::new("touch")
+            .arg("-t")
+            .arg(
+                creation_date
+                    .to_local()
+                    .strftime("%Y%m%d%H%M.%S")
+                    .unwrap()
+                    .to_string(),
+            ).arg(&file_path)
+            .status()
+            .unwrap()
+            .success();
+        assert_eq!(true, success, "failed to exec touch");
+
+        let colors = Colors::new(Theme::Default);
+        let date = Date::from(&file_path.metadata().unwrap());
+
+        assert_eq!(
+            Colour::Fixed(36).paint(creation_date.ctime().to_string()),
+            date.render(&colors)
+        );
+
+        fs::remove_file(file_path).unwrap();
+    }
+}

@@ -136,7 +136,7 @@ impl Size {
 }
 
 #[cfg(test)]
-mod tests {
+mod test {
     use super::Size;
 
     #[test]
