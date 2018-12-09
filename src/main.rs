@@ -2,6 +2,8 @@
 extern crate clap;
 extern crate ansi_term;
 extern crate libc;
+#[cfg(test)]
+extern crate tempdir;
 extern crate term_grid;
 extern crate terminal_size;
 extern crate time;
