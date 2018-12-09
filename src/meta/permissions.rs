@@ -3,7 +3,7 @@ use color::{ColoredString, Colors, Elem};
 use std::fs::Metadata;
 use std::os::unix::fs::PermissionsExt;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq, Copy, Clone)]
 pub struct Permissions {
     pub user_read: bool,
     pub user_write: bool,

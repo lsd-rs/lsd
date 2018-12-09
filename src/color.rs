@@ -37,6 +37,9 @@ pub enum Elem {
     FileLarge,
     FileMedium,
     FileSmall,
+
+    /// Misc
+    ExecutableFile,
 }
 
 pub type ColoredString<'a> = ANSIString<'a>;
@@ -107,6 +110,7 @@ impl Colors {
         m.insert(Elem::FileSmall, Colour::Fixed(229)); // Wheat1
         m.insert(Elem::FileMedium, Colour::Fixed(216)); // LightSalmon1
         m.insert(Elem::FileLarge, Colour::Fixed(172)); // Orange3
+        m.insert(Elem::ExecutableFile, Colour::Fixed(47)); // Green
 
         m
     }
