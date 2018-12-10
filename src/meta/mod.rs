@@ -64,6 +64,7 @@ impl Meta {
             permissions,
             name,
             file_type,
+            permissions,
         })
     }
 }
