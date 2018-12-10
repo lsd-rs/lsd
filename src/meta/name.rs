@@ -67,6 +67,10 @@ impl Name {
     pub fn is_hidden(&self) -> bool {
         self.name.starts_with('.')
     }
+
+    pub fn permissions(&self) -> Permissions {
+        self.permissions
+    }
 }
 
 impl Ord for Name {
