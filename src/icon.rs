@@ -1,3 +1,4 @@
+use meta::Permissions;
 use color::{ColoredString, Colors, Elem};
 use meta::{FileType, Name};
 use std::collections::HashMap;
@@ -7,6 +8,7 @@ const ICON_SPACE: &str = "  ";
 pub struct Icon {
     icon: &'static str,
     file_type: FileType,
+    permissions: Permissions,
 }
 
 impl Icon {
@@ -14,9 +16,10 @@ impl Icon {
         let elem = match self.file_type {
             FileType::Directory => &Elem::Dir,
             FileType::SymLink => &Elem::SymLink,
+            _ if self.permissions.is_executable() => &Elem::ExecutableFile,
             _ => &Elem::File,
         };
-
+        
         colors.colorize(self.icon.to_string() + ICON_SPACE, elem)
     }
 }
@@ -39,11 +42,13 @@ impl Icons {
     }
 
     pub fn get(&self, name: &Name) -> Icon {
+        let permissions = name.permissions();
         // Check the known names.
         if let Some(res) = self.icons_by_name.get(name.name().as_str()) {
             return Icon {
                 icon: res,
                 file_type: name.file_type(),
+                permissions
             };
         }
 
@@ -53,6 +58,7 @@ impl Icons {
                 return Icon {
                     icon: res,
                     file_type: name.file_type(),
+                    permissions
                 };
             }
         }
@@ -66,6 +72,7 @@ impl Icons {
         Icon {
             icon: default_icon,
             file_type: name.file_type(),
+            permissions
         }
     }
 
