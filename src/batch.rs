@@ -1,5 +1,6 @@
 use ansi_term::{ANSIString, ANSIStrings};
 use color::Colors;
+use flags::Flags;
 use icon::Icons;
 use meta::FileType;
 use meta::Meta;
@@ -33,13 +34,17 @@ impl Batch {
         self.0.sort_unstable_by(sort_by_meta);
     }
 
-    pub fn get_short_output(&self, colors: &Colors, icons: &Icons) -> Vec<String> {
+    pub fn get_short_output(&self, colors: &Colors, icons: &Icons, flags: Flags) -> Vec<String> {
         let mut res = Vec::with_capacity(self.0.len());
 
         for meta in &self.0 {
             let icon = icons.get(&meta.name);
 
-            let strings: &[ANSIString] = &[icon.render(colors), meta.name.render(colors)];
+            let strings: &[ANSIString] = &[
+                icon.render(colors),
+                meta.name.render(colors),
+                meta.indicator.render(flags),
+            ];
 
             res.push(ANSIStrings(strings).to_string());
         }
@@ -47,7 +52,7 @@ impl Batch {
         res
     }
 
-    pub fn get_long_output(&self, colors: &Colors, icons: &Icons) -> Vec<String> {
+    pub fn get_long_output(&self, colors: &Colors, icons: &Icons, flags: Flags) -> Vec<String> {
         let mut res = Vec::with_capacity(self.0.len());
 
         let max_user_length = self.detect_user_lenght();
@@ -72,6 +77,7 @@ impl Batch {
                 ANSIString::from("  "),
                 icon.render(colors),
                 meta.name.render(colors),
+                meta.indicator.render(flags),
                 meta.symlink.render(colors),
             ];
 

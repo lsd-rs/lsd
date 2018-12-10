@@ -9,6 +9,7 @@ pub enum Elem {
     SymLink,
     BrokenSymLink,
     Dir,
+    ExecutableFile,
     Pipe,
     BlockDevice,
     CharDevice,
@@ -87,6 +88,7 @@ impl Colors {
         // File Types
         m.insert(Elem::File, Colour::Fixed(184)); // Yellow3
         m.insert(Elem::Dir, Colour::Fixed(33)); // DodgerBlue1
+        m.insert(Elem::ExecutableFile, Colour::Fixed(40)); // Green3
         m.insert(Elem::Pipe, Colour::Fixed(44)); // DarkTurquoise
         m.insert(Elem::SymLink, Colour::Fixed(44)); // DarkTurquoise
         m.insert(Elem::BrokenSymLink, Colour::Fixed(124)); // Red3

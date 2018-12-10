@@ -6,6 +6,7 @@ pub struct Flags {
     pub display_long: bool,
     pub display_online: bool,
     pub display_tree: bool,
+    pub display_indicators: bool,
     pub recursive: bool,
     pub color: WhenFlag,
 }
@@ -17,6 +18,7 @@ impl<'a> From<ArgMatches<'a>> for Flags {
             display_long: matches.is_present("long"),
             display_online: matches.is_present("oneline"),
             display_tree: matches.is_present("tree"),
+            display_indicators: matches.is_present("indicators"),
             recursive: matches.is_present("recursive"),
             color: WhenFlag::from(matches.value_of("color").unwrap()),
         }

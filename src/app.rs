@@ -19,6 +19,11 @@ pub fn build_app() -> App<'static, 'static> {
                 .default_value("auto")
                 .help("When to use terminal colours"),
         ).arg(
+            Arg::with_name("indicators")
+                .short("F")
+                .long("classify")
+                .help("Append indicator (one of */=>@|) at the end of the file names"),
+        ).arg(
             Arg::with_name("long")
                 .short("l")
                 .long("long")
