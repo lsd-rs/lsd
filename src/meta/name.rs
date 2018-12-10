@@ -73,29 +73,13 @@ impl Ord for Name {
 
 impl PartialOrd for Name {
     fn partial_cmp(&self, other: &Name) -> Option<Ordering> {
-        Some(self.name.cmp(&other.name))
+        Some(self.name.to_lowercase().cmp(&other.name.to_lowercase()))
     }
 }
 
 impl PartialEq for Name {
     fn eq(&self, other: &Name) -> bool {
-        let mut other_name = other.name.chars();
-
-        if self.name.len() != other.name.len() {
-            return false;
-        }
-
-        for c in self.name.chars() {
-            if let Some(c2) = other_name.next() {
-                if c != c2 {
-                    return false;
-                }
-            } else {
-                return false;
-            }
-        }
-
-        true
+        self.name.eq_ignore_ascii_case(&other.name)
     }
 }
 
@@ -235,8 +219,30 @@ mod test {
     }
 
     #[test]
+    fn test_order_impl_is_case_insensitive() {
+        let path_a = Path::new("aaaa");
+        let name_a = Name::new(&path_a, FileType::File);
+
+        let path_z = Path::new("ZZZZ");
+        let name_z = Name::new(&path_z, FileType::File);
+
+        assert_eq!(true, name_a < name_z);
+    }
+
+    #[test]
     fn test_eq_impl() {
         let path_1 = Path::new("aaaa");
+        let name_1 = Name::new(&path_1, FileType::File);
+
+        let path_2 = Path::new("aaaa");
+        let name_2 = Name::new(&path_2, FileType::File);
+
+        assert_eq!(true, name_1 == name_2);
+    }
+
+    #[test]
+    fn test_eq_impl_is_case_insensitive() {
+        let path_1 = Path::new("AAAA");
         let name_1 = Name::new(&path_1, FileType::File);
 
         let path_2 = Path::new("aaaa");
