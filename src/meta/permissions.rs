@@ -90,6 +90,10 @@ impl Permissions {
             (true, true) => colors.colorize(String::from("t"), &Elem::ExecSticky),
         }
     }
+
+    pub fn is_executable(&self) -> bool {
+        self.user_execute || self.group_execute || self.other_execute
+    }
 }
 
 // More readable aliases for the permission bits exposed by libc.

@@ -127,9 +127,9 @@ impl Core {
 
     pub fn get_batch_outputs<'b>(&self, batch: &'b Batch) -> Vec<String> {
         if self.flags.display_long {
-            batch.get_long_output(&self.colors, &self.icons)
+            batch.get_long_output(&self.colors, &self.icons, self.flags)
         } else {
-            batch.get_short_output(&self.colors, &self.icons)
+            batch.get_short_output(&self.colors, &self.icons, self.flags)
         }
     }
 

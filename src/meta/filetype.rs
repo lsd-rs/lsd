@@ -1,4 +1,5 @@
 use color::{ColoredString, Colors, Elem};
+use meta::Permissions;
 use std::fs::Metadata;
 use std::os::unix::fs::FileTypeExt;
 
@@ -8,17 +9,20 @@ pub enum FileType {
     CharDevice,
     Directory,
     File,
+    ExecutableFile,
     SymLink,
     Pipe,
     Socket,
     Special,
 }
 
-impl<'a> From<&'a Metadata> for FileType {
-    fn from(meta: &'a Metadata) -> Self {
+impl FileType {
+    pub fn new(meta: &Metadata, permissions: &Permissions) -> Self {
         let file_type = meta.file_type();
 
-        if file_type.is_file() {
+        if file_type.is_file() && permissions.is_executable() {
+            FileType::ExecutableFile
+        } else if file_type.is_file() && !permissions.is_executable() {
             FileType::File
         } else if file_type.is_dir() {
             FileType::Directory
@@ -41,7 +45,9 @@ impl<'a> From<&'a Metadata> for FileType {
 impl FileType {
     pub fn render(self, colors: &Colors) -> ColoredString {
         match self {
-            FileType::File => colors.colorize(String::from("."), &Elem::File),
+            FileType::File | FileType::ExecutableFile => {
+                colors.colorize(String::from("."), &Elem::File)
+            }
             FileType::Directory => colors.colorize(String::from("d"), &Elem::Dir),
             FileType::Pipe => colors.colorize(String::from("|"), &Elem::Pipe),
             FileType::SymLink => colors.colorize(String::from("l"), &Elem::SymLink),

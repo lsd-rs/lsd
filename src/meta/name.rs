@@ -12,15 +12,11 @@ pub struct Name {
 
 impl Name {
     pub fn new(path: &Path, file_type: FileType) -> Self {
-        let mut name = path
+        let name = path
             .file_name()
             .expect("failed to retrieve file name")
             .to_string_lossy()
             .to_string();
-
-        if file_type == FileType::Directory {
-            name.push('/')
-        }
 
         let mut extension = None;
         if let Some(res) = path.extension() {
