@@ -1,3 +1,4 @@
+use icon::Icons;
 use color::{ColoredString, Colors, Elem};
 use meta::filetype::FileType;
 use meta::permissions::Permissions;
@@ -11,6 +12,8 @@ pub struct Name {
     file_type: FileType,
     permissions: Permissions,
 }
+
+const ICON_SPACE: &str = "  ";
 
 impl Name {
     pub fn new(path: &Path, file_type: FileType) -> Self {
@@ -37,8 +40,11 @@ impl Name {
         }
     }
 
-    pub fn render(&self, colors: &Colors) -> ColoredString {
-        let mut content = String::with_capacity(self.name.len() + 3 /* spaces */);
+    pub fn render(&self, colors: &Colors, icons: &Icons) -> ColoredString {
+        let mut content = String::with_capacity(4 /*for the icon*/ + ICON_SPACE.len() +self.name.len() + 3 /* spaces */);
+
+        content += icons.get(self);
+        content += ICON_SPACE;
 
         let elem = match self.file_type {
             FileType::Directory => &Elem::Dir,
@@ -66,10 +72,6 @@ impl Name {
 
     pub fn is_hidden(&self) -> bool {
         self.name.starts_with('.')
-    }
-
-    pub fn permissions(&self) -> Permissions {
-        self.permissions
     }
 }
 
