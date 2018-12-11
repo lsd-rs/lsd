@@ -88,12 +88,13 @@ file  (~/.bashrc, ~/.zshrc, etc.) just under the alias above :
 
 ## Benchmark
 
-Result from `hyperfine --warmup 10 'lsd -la /etc/*' 'colorls -la /etc/*' --export-markdown out.md`:
+Result from `hyperfine --warmup 10 'lsd -la /etc/*' 'colorls -la /etc/*' 'exa -la /etc/*' --export-markdown out.md`:
 
 | Command | Mean [ms] | Min…Max [ms] |
 |:---|---:|---:|
-| `lsd -la /etc/*` | 11.0 ± 0.5 | 9.9…13.0 |
-| `colorls -la /etc/*` | 503.3 ± 5.6 | 494.6…513.4 |
+| `lsd -la /etc/*` | 9.8 ± 0.7 | 8.6…11.9 |
+| `colorls -la /etc/*` | 387.3 ± 4.1 | 379.8…393.6 |
+| `exa -la /etc/*` | 15.4 ± 1.8 | 14.0…24.0 |
 
 
 ## Contributors
