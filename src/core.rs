@@ -110,14 +110,14 @@ impl Core {
 
             if elem.file_type == FileType::Directory {
                 self.display.print_tree_row(
-                    elem.name.render(&self.colors).to_string(),
+                    elem.name.render(&self.colors, &self.icons).to_string(),
                     depth,
                     last,
                 );
                 self.run_inner(vec![elem.path], depth + 1);
             } else {
                 self.display.print_tree_row(
-                    elem.name.render(&self.colors).to_string(),
+                    elem.name.render(&self.colors, &self.icons).to_string(),
                     depth,
                     last,
                 );

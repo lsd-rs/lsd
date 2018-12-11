@@ -1,28 +1,5 @@
-use meta::Permissions;
-use color::{ColoredString, Colors, Elem};
 use meta::{FileType, Name};
 use std::collections::HashMap;
-
-const ICON_SPACE: &str = "  ";
-
-pub struct Icon {
-    icon: &'static str,
-    file_type: FileType,
-    permissions: Permissions,
-}
-
-impl Icon {
-    pub fn render(&self, colors: &Colors) -> ColoredString {
-        let elem = match self.file_type {
-            FileType::Directory => &Elem::Dir,
-            FileType::SymLink => &Elem::SymLink,
-            _ if self.permissions.is_executable() => &Elem::ExecutableFile,
-            _ => &Elem::File,
-        };
-        
-        colors.colorize(self.icon.to_string() + ICON_SPACE, elem)
-    }
-}
 
 pub struct Icons {
     icons_by_name: HashMap<&'static str, &'static str>,
@@ -41,38 +18,23 @@ impl Icons {
         }
     }
 
-    pub fn get(&self, name: &Name) -> Icon {
-        let permissions = name.permissions();
+    pub fn get(&self, name: &Name) -> &'static str {
         // Check the known names.
         if let Some(res) = self.icons_by_name.get(name.name().as_str()) {
-            return Icon {
-                icon: res,
-                file_type: name.file_type(),
-                permissions
-            };
+            return res;
         }
 
         // Check the known extensions.
         if let Some(extension) = name.extension() {
             if let Some(res) = self.icons_by_extension.get(extension.as_str()) {
-                return Icon {
-                    icon: res,
-                    file_type: name.file_type(),
-                    permissions
-                };
+                return res;
             }
         }
 
         // Use the default icons.
-        let default_icon = match name.file_type() {
+        match name.file_type() {
             FileType::Directory => &"",
             _ => &"",
-        };
-
-        Icon {
-            icon: default_icon,
-            file_type: name.file_type(),
-            permissions
         }
     }
 
