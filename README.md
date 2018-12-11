@@ -19,7 +19,6 @@
   * [Required](#required)
   * [Optional](#optional)
 - [Benchmark](#benchmark)
-- [Todo](#todo)
 - [Contributors](#contributors)
 - [Credits](#credits)
 
@@ -100,15 +99,6 @@ Result from `hyperfine --warmup 10 'lsd -la /etc/*' 'colorls -la /etc/*' --expor
 |:---|---:|---:|
 | `lsd -la /etc/*` | 11.0 ± 0.5 | 9.9…13.0 |
 | `colorls -la /etc/*` | 503.3 ± 5.6 | 494.6…513.4 |
-
-## TODO
-
-- [x] Handle the `-l` option (used by default for now)
-- [x] Handle the `-a` option
-- [x] Add icons before the files names
-- [x] Handle all the file types (block/char/pipe/etc)
-- [x] Handle the tree (`--tree`) output option
-- [ ] Handle the json (`--json`) output option
 
 
 ## Contributors
