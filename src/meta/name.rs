@@ -1,5 +1,5 @@
-use icon::Icons;
 use color::{ColoredString, Colors, Elem};
+use icon::Icons;
 use meta::filetype::FileType;
 use std::cmp::{Ordering, PartialOrd};
 use std::path::Path;
@@ -39,7 +39,9 @@ impl Name {
 
     pub fn render(&self, colors: &Colors, icons: &Icons) -> ColoredString {
         let icon = icons.get(self);
-        let mut content = String::with_capacity(icon.len() + ICON_SPACE.len() +self.name.len() + 3 /* spaces */);
+        let mut content = String::with_capacity(
+            icon.len() + ICON_SPACE.len() + self.name.len() + 3, /* spaces */
+        );
 
         content += icon;
         content += ICON_SPACE;
@@ -94,9 +96,9 @@ impl PartialEq for Name {
 #[cfg(test)]
 mod test {
     use super::Name;
-    use icon::Icons;
     use ansi_term::Colour;
     use color::{Colors, Theme};
+    use icon::Icons;
     use meta::FileType;
     use meta::Permissions;
     use std::fs::{self, File};
@@ -119,7 +121,10 @@ mod test {
         let file_type = FileType::new(&meta, &Permissions::from(&meta));
         let name = Name::new(&file_path, file_type);
 
-        assert_eq!(Colour::Fixed(184).paint("  file.txt"), name.render(&colors, &icons));
+        assert_eq!(
+            Colour::Fixed(184).paint("  file.txt"),
+            name.render(&colors, &icons)
+        );
     }
 
     #[test]
@@ -136,7 +141,10 @@ mod test {
         let file_type = FileType::new(&meta, &Permissions::from(&meta));
         let name = Name::new(&dir_path, file_type);
 
-        assert_eq!(Colour::Fixed(33).paint("  directory"), name.render(&colors, &icons));
+        assert_eq!(
+            Colour::Fixed(33).paint("  directory"),
+            name.render(&colors, &icons)
+        );
     }
 
     #[test]
@@ -159,7 +167,10 @@ mod test {
         let file_type = FileType::new(&meta, &Permissions::from(&meta));
         let name = Name::new(&symlink_path, file_type);
 
-        assert_eq!(Colour::Fixed(44).paint("  target.tmp"), name.render(&colors, &icons));
+        assert_eq!(
+            Colour::Fixed(44).paint("  target.tmp"),
+            name.render(&colors, &icons)
+        );
     }
 
     #[test]
@@ -181,7 +192,10 @@ mod test {
         let file_type = FileType::new(&meta, &Permissions::from(&meta));
         let name = Name::new(&pipe_path, file_type);
 
-        assert_eq!(Colour::Fixed(184).paint("  pipe.tmp"), name.render(&colors, &icons));
+        assert_eq!(
+            Colour::Fixed(184).paint("  pipe.tmp"),
+            name.render(&colors, &icons)
+        );
     }
 
     #[test]

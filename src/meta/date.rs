@@ -119,7 +119,8 @@ mod test {
                     .strftime("%Y%m%d%H%M.%S")
                     .unwrap()
                     .to_string(),
-            ).arg(&file_path)
+            )
+            .arg(&file_path)
             .status()
             .unwrap()
             .success();
