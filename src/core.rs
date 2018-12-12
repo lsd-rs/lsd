@@ -91,7 +91,8 @@ impl Core {
                             } else {
                                 None
                             }
-                        }).collect();
+                        })
+                        .collect();
 
                     self.run_inner(folder_dirs, depth);
                 } else {

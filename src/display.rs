@@ -91,7 +91,8 @@ impl Display {
                 .skip_while(|x| {
                     code_size += 1;
                     char::is_numeric(*x)
-                }).count();
+                })
+                .count();
             nb_invisible_char += 6 + code_size; /* "[38;5;" + color number + "m" */
         }
 
