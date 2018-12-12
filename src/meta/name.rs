@@ -38,9 +38,10 @@ impl Name {
     }
 
     pub fn render(&self, colors: &Colors, icons: &Icons) -> ColoredString {
-        let mut content = String::with_capacity(4 /*for the icon*/ + ICON_SPACE.len() +self.name.len() + 3 /* spaces */);
+        let icon = icons.get(self);
+        let mut content = String::with_capacity(icon.len() + ICON_SPACE.len() +self.name.len() + 3 /* spaces */);
 
-        content += icons.get(self);
+        content += icon;
         content += ICON_SPACE;
 
         let elem = match self.file_type {
