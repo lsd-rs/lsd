@@ -34,7 +34,7 @@ impl Icons {
         // Use the default icons.
         match name.file_type() {
             FileType::Directory => &"",
-            _ => &"",
+            _ => &"",
         }
     }
 
