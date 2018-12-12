@@ -47,6 +47,7 @@ impl Name {
         content += ICON_SPACE;
 
         let elem = match self.file_type {
+            FileType::CharDevice => &Elem::CharDevice,
             FileType::Directory => &Elem::Dir,
             FileType::SymLink => &Elem::SymLink,
             FileType::ExecutableFile => &Elem::ExecutableFile,

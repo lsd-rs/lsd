@@ -93,7 +93,7 @@ impl Colors {
         m.insert(Elem::SymLink, Colour::Fixed(44)); // DarkTurquoise
         m.insert(Elem::BrokenSymLink, Colour::Fixed(124)); // Red3
         m.insert(Elem::BlockDevice, Colour::Fixed(44)); // DarkTurquoise
-        m.insert(Elem::CharDevice, Colour::Fixed(44)); // DarkTurquoise
+        m.insert(Elem::CharDevice, Colour::Fixed(172)); // Orange3
         m.insert(Elem::Socket, Colour::Fixed(44)); // DarkTurquoise
         m.insert(Elem::Special, Colour::Fixed(44)); // DarkTurquoise
 
