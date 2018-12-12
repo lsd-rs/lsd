@@ -93,6 +93,7 @@ impl PartialEq for Name {
 #[cfg(test)]
 mod test {
     use super::Name;
+    use icon::Icons;
     use ansi_term::Colour;
     use color::{Colors, Theme};
     use meta::FileType;
@@ -106,6 +107,7 @@ mod test {
     #[test]
     fn test_print_file_name() {
         let tmp_dir = TempDir::new("test_print_file_name").expect("failed to create temp dir");
+        let icons = Icons::new();
 
         // Create the file;
         let file_path = tmp_dir.path().join("file.txt");
@@ -116,12 +118,13 @@ mod test {
         let file_type = FileType::new(&meta, &Permissions::from(&meta));
         let name = Name::new(&file_path, file_type);
 
-        assert_eq!(Colour::Fixed(184).paint("file.txt"), name.render(&colors));
+        assert_eq!(Colour::Fixed(184).paint("  file.txt"), name.render(&colors, &icons));
     }
 
     #[test]
     fn test_print_dir_name() {
         let tmp_dir = TempDir::new("test_print_dir_name").expect("failed to create temp dir");
+        let icons = Icons::new();
 
         // Chreate the directory
         let dir_path = tmp_dir.path().join("directory");
@@ -132,12 +135,13 @@ mod test {
         let file_type = FileType::new(&meta, &Permissions::from(&meta));
         let name = Name::new(&dir_path, file_type);
 
-        assert_eq!(Colour::Fixed(33).paint("directory"), name.render(&colors));
+        assert_eq!(Colour::Fixed(33).paint("  directory"), name.render(&colors, &icons));
     }
 
     #[test]
     fn test_print_symlink_name() {
         let tmp_dir = TempDir::new("test_symlink_name").expect("failed to create temp dir");
+        let icons = Icons::new();
 
         // Create the file;
         let file_path = tmp_dir.path().join("file.tmp");
@@ -154,12 +158,13 @@ mod test {
         let file_type = FileType::new(&meta, &Permissions::from(&meta));
         let name = Name::new(&symlink_path, file_type);
 
-        assert_eq!(Colour::Fixed(44).paint("target.tmp"), name.render(&colors));
+        assert_eq!(Colour::Fixed(44).paint("  target.tmp"), name.render(&colors, &icons));
     }
 
     #[test]
     fn test_print_other_type_name() {
         let tmp_dir = TempDir::new("test_other_type_name").expect("failed to create temp dir");
+        let icons = Icons::new();
 
         // Create the pipe;
         let pipe_path = tmp_dir.path().join("pipe.tmp");
@@ -175,7 +180,7 @@ mod test {
         let file_type = FileType::new(&meta, &Permissions::from(&meta));
         let name = Name::new(&pipe_path, file_type);
 
-        assert_eq!(Colour::Fixed(184).paint("pipe.tmp"), name.render(&colors));
+        assert_eq!(Colour::Fixed(184).paint("  pipe.tmp"), name.render(&colors, &icons));
     }
 
     #[test]
