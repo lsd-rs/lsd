@@ -15,7 +15,6 @@ pub enum Elem {
     CharDevice,
     Socket,
     Special,
-    ExecutableFile,
 
     /// Permissions
     Read,

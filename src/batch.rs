@@ -38,11 +38,8 @@ impl Batch {
         let mut res = Vec::with_capacity(self.0.len());
 
         for meta in &self.0 {
-            let strings: &[ANSIString] = &[meta.name.render(colors, icons)];
-
             let strings: &[ANSIString] = &[
-                icon.render(colors),
-                meta.name.render(colors),
+                meta.name.render(colors, icons),
                 meta.indicator.render(flags),
             ];
 
@@ -73,8 +70,7 @@ impl Batch {
                 ANSIString::from("  "),
                 meta.date.render(colors),
                 ANSIString::from("  "),
-                icon.render(colors),
-                meta.name.render(colors),
+                meta.name.render(colors, icons),
                 meta.indicator.render(flags),
                 meta.symlink.render(colors),
             ];
