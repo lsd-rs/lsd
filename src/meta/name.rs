@@ -1,7 +1,6 @@
 use icon::Icons;
 use color::{ColoredString, Colors, Elem};
 use meta::filetype::FileType;
-use meta::permissions::Permissions;
 use std::cmp::{Ordering, PartialOrd};
 use std::path::Path;
 
@@ -10,7 +9,6 @@ pub struct Name {
     name: String,
     extension: Option<String>,
     file_type: FileType,
-    permissions: Permissions,
 }
 
 const ICON_SPACE: &str = "  ";
@@ -36,7 +34,6 @@ impl Name {
             name,
             extension,
             file_type,
-            permissions,
         }
     }
 
@@ -49,7 +46,7 @@ impl Name {
         let elem = match self.file_type {
             FileType::Directory => &Elem::Dir,
             FileType::SymLink => &Elem::SymLink,
-            _ if self.permissions.is_executable() => &Elem::ExecutableFile,
+            FileType::ExecutableFile => &Elem::ExecutableFile,
             _ => &Elem::File,
         };
 
