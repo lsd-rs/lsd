@@ -8,6 +8,7 @@ pub struct Flags {
     pub display_tree: bool,
     pub display_indicators: bool,
     pub recursive: bool,
+    pub date: DateFlag,
     pub color: WhenFlag,
 }
 
@@ -20,7 +21,24 @@ impl<'a> From<ArgMatches<'a>> for Flags {
             display_tree: matches.is_present("tree"),
             display_indicators: matches.is_present("indicators"),
             recursive: matches.is_present("recursive"),
+            date: DateFlag::from(matches.value_of("date").unwrap()),
             color: WhenFlag::from(matches.value_of("color").unwrap()),
+        }
+    }
+}
+
+#[derive(Clone, Debug, Copy, PartialEq, Eq)]
+pub enum DateFlag {
+    Date,
+    Relative,
+}
+
+impl<'a> From<&'a str> for DateFlag {
+    fn from(time: &'a str) -> Self {
+        match time {
+            "date" => DateFlag::Date,
+            "relative" => DateFlag::Relative,
+            _ => panic!("invalid \"time\" flag: {}", time),
         }
     }
 }

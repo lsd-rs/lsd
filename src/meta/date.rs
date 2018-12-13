@@ -1,4 +1,6 @@
+use chrono_humanize::{Accuracy, HumanTime, Tense};
 use color::{ColoredString, Colors, Elem};
+use flags::{DateFlag, Flags};
 use std::fs::Metadata;
 use std::time::UNIX_EPOCH;
 use time::{Duration, Timespec};
@@ -24,7 +26,8 @@ impl<'a> From<&'a Metadata> for Date {
 }
 
 impl Date {
-    pub fn render(&self, colors: &Colors) -> ColoredString {
+    pub fn render(&self, colors: &Colors, date_alignment: usize, flags: Flags) -> ColoredString {
+        let mut content = String::with_capacity(date_alignment + 1);
         let now = time::now();
 
         let elem;
@@ -36,7 +39,22 @@ impl Date {
             elem = &Elem::Older;
         }
 
-        colors.colorize(self.0.ctime().to_string(), elem)
+        let date_string = &self.date_string(flags);
+        content += date_string;
+
+        for _ in 0..(date_alignment - date_string.len()) {
+            content.push(' ');
+        }
+        colors.colorize(content, elem)
+    }
+
+    pub fn date_string(&self, flags: Flags) -> String {
+        match flags.date {
+            DateFlag::Date => self.0.ctime().to_string(),
+            DateFlag::Relative => {
+                HumanTime::from(self.0 - time::now()).to_text_en(Accuracy::Rough, Tense::Past)
+            }
+        }
     }
 }
 
@@ -45,6 +63,7 @@ mod test {
     use super::Date;
     use ansi_term::Colour;
     use color::{Colors, Theme};
+    use flags::{DateFlag, Flags, WhenFlag};
     use std::env;
     use std::fs;
     use std::process::Command;
@@ -68,10 +87,20 @@ mod test {
 
         let colors = Colors::new(Theme::Default);
         let date = Date::from(&file_path.metadata().unwrap());
+        let flags = Flags {
+            display_all: true,
+            display_long: true,
+            display_online: true,
+            display_tree: true,
+            display_indicators: true,
+            recursive: true,
+            date: DateFlag::Date,
+            color: WhenFlag::Always,
+        };
 
         assert_eq!(
             Colour::Fixed(40).paint(creation_date.ctime().to_string()),
-            date.render(&colors)
+            date.render(&colors, creation_date.ctime().to_string().len(), flags)
         );
 
         fs::remove_file(file_path).unwrap();
@@ -95,10 +124,20 @@ mod test {
 
         let colors = Colors::new(Theme::Default);
         let date = Date::from(&file_path.metadata().unwrap());
+        let flags = Flags {
+            display_all: true,
+            display_long: true,
+            display_online: true,
+            display_tree: true,
+            display_indicators: true,
+            recursive: true,
+            date: DateFlag::Date,
+            color: WhenFlag::Always,
+        };
 
         assert_eq!(
             Colour::Fixed(42).paint(creation_date.ctime().to_string()),
-            date.render(&colors)
+            date.render(&colors, creation_date.ctime().to_string().len(), flags)
         );
 
         fs::remove_file(file_path).unwrap();
@@ -128,10 +167,20 @@ mod test {
 
         let colors = Colors::new(Theme::Default);
         let date = Date::from(&file_path.metadata().unwrap());
+        let flags = Flags {
+            display_all: true,
+            display_long: true,
+            display_online: true,
+            display_tree: true,
+            display_indicators: true,
+            recursive: true,
+            date: DateFlag::Date,
+            color: WhenFlag::Always,
+        };
 
         assert_eq!(
             Colour::Fixed(36).paint(creation_date.ctime().to_string()),
-            date.render(&colors)
+            date.render(&colors, creation_date.ctime().to_string().len(), flags)
         );
 
         fs::remove_file(file_path).unwrap();
