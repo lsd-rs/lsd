@@ -49,4 +49,12 @@ pub fn build_app() -> App<'static, 'static> {
                 .long("tree")
                 .help("Recurse into directories and present the result as a tree"),
         )
+        .arg(
+            Arg::with_name("date")
+                .long("date")
+                .possible_value("date")
+                .possible_value("relative")
+                .default_value("date")
+                .help("How to display date"),
+        )
 }

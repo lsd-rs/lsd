@@ -1,6 +1,7 @@
 #[macro_use]
 extern crate clap;
 extern crate ansi_term;
+extern crate chrono_humanize;
 extern crate libc;
 #[cfg(test)]
 extern crate tempdir;

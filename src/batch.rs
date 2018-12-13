@@ -55,6 +55,7 @@ impl Batch {
         let max_user_length = self.detect_user_lenght();
         let max_group_length = self.detect_group_lenght();
         let (max_size_value_length, max_size_unit_length) = self.detect_size_lenghts();
+        let max_date_length = self.detect_date_lenght(flags);
 
         for meta in &self.0 {
             let strings: &[ANSIString] = &[
@@ -68,7 +69,7 @@ impl Batch {
                 meta.size
                     .render(colors, max_size_value_length, max_size_unit_length),
                 ANSIString::from("  "),
-                meta.date.render(colors),
+                meta.date.render(colors, max_date_length, flags),
                 ANSIString::from("  "),
                 meta.name.render(colors, icons),
                 meta.indicator.render(flags),
@@ -105,6 +106,18 @@ impl Batch {
         }
 
         max
+    }
+
+    fn detect_date_lenght(&self, flags: Flags) -> usize {
+        let mut max_value_length: usize = 0;
+
+        for meta in &self.0 {
+            if meta.date.date_string(flags).len() > max_value_length {
+                max_value_length = meta.date.date_string(flags).len();
+            }
+        }
+
+        max_value_length
     }
 
     fn detect_size_lenghts(&self) -> (usize, usize) {
