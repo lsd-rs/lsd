@@ -13,7 +13,7 @@ impl<'a> From<&'a Path> for SymLink {
     fn from(path: &'a Path) -> Self {
         if let Ok(target) = read_link(path) {
             if target.is_absolute() || path.parent() == None {
-                return SymLink {
+                return Self {
                     valid: target.exists(),
                     target: Some(
                         target
@@ -24,7 +24,7 @@ impl<'a> From<&'a Path> for SymLink {
                 };
             }
 
-            return SymLink {
+            return Self {
                 target: Some(
                     target
                         .to_str()
@@ -35,7 +35,7 @@ impl<'a> From<&'a Path> for SymLink {
             };
         }
 
-        SymLink {
+        Self {
             target: None,
             valid: false,
         }
@@ -52,7 +52,7 @@ impl SymLink {
             };
 
             let strings: &[ColoredString] = &[
-                ColoredString::from(" ⇒ "),
+                ColoredString::from(" \u{21d2} "), // ⇒
                 colors.colorize(target.to_string(), elem),
             ];
 

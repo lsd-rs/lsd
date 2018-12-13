@@ -1,6 +1,6 @@
 use clap::{App, Arg};
 
-pub fn build_app() -> App<'static, 'static> {
+pub fn build() -> App<'static, 'static> {
     App::new("lsd")
         .version(crate_version!())
         .about("An ls comment with a lot of pretty colors and some other stuff.")

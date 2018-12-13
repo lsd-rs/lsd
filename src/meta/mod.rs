@@ -54,7 +54,7 @@ impl Meta {
         let file_type = FileType::new(&metadata, &permissions);
         let name = Name::new(&path, file_type);
 
-        Some(Meta {
+        Some(Self {
             path: path.to_path_buf(),
             symlink: SymLink::from(path.as_path()),
             size: Size::from(&metadata),

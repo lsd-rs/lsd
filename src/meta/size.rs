@@ -13,7 +13,7 @@ pub enum Unit {
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct Size {
-    value: i64,
+    value: u64,
     unit: Unit,
 }
 
@@ -22,9 +22,9 @@ impl<'a> From<&'a Metadata> for Size {
         let len = meta.len();
 
         if meta.is_file() {
-            Size::from_bytes(len as i64)
+            Self::from_bytes(len)
         } else {
-            Size {
+            Self {
                 value: 0,
                 unit: Unit::None,
             }
@@ -33,29 +33,29 @@ impl<'a> From<&'a Metadata> for Size {
 }
 
 impl Size {
-    fn from_bytes(len: i64) -> Self {
+    fn from_bytes(len: u64) -> Self {
         if len < 1024 {
-            Size {
+            Self {
                 value: len * 1024,
                 unit: Unit::Byte,
             }
         } else if len < 1024 * 1024 {
-            Size {
+            Self {
                 value: len,
                 unit: Unit::Kilo,
             }
         } else if len < 1024 * 1024 * 1024 {
-            Size {
+            Self {
                 value: len / 1024,
                 unit: Unit::Mega,
             }
         } else if len < 1024 * 1024 * 1024 * 1024 {
-            Size {
+            Self {
                 value: len / (1024 * 1024),
                 unit: Unit::Giga,
             }
         } else {
-            Size {
+            Self {
                 value: len / (1024 * 1024 * 1024),
                 unit: Unit::Tera,
             }
@@ -103,7 +103,7 @@ impl Size {
     pub fn render_value(&self) -> String {
         let size_str = match self.unit {
             Unit::None => "".to_string(),
-            _ => (self.value as f32 / 1024.0).to_string(),
+            _ => (self.value as f64 / 1024.0).to_string(),
         };
 
         // Check if there is a fraction.

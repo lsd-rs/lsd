@@ -1,3 +1,9 @@
+#![allow(
+    clippy::cast_precision_loss,
+    clippy::cast_sign_loss,
+    clippy::match_same_arms
+)]
+#![warn(clippy::cast_possible_wrap)]
 #[macro_use]
 extern crate clap;
 extern crate ansi_term;
@@ -24,7 +30,7 @@ use flags::Flags;
 use std::path::PathBuf;
 
 fn main() {
-    let matches = app::build_app().get_matches();
+    let matches = app::build().get_matches();
 
     let inputs = matches
         .values_of("FILE")

@@ -55,10 +55,10 @@ impl Colors {
     pub fn new(theme: Theme) -> Self {
         let colors = match theme {
             Theme::NoColor => None,
-            Theme::Default => Some(Colors::get_light_theme_colour_map()),
+            Theme::Default => Some(Self::get_light_theme_colour_map()),
         };
 
-        Colors { colors }
+        Self { colors }
     }
 
     pub fn colorize<'a>(&self, input: String, elem: &Elem) -> ColoredString<'a> {

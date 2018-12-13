@@ -23,7 +23,7 @@ impl<'a> From<&'a Metadata> for Owner {
             .to_string_lossy()
             .to_string();
 
-        Owner { user, group }
+        Self { user, group }
     }
 }
 

@@ -34,7 +34,7 @@ fn main() {
     };
     fs::create_dir_all(&outdir).unwrap();
 
-    let mut app = build_app();
+    let mut app = build();
     app.gen_completions("lsd", Shell::Bash, &outdir);
     app.gen_completions("lsd", Shell::Fish, &outdir);
     app.gen_completions("lsd", Shell::Zsh, &outdir);

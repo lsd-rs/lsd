@@ -28,7 +28,7 @@ impl Name {
             );
         }
 
-        Name {
+        Self {
             name,
             extension,
             file_type,
@@ -72,19 +72,19 @@ impl Name {
 }
 
 impl Ord for Name {
-    fn cmp(&self, other: &Name) -> Ordering {
+    fn cmp(&self, other: &Self) -> Ordering {
         self.name.cmp(&other.name)
     }
 }
 
 impl PartialOrd for Name {
-    fn partial_cmp(&self, other: &Name) -> Option<Ordering> {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.name.to_lowercase().cmp(&other.name.to_lowercase()))
     }
 }
 
 impl PartialEq for Name {
-    fn eq(&self, other: &Name) -> bool {
+    fn eq(&self, other: &Self) -> bool {
         self.name.eq_ignore_ascii_case(&other.name)
     }
 }

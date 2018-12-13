@@ -15,7 +15,7 @@ pub struct Core {
 }
 
 impl Core {
-    pub fn new(flags: Flags) -> Core {
+    pub fn new(flags: Flags) -> Self {
         // terminal_size allows us to know if the stdout is a tty or not.
         let tty_available = terminal_size().is_some();
 
@@ -43,7 +43,7 @@ impl Core {
             inner_flags.display_online = true;
         };
 
-        Core {
+        Self {
             flags,
             display: Display::new(inner_flags),
             colors: Colors::new(color_theme),
@@ -118,14 +118,14 @@ impl Core {
 
             if elem.file_type == FileType::Directory {
                 self.display.print_tree_row(
-                    elem.name.render(&self.colors, &self.icons).to_string(),
+                    &elem.name.render(&self.colors, &self.icons),
                     depth,
                     last,
                 );
                 self.run_inner(vec![elem.path], depth + 1);
             } else {
                 self.display.print_tree_row(
-                    elem.name.render(&self.colors, &self.icons).to_string(),
+                    &elem.name.render(&self.colors, &self.icons),
                     depth,
                     last,
                 );
