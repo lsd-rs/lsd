@@ -35,14 +35,5 @@ version = "2.32.0"
 [dev-dependencies]
 tempdir = "0.3.7"
 
-[metadata.release]
-no-dev-version = true
-sign-commit = true
-
-[[metadata.release.pre-release-replacements]]
-file = "README.md"
-replace = "lsd_ {{version}}_amd64.deb"
-search = "lsd_[a-z0-9\\.-]+_amd64.deb"
-
 [features]
 sudo = []
