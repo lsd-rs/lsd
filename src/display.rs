@@ -1,3 +1,4 @@
+use std::io::Write;
 use flags::Flags;
 use term_grid::{Cell, Direction, Filling, Grid, GridOptions};
 use terminal_size::terminal_size;
@@ -42,13 +43,15 @@ impl Display {
         }
 
         if let Some(gridded_output) = grid.fit_into_width(term_width) {
-            println!("{}", gridded_output);
+            print!("{}", gridded_output);
+            std::io::stdout().flush().ok().expect("Could not flush stdout");
         } else {
             //does not fit into grid, usually because (some) filename(s)
             //are longer or almost as long as term_width
             //print line by line instead!
             let lined_output = grid.fit_into_columns(1);
-            println!("{}", lined_output);
+            print!("{}", lined_output);
+            std::io::stdout().flush().ok().expect("Could not flush stdout");
         }
     }
 
@@ -78,7 +81,8 @@ impl Display {
             res += "\n";
         }
 
-        println!("{}", res);
+        print!("{}", res);
+        std::io::stdout().flush().ok().expect("Could not flush stdout");
     }
 
     fn get_visible_width(&self, input: &str) -> usize {
