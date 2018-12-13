@@ -56,9 +56,9 @@ matrix:
       rust: stable
       # skip the global install step
       install:
-        - rustup component add clippy-preview
+        - rustup component add clippy
       script:
-        - cargo clippy
+        - cargo clippy --all-features -- -D clippy::pedantic
 
 addons:
   apt:
