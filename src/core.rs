@@ -1,8 +1,8 @@
 use batch::Batch;
-use color::{Colors, Theme};
+use color::{self, Colors};
 use display::Display;
 use flags::{Flags, WhenFlag};
-use icon::Icons;
+use icon::{self, Icons};
 use meta::{FileType, Meta};
 use std::path::{Path, PathBuf};
 use terminal_size::terminal_size;
@@ -21,11 +21,18 @@ impl Core {
 
         let mut inner_flags = flags;
 
-        let theme = match (tty_available, flags.color) {
-            (true, WhenFlag::Never) => Theme::NoColor,
-            (false, WhenFlag::Auto) => Theme::NoColor,
-            (false, WhenFlag::Always) => Theme::Default,
-            _ => Theme::Default,
+        let color_theme = match (tty_available, flags.color) {
+            (true, WhenFlag::Never) => color::Theme::NoColor,
+            (false, WhenFlag::Auto) => color::Theme::NoColor,
+            (false, WhenFlag::Always) => color::Theme::Default,
+            _ => color::Theme::Default,
+        };
+
+        let icon_theme = match (tty_available, flags.icon) {
+            (true, WhenFlag::Never) => icon::Theme::NoIcon,
+            (false, WhenFlag::Auto) => icon::Theme::NoIcon,
+            (false, WhenFlag::Always) => icon::Theme::Default,
+            _ => icon::Theme::Default,
         };
 
         if !tty_available {
@@ -39,8 +46,8 @@ impl Core {
         Core {
             flags,
             display: Display::new(inner_flags),
-            colors: Colors::new(theme),
-            icons: Icons::new(),
+            colors: Colors::new(color_theme),
+            icons: Icons::new(icon_theme),
         }
     }
 

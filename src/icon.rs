@@ -2,40 +2,61 @@ use meta::{FileType, Name};
 use std::collections::HashMap;
 
 pub struct Icons {
+    display_icons: bool,
     icons_by_name: HashMap<&'static str, &'static str>,
     icons_by_extension: HashMap<&'static str, &'static str>,
 }
+
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+pub enum Theme {
+    NoIcon,
+    Default,
+}
+
+const ICON_SPACE: &str = "  ";
 
 // In order to add a new icon, write the unicode value like "\ue5fb" then
 // run the command below in vim:
 //
 // s#\\u[0-9a-f]*#\=eval('"'.submatch(0).'"')#
 impl Icons {
-    pub fn new() -> Self {
+    pub fn new(theme: Theme) -> Self {
         Icons {
+            display_icons: theme == Theme::Default,
             icons_by_name: Icons::get_default_icons_by_name(),
             icons_by_extension: Icons::get_default_icons_by_extension(),
         }
     }
 
-    pub fn get(&self, name: &Name) -> &'static str {
+    pub fn get(&self, name: &Name) -> String {
+        if !self.display_icons {
+            return String::new();
+        }
+
+        let mut res = String::with_capacity(4 + ICON_SPACE.len()); // 4 == max icon size
+
         // Check the known names.
-        if let Some(res) = self.icons_by_name.get(name.name().as_str()) {
-            return res;
+        if let Some(icon) = self.icons_by_name.get(name.name().as_str()) {
+            res += icon;
         }
 
         // Check the known extensions.
         if let Some(extension) = name.extension() {
-            if let Some(res) = self.icons_by_extension.get(extension.as_str()) {
-                return res;
+            if let Some(icon) = self.icons_by_extension.get(extension.as_str()) {
+                res += icon;
             }
         }
 
-        // Use the default icons.
-        match name.file_type() {
-            FileType::Directory => &"",
-            _ => &"",
+        if res.is_empty() {
+            // Use the default icons.
+            res += match name.file_type() {
+                FileType::Directory => "",
+                _ => "",
+            };
         }
+
+        res += ICON_SPACE;
+        res
     }
 
     fn get_default_icons_by_name() -> HashMap<&'static str, &'static str> {

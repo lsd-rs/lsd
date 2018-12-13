@@ -21,6 +21,15 @@ pub fn build_app() -> App<'static, 'static> {
                 .help("When to use terminal colours"),
         )
         .arg(
+            Arg::with_name("icon")
+                .long("icon")
+                .possible_value("always")
+                .possible_value("auto")
+                .possible_value("never")
+                .default_value("auto")
+                .help("When to print the icons"),
+        )
+        .arg(
             Arg::with_name("indicators")
                 .short("F")
                 .long("classify")

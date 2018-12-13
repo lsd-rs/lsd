@@ -11,8 +11,6 @@ pub struct Name {
     file_type: FileType,
 }
 
-const ICON_SPACE: &str = "  ";
-
 impl Name {
     pub fn new(path: &Path, file_type: FileType) -> Self {
         let name = path
@@ -39,12 +37,9 @@ impl Name {
 
     pub fn render(&self, colors: &Colors, icons: &Icons) -> ColoredString {
         let icon = icons.get(self);
-        let mut content = String::with_capacity(
-            icon.len() + ICON_SPACE.len() + self.name.len() + 3, /* spaces */
-        );
+        let mut content = String::with_capacity(icon.len() + self.name.len() + 3 /* spaces */);
 
-        content += icon;
-        content += ICON_SPACE;
+        content += icon.as_str();
 
         let elem = match self.file_type {
             FileType::CharDevice => &Elem::CharDevice,
@@ -98,8 +93,8 @@ impl PartialEq for Name {
 mod test {
     use super::Name;
     use ansi_term::Colour;
-    use color::{Colors, Theme};
-    use icon::Icons;
+    use color::{self, Colors};
+    use icon::{self, Icons};
     use meta::FileType;
     use meta::Permissions;
     use std::fs::{self, File};
@@ -111,14 +106,14 @@ mod test {
     #[test]
     fn test_print_file_name() {
         let tmp_dir = TempDir::new("test_print_file_name").expect("failed to create temp dir");
-        let icons = Icons::new();
+        let icons = Icons::new(icon::Theme::Default);
 
         // Create the file;
         let file_path = tmp_dir.path().join("file.txt");
         File::create(&file_path).expect("failed to create file");
         let meta = file_path.metadata().expect("failed to get metas");
 
-        let colors = Colors::new(Theme::Default);
+        let colors = Colors::new(color::Theme::Default);
         let file_type = FileType::new(&meta, &Permissions::from(&meta));
         let name = Name::new(&file_path, file_type);
 
@@ -131,14 +126,14 @@ mod test {
     #[test]
     fn test_print_dir_name() {
         let tmp_dir = TempDir::new("test_print_dir_name").expect("failed to create temp dir");
-        let icons = Icons::new();
+        let icons = Icons::new(icon::Theme::Default);
 
         // Chreate the directory
         let dir_path = tmp_dir.path().join("directory");
         fs::create_dir(&dir_path).expect("failed to create the dir");
         let meta = dir_path.metadata().expect("failed to get metas");
 
-        let colors = Colors::new(Theme::Default);
+        let colors = Colors::new(color::Theme::Default);
         let file_type = FileType::new(&meta, &Permissions::from(&meta));
         let name = Name::new(&dir_path, file_type);
 
@@ -151,7 +146,7 @@ mod test {
     #[test]
     fn test_print_symlink_name() {
         let tmp_dir = TempDir::new("test_symlink_name").expect("failed to create temp dir");
-        let icons = Icons::new();
+        let icons = Icons::new(icon::Theme::Default);
 
         // Create the file;
         let file_path = tmp_dir.path().join("file.tmp");
@@ -164,7 +159,7 @@ mod test {
             .symlink_metadata()
             .expect("failed to get metas");
 
-        let colors = Colors::new(Theme::Default);
+        let colors = Colors::new(color::Theme::Default);
         let file_type = FileType::new(&meta, &Permissions::from(&meta));
         let name = Name::new(&symlink_path, file_type);
 
@@ -177,7 +172,7 @@ mod test {
     #[test]
     fn test_print_other_type_name() {
         let tmp_dir = TempDir::new("test_other_type_name").expect("failed to create temp dir");
-        let icons = Icons::new();
+        let icons = Icons::new(icon::Theme::Default);
 
         // Create the pipe;
         let pipe_path = tmp_dir.path().join("pipe.tmp");
@@ -189,13 +184,34 @@ mod test {
         assert_eq!(true, success, "failed to exec mkfifo");
         let meta = pipe_path.metadata().expect("failed to get metas");
 
-        let colors = Colors::new(Theme::Default);
+        let colors = Colors::new(color::Theme::Default);
         let file_type = FileType::new(&meta, &Permissions::from(&meta));
         let name = Name::new(&pipe_path, file_type);
 
         assert_eq!(
             Colour::Fixed(184).paint("  pipe.tmp"),
             name.render(&colors, &icons)
+        );
+    }
+
+    #[test]
+    fn test_print_without_icon_or_color() {
+        let tmp_dir =
+            TempDir::new("test_print_without_icon_or_color").expect("failed to create temp dir");
+        let icons = Icons::new(icon::Theme::NoIcon);
+
+        // Create the file;
+        let file_path = tmp_dir.path().join("file.txt");
+        File::create(&file_path).expect("failed to create file");
+        let meta = file_path.metadata().expect("failed to get metas");
+
+        let colors = Colors::new(color::Theme::NoColor);
+        let file_type = FileType::new(&meta, &Permissions::from(&meta));
+        let name = Name::new(&file_path, file_type);
+
+        assert_eq!(
+            "file.txt",
+            name.render(&colors, &icons).to_string().as_str()
         );
     }
 
