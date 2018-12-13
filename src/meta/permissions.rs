@@ -27,7 +27,7 @@ impl<'a> From<&'a Metadata> for Permissions {
         let bits = meta.permissions().mode();
         let has_bit = |bit| bits & bit == bit;
 
-        Permissions {
+        Self {
             user_read: has_bit(modes::USER_READ),
             user_write: has_bit(modes::USER_WRITE),
             user_execute: has_bit(modes::USER_EXECUTE),

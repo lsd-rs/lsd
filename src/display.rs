@@ -1,19 +1,20 @@
+use color::ColoredString;
 use flags::Flags;
 use std::io::Write;
 use term_grid::{Cell, Direction, Filling, Grid, GridOptions};
 use terminal_size::terminal_size;
 
-const EDGE: &str = "├──";
-const LINE: &str = "│  ";
-const CORNER: &str = "└──";
+const EDGE: &str = "\u{251c}\u{2500}\u{2500}"; // "├──"
+const LINE: &str = "\u{2502}  "; // "├  "
+const CORNER: &str = "\u{2514}\u{2500}\u{2500}"; // "└──"
 
 pub struct Display {
     flags: Flags,
 }
 
 impl Display {
-    pub fn new(flags: Flags) -> Display {
-        Display { flags }
+    pub fn new(flags: Flags) -> Self {
+        Self { flags }
     }
 
     pub fn print_outputs(&self, outputs: Vec<String>) {
@@ -44,24 +45,18 @@ impl Display {
 
         if let Some(gridded_output) = grid.fit_into_width(term_width) {
             print!("{}", gridded_output);
-            std::io::stdout()
-                .flush()
-                .ok()
-                .expect("Could not flush stdout");
+            std::io::stdout().flush().expect("Could not flush stdout");
         } else {
             //does not fit into grid, usually because (some) filename(s)
             //are longer or almost as long as term_width
             //print line by line instead!
             let lined_output = grid.fit_into_columns(1);
             print!("{}", lined_output);
-            std::io::stdout()
-                .flush()
-                .ok()
-                .expect("Could not flush stdout");
+            std::io::stdout().flush().expect("Could not flush stdout");
         }
     }
 
-    pub fn print_tree_row(&self, output: String, depth: usize, last: bool) {
+    pub fn print_tree_row(&self, output: &ColoredString, depth: usize, last: bool) {
         let mut res = String::new();
 
         for _ in 0..depth {
@@ -88,10 +83,7 @@ impl Display {
         }
 
         print!("{}", res);
-        std::io::stdout()
-            .flush()
-            .ok()
-            .expect("Could not flush stdout");
+        std::io::stdout().flush().expect("Could not flush stdout");
     }
 
     fn get_visible_width(&self, input: &str) -> usize {

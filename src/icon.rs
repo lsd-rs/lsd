@@ -21,10 +21,10 @@ const ICON_SPACE: &str = "  ";
 // s#\\u[0-9a-f]*#\=eval('"'.submatch(0).'"')#
 impl Icons {
     pub fn new(theme: Theme) -> Self {
-        Icons {
+        Self {
             display_icons: theme == Theme::Default,
-            icons_by_name: Icons::get_default_icons_by_name(),
-            icons_by_extension: Icons::get_default_icons_by_extension(),
+            icons_by_name: Self::get_default_icons_by_name(),
+            icons_by_extension: Self::get_default_icons_by_extension(),
         }
     }
 
@@ -50,8 +50,8 @@ impl Icons {
         if res.is_empty() {
             // Use the default icons.
             res += match name.file_type() {
-                FileType::Directory => "",
-                _ => "",
+                FileType::Directory => "\u{f115}", // 
+                _ => "\u{f016}",                   // 
             };
         }
 
@@ -62,28 +62,27 @@ impl Icons {
     fn get_default_icons_by_name() -> HashMap<&'static str, &'static str> {
         let mut m = HashMap::new();
 
-        m.insert(".Trash", "");
-        m.insert(".atom", "");
-        m.insert(".git", "");
-        m.insert(".github", "");
-        m.insert(".rvm", "");
-        m.insert(".vscode", "");
-        m.insert("bin", "");
-        m.insert("config", "");
-        m.insert("ds_store", "");
-        m.insert("folder", "");
-        m.insert("gitconfig", "");
-        m.insert("gitignore", "");
-        m.insert("gitignore_global", "");
-        m.insert("gradle", "");
-        m.insert("hidden", "");
-        m.insert("include", "");
-        m.insert("lib", "");
-        m.insert("localized", "");
-        m.insert("node_modules", "");
-        m.insert("npmignore", "");
-        m.insert("rubydoc", "");
-        m.insert("yarn.lock", "");
+        m.insert(".Trash", "\u{f1f8}"); // ""
+        m.insert(".atom", "\u{e764}"); // ""
+        m.insert(".git", "\u{f1d3}"); // ""
+        m.insert(".github", "\u{f408}"); // ""
+        m.insert(".rvm", "\u{e21e}"); // ""
+        m.insert(".vscode", "\u{e70c}"); // ""
+        m.insert("bin", "\u{e5fc}"); // ""
+        m.insert("config", "\u{e5fc}"); // ""
+        m.insert("ds_store", "\u{f179}"); // ""
+        m.insert("gitconfig", "\u{f1d3}"); // ""
+        m.insert("gitignore", "\u{f1d3}"); // ""
+        m.insert("gitignore_global", "\u{f1d3}"); // ""
+        m.insert("gradle", "\u{e70e}"); // ""
+        m.insert("hidden", "\u{f023}"); // ""
+        m.insert("include", "\u{e5fc}"); // ""
+        m.insert("lib", "\u{f121}"); // ""
+        m.insert("localized", "\u{f179}"); // ""
+        m.insert("node_modules", "\u{e718}"); // ""
+        m.insert("npmignore", "\u{e71e}"); // ""
+        m.insert("rubydoc", "\u{e73b}"); // ""
+        m.insert("yarn.lock", "\u{e718}"); // ""
 
         m
     }
@@ -91,191 +90,186 @@ impl Icons {
     fn get_default_icons_by_extension() -> HashMap<&'static str, &'static str> {
         let mut m = HashMap::new();
 
-        m.insert("ai", "");
-        m.insert("apk", "");
-        m.insert("apk", "");
-        m.insert("avi", "");
-        m.insert("avro", "");
-        m.insert("bash", "");
-        m.insert("bash_history", "");
-        m.insert("bash_profile", "");
-        m.insert("bashrc", "");
-        m.insert("bat", "");
-        m.insert("bmp", "");
-        m.insert("bmp", "");
-        m.insert("c", "");
-        m.insert("cfg", "");
-        m.insert("clj", "");
-        m.insert("cls", "");
-        m.insert("coffee", "");
-        m.insert("conf", "");
-        m.insert("cpp", "");
-        m.insert("css", "");
-        m.insert("csv", "");
-        m.insert("d", "");
-        m.insert("dart", "");
-        m.insert("db", "");
-        m.insert("diff", "");
-        m.insert("doc", "");
-        m.insert("docx", "");
-        m.insert("docx", "");
-        m.insert("ds_store", "");
-        m.insert("ds_store", "");
-        m.insert("ebook", "");
-        m.insert("editorconfig", "");
-        m.insert("env", "");
-        m.insert("eot", "");
-        m.insert("eot", "");
-        m.insert("epub", "");
-        m.insert("erb", "");
-        m.insert("erl", "");
-        m.insert("exe", "");
-        m.insert("file", "");
-        m.insert("fish", "");
-        m.insert("flac", "");
-        m.insert("flac", "");
-        m.insert("flv", "");
-        m.insert("font", "");
-        m.insert("gdoc", "");
-        m.insert("gdoc", "");
-        m.insert("gemfile", "");
-        m.insert("gemspec", "");
-        m.insert("gform", "");
-        m.insert("gif", "");
-        m.insert("gif", "");
-        m.insert("git", "");
-        m.insert("go", "");
-        m.insert("gradle", "");
-        m.insert("gradle", "");
-        m.insert("gsheet", "");
-        m.insert("gslides", "");
-        m.insert("guardfile", "");
-        m.insert("gz", "");
-        m.insert("hs", "");
-        m.insert("htm", "");
-        m.insert("html", "");
-        m.insert("ico", "");
-        m.insert("ico", "");
-        m.insert("image", "");
-        m.insert("iml", "");
-        m.insert("ini", "");
-        m.insert("ipynb", "");
-        m.insert("jar", "");
-        m.insert("jar", "");
-        m.insert("java", "");
-        m.insert("jpeg", "");
-        m.insert("jpeg", "");
-        m.insert("jpg", "");
-        m.insert("jpg", "");
-        m.insert("js", "");
-        m.insert("json", "");
-        m.insert("jsx", "");
-        m.insert("less", "");
-        m.insert("lhs", "");
-        m.insert("lhs", "");
-        m.insert("license", "");
-        m.insert("localized", "");
-        m.insert("localized", "");
-        m.insert("lock", "");
-        m.insert("log", "");
-        m.insert("lua", "");
-        m.insert("m4a", "");
-        m.insert("m4a", "");
-        m.insert("markdown", "");
-        m.insert("md", "");
-        m.insert("mkd", "");
-        m.insert("mkv", "");
-        m.insert("mobi", "");
-        m.insert("mobi", "");
-        m.insert("mov", "");
-        m.insert("mp3", "");
-        m.insert("mp3", "");
-        m.insert("mp4", "");
-        m.insert("mustache", "");
-        m.insert("npmignore", "");
-        m.insert("ogg", "");
-        m.insert("ogg", "");
-        m.insert("ogv", "");
-        m.insert("otf", "");
-        m.insert("otf", "");
-        m.insert("pdf", "");
-        m.insert("php", "");
-        m.insert("pl", "");
-        m.insert("png", "");
-        m.insert("png", "");
-        m.insert("ppt", "");
-        m.insert("pptx", "");
-        m.insert("procfile", "");
-        m.insert("properties", "");
-        m.insert("psd", "");
-        m.insert("pxm", "");
-        m.insert("pxm", "");
-        m.insert("py", "");
-        m.insert("pyc", "");
-        m.insert("r", "");
-        m.insert("rakefile", "");
-        m.insert("rar", "");
-        m.insert("rb", "");
-        m.insert("rdata", "");
-        m.insert("rdb", "");
-        m.insert("rdoc", "");
-        m.insert("rdoc", "");
-        m.insert("rds", "");
-        m.insert("readme", "");
-        m.insert("rs", "");
-        m.insert("rspec", "");
-        m.insert("rspec_parallel", "");
-        m.insert("rspec_status", "");
-        m.insert("rss", "");
-        m.insert("ru", "");
-        m.insert("rubydoc", "");
-        m.insert("sass", "");
-        m.insert("scala", "");
-        m.insert("scss", "");
-        m.insert("scss", "");
-        m.insert("sh", "");
-        m.insert("shell", "");
-        m.insert("slim", "");
-        m.insert("sqlite3", "");
-        m.insert("styl", "");
-        m.insert("stylus", "");
-        m.insert("svg", "");
-        m.insert("svg", "");
-        m.insert("swift", "");
-        m.insert("tar", "");
-        m.insert("tex", "");
-        m.insert("tiff", "");
-        m.insert("tiff", "");
-        m.insert("ts", "");
-        m.insert("tsx", "");
-        m.insert("tsx", "");
-        m.insert("ttf", "");
-        m.insert("ttf", "");
-        m.insert("twig", "");
-        m.insert("txt", "");
-        m.insert("video", "");
-        m.insert("vim", "");
-        m.insert("wav", "");
-        m.insert("wav", "");
-        m.insert("webm", "");
-        m.insert("webp", "");
-        m.insert("webp", "");
-        m.insert("windows", "");
-        m.insert("woff", "");
-        m.insert("woff", "");
-        m.insert("woff2", "");
-        m.insert("woff2", "");
-        m.insert("xls", "");
-        m.insert("xlsx", "");
-        m.insert("xml", "");
-        m.insert("xul", "");
-        m.insert("yaml", "");
-        m.insert("yarn.lock", "");
-        m.insert("yml", "");
-        m.insert("zip", "");
-        m.insert("zsh", "");
-        m.insert("zsh-theme", "");
-        m.insert("zshrc", "");
+        m.insert("apk", "\u{e70e}"); // ""
+        m.insert("apk", "\u{e70e}"); // ""
+        m.insert("avi", "\u{f03d}"); // ""
+        m.insert("avro", "\u{e60b}"); // ""
+        m.insert("bash", "\u{f489}"); // ""
+        m.insert("bash_history", "\u{f489}"); // ""
+        m.insert("bash_profile", "\u{f489}"); // ""
+        m.insert("bashrc", "\u{f489}"); // ""
+        m.insert("bat", "\u{f17a}"); // ""
+        m.insert("bmp", "\u{f1c5}"); // ""
+        m.insert("bmp", "\u{f1c5}"); // ""
+        m.insert("c", "\u{e61e}"); // ""
+        m.insert("cfg", "\u{e615}"); // ""
+        m.insert("clj", "\u{e768}"); // ""
+        m.insert("cls", "\u{e600}"); // ""
+        m.insert("coffee", "\u{f0f4}"); // ""
+        m.insert("conf", "\u{e615}"); // ""
+        m.insert("cpp", "\u{e61d}"); // ""
+        m.insert("css", "\u{e749}"); // ""
+        m.insert("csv", "\u{f1c3}"); // ""
+        m.insert("d", "\u{e7af}"); // ""
+        m.insert("dart", "\u{e798}"); // ""
+        m.insert("db", "\u{f1c0}"); // ""
+        m.insert("diff", "\u{f440}"); // ""
+        m.insert("doc", "\u{f1c2}"); // ""
+        m.insert("docx", "\u{f1c2}"); // ""
+        m.insert("docx", "\u{f1c2}"); // ""
+        m.insert("ds_store", "\u{f179}"); // ""
+        m.insert("ds_store", "\u{f179}"); // ""
+        m.insert("ebook", "\u{e28b}"); // ""
+        m.insert("editorconfig", "\u{e615}"); // ""
+        m.insert("env", "\u{f462}"); // ""
+        m.insert("eot", "\u{f031}"); // ""
+        m.insert("eot", "\u{f031}"); // ""
+        m.insert("epub", "\u{e28a}"); // ""
+        m.insert("erb", "\u{e73b}"); // ""
+        m.insert("erl", "\u{e7b1}"); // ""
+        m.insert("exe", "\u{f17a}"); // ""
+        m.insert("fish", "\u{f489}"); // ""
+        m.insert("flac", "\u{f001}"); // ""
+        m.insert("flac", "\u{f001}"); // ""
+        m.insert("flv", "\u{f03d}"); // ""
+        m.insert("font", "\u{f031}"); // ""
+        m.insert("gdoc", "\u{f1c2}"); // ""
+        m.insert("gdoc", "\u{f1c2}"); // ""
+        m.insert("gemfile", "\u{e21e}"); // ""
+        m.insert("gemspec", "\u{e21e}"); // ""
+        m.insert("gform", "\u{f298}"); // ""
+        m.insert("gif", "\u{f1c5}"); // ""
+        m.insert("gif", "\u{f1c5}"); // ""
+        m.insert("git", "\u{f1d3}"); // ""
+        m.insert("go", "\u{e626}"); // ""
+        m.insert("gradle", "\u{e70e}"); // ""
+        m.insert("gsheet", "\u{f1c3}"); // ""
+        m.insert("gslides", "\u{f1c4}"); // ""
+        m.insert("guardfile", "\u{e21e}"); // ""
+        m.insert("gz", "\u{f410}"); // ""
+        m.insert("hs", "\u{e777}"); // ""
+        m.insert("htm", "\u{f13b}"); // ""
+        m.insert("html", "\u{f13b}"); // ""
+        m.insert("ico", "\u{f1c5}"); // ""
+        m.insert("ico", "\u{f1c5}"); // ""
+        m.insert("image", "\u{f1c5}"); // ""
+        m.insert("iml", "\u{e7b5}"); // ""
+        m.insert("ini", "\u{f17a}"); // ""
+        m.insert("ipynb", "\u{e606}"); // ""
+        m.insert("jar", "\u{e204}"); // ""
+        m.insert("java", "\u{e204}"); // ""
+        m.insert("jpeg", "\u{f1c5}"); // ""
+        m.insert("jpeg", "\u{f1c5}"); // ""
+        m.insert("jpg", "\u{f1c5}"); // ""
+        m.insert("jpg", "\u{f1c5}"); // ""
+        m.insert("js", "\u{e74e}"); // ""
+        m.insert("json", "\u{e60b}"); // ""
+        m.insert("jsx", "\u{e7ba}"); // ""
+        m.insert("less", "\u{e758}"); // ""
+        m.insert("lhs", "\u{e777}"); // ""
+        m.insert("lhs", "\u{e777}"); // ""
+        m.insert("license", "\u{f48a}"); // ""
+        m.insert("localized", "\u{f179}"); // ""
+        m.insert("localized", "\u{f179}"); // ""
+        m.insert("lock", "\u{e21e}"); // ""
+        m.insert("log", "\u{f18d}"); // ""
+        m.insert("lua", "\u{e620}"); // ""
+        m.insert("m4a", "\u{f001}"); // ""
+        m.insert("m4a", "\u{f001}"); // ""
+        m.insert("markdown", "\u{f48a}"); // ""
+        m.insert("md", "\u{f48a}"); // ""
+        m.insert("mkd", "\u{f48a}"); // ""
+        m.insert("mkv", "\u{f03d}"); // ""
+        m.insert("mobi", "\u{e28b}"); // ""
+        m.insert("mobi", "\u{e28b}"); // ""
+        m.insert("mov", "\u{f03d}"); // ""
+        m.insert("mp3", "\u{f001}"); // ""
+        m.insert("mp3", "\u{f001}"); // ""
+        m.insert("mp4", "\u{f03d}"); // ""
+        m.insert("mustache", "\u{e60f}"); // ""
+        m.insert("npmignore", "\u{e71e}"); // ""
+        m.insert("ogg", "\u{f001}"); // ""
+        m.insert("ogg", "\u{f001}"); // ""
+        m.insert("ogv", "\u{f03d}"); // ""
+        m.insert("otf", "\u{f031}"); // ""
+        m.insert("otf", "\u{f031}"); // ""
+        m.insert("pdf", "\u{f1c1}"); // ""
+        m.insert("php", "\u{e73d}"); // ""
+        m.insert("pl", "\u{e769}"); // ""
+        m.insert("png", "\u{f1c5}"); // ""
+        m.insert("png", "\u{f1c5}"); // ""
+        m.insert("ppt", "\u{f1c4}"); // ""
+        m.insert("pptx", "\u{f1c4}"); // ""
+        m.insert("procfile", "\u{e21e}"); // ""
+        m.insert("properties", "\u{e60b}"); // ""
+        m.insert("psd", "\u{e7b8}"); // ""
+        m.insert("pxm", "\u{f1c5}"); // ""
+        m.insert("pxm", "\u{f1c5}"); // ""
+        m.insert("py", "\u{e606}"); // ""
+        m.insert("pyc", "\u{e606}"); // ""
+        m.insert("r", "\u{f25d}"); // ""
+        m.insert("rakefile", "\u{e21e}"); // ""
+        m.insert("rar", "\u{f410}"); // ""
+        m.insert("rb", "\u{e21e}"); // ""
+        m.insert("rdata", "\u{f25d}"); // ""
+        m.insert("rdb", "\u{e76d}"); // ""
+        m.insert("rdoc", "\u{f48a}"); // ""
+        m.insert("rdoc", "\u{f48a}"); // ""
+        m.insert("rds", "\u{f25d}"); // ""
+        m.insert("readme", "\u{f48a}"); // ""
+        m.insert("rs", "\u{e7a8}"); // ""
+        m.insert("rspec", "\u{e21e}"); // ""
+        m.insert("rspec_parallel", "\u{e21e}"); // ""
+        m.insert("rspec_status", "\u{e21e}"); // ""
+        m.insert("rss", "\u{f09e}"); // ""
+        m.insert("ru", "\u{e21e}"); // ""
+        m.insert("rubydoc", "\u{e73b}"); // ""
+        m.insert("sass", "\u{e603}"); // ""
+        m.insert("scala", "\u{e737}"); // ""
+        m.insert("scss", "\u{e749}"); // ""
+        m.insert("scss", "\u{e749}"); // ""
+        m.insert("sh", "\u{f489}"); // ""
+        m.insert("shell", "\u{f489}"); // ""
+        m.insert("slim", "\u{e73b}"); // ""
+        m.insert("sqlite3", "\u{e7c4}"); // ""
+        m.insert("styl", "\u{e600}"); // ""
+        m.insert("stylus", "\u{e600}"); // ""
+        m.insert("svg", "\u{f1c5}"); // ""
+        m.insert("svg", "\u{f1c5}"); // ""
+        m.insert("swift", "\u{e755}"); // ""
+        m.insert("tar", "\u{f410}"); // ""
+        m.insert("tex", "\u{e600}"); // ""
+        m.insert("tiff", "\u{f1c5}"); // ""
+        m.insert("tiff", "\u{f1c5}"); // ""
+        m.insert("ts", "\u{e628}"); // ""
+        m.insert("tsx", "\u{e7ba}"); // ""
+        m.insert("ttf", "\u{f031}"); // ""
+        m.insert("ttf", "\u{f031}"); // ""
+        m.insert("twig", "\u{e61c}"); // ""
+        m.insert("txt", "\u{f15c}"); // ""
+        m.insert("video", "\u{f03d}"); // ""
+        m.insert("vim", "\u{e62b}"); // ""
+        m.insert("wav", "\u{f001}"); // ""
+        m.insert("wav", "\u{f001}"); // ""
+        m.insert("webm", "\u{f03d}"); // ""
+        m.insert("webp", "\u{f1c5}"); // ""
+        m.insert("webp", "\u{f1c5}"); // ""
+        m.insert("windows", "\u{f17a}"); // ""
+        m.insert("woff", "\u{f031}"); // ""
+        m.insert("woff", "\u{f031}"); // ""
+        m.insert("woff2", "\u{f031}"); // ""
+        m.insert("woff2", "\u{f031}"); // ""
+        m.insert("xls", "\u{f1c3}"); // ""
+        m.insert("xlsx", "\u{f1c3}"); // ""
+        m.insert("xml", "\u{e619}"); // ""
+        m.insert("xul", "\u{e619}"); // ""
+        m.insert("yaml", "\u{f481}"); // ""
+        m.insert("yarn.lock", "\u{e718}"); // ""
+        m.insert("yml", "\u{f481}"); // ""
+        m.insert("zip", "\u{f410}"); // ""
+        m.insert("zsh", "\u{f489}"); // ""
+        m.insert("zsh-theme", "\u{f489}"); // ""
+        m.insert("zshrc", "\u{f489}"); // ""
 
         m
     }
