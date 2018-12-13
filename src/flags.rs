@@ -10,6 +10,7 @@ pub struct Flags {
     pub recursive: bool,
     pub date: DateFlag,
     pub color: WhenFlag,
+    pub icon: WhenFlag,
 }
 
 impl<'a> From<ArgMatches<'a>> for Flags {
@@ -23,6 +24,7 @@ impl<'a> From<ArgMatches<'a>> for Flags {
             recursive: matches.is_present("recursive"),
             date: DateFlag::from(matches.value_of("date").unwrap()),
             color: WhenFlag::from(matches.value_of("color").unwrap()),
+            icon: WhenFlag::from(matches.value_of("icon").unwrap()),
         }
     }
 }

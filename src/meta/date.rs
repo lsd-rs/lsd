@@ -96,6 +96,7 @@ mod test {
             recursive: true,
             date: DateFlag::Date,
             color: WhenFlag::Always,
+            icon: WhenFlag::Always,
         };
 
         assert_eq!(
@@ -133,6 +134,7 @@ mod test {
             recursive: true,
             date: DateFlag::Date,
             color: WhenFlag::Always,
+            icon: WhenFlag::Always,
         };
 
         assert_eq!(
@@ -176,6 +178,7 @@ mod test {
             recursive: true,
             date: DateFlag::Date,
             color: WhenFlag::Always,
+            icon: WhenFlag::Always,
         };
 
         assert_eq!(
