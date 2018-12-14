@@ -15,16 +15,21 @@ pub struct Flags {
 
 impl<'a> From<ArgMatches<'a>> for Flags {
     fn from(matches: ArgMatches) -> Self {
-        Flags {
+        let color_inputs: Vec<&str> = matches.values_of("color").unwrap().collect();
+        let icon_inputs: Vec<&str> = matches.values_of("icon").unwrap().collect();
+        let date_inputs: Vec<&str> = matches.values_of("date").unwrap().collect();
+
+        Self {
             display_all: matches.is_present("all"),
             display_long: matches.is_present("long"),
             display_online: matches.is_present("oneline"),
             display_tree: matches.is_present("tree"),
             display_indicators: matches.is_present("indicators"),
             recursive: matches.is_present("recursive"),
-            date: DateFlag::from(matches.value_of("date").unwrap()),
-            color: WhenFlag::from(matches.value_of("color").unwrap()),
-            icon: WhenFlag::from(matches.value_of("icon").unwrap()),
+            // Take only the last value
+            date: DateFlag::from(date_inputs[date_inputs.len() - 1]),
+            color: WhenFlag::from(color_inputs[color_inputs.len() - 1]),
+            icon: WhenFlag::from(icon_inputs[icon_inputs.len() - 1]),
         }
     }
 }
@@ -54,6 +59,7 @@ pub enum WhenFlag {
 
 impl<'a> From<&'a str> for WhenFlag {
     fn from(when: &'a str) -> Self {
+        println!("foobar: {}", when);
         match when {
             "always" => WhenFlag::Always,
             "auto" => WhenFlag::Auto,
