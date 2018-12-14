@@ -188,4 +188,48 @@ mod test {
 
         fs::remove_file(file_path).unwrap();
     }
+
+    #[test]
+    fn test_with_relative_date() {
+        let mut file_path = env::temp_dir();
+        file_path.push("test_with_relative_date.tmp");
+
+        let creation_date = time::now() - time::Duration::days(2);
+
+        let success = Command::new("touch")
+            .arg("-t")
+            .arg(
+                creation_date
+                    .to_local()
+                    .strftime("%Y%m%d%H%M.%S")
+                    .unwrap()
+                    .to_string(),
+            )
+            .arg(&file_path)
+            .status()
+            .unwrap()
+            .success();
+        assert_eq!(true, success, "failed to exec touch");
+
+        let colors = Colors::new(Theme::Default);
+        let date = Date::from(&file_path.metadata().unwrap());
+        let flags = Flags {
+            display_all: true,
+            display_long: true,
+            display_online: true,
+            display_tree: true,
+            display_indicators: true,
+            recursive: true,
+            date: DateFlag::Relative,
+            color: WhenFlag::Always,
+            icon: WhenFlag::Always,
+        };
+
+        assert_eq!(
+            Colour::Fixed(36).paint("2 days ago  "),
+            date.render(&colors, 12, flags)
+        );
+
+        fs::remove_file(file_path).unwrap();
+    }
 }
