@@ -71,7 +71,7 @@ impl Core {
 
         if !files.is_empty() && !self.flags.display_tree {
             let mut file_batch = Batch::from(files);
-            file_batch.sort();
+            file_batch.sort(self.flags.sort);
             self.display
                 .print_outputs(self.get_batch_outputs(&file_batch));
         }
@@ -163,7 +163,7 @@ impl Core {
         }
 
         let mut batch = Batch::from(metas);
-        batch.sort();
+        batch.sort(self.flags.sort);
 
         Some(batch)
     }

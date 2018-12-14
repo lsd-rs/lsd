@@ -75,4 +75,18 @@ pub fn build() -> App<'static, 'static> {
                 .multiple(true)
                 .help("How to display date"),
         )
+        .arg(
+            Arg::with_name("timesort")
+                .short("t")
+                .long("timesort")
+                .multiple(true)
+                .help("Sort by time modified"),
+        )
+        .arg(
+            Arg::with_name("reverse")
+                .short("r")
+                .long("reverse")
+                .multiple(true)
+                .help("Reverse the order of the sort"),
+        )
 }
