@@ -89,7 +89,6 @@ pub enum WhenFlag {
 
 impl<'a> From<&'a str> for WhenFlag {
     fn from(when: &'a str) -> Self {
-        println!("foobar: {}", when);
         match when {
             "always" => WhenFlag::Always,
             "auto" => WhenFlag::Auto,
