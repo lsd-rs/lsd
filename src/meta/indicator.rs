@@ -30,3 +30,106 @@ impl Indicator {
         }
     }
 }
+
+#[cfg(test)]
+mod test {
+    use super::Indicator;
+    use meta::FileType;
+    use flags::{DateFlag, Flags, WhenFlag};
+
+    #[test]
+    fn test_directory_indicator() {
+        let flags = Flags {
+            display_all: true,
+            display_long: true,
+            display_online: true,
+            display_tree: true,
+            display_indicators: true,
+            recursive: true,
+            date: DateFlag::Relative,
+            color: WhenFlag::Always,
+            icon: WhenFlag::Always,
+        };
+
+        let file_type = Indicator::from(FileType::Directory);
+
+        assert_eq!("/", file_type.render(flags).to_string().as_str());
+    }
+
+    #[test]
+    fn test_executable_file_indicator() {
+        let flags = Flags {
+            display_all: true,
+            display_long: true,
+            display_online: true,
+            display_tree: true,
+            display_indicators: true,
+            recursive: true,
+            date: DateFlag::Relative,
+            color: WhenFlag::Always,
+            icon: WhenFlag::Always,
+        };
+
+        let file_type = Indicator::from(FileType::ExecutableFile);
+
+        assert_eq!("*", file_type.render(flags).to_string().as_str());
+    }
+
+    #[test]
+    fn test_socket_indicator() {
+        let flags = Flags {
+            display_all: true,
+            display_long: true,
+            display_online: true,
+            display_tree: true,
+            display_indicators: true,
+            recursive: true,
+            date: DateFlag::Relative,
+            color: WhenFlag::Always,
+            icon: WhenFlag::Always,
+        };
+
+        let file_type = Indicator::from(FileType::Socket);
+
+        assert_eq!("=", file_type.render(flags).to_string().as_str());
+    }
+
+    #[test]
+    fn test_symlink_indicator() {
+        let flags = Flags {
+            display_all: true,
+            display_long: true,
+            display_online: true,
+            display_tree: true,
+            display_indicators: true,
+            recursive: true,
+            date: DateFlag::Relative,
+            color: WhenFlag::Always,
+            icon: WhenFlag::Always,
+        };
+
+        let file_type = Indicator::from(FileType::SymLink);
+
+        assert_eq!("@", file_type.render(flags).to_string().as_str());
+    }
+
+    #[test]
+    fn test_not_represented_indicator() {
+        let flags = Flags {
+            display_all: true,
+            display_long: true,
+            display_online: true,
+            display_tree: true,
+            display_indicators: true,
+            recursive: true,
+            date: DateFlag::Relative,
+            color: WhenFlag::Always,
+            icon: WhenFlag::Always,
+        };
+
+        // The File type doesn't have any indicator
+        let file_type = Indicator::from(FileType::File);
+
+        assert_eq!("", file_type.render(flags).to_string().as_str());
+    }
+}
