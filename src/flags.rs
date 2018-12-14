@@ -34,6 +34,22 @@ impl<'a> From<ArgMatches<'a>> for Flags {
     }
 }
 
+impl Default for Flags {
+    fn default() -> Self {
+        Self{
+            display_all: false,
+            display_long: false,
+            display_online: false,
+            display_tree: false,
+            display_indicators: false,
+            recursive: false,
+            date: DateFlag::Date,
+            color: WhenFlag::Auto,
+            icon: WhenFlag::Auto,
+        }
+    }
+}
+
 #[derive(Clone, Debug, Copy, PartialEq, Eq)]
 pub enum DateFlag {
     Date,

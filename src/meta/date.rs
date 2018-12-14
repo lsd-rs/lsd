@@ -63,7 +63,7 @@ mod test {
     use super::Date;
     use ansi_term::Colour;
     use color::{Colors, Theme};
-    use flags::{DateFlag, Flags, WhenFlag};
+    use flags::{DateFlag, Flags};
     use std::env;
     use std::fs;
     use std::process::Command;
@@ -87,17 +87,7 @@ mod test {
 
         let colors = Colors::new(Theme::Default);
         let date = Date::from(&file_path.metadata().unwrap());
-        let flags = Flags {
-            display_all: true,
-            display_long: true,
-            display_online: true,
-            display_tree: true,
-            display_indicators: true,
-            recursive: true,
-            date: DateFlag::Date,
-            color: WhenFlag::Always,
-            icon: WhenFlag::Always,
-        };
+        let flags = Flags::default();
 
         assert_eq!(
             Colour::Fixed(40).paint(creation_date.ctime().to_string()),
@@ -125,17 +115,7 @@ mod test {
 
         let colors = Colors::new(Theme::Default);
         let date = Date::from(&file_path.metadata().unwrap());
-        let flags = Flags {
-            display_all: true,
-            display_long: true,
-            display_online: true,
-            display_tree: true,
-            display_indicators: true,
-            recursive: true,
-            date: DateFlag::Date,
-            color: WhenFlag::Always,
-            icon: WhenFlag::Always,
-        };
+        let flags = Flags::default();
 
         assert_eq!(
             Colour::Fixed(42).paint(creation_date.ctime().to_string()),
@@ -169,17 +149,7 @@ mod test {
 
         let colors = Colors::new(Theme::Default);
         let date = Date::from(&file_path.metadata().unwrap());
-        let flags = Flags {
-            display_all: true,
-            display_long: true,
-            display_online: true,
-            display_tree: true,
-            display_indicators: true,
-            recursive: true,
-            date: DateFlag::Date,
-            color: WhenFlag::Always,
-            icon: WhenFlag::Always,
-        };
+        let flags = Flags::default();
 
         assert_eq!(
             Colour::Fixed(36).paint(creation_date.ctime().to_string()),
@@ -213,17 +183,9 @@ mod test {
 
         let colors = Colors::new(Theme::Default);
         let date = Date::from(&file_path.metadata().unwrap());
-        let flags = Flags {
-            display_all: true,
-            display_long: true,
-            display_online: true,
-            display_tree: true,
-            display_indicators: true,
-            recursive: true,
-            date: DateFlag::Relative,
-            color: WhenFlag::Always,
-            icon: WhenFlag::Always,
-        };
+
+        let mut flags = Flags::default();
+        flags.date = DateFlag::Relative;
 
         assert_eq!(
             Colour::Fixed(36).paint("2 days ago  "),

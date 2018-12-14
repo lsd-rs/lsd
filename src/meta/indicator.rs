@@ -39,17 +39,8 @@ mod test {
 
     #[test]
     fn test_directory_indicator() {
-        let flags = Flags {
-            display_all: true,
-            display_long: true,
-            display_online: true,
-            display_tree: true,
-            display_indicators: true,
-            recursive: true,
-            date: DateFlag::Relative,
-            color: WhenFlag::Always,
-            icon: WhenFlag::Always,
-        };
+        let mut flags = Flags::default();
+        flags.display_indicators = true;
 
         let file_type = Indicator::from(FileType::Directory);
 
@@ -58,17 +49,8 @@ mod test {
 
     #[test]
     fn test_executable_file_indicator() {
-        let flags = Flags {
-            display_all: true,
-            display_long: true,
-            display_online: true,
-            display_tree: true,
-            display_indicators: true,
-            recursive: true,
-            date: DateFlag::Relative,
-            color: WhenFlag::Always,
-            icon: WhenFlag::Always,
-        };
+        let mut flags = Flags::default();
+        flags.display_indicators = true;
 
         let file_type = Indicator::from(FileType::ExecutableFile);
 
@@ -77,17 +59,8 @@ mod test {
 
     #[test]
     fn test_socket_indicator() {
-        let flags = Flags {
-            display_all: true,
-            display_long: true,
-            display_online: true,
-            display_tree: true,
-            display_indicators: true,
-            recursive: true,
-            date: DateFlag::Relative,
-            color: WhenFlag::Always,
-            icon: WhenFlag::Always,
-        };
+        let mut flags = Flags::default();
+        flags.display_indicators = true;
 
         let file_type = Indicator::from(FileType::Socket);
 
@@ -115,17 +88,8 @@ mod test {
 
     #[test]
     fn test_not_represented_indicator() {
-        let flags = Flags {
-            display_all: true,
-            display_long: true,
-            display_online: true,
-            display_tree: true,
-            display_indicators: true,
-            recursive: true,
-            date: DateFlag::Relative,
-            color: WhenFlag::Always,
-            icon: WhenFlag::Always,
-        };
+        let mut flags = Flags::default();
+        flags.display_indicators = true;
 
         // The File type doesn't have any indicator
         let file_type = Indicator::from(FileType::File);
