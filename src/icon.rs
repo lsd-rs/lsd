@@ -38,23 +38,24 @@ impl Icons {
         // Check the known names.
         if let Some(icon) = self.icons_by_name.get(name.name().as_str()) {
             res += icon;
+            res += ICON_SPACE;
+            return res;
         }
 
-        // Check the known extensions.
+            // Check the known extensions.
         if let Some(extension) = name.extension() {
             if let Some(icon) = self.icons_by_extension.get(extension.as_str()) {
                 res += icon;
+                res += ICON_SPACE;
+                return res;
             }
         }
 
-        if res.is_empty() {
-            // Use the default icons.
-            res += match name.file_type() {
-                FileType::Directory => "\u{f115}", // 
-                _ => "\u{f016}",                   // 
-            };
-        }
-
+        // Use the default icons.
+        res += match name.file_type() {
+            FileType::Directory => "\u{f115}", // 
+            _ => "\u{f016}",                   // 
+        };
         res += ICON_SPACE;
         res
     }
