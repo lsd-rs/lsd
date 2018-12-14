@@ -1,6 +1,6 @@
 use ansi_term::{ANSIString, ANSIStrings};
 use color::Colors;
-use flags::Flags;
+use flags::{Flags, SortFlag, SortOrder};
 use icon::Icons;
 use meta::FileType;
 use meta::Meta;
@@ -30,8 +30,8 @@ impl Batch {
         self.0.len()
     }
 
-    pub fn sort(&mut self) {
-        self.0.sort_unstable_by(sort_by_meta);
+    pub fn sort(&mut self, sort: (SortFlag, SortOrder)) {
+        self.0.sort_unstable_by(|a, b| sort_by_meta(a, b, sort));
     }
 
     pub fn get_short_output(&self, colors: &Colors, icons: &Icons, flags: Flags) -> Vec<String> {
@@ -138,12 +138,22 @@ impl Batch {
     }
 }
 
-fn sort_by_meta(a: &Meta, b: &Meta) -> Ordering {
-    if a.file_type == FileType::Directory && b.file_type != FileType::Directory {
-        Ordering::Less
-    } else if b.file_type == FileType::Directory && a.file_type != FileType::Directory {
-        Ordering::Greater
-    } else {
-        a.name.cmp(&b.name)
+fn sort_by_meta(a: &Meta, b: &Meta, (sort_flag, sort_order): (SortFlag, SortOrder)) -> Ordering {
+    let ord = match sort_flag {
+        SortFlag::Lexicographical => {
+            if a.file_type == FileType::Directory && b.file_type != FileType::Directory {
+                Ordering::Less
+            } else if b.file_type == FileType::Directory && a.file_type != FileType::Directory {
+                Ordering::Greater
+            } else {
+                a.name.cmp(&b.name)
+            }
+        }
+        // most recently modified first
+        SortFlag::Time => b.date.cmp(&a.date).then(a.name.cmp(&b.name)),
+    };
+    match sort_order {
+        SortOrder::Default => ord,
+        SortOrder::Reverse => ord.reverse(),
     }
 }
