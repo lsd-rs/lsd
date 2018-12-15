@@ -174,7 +174,7 @@ mod tests {
         File::create(&path_a).expect("failed to create file");
         let success = Command::new("touch")
             .arg("-t")
-            .arg("19851116")
+            .arg("198511160000")
             .arg(&path_a)
             .status()
             .unwrap()
@@ -216,7 +216,7 @@ mod tests {
                     ..Flags::default()
                 }
             ),
-            Ordering::Less
+            Ordering::Greater
         );
 
         // Sort by time reversed
@@ -230,7 +230,7 @@ mod tests {
                     ..Flags::default()
                 }
             ),
-            Ordering::Greater
+            Ordering::Less
         );
     }
 }
