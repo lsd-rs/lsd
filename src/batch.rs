@@ -162,15 +162,24 @@ fn sort_by_meta(a: &Meta, b: &Meta, flags: Flags) -> Ordering {
 mod tests {
     use super::*;
     use std::fs::{create_dir, File};
+    use std::process::Command;
     use tempdir::TempDir;
 
     #[test]
     fn test_sort_by_meta() {
         let tmp_dir = TempDir::new("test_dir").expect("failed to create temp dir");
 
-        // Create a file;
+        // Create a file and make sure that its mod time is before now.
         let path_a = tmp_dir.path().join("a.txt");
         File::create(&path_a).expect("failed to create file");
+        let success = Command::new("touch")
+            .arg("-t")
+            .arg("19851116")
+            .arg(&path_a)
+            .status()
+            .unwrap()
+            .success();
+        assert!(success, "failed to exec touch");
         let meta_a = Meta::from_path(&path_a).expect("failed to get meta");
 
         // Create a dir;
@@ -207,7 +216,7 @@ mod tests {
                     ..Flags::default()
                 }
             ),
-            Ordering::Greater
+            Ordering::Less
         );
 
         // Sort by time reversed
@@ -221,7 +230,7 @@ mod tests {
                     ..Flags::default()
                 }
             ),
-            Ordering::Less
+            Ordering::Greater
         );
     }
 }
