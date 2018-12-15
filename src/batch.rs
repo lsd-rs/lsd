@@ -30,8 +30,8 @@ impl Batch {
         self.0.len()
     }
 
-    pub fn sort(&mut self, sort: (SortFlag, SortOrder)) {
-        self.0.sort_unstable_by(|a, b| sort_by_meta(a, b, sort));
+    pub fn sort(&mut self, flags: Flags) {
+        self.0.sort_unstable_by(|a, b| sort_by_meta(a, b, flags));
     }
 
     pub fn get_short_output(&self, colors: &Colors, icons: &Icons, flags: Flags) -> Vec<String> {
@@ -138,9 +138,9 @@ impl Batch {
     }
 }
 
-fn sort_by_meta(a: &Meta, b: &Meta, (sort_flag, sort_order): (SortFlag, SortOrder)) -> Ordering {
-    let ord = match sort_flag {
-        SortFlag::Lexicographical => {
+fn sort_by_meta(a: &Meta, b: &Meta, flags: Flags) -> Ordering {
+    let ord = match flags.sort_by {
+        SortFlag::Name => {
             if a.file_type == FileType::Directory && b.file_type != FileType::Directory {
                 Ordering::Less
             } else if b.file_type == FileType::Directory && a.file_type != FileType::Directory {
@@ -152,8 +152,76 @@ fn sort_by_meta(a: &Meta, b: &Meta, (sort_flag, sort_order): (SortFlag, SortOrde
         // most recently modified first
         SortFlag::Time => b.date.cmp(&a.date).then(a.name.cmp(&b.name)),
     };
-    match sort_order {
+    match flags.sort_order {
         SortOrder::Default => ord,
         SortOrder::Reverse => ord.reverse(),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::fs::{create_dir, File};
+    use tempdir::TempDir;
+
+    #[test]
+    fn test_sort_by_meta() {
+        let tmp_dir = TempDir::new("test_dir").expect("failed to create temp dir");
+
+        // Create a file;
+        let path_a = tmp_dir.path().join("a.txt");
+        File::create(&path_a).expect("failed to create file");
+        let meta_a = Meta::from_path(&path_a).expect("failed to get meta");
+
+        // Create a dir;
+        let path_b = tmp_dir.path().join("b");
+        create_dir(&path_b).expect("failed to create dir");
+        let meta_b = Meta::from_path(&path_b).expect("failed to get meta");
+
+        // Sort by name
+        assert_eq!(
+            sort_by_meta(&meta_a, &meta_b, Flags::default()),
+            Ordering::Greater
+        );
+
+        // Sort by name reversed
+        assert_eq!(
+            sort_by_meta(
+                &meta_a,
+                &meta_b,
+                Flags {
+                    sort_order: SortOrder::Reverse,
+                    ..Flags::default()
+                }
+            ),
+            Ordering::Less
+        );
+
+        // Sort by time
+        assert_eq!(
+            sort_by_meta(
+                &meta_a,
+                &meta_b,
+                Flags {
+                    sort_by: SortFlag::Time,
+                    ..Flags::default()
+                }
+            ),
+            Ordering::Greater
+        );
+
+        // Sort by time reversed
+        assert_eq!(
+            sort_by_meta(
+                &meta_a,
+                &meta_b,
+                Flags {
+                    sort_by: SortFlag::Time,
+                    sort_order: SortOrder::Reverse,
+                    ..Flags::default()
+                }
+            ),
+            Ordering::Less
+        );
     }
 }
