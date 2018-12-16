@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased] - ReleaseDate
 ### Added
 - Add a CHANGELOG.md
+- Add the --date flag with the relative date display from [meain](https://github.com/meain)
+- Add new icons
+
+### Changed
+- Accept the same flag several times and keep only the latest value
+
+### Fixed
+- Fix the snap installation instructions into the README
 
 
 ## [0.9.0] - 2018-12-12

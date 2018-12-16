@@ -45,8 +45,7 @@ sudo dpkg -i lsd_7.2.0_amd64.deb  # adapt version number and architecture
 ### From Snap
 
 ```sh
-sudo snap install lsd
-
+sudo snap install lsd --classic
 ```
 
 ### From Sources
