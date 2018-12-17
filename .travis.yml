@@ -15,30 +15,23 @@ matrix:
     - os: osx
       rust: stable
       env: TARGET=x86_64-apple-darwin
+    - os: linux
+      rust: stable
+      env:
+        - TARGET=arm-unknown-linux-gnueabihf
+        - CARGO_TARGET_ARM_UNKNOWN_LINUX_GNUEABIHF_LINKER=arm-linux-gnueabihf-gcc-4.8
 
     # Beta channel.
+    # The other platforms are disabled in order to reduce the total CI time
     - os: linux
       rust: beta
       env: TARGET=x86_64-unknown-linux-gnu
-    # Disabled to reduce total CI time
-    # - os: linux
-    #   rust: beta
-    #   env: TARGET=i686-unknown-linux-gnu
-    # - os: osx
-    #   rust: beta
-    #   env: TARGET=x86_64-apple-darwin
 
     # Nightly channel.
+    # The other platforms are disabled in order to reduce the total CI time
     - os: linux
       rust: nightly
       env: TARGET=x86_64-unknown-linux-gnu
-    # Disabled to reduce total CI time
-    # - os: linux
-    #   rust: nightly
-    #   env: TARGET=i686-unknown-linux-gnu
-    # - os: osx
-    #   rust: nightly
-    #   env: TARGET=x86_64-apple-darwin
 
     # Minimum Rust supported channel.
     - os: linux
@@ -50,6 +43,11 @@ matrix:
     - os: osx
       rust: 1.30.1
       env: TARGET=x86_64-apple-darwin
+    - os: linux
+      rust: 1.30.1
+      env:
+        - TARGET=arm-unknown-linux-gnueabihf
+        - CARGO_TARGET_ARM_UNKNOWN_LINUX_GNUEABIHF_LINKER=arm-linux-gnueabihf-gcc-4.8
 
     # Code formatting check
     - os: linux
@@ -59,13 +57,6 @@ matrix:
         - rustup component add clippy
       script:
         - cargo clippy --all-features -- -D clippy::pedantic
-
-addons:
-  apt:
-    packages:
-      # needed for i686-unknown-linux-gnu target
-      - gcc-multilib
-      - fakeroot
 
 env:
   global:
@@ -80,13 +71,13 @@ install:
   - if [[ $TRAVIS_OS_NAME = linux && $HOST != $TARGET ]]; then rustup target add $TARGET; fi
 
 script:
-  # Incorporate TARGET env var to the build and test process
-  - cargo build --target $TARGET --verbose
-  - cargo test --target $TARGET --verbose
+  - bash ci/script.bash
 
+before_install:
+  - bash ci/before_install.bash
 
 before_deploy:
-  - bash deploy/before_deploy.bash
+  - bash ci/before_deploy.bash
 
 deploy:
   provider: releases
