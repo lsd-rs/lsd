@@ -73,7 +73,7 @@ impl Name {
 
 impl Ord for Name {
     fn cmp(&self, other: &Self) -> Ordering {
-        self.name.cmp(&other.name)
+        self.name.to_lowercase().cmp(&other.name.to_lowercase())
     }
 }
 
@@ -97,6 +97,7 @@ mod test {
     use icon::{self, Icons};
     use meta::FileType;
     use meta::Permissions;
+    use std::cmp::Ordering;
     use std::fs::{self, File};
     use std::os::unix::fs::symlink;
     use std::path::Path;
@@ -252,7 +253,18 @@ mod test {
     }
 
     #[test]
-    fn test_order_impl() {
+    fn test_order_impl_is_case_insensitive() {
+        let path_1 = Path::new("AAAA");
+        let name_1 = Name::new(&path_1, FileType::File);
+
+        let path_2 = Path::new("aaaa");
+        let name_2 = Name::new(&path_2, FileType::File);
+
+        assert_eq!(Ordering::Equal, name_1.cmp(&name_2));
+    }
+
+    #[test]
+    fn test_partial_order_impl() {
         let path_a = Path::new("aaaa");
         let name_a = Name::new(&path_a, FileType::File);
 
@@ -263,7 +275,7 @@ mod test {
     }
 
     #[test]
-    fn test_order_impl_is_case_insensitive() {
+    fn test_partial_order_impl_is_case_insensitive() {
         let path_a = Path::new("aaaa");
         let name_a = Name::new(&path_a, FileType::File);
 
@@ -274,7 +286,7 @@ mod test {
     }
 
     #[test]
-    fn test_eq_impl() {
+    fn test_partial_eq_impl() {
         let path_1 = Path::new("aaaa");
         let name_1 = Name::new(&path_1, FileType::File);
 
@@ -285,7 +297,7 @@ mod test {
     }
 
     #[test]
-    fn test_eq_impl_is_case_insensitive() {
+    fn test_partial_eq_impl_is_case_insensitive() {
         let path_1 = Path::new("AAAA");
         let name_1 = Name::new(&path_1, FileType::File);
 
