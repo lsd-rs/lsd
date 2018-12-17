@@ -5,7 +5,7 @@ use std::fs::Metadata;
 use std::time::UNIX_EPOCH;
 use time::{Duration, Timespec};
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Date(time::Tm);
 
 impl<'a> From<&'a Metadata> for Date {

@@ -34,8 +34,8 @@ impl Indicator {
 #[cfg(test)]
 mod test {
     use super::Indicator;
+    use flags::{DateFlag, Flags, SortFlag, SortOrder, WhenFlag};
     use meta::FileType;
-    use flags::{DateFlag, Flags, WhenFlag};
 
     #[test]
     fn test_directory_indicator() {
@@ -76,6 +76,8 @@ mod test {
             display_tree: true,
             display_indicators: true,
             recursive: true,
+            sort_by: SortFlag::Name,
+            sort_order: SortOrder::Default,
             date: DateFlag::Relative,
             color: WhenFlag::Always,
             icon: WhenFlag::Always,

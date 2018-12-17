@@ -8,6 +8,8 @@ pub struct Flags {
     pub display_tree: bool,
     pub display_indicators: bool,
     pub recursive: bool,
+    pub sort_by: SortFlag,
+    pub sort_order: SortOrder,
     pub date: DateFlag,
     pub color: WhenFlag,
     pub icon: WhenFlag,
@@ -19,6 +21,17 @@ impl<'a> From<ArgMatches<'a>> for Flags {
         let icon_inputs: Vec<&str> = matches.values_of("icon").unwrap().collect();
         let date_inputs: Vec<&str> = matches.values_of("date").unwrap().collect();
 
+        let sort_by = if matches.is_present("timesort") {
+            SortFlag::Time
+        } else {
+            SortFlag::Name
+        };
+        let sort_order = if matches.is_present("reverse") {
+            SortOrder::Reverse
+        } else {
+            SortOrder::Default
+        };
+
         Self {
             display_all: matches.is_present("all"),
             display_long: matches.is_present("long"),
@@ -26,6 +39,8 @@ impl<'a> From<ArgMatches<'a>> for Flags {
             display_tree: matches.is_present("tree"),
             display_indicators: matches.is_present("indicators"),
             recursive: matches.is_present("recursive"),
+            sort_by,
+            sort_order,
             // Take only the last value
             date: DateFlag::from(date_inputs[date_inputs.len() - 1]),
             color: WhenFlag::from(color_inputs[color_inputs.len() - 1]),
@@ -36,13 +51,15 @@ impl<'a> From<ArgMatches<'a>> for Flags {
 
 impl Default for Flags {
     fn default() -> Self {
-        Self{
+        Self {
             display_all: false,
             display_long: false,
             display_online: false,
             display_tree: false,
             display_indicators: false,
             recursive: false,
+            sort_by: SortFlag::Name,
+            sort_order: SortOrder::Default,
             date: DateFlag::Date,
             color: WhenFlag::Auto,
             icon: WhenFlag::Auto,
@@ -82,4 +99,16 @@ impl<'a> From<&'a str> for WhenFlag {
             _ => panic!("invalid \"when\" flag: {}", when),
         }
     }
+}
+
+#[derive(Clone, Debug, Copy, PartialEq, Eq)]
+pub enum SortFlag {
+    Name,
+    Time,
+}
+
+#[derive(Clone, Debug, Copy, PartialEq, Eq)]
+pub enum SortOrder {
+    Default,
+    Reverse,
 }
