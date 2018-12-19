@@ -76,6 +76,7 @@ mod test {
             display_tree: true,
             display_indicators: true,
             recursive: true,
+            recursion_depth: usize::max_value(),
             sort_by: SortFlag::Name,
             sort_order: SortOrder::Default,
             date: DateFlag::Relative,
