@@ -15,6 +15,7 @@ extern crate tempdir;
 extern crate term_grid;
 extern crate terminal_size;
 extern crate time;
+extern crate unicode_width;
 extern crate users;
 
 mod app;

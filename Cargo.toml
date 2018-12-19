@@ -27,6 +27,7 @@ terminal_size = "0.1.8"
 time = "0.1.40"
 users = "0.8.0"
 chrono-humanize = "0.0.11"
+unicode-width = "0.1.5"
 
 [dependencies.clap]
 features = ["suggestions", "color", "wrap_help"]

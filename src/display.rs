@@ -3,6 +3,7 @@ use flags::Flags;
 use std::io::Write;
 use term_grid::{Cell, Direction, Filling, Grid, GridOptions};
 use terminal_size::terminal_size;
+use unicode_width::UnicodeWidthStr;
 
 const EDGE: &str = "\u{251c}\u{2500}\u{2500}"; // "├──"
 const LINE: &str = "\u{2502}  "; // "├  "
@@ -103,6 +104,6 @@ impl Display {
 
         nb_invisible_char += 3; /* "[0m" */
 
-        input.chars().count() - nb_invisible_char
+        UnicodeWidthStr::width(input) - nb_invisible_char
     }
 }
