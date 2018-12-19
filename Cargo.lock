@@ -94,6 +94,7 @@ dependencies = [
  "term_grid 0.1.7 (registry+https://github.com/rust-lang/crates.io-index)",
  "terminal_size 0.1.8 (registry+https://github.com/rust-lang/crates.io-index)",
  "time 0.1.40 (registry+https://github.com/rust-lang/crates.io-index)",
+ "unicode-width 0.1.5 (registry+https://github.com/rust-lang/crates.io-index)",
  "users 0.8.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "version_check 0.1.5 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
