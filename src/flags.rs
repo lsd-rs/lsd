@@ -1,4 +1,4 @@
-use clap::ArgMatches;
+use clap::{ArgMatches, Error, ErrorKind};
 
 #[derive(Clone, Debug, Copy)]
 pub struct Flags {
@@ -13,10 +13,11 @@ pub struct Flags {
     pub date: DateFlag,
     pub color: WhenFlag,
     pub icon: WhenFlag,
+    pub recursion_depth: usize,
 }
 
-impl<'a> From<ArgMatches<'a>> for Flags {
-    fn from(matches: ArgMatches) -> Self {
+impl Flags {
+    pub fn from_matches(matches: &ArgMatches) -> Result<Self, Error> {
         let color_inputs: Vec<&str> = matches.values_of("color").unwrap().collect();
         let icon_inputs: Vec<&str> = matches.values_of("icon").unwrap().collect();
         let date_inputs: Vec<&str> = matches.values_of("date").unwrap().collect();
@@ -32,20 +33,42 @@ impl<'a> From<ArgMatches<'a>> for Flags {
             SortOrder::Default
         };
 
-        Self {
+        let display_tree = matches.is_present("tree");
+        let recursive = matches.is_present("recursive");
+        let recursion_depth = match matches.value_of("depth") {
+            Some(str) if recursive || display_tree => match str.parse::<usize>() {
+                Ok(val) => val,
+                Err(_) => {
+                    return Err(Error::with_description(
+                        "The argument '--depth' requires a valid number",
+                        ErrorKind::ValueValidation,
+                    ))
+                }
+            },
+            Some(_) => {
+                return Err(Error::with_description(
+                    "The argument '--depth' requires '--tree' or '--recursive'",
+                    ErrorKind::MissingRequiredArgument,
+                ))
+            }
+            None => usize::max_value(),
+        };
+
+        Ok(Self {
             display_all: matches.is_present("all"),
             display_long: matches.is_present("long"),
             display_online: matches.is_present("oneline"),
-            display_tree: matches.is_present("tree"),
+            display_tree,
             display_indicators: matches.is_present("indicators"),
-            recursive: matches.is_present("recursive"),
+            recursive,
+            recursion_depth,
             sort_by,
             sort_order,
             // Take only the last value
             date: DateFlag::from(date_inputs[date_inputs.len() - 1]),
             color: WhenFlag::from(color_inputs[color_inputs.len() - 1]),
             icon: WhenFlag::from(icon_inputs[icon_inputs.len() - 1]),
-        }
+        })
     }
 }
 
@@ -58,6 +81,7 @@ impl Default for Flags {
             display_tree: false,
             display_indicators: false,
             recursive: false,
+            recursion_depth: usize::max_value(),
             sort_by: SortFlag::Name,
             sort_order: SortOrder::Default,
             date: DateFlag::Date,
@@ -111,4 +135,33 @@ pub enum SortFlag {
 pub enum SortOrder {
     Default,
     Reverse,
+}
+
+#[cfg(test)]
+mod test {
+    use super::Flags;
+    use crate::app;
+    use clap::ErrorKind;
+
+    #[test]
+    fn test_validate_depth_value() {
+        let matches = app::build()
+            .get_matches_from_safe(vec!["lsd", "--tree", "--depth", "xx"])
+            .unwrap();
+        let res = Flags::from_matches(&matches);
+
+        assert!(res.is_err());
+        assert_eq!(res.unwrap_err().kind, ErrorKind::ValueValidation);
+    }
+
+    #[test]
+    fn test_useless_depth() {
+        let matches = app::build()
+            .get_matches_from_safe(vec!["lsd", "--depth", "10"])
+            .unwrap();
+        let res = Flags::from_matches(&matches);
+
+        assert!(res.is_err());
+        assert_eq!(res.unwrap_err().kind, ErrorKind::MissingRequiredArgument);
+    }
 }
