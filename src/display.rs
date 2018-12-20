@@ -90,8 +90,8 @@ impl Display {
     fn get_visible_width(&self, input: &str) -> usize {
         let mut nb_invisible_char = 0;
 
-        for (idx, _) in input.match_indices("[38;5;") {
-            let color_code = input.chars().skip(idx + 6);
+        for (idx, _) in input.match_indices("\u{1b}[38;5;" /* "\e[38;5;" */) {
+            let color_code = input.chars().skip(idx + 7);
             let mut code_size = 0;
             color_code
                 .skip_while(|x| {
@@ -99,10 +99,13 @@ impl Display {
                     char::is_numeric(*x)
                 })
                 .count();
-            nb_invisible_char += 6 + code_size; /* "[38;5;" + color number + "m" */
+            nb_invisible_char += 6 + code_size; /* "\e[38;5;" + color number + "m" */
         }
 
-        nb_invisible_char += 3; /* "[0m" */
+        if nb_invisible_char > 0 {
+            // If no color have been set, the is no reset character.
+            nb_invisible_char += 3; /* "[0m" */
+        }
 
         UnicodeWidthStr::width(input) - nb_invisible_char
     }
@@ -119,7 +122,7 @@ mod tests {
     use std::path::Path;
 
     #[test]
-    fn test_display_get_visible_width() {
+    fn test_display_get_visible_width_without_icons() {
         let display = Display::new(Flags::default());
         for (s, l) in &[
             ("Ｈｅｌｌｏ,ｗｏｒｌｄ!", 22),
@@ -133,9 +136,63 @@ mod tests {
             let path = Path::new(s);
             let name = Name::new(&path, FileType::File);
             let output = name.render(
-                &Colors::new(color::Theme::Default),
-                &Icons::new(icon::Theme::Default),
+                &Colors::new(color::Theme::NoColor),
+                &Icons::new(icon::Theme::NoIcon),
             );
+            assert_eq!(display.get_visible_width(&output), *l);
+        }
+    }
+
+    #[test]
+    fn test_display_get_visible_width_with_icons() {
+        let display = Display::new(Flags::default());
+        for (s, l) in &[
+            // Add 3 characters for the icons.
+            ("Ｈｅｌｌｏ,ｗｏｒｌｄ!", 25),
+            ("ASCII1234-_", 14),
+            ("制作样本。", 13),
+            ("日本語", 9),
+            ("샘플은 무료로 드리겠습니다", 29),
+            ("👩🐩", 7),
+            ("🔬", 5),
+        ] {
+            let path = Path::new(s);
+            let name = Name::new(&path, FileType::File);
+            let output = name
+                .render(
+                    &Colors::new(color::Theme::NoColor),
+                    &Icons::new(icon::Theme::Default),
+                )
+                .to_string();
+            assert_eq!(display.get_visible_width(&output), *l);
+        }
+    }
+
+    #[test]
+    fn test_display_get_visible_width_with_colors() {
+        let display = Display::new(Flags::default());
+        for (s, l) in &[
+            ("Ｈｅｌｌｏ,ｗｏｒｌｄ!", 22),
+            ("ASCII1234-_", 11),
+            ("制作样本。", 10),
+            ("日本語", 6),
+            ("샘플은 무료로 드리겠습니다", 26),
+            ("👩🐩", 4),
+            ("🔬", 2),
+        ] {
+            let path = Path::new(s);
+            let name = Name::new(&path, FileType::File);
+            let output = name
+                .render(
+                    &Colors::new(color::Theme::Default),
+                    &Icons::new(icon::Theme::NoIcon),
+                )
+                .to_string();
+
+            // check if the color is present.
+            assert_eq!(true, output.starts_with("\u{1b}[38;5;"));
+            assert_eq!(true, output.ends_with("[0m"));
+
             assert_eq!(display.get_visible_width(&output), *l);
         }
     }
