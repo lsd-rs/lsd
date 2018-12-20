@@ -108,10 +108,8 @@ impl Display {
     }
 }
 
-
 #[cfg(test)]
 mod tests {
-    use std::path::Path;
     use super::*;
     use color;
     use color::Colors;
@@ -119,6 +117,7 @@ mod tests {
     use icon;
     use icon::Icons;
     use meta::{FileType, Name};
+    use std::path::Path;
 
     #[test]
     fn test_display_get_visible_width() {
@@ -134,7 +133,10 @@ mod tests {
         ] {
             let path = Path::new(s);
             let name = Name::new(&path, FileType::File);
-            let output = name.render(&Colors::new(color::Theme::Default), &Icons::new(icon::Theme::Default));
+            let output = name.render(
+                &Colors::new(color::Theme::Default),
+                &Icons::new(icon::Theme::Default),
+            );
             assert_eq!(display.get_visible_width(&output), *l);
         }
     }
