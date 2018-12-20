@@ -4,7 +4,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased] - ReleaseDate
+## [0.11.0] - 2018-12-20
+### Added
+- Add the sort by time flag from [boxdot](https://github.com/boxdot)
+- Add the reverse sort flag from [boxdot](https://github.com/boxdot)
+- Add the suport to the arm-unknown-linux-gnueabihf platform
+
+### Fixed
+- Fix the width calculation when using the grid output from [kkk669](https://github.com/kkk669)
+
+
+## [0.10.0] - 2018-12-16
 ### Added
 - Add a CHANGELOG.md
 - Add the --date flag with the relative date display from [meain](https://github.com/meain)
@@ -128,6 +138,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 [Unreleased]: https://github.com/Peltoche/lsd/compare/0.9.0...HEAD
+[0.11.0]: https://github.com/Peltoche/lsd/compare/0.10.0...0.11.0
+[0.10.0]: https://github.com/Peltoche/lsd/compare/0.9.0...0.10.0
 [0.9.0]: https://github.com/Peltoche/lsd/compare/0.8.0...0.9.0
 [0.8.0]: https://github.com/Peltoche/lsd/compare/0.7.12...0.8.0
 [0.7.12]: https://github.com/Peltoche/lsd/compare/0.7.0...0.7.12
