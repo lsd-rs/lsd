@@ -107,3 +107,35 @@ impl Display {
         UnicodeWidthStr::width(input) - nb_invisible_char
     }
 }
+
+
+#[cfg(test)]
+mod tests {
+    use std::path::Path;
+    use super::*;
+    use color;
+    use color::Colors;
+    use flags::WhenFlag;
+    use icon;
+    use icon::Icons;
+    use meta::{FileType, Name};
+
+    #[test]
+    fn test_display_get_visible_width() {
+        let display = Display::new(Flags::default());
+        for (s, l) in &[
+            ("Ｈｅｌｌｏ,ｗｏｒｌｄ!", 22),
+            ("ASCII1234-_", 11),
+            ("制作样本。", 10),
+            ("日本語", 6),
+            ("샘플은 무료로 드리겠습니다", 26),
+            ("👩🐩", 4),
+            ("🔬", 2),
+        ] {
+            let path = Path::new(s);
+            let name = Name::new(&path, FileType::File);
+            let output = name.render(&Colors::new(color::Theme::Default), &Icons::new(icon::Theme::Default));
+            assert_eq!(display.get_visible_width(&output), *l);
+        }
+    }
+}
