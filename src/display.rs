@@ -113,7 +113,6 @@ mod tests {
     use super::*;
     use color;
     use color::Colors;
-    use flags::WhenFlag;
     use icon;
     use icon::Icons;
     use meta::{FileType, Name};
