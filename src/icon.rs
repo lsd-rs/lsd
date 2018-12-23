@@ -42,7 +42,7 @@ impl Icons {
             return res;
         }
 
-            // Check the known extensions.
+        // Check the known extensions.
         if let Some(extension) = name.extension() {
             if let Some(icon) = self.icons_by_extension.get(extension.as_str()) {
                 res += icon;
