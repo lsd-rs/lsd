@@ -58,13 +58,22 @@ pub fn build() -> App<'static, 'static> {
                 .short("R")
                 .long("recursive")
                 .multiple(true)
+                .conflicts_with("tree")
                 .help("Recurse into directories"),
         )
         .arg(
             Arg::with_name("tree")
                 .long("tree")
                 .multiple(true)
+                .conflicts_with("recursive")
                 .help("Recurse into directories and present the result as a tree"),
+        )
+        .arg(
+            Arg::with_name("depth")
+                .long("depth")
+                .takes_value(true)
+                .value_name("num")
+                .help("Stop recursing into directories after reaching specified depth"),
         )
         .arg(
             Arg::with_name("date")

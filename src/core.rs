@@ -56,6 +56,10 @@ impl Core {
     }
 
     fn run_inner(&self, paths: Vec<PathBuf>, depth: usize) {
+        if depth > self.flags.recursion_depth {
+            return;
+        }
+
         let mut dirs = Vec::new();
         let mut files = Vec::new();
 
@@ -101,7 +105,7 @@ impl Core {
                         })
                         .collect();
 
-                    self.run_inner(folder_dirs, depth);
+                    self.run_inner(folder_dirs, depth + 1);
                 } else {
                     self.display
                         .print_outputs(self.get_batch_outputs(&folder_batch));

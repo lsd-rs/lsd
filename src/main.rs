@@ -40,7 +40,8 @@ fn main() {
         .map(PathBuf::from)
         .collect();
 
-    let core = Core::new(Flags::from(matches));
+    let flags = Flags::from_matches(&matches).unwrap_or_else(|err| err.exit());
+    let core = Core::new(flags);
 
     core.run(inputs);
 }

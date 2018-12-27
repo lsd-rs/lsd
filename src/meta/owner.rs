@@ -11,17 +11,15 @@ pub struct Owner {
 
 impl<'a> From<&'a Metadata> for Owner {
     fn from(meta: &Metadata) -> Self {
-        let user = get_user_by_uid(meta.uid())
-            .expect("failed to get user name")
-            .name()
-            .to_string_lossy()
-            .to_string();
+        let user = match get_user_by_uid(meta.uid()) {
+            Some(res) => res.name().to_string_lossy().to_string(),
+            None => meta.uid().to_string(),
+        };
 
-        let group = get_group_by_gid(meta.gid())
-            .expect("failed to get the group name")
-            .name()
-            .to_string_lossy()
-            .to_string();
+        let group = match get_group_by_gid(meta.gid()) {
+            Some(res) => res.name().to_string_lossy().to_string(),
+            None => meta.gid().to_string(),
+        };
 
         Self { user, group }
     }
