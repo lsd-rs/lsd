@@ -72,7 +72,7 @@ pub fn build() -> App<'static, 'static> {
             Arg::with_name("depth")
                 .long("depth")
                 .takes_value(true)
-                .value_name("NUM")
+                .value_name("num")
                 .help("Stop recursing into directories after reaching specified depth"),
         )
         .arg(
