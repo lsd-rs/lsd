@@ -272,7 +272,6 @@ impl Icons {
         m.insert("xml", "\u{e619}"); // ""
         m.insert("xul", "\u{e619}"); // ""
         m.insert("yaml", "\u{f481}"); // ""
-        m.insert("yarn.lock", "\u{e718}"); // ""
         m.insert("yml", "\u{f481}"); // ""
         m.insert("zip", "\u{f410}"); // ""
         m.insert("zsh", "\u{f489}"); // ""
