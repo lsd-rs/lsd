@@ -40,7 +40,7 @@ impl Flags {
                 Ok(val) => val,
                 Err(_) => {
                     return Err(Error::with_description(
-                        "The argument '--depth' requires a valid number",
+                        "The argument '--depth' requires a valid positive number",
                         ErrorKind::ValueValidation,
                     ))
                 }
