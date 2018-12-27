@@ -36,13 +36,10 @@ impl Icons {
         let mut res = String::with_capacity(4 + ICON_SPACE.len()); // 4 == max icon size
 
         // Check directory.
-        match name.file_type() {
-            FileType::Directory => {
-                res += "\u{f115}"; // 
-                res += ICON_SPACE;
-                return res;
-            }
-            _ => {}
+        if name.file_type() == FileType::Directory {
+            res += "\u{f115}"; // 
+            res += ICON_SPACE;
+            return res;
         }
 
         // Check the known names.
