@@ -320,7 +320,7 @@ mod test {
         let icon = Icons::new(Theme::Default);
         let icon = icon.get(&name);
 
-        assert_eq!(icon, format!("{}{}", "", ICON_SPACE));
+        assert_eq!(icon, format!("{}{}", "\u{f016}", ICON_SPACE)); // 
     }
 
     #[test]
@@ -334,7 +334,7 @@ mod test {
         let icon = Icons::new(Theme::Default);
         let icon = icon.get(&name);
 
-        assert_eq!(icon, format!("{}{}", "", ICON_SPACE));
+        assert_eq!(icon, format!("{}{}", "\u{f115}", ICON_SPACE)); // 
     }
 
     #[test]
@@ -348,7 +348,7 @@ mod test {
         let icon = Icons::new(Theme::Default);
         let icon = icon.get(&name);
 
-        assert_eq!(icon, format!("{}{}", "", ICON_SPACE));
+        assert_eq!(icon, format!("{}{}", "\u{f115}", ICON_SPACE)); // 
     }
 
     #[test]
