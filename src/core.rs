@@ -118,24 +118,27 @@ impl Core {
     pub fn display_as_tree(&self, batch: Batch, depth: usize) {
         let last_idx = batch.len();
 
+        let mut output = String::new();
         for (idx, elem) in batch.into_iter().enumerate() {
             let last = idx + 1 != last_idx;
 
             if elem.file_type == FileType::Directory {
-                self.display.print_tree_row(
+                output += &self.display.print_tree_row(
                     &elem.name.render(&self.colors, &self.icons),
                     depth,
                     last,
                 );
                 self.run_inner(vec![elem.path], depth + 1);
             } else {
-                self.display.print_tree_row(
+                output += &self.display.print_tree_row(
                     &elem.name.render(&self.colors, &self.icons),
                     depth,
                     last,
                 );
             }
         }
+
+        self.display.print_output(&output);
     }
 
     pub fn get_batch_outputs<'b>(&self, batch: &'b Batch) -> Vec<String> {
