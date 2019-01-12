@@ -1,6 +1,6 @@
 use color::ColoredString;
 use flags::Flags;
-use std::io::Write;
+use std::io::{self, Write};
 use term_grid::{Cell, Direction, Filling, Grid, GridOptions};
 use terminal_size::terminal_size;
 use unicode_width::UnicodeWidthStr;
@@ -45,19 +45,40 @@ impl Display {
         }
 
         if let Some(gridded_output) = grid.fit_into_width(term_width) {
-            print!("{}", gridded_output);
-            std::io::stdout().flush().expect("Could not flush stdout");
+            self.print_output(&gridded_output.to_string());
         } else {
             //does not fit into grid, usually because (some) filename(s)
             //are longer or almost as long as term_width
             //print line by line instead!
             let lined_output = grid.fit_into_columns(1);
-            print!("{}", lined_output);
-            std::io::stdout().flush().expect("Could not flush stdout");
+            self.print_output(&lined_output.to_string());
         }
     }
 
-    pub fn print_tree_row(&self, output: &ColoredString, depth: usize, last: bool) {
+    pub fn print_output(&self, output: &str) {
+        let stdout = io::stdout();
+        let mut handle = stdout.lock();
+
+        if let Err(err) = handle.write_all(output.as_bytes()) {
+            if err.kind() != io::ErrorKind::Interrupted {
+                io::stderr().write_all(err.to_string().as_bytes()).unwrap();
+                std::process::exit(1);
+            }
+        };
+
+        // Do not check th
+        if let Err(err) = handle.flush() {
+            match err.kind() {
+                io::ErrorKind::Interrupted | io::ErrorKind::BrokenPipe => std::process::exit(0),
+                _ => {
+                    io::stderr().write_all(err.to_string().as_bytes()).unwrap();
+                    std::process::exit(1);
+                }
+            };
+        }
+    }
+
+    pub fn print_tree_row(&self, output: &ColoredString, depth: usize, last: bool) -> String {
         let mut res = String::new();
 
         for _ in 0..depth {
@@ -72,8 +93,9 @@ impl Display {
 
         res += " ";
         res += &output;
+        res += "\n";
 
-        println!("{}", res);
+        res
     }
 
     fn print_one_per_line(&self, outputs: &[String]) {
@@ -83,8 +105,7 @@ impl Display {
             res += "\n";
         }
 
-        print!("{}", res);
-        std::io::stdout().flush().expect("Could not flush stdout");
+        self.print_output(&res);
     }
 
     fn get_visible_width(&self, input: &str) -> usize {
