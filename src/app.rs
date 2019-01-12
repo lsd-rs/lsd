@@ -98,4 +98,14 @@ pub fn build() -> App<'static, 'static> {
                 .multiple(true)
                 .help("Reverse the order of the sort"),
         )
+        .arg(
+            Arg::with_name("group-dirs")
+                .long("group-dirs")
+                .possible_value("none")
+                .possible_value("first")
+                .possible_value("last")
+                .default_value("none")
+                .multiple(true)
+                .help("Sort the directories then the files"),
+        )
 }

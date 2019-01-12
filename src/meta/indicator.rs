@@ -34,7 +34,7 @@ impl Indicator {
 #[cfg(test)]
 mod test {
     use super::Indicator;
-    use flags::{DateFlag, Flags, SortFlag, SortOrder, WhenFlag};
+    use flags::Flags;
     use meta::FileType;
 
     #[test]
@@ -69,20 +69,8 @@ mod test {
 
     #[test]
     fn test_symlink_indicator() {
-        let flags = Flags {
-            display_all: true,
-            display_long: true,
-            display_online: true,
-            display_tree: true,
-            display_indicators: true,
-            recursive: true,
-            recursion_depth: usize::max_value(),
-            sort_by: SortFlag::Name,
-            sort_order: SortOrder::Default,
-            date: DateFlag::Relative,
-            color: WhenFlag::Always,
-            icon: WhenFlag::Always,
-        };
+        let mut flags = Flags::default();
+        flags.display_indicators = true;
 
         let file_type = Indicator::from(FileType::SymLink);
 
