@@ -30,6 +30,7 @@ impl Core {
 
         let icon_theme = match (tty_available, flags.icon) {
             (true, WhenFlag::Never) => icon::Theme::NoIcon,
+            (false, WhenFlag::Never) => icon::Theme::NoIcon,
             (false, WhenFlag::Auto) => icon::Theme::NoIcon,
             (false, WhenFlag::Always) => icon::Theme::Default,
             _ => icon::Theme::Default,
