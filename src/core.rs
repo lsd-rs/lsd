@@ -1,7 +1,7 @@
 use batch::Batch;
 use color::{self, Colors};
 use display::Display;
-use flags::{Flags, WhenFlag};
+use flags::{Flags, ThemeFlag, WhenFlag};
 use icon::{self, Icons};
 use meta::{FileType, Meta};
 use std::path::{Path, PathBuf};
@@ -28,12 +28,10 @@ impl Core {
             _ => color::Theme::Default,
         };
 
-        let icon_theme = match (tty_available, flags.icon) {
-            (true, WhenFlag::Never) => icon::Theme::NoIcon,
-            (false, WhenFlag::Never) => icon::Theme::NoIcon,
-            (false, WhenFlag::Auto) => icon::Theme::NoIcon,
-            (false, WhenFlag::Always) => icon::Theme::Default,
-            _ => icon::Theme::Default,
+        let icon_theme = match (tty_available, flags.icon, flags.icon_theme) {
+            (_, WhenFlag::Never, _) | (false, WhenFlag::Auto, _) => icon::Theme::NoIcon,
+            (_, _, ThemeFlag::Default) => icon::Theme::Default,
+            (_, _, ThemeFlag::Unicode) => icon::Theme::Unicode,
         };
 
         if !tty_available {

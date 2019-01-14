@@ -24,7 +24,10 @@ impl Icons {
     pub fn new(theme: Theme) -> Self {
         let display_icons = theme == Theme::Default || theme == Theme::Unicode;
         let (icons_by_name, icons_by_extension) = if theme == Theme::Default {
-            (Self::get_default_icons_by_name(), Self::get_default_icons_by_extension())
+            (
+                Self::get_default_icons_by_name(),
+                Self::get_default_icons_by_extension(),
+            )
         } else {
             (HashMap::new(), HashMap::new())
         };
