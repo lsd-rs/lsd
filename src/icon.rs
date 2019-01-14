@@ -11,6 +11,7 @@ pub struct Icons {
 pub enum Theme {
     NoIcon,
     Default,
+    Unicode,
 }
 
 const ICON_SPACE: &str = "  ";
@@ -21,10 +22,17 @@ const ICON_SPACE: &str = "  ";
 // s#\\u[0-9a-f]*#\=eval('"'.submatch(0).'"')#
 impl Icons {
     pub fn new(theme: Theme) -> Self {
+        let display_icons = theme == Theme::Default || theme == Theme::Unicode;
+        let (icons_by_name, icons_by_extension) = if theme == Theme::Default {
+            (Self::get_default_icons_by_name(), Self::get_default_icons_by_extension())
+        } else {
+            (HashMap::new(), HashMap::new())
+        };
+
         Self {
-            display_icons: theme == Theme::Default,
-            icons_by_name: Self::get_default_icons_by_name(),
-            icons_by_extension: Self::get_default_icons_by_extension(),
+            display_icons,
+            icons_by_name,
+            icons_by_extension,
         }
     }
 
