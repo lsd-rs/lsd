@@ -14,6 +14,7 @@ pub struct Flags {
     pub date: DateFlag,
     pub color: WhenFlag,
     pub icon: WhenFlag,
+    pub icon_theme: ThemeFlag,
     pub recursion_depth: usize,
 }
 
@@ -21,6 +22,7 @@ impl Flags {
     pub fn from_matches(matches: &ArgMatches) -> Result<Self, Error> {
         let color_inputs: Vec<&str> = matches.values_of("color").unwrap().collect();
         let icon_inputs: Vec<&str> = matches.values_of("icon").unwrap().collect();
+        let icon_theme_inputs: Vec<&str> = matches.values_of("theme").unwrap().collect();
         let date_inputs: Vec<&str> = matches.values_of("date").unwrap().collect();
         let dir_order_inputs: Vec<&str> = matches.values_of("group-dirs").unwrap().collect();
 
@@ -70,6 +72,7 @@ impl Flags {
             date: DateFlag::from(date_inputs[date_inputs.len() - 1]),
             color: WhenFlag::from(color_inputs[color_inputs.len() - 1]),
             icon: WhenFlag::from(icon_inputs[icon_inputs.len() - 1]),
+            icon_theme: ThemeFlag::from(icon_theme_inputs[icon_inputs.len() - 1]),
             directory_order: DirOrderFlag::from(dir_order_inputs[dir_order_inputs.len() - 1]),
         })
     }
@@ -91,6 +94,7 @@ impl Default for Flags {
             date: DateFlag::Date,
             color: WhenFlag::Auto,
             icon: WhenFlag::Auto,
+            icon_theme: ThemeFlag::Default,
         }
     }
 }
@@ -155,6 +159,22 @@ impl<'a> From<&'a str> for DirOrderFlag {
             "first" => DirOrderFlag::First,
             "last" => DirOrderFlag::Last,
             _ => panic!("invalid \"when\" flag: {}", when),
+        }
+    }
+}
+
+#[derive(Clone, Debug, Copy, PartialEq, Eq)]
+pub enum ThemeFlag {
+    Unicode,
+    Default,
+}
+
+impl<'a> From<&'a str> for ThemeFlag {
+    fn from(theme: &'a str) -> Self {
+        match theme {
+            "default" => ThemeFlag::Default,
+            "unicode" => ThemeFlag::Unicode,
+            _ => panic!("invalid \"theme\" flag: {}", theme),
         }
     }
 }

@@ -33,6 +33,15 @@ pub fn build() -> App<'static, 'static> {
                 .help("When to print the icons"),
         )
         .arg(
+            Arg::with_name("theme")
+                .long("theme")
+                .possible_value("default")
+                .possible_value("unicode")
+                .default_value("default")
+                .multiple(true)
+                .help("Whether to use extended or unicode icons"),
+        )
+        .arg(
             Arg::with_name("indicators")
                 .short("F")
                 .long("classify")
