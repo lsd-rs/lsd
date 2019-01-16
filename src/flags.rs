@@ -10,6 +10,7 @@ pub struct Flags {
     pub recursive: bool,
     pub sort_by: SortFlag,
     pub sort_order: SortOrder,
+    pub directory_order: DirOrderFlag,
     pub date: DateFlag,
     pub color: WhenFlag,
     pub icon: WhenFlag,
@@ -21,6 +22,7 @@ impl Flags {
         let color_inputs: Vec<&str> = matches.values_of("color").unwrap().collect();
         let icon_inputs: Vec<&str> = matches.values_of("icon").unwrap().collect();
         let date_inputs: Vec<&str> = matches.values_of("date").unwrap().collect();
+        let dir_order_inputs: Vec<&str> = matches.values_of("group-dirs").unwrap().collect();
 
         let sort_by = if matches.is_present("timesort") {
             SortFlag::Time
@@ -68,6 +70,7 @@ impl Flags {
             date: DateFlag::from(date_inputs[date_inputs.len() - 1]),
             color: WhenFlag::from(color_inputs[color_inputs.len() - 1]),
             icon: WhenFlag::from(icon_inputs[icon_inputs.len() - 1]),
+            directory_order: DirOrderFlag::from(dir_order_inputs[dir_order_inputs.len() - 1]),
         })
     }
 }
@@ -84,6 +87,7 @@ impl Default for Flags {
             recursion_depth: usize::max_value(),
             sort_by: SortFlag::Name,
             sort_order: SortOrder::Default,
+            directory_order: DirOrderFlag::None,
             date: DateFlag::Date,
             color: WhenFlag::Auto,
             icon: WhenFlag::Auto,
@@ -135,6 +139,24 @@ pub enum SortFlag {
 pub enum SortOrder {
     Default,
     Reverse,
+}
+
+#[derive(Clone, Debug, Copy, PartialEq, Eq)]
+pub enum DirOrderFlag {
+    None,
+    First,
+    Last,
+}
+
+impl<'a> From<&'a str> for DirOrderFlag {
+    fn from(when: &'a str) -> Self {
+        match when {
+            "none" => DirOrderFlag::None,
+            "first" => DirOrderFlag::First,
+            "last" => DirOrderFlag::Last,
+            _ => panic!("invalid \"when\" flag: {}", when),
+        }
+    }
 }
 
 #[cfg(test)]
