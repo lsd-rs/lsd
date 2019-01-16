@@ -10,7 +10,7 @@ pub struct Icons {
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum Theme {
     NoIcon,
-    Default,
+    Fancy,
     Unicode,
 }
 
@@ -22,8 +22,8 @@ const ICON_SPACE: &str = "  ";
 // s#\\u[0-9a-f]*#\=eval('"'.submatch(0).'"')#
 impl Icons {
     pub fn new(theme: Theme) -> Self {
-        let display_icons = theme == Theme::Default || theme == Theme::Unicode;
-        let (icons_by_name, icons_by_extension) = if theme == Theme::Default {
+        let display_icons = theme == Theme::Fancy || theme == Theme::Unicode;
+        let (icons_by_name, icons_by_extension) = if theme == Theme::Fancy {
             (
                 Self::get_default_icons_by_name(),
                 Self::get_default_icons_by_extension(),
@@ -324,7 +324,7 @@ mod test {
 
         let file_type = FileType::new(&meta, &Permissions::from(&meta));
         let name = Name::new(&file_path, file_type);
-        let icon = Icons::new(Theme::Default);
+        let icon = Icons::new(Theme::Fancy);
         let icon = icon.get(&name);
 
         assert_eq!(icon, format!("{}{}", "\u{f016}", ICON_SPACE)); // 
@@ -338,7 +338,7 @@ mod test {
 
         let file_type = FileType::new(&meta, &Permissions::from(&meta));
         let name = Name::new(&file_path, file_type);
-        let icon = Icons::new(Theme::Default);
+        let icon = Icons::new(Theme::Fancy);
         let icon = icon.get(&name);
 
         assert_eq!(icon, format!("{}{}", "\u{f115}", ICON_SPACE)); // 
@@ -352,7 +352,7 @@ mod test {
 
         let file_type = FileType::new(&meta, &Permissions::from(&meta));
         let name = Name::new(&file_path, file_type);
-        let icon = Icons::new(Theme::Default);
+        let icon = Icons::new(Theme::Fancy);
         let icon = icon.get(&name);
 
         assert_eq!(icon, format!("{}{}", "\u{f115}", ICON_SPACE)); // 
@@ -369,7 +369,7 @@ mod test {
 
             let file_type = FileType::new(&meta, &Permissions::from(&meta));
             let name = Name::new(&file_path, file_type);
-            let icon = Icons::new(Theme::Default);
+            let icon = Icons::new(Theme::Fancy);
             let icon = icon.get(&name);
 
             assert_eq!(icon, format!("{}{}", file_icon, ICON_SPACE));
@@ -387,7 +387,7 @@ mod test {
 
             let file_type = FileType::new(&meta, &Permissions::from(&meta));
             let name = Name::new(&file_path, file_type);
-            let icon = Icons::new(Theme::Default);
+            let icon = Icons::new(Theme::Fancy);
             let icon = icon.get(&name);
 
             assert_eq!(icon, format!("{}{}", file_icon, ICON_SPACE));

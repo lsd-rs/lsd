@@ -182,7 +182,7 @@ mod tests {
             let output = name
                 .render(
                     &Colors::new(color::Theme::NoColor),
-                    &Icons::new(icon::Theme::Default),
+                    &Icons::new(icon::Theme::Fancy),
                 )
                 .to_string();
             assert_eq!(display.get_visible_width(&output), *l);

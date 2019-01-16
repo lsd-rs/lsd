@@ -107,7 +107,7 @@ mod test {
     #[test]
     fn test_print_file_name() {
         let tmp_dir = TempDir::new("test_print_file_name").expect("failed to create temp dir");
-        let icons = Icons::new(icon::Theme::Default);
+        let icons = Icons::new(icon::Theme::Fancy);
 
         // Create the file;
         let file_path = tmp_dir.path().join("file.txt");
@@ -127,7 +127,7 @@ mod test {
     #[test]
     fn test_print_dir_name() {
         let tmp_dir = TempDir::new("test_print_dir_name").expect("failed to create temp dir");
-        let icons = Icons::new(icon::Theme::Default);
+        let icons = Icons::new(icon::Theme::Fancy);
 
         // Chreate the directory
         let dir_path = tmp_dir.path().join("directory");
@@ -147,7 +147,7 @@ mod test {
     #[test]
     fn test_print_symlink_name() {
         let tmp_dir = TempDir::new("test_symlink_name").expect("failed to create temp dir");
-        let icons = Icons::new(icon::Theme::Default);
+        let icons = Icons::new(icon::Theme::Fancy);
 
         // Create the file;
         let file_path = tmp_dir.path().join("file.tmp");
@@ -173,7 +173,7 @@ mod test {
     #[test]
     fn test_print_other_type_name() {
         let tmp_dir = TempDir::new("test_other_type_name").expect("failed to create temp dir");
-        let icons = Icons::new(icon::Theme::Default);
+        let icons = Icons::new(icon::Theme::Fancy);
 
         // Create the pipe;
         let pipe_path = tmp_dir.path().join("pipe.tmp");
