@@ -34,27 +34,20 @@ pub struct Meta {
 }
 
 impl Meta {
-    pub fn from_path(path: &PathBuf) -> Option<Self> {
+    pub fn from_path(path: &PathBuf) -> Result<Self, std::io::Error> {
         let metadata = if read_link(path).is_ok() {
             // If the file is a link, retrieve the metadata without following
             // the link.
-            path.symlink_metadata()
-                .expect("failed to retrieve symlink metadata")
+            path.symlink_metadata()?
         } else {
-            match path.metadata() {
-                Ok(res) => res,
-                Err(err) => {
-                    println!("cannot access '{}': {}", path.display(), err);
-                    return None;
-                }
-            }
+            path.metadata()?
         };
 
         let permissions = Permissions::from(&metadata);
         let file_type = FileType::new(&metadata, &permissions);
         let name = Name::new(&path, file_type);
 
-        Some(Self {
+        Ok(Self {
             path: path.to_path_buf(),
             symlink: SymLink::from(path.as_path()),
             size: Size::from(&metadata),

@@ -63,8 +63,12 @@ impl Core {
         for path in paths {
             if path.is_dir() {
                 dirs.push(path);
-            } else if let Some(meta) = Meta::from_path(&path) {
-                files.push(meta);
+                continue;
+            }
+
+            match Meta::from_path(&path) {
+                Ok(meta) => files.push(meta),
+                Err(err) => println!("cannot access '{}': {}", path.display(), err),
             }
         }
 
@@ -158,7 +162,7 @@ impl Core {
 
         for entry in dir {
             if let Ok(entry) = entry {
-                if let Some(meta) = Meta::from_path(&entry.path()) {
+                if let Ok(meta) = Meta::from_path(&entry.path()) {
                     if !meta.name.is_hidden() || self.flags.display_all {
                         metas.push(meta);
                     }
