@@ -9,7 +9,9 @@ pub enum Elem {
     SymLink,
     BrokenSymLink,
     Dir,
+    SetuidDir,
     ExecutableFile,
+    SetuidFile,
     Pipe,
     BlockDevice,
     CharDevice,
@@ -62,10 +64,18 @@ impl Colors {
     }
 
     pub fn colorize<'a>(&self, input: String, elem: &Elem) -> ColoredString<'a> {
+        self.style(elem).paint(input)
+    }
+
+    fn style(&self, elem: &Elem) -> Style {
         if let Some(ref colors) = self.colors {
-            colors[elem].paint(input)
+            let style_fg = Style::default().fg(colors[elem]);
+            match elem {
+                Elem::SetuidFile | Elem::SetuidDir => style_fg.on(Colour::Fixed(124)),
+                _ => style_fg,
+            }
         } else {
-            Style::default().paint(input)
+            Style::default()
         }
     }
 
@@ -82,13 +92,15 @@ impl Colors {
         m.insert(Elem::Read, Colour::Fixed(40)); // Green3
         m.insert(Elem::Write, Colour::Fixed(192)); // DarkOliveGreen1
         m.insert(Elem::Exec, Colour::Fixed(124)); // Red3
-        m.insert(Elem::ExecSticky, Colour::Fixed(13)); // Fuschsia
+        m.insert(Elem::ExecSticky, Colour::Fixed(13)); // Fuchsia
         m.insert(Elem::NoAccess, Colour::Fixed(168)); // HotPink3
 
         // File Types
         m.insert(Elem::File, Colour::Fixed(184)); // Yellow3
         m.insert(Elem::Dir, Colour::Fixed(33)); // DodgerBlue1
+        m.insert(Elem::SetuidDir, Colour::Fixed(33)); // DodgerBlue1
         m.insert(Elem::ExecutableFile, Colour::Fixed(40)); // Green3
+        m.insert(Elem::SetuidFile, Colour::Fixed(184)); // Yellow3
         m.insert(Elem::Pipe, Colour::Fixed(44)); // DarkTurquoise
         m.insert(Elem::SymLink, Colour::Fixed(44)); // DarkTurquoise
         m.insert(Elem::BrokenSymLink, Colour::Fixed(124)); // Red3
