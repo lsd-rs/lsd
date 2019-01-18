@@ -43,9 +43,11 @@ impl Name {
 
         let elem = match self.file_type {
             FileType::CharDevice => &Elem::CharDevice,
+            FileType::SetuidDirectory => &Elem::SetuidDir,
             FileType::Directory => &Elem::Dir,
             FileType::SymLink => &Elem::SymLink,
             FileType::ExecutableFile => &Elem::ExecutableFile,
+            FileType::SetuidFile => &Elem::SetuidFile,
             _ => &Elem::File,
         };
 
