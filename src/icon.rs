@@ -30,11 +30,16 @@ impl Icons {
                 (
                     Self::get_default_icons_by_name(),
                     Self::get_default_icons_by_extension(),
-                    "\u{f016}",
-                    "\u{f115}",
+                    "\u{f016}", // 
+                    "\u{f115}", // 
                 )
             } else {
-                (HashMap::new(), HashMap::new(), "\u{1F5CB}", "\u{1F5C1}")
+                (
+                HashMap::new(),
+                HashMap::new(),
+                "\u{1f5cb}", // 🗋
+                "\u{1f5c1}", // 🗁
+                )
             };
 
         Self {
@@ -349,7 +354,7 @@ mod test {
         let icon = Icons::new(Theme::Unicode);
         let icon = icon.get(&name);
 
-        assert_eq!(icon, format!("{}{}", "\u{1F5CB}", ICON_SPACE));
+        assert_eq!(icon, format!("{}{}", "\u{1f5cb}", ICON_SPACE));
     }
 
     #[test]
@@ -377,7 +382,7 @@ mod test {
         let icon = Icons::new(Theme::Unicode);
         let icon = icon.get(&name);
 
-        assert_eq!(icon, format!("{}{}", "\u{1F5C1}", ICON_SPACE));
+        assert_eq!(icon, format!("{}{}", "\u{1f5c1}", ICON_SPACE));
     }
 
     #[test]
