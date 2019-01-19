@@ -141,19 +141,19 @@ fn sort_by_meta(a: &Meta, b: &Meta, flags: Flags) -> Ordering {
     match flags.sort_by {
         SortFlag::Name => match flags.directory_order {
             DirOrderFlag::First => sort_by_name_with_dirs_first(a, b, flags),
-            DirOrderFlag::None => sort_by_name_with_dirs_unordored(a, b, flags),
+            DirOrderFlag::None => sort_by_name_with_dirs_unordered(a, b, flags),
             DirOrderFlag::Last => sort_by_name_with_files_first(a, b, flags),
         },
 
         SortFlag::Time => match flags.directory_order {
             DirOrderFlag::First => sort_by_date_with_dirs_first(a, b, flags),
-            DirOrderFlag::None => sort_by_date_with_dirs_unordored(a, b, flags),
+            DirOrderFlag::None => sort_by_date_with_dirs_unordered(a, b, flags),
             DirOrderFlag::Last => sort_by_date_with_files_first(a, b, flags),
         },
     }
 }
 
-fn sort_by_name_with_dirs_unordored(a: &Meta, b: &Meta, flags: Flags) -> Ordering {
+fn sort_by_name_with_dirs_unordered(a: &Meta, b: &Meta, flags: Flags) -> Ordering {
     if flags.sort_order == SortOrder::Default {
         a.name.cmp(&b.name)
     } else {
@@ -162,34 +162,28 @@ fn sort_by_name_with_dirs_unordored(a: &Meta, b: &Meta, flags: Flags) -> Orderin
 }
 
 fn sort_by_name_with_dirs_first(a: &Meta, b: &Meta, flags: Flags) -> Ordering {
-    if a.file_type == FileType::Directory && b.file_type != FileType::Directory {
-        Ordering::Less
-    } else if b.file_type == FileType::Directory && a.file_type != FileType::Directory {
-        Ordering::Greater
-    } else {
-        if flags.sort_order == SortOrder::Default {
-            a.name.cmp(&b.name)
-        } else {
-            b.name.cmp(&a.name)
+    match (a.file_type, b.file_type) {
+        (FileType::Directory { .. }, FileType::Directory { .. }) => {
+            sort_by_name_with_dirs_unordered(a, b, flags)
         }
+        (FileType::Directory { .. }, _) => Ordering::Less,
+        (_, FileType::Directory { .. }) => Ordering::Greater,
+        _ => sort_by_name_with_dirs_unordered(a, b, flags),
     }
 }
 
 fn sort_by_name_with_files_first(a: &Meta, b: &Meta, flags: Flags) -> Ordering {
-    if a.file_type == FileType::Directory && b.file_type != FileType::Directory {
-        Ordering::Greater
-    } else if b.file_type == FileType::Directory && a.file_type != FileType::Directory {
-        Ordering::Less
-    } else {
-        if flags.sort_order == SortOrder::Default {
-            a.name.cmp(&b.name)
-        } else {
-            b.name.cmp(&a.name)
+    match (a.file_type, b.file_type) {
+        (FileType::Directory { .. }, FileType::Directory { .. }) => {
+            sort_by_name_with_dirs_unordered(a, b, flags)
         }
+        (FileType::Directory { .. }, _) => Ordering::Greater,
+        (_, FileType::Directory { .. }) => Ordering::Less,
+        _ => sort_by_name_with_dirs_unordered(a, b, flags),
     }
 }
 
-fn sort_by_date_with_dirs_unordored(a: &Meta, b: &Meta, flags: Flags) -> Ordering {
+fn sort_by_date_with_dirs_unordered(a: &Meta, b: &Meta, flags: Flags) -> Ordering {
     if flags.sort_order == SortOrder::Default {
         b.date.cmp(&a.date).then(a.name.cmp(&b.name))
     } else {
@@ -198,30 +192,24 @@ fn sort_by_date_with_dirs_unordored(a: &Meta, b: &Meta, flags: Flags) -> Orderin
 }
 
 fn sort_by_date_with_dirs_first(a: &Meta, b: &Meta, flags: Flags) -> Ordering {
-    if a.file_type == FileType::Directory && b.file_type != FileType::Directory {
-        Ordering::Less
-    } else if b.file_type == FileType::Directory && a.file_type != FileType::Directory {
-        Ordering::Greater
-    } else {
-        if flags.sort_order == SortOrder::Default {
-            b.date.cmp(&a.date).then(a.name.cmp(&b.name))
-        } else {
-            a.date.cmp(&b.date).then(b.name.cmp(&a.name))
+    match (a.file_type, b.file_type) {
+        (FileType::Directory { .. }, FileType::Directory { .. }) => {
+            sort_by_date_with_dirs_unordered(a, b, flags)
         }
+        (FileType::Directory { .. }, _) => Ordering::Less,
+        (_, FileType::Directory { .. }) => Ordering::Greater,
+        _ => sort_by_date_with_dirs_unordered(a, b, flags),
     }
 }
 
 fn sort_by_date_with_files_first(a: &Meta, b: &Meta, flags: Flags) -> Ordering {
-    if a.file_type == FileType::Directory && b.file_type != FileType::Directory {
-        Ordering::Greater
-    } else if b.file_type == FileType::Directory && a.file_type != FileType::Directory {
-        Ordering::Less
-    } else {
-        if flags.sort_order == SortOrder::Default {
-            b.date.cmp(&a.date).then(a.name.cmp(&b.name))
-        } else {
-            a.date.cmp(&b.date).then(b.name.cmp(&a.name))
+    match (a.file_type, b.file_type) {
+        (FileType::Directory { .. }, FileType::Directory { .. }) => {
+            sort_by_date_with_dirs_unordered(a, b, flags)
         }
+        (FileType::Directory { .. }, _) => Ordering::Greater,
+        (_, FileType::Directory { .. }) => Ordering::Less,
+        _ => sort_by_date_with_dirs_unordered(a, b, flags),
     }
 }
 

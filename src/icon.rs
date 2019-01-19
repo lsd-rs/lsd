@@ -35,10 +35,10 @@ impl Icons {
                 )
             } else {
                 (
-                HashMap::new(),
-                HashMap::new(),
-                "\u{1f5cb}", // 🗋
-                "\u{1f5c1}", // 🗁
+                    HashMap::new(),
+                    HashMap::new(),
+                    "\u{1f5cb}", // 🗋
+                    "\u{1f5c1}", // 🗁
                 )
             };
 
@@ -59,7 +59,7 @@ impl Icons {
         let mut res = String::with_capacity(4 + ICON_SPACE.len()); // 4 == max icon size
 
         // Check directory.
-        if name.file_type() == FileType::Directory {
+        if let FileType::Directory { .. } = name.file_type() {
             res += self.default_folder_icon;
             res += ICON_SPACE;
             return res;

@@ -9,8 +9,8 @@ pub struct Indicator(&'static str);
 impl From<FileType> for Indicator {
     fn from(file_type: FileType) -> Self {
         let res = match file_type {
-            FileType::Directory => "/",
-            FileType::ExecutableFile => "*",
+            FileType::Directory { .. } => "/",
+            FileType::File { exec: true, .. } => "*",
             FileType::Pipe => "|",
             FileType::Socket => "=",
             FileType::SymLink => "@",
@@ -42,7 +42,7 @@ mod test {
         let mut flags = Flags::default();
         flags.display_indicators = true;
 
-        let file_type = Indicator::from(FileType::Directory);
+        let file_type = Indicator::from(FileType::Directory { uid: false });
 
         assert_eq!("/", file_type.render(flags).to_string().as_str());
     }
@@ -52,7 +52,10 @@ mod test {
         let mut flags = Flags::default();
         flags.display_indicators = true;
 
-        let file_type = Indicator::from(FileType::ExecutableFile);
+        let file_type = Indicator::from(FileType::File {
+            uid: false,
+            exec: true,
+        });
 
         assert_eq!("*", file_type.render(flags).to_string().as_str());
     }
@@ -83,7 +86,10 @@ mod test {
         flags.display_indicators = true;
 
         // The File type doesn't have any indicator
-        let file_type = Indicator::from(FileType::File);
+        let file_type = Indicator::from(FileType::File {
+            exec: false,
+            uid: false,
+        });
 
         assert_eq!("", file_type.render(flags).to_string().as_str());
     }

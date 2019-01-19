@@ -94,7 +94,7 @@ impl Core {
                     let folder_dirs = folder_batch
                         .into_iter()
                         .filter_map(|x| {
-                            if x.file_type == FileType::Directory {
+                            if let FileType::Directory { .. } = x.file_type {
                                 Some(x.path)
                             } else {
                                 None
@@ -118,7 +118,7 @@ impl Core {
         for (idx, elem) in batch.into_iter().enumerate() {
             let last = idx + 1 != last_idx;
 
-            if elem.file_type == FileType::Directory {
+            if let FileType::Directory { .. } = elem.file_type {
                 output += &self.display.print_tree_row(
                     &elem.name.render(&self.colors, &self.icons),
                     depth,
