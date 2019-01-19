@@ -155,7 +155,13 @@ mod tests {
             ("🔬", 2),
         ] {
             let path = Path::new(s);
-            let name = Name::new(&path, FileType::File);
+            let name = Name::new(
+                &path,
+                FileType::File {
+                    exec: false,
+                    uid: false,
+                },
+            );
             let output = name.render(
                 &Colors::new(color::Theme::NoColor),
                 &Icons::new(icon::Theme::NoIcon),
@@ -178,7 +184,13 @@ mod tests {
             ("🔬", 5),
         ] {
             let path = Path::new(s);
-            let name = Name::new(&path, FileType::File);
+            let name = Name::new(
+                &path,
+                FileType::File {
+                    exec: false,
+                    uid: false,
+                },
+            );
             let output = name
                 .render(
                     &Colors::new(color::Theme::NoColor),
@@ -202,7 +214,13 @@ mod tests {
             ("🔬", 2),
         ] {
             let path = Path::new(s);
-            let name = Name::new(&path, FileType::File);
+            let name = Name::new(
+                &path,
+                FileType::File {
+                    exec: false,
+                    uid: false,
+                },
+            );
             let output = name
                 .render(
                     &Colors::new(color::Theme::Default),

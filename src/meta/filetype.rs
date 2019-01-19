@@ -7,11 +7,8 @@ use std::os::unix::fs::FileTypeExt;
 pub enum FileType {
     BlockDevice,
     CharDevice,
-    Directory,
-    SetuidDirectory,
-    File,
-    ExecutableFile,
-    SetuidFile,
+    Directory { uid: bool },
+    File { uid: bool, exec: bool },
     SymLink,
     Pipe,
     Socket,
@@ -22,16 +19,15 @@ impl FileType {
     pub fn new(meta: &Metadata, permissions: &Permissions) -> Self {
         let file_type = meta.file_type();
 
-        if file_type.is_file() && permissions.setuid {
-            FileType::SetuidFile
-        } else if file_type.is_file() && permissions.is_executable() {
-            FileType::ExecutableFile
-        } else if file_type.is_file() && !permissions.is_executable() {
-            FileType::File
-        } else if file_type.is_dir() && permissions.setuid {
-            FileType::SetuidDirectory
+        if file_type.is_file() {
+            FileType::File {
+                exec: permissions.is_executable(),
+                uid: permissions.setuid,
+            }
         } else if file_type.is_dir() {
-            FileType::Directory
+            FileType::Directory {
+                uid: permissions.setuid,
+            }
         } else if file_type.is_fifo() {
             FileType::Pipe
         } else if file_type.is_symlink() {
@@ -51,11 +47,11 @@ impl FileType {
 impl FileType {
     pub fn render(self, colors: &Colors) -> ColoredString {
         match self {
-            FileType::File | FileType::ExecutableFile | FileType::SetuidFile => {
-                colors.colorize(String::from("."), &Elem::File)
+            FileType::File { exec, .. } => {
+                colors.colorize(String::from("."), &Elem::File { exec, uid: false })
             }
-            FileType::Directory | FileType::SetuidDirectory => {
-                colors.colorize(String::from("d"), &Elem::Dir)
+            FileType::Directory { .. } => {
+                colors.colorize(String::from("d"), &Elem::Dir { uid: false })
             }
             FileType::Pipe => colors.colorize(String::from("|"), &Elem::Pipe),
             FileType::SymLink => colors.colorize(String::from("l"), &Elem::SymLink),

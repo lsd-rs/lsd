@@ -42,18 +42,19 @@ impl Name {
         content += icon.as_str();
 
         let elem = match self.file_type {
-            FileType::CharDevice => &Elem::CharDevice,
-            FileType::SetuidDirectory => &Elem::SetuidDir,
-            FileType::Directory => &Elem::Dir,
-            FileType::SymLink => &Elem::SymLink,
-            FileType::ExecutableFile => &Elem::ExecutableFile,
-            FileType::SetuidFile => &Elem::SetuidFile,
-            _ => &Elem::File,
+            FileType::CharDevice => Elem::CharDevice,
+            FileType::Directory { uid } => Elem::Dir { uid },
+            FileType::SymLink => Elem::SymLink,
+            FileType::File { uid, exec } => Elem::File { uid, exec },
+            _ => Elem::File {
+                exec: false,
+                uid: false,
+            },
         };
 
         content += &self.name;
 
-        colors.colorize(content, elem)
+        colors.colorize(content, &elem)
     }
 
     pub fn name(&self) -> String {
@@ -222,7 +223,13 @@ mod test {
     fn test_extensions_with_valid_file() {
         let path = Path::new("some-file.txt");
 
-        let name = Name::new(&path, FileType::File);
+        let name = Name::new(
+            &path,
+            FileType::File {
+                uid: false,
+                exec: false,
+            },
+        );
 
         assert_eq!(Some(String::from("txt")), name.extension());
     }
@@ -231,7 +238,13 @@ mod test {
     fn test_extensions_with_file_without_extension() {
         let path = Path::new(".gitignore");
 
-        let name = Name::new(&path, FileType::File);
+        let name = Name::new(
+            &path,
+            FileType::File {
+                uid: false,
+                exec: false,
+            },
+        );
 
         assert_eq!(None, name.extension());
     }
@@ -240,7 +253,13 @@ mod test {
     fn test_is_hidder_with_hidden_file() {
         let path = Path::new(".gitignore");
 
-        let name = Name::new(&path, FileType::File);
+        let name = Name::new(
+            &path,
+            FileType::File {
+                uid: false,
+                exec: false,
+            },
+        );
 
         assert_eq!(true, name.is_hidden());
     }
@@ -249,7 +268,13 @@ mod test {
     fn test_is_hidder_with_visible_file() {
         let path = Path::new("some-file.txt");
 
-        let name = Name::new(&path, FileType::File);
+        let name = Name::new(
+            &path,
+            FileType::File {
+                uid: false,
+                exec: false,
+            },
+        );
 
         assert_eq!(false, name.is_hidden());
     }
@@ -257,10 +282,22 @@ mod test {
     #[test]
     fn test_order_impl_is_case_insensitive() {
         let path_1 = Path::new("AAAA");
-        let name_1 = Name::new(&path_1, FileType::File);
+        let name_1 = Name::new(
+            &path_1,
+            FileType::File {
+                uid: false,
+                exec: false,
+            },
+        );
 
         let path_2 = Path::new("aaaa");
-        let name_2 = Name::new(&path_2, FileType::File);
+        let name_2 = Name::new(
+            &path_2,
+            FileType::File {
+                uid: false,
+                exec: false,
+            },
+        );
 
         assert_eq!(Ordering::Equal, name_1.cmp(&name_2));
     }
@@ -268,10 +305,22 @@ mod test {
     #[test]
     fn test_partial_order_impl() {
         let path_a = Path::new("aaaa");
-        let name_a = Name::new(&path_a, FileType::File);
+        let name_a = Name::new(
+            &path_a,
+            FileType::File {
+                uid: false,
+                exec: false,
+            },
+        );
 
         let path_z = Path::new("zzzz");
-        let name_z = Name::new(&path_z, FileType::File);
+        let name_z = Name::new(
+            &path_z,
+            FileType::File {
+                uid: false,
+                exec: false,
+            },
+        );
 
         assert_eq!(true, name_a < name_z);
     }
@@ -279,10 +328,22 @@ mod test {
     #[test]
     fn test_partial_order_impl_is_case_insensitive() {
         let path_a = Path::new("aaaa");
-        let name_a = Name::new(&path_a, FileType::File);
+        let name_a = Name::new(
+            &path_a,
+            FileType::File {
+                uid: false,
+                exec: false,
+            },
+        );
 
         let path_z = Path::new("ZZZZ");
-        let name_z = Name::new(&path_z, FileType::File);
+        let name_z = Name::new(
+            &path_z,
+            FileType::File {
+                uid: false,
+                exec: false,
+            },
+        );
 
         assert_eq!(true, name_a < name_z);
     }
@@ -290,10 +351,22 @@ mod test {
     #[test]
     fn test_partial_eq_impl() {
         let path_1 = Path::new("aaaa");
-        let name_1 = Name::new(&path_1, FileType::File);
+        let name_1 = Name::new(
+            &path_1,
+            FileType::File {
+                uid: false,
+                exec: false,
+            },
+        );
 
         let path_2 = Path::new("aaaa");
-        let name_2 = Name::new(&path_2, FileType::File);
+        let name_2 = Name::new(
+            &path_2,
+            FileType::File {
+                uid: false,
+                exec: false,
+            },
+        );
 
         assert_eq!(true, name_1 == name_2);
     }
@@ -301,10 +374,22 @@ mod test {
     #[test]
     fn test_partial_eq_impl_is_case_insensitive() {
         let path_1 = Path::new("AAAA");
-        let name_1 = Name::new(&path_1, FileType::File);
+        let name_1 = Name::new(
+            &path_1,
+            FileType::File {
+                uid: false,
+                exec: false,
+            },
+        );
 
         let path_2 = Path::new("aaaa");
-        let name_2 = Name::new(&path_2, FileType::File);
+        let name_2 = Name::new(
+            &path_2,
+            FileType::File {
+                uid: false,
+                exec: false,
+            },
+        );
 
         assert_eq!(true, name_1 == name_2);
     }
