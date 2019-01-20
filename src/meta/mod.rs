@@ -18,6 +18,7 @@ pub use self::symlink::SymLink;
 pub use icon::Icons;
 
 use std::fs::read_link;
+use std::io::{Error, ErrorKind};
 use std::path::PathBuf;
 
 #[derive(Debug)]
@@ -31,9 +32,67 @@ pub struct Meta {
     pub size: Size,
     pub symlink: SymLink,
     pub indicator: Indicator,
+    pub content: Option<Vec<Meta>>,
 }
 
 impl Meta {
+    pub fn from_path_recursive(
+        path: &PathBuf,
+        depth: usize,
+        list_hidden_files: bool,
+    ) -> Result<Self, std::io::Error> {
+        let mut meta = Self::from_path(path)?;
+
+        if depth == 0 {
+            return Ok(meta);
+        }
+
+        match meta.file_type {
+            FileType::Directory { .. } => (),
+            _ => return Ok(meta),
+        }
+
+        if let Err(err) = meta.path.read_dir() {
+            println!("cannot access '{}': {}", path.display(), err);
+            return Ok(meta);
+        }
+
+        let mut content = Vec::new();
+        for entry in meta.path.read_dir()? {
+            let path = entry?.path();
+
+            if !list_hidden_files
+                && path
+                    .file_name()
+                    .ok_or_else(|| Error::new(ErrorKind::InvalidInput, "invalid file name"))?
+                    .to_string_lossy()
+                    .starts_with('.')
+            {
+                continue;
+            }
+
+            let entry_meta = match Self::from_path_recursive(
+                &path.to_path_buf(),
+                depth - 1,
+                list_hidden_files,
+            ) {
+                Ok(res) => res,
+                Err(err) => {
+                    println!("cannot access '{}': {}", path.display(), err);
+                    continue;
+                }
+            };
+
+            content.push(entry_meta);
+        }
+
+        if !content.is_empty() {
+            meta.content = Some(content);
+        }
+
+        Ok(meta)
+    }
+
     pub fn from_path(path: &PathBuf) -> Result<Self, std::io::Error> {
         let metadata = if read_link(path).is_ok() {
             // If the file is a link, retrieve the metadata without following
@@ -57,6 +116,7 @@ impl Meta {
             permissions,
             name,
             file_type,
+            content: None,
         })
     }
 }

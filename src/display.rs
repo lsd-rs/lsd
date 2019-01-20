@@ -1,6 +1,8 @@
-use color::ColoredString;
+use ansi_term::{ANSIString, ANSIStrings};
+use color::Colors;
 use flags::Flags;
-use std::io::{self, Write};
+use icon::Icons;
+use meta::{FileType, Meta};
 use term_grid::{Cell, Direction, Filling, Grid, GridOptions};
 use terminal_size::terminal_size;
 use unicode_width::UnicodeWidthStr;
@@ -9,127 +11,323 @@ const EDGE: &str = "\u{251c}\u{2500}\u{2500}"; // "├──"
 const LINE: &str = "\u{2502}  "; // "├  "
 const CORNER: &str = "\u{2514}\u{2500}\u{2500}"; // "└──"
 
-pub struct Display {
-    flags: Flags,
+#[derive(Debug, Copy, Clone)]
+struct PaddingRules {
+    user: usize,
+    group: usize,
+    size: (usize, usize),
+    date: usize,
 }
 
-impl Display {
-    pub fn new(flags: Flags) -> Self {
-        Self { flags }
+pub fn one_line(metas: Vec<Meta>, flags: Flags, colors: &Colors, icons: &Icons) -> String {
+    inner_display_one_line(metas, flags, colors, icons, 0)
+}
+
+pub fn grid(metas: Vec<Meta>, flags: Flags, colors: &Colors, icons: &Icons) -> String {
+    let term_width = match terminal_size() {
+        Some((w, _)) => w.0 as usize,
+        None => panic!("failed to retrieve terminal size"),
+    };
+
+    inner_display_grid(metas, flags, colors, icons, 0, term_width)
+}
+
+pub fn tree(metas: Vec<Meta>, flags: Flags, colors: &Colors, icons: &Icons) -> String {
+    inner_display_tree(metas, flags, colors, icons, 0)
+}
+
+fn inner_display_one_line(
+    metas: Vec<Meta>,
+    flags: Flags,
+    colors: &Colors,
+    icons: &Icons,
+    depth: usize,
+) -> String {
+    let mut output = String::new();
+
+    let mut padding_rules = None;
+    if flags.display_long {
+        // Defining the padding rules is costly and so shouldn't be done several
+        // times. That's why it's done outside the loop.
+        padding_rules = Some(PaddingRules {
+            user: detect_user_length(&metas),
+            group: detect_group_length(&metas),
+            size: detect_size_lengths(&metas),
+            date: detect_date_length(&metas, flags),
+        })
     }
 
-    pub fn print_outputs(&self, outputs: Vec<String>) {
-        if self.flags.display_long || self.flags.display_online {
-            self.print_one_per_line(&outputs);
+    // print the files first.
+    for meta in &metas {
+        // The first iteration (depth == 0) correspond to the inputs given by
+        // the user. If the user enter a folder name it should not print the
+        // folder meta but its content.
+        if let (0, FileType::Directory { .. }) = (depth, meta.file_type) {
+            continue;
+        }
+
+        if flags.display_long {
+            output += &get_long_output(&meta, &colors, &icons, flags, padding_rules.unwrap());
         } else {
-            self.print_grid(outputs);
+            output += &get_short_output(&meta, &colors, &icons, flags);
         }
+
+        output.push('\n');
     }
 
-    fn print_grid(&self, outputs: Vec<String>) {
-        let term_width = match terminal_size() {
-            Some((w, _)) => w.0 as usize,
-            None => panic!("failed to retrieve terminal size"),
-        };
+    let should_display_folder_path = should_display_folder_path(depth, &metas);
 
-        let mut grid = Grid::new(GridOptions {
-            filling: Filling::Spaces(2),
-            direction: Direction::TopToBottom,
-        });
-
-        for output in outputs {
-            grid.add(Cell {
-                width: self.get_visible_width(&output),
-                contents: output,
-            });
-        }
-
-        if let Some(gridded_output) = grid.fit_into_width(term_width) {
-            self.print_output(&gridded_output.to_string());
-        } else {
-            //does not fit into grid, usually because (some) filename(s)
-            //are longer or almost as long as term_width
-            //print line by line instead!
-            let lined_output = grid.fit_into_columns(1);
-            self.print_output(&lined_output.to_string());
-        }
-    }
-
-    pub fn print_output(&self, output: &str) {
-        let stdout = io::stdout();
-        let mut handle = stdout.lock();
-
-        if let Err(err) = handle.write_all(output.as_bytes()) {
-            if err.kind() != io::ErrorKind::Interrupted {
-                io::stderr().write_all(err.to_string().as_bytes()).unwrap();
-                std::process::exit(1);
+    // print the folder content
+    for meta in metas {
+        if meta.content.is_some() {
+            if should_display_folder_path {
+                output += &display_folder_path(&meta);
             }
-        };
 
-        // Do not check th
-        if let Err(err) = handle.flush() {
-            match err.kind() {
-                io::ErrorKind::Interrupted | io::ErrorKind::BrokenPipe => std::process::exit(0),
-                _ => {
-                    io::stderr().write_all(err.to_string().as_bytes()).unwrap();
-                    std::process::exit(1);
-                }
-            };
+            output +=
+                &inner_display_one_line(meta.content.unwrap(), flags, colors, icons, depth + 1);
         }
     }
 
-    pub fn print_tree_row(&self, output: &ColoredString, depth: usize, last: bool) -> String {
-        let mut res = String::new();
+    output
+}
+
+fn inner_display_grid(
+    metas: Vec<Meta>,
+    flags: Flags,
+    colors: &Colors,
+    icons: &Icons,
+    depth: usize,
+    term_width: usize,
+) -> String {
+    let mut output = String::new();
+
+    let mut grid = Grid::new(GridOptions {
+        filling: Filling::Spaces(2),
+        direction: Direction::TopToBottom,
+    });
+
+    // print the files first.
+    for meta in &metas {
+        // The first iteration (depth == 0) correspond to the inputs given by
+        // the user. If the user enter a folder name it should not print the
+        // folder meta but its content.
+        if let (0, FileType::Directory { .. }) = (depth, meta.file_type) {
+            continue;
+        }
+
+        let line_output = get_short_output(&meta, &colors, &icons, flags);
+        grid.add(Cell {
+            width: get_visible_width(&line_output),
+            contents: line_output,
+        });
+    }
+
+    if let Some(gridded_output) = grid.fit_into_width(term_width) {
+        output += &gridded_output.to_string();
+    } else {
+        //does not fit into grid, usually because (some) filename(s)
+        //are longer or almost as long as term_width
+        //print line by line instead!
+        output += &grid.fit_into_columns(1).to_string();
+    }
+
+    let should_display_folder_path = should_display_folder_path(depth, &metas);
+
+    // print the folder content
+    for meta in metas {
+        if meta.content.is_some() {
+            if should_display_folder_path {
+                output += &display_folder_path(&meta);
+            }
+
+            output += &inner_display_grid(
+                meta.content.unwrap(),
+                flags,
+                colors,
+                icons,
+                depth + 1,
+                term_width,
+            );
+        }
+    }
+
+    output
+}
+
+fn inner_display_tree(
+    metas: Vec<Meta>,
+    flags: Flags,
+    colors: &Colors,
+    icons: &Icons,
+    depth: usize,
+) -> String {
+    let mut output = String::new();
+    let last_idx = metas.len();
+
+    for (idx, meta) in metas.into_iter().enumerate() {
+        let is_last_folder_elem = idx + 1 != last_idx;
 
         for _ in 0..depth {
-            res += LINE;
+            output += LINE;
         }
 
-        if last {
-            res += EDGE;
+        if is_last_folder_elem {
+            output += EDGE;
         } else {
-            res += CORNER;
+            output += CORNER;
         }
 
-        res += " ";
-        res += &output;
-        res += "\n";
+        output += " ";
+        output += &get_short_output(&meta, &colors, &icons, flags);
+        output += "\n";
 
-        res
+        if meta.content.is_some() {
+            output += &inner_display_tree(meta.content.unwrap(), flags, colors, icons, depth + 1);
+        }
     }
 
-    fn print_one_per_line(&self, outputs: &[String]) {
-        let mut res = String::new();
-        for output in outputs {
-            res += output;
-            res += "\n";
-        }
+    output
+}
 
-        self.print_output(&res);
+fn should_display_folder_path(depth: usize, metas: &[Meta]) -> bool {
+    if depth > 0 {
+        true
+    } else {
+        let folder_number = metas
+            .iter()
+            .filter(|x| match x.file_type {
+                FileType::Directory { .. } => true,
+                _ => false,
+            })
+            .count();
+
+        folder_number > 1 || folder_number < metas.len()
+    }
+}
+
+fn display_folder_path(meta: &Meta) -> String {
+    let mut output = String::new();
+    output.push('\n');
+    output += &meta.path.to_string_lossy();
+    output += ":\n";
+
+    output
+}
+
+fn get_short_output(meta: &Meta, colors: &Colors, icons: &Icons, flags: Flags) -> String {
+    let strings: &[ANSIString] = &[
+        meta.name.render(colors, icons),
+        meta.indicator.render(flags),
+    ];
+
+    ANSIStrings(strings).to_string()
+}
+
+fn get_long_output(
+    meta: &Meta,
+    colors: &Colors,
+    icons: &Icons,
+    flags: Flags,
+    padding_rules: PaddingRules,
+) -> String {
+    let strings: &[ANSIString] = &[
+        meta.file_type.render(colors),
+        meta.permissions.render(colors),
+        ANSIString::from("  "),
+        meta.owner.render_user(colors, padding_rules.user),
+        ANSIString::from("  "),
+        meta.owner.render_group(colors, padding_rules.group),
+        ANSIString::from("  "),
+        meta.size
+            .render(colors, padding_rules.size.0, padding_rules.size.1),
+        ANSIString::from("  "),
+        meta.date.render(colors, padding_rules.date, flags),
+        ANSIString::from("  "),
+        meta.name.render(colors, icons),
+        meta.indicator.render(flags),
+        meta.symlink.render(colors),
+    ];
+
+    ANSIStrings(strings).to_string()
+}
+
+fn get_visible_width(input: &str) -> usize {
+    let mut nb_invisible_char = 0;
+
+    for (idx, _) in input.match_indices("\u{1b}[38;5;" /* "\e[38;5;" */) {
+        let color_code = input.chars().skip(idx + 7);
+        let mut code_size = 0;
+        color_code
+            .skip_while(|x| {
+                code_size += 1;
+                char::is_numeric(*x)
+            })
+            .count();
+        nb_invisible_char += 6 + code_size; /* "\e[38;5;" + color number + "m" */
     }
 
-    fn get_visible_width(&self, input: &str) -> usize {
-        let mut nb_invisible_char = 0;
-
-        for (idx, _) in input.match_indices("\u{1b}[38;5;" /* "\e[38;5;" */) {
-            let color_code = input.chars().skip(idx + 7);
-            let mut code_size = 0;
-            color_code
-                .skip_while(|x| {
-                    code_size += 1;
-                    char::is_numeric(*x)
-                })
-                .count();
-            nb_invisible_char += 6 + code_size; /* "\e[38;5;" + color number + "m" */
-        }
-
-        if nb_invisible_char > 0 {
-            // If no color have been set, the is no reset character.
-            nb_invisible_char += 3; /* "[0m" */
-        }
-
-        UnicodeWidthStr::width(input) - nb_invisible_char
+    if nb_invisible_char > 0 {
+        // If no color have been set, the is no reset character.
+        nb_invisible_char += 3; /* "[0m" */
     }
+
+    UnicodeWidthStr::width(input) - nb_invisible_char
+}
+
+fn detect_user_length(metas: &[Meta]) -> usize {
+    let mut max: usize = 0;
+
+    for meta in metas {
+        let user = meta.owner.user();
+        if user.len() > max {
+            max = user.len();
+        }
+    }
+
+    max
+}
+
+fn detect_group_length(metas: &[Meta]) -> usize {
+    let mut max: usize = 0;
+
+    for meta in metas {
+        let group = meta.owner.group();
+        if group.len() > max {
+            max = group.len();
+        }
+    }
+
+    max
+}
+
+fn detect_date_length(metas: &[Meta], flags: Flags) -> usize {
+    let mut max_value_length: usize = 0;
+
+    for meta in metas {
+        if meta.date.date_string(flags).len() > max_value_length {
+            max_value_length = meta.date.date_string(flags).len();
+        }
+    }
+
+    max_value_length
+}
+
+fn detect_size_lengths(metas: &[Meta]) -> (usize, usize) {
+    let mut max_value_length: usize = 0;
+    let mut max_unit_size: usize = 0;
+
+    for meta in metas {
+        if meta.size.render_value().len() > max_value_length {
+            max_value_length = meta.size.render_value().len();
+        }
+
+        if meta.size.render_unit().len() > max_unit_size {
+            max_unit_size = meta.size.render_unit().len();
+        }
+    }
+
+    (max_value_length, max_unit_size)
 }
 
 #[cfg(test)]
@@ -144,7 +342,6 @@ mod tests {
 
     #[test]
     fn test_display_get_visible_width_without_icons() {
-        let display = Display::new(Flags::default());
         for (s, l) in &[
             ("Ｈｅｌｌｏ,ｗｏｒｌｄ!", 22),
             ("ASCII1234-_", 11),
@@ -166,13 +363,13 @@ mod tests {
                 &Colors::new(color::Theme::NoColor),
                 &Icons::new(icon::Theme::NoIcon),
             );
-            assert_eq!(display.get_visible_width(&output), *l);
+
+            assert_eq!(get_visible_width(&output), *l);
         }
     }
 
     #[test]
     fn test_display_get_visible_width_with_icons() {
-        let display = Display::new(Flags::default());
         for (s, l) in &[
             // Add 3 characters for the icons.
             ("Ｈｅｌｌｏ,ｗｏｒｌｄ!", 25),
@@ -197,13 +394,13 @@ mod tests {
                     &Icons::new(icon::Theme::Fancy),
                 )
                 .to_string();
-            assert_eq!(display.get_visible_width(&output), *l);
+
+            assert_eq!(get_visible_width(&output), *l);
         }
     }
 
     #[test]
     fn test_display_get_visible_width_with_colors() {
-        let display = Display::new(Flags::default());
         for (s, l) in &[
             ("Ｈｅｌｌｏ,ｗｏｒｌｄ!", 22),
             ("ASCII1234-_", 11),
@@ -232,7 +429,7 @@ mod tests {
             assert_eq!(true, output.starts_with("\u{1b}[38;5;"));
             assert_eq!(true, output.ends_with("[0m"));
 
-            assert_eq!(display.get_visible_width(&output), *l);
+            assert_eq!(get_visible_width(&output), *l);
         }
     }
 }

@@ -1,16 +1,16 @@
-use batch::Batch;
 use color::{self, Colors};
-use display::Display;
+use display;
 use flags::{Flags, IconTheme, WhenFlag};
 use icon::{self, Icons};
-use meta::{FileType, Meta};
-use std::path::{Path, PathBuf};
+use meta::Meta;
+use sort;
+use std::path::PathBuf;
 use terminal_size::terminal_size;
 
 pub struct Core {
     flags: Flags,
     icons: Icons,
-    display: Display,
+    //display: Display,
     colors: Colors,
 }
 
@@ -42,137 +42,58 @@ impl Core {
 
         Self {
             flags,
-            display: Display::new(inner_flags),
+            //display: Display::new(inner_flags),
             colors: Colors::new(color_theme),
             icons: Icons::new(icon_theme),
         }
     }
 
     pub fn run(self, paths: Vec<PathBuf>) {
-        self.run_inner(paths, 0);
+        let mut meta_list = self.fetch(paths);
+
+        self.sort(&mut meta_list);
+
+        self.display(meta_list)
     }
 
-    fn run_inner(&self, paths: Vec<PathBuf>, depth: usize) {
-        if depth > self.flags.recursion_depth {
-            return;
-        }
+    fn fetch(&self, paths: Vec<PathBuf>) -> Vec<Meta> {
+        let mut meta_list = Vec::with_capacity(paths.len());
 
-        let mut dirs = Vec::new();
-        let mut files = Vec::new();
-
-        for path in paths {
-            if path.is_dir() {
-                dirs.push(path);
-                continue;
-            }
-
-            match Meta::from_path(&path) {
-                Ok(meta) => files.push(meta),
-                Err(err) => println!("cannot access '{}': {}", path.display(), err),
-            }
-        }
-
-        let print_folder_name: bool = dirs.len() + files.len() > 1;
-
-        if !files.is_empty() && !self.flags.display_tree {
-            let mut file_batch = Batch::from(files);
-            file_batch.sort(self.flags);
-            self.display
-                .print_outputs(self.get_batch_outputs(&file_batch));
-        }
-
-        dirs.sort_unstable();
-
-        for dir in dirs {
-            if let Some(folder_batch) = self.list_folder_content(dir.as_path()) {
-                if (print_folder_name || self.flags.recursive) && !self.flags.display_tree {
-                    println!("\n{}:", dir.display())
-                }
-
-                if self.flags.display_tree {
-                    self.display_as_tree(folder_batch, depth);
-                } else if self.flags.recursive {
-                    self.display
-                        .print_outputs(self.get_batch_outputs(&folder_batch));
-
-                    let folder_dirs = folder_batch
-                        .into_iter()
-                        .filter_map(|x| {
-                            if let FileType::Directory { .. } = x.file_type {
-                                Some(x.path)
-                            } else {
-                                None
-                            }
-                        })
-                        .collect();
-
-                    self.run_inner(folder_dirs, depth + 1);
-                } else {
-                    self.display
-                        .print_outputs(self.get_batch_outputs(&folder_batch));
-                }
-            }
-        }
-    }
-
-    pub fn display_as_tree(&self, batch: Batch, depth: usize) {
-        let last_idx = batch.len();
-
-        let mut output = String::new();
-        for (idx, elem) in batch.into_iter().enumerate() {
-            let last = idx + 1 != last_idx;
-
-            if let FileType::Directory { .. } = elem.file_type {
-                output += &self.display.print_tree_row(
-                    &elem.name.render(&self.colors, &self.icons),
-                    depth,
-                    last,
-                );
-                self.run_inner(vec![elem.path], depth + 1);
-            } else {
-                output += &self.display.print_tree_row(
-                    &elem.name.render(&self.colors, &self.icons),
-                    depth,
-                    last,
-                );
-            }
-        }
-
-        self.display.print_output(&output);
-    }
-
-    pub fn get_batch_outputs<'b>(&self, batch: &'b Batch) -> Vec<String> {
-        if self.flags.display_long {
-            batch.get_long_output(&self.colors, &self.icons, self.flags)
+        let depth = if self.flags.recursive || self.flags.display_tree {
+            self.flags.recursion_depth
         } else {
-            batch.get_short_output(&self.colors, &self.icons, self.flags)
-        }
-    }
-
-    pub fn list_folder_content(&self, folder: &Path) -> Option<Batch> {
-        let mut metas: Vec<Meta> = Vec::new();
-
-        let dir = match folder.read_dir() {
-            Ok(dir) => dir,
-            Err(err) => {
-                println!("cannot open directory'{}': {}", folder.display(), err);
-                return None;
-            }
+            1
         };
 
-        for entry in dir {
-            if let Ok(entry) = entry {
-                if let Ok(meta) = Meta::from_path(&entry.path()) {
-                    if !meta.name.is_hidden() || self.flags.display_all {
-                        metas.push(meta);
-                    }
-                }
-            }
+        for path in paths {
+            match Meta::from_path_recursive(&path.to_path_buf(), depth, self.flags.display_all) {
+                Ok(meta) => meta_list.push(meta),
+                Err(err) => println!("cannot access '{}': {}", path.display(), err),
+            };
         }
 
-        let mut batch = Batch::from(metas);
-        batch.sort(self.flags);
+        meta_list
+    }
 
-        Some(batch)
+    fn sort(&self, metas: &mut Vec<Meta>) {
+        metas.sort_unstable_by(|a, b| sort::by_meta(a, b, self.flags));
+
+        for meta in metas {
+            if let Some(ref mut content) = meta.content {
+                self.sort(content);
+            }
+        }
+    }
+
+    fn display(&self, metas: Vec<Meta>) {
+        let output = if self.flags.display_online || self.flags.display_long {
+            display::one_line(metas, self.flags, &self.colors, &self.icons)
+        } else if self.flags.display_tree {
+            display::tree(metas, self.flags, &self.colors, &self.icons)
+        } else {
+            display::grid(metas, self.flags, &self.colors, &self.icons)
+        };
+
+        print!("{}", output);
     }
 }

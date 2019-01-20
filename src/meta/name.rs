@@ -13,11 +13,10 @@ pub struct Name {
 
 impl Name {
     pub fn new(path: &Path, file_type: FileType) -> Self {
-        let name = path
-            .file_name()
-            .expect("failed to retrieve file name")
-            .to_string_lossy()
-            .to_string();
+        let name = match path.file_name() {
+            Some(name) => name.to_string_lossy().to_string(),
+            None => path.to_string_lossy().to_string(),
+        };
 
         let mut extension = None;
         if let Some(res) = path.extension() {
@@ -67,10 +66,6 @@ impl Name {
 
     pub fn file_type(&self) -> FileType {
         self.file_type
-    }
-
-    pub fn is_hidden(&self) -> bool {
-        self.name.starts_with('.')
     }
 }
 
@@ -247,36 +242,6 @@ mod test {
         );
 
         assert_eq!(None, name.extension());
-    }
-
-    #[test]
-    fn test_is_hidder_with_hidden_file() {
-        let path = Path::new(".gitignore");
-
-        let name = Name::new(
-            &path,
-            FileType::File {
-                uid: false,
-                exec: false,
-            },
-        );
-
-        assert_eq!(true, name.is_hidden());
-    }
-
-    #[test]
-    fn test_is_hidder_with_visible_file() {
-        let path = Path::new("some-file.txt");
-
-        let name = Name::new(
-            &path,
-            FileType::File {
-                uid: false,
-                exec: false,
-            },
-        );
-
-        assert_eq!(false, name.is_hidden());
     }
 
     #[test]
