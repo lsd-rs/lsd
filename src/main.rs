@@ -22,13 +22,13 @@ extern crate unicode_width;
 extern crate users;
 
 mod app;
-mod batch;
 mod color;
 mod core;
 mod display;
 mod flags;
 mod icon;
 mod meta;
+mod sort;
 
 use core::Core;
 use flags::Flags;
