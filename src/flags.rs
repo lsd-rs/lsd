@@ -72,7 +72,7 @@ impl Flags {
             date: DateFlag::from(date_inputs[date_inputs.len() - 1]),
             color: WhenFlag::from(color_inputs[color_inputs.len() - 1]),
             icon: WhenFlag::from(icon_inputs[icon_inputs.len() - 1]),
-            icon_theme: IconTheme::from(icon_theme_inputs[icon_inputs.len() - 1]),
+            icon_theme: IconTheme::from(icon_theme_inputs[icon_theme_inputs.len() - 1]),
             directory_order: DirOrderFlag::from(dir_order_inputs[dir_order_inputs.len() - 1]),
         })
     }
