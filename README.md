@@ -32,6 +32,12 @@ project but with some little differences.  For example it is written in rust and
 
 Install the patched fonts of powerline nerd-font and/or font-awesome. Have a look at the [Nerd Font README](https://github.com/ryanoasis/nerd-fonts/blob/master/readme.md) for more installation instructions. Don't forget to setup your terminal in order to use the correct font.
 
+### Archlinux
+
+```sh
+pacman -S lsd
+```
+
 ### On Ubuntu
 
 _... and other Debian-based Linux distributions_
