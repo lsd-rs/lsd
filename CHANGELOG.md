@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add the --depth parameter for the -R and --tree options from [jorpic](https://github.com/jorpic)
 - Add the directory-order flag
 - Add a basic unicode support from [loewenheim](https://github.com/loewenheim)
-  - Add the background color for the files with the setuid permission from [loewenheim](https://github.com/loewenheim)
+- Add the background color for the files with the setuid permission from [loewenheim](https://github.com/loewenheim)
 
 ### Changed
 - Do not use the the custom icons for the directoriesa from [cat12079801](https://github.com/cat12079801)
@@ -157,8 +157,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Change the component alignement by using term_grid
 
 
-[Unreleased]: https://github.com/Peltoche/lsd/compare/0.11.1...HEAD
-[0.11.0]: https://github.com/Peltoche/lsd/compare/0.11.0...0.11.1
+[Unreleased]: https://github.com/Peltoche/lsd/compare/0.12.0...HEAD
+[0.12.0]: https://github.com/Peltoche/lsd/compare/0.11.1...0.12.0
+[0.11.1]: https://github.com/Peltoche/lsd/compare/0.11.0...0.11.1
 [0.11.0]: https://github.com/Peltoche/lsd/compare/0.10.0...0.11.0
 [0.10.0]: https://github.com/Peltoche/lsd/compare/0.9.0...0.10.0
 [0.9.0]: https://github.com/Peltoche/lsd/compare/0.8.0...0.9.0
