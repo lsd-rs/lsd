@@ -58,37 +58,37 @@ impl Permissions {
         };
 
         let strings: &[ColoredString] = &[
+            // User permissions
             bit(self.user_read, "r", &Elem::Read),
             bit(self.user_write, "w", &Elem::Write),
-            self.execute_bit(colors, self.setuid),
+            match (self.user_execute, self.setuid) {
+                (false, false) => colors.colorize(String::from("-"), &Elem::NoAccess),
+                (true, false) => colors.colorize(String::from("x"), &Elem::Exec),
+                (false, true) => colors.colorize(String::from("S"), &Elem::ExecSticky),
+                (true, true) => colors.colorize(String::from("s"), &Elem::ExecSticky),
+            },
+            // Group permissions
             bit(self.group_read, "r", &Elem::Read),
             bit(self.group_write, "w", &Elem::Write),
-            self.execute_bit(colors, self.setgid),
+            match (self.group_execute, self.setuid) {
+                (false, false) => colors.colorize(String::from("-"), &Elem::NoAccess),
+                (true, false) => colors.colorize(String::from("x"), &Elem::Exec),
+                (false, true) => colors.colorize(String::from("S"), &Elem::ExecSticky),
+                (true, true) => colors.colorize(String::from("s"), &Elem::ExecSticky),
+            },
+            // Other permissions
             bit(self.other_read, "r", &Elem::Read),
             bit(self.other_write, "w", &Elem::Write),
-            self.other_execute_bit(colors),
+            match (self.other_execute, self.sticky) {
+                (false, false) => colors.colorize(String::from("-"), &Elem::NoAccess),
+                (true, false) => colors.colorize(String::from("x"), &Elem::Exec),
+                (false, true) => colors.colorize(String::from("T"), &Elem::ExecSticky),
+                (true, true) => colors.colorize(String::from("t"), &Elem::ExecSticky),
+            },
         ];
 
         let res = ANSIStrings(strings).to_string();
         ColoredString::from(res)
-    }
-
-    fn execute_bit(&self, colors: &Colors, special: bool) -> ColoredString {
-        match (self.user_execute, special) {
-            (false, false) => colors.colorize(String::from("-"), &Elem::NoAccess),
-            (true, false) => colors.colorize(String::from("x"), &Elem::Exec),
-            (false, true) => colors.colorize(String::from("S"), &Elem::ExecSticky),
-            (true, true) => colors.colorize(String::from("s"), &Elem::ExecSticky),
-        }
-    }
-
-    fn other_execute_bit(&self, colors: &Colors) -> ColoredString {
-        match (self.other_execute, self.sticky) {
-            (false, false) => colors.colorize(String::from("-"), &Elem::NoAccess),
-            (true, false) => colors.colorize(String::from("x"), &Elem::Exec),
-            (false, true) => colors.colorize(String::from("T"), &Elem::ExecSticky),
-            (true, true) => colors.colorize(String::from("t"), &Elem::ExecSticky),
-        }
     }
 
     pub fn is_executable(&self) -> bool {
