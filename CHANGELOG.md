@@ -4,6 +4,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.12.0] - 2019-01-23
+### Added
+- Add the --depth parameter for the -R and --tree options from [jorpic](https://github.com/jorpic)
+- Add the directory-order flag
+- Add a basic unicode support from [loewenheim](https://github.com/loewenheim)
+  - Add the background color for the files with the setuid permission from [loewenheim](https://github.com/loewenheim)
+
+### Changed
+- Do not use the the custom icons for the directoriesa from [cat12079801](https://github.com/cat12079801)
+
+### Fixed
+- Fix the --icon=never in case of no tiiy
+- Fix a panic in case of multiple --icon option set
+- Fix some permission display
+
+
 ## [0.11.1] - 2018-12-27
 ### Fixed
 - Fix a panic when a group/user name is not available
@@ -141,7 +157,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Change the component alignement by using term_grid
 
 
-[Unreleased]: https://github.com/Peltoche/lsd/compare/0.9.0...HEAD
+[Unreleased]: https://github.com/Peltoche/lsd/compare/0.11.1...HEAD
+[0.11.0]: https://github.com/Peltoche/lsd/compare/0.11.0...0.11.1
 [0.11.0]: https://github.com/Peltoche/lsd/compare/0.10.0...0.11.0
 [0.10.0]: https://github.com/Peltoche/lsd/compare/0.9.0...0.10.0
 [0.9.0]: https://github.com/Peltoche/lsd/compare/0.8.0...0.9.0
