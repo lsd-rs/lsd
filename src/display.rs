@@ -10,6 +10,7 @@ use unicode_width::UnicodeWidthStr;
 const EDGE: &str = "\u{251c}\u{2500}\u{2500}"; // "├──"
 const LINE: &str = "\u{2502}  "; // "├  "
 const CORNER: &str = "\u{2514}\u{2500}\u{2500}"; // "└──"
+const BLANK: &str = "   ";
 
 #[derive(Debug, Copy, Clone)]
 struct PaddingRules {
@@ -33,7 +34,7 @@ pub fn grid(metas: Vec<Meta>, flags: Flags, colors: &Colors, icons: &Icons) -> S
 }
 
 pub fn tree(metas: Vec<Meta>, flags: Flags, colors: &Colors, icons: &Icons) -> String {
-    inner_display_tree(metas, flags, colors, icons, 0)
+    inner_display_tree(metas, flags, colors, icons, 0, "")
 }
 
 fn inner_display_one_line(
@@ -161,6 +162,7 @@ fn inner_display_tree(
     colors: &Colors,
     icons: &Icons,
     depth: usize,
+    prefix: &str,
 ) -> String {
     let mut output = String::new();
     let last_idx = metas.len();
@@ -168,22 +170,39 @@ fn inner_display_tree(
     for (idx, meta) in metas.into_iter().enumerate() {
         let is_last_folder_elem = idx + 1 != last_idx;
 
-        for _ in 0..depth {
-            output += LINE;
+        if depth > 0 {
+            output += prefix;
+
+            if is_last_folder_elem {
+                output += EDGE;
+            } else {
+                output += CORNER;
+            }
+            output += " ";
         }
 
-        if is_last_folder_elem {
-            output += EDGE;
-        } else {
-            output += CORNER;
-        }
-
-        output += " ";
         output += &get_short_output(&meta, &colors, &icons, flags);
         output += "\n";
 
         if meta.content.is_some() {
-            output += &inner_display_tree(meta.content.unwrap(), flags, colors, icons, depth + 1);
+            let mut new_prefix = String::from(prefix);
+
+            if depth > 0 {
+                if is_last_folder_elem {
+                    new_prefix += LINE;
+                } else {
+                    new_prefix += BLANK;
+                }
+            }
+
+            output += &inner_display_tree(
+                meta.content.unwrap(),
+                flags,
+                colors,
+                icons,
+                depth + 1,
+                &new_prefix,
+            );
         }
     }
 

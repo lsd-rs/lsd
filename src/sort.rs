@@ -3,6 +3,10 @@ use meta::{FileType, Meta};
 use std::cmp::Ordering;
 
 pub fn by_meta(a: &Meta, b: &Meta, flags: Flags) -> Ordering {
+    if flags.display_tree {
+        return by_name_with_files_first(a, b, flags);
+    }
+
     match flags.sort_by {
         SortFlag::Name => match flags.directory_order {
             DirOrderFlag::First => by_name_with_dirs_first(a, b, flags),
