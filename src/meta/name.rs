@@ -7,6 +7,7 @@ use std::path::Path;
 #[derive(Debug, Eq)]
 pub struct Name {
     name: String,
+    path: String,
     extension: Option<String>,
     file_type: FileType,
 }
@@ -27,8 +28,11 @@ impl Name {
             );
         }
 
+        let path_string = path.to_string_lossy().to_string();
+
         Self {
             name,
+            path: path_string,
             extension,
             file_type,
         }
@@ -39,6 +43,7 @@ impl Name {
         let mut content = String::with_capacity(icon.len() + self.name.len() + 3 /* spaces */);
 
         content += icon.as_str();
+        content += &self.name;
 
         let elem = match self.file_type {
             FileType::CharDevice => Elem::CharDevice,
@@ -51,9 +56,7 @@ impl Name {
             },
         };
 
-        content += &self.name;
-
-        colors.colorize(content, &elem)
+        colors.colorize_using_path(content, &self.path, &elem)
     }
 
     pub fn name(&self) -> String {

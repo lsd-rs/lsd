@@ -1,4 +1,5 @@
 use ansi_term::{ANSIString, Colour, Style};
+use lscolors::{Indicator, LsColors};
 use std::collections::HashMap;
 
 #[allow(dead_code)]
@@ -62,6 +63,7 @@ pub enum Theme {
 
 pub struct Colors {
     colors: Option<HashMap<Elem, Colour>>,
+    lscolors: Option<LsColors>,
 }
 
 impl Colors {
@@ -70,15 +72,55 @@ impl Colors {
             Theme::NoColor => None,
             Theme::Default => Some(Self::get_light_theme_colour_map()),
         };
+        let lscolors = LsColors::from_env();
 
-        Self { colors }
+        Self { colors, lscolors }
     }
 
     pub fn colorize<'a>(&self, input: String, elem: &Elem) -> ColoredString<'a> {
         self.style(elem).paint(input)
     }
 
+    pub fn colorize_using_path<'a>(
+        &self,
+        input: String,
+        path: &str,
+        elem: &Elem,
+    ) -> ColoredString<'a> {
+        let style_from_path = self.style_from_path(path);
+        match style_from_path {
+            Some(style_from_path) => style_from_path.paint(input),
+            None => self.colorize(input, elem),
+        }
+    }
+
+    fn style_from_path(&self, path: &str) -> Option<Style> {
+        match &self.lscolors {
+            Some(lscolors) => lscolors
+                    .style_for_path(path)
+                    .map(lscolors::Style::to_ansi_term_style),
+            None => None,
+        }
+    }
+
     fn style(&self, elem: &Elem) -> Style {
+        match &self.lscolors {
+            Some(lscolors) => {
+                match self.get_indicator_from_elem(elem) {
+                    Some(style) => {
+                        let style = lscolors.style_for_indicator(style);
+                        style
+                            .map(lscolors::Style::to_ansi_term_style)
+                            .unwrap_or_default()
+                    }
+                    None => self.style_default(elem),
+                }
+            }
+            None => self.style_default(elem),
+        }
+    }
+
+    fn style_default(&self, elem: &Elem) -> Style {
         if let Some(ref colors) = self.colors {
             let style_fg = Style::default().fg(colors[elem]);
             if elem.has_suid() {
@@ -88,6 +130,35 @@ impl Colors {
             }
         } else {
             Style::default()
+        }
+    }
+
+    fn get_indicator_from_elem(&self, elem: &Elem) -> Option<Indicator> {
+        let indicator_string = match elem {
+            Elem::File { exec, uid } => match (exec, uid) {
+                (_, true) => None,
+                (true, false) => Some("ex"),
+                (false, false) => Some("fi"),
+            },
+            Elem::Dir { uid } => {
+                if *uid {
+                    None
+                } else {
+                    Some("di")
+                }
+            }
+            Elem::SymLink => Some("ln"),
+            Elem::Pipe => Some("pi"),
+            Elem::Socket => Some("so"),
+            Elem::BlockDevice => Some("bd"),
+            Elem::CharDevice => Some("cd"),
+            Elem::BrokenSymLink => Some("or"),
+            _ => None,
+        };
+
+        match indicator_string {
+            Some(ids) => Indicator::from(ids),
+            None => None,
         }
     }
 

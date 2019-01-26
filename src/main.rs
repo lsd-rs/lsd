@@ -10,6 +10,7 @@ extern crate clap;
 extern crate ansi_term;
 extern crate chrono_humanize;
 extern crate libc;
+extern crate lscolors;
 #[cfg(test)]
 extern crate tempdir;
 extern crate term_grid;
