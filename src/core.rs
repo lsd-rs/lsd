@@ -21,15 +21,23 @@ impl Core {
 
         let mut inner_flags = flags;
 
-        let color_theme = match (tty_available, flags.color) {
-            (_, WhenFlag::Never) | (false, WhenFlag::Auto) => color::Theme::NoColor,
-            _ => color::Theme::Default,
+        let color_theme = if flags.classic_mode {
+            color::Theme::NoColor
+        } else {
+            match (tty_available, flags.color) {
+                (_, WhenFlag::Never) | (false, WhenFlag::Auto) => color::Theme::NoColor,
+                _ => color::Theme::Default,
+            }
         };
 
-        let icon_theme = match (tty_available, flags.icon, flags.icon_theme) {
-            (_, WhenFlag::Never, _) | (false, WhenFlag::Auto, _) => icon::Theme::NoIcon,
-            (_, _, IconTheme::Fancy) => icon::Theme::Fancy,
-            (_, _, IconTheme::Unicode) => icon::Theme::Unicode,
+        let icon_theme = if flags.classic_mode {
+            icon::Theme::NoIcon
+        } else {
+            match (tty_available, flags.icon, flags.icon_theme) {
+                (_, WhenFlag::Never, _) | (false, WhenFlag::Auto, _) => icon::Theme::NoIcon,
+                (_, _, IconTheme::Fancy) => icon::Theme::Fancy,
+                (_, _, IconTheme::Unicode) => icon::Theme::Unicode,
+            }
         };
 
         if !tty_available {

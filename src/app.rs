@@ -117,4 +117,9 @@ pub fn build() -> App<'static, 'static> {
                 .multiple(true)
                 .help("Sort the directories then the files"),
         )
+        .arg(
+            Arg::with_name("classic")
+                .long("classic")
+                .help("Enable classic mode (no colors or icons)"),
+        )
 }

@@ -2,6 +2,7 @@ use clap::{ArgMatches, Error, ErrorKind};
 
 #[derive(Clone, Debug, Copy)]
 pub struct Flags {
+    pub classic_mode: bool,
     pub display_all: bool,
     pub display_long: bool,
     pub display_online: bool,
@@ -20,6 +21,7 @@ pub struct Flags {
 
 impl Flags {
     pub fn from_matches(matches: &ArgMatches) -> Result<Self, Error> {
+        let classic_mode: bool = matches.is_present("classic");
         let color_inputs: Vec<&str> = matches.values_of("color").unwrap().collect();
         let icon_inputs: Vec<&str> = matches.values_of("icon").unwrap().collect();
         let icon_theme_inputs: Vec<&str> = matches.values_of("icon-theme").unwrap().collect();
@@ -59,6 +61,7 @@ impl Flags {
         };
 
         Ok(Self {
+            classic_mode,
             display_all: matches.is_present("all"),
             display_long: matches.is_present("long"),
             display_online: matches.is_present("oneline"),
@@ -81,6 +84,7 @@ impl Flags {
 impl Default for Flags {
     fn default() -> Self {
         Self {
+            classic_mode: false,
             display_all: false,
             display_long: false,
             display_online: false,
