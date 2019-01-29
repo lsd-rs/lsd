@@ -2,7 +2,6 @@ use clap::{ArgMatches, Error, ErrorKind};
 
 #[derive(Clone, Debug, Copy)]
 pub struct Flags {
-    pub classic_mode: bool,
     pub display_all: bool,
     pub display_long: bool,
     pub display_online: bool,
@@ -21,7 +20,7 @@ pub struct Flags {
 
 impl Flags {
     pub fn from_matches(matches: &ArgMatches) -> Result<Self, Error> {
-        let classic_mode: bool = matches.is_present("classic");
+        let classic_mode = matches.is_present("classic");
         let color_inputs: Vec<&str> = matches.values_of("color").unwrap().collect();
         let icon_inputs: Vec<&str> = matches.values_of("icon").unwrap().collect();
         let icon_theme_inputs: Vec<&str> = matches.values_of("icon-theme").unwrap().collect();
@@ -61,7 +60,6 @@ impl Flags {
         };
 
         Ok(Self {
-            classic_mode,
             display_all: matches.is_present("all"),
             display_long: matches.is_present("long"),
             display_online: matches.is_present("oneline"),
@@ -72,11 +70,27 @@ impl Flags {
             sort_by,
             sort_order,
             // Take only the last value
-            date: DateFlag::from(date_inputs[date_inputs.len() - 1]),
-            color: WhenFlag::from(color_inputs[color_inputs.len() - 1]),
-            icon: WhenFlag::from(icon_inputs[icon_inputs.len() - 1]),
+            date: if classic_mode {
+                DateFlag::Date
+            } else {
+                DateFlag::from(date_inputs[date_inputs.len() - 1])
+            },
+            color: if classic_mode {
+                WhenFlag::Never
+            } else {
+                WhenFlag::from(color_inputs[color_inputs.len() - 1])
+            },
+            icon: if classic_mode {
+                WhenFlag::Never
+            } else {
+                WhenFlag::from(icon_inputs[icon_inputs.len() - 1])
+            },
             icon_theme: IconTheme::from(icon_theme_inputs[icon_theme_inputs.len() - 1]),
-            directory_order: DirOrderFlag::from(dir_order_inputs[dir_order_inputs.len() - 1]),
+            directory_order: if classic_mode {
+                DirOrderFlag::None
+            } else {
+                DirOrderFlag::from(dir_order_inputs[dir_order_inputs.len() - 1])
+            },
         })
     }
 }
@@ -84,7 +98,6 @@ impl Flags {
 impl Default for Flags {
     fn default() -> Self {
         Self {
-            classic_mode: false,
             display_all: false,
             display_long: false,
             display_online: false,
