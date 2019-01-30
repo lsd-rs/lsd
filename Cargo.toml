@@ -3,7 +3,6 @@ authors = ["Peltoche <dev@halium.fr>"]
 build = "build.rs"
 categories = ["command-line-utilities"]
 description = "A ls command with a lot of pretty colors."
-homepage = "https://github.com/Peltoche/lsd"
 keywords = ["ls"]
 license = "Apache-2.0"
 name = "lsd"
