@@ -7,6 +7,9 @@ mod permissions;
 mod size;
 mod symlink;
 
+#[cfg(windows)]
+mod windows_utils;
+
 pub use self::date::Date;
 pub use self::filetype::FileType;
 pub use self::indicator::Indicator;
@@ -120,7 +123,14 @@ impl Meta {
             path.metadata()?
         };
 
+        #[cfg(unix)]
+        let owner = Owner::from(&metadata);
+        #[cfg(unix)]
         let permissions = Permissions::from(&metadata);
+
+        #[cfg(windows)]
+        let (owner, permissions) = windows_utils::get_file_data(&path)?;
+
         let file_type = FileType::new(&metadata, &permissions);
         let name = Name::new(&path, file_type);
 
@@ -130,7 +140,7 @@ impl Meta {
             size: Size::from(&metadata),
             date: Date::from(&metadata),
             indicator: Indicator::from(file_type),
-            owner: Owner::from(&metadata),
+            owner,
             permissions,
             name,
             file_type,

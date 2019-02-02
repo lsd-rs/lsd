@@ -1,7 +1,6 @@
 use crate::color::{ColoredString, Colors, Elem};
 use crate::meta::Permissions;
 use std::fs::Metadata;
-use std::os::unix::fs::FileTypeExt;
 
 #[derive(Debug, PartialEq, Eq, Copy, Clone)]
 pub enum FileType {
@@ -16,7 +15,10 @@ pub enum FileType {
 }
 
 impl FileType {
+    #[cfg(unix)]
     pub fn new(meta: &Metadata, permissions: &Permissions) -> Self {
+        use std::os::unix::fs::FileTypeExt;
+
         let file_type = meta.file_type();
 
         if file_type.is_file() {
@@ -41,6 +43,11 @@ impl FileType {
         } else {
             FileType::Special
         }
+    }
+
+    #[cfg(windows)]
+    pub fn new(meta: &Metadata, permissions: &Permissions) -> Self {
+        unimplemented!()
     }
 }
 
