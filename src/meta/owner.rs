@@ -1,7 +1,5 @@
 use crate::color::{ColoredString, Colors, Elem};
 use std::fs::Metadata;
-use std::os::unix::fs::MetadataExt;
-use users::{get_group_by_gid, get_user_by_uid};
 
 #[derive(Debug)]
 pub struct Owner {
@@ -9,8 +7,12 @@ pub struct Owner {
     group: String,
 }
 
+#[cfg(unix)]
 impl<'a> From<&'a Metadata> for Owner {
     fn from(meta: &Metadata) -> Self {
+        use std::os::unix::fs::MetadataExt;
+        use users::{get_group_by_gid, get_user_by_uid};
+
         let user = match get_user_by_uid(meta.uid()) {
             Some(res) => res.name().to_string_lossy().to_string(),
             None => meta.uid().to_string(),
