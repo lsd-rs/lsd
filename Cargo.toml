@@ -33,7 +33,7 @@ lscolors = "0.5.0"
 users = "0.8.0"
 
 [target.'cfg(windows)'.dependencies]
-winapi = {version = "0.3.6", features = []}
+winapi = {version = "0.3.6", features = ["aclapi", "accctrl", "winnt", "winerror", "securitybaseapi", "winbase"]}
 
 [dependencies.clap]
 features = ["suggestions", "color", "wrap_help"]
