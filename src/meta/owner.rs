@@ -7,6 +7,15 @@ pub struct Owner {
     group: String,
 }
 
+impl Owner {
+    pub fn new(user: String, group: String) -> Owner {
+        Owner {
+            user,
+            group,
+        }
+    }
+}
+
 #[cfg(unix)]
 impl<'a> From<&'a Metadata> for Owner {
     fn from(meta: &Metadata) -> Self {
