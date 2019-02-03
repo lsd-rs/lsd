@@ -90,7 +90,7 @@ impl PartialEq for Name {
     }
 }
 
-#[cfg(test)]
+#[cfg(all(test, unix))]
 mod test {
     use super::Name;
     use crate::color::{self, Colors};
