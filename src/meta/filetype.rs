@@ -47,7 +47,22 @@ impl FileType {
 
     #[cfg(windows)]
     pub fn new(meta: &Metadata, permissions: &Permissions) -> Self {
-        unimplemented!()
+        let file_type = meta.file_type();
+
+        if file_type.is_file() {
+            FileType::File {
+                exec: permissions.is_executable(),
+                uid: permissions.setuid,
+            }
+        } else if file_type.is_dir() {
+            FileType::Directory {
+                uid: permissions.setuid,
+            }
+        } else if file_type.is_symlink() {
+            FileType::SymLink
+        } else {
+            FileType::Special
+        }
     }
 }
 
