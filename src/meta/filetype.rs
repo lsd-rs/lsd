@@ -70,7 +70,7 @@ impl FileType {
     }
 }
 
-#[cfg(test)]
+#[cfg(all(test, unix))]
 mod test {
     use super::FileType;
     use crate::color::{Colors, Theme};

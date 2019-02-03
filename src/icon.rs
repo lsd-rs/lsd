@@ -305,7 +305,7 @@ impl Icons {
     }
 }
 
-#[cfg(test)]
+#[cfg(all(test,unix))]
 mod test {
     use super::{Icons, Theme, ICON_SPACE};
     use crate::meta::{FileType, Name, Permissions};

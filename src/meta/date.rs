@@ -58,7 +58,7 @@ impl Date {
     }
 }
 
-#[cfg(test)]
+#[cfg(all(test, unix))]
 mod test {
     use super::Date;
     use crate::color::{Colors, Theme};
