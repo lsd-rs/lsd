@@ -1,4 +1,5 @@
 use crate::color::{ColoredString, Colors, Elem};
+#[cfg(unix)]
 use std::fs::Metadata;
 
 #[derive(Debug)]
@@ -8,6 +9,7 @@ pub struct Owner {
 }
 
 impl Owner {
+    #[cfg_attr(unix, allow(dead_code))]
     pub fn new(user: String, group: String) -> Owner {
         Owner {
             user,

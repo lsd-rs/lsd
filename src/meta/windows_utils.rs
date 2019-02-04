@@ -26,7 +26,7 @@ pub fn get_file_data(path: &PathBuf) -> Result<(Owner, Permissions), io::Error> 
     // - LocalFree must be called before returning
     // - No pointer is valid after the call to LocalFree
 
-    let mut windows_path = buf_from_os(path.as_os_str());
+    let windows_path = buf_from_os(path.as_os_str());
 
     // These pointers will be populated by GetNamedSecurityInfoW
     // sd_ptr points at a new buffer that must be freed
@@ -129,15 +129,15 @@ pub fn get_file_data(path: &PathBuf) -> Result<(Owner, Permissions), io::Error> 
     // Assumptions:
     // - xxxxx_trustee are still valid (including underlying SID)
     // - dacl_ptr is still valid
-    let mut owner_access_mask = unsafe {
+    let owner_access_mask = unsafe {
         get_acl_access_mask(dacl_ptr as *mut _, &mut owner_trustee)
     }?;
 
-    let mut group_access_mask = unsafe {
+    let group_access_mask = unsafe {
         get_acl_access_mask(dacl_ptr as *mut _, &mut group_trustee)
     }?;
 
-    let mut world_access_mask = unsafe {
+    let world_access_mask = unsafe {
         get_acl_access_mask(dacl_ptr as *mut _, &mut world_trustee)
     }?;
 
@@ -284,13 +284,6 @@ fn buf_from_os(os: &OsStr) -> Vec<u16> {
 #[cfg(test)]
 mod test {
     use super::*;
-
-    #[test]
-    fn throwaway() {
-        let mut manifest_path = PathBuf::from(std::env::var_os("CARGO_MANIFEST_DIR").unwrap()).join("Cargo.toml");
-
-        get_file_data(&manifest_path);
-    }
 
     #[test]
     fn basic_wtf16_behavior() {
