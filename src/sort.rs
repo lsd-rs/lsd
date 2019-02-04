@@ -193,6 +193,8 @@ mod tests {
         // Create the file;
         let path_z = tmp_dir.path().join("zzz");
         File::create(&path_z).expect("failed to create file");
+
+        #[cfg(unix)]
         let success = Command::new("touch")
             .arg("-t")
             .arg("198511160000")
@@ -200,7 +202,18 @@ mod tests {
             .status()
             .unwrap()
             .success();
-        assert_eq!(true, success, "failed to exec mkfifo");
+
+        #[cfg(windows)]
+        let success = Command::new("powershell")
+            .arg("-Command")
+            .arg("$(Get-Item")
+            .arg(&path_z)
+            .arg(").lastwritetime=$(Get-Date \"11/16/1985\")")
+            .status()
+            .unwrap()
+            .success();
+
+        assert_eq!(true, success, "failed to change file timestamp");
         let meta_z = Meta::from_path(&path_z).expect("failed to get meta");
 
         let mut flags = Flags::default();
