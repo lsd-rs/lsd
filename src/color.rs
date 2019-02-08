@@ -55,10 +55,13 @@ impl Elem {
 
 pub type ColoredString<'a> = ANSIString<'a>;
 
+
+#[allow(dead_code)]
 #[derive(Debug, Copy, Clone)]
 pub enum Theme {
     NoColor,
     Default,
+    NoLscolors,
 }
 
 pub struct Colors {
@@ -71,8 +74,13 @@ impl Colors {
         let colors = match theme {
             Theme::NoColor => None,
             Theme::Default => Some(Self::get_light_theme_colour_map()),
+            Theme::NoLscolors => Some(Self::get_light_theme_colour_map()),
         };
-        let lscolors = LsColors::from_env();
+        let lscolors = match theme {
+            Theme::NoColor => None,
+            Theme::Default => LsColors::from_env(),
+            Theme::NoLscolors => None,
+        };
 
         Self { colors, lscolors }
     }
