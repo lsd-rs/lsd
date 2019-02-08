@@ -443,7 +443,7 @@ mod tests {
             );
             let output = name
                 .render(
-                    &Colors::new(color::Theme::Default),
+                    &Colors::new(color::Theme::NoLscolors),
                     &Icons::new(icon::Theme::NoIcon),
                 )
                 .to_string();

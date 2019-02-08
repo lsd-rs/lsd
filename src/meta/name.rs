@@ -115,7 +115,7 @@ mod test {
         File::create(&file_path).expect("failed to create file");
         let meta = file_path.metadata().expect("failed to get metas");
 
-        let colors = Colors::new(color::Theme::Default);
+        let colors = Colors::new(color::Theme::NoLscolors);
         let file_type = FileType::new(&meta, &Permissions::from(&meta));
         let name = Name::new(&file_path, file_type);
 
@@ -135,7 +135,7 @@ mod test {
         fs::create_dir(&dir_path).expect("failed to create the dir");
         let meta = dir_path.metadata().expect("failed to get metas");
 
-        let colors = Colors::new(color::Theme::Default);
+        let colors = Colors::new(color::Theme::NoLscolors);
         let file_type = FileType::new(&meta, &Permissions::from(&meta));
         let name = Name::new(&dir_path, file_type);
 
@@ -161,7 +161,7 @@ mod test {
             .symlink_metadata()
             .expect("failed to get metas");
 
-        let colors = Colors::new(color::Theme::Default);
+        let colors = Colors::new(color::Theme::NoLscolors);
         let file_type = FileType::new(&meta, &Permissions::from(&meta));
         let name = Name::new(&symlink_path, file_type);
 
@@ -186,7 +186,7 @@ mod test {
         assert_eq!(true, success, "failed to exec mkfifo");
         let meta = pipe_path.metadata().expect("failed to get metas");
 
-        let colors = Colors::new(color::Theme::Default);
+        let colors = Colors::new(color::Theme::NoLscolors);
         let file_type = FileType::new(&meta, &Permissions::from(&meta));
         let name = Name::new(&pipe_path, file_type);
 

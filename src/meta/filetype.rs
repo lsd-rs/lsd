@@ -84,7 +84,7 @@ mod test {
         File::create(&file_path).expect("failed to create file");
         let meta = file_path.metadata().expect("failed to get metas");
 
-        let colors = Colors::new(Theme::Default);
+        let colors = Colors::new(Theme::NoLscolors);
         let file_type = FileType::new(&meta, &Permissions::from(&meta));
 
         assert_eq!(Colour::Fixed(184).paint("."), file_type.render(&colors));
@@ -95,7 +95,7 @@ mod test {
         let tmp_dir = TempDir::new("test_dir_type").expect("failed to create temp dir");
         let meta = tmp_dir.path().metadata().expect("failed to get metas");
 
-        let colors = Colors::new(Theme::Default);
+        let colors = Colors::new(Theme::NoLscolors);
         let file_type = FileType::new(&meta, &Permissions::from(&meta));
 
         assert_eq!(Colour::Fixed(33).paint("d"), file_type.render(&colors));
@@ -116,7 +116,7 @@ mod test {
             .symlink_metadata()
             .expect("failed to get metas");
 
-        let colors = Colors::new(Theme::Default);
+        let colors = Colors::new(Theme::NoLscolors);
         let file_type = FileType::new(&meta, &Permissions::from(&meta));
 
         assert_eq!(Colour::Fixed(44).paint("l"), file_type.render(&colors));
@@ -136,7 +136,7 @@ mod test {
         assert_eq!(true, success, "failed to exec mkfifo");
         let meta = pipe_path.metadata().expect("failed to get metas");
 
-        let colors = Colors::new(Theme::Default);
+        let colors = Colors::new(Theme::NoLscolors);
         let file_type = FileType::new(&meta, &Permissions::from(&meta));
 
         assert_eq!(Colour::Fixed(44).paint("|"), file_type.render(&colors));
@@ -161,7 +161,7 @@ mod test {
         assert_eq!(true, success, "failed to exec mknod");
         let meta = char_device_path.metadata().expect("failed to get metas");
 
-        let colors = Colors::new(Theme::Default);
+        let colors = Colors::new(Theme::NoLscolors);
         let file_type = FileType::new(&meta, &Permissions::from(&meta));
 
         assert_eq!(Colour::Fixed(44).paint("c"), file_type.render(&colors));
@@ -176,7 +176,7 @@ mod test {
         UnixListener::bind(&socket_path).expect("failed to create the socket");
         let meta = socket_path.metadata().expect("failed to get metas");
 
-        let colors = Colors::new(Theme::Default);
+        let colors = Colors::new(Theme::NoLscolors);
         let file_type = FileType::new(&meta, &Permissions::from(&meta));
 
         assert_eq!(Colour::Fixed(44).paint("s"), file_type.render(&colors));
