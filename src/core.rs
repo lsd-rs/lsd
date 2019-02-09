@@ -1,9 +1,9 @@
-use color::{self, Colors};
-use display;
-use flags::{Flags, IconTheme, WhenFlag};
-use icon::{self, Icons};
-use meta::Meta;
-use sort;
+use crate::color::{self, Colors};
+use crate::display;
+use crate::flags::{Flags, IconTheme, WhenFlag};
+use crate::icon::{self, Icons};
+use crate::meta::Meta;
+use crate::sort;
 use std::path::PathBuf;
 use terminal_size::terminal_size;
 

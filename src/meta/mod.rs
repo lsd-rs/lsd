@@ -15,7 +15,7 @@ pub use self::owner::Owner;
 pub use self::permissions::Permissions;
 pub use self::size::Size;
 pub use self::symlink::SymLink;
-pub use icon::Icons;
+pub use crate::icon::Icons;
 
 use std::fs::read_link;
 use std::io::{Error, ErrorKind};

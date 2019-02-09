@@ -1,8 +1,8 @@
+use crate::color::Colors;
+use crate::flags::Flags;
+use crate::icon::Icons;
+use crate::meta::{FileType, Meta};
 use ansi_term::{ANSIString, ANSIStrings};
-use color::Colors;
-use flags::Flags;
-use icon::Icons;
-use meta::{FileType, Meta};
 use term_grid::{Cell, Direction, Filling, Grid, GridOptions};
 use terminal_size::terminal_size;
 use unicode_width::UnicodeWidthStr;
@@ -352,11 +352,11 @@ fn detect_size_lengths(metas: &[Meta]) -> (usize, usize) {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use color;
-    use color::Colors;
-    use icon;
-    use icon::Icons;
-    use meta::{FileType, Name};
+    use crate::color;
+    use crate::color::Colors;
+    use crate::icon;
+    use crate::icon::Icons;
+    use crate::meta::{FileType, Name};
     use std::path::Path;
 
     #[test]
