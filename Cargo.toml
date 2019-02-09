@@ -9,6 +9,7 @@ name = "lsd"
 readme = "./README.md"
 repository = "https://github.com/Peltoche/lsd"
 version = "0.12.1-pre"
+edition = "2018"
 
 [[bin]]
 name = "lsd"
