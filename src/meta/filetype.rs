@@ -1,5 +1,5 @@
-use color::{ColoredString, Colors, Elem};
-use meta::Permissions;
+use crate::color::{ColoredString, Colors, Elem};
+use crate::meta::Permissions;
 use std::fs::Metadata;
 use std::os::unix::fs::FileTypeExt;
 
@@ -66,9 +66,9 @@ impl FileType {
 #[cfg(test)]
 mod test {
     use super::FileType;
+    use crate::color::{Colors, Theme};
+    use crate::meta::Permissions;
     use ansi_term::Colour;
-    use color::{Colors, Theme};
-    use meta::Permissions;
     use std::fs::File;
     use std::os::unix::fs::symlink;
     use std::os::unix::net::UnixListener;

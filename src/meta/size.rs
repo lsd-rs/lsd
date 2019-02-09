@@ -1,4 +1,4 @@
-use color::{ColoredString, Colors, Elem};
+use crate::color::{ColoredString, Colors, Elem};
 use std::fs::Metadata;
 
 #[derive(Debug, PartialEq, Eq)]

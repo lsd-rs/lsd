@@ -1,6 +1,6 @@
-use color::{ColoredString, Colors, Elem};
-use icon::Icons;
-use meta::filetype::FileType;
+use crate::color::{ColoredString, Colors, Elem};
+use crate::icon::Icons;
+use crate::meta::filetype::FileType;
 use std::cmp::{Ordering, PartialOrd};
 use std::path::Path;
 
@@ -90,11 +90,11 @@ impl PartialEq for Name {
 #[cfg(test)]
 mod test {
     use super::Name;
+    use crate::color::{self, Colors};
+    use crate::icon::{self, Icons};
+    use crate::meta::FileType;
+    use crate::meta::Permissions;
     use ansi_term::Colour;
-    use color::{self, Colors};
-    use icon::{self, Icons};
-    use meta::FileType;
-    use meta::Permissions;
     use std::cmp::Ordering;
     use std::fs::{self, File};
     use std::os::unix::fs::symlink;

@@ -1,11 +1,8 @@
-#![cfg_attr(
-    feature = "cargo-clippy",
-    allow(
-        clippy::cast_precision_loss,
-        clippy::cast_sign_loss,
-        clippy::match_same_arms,
-        clippy::cast_possible_wrap
-    )
+#![allow(
+    clippy::cast_precision_loss,
+    clippy::cast_sign_loss,
+    clippy::match_same_arms,
+    clippy::cast_possible_wrap
 )]
 
 #[macro_use]
@@ -30,8 +27,8 @@ mod icon;
 mod meta;
 mod sort;
 
-use core::Core;
-use flags::Flags;
+use crate::core::Core;
+use crate::flags::Flags;
 use std::path::PathBuf;
 
 fn main() {
