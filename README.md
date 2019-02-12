@@ -14,6 +14,7 @@
   * [Required](#required)
   * [Optional](#optional)
 - [Benchmark](#benchmark)
+- [F.A.Q.](#faq)
 - [Contributors](#contributors)
 - [Credits](#credits)
 
@@ -104,6 +105,23 @@ Result from `hyperfine --warmup 10 'lsd -la /etc/*' 'colorls -la /etc/*' 'exa -l
 | `lsd -la /etc/*` | 9.8 ± 0.7 | 8.6…11.9 |
 | `colorls -la /etc/*` | 387.3 ± 4.1 | 379.8…393.6 |
 | `exa -la /etc/*` | 15.4 ± 1.8 | 14.0…24.0 |
+
+## F.A.Q.
+
+### Default Colors
+
+In the future the possibility to customize the colors might be implemented.
+For now, the default colors are:
+
+| User/Group | Permissions | File Types | Last time Modified | File Size |
+|:---|:---|:---|:---|:---|
+|![#ffffd7](https://placehold.it/17/ffffd7/000000?text=+) User|![#00d700](https://placehold.it/17/00d700/000000?text=+) Read |![#0087ff](https://placehold.it/17/0087ff/000000?text=+) Directory|![#00d700](https://placehold.it/17/00d700/000000?text=+) within the last hour|![#ffffaf](https://placehold.it/17/ffffaf/000000?text=+) Small File|
+|![#d7d7af](https://placehold.it/17/d7d7af/000000?text=+) Group|![#d7ff87](https://placehold.it/17/d7ff87/000000?text=+) Write|![#00d700](https://placehold.it/17/00d700/000000?text=+) Executable File|![#00d787](https://placehold.it/17/00d787/000000?text=+) within the last day|![#ffaf87](https://placehold.it/17/ffaf87/000000?text=+) Medium File|
+||![#af0000](https://placehold.it/17/af0000/000000?text=+) Execute|![#d7d700](https://placehold.it/17/d7d700/000000?text=+) Non-Executable File|![#00af87](https://placehold.it/17/00af87/000000?text=+) older|![#d78700](https://placehold.it/17/d78700/000000?text=+) Large File|
+||![#ff00ff](https://placehold.it/17/ff00ff/000000?text=+) Execute with Stickybit|![#af0000](https://placehold.it/17/af0000/000000?text=+) Broken Symlink||![#ffffff](https://placehold.it/17/ffffff/000000?text=+) Non File|
+||![#d75f87](https://placehold.it/17/d75f87/000000?text=+) No Access|![#00d7d7](https://placehold.it/17/00d7d7/000000?text=+) Pipe/Symlink/Blockdevice/Socket/Special|||
+|||![#d78700](https://placehold.it/17/d78700/000000?text=+) CharDevice|||
+
 
 
 ## Contributors
