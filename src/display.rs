@@ -26,8 +26,8 @@ pub fn one_line(metas: Vec<Meta>, flags: Flags, colors: &Colors, icons: &Icons) 
 
 pub fn grid(metas: Vec<Meta>, flags: Flags, colors: &Colors, icons: &Icons) -> String {
     let term_width = match terminal_size() {
-        Some((w, _)) => w.0 as usize,
-        None => panic!("failed to retrieve terminal size"),
+        Some((w, _)) => Some(w.0 as usize),
+        None => None,
     };
 
     inner_display_grid(metas, flags, colors, icons, 0, term_width)
@@ -99,7 +99,7 @@ fn inner_display_grid(
     colors: &Colors,
     icons: &Icons,
     depth: usize,
-    term_width: usize,
+    term_width: Option<usize>,
 ) -> String {
     let mut output = String::new();
 
@@ -124,12 +124,16 @@ fn inner_display_grid(
         });
     }
 
-    if let Some(gridded_output) = grid.fit_into_width(term_width) {
-        output += &gridded_output.to_string();
+    if let Some(tw) = term_width {
+        if let Some(gridded_output) = grid.fit_into_width(tw) {
+            output += &gridded_output.to_string();
+        } else {
+            //does not fit into grid, usually because (some) filename(s)
+            //are longer or almost as long as term_width
+            //print line by line instead!
+            output += &grid.fit_into_columns(1).to_string();
+        }
     } else {
-        //does not fit into grid, usually because (some) filename(s)
-        //are longer or almost as long as term_width
-        //print line by line instead!
         output += &grid.fit_into_columns(1).to_string();
     }
 
