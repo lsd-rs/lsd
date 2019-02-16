@@ -1,7 +1,7 @@
+use crate::color::ColoredString;
+use crate::flags::Flags;
+use crate::meta::FileType;
 use ansi_term::ANSIString;
-use color::ColoredString;
-use flags::Flags;
-use meta::FileType;
 
 #[derive(Debug)]
 pub struct Indicator(&'static str);
@@ -34,8 +34,8 @@ impl Indicator {
 #[cfg(test)]
 mod test {
     use super::Indicator;
-    use flags::Flags;
-    use meta::FileType;
+    use crate::flags::Flags;
+    use crate::meta::FileType;
 
     #[test]
     fn test_directory_indicator() {

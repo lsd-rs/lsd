@@ -1,5 +1,5 @@
+use crate::color::{ColoredString, Colors, Elem};
 use ansi_term::{ANSIString, ANSIStrings};
-use color::{ColoredString, Colors, Elem};
 use std::fs::read_link;
 use std::path::Path;
 

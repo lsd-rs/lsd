@@ -1,5 +1,5 @@
-use flags::{DirOrderFlag, Flags, SortFlag, SortOrder};
-use meta::{FileType, Meta};
+use crate::flags::{DirOrderFlag, Flags, SortFlag, SortOrder};
+use crate::meta::{FileType, Meta};
 use std::cmp::Ordering;
 
 pub fn by_meta(a: &Meta, b: &Meta, flags: Flags) -> Ordering {
@@ -77,7 +77,7 @@ fn by_date_with_files_first(a: &Meta, b: &Meta, flags: Flags) -> Ordering {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use flags::Flags;
+    use crate::flags::Flags;
     use std::fs::{create_dir, File};
     use std::process::Command;
     use tempdir::TempDir;

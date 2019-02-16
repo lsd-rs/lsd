@@ -1,5 +1,5 @@
+use crate::color::{ColoredString, Colors, Elem};
 use ansi_term::ANSIStrings;
-use color::{ColoredString, Colors, Elem};
 use std::fs::Metadata;
 use std::os::unix::fs::PermissionsExt;
 

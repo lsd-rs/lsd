@@ -1,4 +1,4 @@
-use meta::{FileType, Name};
+use crate::meta::{FileType, Name};
 use std::collections::HashMap;
 
 pub struct Icons {
@@ -308,7 +308,7 @@ impl Icons {
 #[cfg(test)]
 mod test {
     use super::{Icons, Theme, ICON_SPACE};
-    use meta::{FileType, Name, Permissions};
+    use crate::meta::{FileType, Name, Permissions};
     use std::fs::File;
     use tempdir::TempDir;
 

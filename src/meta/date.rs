@@ -1,6 +1,6 @@
+use crate::color::{ColoredString, Colors, Elem};
+use crate::flags::{DateFlag, Flags};
 use chrono_humanize::{Accuracy, HumanTime, Tense};
-use color::{ColoredString, Colors, Elem};
-use flags::{DateFlag, Flags};
 use std::fs::Metadata;
 use std::time::UNIX_EPOCH;
 use time::{Duration, Timespec};
@@ -61,12 +61,11 @@ impl Date {
 #[cfg(test)]
 mod test {
     use super::Date;
+    use crate::color::{Colors, Theme};
+    use crate::flags::{DateFlag, Flags};
     use ansi_term::Colour;
-    use color::{Colors, Theme};
-    use flags::{DateFlag, Flags};
-    use std::env;
-    use std::fs;
     use std::process::Command;
+    use std::{env, fs};
     use time;
 
     #[test]
