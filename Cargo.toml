@@ -2,7 +2,7 @@
 authors = ["Peltoche <dev@halium.fr>"]
 build = "build.rs"
 categories = ["command-line-utilities"]
-description = "A ls command with a lot of pretty colors."
+description = "An ls command with a lot of pretty colors and some other stuff."
 keywords = ["ls"]
 license = "Apache-2.0"
 name = "lsd"
