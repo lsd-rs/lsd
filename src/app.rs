@@ -3,7 +3,7 @@ use clap::{App, Arg};
 pub fn build() -> App<'static, 'static> {
     App::new("lsd")
         .version(crate_version!())
-        .about("An ls comment with a lot of pretty colors and some other stuff.")
+        .about(crate_description!())
         .arg(Arg::with_name("FILE").multiple(true).default_value("."))
         .arg(
             Arg::with_name("all")
