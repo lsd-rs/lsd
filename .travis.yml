@@ -56,7 +56,7 @@ matrix:
       install:
         - rustup component add clippy
       script:
-        - cargo clippy --all-features -- -D clippy::pedantic
+        - cargo clippy --all-features
 
 env:
   global:
