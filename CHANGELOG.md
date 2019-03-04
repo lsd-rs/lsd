@@ -5,10 +5,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [0.13.0] - 2019-03-04
+### Added
 - Add some support for the LS_COLORS env variable from [meain](https://github.com/meain)
-- Fix the display when not outputting to a tty from [meain](https://github.com/meain)
 - Add the --classic flag from [loewenheim](https://github.com/loewenheim)
+
+### Changed
 - Improve the tree display
+
+### Fixed
+- Fix the display when not outputting to a tty from [meain](https://github.com/meain)
 
 ## [0.12.0] - 2019-01-23
 ### Added
