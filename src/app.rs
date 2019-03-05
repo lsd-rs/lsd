@@ -71,6 +71,12 @@ pub fn build() -> App<'static, 'static> {
                 .help("Recurse into directories"),
         )
         .arg(
+            Arg::with_name("human_readable")
+                .short("h")
+                .long("human-readable")
+                .help("For ls compatibility purposes ONLY, currently set by default"),
+        )
+        .arg(
             Arg::with_name("tree")
                 .long("tree")
                 .multiple(true)
