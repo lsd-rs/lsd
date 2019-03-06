@@ -1,6 +1,6 @@
 use crate::color::{ColoredString, Colors, Elem};
 use crate::flags::{DateFlag, Flags};
-use chrono_humanize::{Accuracy, HumanTime, Tense};
+use chrono_humanize::{HumanTime};
 use std::fs::Metadata;
 use std::time::UNIX_EPOCH;
 use time::{Duration, Timespec};
@@ -52,7 +52,7 @@ impl Date {
         match flags.date {
             DateFlag::Date => self.0.ctime().to_string(),
             DateFlag::Relative => {
-                HumanTime::from(self.0 - time::now()).to_text_en(Accuracy::Rough, Tense::Past)
+                format!("{}", HumanTime::from(self.0 - time::now()))
             }
         }
     }
@@ -189,6 +189,43 @@ mod test {
         assert_eq!(
             Colour::Fixed(36).paint("2 days ago  "),
             date.render(&colors, 12, flags)
+        );
+
+        fs::remove_file(file_path).unwrap();
+    }
+
+
+    #[test]
+    fn test_with_relative_date_now() {
+        let mut file_path = env::temp_dir();
+        file_path.push("test_with_relative_date_now.tmp");
+
+        let creation_date = time::now();
+
+        let success = Command::new("touch")
+            .arg("-t")
+            .arg(
+                creation_date
+                    .to_local()
+                    .strftime("%Y%m%d%H%M.%S")
+                    .unwrap()
+                    .to_string(),
+            )
+            .arg(&file_path)
+            .status()
+            .unwrap()
+            .success();
+        assert_eq!(true, success, "failed to exec touch");
+
+        let colors = Colors::new(Theme::Default);
+        let date = Date::from(&file_path.metadata().unwrap());
+
+        let mut flags = Flags::default();
+        flags.date = DateFlag::Relative;
+
+        assert_eq!(
+            Colour::Fixed(40).paint("now  "),
+            date.render(&colors, 5, flags)
         );
 
         fs::remove_file(file_path).unwrap();
