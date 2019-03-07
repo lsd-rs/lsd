@@ -1,145 +1,109 @@
-use std::io;
-use std::path::PathBuf;
 use std::ffi::{OsStr, OsString};
+use std::io;
+use std::os::windows::ffi::{OsStrExt, OsStringExt};
+use std::path::PathBuf;
 use std::ptr::null_mut;
-use std::os::windows::ffi::{OsStringExt, OsStrExt};
 
-use winapi::um::winnt;
-use winapi::um::accctrl::TRUSTEE_W;
-use winapi::shared::winerror;
 use winapi::ctypes::c_void;
+use winapi::shared::winerror;
+use winapi::um::accctrl::TRUSTEE_W;
+use winapi::um::winnt;
 
 use super::{Owner, Permissions};
 
-const BUF_SIZE: u32 = 256;
+// All pointers should only be used with WinAPI calls
+struct SecurityDescriptor {
+    sd_ptr: *mut c_void,
+    owner_sid_ptr: *mut c_void,
+    group_sid_ptr: *mut c_void,
+    dacl_ptr: *mut winapi::um::winnt::ACL,
+}
 
+// Only sd_ptr needs to be freed
+// Other pointers point to memory inside sd_ptr
+impl Drop for SecurityDescriptor {
+    fn drop(&mut self) {
+        unsafe {
+            winapi::um::winbase::LocalFree(self.sd_ptr);
+        }
+    }
+}
+
+impl SecurityDescriptor {
+    pub fn new(path: Vec<u16>) -> Result<Self, io::Error> {
+        let mut security_descriptor = SecurityDescriptor {
+            sd_ptr: null_mut(),
+            owner_sid_ptr: null_mut(),
+            group_sid_ptr: null_mut(),
+            dacl_ptr: null_mut(),
+        };
+
+        // Pointers are only valid if their corresponding X_SECURITY_INFORMATION
+        // flags are set
+        let error_code = unsafe {
+            winapi::um::aclapi::GetNamedSecurityInfoW(
+                path.as_ptr(),
+                winapi::um::accctrl::SE_FILE_OBJECT,
+                winnt::OWNER_SECURITY_INFORMATION
+                    | winnt::GROUP_SECURITY_INFORMATION
+                    | winnt::DACL_SECURITY_INFORMATION,
+                &mut security_descriptor.owner_sid_ptr,
+                &mut security_descriptor.group_sid_ptr,
+                &mut security_descriptor.dacl_ptr,
+                null_mut(),
+                &mut security_descriptor.sd_ptr,
+            )
+        };
+
+        match error_code {
+            winerror::ERROR_SUCCESS => Ok(security_descriptor),
+            _ => Err(std::io::Error::from_raw_os_error(error_code as i32)),
+        }
+    }
+
+    pub fn get_owner(&mut self) -> Result<String, std::io::Error> {
+        get_account_info(self.owner_sid_ptr)
+    }
+
+    pub fn get_group(&mut self) -> Result<String, std::io::Error> {
+        get_account_info(self.group_sid_ptr)
+    }
+
+    pub fn get_owner_access_mask(&mut self) -> Result<u32, io::Error> {
+        self.get_access_mask(self.owner_sid_ptr)
+    }
+
+    pub fn get_group_access_mask(&mut self) -> Result<u32, io::Error> {
+        self.get_access_mask(self.group_sid_ptr)
+    }
+
+    pub fn get_world_access_mask(&mut self) -> Result<u32, io::Error> {
+        let world_sid = get_world_sid()?;
+
+        self.get_access_mask(world_sid.as_ptr() as *mut c_void)
+    }
+
+    fn get_access_mask(&mut self, sid: *mut c_void) -> Result<u32, io::Error> {
+        let mut trustee = trustee_from_sid(sid);
+
+        get_acl_access_mask(self.dacl_ptr as *mut _, &mut trustee)
+    }
+}
 
 pub fn get_file_data(path: &PathBuf) -> Result<(Owner, Permissions), io::Error> {
-    // Overall design:
-    // This function allocates some data with GetNamedSecurityInfoW,
-    // manipulates it only through WinAPI calls (treating the pointers as
-    // opaque) and then frees it at the end with LocalFree.
-    //
-    // For memory safety, the critical things are:
-    // - No pointer is valid before the return value of GetNamedSecurityInfoW
-    //   is checked
-    // - LocalFree must be called before returning
-    // - No pointer is valid after the call to LocalFree
-
-    let windows_path = buf_from_os(path.as_os_str());
-
-    // These pointers will be populated by GetNamedSecurityInfoW
-    // sd_ptr points at a new buffer that must be freed
-    // The others point at (opaque) things inside that buffer
-    let mut owner_sid_ptr = null_mut();
-    let mut group_sid_ptr = null_mut();
-    let mut dacl_ptr = null_mut();
-    let mut sd_ptr = null_mut();
-
     // Assumptions:
     // - windows_path is a null-terminated WTF-16-encoded string
-    // - The return value is checked against ERROR_SUCCESS before pointers are used
-    // - All pointers are opaque and should only be used with WinAPI calls
-    // - Pointers are only valid if their corresponding X_SECURITY_INFORMATION
-    //   flags are set
-    // - sd_ptr must be freed with LocalFree
-    let error_code = unsafe {
-        winapi::um::aclapi::GetNamedSecurityInfoW(
-            windows_path.as_ptr(),
-            winapi::um::accctrl::SE_FILE_OBJECT,
-            winnt::OWNER_SECURITY_INFORMATION
-                | winnt::GROUP_SECURITY_INFORMATION
-                | winnt::DACL_SECURITY_INFORMATION,
-            &mut owner_sid_ptr,
-            &mut group_sid_ptr,
-            &mut dacl_ptr,
-            null_mut(),
-            &mut sd_ptr
-        )
-    };
+    let windows_path = buf_from_os(path.as_os_str());
+    let mut security_descriptor = SecurityDescriptor::new(windows_path)?;
 
-    if error_code != winerror::ERROR_SUCCESS {
-        return Err(std::io::Error::from_raw_os_error(error_code as i32))
-    }
+    let owner = security_descriptor.get_owner()?;
+    let group = security_descriptor.get_group()?;
 
-    // Assumptions:
-    // - owner_sid_ptr is valid
-    // - group_sid_ptr is valid
-    // (both OK because GetNamedSecurityInfoW returned success)
-    let (owner_name, owner_domain) = unsafe { lookup_account_sid(owner_sid_ptr) }?;
-    let (group_name, group_domain) = unsafe { lookup_account_sid(group_sid_ptr) }?;
-
-    let owner_name = os_from_buf(&owner_name);
-    let owner_domain = os_from_buf(&owner_domain);
-    let group_name = os_from_buf(&group_name);
-    let group_domain = os_from_buf(&group_domain);
-
-    // Format into domain\name format
-    let mut owner = owner_domain.to_string_lossy().into_owned();
-    owner.push('\\');
-    owner.push_str(&owner_name.to_string_lossy());
-
-    let mut group = group_domain.to_string_lossy().into_owned();
-    group.push('\\');
-    group.push_str(&group_name.to_string_lossy());
-
-    // This structure will be returned
     let owner = Owner::new(owner, group);
 
-    // Get the size and allocate bytes for a 1-sub-authority SID
-    // 1 sub-authority because the Windows World SID is always S-1-1-0, with
-    // only a single sub-authority.
-    //
-    // Assumptions: None
-    // "This function cannot fail"
-    //     -- Windows Dev Center docs
-    let mut world_sid_len: u32 = unsafe { winapi::um::securitybaseapi::GetSidLengthRequired(1) };
-    let mut world_sid = vec![0u8; world_sid_len as usize];
-
-    // Assumptions:
-    // - world_sid_len is no larger than the number of bytes available at
-    //   world_sid
-    // - world_sid is appropriately aligned (if there are strange crashes this
-    //   might be why)
-    let result = unsafe {
-        winapi::um::securitybaseapi::CreateWellKnownSid(
-            winnt::WinWorldSid,
-            null_mut(),
-            world_sid.as_mut_ptr() as *mut _,
-            &mut world_sid_len)
-    };
-
-    if result == 0 {
-        // Failed to create the SID
-        // Assumptions: Same as the other identical calls
-        unsafe { winapi::um::winbase::LocalFree(sd_ptr); }
-
-        // Assumptions: None (GetLastError shouldn't ever fail)
-        return Err(io::Error::from_raw_os_error(
-                unsafe { winapi::um::errhandlingapi::GetLastError() } as i32));
-    }
-
-    // Assumptions:
-    // - xxxxx_sid_ptr are valid pointers to SIDs
-    // - xxxxx_trustee is only valid as long as its SID pointer is
-    let mut owner_trustee = unsafe { trustee_from_sid(owner_sid_ptr) };
-    let mut group_trustee = unsafe { trustee_from_sid(group_sid_ptr) };
-    let mut world_trustee = unsafe { trustee_from_sid(world_sid.as_mut_ptr() as *mut _) };
-
-    // Assumptions:
-    // - xxxxx_trustee are still valid (including underlying SID)
-    // - dacl_ptr is still valid
-    let owner_access_mask = unsafe {
-        get_acl_access_mask(dacl_ptr as *mut _, &mut owner_trustee)
-    }?;
-
-    let group_access_mask = unsafe {
-        get_acl_access_mask(dacl_ptr as *mut _, &mut group_trustee)
-    }?;
-
-    let world_access_mask = unsafe {
-        get_acl_access_mask(dacl_ptr as *mut _, &mut world_trustee)
-    }?;
+    let owner_access_mask = security_descriptor.get_owner_access_mask()?;
+    let group_access_mask = security_descriptor.get_group_access_mask()?;
+    let world_access_mask = security_descriptor.get_world_access_mask()?;
 
     let has_bit = |field: u32, bit: u32| field & bit != 0;
 
@@ -161,15 +125,42 @@ pub fn get_file_data(path: &PathBuf) -> Result<(Owner, Permissions), io::Error> 
         setgid: false,
     };
 
-    // Assumptions:
-    // - sd_ptr was previously allocated with WinAPI functions
-    // - All pointers into the memory are now invalid
-    // - The free succeeds (currently unchecked -- there's no real recovery
-    //   options. It's not much memory, so leaking it on failure is
-    //   *probably* fine)
-    unsafe { winapi::um::winbase::LocalFree(sd_ptr); }
-
     Ok((owner, permissions))
+}
+
+fn get_last_error() -> i32 {
+    unsafe { winapi::um::errhandlingapi::GetLastError() as i32 }
+}
+
+fn get_world_sid() -> Result<Vec<u8>, io::Error> {
+    // Get the size and allocate bytes for a 1-sub-authority SID
+    // 1 sub-authority because the Windows World SID is always S-1-1-0, with
+    // only a single sub-authority.
+    //
+    // Assumptions: None
+    // "This function cannot fail"
+    //     -- Windows Dev Center docs
+    let mut world_sid_len: u32 = unsafe { winapi::um::securitybaseapi::GetSidLengthRequired(1) };
+    let mut world_sid = vec![0u8; world_sid_len as usize];
+
+    // Assumptions:
+    // - world_sid_len is no larger than the number of bytes available at
+    //   world_sid
+    // - world_sid is appropriately aligned (if there are strange crashes this
+    //   might be why)
+    let result = unsafe {
+        winapi::um::securitybaseapi::CreateWellKnownSid(
+            winnt::WinWorldSid,
+            null_mut(),
+            world_sid.as_mut_ptr() as *mut _,
+            &mut world_sid_len,
+        )
+    };
+
+    match result {
+        0 => Err(io::Error::from_raw_os_error(get_last_error())),
+        _ => Ok(world_sid),
+    }
 }
 
 /// Evaluate an ACL for a particular trustee and get its access rights
@@ -178,21 +169,26 @@ pub fn get_file_data(path: &PathBuf) -> Result<(Owner, Permissions), io::Error> 
 /// - acl_ptr points to a valid ACL data structure
 /// - trustee_ptr points to a valid trustee data structure
 /// - Both remain valid through the function call (no long-term requirement)
-unsafe fn get_acl_access_mask(acl_ptr: *mut c_void, trustee_ptr: *mut TRUSTEE_W) -> Result<u32, io::Error> {
+fn get_acl_access_mask(
+    acl_ptr: *mut c_void,
+    trustee_ptr: *mut TRUSTEE_W,
+) -> Result<u32, io::Error> {
     let mut access_mask = 0;
 
     // Assumptions:
     // - All function assumptions
     // - Result is not valid until return value is checked
-    let err_code = winapi::um::aclapi::GetEffectiveRightsFromAclW(
-        acl_ptr as *mut _,
-        trustee_ptr,
-        &mut access_mask);
+    let err_code = unsafe {
+        winapi::um::aclapi::GetEffectiveRightsFromAclW(
+            acl_ptr as *mut _,
+            trustee_ptr,
+            &mut access_mask,
+        )
+    };
 
-    if err_code == winerror::ERROR_SUCCESS {
-        Ok(access_mask)
-    } else {
-        Err(io::Error::from_raw_os_error(err_code as i32))
+    match err_code {
+        winerror::ERROR_SUCCESS => Ok(access_mask),
+        _ => Err(io::Error::from_raw_os_error(err_code as i32)),
     }
 }
 
@@ -204,23 +200,23 @@ unsafe fn get_acl_access_mask(acl_ptr: *mut c_void, trustee_ptr: *mut TRUSTEE_W)
 /// Note: winapi's TRUSTEE_W looks different from the one in the MS docs because
 /// of some unusal pre-processor macros in the original .h file. The winapi
 /// version is correct (MS's doc generator messed up)
-unsafe fn trustee_from_sid(sid_ptr: *mut c_void) -> TRUSTEE_W {
-    let mut trustee: TRUSTEE_W = std::mem::zeroed();
+fn trustee_from_sid(sid_ptr: *mut c_void) -> TRUSTEE_W {
+    let mut trustee: TRUSTEE_W = unsafe { std::mem::zeroed() };
 
-    winapi::um::aclapi::BuildTrusteeWithSidW(&mut trustee, sid_ptr);
+    unsafe {
+        winapi::um::aclapi::BuildTrusteeWithSidW(&mut trustee, sid_ptr);
+    }
 
     trustee
 }
 
 /// Get a username and domain name from a SID
 ///
-/// Assumption: sid is a valid pointer that remains valid through the entire
-/// function execution
-///
 /// Returns null-terminated Vec's, one for the name and one for the domain.
-unsafe fn lookup_account_sid(sid: *mut c_void) -> Result<(Vec<u16>, Vec<u16>), std::io::Error> {
-    let mut name_size: u32 = BUF_SIZE;
-    let mut domain_size: u32 = BUF_SIZE;
+fn lookup_account_sid(sid: *mut c_void) -> Result<(Vec<u16>, Vec<u16>), std::io::Error> {
+    const BUF_SIZE: u32 = 256;
+    let mut name_size = BUF_SIZE;
+    let mut domain_size = BUF_SIZE;
 
     loop {
         let mut name: Vec<u16> = vec![0; name_size as usize];
@@ -232,20 +228,20 @@ unsafe fn lookup_account_sid(sid: *mut c_void) -> Result<(Vec<u16>, Vec<u16>), s
         let mut sid_name_use = 0;
 
         // Assumptions:
-        // - sid is a valid pointer to a SID data structure
-        // - name_size and domain_size accurately reflect the sizes
-        let result = winapi::um::winbase::LookupAccountSidW(
-            null_mut(),
-            sid,
-            name.as_mut_ptr(),
-            &mut name_size,
-            domain.as_mut_ptr(),
-            &mut domain_size,
-            &mut sid_name_use,
-        );
+        // - after call, name_size and domain_size accurately reflect the sizes
+        let result = unsafe {
+            winapi::um::winbase::LookupAccountSidW(
+                null_mut(),
+                sid,
+                name.as_mut_ptr(),
+                &mut name_size,
+                domain.as_mut_ptr(),
+                &mut domain_size,
+                &mut sid_name_use,
+            )
+        };
 
         if result != 0 {
-            // Success!
             return Ok((name, domain));
         } else if name_size != old_name_size || domain_size != old_domain_size {
             // Need bigger buffers
@@ -253,10 +249,17 @@ unsafe fn lookup_account_sid(sid: *mut c_void) -> Result<(Vec<u16>, Vec<u16>), s
             continue;
         } else {
             // Some other failure
-            // Assumptions: None (GetLastError shouldn't ever fail)
-            return Err(io::Error::from_raw_os_error(winapi::um::errhandlingapi::GetLastError() as i32));
+            return Err(io::Error::from_raw_os_error(get_last_error()));
         }
     }
+}
+
+fn get_account_info(sid: *mut c_void) -> Result<String, std::io::Error> {
+    let (name, domain) = lookup_account_sid(sid)?;
+    let name = os_from_buf(&name);
+    let domain = os_from_buf(&domain);
+
+    Ok(format!("{}\\{}", domain.to_string_lossy(), name.to_string_lossy()))
 }
 
 /// Create an `OsString` from a NUL-terminated buffer
@@ -312,7 +315,9 @@ mod test {
             for msb in 0..=256u16 {
                 let val = msb << 8 | lsb;
 
-                if val != 0 { vec.push(val) }
+                if val != 0 {
+                    vec.push(val)
+                }
             }
 
             vec.push(0);
@@ -321,6 +326,16 @@ mod test {
             let new_vec = buf_from_os(&os);
 
             assert_eq!(&vec, &new_vec);
+        }
+    }
+
+    #[test]
+    fn get_file_data_success() {
+        let path = PathBuf::from("Cargo.toml");
+
+        match get_file_data(&path) {
+            Ok(_) => assert!(true),
+            _ => assert!(false),
         }
     }
 }
