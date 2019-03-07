@@ -20,6 +20,9 @@ matrix:
       env:
         - TARGET=arm-unknown-linux-gnueabihf
         - CARGO_TARGET_ARM_UNKNOWN_LINUX_GNUEABIHF_LINKER=arm-linux-gnueabihf-gcc-4.8
+    - os: windows
+      rust: stable
+      env: TARGET=x86_64-pc-windows-gnu
 
     # Beta channel.
     # The other platforms are disabled in order to reduce the total CI time
@@ -48,6 +51,9 @@ matrix:
       env:
         - TARGET=arm-unknown-linux-gnueabihf
         - CARGO_TARGET_ARM_UNKNOWN_LINUX_GNUEABIHF_LINKER=arm-linux-gnueabihf-gcc-4.8
+    - os: windows
+      rust: 1.31.0
+      env: TARGET=x86_64-pc-windows-gnu
 
     # Code formatting check
     - os: linux
