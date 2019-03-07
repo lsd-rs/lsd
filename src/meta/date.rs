@@ -64,10 +64,10 @@ mod test {
     use crate::color::{Colors, Theme};
     use crate::flags::{DateFlag, Flags};
     use ansi_term::Colour;
-    use std::{env, fs};
-    use std::process::{Command, ExitStatus};
-    use std::path::Path;
     use std::io;
+    use std::path::Path;
+    use std::process::{Command, ExitStatus};
+    use std::{env, fs};
     use time;
 
     #[cfg(unix)]

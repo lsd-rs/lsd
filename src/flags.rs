@@ -47,14 +47,14 @@ impl Flags {
                     return Err(Error::with_description(
                         "The argument '--depth' requires a valid positive number",
                         ErrorKind::ValueValidation,
-                    ))
+                    ));
                 }
             },
             Some(_) => {
                 return Err(Error::with_description(
                     "The argument '--depth' requires '--tree' or '--recursive'",
                     ErrorKind::MissingRequiredArgument,
-                ))
+                ));
             }
             None => usize::max_value(),
         };
