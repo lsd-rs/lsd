@@ -3,9 +3,7 @@ use clap::{ArgMatches, Error, ErrorKind};
 #[derive(Clone, Debug, Copy)]
 pub struct Flags {
     pub display_all: bool,
-    pub display_long: bool,
-    pub display_online: bool,
-    pub display_tree: bool,
+    pub layout: Layout,
     pub display_indicators: bool,
     pub recursive: bool,
     pub sort_by: SortFlag,
@@ -37,33 +35,38 @@ impl Flags {
         } else {
             SortOrder::Default
         };
-
-        let display_tree = matches.is_present("tree");
+        let layout = if matches.is_present("tree") {
+            Layout::Tree
+        } else if matches.is_present("long") {
+            Layout::OneLine { long: true }
+        } else if matches.is_present("oneline") {
+            Layout::OneLine { long: false }
+        } else {
+            Layout::Grid
+        };
         let recursive = matches.is_present("recursive");
         let recursion_depth = match matches.value_of("depth") {
-            Some(str) if recursive || display_tree => match str.parse::<usize>() {
+            Some(str) if recursive || layout == Layout::Tree => match str.parse::<usize>() {
                 Ok(val) => val,
                 Err(_) => {
                     return Err(Error::with_description(
                         "The argument '--depth' requires a valid positive number",
                         ErrorKind::ValueValidation,
-                    ))
+                    ));
                 }
             },
             Some(_) => {
                 return Err(Error::with_description(
                     "The argument '--depth' requires '--tree' or '--recursive'",
                     ErrorKind::MissingRequiredArgument,
-                ))
+                ));
             }
             None => usize::max_value(),
         };
 
         Ok(Self {
             display_all: matches.is_present("all"),
-            display_long: matches.is_present("long"),
-            display_online: matches.is_present("oneline"),
-            display_tree,
+            layout,
             display_indicators: matches.is_present("indicators"),
             recursive,
             recursion_depth,
@@ -99,9 +102,7 @@ impl Default for Flags {
     fn default() -> Self {
         Self {
             display_all: false,
-            display_long: false,
-            display_online: false,
-            display_tree: false,
+            layout: Layout::Grid,
             display_indicators: false,
             recursive: false,
             recursion_depth: usize::max_value(),
@@ -194,6 +195,13 @@ impl<'a> From<&'a str> for IconTheme {
             _ => panic!("invalid \"icon-theme\" flag: {}", theme),
         }
     }
+}
+
+#[derive(Clone, Debug, Copy, PartialEq, Eq)]
+pub enum Layout {
+    Grid,
+    Tree,
+    OneLine { long: bool },
 }
 
 #[cfg(test)]
