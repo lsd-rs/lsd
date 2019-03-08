@@ -1,9 +1,9 @@
-use crate::flags::{DirOrderFlag, Flags, SortFlag, SortOrder};
+use crate::flags::{DirOrderFlag, Flags, Layout, SortFlag, SortOrder};
 use crate::meta::{FileType, Meta};
 use std::cmp::Ordering;
 
 pub fn by_meta(a: &Meta, b: &Meta, flags: Flags) -> Ordering {
-    if flags.display_tree {
+    if flags.layout == Layout::Tree {
         return by_name_with_files_first(a, b, flags);
     }
 

@@ -1,6 +1,6 @@
 use crate::color::{ColoredString, Colors, Elem};
 use crate::flags::{DateFlag, Flags};
-use chrono_humanize::{HumanTime};
+use chrono_humanize::HumanTime;
 use std::fs::Metadata;
 use std::time::UNIX_EPOCH;
 use time::{Duration, Timespec};
@@ -51,9 +51,7 @@ impl Date {
     pub fn date_string(&self, flags: Flags) -> String {
         match flags.date {
             DateFlag::Date => self.0.ctime().to_string(),
-            DateFlag::Relative => {
-                format!("{}", HumanTime::from(self.0 - time::now()))
-            }
+            DateFlag::Relative => format!("{}", HumanTime::from(self.0 - time::now())),
         }
     }
 }
@@ -193,7 +191,6 @@ mod test {
 
         fs::remove_file(file_path).unwrap();
     }
-
 
     #[test]
     fn test_with_relative_date_now() {

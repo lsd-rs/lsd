@@ -1,5 +1,5 @@
 use crate::color::Colors;
-use crate::flags::Flags;
+use crate::flags::{Flags, Layout};
 use crate::icon::Icons;
 use crate::meta::{FileType, Meta};
 use ansi_term::{ANSIString, ANSIStrings};
@@ -47,7 +47,7 @@ fn inner_display_one_line(
     let mut output = String::new();
 
     let mut padding_rules = None;
-    if flags.display_long {
+    if let Layout::OneLine { long: true } = flags.layout {
         // Defining the padding rules is costly and so shouldn't be done several
         // times. That's why it's done outside the loop.
         padding_rules = Some(PaddingRules {
@@ -67,7 +67,7 @@ fn inner_display_one_line(
             continue;
         }
 
-        if flags.display_long {
+        if let Layout::OneLine { long: true } = flags.layout {
             output += &get_long_output(&meta, &colors, &icons, flags, padding_rules.unwrap());
         } else {
             output += &get_short_output(&meta, &colors, &icons, flags);

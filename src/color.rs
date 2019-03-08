@@ -55,7 +55,6 @@ impl Elem {
 
 pub type ColoredString<'a> = ANSIString<'a>;
 
-
 #[allow(dead_code)]
 #[derive(Debug, Copy, Clone)]
 pub enum Theme {
@@ -105,25 +104,23 @@ impl Colors {
     fn style_from_path(&self, path: &str) -> Option<Style> {
         match &self.lscolors {
             Some(lscolors) => lscolors
-                    .style_for_path(path)
-                    .map(lscolors::Style::to_ansi_term_style),
+                .style_for_path(path)
+                .map(lscolors::Style::to_ansi_term_style),
             None => None,
         }
     }
 
     fn style(&self, elem: &Elem) -> Style {
         match &self.lscolors {
-            Some(lscolors) => {
-                match self.get_indicator_from_elem(elem) {
-                    Some(style) => {
-                        let style = lscolors.style_for_indicator(style);
-                        style
-                            .map(lscolors::Style::to_ansi_term_style)
-                            .unwrap_or_default()
-                    }
-                    None => self.style_default(elem),
+            Some(lscolors) => match self.get_indicator_from_elem(elem) {
+                Some(style) => {
+                    let style = lscolors.style_for_indicator(style);
+                    style
+                        .map(lscolors::Style::to_ansi_term_style)
+                        .unwrap_or_default()
                 }
-            }
+                None => self.style_default(elem),
+            },
             None => self.style_default(elem),
         }
     }
