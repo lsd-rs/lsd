@@ -5,7 +5,6 @@ description: lsd is a ls command including pretty icons based on nerd-font.
 
 architectures:
   - amd64
-  - i386
 grade: stable
 confinement: strict
 

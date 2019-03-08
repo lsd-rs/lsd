@@ -2,13 +2,13 @@
 authors = ["Peltoche <dev@halium.fr>"]
 build = "build.rs"
 categories = ["command-line-utilities"]
-description = "A ls command with a lot of pretty colors."
+description = "An ls command with a lot of pretty colors and some other stuff."
 keywords = ["ls"]
 license = "Apache-2.0"
 name = "lsd"
 readme = "./README.md"
 repository = "https://github.com/Peltoche/lsd"
-version = "0.12.1-pre"
+version = "0.13.0"
 edition = "2018"
 
 [[bin]]

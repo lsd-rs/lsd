@@ -3,7 +3,7 @@ use clap::{App, Arg};
 pub fn build() -> App<'static, 'static> {
     App::new("lsd")
         .version(crate_version!())
-        .about("An ls comment with a lot of pretty colors and some other stuff.")
+        .about(crate_description!())
         .arg(Arg::with_name("FILE").multiple(true).default_value("."))
         .arg(
             Arg::with_name("all")
@@ -69,6 +69,12 @@ pub fn build() -> App<'static, 'static> {
                 .multiple(true)
                 .conflicts_with("tree")
                 .help("Recurse into directories"),
+        )
+        .arg(
+            Arg::with_name("human_readable")
+                .short("h")
+                .long("human-readable")
+                .help("For ls compatibility purposes ONLY, currently set by default"),
         )
         .arg(
             Arg::with_name("tree")
