@@ -281,13 +281,15 @@ fn get_visible_width(input: &str) -> usize {
     // Search for every instance of "\e[" indicating the start of a color code
     // then count the number of charactere between the string and the first 'm'
     // charactere indicating the end of the code color.
-    for (idx, _) in input.match_indices("\u{1b}[") {
-        for c in input.chars().skip(idx) {
+    let matches: Vec<_> = input.match_indices("\u{1b}[").collect();
+    if matches.len() > 0 {
+        for c in input.chars().skip(matches[0].0) {
             nb_invisible_char += 1;
             if c == 'm' {
                 break;
             }
         }
+        nb_invisible_char += 2;
     }
 
     UnicodeWidthStr::width(input) - nb_invisible_char
@@ -392,6 +394,7 @@ mod tests {
             // Add 3 characters for the icons.
             ("Ｈｅｌｌｏ,ｗｏｒｌｄ!", 25),
             ("ASCII1234-_", 14),
+            ("File with space", 18),
             ("制作样本。", 13),
             ("日本語", 9),
             ("샘플은 무료로 드리겠습니다", 29),
@@ -420,8 +423,9 @@ mod tests {
     #[test]
     fn test_display_get_visible_width_with_colors() {
         for (s, l) in &[
-            ("Ｈｅｌｌｏ,ｗｏｒｌｄ!", 24),
+            ("Ｈｅｌｌｏ,ｗｏｒｌｄ!", 22),
             ("ASCII1234-_", 11),
+            ("File with space", 15),
             ("制作样本。", 10),
             ("日本語", 6),
             ("샘플은 무료로 드리겠습니다", 26),
@@ -447,7 +451,41 @@ mod tests {
             assert_eq!(true, output.starts_with("\u{1b}[38;5;"));
             assert_eq!(true, output.ends_with("[0m"));
 
-            println!("str: {:?}", output);
+            assert_eq!(get_visible_width(&output), *l);
+        }
+    }
+
+    #[test]
+    fn test_display_get_visible_width_without_colors() {
+        for (s, l) in &[
+            ("Ｈｅｌｌｏ,ｗｏｒｌｄ!", 22),
+            ("ASCII1234-_", 11),
+            ("File with space", 15),
+            ("制作样本。", 10),
+            ("日本語", 6),
+            ("샘플은 무료로 드리겠습니다", 26),
+            ("👩🐩", 4),
+            ("🔬", 2),
+        ] {
+            let path = Path::new(s);
+            let name = Name::new(
+                &path,
+                FileType::File {
+                    exec: false,
+                    uid: false,
+                },
+            );
+            let output = name
+                .render(
+                    &Colors::new(color::Theme::NoColor),
+                    &Icons::new(icon::Theme::NoIcon),
+                )
+                .to_string();
+
+            // check if the color is present.
+            assert_eq!(false, output.starts_with("\u{1b}[38;5;"));
+            assert_eq!(false, output.ends_with("[0m"));
+
             assert_eq!(get_visible_width(&output), *l);
         }
     }
