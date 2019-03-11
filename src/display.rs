@@ -278,21 +278,18 @@ fn get_long_output(
 fn get_visible_width(input: &str) -> usize {
     let mut nb_invisible_char = 0;
 
-    for (idx, _) in input.match_indices("\u{1b}[38;5;" /* "\e[38;5;" */) {
-        let color_code = input.chars().skip(idx + 7);
-        let mut code_size = 0;
-        color_code
-            .skip_while(|x| {
-                code_size += 1;
-                char::is_numeric(*x)
-            })
-            .count();
-        nb_invisible_char += 6 + code_size; /* "\e[38;5;" + color number + "m" */
-    }
-
-    if nb_invisible_char > 0 {
-        // If no color have been set, the is no reset character.
-        nb_invisible_char += 3; /* "[0m" */
+    // Search for every instance of "\e[" indicating the start of a color code
+    // then count the number of charactere between the string and the first 'm'
+    // charactere indicating the end of the code color.
+    let matches: Vec<_> = input.match_indices("\u{1b}[").collect();
+    if matches.len() > 0 {
+        for c in input.chars().skip(matches[0].0) {
+            nb_invisible_char += 1;
+            if c == 'm' {
+                break;
+            }
+        }
+        nb_invisible_char += 2;
     }
 
     UnicodeWidthStr::width(input) - nb_invisible_char
@@ -397,6 +394,7 @@ mod tests {
             // Add 3 characters for the icons.
             ("Ｈｅｌｌｏ,ｗｏｒｌｄ!", 25),
             ("ASCII1234-_", 14),
+            ("File with space", 18),
             ("制作样本。", 13),
             ("日本語", 9),
             ("샘플은 무료로 드리겠습니다", 29),
@@ -427,6 +425,7 @@ mod tests {
         for (s, l) in &[
             ("Ｈｅｌｌｏ,ｗｏｒｌｄ!", 22),
             ("ASCII1234-_", 11),
+            ("File with space", 15),
             ("制作样本。", 10),
             ("日本語", 6),
             ("샘플은 무료로 드리겠습니다", 26),
@@ -451,6 +450,41 @@ mod tests {
             // check if the color is present.
             assert_eq!(true, output.starts_with("\u{1b}[38;5;"));
             assert_eq!(true, output.ends_with("[0m"));
+
+            assert_eq!(get_visible_width(&output), *l);
+        }
+    }
+
+    #[test]
+    fn test_display_get_visible_width_without_colors() {
+        for (s, l) in &[
+            ("Ｈｅｌｌｏ,ｗｏｒｌｄ!", 22),
+            ("ASCII1234-_", 11),
+            ("File with space", 15),
+            ("制作样本。", 10),
+            ("日本語", 6),
+            ("샘플은 무료로 드리겠습니다", 26),
+            ("👩🐩", 4),
+            ("🔬", 2),
+        ] {
+            let path = Path::new(s);
+            let name = Name::new(
+                &path,
+                FileType::File {
+                    exec: false,
+                    uid: false,
+                },
+            );
+            let output = name
+                .render(
+                    &Colors::new(color::Theme::NoColor),
+                    &Icons::new(icon::Theme::NoIcon),
+                )
+                .to_string();
+
+            // check if the color is present.
+            assert_eq!(false, output.starts_with("\u{1b}[38;5;"));
+            assert_eq!(false, output.ends_with("[0m"));
 
             assert_eq!(get_visible_width(&output), *l);
         }
