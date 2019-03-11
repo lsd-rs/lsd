@@ -65,7 +65,7 @@ impl Flags {
         };
 
         Ok(Self {
-            display_all: matches.is_present("all"),
+            display_all: matches.is_present("all") || matches.is_present("almost-all"),
             layout,
             display_indicators: matches.is_present("indicators"),
             recursive,
