@@ -278,21 +278,16 @@ fn get_long_output(
 fn get_visible_width(input: &str) -> usize {
     let mut nb_invisible_char = 0;
 
-    for (idx, _) in input.match_indices("\u{1b}[38;5;" /* "\e[38;5;" */) {
-        let color_code = input.chars().skip(idx + 7);
-        let mut code_size = 0;
-        color_code
-            .skip_while(|x| {
-                code_size += 1;
-                char::is_numeric(*x)
-            })
-            .count();
-        nb_invisible_char += 6 + code_size; /* "\e[38;5;" + color number + "m" */
-    }
-
-    if nb_invisible_char > 0 {
-        // If no color have been set, the is no reset character.
-        nb_invisible_char += 3; /* "[0m" */
+    // Search for every instance of "\e[" indicating the start of a color code
+    // then count the number of charactere between the string and the first 'm'
+    // charactere indicating the end of the code color.
+    for (idx, _) in input.match_indices("\u{1b}[") {
+        for c in input.chars().skip(idx) {
+            nb_invisible_char += 1;
+            if c == 'm' {
+                break;
+            }
+        }
     }
 
     UnicodeWidthStr::width(input) - nb_invisible_char
@@ -425,7 +420,7 @@ mod tests {
     #[test]
     fn test_display_get_visible_width_with_colors() {
         for (s, l) in &[
-            ("Ｈｅｌｌｏ,ｗｏｒｌｄ!", 22),
+            ("Ｈｅｌｌｏ,ｗｏｒｌｄ!", 24),
             ("ASCII1234-_", 11),
             ("制作样本。", 10),
             ("日本語", 6),
@@ -452,6 +447,7 @@ mod tests {
             assert_eq!(true, output.starts_with("\u{1b}[38;5;"));
             assert_eq!(true, output.ends_with("[0m"));
 
+            println!("str: {:?}", output);
             assert_eq!(get_visible_width(&output), *l);
         }
     }
