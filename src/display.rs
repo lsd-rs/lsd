@@ -278,18 +278,12 @@ fn get_long_output(
 fn get_visible_width(input: &str) -> usize {
     let mut nb_invisible_char = 0;
 
-    // Search for every instance of "\e[" indicating the start of a color code
-    // then count the number of charactere between the string and the first 'm'
-    // charactere indicating the end of the code color.
-    let matches: Vec<_> = input.match_indices("\u{1b}[").collect();
-    if matches.len() > 0 {
-        for c in input.chars().skip(matches[0].0) {
-            nb_invisible_char += 1;
-            if c == 'm' {
-                break;
-            }
+    // If the input has color, do not compute the length contributed by the color to the actual length
+    if input.starts_with("\u{1b}[") {
+        let m_pos = input.find('m');
+        if let Some(len) = m_pos {
+            nb_invisible_char = len + 3  // 1 (index -> length) + 2 ( compensate for color reset chars )
         }
-        nb_invisible_char += 2;
     }
 
     UnicodeWidthStr::width(input) - nb_invisible_char
