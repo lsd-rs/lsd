@@ -59,6 +59,14 @@ Package available on [package.gentoo.org](https://packages.gentoo.org/packages/s
 sudo snap install lsd --classic
 ```
 
+### On macOS
+
+via [Homebrew](https://brew.sh/):
+
+```sh
+brew install lsd
+```
+
 ### From Sources
 
 With Rust's package manager cargo, you can install lsd via:
