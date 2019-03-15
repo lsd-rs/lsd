@@ -13,6 +13,12 @@ pub fn build() -> App<'static, 'static> {
                 .help("Do not ignore entries starting with ."),
         )
         .arg(
+            Arg::with_name("almost-all")
+                .short("A")
+                .multiple(true)
+                .help("Alias of -a"),
+        )
+        .arg(
             Arg::with_name("color")
                 .long("color")
                 .possible_value("always")
