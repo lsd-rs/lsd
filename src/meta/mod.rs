@@ -56,8 +56,14 @@ impl Meta {
             println!("cannot access '{}': {}", path.display(), err);
             return Ok(meta);
         }
+		let mut content = Vec::new();
 
-        let mut content = Vec::new();
+		let current_meta = Self::from_path(&PathBuf::from("."))?;
+		let parent_meta = Self::from_path(&PathBuf::from(".."))?;
+
+		content.push(current_meta);
+		content.push(parent_meta);
+
         for entry in meta.path.read_dir()? {
             let path = entry?.path();
 
