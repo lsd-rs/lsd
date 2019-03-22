@@ -113,6 +113,13 @@ pub fn build() -> App<'static, 'static> {
                 .help("Sort by time modified"),
         )
         .arg(
+            Arg::with_name("sizesort")
+                .short("S")
+                .long("sizesort")
+                .multiple(true)
+                .help("Sort by size"),
+        )
+        .arg(
             Arg::with_name("reverse")
                 .short("r")
                 .long("reverse")

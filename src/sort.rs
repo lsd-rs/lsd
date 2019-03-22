@@ -13,7 +13,11 @@ pub fn by_meta(a: &Meta, b: &Meta, flags: Flags) -> Ordering {
             DirOrderFlag::None => by_name(a, b, flags),
             DirOrderFlag::Last => by_name_with_files_first(a, b, flags),
         },
-
+        SortFlag::Size => match flags.directory_order {
+            DirOrderFlag::First => by_size(a, b, flags),
+            DirOrderFlag::None => by_size(a, b, flags),
+            DirOrderFlag::Last => by_size(a, b, flags),
+        },
         SortFlag::Time => match flags.directory_order {
             DirOrderFlag::First => by_date_with_dirs_first(a, b, flags),
             DirOrderFlag::None => by_date(a, b, flags),
@@ -21,6 +25,17 @@ pub fn by_meta(a: &Meta, b: &Meta, flags: Flags) -> Ordering {
         },
     }
 }
+
+fn by_size(a: &Meta, b: &Meta, flags: Flags) -> Ordering {
+
+    if flags.sort_order == SortOrder::Default {
+        b.size.get_bytes().cmp(&a.size.get_bytes())
+    } else {
+        a.size.get_bytes().cmp(&b.size.get_bytes())
+    }
+}
+
+
 
 fn by_name(a: &Meta, b: &Meta, flags: Flags) -> Ordering {
     if flags.sort_order == SortOrder::Default {

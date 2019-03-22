@@ -52,7 +52,6 @@ impl Core {
         let mut meta_list = self.fetch(paths);
 
         self.sort(&mut meta_list);
-
         self.display(meta_list)
     }
 
