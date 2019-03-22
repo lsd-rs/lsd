@@ -39,6 +39,8 @@ impl Flags {
 
         let sort_by = if matches.is_present("timesort") {
             SortFlag::Time
+        } else if matches.is_present("sizesort") {
+            SortFlag::Size
         } else {
             SortFlag::Name
         };
@@ -193,6 +195,7 @@ impl<'a> From<&'a str> for WhenFlag {
 pub enum SortFlag {
     Name,
     Time,
+    Size,
 }
 
 #[derive(Clone, Debug, Copy, PartialEq, Eq)]

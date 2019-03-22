@@ -16,49 +16,50 @@ pub enum Unit {
 pub struct Size {
     value: u64,
     unit: Unit,
+    bytes: u64,
 }
 
 impl<'a> From<&'a Metadata> for Size {
     fn from(meta: &Metadata) -> Self {
         let len = meta.len();
-
-        if meta.is_file() {
-            Self::from_bytes(len)
-        } else {
-            Self {
-                value: 0,
-                unit: Unit::None,
-            }
-        }
+        Self::from_bytes(len)
     }
 }
 
 impl Size {
+    pub fn get_bytes(&self) -> u64 {
+        self.bytes
+    }
     fn from_bytes(len: u64) -> Self {
         if len < 1024 {
             Self {
                 value: len * 1024,
                 unit: Unit::Byte,
+                bytes: len,
             }
         } else if len < 1024 * 1024 {
             Self {
                 value: len,
                 unit: Unit::Kilo,
+                bytes: len,
             }
         } else if len < 1024 * 1024 * 1024 {
             Self {
                 value: len / 1024,
                 unit: Unit::Mega,
+                bytes: len,
             }
         } else if len < 1024 * 1024 * 1024 * 1024 {
             Self {
                 value: len / (1024 * 1024),
                 unit: Unit::Giga,
+                bytes: len,
             }
         } else {
             Self {
                 value: len / (1024 * 1024 * 1024),
                 unit: Unit::Tera,
+                bytes: len,
             }
         }
     }
