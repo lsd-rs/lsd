@@ -58,11 +58,28 @@ impl Meta {
         }
 		let mut content = Vec::new();
 
-		let current_meta = Self::from_path(&PathBuf::from("."))?;
-		let parent_meta = Self::from_path(&PathBuf::from(".."))?;
+		if list_hidden_files {
+			let mut current_meta;
+			let mut parent_meta;
 
-		content.push(current_meta);
-		content.push(parent_meta);
+			if path.to_str().unwrap() != "." {
+				let parent_path = match  path.parent() {
+					None => PathBuf::from(&"/"),
+					Some(path) => PathBuf::from(path),
+				};
+
+				current_meta = Self::from_path(&PathBuf::from(path))?;
+				current_meta.name.name = ".".to_string();
+				parent_meta = Self::from_path(&PathBuf::from(parent_path))?;
+				parent_meta.name.name = "..".to_string();
+			} else {
+				current_meta = Self::from_path(&PathBuf::from("."))?;
+				parent_meta = Self::from_path(&PathBuf::from(".."))?;
+			}
+
+			content.push(current_meta);
+			content.push(parent_meta);
+		}
 
         for entry in meta.path.read_dir()? {
             let path = entry?.path();
@@ -125,4 +142,56 @@ impl Meta {
             content: None,
         })
     }
+
+/*
+	pub fn from_current_path(path: &PathBuf) -> Result<Self, std::io::Error> {
+		let metadata = if read_link(path).is_ok() {
+			path.symlink_metadata()?
+		} else {
+			path.metadata()?
+		};
+
+		let permissions = Permissions::from(&metadata);
+        let file_type = FileType::new(&metadata, &permissions);
+        let name = Name::new(&PathBuf::from("."), file_type);
+
+		 Ok(Self {
+            path: path.to_path_buf(),
+            symlink: SymLink::from(path.as_path()),
+            size: Size::from(&metadata),
+            date: Date::from(&metadata),
+            indicator: Indicator::from(file_type),
+            owner: Owner::from(&metadata),
+            permissions,
+            name,
+            file_type,
+            content: None,
+        })
+	}
+
+	pub fn from_parent_path(path: &PathBuf) -> Result<Self, std::io::Error> {
+		let metadata = if read_link(path).is_ok() {
+			path.symlink_metadata()?
+		} else {
+			path.metadata()?
+		};
+
+		let permissions = Permissions::from(&metadata);
+        let file_type = FileType::new(&metadata, &permissions);
+        let name = Name::new(&PathBuf::from(".."), file_type);
+
+		 Ok(Self {
+            path: path.to_path_buf(),
+            symlink: SymLink::from(path.as_path()),
+            size: Size::from(&metadata),
+            date: Date::from(&metadata),
+            indicator: Indicator::from(file_type),
+            owner: Owner::from(&metadata),
+            permissions,
+            name,
+            file_type,
+            content: None,
+        })
+	}
+*/
 }
