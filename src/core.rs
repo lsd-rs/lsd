@@ -72,7 +72,7 @@ impl Core {
             };
         }
 
-        meta_list
+		meta_list
     }
 
     fn sort(&self, metas: &mut Vec<Meta>) {
