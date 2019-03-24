@@ -64,7 +64,7 @@ impl Meta {
 
 			if path.to_str().unwrap() != "." {
 				let parent_path = match  path.parent() {
-					None => PathBuf::from(&"/"),
+					None => PathBuf::from("/"),
 					Some(path) => PathBuf::from(path),
 				};
 
