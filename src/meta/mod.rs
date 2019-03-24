@@ -20,6 +20,7 @@ pub use crate::icon::Icons;
 use std::fs::read_link;
 use std::io::{Error, ErrorKind};
 use std::path::PathBuf;
+use std::fs;
 
 #[derive(Debug)]
 pub struct Meta {
@@ -62,19 +63,34 @@ impl Meta {
 			let mut current_meta;
 			let mut parent_meta;
 
-			if path.to_str().unwrap() != "." {
+			let path_str = path.to_str().unwrap();
+
+			if path_str == ".." {
+				let temp_path = fs::canonicalize(&PathBuf::from("..")).unwrap();
+				let parent_temp_path = match temp_path.parent() {
+					None => PathBuf::from("/"),
+					Some(path) => PathBuf::from(path),
+				};
+
+				current_meta = Self::from_path(&PathBuf::from(temp_path))?;
+				current_meta.name.name = ".".to_string();
+
+				parent_meta = Self::from_path(&PathBuf::from(parent_temp_path))?;
+				parent_meta.name.name = "..".to_string();
+			} else if path_str == "." {
+				current_meta = Self::from_path(&PathBuf::from("."))?;
+				parent_meta = Self::from_path(&PathBuf::from(".."))?;
+			} else {
 				let parent_path = match  path.parent() {
-					None => PathBuf::from(&"/"),
+					None => PathBuf::from("/"),
 					Some(path) => PathBuf::from(path),
 				};
 
 				current_meta = Self::from_path(&PathBuf::from(path))?;
 				current_meta.name.name = ".".to_string();
+
 				parent_meta = Self::from_path(&PathBuf::from(parent_path))?;
 				parent_meta.name.name = "..".to_string();
-			} else {
-				current_meta = Self::from_path(&PathBuf::from("."))?;
-				parent_meta = Self::from_path(&PathBuf::from(".."))?;
 			}
 
 			content.push(current_meta);
