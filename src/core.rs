@@ -67,8 +67,16 @@ impl Core {
         };
 
         for path in paths {
+			let absolute_path = match fs::canonicalize(&path) {
+				Ok(path) => path,
+				Err(err) => {
+					println!("couldn't access '{}': {}", path.display(), err);
+					continue;
+				}
+			};
+
             match Meta::from_path_recursive(
-                &fs::canonicalize(&path.to_path_buf()).unwrap(),
+                &fs::canonicalize(&absolute_path.to_path_buf()).unwrap(),
                 depth,
                 self.flags.display_all,
             ) {
