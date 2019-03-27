@@ -3,6 +3,7 @@ use clap::{ArgMatches, Error, ErrorKind};
 #[derive(Clone, Debug, Copy)]
 pub struct Flags {
     pub display_all: bool,
+    pub display_almost_all: bool,
     pub layout: Layout,
     pub display_indicators: bool,
     pub recursive: bool,
@@ -66,6 +67,7 @@ impl Flags {
 
         Ok(Self {
             display_all: matches.is_present("all"),
+            display_almost_all: matches.is_present("almost-all"),
             layout,
             display_indicators: matches.is_present("indicators"),
             recursive,
@@ -102,6 +104,7 @@ impl Default for Flags {
     fn default() -> Self {
         Self {
             display_all: false,
+            display_almost_all: false,
             layout: Layout::Grid,
             display_indicators: false,
             recursive: false,
