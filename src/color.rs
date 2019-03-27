@@ -177,11 +177,11 @@ impl Colors {
         m.insert(Elem::Group, Colour::Fixed(187)); // LightYellow3
 
         // Permissions
-        m.insert(Elem::Read, Colour::Fixed(40)); // Green3
-        m.insert(Elem::Write, Colour::Fixed(192)); // DarkOliveGreen1
-        m.insert(Elem::Exec, Colour::Fixed(124)); // Red3
-        m.insert(Elem::ExecSticky, Colour::Fixed(13)); // Fuchsia
-        m.insert(Elem::NoAccess, Colour::Fixed(168)); // HotPink3
+        m.insert(Elem::Read, Colour::Green);
+        m.insert(Elem::Write, Colour::Yellow);
+        m.insert(Elem::Exec, Colour::Red);
+        m.insert(Elem::ExecSticky, Colour::Purple);
+        m.insert(Elem::NoAccess, Colour::Fixed(245)); // Grey
 
         // File Types
         m.insert(
@@ -228,7 +228,7 @@ impl Colors {
         m.insert(Elem::Older, Colour::Fixed(36)); // DarkCyan
 
         // Last Time Modified
-        m.insert(Elem::NonFile, Colour::Fixed(15)); // White
+        m.insert(Elem::NonFile, Colour::Fixed(245)); // Grey
         m.insert(Elem::FileSmall, Colour::Fixed(229)); // Wheat1
         m.insert(Elem::FileMedium, Colour::Fixed(216)); // LightSalmon1
         m.insert(Elem::FileLarge, Colour::Fixed(172)); // Orange3
