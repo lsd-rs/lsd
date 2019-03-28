@@ -8,6 +8,7 @@ pub fn build() -> App<'static, 'static> {
         .arg(
             Arg::with_name("all")
                 .short("a")
+                .overrides_with("display_almost_all")
                 .long("all")
                 .multiple(true)
                 .help("Do not ignore entries starting with ."),
@@ -15,6 +16,7 @@ pub fn build() -> App<'static, 'static> {
         .arg(
             Arg::with_name("almost-all")
                 .short("A")
+                .overrides_with("display_all")
                 .long("almost-all")
                 .multiple(true)
                 .help("Do not list implied . and .."),
