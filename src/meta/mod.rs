@@ -40,6 +40,7 @@ impl Meta {
         path: &PathBuf,
         depth: usize,
         list_hidden_files: bool,
+        list_almost_all: bool,
     ) -> Result<Self, std::io::Error> {
         let mut meta = Self::from_path(path)?;
 
@@ -81,6 +82,7 @@ impl Meta {
             let path = entry?.path();
 
             if !list_hidden_files
+                && !list_almost_all
                 && path
                     .file_name()
                     .ok_or_else(|| Error::new(ErrorKind::InvalidInput, "invalid file name"))?
@@ -94,6 +96,7 @@ impl Meta {
                 &path.to_path_buf(),
                 depth - 1,
                 list_hidden_files,
+                list_almost_all,
             ) {
                 Ok(res) => res,
                 Err(err) => {

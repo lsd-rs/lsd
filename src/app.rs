@@ -15,8 +15,9 @@ pub fn build() -> App<'static, 'static> {
         .arg(
             Arg::with_name("almost-all")
                 .short("A")
+                .long("almost-all")
                 .multiple(true)
-                .help("Alias of -a"),
+                .help("Do not list implied . and .."),
         )
         .arg(
             Arg::with_name("color")
