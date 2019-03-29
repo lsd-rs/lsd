@@ -100,6 +100,16 @@ pub fn build() -> App<'static, 'static> {
                 .help("Stop recursing into directories after reaching specified depth"),
         )
         .arg(
+            Arg::with_name("size")
+                .long("size")
+                .possible_value("default")
+                .possible_value("small")
+                .default_value("default")
+                .multiple(true)
+                .number_of_values(1)
+                .help("How to display size"),
+        )
+        .arg(
             Arg::with_name("date")
                 .long("date")
                 .possible_value("date")
