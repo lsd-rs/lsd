@@ -2,12 +2,12 @@ use crate::flags::{DirOrderFlag, Flags, SortFlag, SortOrder};
 use crate::meta::{FileType, Meta};
 use std::cmp::Ordering;
 
-pub fn by_meta(a: &Meta, b: &Meta, flags: Flags) -> Ordering {
+pub fn by_meta(a: &Meta, b: &Meta, flags: &Flags) -> Ordering {
     match flags.sort_by {
         SortFlag::Name => match flags.directory_order {
-            DirOrderFlag::First => by_name_with_dirs_first(a, b, flags),
-            DirOrderFlag::None => by_name(a, b, flags),
-            DirOrderFlag::Last => by_name_with_files_first(a, b, flags),
+            DirOrderFlag::First => by_name_with_dirs_first(a, b, &flags),
+            DirOrderFlag::None => by_name(a, b, &flags),
+            DirOrderFlag::Last => by_name_with_files_first(a, b, &flags),
         },
         SortFlag::Size => match flags.directory_order {
             DirOrderFlag::First => by_size(a, b, flags),
@@ -15,14 +15,14 @@ pub fn by_meta(a: &Meta, b: &Meta, flags: Flags) -> Ordering {
             DirOrderFlag::Last => by_size(a, b, flags),
         },
         SortFlag::Time => match flags.directory_order {
-            DirOrderFlag::First => by_date_with_dirs_first(a, b, flags),
-            DirOrderFlag::None => by_date(a, b, flags),
-            DirOrderFlag::Last => by_date_with_files_first(a, b, flags),
+            DirOrderFlag::First => by_date_with_dirs_first(a, b, &flags),
+            DirOrderFlag::None => by_date(a, b, &flags),
+            DirOrderFlag::Last => by_date_with_files_first(a, b, &flags),
         },
     }
 }
 
-fn by_size(a: &Meta, b: &Meta, flags: Flags) -> Ordering {
+fn by_size(a: &Meta, b: &Meta, flags: &Flags) -> Ordering {
 
     if flags.sort_order == SortOrder::Default {
         b.size.get_bytes().cmp(&a.size.get_bytes())
@@ -33,7 +33,7 @@ fn by_size(a: &Meta, b: &Meta, flags: Flags) -> Ordering {
 
 
 
-fn by_name(a: &Meta, b: &Meta, flags: Flags) -> Ordering {
+fn by_name(a: &Meta, b: &Meta, flags: &Flags) -> Ordering {
     if flags.sort_order == SortOrder::Default {
         a.name.cmp(&b.name)
     } else {
@@ -41,25 +41,25 @@ fn by_name(a: &Meta, b: &Meta, flags: Flags) -> Ordering {
     }
 }
 
-fn by_name_with_dirs_first(a: &Meta, b: &Meta, flags: Flags) -> Ordering {
+fn by_name_with_dirs_first(a: &Meta, b: &Meta, flags: &Flags) -> Ordering {
     match (a.file_type, b.file_type) {
-        (FileType::Directory { .. }, FileType::Directory { .. }) => by_name(a, b, flags),
+        (FileType::Directory { .. }, FileType::Directory { .. }) => by_name(a, b, &flags),
         (FileType::Directory { .. }, _) => Ordering::Less,
         (_, FileType::Directory { .. }) => Ordering::Greater,
-        _ => by_name(a, b, flags),
+        _ => by_name(a, b, &flags),
     }
 }
 
-fn by_name_with_files_first(a: &Meta, b: &Meta, flags: Flags) -> Ordering {
+fn by_name_with_files_first(a: &Meta, b: &Meta, flags: &Flags) -> Ordering {
     match (a.file_type, b.file_type) {
-        (FileType::Directory { .. }, FileType::Directory { .. }) => by_name(a, b, flags),
+        (FileType::Directory { .. }, FileType::Directory { .. }) => by_name(a, b, &flags),
         (FileType::Directory { .. }, _) => Ordering::Greater,
         (_, FileType::Directory { .. }) => Ordering::Less,
-        _ => by_name(a, b, flags),
+        _ => by_name(a, b, &flags),
     }
 }
 
-fn by_date(a: &Meta, b: &Meta, flags: Flags) -> Ordering {
+fn by_date(a: &Meta, b: &Meta, flags: &Flags) -> Ordering {
     if flags.sort_order == SortOrder::Default {
         b.date.cmp(&a.date).then(a.name.cmp(&b.name))
     } else {
@@ -67,21 +67,21 @@ fn by_date(a: &Meta, b: &Meta, flags: Flags) -> Ordering {
     }
 }
 
-fn by_date_with_dirs_first(a: &Meta, b: &Meta, flags: Flags) -> Ordering {
+fn by_date_with_dirs_first(a: &Meta, b: &Meta, flags: &Flags) -> Ordering {
     match (a.file_type, b.file_type) {
-        (FileType::Directory { .. }, FileType::Directory { .. }) => by_date(a, b, flags),
+        (FileType::Directory { .. }, FileType::Directory { .. }) => by_date(a, b, &flags),
         (FileType::Directory { .. }, _) => Ordering::Less,
         (_, FileType::Directory { .. }) => Ordering::Greater,
-        _ => by_date(a, b, flags),
+        _ => by_date(a, b, &flags),
     }
 }
 
-fn by_date_with_files_first(a: &Meta, b: &Meta, flags: Flags) -> Ordering {
+fn by_date_with_files_first(a: &Meta, b: &Meta, flags: &Flags) -> Ordering {
     match (a.file_type, b.file_type) {
-        (FileType::Directory { .. }, FileType::Directory { .. }) => by_date(a, b, flags),
+        (FileType::Directory { .. }, FileType::Directory { .. }) => by_date(a, b, &flags),
         (FileType::Directory { .. }, _) => Ordering::Greater,
         (_, FileType::Directory { .. }) => Ordering::Less,
-        _ => by_date(a, b, flags),
+        _ => by_date(a, b, &flags),
     }
 }
 
@@ -111,11 +111,11 @@ mod tests {
         flags.directory_order = DirOrderFlag::First;
 
         //  Sort with the dirs first
-        assert_eq!(by_meta(&meta_a, &meta_z, flags), Ordering::Greater);
+        assert_eq!(by_meta(&meta_a, &meta_z, &flags), Ordering::Greater);
 
         //  Sort with the dirs first (the dirs stay first)
         flags.sort_order = SortOrder::Reverse;
-        assert_eq!(by_meta(&meta_a, &meta_z, flags), Ordering::Greater);
+        assert_eq!(by_meta(&meta_a, &meta_z, &flags), Ordering::Greater);
     }
 
     #[test]
@@ -136,10 +136,10 @@ mod tests {
         flags.directory_order = DirOrderFlag::Last;
 
         // Sort with file first
-        assert_eq!(by_meta(&meta_a, &meta_z, flags), Ordering::Less);
+        assert_eq!(by_meta(&meta_a, &meta_z, &flags), Ordering::Less);
 
         // Sort with file first reversed (thie files stay first)
-        assert_eq!(by_meta(&meta_a, &meta_z, flags), Ordering::Less);
+        assert_eq!(by_meta(&meta_a, &meta_z, &flags), Ordering::Less);
     }
 
     #[test]
@@ -160,11 +160,11 @@ mod tests {
         flags.directory_order = DirOrderFlag::None;
 
         // Sort by name unordered
-        assert_eq!(by_meta(&meta_a, &meta_z, flags), Ordering::Less);
+        assert_eq!(by_meta(&meta_a, &meta_z, &flags), Ordering::Less);
 
         // Sort by name unordered
         flags.sort_order = SortOrder::Reverse;
-        assert_eq!(by_meta(&meta_a, &meta_z, flags), Ordering::Greater);
+        assert_eq!(by_meta(&meta_a, &meta_z, &flags), Ordering::Greater);
     }
 
     #[test]
@@ -185,11 +185,11 @@ mod tests {
         flags.directory_order = DirOrderFlag::None;
 
         // Sort by name unordered
-        assert_eq!(by_meta(&meta_a, &meta_z, flags), Ordering::Greater);
+        assert_eq!(by_meta(&meta_a, &meta_z, &flags), Ordering::Greater);
 
         // Sort by name unordered reversed
         flags.sort_order = SortOrder::Reverse;
-        assert_eq!(by_meta(&meta_a, &meta_z, flags), Ordering::Less);
+        assert_eq!(by_meta(&meta_a, &meta_z, &flags), Ordering::Less);
     }
 
     #[test]
@@ -231,10 +231,10 @@ mod tests {
         flags.sort_by = SortFlag::Time;
 
         // Sort by time
-        assert_eq!(by_meta(&meta_a, &meta_z, flags), Ordering::Less);
+        assert_eq!(by_meta(&meta_a, &meta_z, &flags), Ordering::Less);
 
         // Sort by time reversed
         flags.sort_order = SortOrder::Reverse;
-        assert_eq!(by_meta(&meta_a, &meta_z, flags), Ordering::Greater);
+        assert_eq!(by_meta(&meta_a, &meta_z, &flags), Ordering::Greater);
     }
 }

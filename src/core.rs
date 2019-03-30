@@ -110,7 +110,7 @@ impl Core {
     }
 
     fn sort(&self, metas: &mut Vec<Meta>) {
-        metas.sort_unstable_by(|a, b| sort::by_meta(a, b, self.flags.clone()));
+        metas.sort_unstable_by(|a, b| sort::by_meta(a, b, &self.flags));
 
         for meta in metas {
             if let Some(ref mut content) = meta.content {

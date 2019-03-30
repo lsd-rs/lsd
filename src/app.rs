@@ -169,18 +169,11 @@ pub fn build() -> App<'static, 'static> {
             Arg::with_name("blocks")
                 .long("blocks")
                 .multiple(true)
-                .possible_values(&[
-                    "type",
-                    "permission",
-                    "user",
-                    "group",
-                    "size",
-                    "date",
-                    "name",
-                ])
-                .require_delimiter(true)
                 .number_of_values(1)
-                .help("Specify the blocks that will be displayed"),
+                .require_delimiter(true)
+                .possible_values(&["permission", "user", "group", "size", "date", "name"])
+                .default_value("permission,user,group,size,date,name")
+                .help("Specify the blocks that will be displayed and in what order"),
         )
         .arg(
             Arg::with_name("classic")
