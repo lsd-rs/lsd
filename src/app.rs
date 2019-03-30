@@ -103,7 +103,7 @@ pub fn build() -> App<'static, 'static> {
             Arg::with_name("size")
                 .long("size")
                 .possible_value("default")
-                .possible_value("small")
+                .possible_value("short")
                 .default_value("default")
                 .multiple(true)
                 .number_of_values(1)

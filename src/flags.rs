@@ -124,14 +124,14 @@ impl Default for Flags {
 #[derive(Clone, Debug, Copy, PartialEq, Eq)]
 pub enum SizeFlag {
     Default,
-    Small,
+    Short,
 }
 
 impl<'a> From<&'a str> for SizeFlag {
     fn from(size: &'a str) -> Self {
         match size {
             "default" => SizeFlag::Default,
-            "small" => SizeFlag::Small,
+            "short" => SizeFlag::Short,
             _ => panic!("invalid \"size\" flag: {}", size),
         }
     }
