@@ -25,7 +25,7 @@ impl<'a> From<&'a Metadata> for Date {
 }
 
 impl Date {
-    pub fn render(&self, colors: &Colors, date_alignment: usize, flags: Flags) -> ColoredString {
+    pub fn render(&self, colors: &Colors, date_alignment: usize, flags: &Flags) -> ColoredString {
         let mut content = String::with_capacity(date_alignment + 1);
         let now = time::now();
 
@@ -38,7 +38,7 @@ impl Date {
             elem = &Elem::Older;
         }
 
-        let date_string = &self.date_string(flags);
+        let date_string = &self.date_string(&flags);
         content += date_string;
 
         for _ in 0..(date_alignment - date_string.len()) {
@@ -47,7 +47,7 @@ impl Date {
         colors.colorize(content, elem)
     }
 
-    pub fn date_string(&self, flags: Flags) -> String {
+    pub fn date_string(&self, flags: &Flags) -> String {
         match flags.date {
             DateFlag::Date => self.0.ctime().to_string(),
             DateFlag::Relative => format!("{}", HumanTime::from(self.0 - time::now())),

@@ -69,12 +69,12 @@ impl Size {
         colors: &Colors,
         value_alignment: usize,
         unit_alignment: usize,
-        flags: Flags,
+        flags: &Flags,
     ) -> ColoredString {
         let mut content = String::with_capacity(value_alignment + unit_alignment + 1);
 
         let value = self.render_value();
-        let unit = self.render_unit(flags);
+        let unit = self.render_unit(&flags);
 
         for _ in 0..(value_alignment - value.len()) {
             content.push(' ');
@@ -84,7 +84,7 @@ impl Size {
         if flags.size != SizeFlag::Short {
             content.push(' ');
         }
-        content += &self.render_unit(flags);
+        content += &self.render_unit(&flags);
 
         for _ in 0..(unit_alignment - unit.len()) {
             content.push(' ');
@@ -128,7 +128,7 @@ impl Size {
         }
     }
 
-    pub fn render_unit(&self, flags: Flags) -> String {
+    pub fn render_unit(&self, flags: &Flags) -> String {
         match flags.size {
             SizeFlag::Default => match self.unit {
                 Unit::None => String::from("-"),
