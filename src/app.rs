@@ -166,6 +166,23 @@ pub fn build() -> App<'static, 'static> {
                 .help("Sort the directories then the files"),
         )
         .arg(
+            Arg::with_name("blocks")
+                .long("blocks")
+                .multiple(true)
+                .possible_values(&[
+                    "type",
+                    "permission",
+                    "user",
+                    "group",
+                    "size",
+                    "date",
+                    "name",
+                ])
+                .require_delimiter(true)
+                .number_of_values(1)
+                .help("Specify the blocks that will be displayed"),
+        )
+        .arg(
             Arg::with_name("classic")
                 .long("classic")
                 .help("Enable classic mode (no colors or icons)"),

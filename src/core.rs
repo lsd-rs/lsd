@@ -26,7 +26,7 @@ impl Core {
         #[cfg(target_os = "windows")]
         let console_color_ok = ansi_term::enable_ansi_support().is_ok();
 
-        let mut inner_flags = flags;
+        let mut inner_flags = flags.clone();
 
         let color_theme = match (tty_available && console_color_ok, flags.color) {
             (_, WhenFlag::Never) | (false, WhenFlag::Auto) => color::Theme::NoColor,
@@ -110,7 +110,7 @@ impl Core {
     }
 
     fn sort(&self, metas: &mut Vec<Meta>) {
-        metas.sort_unstable_by(|a, b| sort::by_meta(a, b, self.flags));
+        metas.sort_unstable_by(|a, b| sort::by_meta(a, b, self.flags.clone()));
 
         for meta in metas {
             if let Some(ref mut content) = meta.content {
@@ -122,10 +122,10 @@ impl Core {
     fn display(&self, metas: Vec<Meta>) {
         let output = match self.flags.layout {
             Layout::OneLine { .. } => {
-                display::one_line(metas, self.flags, &self.colors, &self.icons)
+                display::one_line(metas, &self.flags, &self.colors, &self.icons)
             }
-            Layout::Tree { .. } => display::tree(metas, self.flags, &self.colors, &self.icons),
-            Layout::Grid => display::grid(metas, self.flags, &self.colors, &self.icons),
+            Layout::Tree { .. } => display::tree(metas, &self.flags, &self.colors, &self.icons),
+            Layout::Grid => display::grid(metas, &self.flags, &self.colors, &self.icons),
         };
         print!("{}", output);
     }

@@ -1,5 +1,5 @@
 use crate::color::Colors;
-use crate::flags::{Display, Flags, Layout};
+use crate::flags::{Display, Flags, Layout, Block};
 use crate::icon::Icons;
 use crate::meta::{FileType, Meta};
 use ansi_term::{ANSIString, ANSIStrings};
@@ -20,26 +20,26 @@ struct PaddingRules {
     date: usize,
 }
 
-pub fn one_line(metas: Vec<Meta>, flags: Flags, colors: &Colors, icons: &Icons) -> String {
-    inner_display_one_line(metas, flags, colors, icons, 0)
+pub fn one_line(metas: Vec<Meta>, flags: &Flags, colors: &Colors, icons: &Icons) -> String {
+    inner_display_one_line(metas, &flags, colors, icons, 0)
 }
 
-pub fn grid(metas: Vec<Meta>, flags: Flags, colors: &Colors, icons: &Icons) -> String {
+pub fn grid(metas: Vec<Meta>, flags: &Flags, colors: &Colors, icons: &Icons) -> String {
     let term_width = match terminal_size() {
         Some((w, _)) => Some(w.0 as usize),
         None => None,
     };
 
-    inner_display_grid(metas, flags, colors, icons, 0, term_width)
+    inner_display_grid(metas, &flags, colors, icons, 0, term_width)
 }
 
-pub fn tree(metas: Vec<Meta>, flags: Flags, colors: &Colors, icons: &Icons) -> String {
-    inner_display_tree(metas, flags, colors, icons, 0, "")
+pub fn tree(metas: Vec<Meta>, flags: &Flags, colors: &Colors, icons: &Icons) -> String {
+    inner_display_tree(metas, &flags, colors, icons, 0, "")
 }
 
 fn inner_display_one_line(
     metas: Vec<Meta>,
-    flags: Flags,
+    flags: &Flags,
     colors: &Colors,
     icons: &Icons,
     depth: usize,
@@ -53,8 +53,8 @@ fn inner_display_one_line(
         padding_rules = Some(PaddingRules {
             user: detect_user_length(&metas),
             group: detect_group_length(&metas),
-            size: detect_size_lengths(&metas, flags),
-            date: detect_date_length(&metas, flags),
+            size: detect_size_lengths(&metas, &flags),
+            date: detect_date_length(&metas, &flags),
         })
     }
 
@@ -71,9 +71,9 @@ fn inner_display_one_line(
         }
 
         if let Layout::OneLine { long: true } = flags.layout {
-            output += &get_long_output(&meta, &colors, &icons, flags, padding_rules.unwrap());
+            output += &get_long_output(&meta, &colors, &icons, &flags, padding_rules.unwrap());
         } else {
-            output += &get_short_output(&meta, &colors, &icons, flags);
+            output += &get_short_output(&meta, &colors, &icons, &flags);
         }
 
         output.push('\n');
@@ -89,7 +89,7 @@ fn inner_display_one_line(
             }
 
             output +=
-                &inner_display_one_line(meta.content.unwrap(), flags, colors, icons, depth + 1);
+                &inner_display_one_line(meta.content.unwrap(), &flags, colors, icons, depth + 1);
         }
     }
 
@@ -98,7 +98,7 @@ fn inner_display_one_line(
 
 fn inner_display_grid(
     metas: Vec<Meta>,
-    flags: Flags,
+    flags: &Flags,
     colors: &Colors,
     icons: &Icons,
     depth: usize,
@@ -123,7 +123,7 @@ fn inner_display_grid(
             continue;
         }
 
-        let line_output = get_short_output(&meta, &colors, &icons, flags);
+        let line_output = get_short_output(&meta, &colors, &icons, &flags);
         grid.add(Cell {
             width: get_visible_width(&line_output),
             contents: line_output,
@@ -154,7 +154,7 @@ fn inner_display_grid(
 
             output += &inner_display_grid(
                 meta.content.unwrap(),
-                flags,
+                &flags,
                 colors,
                 icons,
                 depth + 1,
@@ -168,7 +168,7 @@ fn inner_display_grid(
 
 fn inner_display_tree(
     metas: Vec<Meta>,
-    flags: Flags,
+    flags: &Flags,
     colors: &Colors,
     icons: &Icons,
     depth: usize,
@@ -204,9 +204,9 @@ fn inner_display_tree(
         }
 
         if let Layout::Tree { long: true } = flags.layout {
-            output += &get_long_output(&meta, &colors, &icons, flags, padding_rules.unwrap());
+            output += &get_long_output(&meta, &colors, &icons, &flags, padding_rules.unwrap());
         } else {
-            output += &get_short_output(&meta, &colors, &icons, flags);
+            output += &get_short_output(&meta, &colors, &icons, &flags);
         }
         output += "\n";
 
@@ -223,7 +223,7 @@ fn inner_display_tree(
 
             output += &inner_display_tree(
                 meta.content.unwrap(),
-                flags,
+                &flags,
                 colors,
                 icons,
                 depth + 1,
@@ -260,10 +260,10 @@ fn display_folder_path(meta: &Meta) -> String {
     output
 }
 
-fn get_short_output(meta: &Meta, colors: &Colors, icons: &Icons, flags: Flags) -> String {
+fn get_short_output(meta: &Meta, colors: &Colors, icons: &Icons, flags: &Flags) -> String {
     let strings: &[ANSIString] = &[
         meta.name.render(colors, icons),
-        meta.indicator.render(flags),
+        meta.indicator.render(&flags),
     ];
 
     ANSIStrings(strings).to_string()
@@ -273,28 +273,52 @@ fn get_long_output(
     meta: &Meta,
     colors: &Colors,
     icons: &Icons,
-    flags: Flags,
+    flags: &Flags,
     padding_rules: PaddingRules,
 ) -> String {
-    let strings: &[ANSIString] = &[
-        meta.file_type.render(colors),
-        meta.permissions.render(colors),
-        ANSIString::from(" "),
-        meta.owner.render_user(colors, padding_rules.user),
-        ANSIString::from(" "),
-        meta.owner.render_group(colors, padding_rules.group),
-        ANSIString::from(" "),
-        meta.size
-            .render(colors, padding_rules.size.0, padding_rules.size.1, flags),
-        ANSIString::from(" "),
-        meta.date.render(colors, padding_rules.date, flags),
-        ANSIString::from(" "),
-        meta.name.render(colors, icons),
-        meta.indicator.render(flags),
-        meta.symlink.render(colors),
-    ];
+    let mut strings: Vec<ANSIString> = Vec::new();
+    for block in flags.blocks.iter() {
+        match block {
+            Block::Permission => {
+                strings.push(meta.file_type.render(colors));
+                strings.push(meta.permissions.render(colors));
+            }
+            Block::User => strings.push(meta.owner.render_user(colors, padding_rules.user)),
+            Block::Group => strings.push(meta.owner.render_group(colors, padding_rules.group)),
+            Block::Size => strings.push(meta.size.render(
+                colors,
+                padding_rules.size.0,
+                padding_rules.size.1,
+                &flags
+            )),
+            Block::Date => strings.push(meta.date.render(colors, padding_rules.date, &flags)),
+            Block::Name => {
+                strings.push(meta.name.render(colors, icons));
+                strings.push(meta.indicator.render(&flags));
+                strings.push(meta.symlink.render(colors));
+            }
+        };
+        strings.push(ANSIString::from(" ")); // TODO do not add this space to the end
+    }
+    // let strings: &[ANSIString] = &[
+    //     meta.file_type.render(colors),
+    //     meta.permissions.render(colors),
+    //     ANSIString::from(" "),
+    //     meta.owner.render_user(colors, padding_rules.user),
+    //     ANSIString::from(" "),
+    //     meta.owner.render_group(colors, padding_rules.group),
+    //     ANSIString::from(" "),
+    //     meta.size
+    //         .render(colors, padding_rules.size.0, padding_rules.size.1),
+    //     ANSIString::from(" "),
+    //     meta.date.render(colors, padding_rules.date, flags),
+    //     ANSIString::from(" "),
+    //     meta.name.render(colors, icons),
+    //     meta.indicator.render(flags),
+    //     meta.symlink.render(colors),
+    // ];
 
-    ANSIStrings(strings).to_string()
+    ANSIStrings(&strings).to_string()
 }
 
 fn get_visible_width(input: &str) -> usize {
@@ -337,19 +361,19 @@ fn detect_group_length(metas: &[Meta]) -> usize {
     max
 }
 
-fn detect_date_length(metas: &[Meta], flags: Flags) -> usize {
+fn detect_date_length(metas: &[Meta], flags: &Flags) -> usize {
     let mut max_value_length: usize = 0;
 
     for meta in metas {
-        if meta.date.date_string(flags).len() > max_value_length {
-            max_value_length = meta.date.date_string(flags).len();
+        if meta.date.date_string(&flags).len() > max_value_length {
+            max_value_length = meta.date.date_string(&flags).len();
         }
     }
 
     max_value_length
 }
 
-fn detect_size_lengths(metas: &[Meta], flags: Flags) -> (usize, usize) {
+fn detect_size_lengths(metas: &[Meta], flags: &Flags) -> (usize, usize) {
     let mut max_value_length: usize = 0;
     let mut max_unit_size: usize = 0;
 
@@ -358,8 +382,8 @@ fn detect_size_lengths(metas: &[Meta], flags: Flags) -> (usize, usize) {
             max_value_length = meta.size.render_value().len();
         }
 
-        if meta.size.render_unit(flags).len() > max_unit_size {
-            max_unit_size = meta.size.render_unit(flags).len();
+        if meta.size.render_unit(&flags).len() > max_unit_size {
+            max_unit_size = meta.size.render_unit(&flags).len();
         }
     }
 

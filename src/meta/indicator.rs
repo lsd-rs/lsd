@@ -22,7 +22,7 @@ impl From<FileType> for Indicator {
 }
 
 impl Indicator {
-    pub fn render(&self, flags: Flags) -> ColoredString {
+    pub fn render(&self, flags: &Flags) -> ColoredString {
         if flags.display_indicators {
             ANSIString::from(self.0)
         } else {

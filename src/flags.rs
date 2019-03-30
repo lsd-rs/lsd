@@ -1,6 +1,6 @@
 use clap::{ArgMatches, Error, ErrorKind};
 
-#[derive(Clone, Debug, Copy)]
+#[derive(Clone, Debug)]
 pub struct Flags {
     pub display: Display,
     pub layout: Layout,
@@ -15,6 +15,7 @@ pub struct Flags {
     pub icon: WhenFlag,
     pub icon_theme: IconTheme,
     pub recursion_depth: usize,
+    pub blocks: Vec<Block>,
 }
 
 impl Flags {
@@ -26,6 +27,7 @@ impl Flags {
         let size_inputs: Vec<&str> = matches.values_of("size").unwrap().collect();
         let date_inputs: Vec<&str> = matches.values_of("date").unwrap().collect();
         let dir_order_inputs: Vec<&str> = matches.values_of("group-dirs").unwrap().collect();
+        let blocks_inputs: Vec<&str> = matches.values_of("blocks").unwrap().collect();
 
         let display = if matches.is_present("all") {
             Display::DisplayAll
@@ -97,6 +99,7 @@ impl Flags {
             sort_by,
             sort_order,
             size: SizeFlag::from(size_inputs[size_inputs.len() - 1]),
+            blocks: blocks_inputs.into_iter().map(|b| Block::from(b)).collect(),
             // Take only the last value
             date: if classic_mode {
                 DateFlag::Date
@@ -139,6 +142,39 @@ impl Default for Flags {
             color: WhenFlag::Auto,
             icon: WhenFlag::Auto,
             icon_theme: IconTheme::Fancy,
+            blocks: vec![
+                Block::Permission,
+                Block::User,
+                Block::Group,
+                Block::Size,
+                Block::Date,
+                Block::Name,
+            ],
+        }
+    }
+}
+
+#[derive(Clone, Debug, Copy, PartialEq, Eq)]
+pub enum Block {
+    // Type,
+    Permission,
+    User,
+    Group,
+    Size,
+    Date,
+    Name,
+}
+impl<'a> From<&'a str> for Block {
+    fn from(block: &'a str) -> Self {
+        match block {
+            // "type" => Block::Type,
+            "permission" => Block::Permission,
+            "user" => Block::User,
+            "group" => Block::Group,
+            "size" => Block::Size,
+            "date" => Block::Date,
+            "name" => Block::Name,
+            _ => panic!("invalid \"time\" flag: {}", block),
         }
     }
 }
@@ -189,7 +225,6 @@ pub enum WhenFlag {
     Auto,
     Never,
 }
-
 impl<'a> From<&'a str> for WhenFlag {
     fn from(when: &'a str) -> Self {
         match when {
