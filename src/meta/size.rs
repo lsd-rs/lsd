@@ -162,9 +162,9 @@ mod test {
 
         assert_eq!(size.render_value().as_str(), "42");
 
-        assert_eq!(size.render_unit(flags).as_str(), "B");
+        assert_eq!(size.render_unit(&flags).as_str(), "B");
         flags.size = SizeFlag::Short;
-        assert_eq!(size.render_unit(flags).as_str(), "B");
+        assert_eq!(size.render_unit(&flags).as_str(), "B");
     }
 
     #[test]
@@ -173,9 +173,9 @@ mod test {
         let mut flags = Flags::default();
 
         assert_eq!(size.render_value().as_str(), "42");
-        assert_eq!(size.render_unit(flags).as_str(), "KB");
+        assert_eq!(size.render_unit(&flags).as_str(), "KB");
         flags.size = SizeFlag::Short;
-        assert_eq!(size.render_unit(flags).as_str(), "K");
+        assert_eq!(size.render_unit(&flags).as_str(), "K");
     }
 
     #[test]
@@ -184,9 +184,9 @@ mod test {
         let mut flags = Flags::default();
 
         assert_eq!(size.render_value().as_str(), "42");
-        assert_eq!(size.render_unit(flags).as_str(), "MB");
+        assert_eq!(size.render_unit(&flags).as_str(), "MB");
         flags.size = SizeFlag::Short;
-        assert_eq!(size.render_unit(flags).as_str(), "M");
+        assert_eq!(size.render_unit(&flags).as_str(), "M");
     }
 
     #[test]
@@ -195,9 +195,9 @@ mod test {
         let mut flags = Flags::default();
 
         assert_eq!(size.render_value().as_str(), "42");
-        assert_eq!(size.render_unit(flags).as_str(), "GB");
+        assert_eq!(size.render_unit(&flags).as_str(), "GB");
         flags.size = SizeFlag::Short;
-        assert_eq!(size.render_unit(flags).as_str(), "G");
+        assert_eq!(size.render_unit(&flags).as_str(), "G");
     }
 
     #[test]
@@ -206,9 +206,9 @@ mod test {
         let mut flags = Flags::default();
 
         assert_eq!(size.render_value().as_str(), "42");
-        assert_eq!(size.render_unit(flags).as_str(), "TB");
+        assert_eq!(size.render_unit(&flags).as_str(), "TB");
         flags.size = SizeFlag::Short;
-        assert_eq!(size.render_unit(flags).as_str(), "T");
+        assert_eq!(size.render_unit(&flags).as_str(), "T");
     }
 
     #[test]
@@ -217,7 +217,7 @@ mod test {
         let flags = Flags::default();
 
         assert_eq!(size.render_value().as_str(), "42.1");
-        assert_eq!(size.render_unit(flags).as_str(), "KB");
+        assert_eq!(size.render_unit(&flags).as_str(), "KB");
     }
 
     #[test]
@@ -226,6 +226,6 @@ mod test {
         let flags = Flags::default();
 
         assert_eq!(size.render_value().as_str(), "42");
-        assert_eq!(size.render_unit(flags).as_str(), "KB");
+        assert_eq!(size.render_unit(&flags).as_str(), "KB");
     }
 }

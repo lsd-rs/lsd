@@ -119,7 +119,7 @@ mod test {
 
         assert_eq!(
             Colour::Fixed(40).paint(creation_date.ctime().to_string()),
-            date.render(&colors, creation_date.ctime().to_string().len(), flags)
+            date.render(&colors, creation_date.ctime().to_string().len(), &flags)
         );
 
         fs::remove_file(file_path).unwrap();
@@ -143,7 +143,7 @@ mod test {
 
         assert_eq!(
             Colour::Fixed(42).paint(creation_date.ctime().to_string()),
-            date.render(&colors, creation_date.ctime().to_string().len(), flags)
+            date.render(&colors, creation_date.ctime().to_string().len(), &flags)
         );
 
         fs::remove_file(file_path).unwrap();
@@ -167,7 +167,7 @@ mod test {
 
         assert_eq!(
             Colour::Fixed(36).paint(creation_date.ctime().to_string()),
-            date.render(&colors, creation_date.ctime().to_string().len(), flags)
+            date.render(&colors, creation_date.ctime().to_string().len(), &flags)
         );
 
         fs::remove_file(file_path).unwrap();
@@ -193,7 +193,7 @@ mod test {
 
         assert_eq!(
             Colour::Fixed(36).paint("2 days ago  "),
-            date.render(&colors, 12, flags)
+            date.render(&colors, 12, &flags)
         );
 
         fs::remove_file(file_path).unwrap();
@@ -229,7 +229,7 @@ mod test {
 
         assert_eq!(
             Colour::Fixed(40).paint("now  "),
-            date.render(&colors, 5, flags)
+            date.render(&colors, 5, &flags)
         );
 
         fs::remove_file(file_path).unwrap();
