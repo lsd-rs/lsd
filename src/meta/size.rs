@@ -80,7 +80,7 @@ impl Size {
         }
 
         content += &self.render_value();
-        if flags.size != SizeFlag::Small {
+        if flags.size != SizeFlag::Short {
             content.push(' ');
         }
         content += &self.render_unit(flags);
@@ -137,7 +137,7 @@ impl Size {
                 Unit::Giga => String::from("GB"),
                 Unit::Tera => String::from("TB"),
             },
-            SizeFlag::Small => match self.unit {
+            SizeFlag::Short => match self.unit {
                 Unit::None => String::from("-"),
                 Unit::Byte => String::from("B"),
                 Unit::Kilo => String::from("K"),
@@ -162,7 +162,7 @@ mod test {
         assert_eq!(size.render_value().as_str(), "42");
 
         assert_eq!(size.render_unit(flags).as_str(), "B");
-        flags.size = SizeFlag::Small;
+        flags.size = SizeFlag::Short;
         assert_eq!(size.render_unit(flags).as_str(), "B");
     }
 
@@ -173,7 +173,7 @@ mod test {
 
         assert_eq!(size.render_value().as_str(), "42");
         assert_eq!(size.render_unit(flags).as_str(), "KB");
-        flags.size = SizeFlag::Small;
+        flags.size = SizeFlag::Short;
         assert_eq!(size.render_unit(flags).as_str(), "K");
     }
 
@@ -184,7 +184,7 @@ mod test {
 
         assert_eq!(size.render_value().as_str(), "42");
         assert_eq!(size.render_unit(flags).as_str(), "MB");
-        flags.size = SizeFlag::Small;
+        flags.size = SizeFlag::Short;
         assert_eq!(size.render_unit(flags).as_str(), "M");
     }
 
@@ -195,7 +195,7 @@ mod test {
 
         assert_eq!(size.render_value().as_str(), "42");
         assert_eq!(size.render_unit(flags).as_str(), "GB");
-        flags.size = SizeFlag::Small;
+        flags.size = SizeFlag::Short;
         assert_eq!(size.render_unit(flags).as_str(), "G");
     }
 
@@ -206,7 +206,7 @@ mod test {
 
         assert_eq!(size.render_value().as_str(), "42");
         assert_eq!(size.render_unit(flags).as_str(), "TB");
-        flags.size = SizeFlag::Small;
+        flags.size = SizeFlag::Short;
         assert_eq!(size.render_unit(flags).as_str(), "T");
     }
 
