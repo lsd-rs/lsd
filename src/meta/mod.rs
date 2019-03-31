@@ -59,56 +59,47 @@ impl Meta {
         }
         let mut content = Vec::new();
 
-         match display {
-            Display::DisplayAll => {
-                let mut current_meta;
-                let mut parent_meta;
+        if let Display::DisplayAll = display {
+            let mut current_meta;
+            let mut parent_meta;
 
-                let parent_path = match path.parent() {
-                    None => PathBuf::from("/"),
-                    Some(path) => PathBuf::from(path),
-                };
+            let parent_path = match path.parent() {
+                None => PathBuf::from("/"),
+                Some(path) => PathBuf::from(path),
+            };
 
-                current_meta = Self::from_path(&PathBuf::from(path))?;
-                current_meta.name.name = ".".to_string();
+            current_meta = Self::from_path(&path)?;
+            current_meta.name.name = ".".to_string();
 
-                parent_meta = Self::from_path(&PathBuf::from(parent_path))?;
-                parent_meta.name.name = "..".to_string();
+            parent_meta = Self::from_path(&parent_path)?;
+            parent_meta.name.name = "..".to_string();
 
-                content.push(current_meta);
-                content.push(parent_meta);
-            }
-            _ => (),
-        };
+            content.push(current_meta);
+            content.push(parent_meta);
+        }
 
         for entry in meta.path.read_dir()? {
             let path = entry?.path();
 
-           match display {
-                Display::DisplayOnlyVisible => {
-                    if path
-                        .file_name()
-                        .ok_or_else(|| Error::new(ErrorKind::InvalidInput, "invalid file name"))?
-                        .to_string_lossy()
-                        .starts_with('.')
-                    {
-                        continue;
-                    }
-                }
-                _ => (),
-            };
-
-            let entry_meta = match Self::from_path_recursive(
-                &path.to_path_buf(),
-                depth - 1,
-                display,
-            ) {
-                Ok(res) => res,
-                Err(err) => {
-                    println!("cannot access '{}': {}", path.display(), err);
+            if let Display::DisplayOnlyVisible = display {
+                if path
+                    .file_name()
+                    .ok_or_else(|| Error::new(ErrorKind::InvalidInput, "invalid file name"))?
+                    .to_string_lossy()
+                    .starts_with('.')
+                {
                     continue;
                 }
-            };
+            }
+
+            let entry_meta =
+                match Self::from_path_recursive(&path.to_path_buf(), depth - 1, display) {
+                    Ok(res) => res,
+                    Err(err) => {
+                        println!("cannot access '{}': {}", path.display(), err);
+                        continue;
+                    }
+                };
 
             content.push(entry_meta);
         }
