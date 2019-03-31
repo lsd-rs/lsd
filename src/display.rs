@@ -53,7 +53,7 @@ fn inner_display_one_line(
         padding_rules = Some(PaddingRules {
             user: detect_user_length(&metas),
             group: detect_group_length(&metas),
-            size: detect_size_lengths(&metas),
+            size: detect_size_lengths(&metas, flags),
             date: detect_date_length(&metas, flags),
         })
     }
@@ -263,7 +263,7 @@ fn get_long_output(
         meta.owner.render_group(colors, padding_rules.group),
         ANSIString::from(" "),
         meta.size
-            .render(colors, padding_rules.size.0, padding_rules.size.1),
+            .render(colors, padding_rules.size.0, padding_rules.size.1, flags),
         ANSIString::from(" "),
         meta.date.render(colors, padding_rules.date, flags),
         ANSIString::from(" "),
@@ -327,7 +327,7 @@ fn detect_date_length(metas: &[Meta], flags: Flags) -> usize {
     max_value_length
 }
 
-fn detect_size_lengths(metas: &[Meta]) -> (usize, usize) {
+fn detect_size_lengths(metas: &[Meta], flags: Flags) -> (usize, usize) {
     let mut max_value_length: usize = 0;
     let mut max_unit_size: usize = 0;
 
@@ -336,8 +336,8 @@ fn detect_size_lengths(metas: &[Meta]) -> (usize, usize) {
             max_value_length = meta.size.render_value().len();
         }
 
-        if meta.size.render_unit().len() > max_unit_size {
-            max_unit_size = meta.size.render_unit().len();
+        if meta.size.render_unit(flags).len() > max_unit_size {
+            max_unit_size = meta.size.render_unit(flags).len();
         }
     }
 

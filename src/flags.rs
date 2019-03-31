@@ -10,6 +10,7 @@ pub struct Flags {
     pub sort_by: SortFlag,
     pub sort_order: SortOrder,
     pub directory_order: DirOrderFlag,
+    pub size: SizeFlag,
     pub date: DateFlag,
     pub color: WhenFlag,
     pub icon: WhenFlag,
@@ -23,6 +24,7 @@ impl Flags {
         let color_inputs: Vec<&str> = matches.values_of("color").unwrap().collect();
         let icon_inputs: Vec<&str> = matches.values_of("icon").unwrap().collect();
         let icon_theme_inputs: Vec<&str> = matches.values_of("icon-theme").unwrap().collect();
+        let size_inputs: Vec<&str> = matches.values_of("size").unwrap().collect();
         let date_inputs: Vec<&str> = matches.values_of("date").unwrap().collect();
         let dir_order_inputs: Vec<&str> = matches.values_of("group-dirs").unwrap().collect();
 
@@ -74,6 +76,7 @@ impl Flags {
             recursion_depth,
             sort_by,
             sort_order,
+            size: SizeFlag::from(size_inputs[size_inputs.len() - 1]),
             // Take only the last value
             date: if classic_mode {
                 DateFlag::Date
@@ -112,10 +115,27 @@ impl Default for Flags {
             sort_by: SortFlag::Name,
             sort_order: SortOrder::Default,
             directory_order: DirOrderFlag::None,
+            size:  SizeFlag::Default,
             date: DateFlag::Date,
             color: WhenFlag::Auto,
             icon: WhenFlag::Auto,
             icon_theme: IconTheme::Fancy,
+        }
+    }
+}
+
+#[derive(Clone, Debug, Copy, PartialEq, Eq)]
+pub enum SizeFlag {
+    Default,
+    Short,
+}
+
+impl<'a> From<&'a str> for SizeFlag {
+    fn from(size: &'a str) -> Self {
+        match size {
+            "default" => SizeFlag::Default,
+            "short" => SizeFlag::Short,
+            _ => panic!("invalid \"size\" flag: {}", size),
         }
     }
 }
