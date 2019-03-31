@@ -15,6 +15,7 @@ pub use self::owner::Owner;
 pub use self::permissions::Permissions;
 pub use self::size::Size;
 pub use self::symlink::SymLink;
+pub use crate::flags::Display;
 pub use crate::icon::Icons;
 
 use std::fs::read_link;
@@ -39,8 +40,7 @@ impl Meta {
     pub fn from_path_recursive(
         path: &PathBuf,
         depth: usize,
-        list_hidden_files: bool,
-        list_almost_all: bool,
+        display: Display,
     ) -> Result<Self, std::io::Error> {
         let mut meta = Self::from_path(path)?;
 
@@ -59,44 +59,49 @@ impl Meta {
         }
         let mut content = Vec::new();
 
-        if list_hidden_files {
-            let mut current_meta;
-            let mut parent_meta;
+         match display {
+            Display::DisplayAll => {
+                let mut current_meta;
+                let mut parent_meta;
 
-            let parent_path = match path.parent() {
-                None => PathBuf::from("/"),
-                Some(path) => PathBuf::from(path),
-            };
+                let parent_path = match path.parent() {
+                    None => PathBuf::from("/"),
+                    Some(path) => PathBuf::from(path),
+                };
 
-            current_meta = Self::from_path(&PathBuf::from(path))?;
-            current_meta.name.name = ".".to_string();
+                current_meta = Self::from_path(&PathBuf::from(path))?;
+                current_meta.name.name = ".".to_string();
 
-            parent_meta = Self::from_path(&PathBuf::from(parent_path))?;
-            parent_meta.name.name = "..".to_string();
+                parent_meta = Self::from_path(&PathBuf::from(parent_path))?;
+                parent_meta.name.name = "..".to_string();
 
-            content.push(current_meta);
-            content.push(parent_meta);
-        }
+                content.push(current_meta);
+                content.push(parent_meta);
+            }
+            _ => (),
+        };
 
         for entry in meta.path.read_dir()? {
             let path = entry?.path();
 
-            if !list_hidden_files
-                && !list_almost_all
-                && path
-                    .file_name()
-                    .ok_or_else(|| Error::new(ErrorKind::InvalidInput, "invalid file name"))?
-                    .to_string_lossy()
-                    .starts_with('.')
-            {
-                continue;
-            }
+           match display {
+                Display::DisplayOnlyVisible => {
+                    if path
+                        .file_name()
+                        .ok_or_else(|| Error::new(ErrorKind::InvalidInput, "invalid file name"))?
+                        .to_string_lossy()
+                        .starts_with('.')
+                    {
+                        continue;
+                    }
+                }
+                _ => (),
+            };
 
             let entry_meta = match Self::from_path_recursive(
                 &path.to_path_buf(),
                 depth - 1,
-                list_hidden_files,
-                list_almost_all,
+                display,
             ) {
                 Ok(res) => res,
                 Err(err) => {
