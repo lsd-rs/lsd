@@ -78,8 +78,7 @@ impl Core {
             match Meta::from_path_recursive(
                 &fs::canonicalize(&absolute_path.to_path_buf()).unwrap(),
                 depth,
-                self.flags.display_all,
-                self.flags.display_almost_all,
+                self.flags.display,
             ) {
                 Ok(meta) => meta_list.push(meta),
                 Err(err) => println!("cannot access '{}': {}", path.display(), err),
