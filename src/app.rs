@@ -8,6 +8,7 @@ pub fn build() -> App<'static, 'static> {
         .arg(
             Arg::with_name("all")
                 .short("a")
+                .overrides_with("almost-all")
                 .long("all")
                 .multiple(true)
                 .help("Do not ignore entries starting with ."),
@@ -15,8 +16,10 @@ pub fn build() -> App<'static, 'static> {
         .arg(
             Arg::with_name("almost-all")
                 .short("A")
+                .overrides_with("all")
+                .long("almost-all")
                 .multiple(true)
-                .help("Alias of -a"),
+                .help("Do not list implied . and .."),
         )
         .arg(
             Arg::with_name("color")
@@ -98,6 +101,16 @@ pub fn build() -> App<'static, 'static> {
                 .takes_value(true)
                 .value_name("num")
                 .help("Stop recursing into directories after reaching specified depth"),
+        )
+        .arg(
+            Arg::with_name("size")
+                .long("size")
+                .possible_value("default")
+                .possible_value("short")
+                .default_value("default")
+                .multiple(true)
+                .number_of_values(1)
+                .help("How to display size"),
         )
         .arg(
             Arg::with_name("date")

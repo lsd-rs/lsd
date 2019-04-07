@@ -6,7 +6,7 @@ use std::path::Path;
 
 #[derive(Debug, Eq)]
 pub struct Name {
-    name: String,
+   pub name: String,
     path: String,
     extension: Option<String>,
     file_type: FileType,

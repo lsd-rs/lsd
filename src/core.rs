@@ -4,6 +4,7 @@ use crate::flags::{Flags, IconTheme, Layout, WhenFlag};
 use crate::icon::{self, Icons};
 use crate::meta::Meta;
 use crate::sort;
+use std::fs;
 use std::path::PathBuf;
 use terminal_size::terminal_size;
 
@@ -65,7 +66,19 @@ impl Core {
         };
 
         for path in paths {
-            match Meta::from_path_recursive(&path.to_path_buf(), depth, self.flags.display_all) {
+            let absolute_path = match fs::canonicalize(&path) {
+                Ok(path) => path,
+                Err(err) => {
+                    println!("couldn't access '{}': {}", path.display(), err);
+                    continue;
+                }
+            };
+
+            match Meta::from_path_recursive(
+                &fs::canonicalize(&absolute_path.to_path_buf()).unwrap(),
+                depth,
+                self.flags.display,
+            ) {
                 Ok(meta) => meta_list.push(meta),
                 Err(err) => println!("cannot access '{}': {}", path.display(), err),
             };
