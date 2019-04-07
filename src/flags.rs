@@ -2,8 +2,7 @@ use clap::{ArgMatches, Error, ErrorKind};
 
 #[derive(Clone, Debug, Copy)]
 pub struct Flags {
-    pub display_all: bool,
-    pub display_almost_all: bool,
+    pub display: Display,
     pub layout: Layout,
     pub display_indicators: bool,
     pub recursive: bool,
@@ -27,6 +26,14 @@ impl Flags {
         let size_inputs: Vec<&str> = matches.values_of("size").unwrap().collect();
         let date_inputs: Vec<&str> = matches.values_of("date").unwrap().collect();
         let dir_order_inputs: Vec<&str> = matches.values_of("group-dirs").unwrap().collect();
+
+        let display = if matches.is_present("all") {
+            Display::DisplayAll
+        } else if matches.is_present("almost-all") {
+            Display::DisplayAlmostAll
+        } else {
+            Display::DisplayOnlyVisible
+        };
 
         let sort_by = if matches.is_present("timesort") {
             SortFlag::Time
@@ -68,8 +75,7 @@ impl Flags {
         };
 
         Ok(Self {
-            display_all: matches.is_present("all"),
-            display_almost_all: matches.is_present("almost-all"),
+            display,
             layout,
             display_indicators: matches.is_present("indicators"),
             recursive,
@@ -106,8 +112,7 @@ impl Flags {
 impl Default for Flags {
     fn default() -> Self {
         Self {
-            display_all: false,
-            display_almost_all: false,
+            display: Display::DisplayOnlyVisible,
             layout: Layout::Grid,
             display_indicators: false,
             recursive: false,
@@ -115,13 +120,20 @@ impl Default for Flags {
             sort_by: SortFlag::Name,
             sort_order: SortOrder::Default,
             directory_order: DirOrderFlag::None,
-            size:  SizeFlag::Default,
+            size: SizeFlag::Default,
             date: DateFlag::Date,
             color: WhenFlag::Auto,
             icon: WhenFlag::Auto,
             icon_theme: IconTheme::Fancy,
         }
     }
+}
+
+#[derive(Clone, Debug, Copy, PartialEq, Eq)]
+pub enum Display {
+    DisplayAll,
+    DisplayAlmostAll,
+    DisplayOnlyVisible,
 }
 
 #[derive(Clone, Debug, Copy, PartialEq, Eq)]
