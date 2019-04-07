@@ -53,7 +53,7 @@ fn inner_display_one_line(
         padding_rules = Some(PaddingRules {
             user: detect_user_length(&metas),
             group: detect_group_length(&metas),
-            size: detect_size_lengths(&metas),
+            size: detect_size_lengths(&metas, flags),
             date: detect_date_length(&metas, flags),
         })
     }
@@ -257,16 +257,16 @@ fn get_long_output(
     let strings: &[ANSIString] = &[
         meta.file_type.render(colors),
         meta.permissions.render(colors),
-        ANSIString::from("  "),
+        ANSIString::from(" "),
         meta.owner.render_user(colors, padding_rules.user),
-        ANSIString::from("  "),
+        ANSIString::from(" "),
         meta.owner.render_group(colors, padding_rules.group),
-        ANSIString::from("  "),
+        ANSIString::from(" "),
         meta.size
-            .render(colors, padding_rules.size.0, padding_rules.size.1),
-        ANSIString::from("  "),
+            .render(colors, padding_rules.size.0, padding_rules.size.1, flags),
+        ANSIString::from(" "),
         meta.date.render(colors, padding_rules.date, flags),
-        ANSIString::from("  "),
+        ANSIString::from(" "),
         meta.name.render(colors, icons),
         meta.indicator.render(flags),
         meta.symlink.render(colors),
@@ -278,18 +278,12 @@ fn get_long_output(
 fn get_visible_width(input: &str) -> usize {
     let mut nb_invisible_char = 0;
 
-    // Search for every instance of "\e[" indicating the start of a color code
-    // then count the number of charactere between the string and the first 'm'
-    // charactere indicating the end of the code color.
-    let matches: Vec<_> = input.match_indices("\u{1b}[").collect();
-    if matches.len() > 0 {
-        for c in input.chars().skip(matches[0].0) {
-            nb_invisible_char += 1;
-            if c == 'm' {
-                break;
-            }
+    // If the input has color, do not compute the length contributed by the color to the actual length
+    if input.starts_with("\u{1b}[") {
+        let m_pos = input.find('m');
+        if let Some(len) = m_pos {
+            nb_invisible_char = len + 3  // 1 (index -> length) + 2 ( compensate for color reset chars )
         }
-        nb_invisible_char += 2;
     }
 
     UnicodeWidthStr::width(input) - nb_invisible_char
@@ -333,7 +327,7 @@ fn detect_date_length(metas: &[Meta], flags: Flags) -> usize {
     max_value_length
 }
 
-fn detect_size_lengths(metas: &[Meta]) -> (usize, usize) {
+fn detect_size_lengths(metas: &[Meta], flags: Flags) -> (usize, usize) {
     let mut max_value_length: usize = 0;
     let mut max_unit_size: usize = 0;
 
@@ -342,8 +336,8 @@ fn detect_size_lengths(metas: &[Meta]) -> (usize, usize) {
             max_value_length = meta.size.render_value().len();
         }
 
-        if meta.size.render_unit().len() > max_unit_size {
-            max_unit_size = meta.size.render_unit().len();
+        if meta.size.render_unit(flags).len() > max_unit_size {
+            max_unit_size = meta.size.render_unit(flags).len();
         }
     }
 

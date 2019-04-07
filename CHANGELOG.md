@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.14.0] - 2019-03-12
+### Added
+- Add the `-h` option for retro compatibility from [khross](https://github.com/khross)
+
+### Changed
+- Update the format for the relative times from [meain](https://github.com/meain)
+
+### Fixed
+- Fix the visible width calculation from  [meain](https://github.com/meain)
+- Fix a panic une case of invalid modification time
+
 ## [0.13.0] - 2019-03-04
 ### Added
 - Add some support for the LS_COLORS env variable from [meain](https://github.com/meain)
@@ -168,7 +179,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Change the component alignement by using term_grid
 
 
-[Unreleased]: https://github.com/Peltoche/lsd/compare/0.13.0...HEAD
+[Unreleased]: https://github.com/Peltoche/lsd/compare/0.14.0...HEAD
+[0.14.0]: https://github.com/Peltoche/lsd/compare/0.13.1...0.14.0
 [0.13.0]: https://github.com/Peltoche/lsd/compare/0.12.1...0.13.0
 [0.12.0]: https://github.com/Peltoche/lsd/compare/0.11.1...0.12.0
 [0.11.1]: https://github.com/Peltoche/lsd/compare/0.11.0...0.11.1

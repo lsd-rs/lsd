@@ -8,9 +8,18 @@ pub fn build() -> App<'static, 'static> {
         .arg(
             Arg::with_name("all")
                 .short("a")
+                .overrides_with("almost-all")
                 .long("all")
                 .multiple(true)
                 .help("Do not ignore entries starting with ."),
+        )
+        .arg(
+            Arg::with_name("almost-all")
+                .short("A")
+                .overrides_with("all")
+                .long("almost-all")
+                .multiple(true)
+                .help("Do not list implied . and .."),
         )
         .arg(
             Arg::with_name("color")
@@ -20,6 +29,7 @@ pub fn build() -> App<'static, 'static> {
                 .possible_value("never")
                 .default_value("auto")
                 .multiple(true)
+                .number_of_values(1)
                 .help("When to use terminal colours"),
         )
         .arg(
@@ -30,6 +40,7 @@ pub fn build() -> App<'static, 'static> {
                 .possible_value("never")
                 .default_value("auto")
                 .multiple(true)
+                .number_of_values(1)
                 .help("When to print the icons"),
         )
         .arg(
@@ -39,6 +50,7 @@ pub fn build() -> App<'static, 'static> {
                 .possible_value("unicode")
                 .default_value("fancy")
                 .multiple(true)
+                .number_of_values(1)
                 .help("Whether to use fancy or unicode icons"),
         )
         .arg(
@@ -91,12 +103,23 @@ pub fn build() -> App<'static, 'static> {
                 .help("Stop recursing into directories after reaching specified depth"),
         )
         .arg(
+            Arg::with_name("size")
+                .long("size")
+                .possible_value("default")
+                .possible_value("short")
+                .default_value("default")
+                .multiple(true)
+                .number_of_values(1)
+                .help("How to display size"),
+        )
+        .arg(
             Arg::with_name("date")
                 .long("date")
                 .possible_value("date")
                 .possible_value("relative")
                 .default_value("date")
                 .multiple(true)
+                .number_of_values(1)
                 .help("How to display date"),
         )
         .arg(
@@ -121,6 +144,7 @@ pub fn build() -> App<'static, 'static> {
                 .possible_value("last")
                 .default_value("none")
                 .multiple(true)
+                .number_of_values(1)
                 .help("Sort the directories then the files"),
         )
         .arg(

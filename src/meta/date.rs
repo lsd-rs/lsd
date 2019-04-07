@@ -12,9 +12,8 @@ impl<'a> From<&'a Metadata> for Date {
     fn from(meta: &'a Metadata) -> Self {
         let modified_time = meta.modified().expect("failed to retrieve modified date");
 
-        let modified_time_since_epoch = modified_time
-            .duration_since(UNIX_EPOCH)
-            .expect("failed to convert modified time to timestamp");
+        let modified_time_since_epoch =
+            modified_time.duration_since(UNIX_EPOCH).unwrap_or_default();
 
         let time = time::at(Timespec::new(
             modified_time_since_epoch.as_secs() as i64,
