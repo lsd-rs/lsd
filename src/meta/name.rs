@@ -74,7 +74,18 @@ impl Name {
 
 impl Ord for Name {
     fn cmp(&self, other: &Self) -> Ordering {
-        self.name.to_lowercase().cmp(&other.name.to_lowercase())
+        // Compare names without considering leading dot
+        let mut a = self.name.as_str();
+        if a.len() > 1 && a.starts_with(".") {
+            let (_, a_) = a.split_at(1);
+            a = &a_;
+        } 
+        let mut b = other.name.as_str();
+        if b.len() > 1 && b.starts_with(".") {
+            let (_, b_) = b.split_at(1);
+            b = &b_
+        } 
+        a.to_lowercase().cmp(&b.to_lowercase())
     }
 }
 
