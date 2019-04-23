@@ -9,6 +9,7 @@ pub struct Flags {
     pub sort_by: SortFlag,
     pub sort_order: SortOrder,
     pub directory_order: DirOrderFlag,
+    pub directory_display: DirDisplay,
     pub size: SizeFlag,
     pub date: DateFlag,
     pub color: WhenFlag,
@@ -33,6 +34,11 @@ impl Flags {
             Display::DisplayAlmostAll
         } else {
             Display::DisplayOnlyVisible
+        };
+        let dir_display = if matches.is_present("directory-only") {
+            DirDisplay::DirectoryItself
+        } else {
+            DirDisplay::DirectoryContents
         };
 
         let sort_by = if matches.is_present("timesort") {
@@ -105,6 +111,7 @@ impl Flags {
             } else {
                 DirOrderFlag::from(dir_order_inputs[dir_order_inputs.len() - 1])
             },
+            directory_display: dir_display,
         })
     }
 }
@@ -120,6 +127,7 @@ impl Default for Flags {
             sort_by: SortFlag::Name,
             sort_order: SortOrder::Default,
             directory_order: DirOrderFlag::None,
+            directory_display: DirDisplay::DirectoryContents,
             size: SizeFlag::Default,
             date: DateFlag::Date,
             color: WhenFlag::Auto,
@@ -214,6 +222,12 @@ impl<'a> From<&'a str> for DirOrderFlag {
             _ => panic!("invalid \"when\" flag: {}", when),
         }
     }
+}
+
+#[derive(Clone, Debug, Copy, PartialEq, Eq)]
+pub enum DirDisplay {
+    DirectoryContents,
+    DirectoryItself,
 }
 
 #[derive(Clone, Debug, Copy, PartialEq, Eq)]
