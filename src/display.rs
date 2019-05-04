@@ -452,6 +452,7 @@ mod tests {
             let output = name.render(
                 &Colors::new(color::Theme::NoColor),
                 &Icons::new(icon::Theme::NoIcon),
+                None,
             );
 
             assert_eq!(get_visible_width(&output), *l);
@@ -483,6 +484,7 @@ mod tests {
                 .render(
                     &Colors::new(color::Theme::NoColor),
                     &Icons::new(icon::Theme::Fancy),
+                    None,
                 )
                 .to_string();
 
@@ -514,6 +516,7 @@ mod tests {
                 .render(
                     &Colors::new(color::Theme::NoLscolors),
                     &Icons::new(icon::Theme::NoIcon),
+                    None,
                 )
                 .to_string();
 
@@ -549,6 +552,7 @@ mod tests {
                 .render(
                     &Colors::new(color::Theme::NoColor),
                     &Icons::new(icon::Theme::NoIcon),
+                    None,
                 )
                 .to_string();
 
