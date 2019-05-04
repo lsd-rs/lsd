@@ -136,7 +136,7 @@ mod test {
 
         assert_eq!(
             Colour::Fixed(184).paint("  file.txt"),
-            name.render(&colors, &icons)
+            name.render(&colors, &icons, None)
         );
     }
 
@@ -154,7 +154,7 @@ mod test {
 
         assert_eq!(
             Colour::Fixed(33).paint("  directory"),
-            meta.name.render(&colors, &icons)
+            meta.name.render(&colors, &icons, None)
         );
     }
 
@@ -181,7 +181,7 @@ mod test {
 
         assert_eq!(
             Colour::Fixed(44).paint("  target.tmp"),
-            name.render(&colors, &icons)
+            name.render(&colors, &icons, None)
         );
     }
 
@@ -207,7 +207,7 @@ mod test {
 
         assert_eq!(
             Colour::Fixed(184).paint("  pipe.tmp"),
-            name.render(&colors, &icons)
+            name.render(&colors, &icons, None)
         );
     }
 
@@ -226,7 +226,7 @@ mod test {
 
         assert_eq!(
             "file.txt",
-            meta.name.render(&colors, &icons).to_string().as_str()
+            meta.name.render(&colors, &icons, None).to_string().as_str()
         );
     }
 
