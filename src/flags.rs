@@ -156,24 +156,26 @@ impl Default for Flags {
 
 #[derive(Clone, Debug, Copy, PartialEq, Eq)]
 pub enum Block {
-    // Type,
+    FileType,
     Permission,
     User,
     Group,
     Size,
     Date,
     Name,
+    NameWithSymlink,
 }
 impl<'a> From<&'a str> for Block {
     fn from(block: &'a str) -> Self {
         match block {
-            // "type" => Block::Type,
+            "filetype" => Block::FileType,
             "permission" => Block::Permission,
             "user" => Block::User,
             "group" => Block::Group,
             "size" => Block::Size,
             "date" => Block::Date,
             "name" => Block::Name,
+            "namewithsymlink" => Block::NameWithSymlink,
             _ => panic!("invalid \"time\" flag: {}", block),
         }
     }

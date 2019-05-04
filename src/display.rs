@@ -19,6 +19,7 @@ struct PaddingRules {
     size: (usize, usize),
     date: usize,
     name: usize,
+    name_with_symlink: usize,
 }
 
 pub fn one_line(metas: Vec<Meta>, flags: &Flags, colors: &Colors, icons: &Icons) -> String {
@@ -57,6 +58,7 @@ fn inner_display_one_line(
             size: detect_size_lengths(&metas, &flags),
             date: detect_date_length(&metas, &flags),
             name: detect_name_length(&metas, &icons),
+            name_with_symlink: detect_name_with_symlink_length(&metas, &icons)
         })
     }
 
@@ -281,10 +283,8 @@ fn get_long_output(
     let mut strings: Vec<ANSIString> = Vec::new();
     for block in flags.blocks.iter() {
         match block {
-            Block::Permission => {
-                strings.push(meta.file_type.render(colors));
-                strings.push(meta.permissions.render(colors));
-            }
+            Block::FileType => strings.push(meta.file_type.render(colors)),
+            Block::Permission => strings.push(meta.permissions.render(colors)),
             Block::User => strings.push(meta.owner.render_user(colors, padding_rules.user)),
             Block::Group => strings.push(meta.owner.render_group(colors, padding_rules.group)),
             Block::Size => strings.push(meta.size.render(
@@ -294,8 +294,9 @@ fn get_long_output(
                 &flags,
             )),
             Block::Date => strings.push(meta.date.render(colors, padding_rules.date, &flags)),
-            Block::Name => {
-                strings.push(meta.name.render(colors, icons, Some(padding_rules.name)));
+            Block::Name => strings.push(meta.name.render(colors, icons, Some(padding_rules.name))),
+            Block::NameWithSymlink => {
+                strings.push(meta.name.render(colors, icons, None));
                 strings.push(meta.indicator.render(&flags));
                 strings.push(meta.symlink.render(colors));
             }
@@ -391,12 +392,29 @@ fn detect_size_lengths(metas: &[Meta], flags: &Flags) -> (usize, usize) {
 
     (max_value_length, max_unit_size)
 }
+
 fn detect_name_length(metas: &[Meta], icons: &Icons) -> usize {
     let mut max_value_length: usize = 0;
 
     for meta in metas {
         if meta.name.name_string(&icons).len() > max_value_length {
             max_value_length = meta.name.name_string(&icons).len();
+        }
+    }
+
+    max_value_length
+}
+
+fn detect_name_with_symlink_length(metas: &[Meta], icons: &Icons) -> usize {
+    let mut max_value_length: usize = 0;
+
+    for meta in metas {
+        let mut len = meta.name.name_string(&icons).len();
+        if let Some(syml) = meta.symlink.symlink_string() {
+            len += syml.len();
+        }
+        if len > max_value_length {
+            max_value_length = len;
         }
     }
 
