@@ -156,7 +156,7 @@ impl Default for Flags {
 
 #[derive(Clone, Debug, Copy, PartialEq, Eq)]
 pub enum Block {
-    FileType,
+    // FileType,
     Permission,
     User,
     Group,
@@ -168,7 +168,7 @@ pub enum Block {
 impl<'a> From<&'a str> for Block {
     fn from(block: &'a str) -> Self {
         match block {
-            "filetype" => Block::FileType,
+            // "filetype" => Block::FileType,
             "permission" => Block::Permission,
             "user" => Block::User,
             "group" => Block::Group,
