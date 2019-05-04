@@ -18,6 +18,7 @@ struct PaddingRules {
     group: usize,
     size: (usize, usize),
     date: usize,
+    name: usize,
 }
 
 pub fn one_line(metas: Vec<Meta>, flags: &Flags, colors: &Colors, icons: &Icons) -> String {
@@ -55,6 +56,7 @@ fn inner_display_one_line(
             group: detect_group_length(&metas),
             size: detect_size_lengths(&metas, &flags),
             date: detect_date_length(&metas, &flags),
+            name: detect_name_length(&metas, &icons),
         })
     }
 
@@ -262,7 +264,7 @@ fn display_folder_path(meta: &Meta) -> String {
 
 fn get_short_output(meta: &Meta, colors: &Colors, icons: &Icons, flags: &Flags) -> String {
     let strings: &[ANSIString] = &[
-        meta.name.render(colors, icons),
+        meta.name.render(colors, icons, None),
         meta.indicator.render(&flags),
     ];
 
@@ -289,11 +291,11 @@ fn get_long_output(
                 colors,
                 padding_rules.size.0,
                 padding_rules.size.1,
-                &flags
+                &flags,
             )),
             Block::Date => strings.push(meta.date.render(colors, padding_rules.date, &flags)),
             Block::Name => {
-                strings.push(meta.name.render(colors, icons));
+                strings.push(meta.name.render(colors, icons, Some(padding_rules.name)));
                 strings.push(meta.indicator.render(&flags));
                 strings.push(meta.symlink.render(colors));
             }
@@ -388,6 +390,17 @@ fn detect_size_lengths(metas: &[Meta], flags: &Flags) -> (usize, usize) {
     }
 
     (max_value_length, max_unit_size)
+}
+fn detect_name_length(metas: &[Meta], icons: &Icons) -> usize {
+    let mut max_value_length: usize = 0;
+
+    for meta in metas {
+        if meta.name.name_string(&icons).len() > max_value_length {
+            max_value_length = meta.name.name_string(&icons).len();
+        }
+    }
+
+    max_value_length
 }
 
 #[cfg(test)]

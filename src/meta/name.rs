@@ -38,12 +38,22 @@ impl Name {
         }
     }
 
-    pub fn render(&self, colors: &Colors, icons: &Icons) -> ColoredString {
+    pub fn name_string(&self, icons: &Icons) -> String {
         let icon = icons.get(self);
         let mut content = String::with_capacity(icon.len() + self.name.len() + 3 /* spaces */);
 
         content += icon.as_str();
         content += &self.name;
+        content
+    }
+
+    pub fn render(&self, colors: &Colors, icons: &Icons, name_alignment: Option<usize>) -> ColoredString {
+        let mut content = self.name_string(&icons);
+        if let Some(na) = name_alignment {
+            for _ in 0..(na - content.len()) {
+                content.push(' ');
+            }
+        }
 
         let elem = match self.file_type {
             FileType::CharDevice => Elem::CharDevice,
