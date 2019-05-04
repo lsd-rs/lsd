@@ -58,7 +58,7 @@ fn inner_display_one_line(
             size: detect_size_lengths(&metas, &flags),
             date: detect_date_length(&metas, &flags),
             name: detect_name_length(&metas, &icons),
-            name_with_symlink: detect_name_with_symlink_length(&metas, &icons)
+            name_with_symlink: detect_name_with_symlink_length(&metas, &icons),
         })
     }
 
@@ -283,8 +283,10 @@ fn get_long_output(
     let mut strings: Vec<ANSIString> = Vec::new();
     for block in flags.blocks.iter() {
         match block {
-            Block::FileType => strings.push(meta.file_type.render(colors)),
-            Block::Permission => strings.push(meta.permissions.render(colors)),
+            Block::Permission => {
+                strings.push(meta.file_type.render(colors));
+                strings.push(meta.permissions.render(colors));
+            }
             Block::User => strings.push(meta.owner.render_user(colors, padding_rules.user)),
             Block::Group => strings.push(meta.owner.render_group(colors, padding_rules.group)),
             Block::Size => strings.push(meta.size.render(
