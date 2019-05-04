@@ -297,11 +297,25 @@ fn get_long_output(
             )),
             Block::Date => strings.push(meta.date.render(colors, padding_rules.date, &flags)),
             Block::Name => strings.push(meta.name.render(colors, icons, Some(padding_rules.name))),
-            Block::NameWithSymlink => {
-                strings.push(meta.name.render(colors, icons, None));
-                strings.push(meta.indicator.render(&flags));
-                strings.push(meta.symlink.render(colors));
-            }
+            Block::NameWithSymlink => match meta.symlink.symlink_string() {
+                Some(_) => {
+                    strings.push(meta.name.render(colors, icons, None));
+                    strings.push(meta.indicator.render(&flags));
+                    strings.push(meta.symlink.render(
+                        colors,
+                        Some(padding_rules.name_with_symlink - meta.name.name_string(icons).len()),
+                    ));
+                }
+                None => {
+                    strings.push(meta.name.render(
+                        colors,
+                        icons,
+                        Some(padding_rules.name_with_symlink + 3),
+                    ));
+                    strings.push(meta.indicator.render(&flags));
+                    strings.push(meta.symlink.render(colors, None));
+                }
+            },
         };
         strings.push(ANSIString::from(" ")); // TODO do not add this space to the end
     }

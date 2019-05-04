@@ -51,8 +51,14 @@ impl SymLink {
         }
     }
 
-    pub fn render(&self, colors: &Colors) -> ColoredString {
-        if let Some(target_string) = self.symlink_string() {
+    pub fn render(&self, colors: &Colors, symlink_alignment: Option<usize>) -> ColoredString {
+        if let Some(mut target_string) = self.symlink_string() {
+            if let Some(sa) = symlink_alignment {
+                for _ in 0..(sa - target_string.len()) {
+                    target_string.push(' ');
+                }
+            }
+
             let elem = if self.valid {
                 &Elem::SymLink
             } else {
