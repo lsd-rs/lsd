@@ -319,23 +319,6 @@ fn get_long_output(
         };
         strings.push(ANSIString::from(" ")); // TODO do not add this space to the end
     }
-    // let strings: &[ANSIString] = &[
-    //     meta.file_type.render(colors),
-    //     meta.permissions.render(colors),
-    //     ANSIString::from(" "),
-    //     meta.owner.render_user(colors, padding_rules.user),
-    //     ANSIString::from(" "),
-    //     meta.owner.render_group(colors, padding_rules.group),
-    //     ANSIString::from(" "),
-    //     meta.size
-    //         .render(colors, padding_rules.size.0, padding_rules.size.1),
-    //     ANSIString::from(" "),
-    //     meta.date.render(colors, padding_rules.date, flags),
-    //     ANSIString::from(" "),
-    //     meta.name.render(colors, icons),
-    //     meta.indicator.render(flags),
-    //     meta.symlink.render(colors),
-    // ];
 
     ANSIStrings(&strings).to_string()
 }
