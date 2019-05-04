@@ -43,8 +43,16 @@ impl<'a> From<&'a Path> for SymLink {
 }
 
 impl SymLink {
-    pub fn render(&self, colors: &Colors) -> ColoredString {
+    pub fn symlink_string(&self) -> Option<String> {
         if let Some(ref target) = self.target {
+            Some(target.to_string())
+        } else {
+            None
+        }
+    }
+
+    pub fn render(&self, colors: &Colors) -> ColoredString {
+        if let Some(target_string) = self.symlink_string() {
             let elem = if self.valid {
                 &Elem::SymLink
             } else {
@@ -53,7 +61,7 @@ impl SymLink {
 
             let strings: &[ColoredString] = &[
                 ColoredString::from(" \u{21d2} "), // ⇒
-                colors.colorize(target.to_string(), elem),
+                colors.colorize(target_string, elem),
             ];
 
             let res = ANSIStrings(strings).to_string();
