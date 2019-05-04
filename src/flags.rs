@@ -174,8 +174,8 @@ impl<'a> From<&'a str> for Block {
             "group" => Block::Group,
             "size" => Block::Size,
             "date" => Block::Date,
-            "name" => Block::Name,
-            "namewithsymlink" => Block::NameWithSymlink,
+            "name" => Block::NameWithSymlink,
+            "namewithoutsymlink" => Block::Name,
             _ => panic!("invalid \"time\" flag: {}", block),
         }
     }
