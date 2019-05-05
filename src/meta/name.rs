@@ -6,7 +6,7 @@ use std::path::Path;
 
 #[derive(Debug, Eq)]
 pub struct Name {
-   pub name: String,
+    pub name: String,
     path: String,
     extension: Option<String>,
     file_type: FileType,
@@ -95,8 +95,8 @@ mod test {
     use super::Name;
     use crate::color::{self, Colors};
     use crate::icon::{self, Icons};
-    use crate::meta::Meta;
     use crate::meta::FileType;
+    use crate::meta::Meta;
     #[cfg(unix)]
     use crate::meta::Permissions;
     use ansi_term::Colour;

@@ -1,18 +1,17 @@
-use std::io;
-use std::path::PathBuf;
 use std::ffi::{OsStr, OsString};
+use std::io;
+use std::os::windows::ffi::{OsStrExt, OsStringExt};
+use std::path::PathBuf;
 use std::ptr::null_mut;
-use std::os::windows::ffi::{OsStringExt, OsStrExt};
 
-use winapi::um::winnt;
-use winapi::um::accctrl::TRUSTEE_W;
-use winapi::shared::winerror;
 use winapi::ctypes::c_void;
+use winapi::shared::winerror;
+use winapi::um::accctrl::TRUSTEE_W;
+use winapi::um::winnt;
 
 use super::{Owner, Permissions};
 
 const BUF_SIZE: u32 = 256;
-
 
 pub fn get_file_data(path: &PathBuf) -> Result<(Owner, Permissions), io::Error> {
     // Overall design:
@@ -54,12 +53,12 @@ pub fn get_file_data(path: &PathBuf) -> Result<(Owner, Permissions), io::Error> 
             &mut group_sid_ptr,
             &mut dacl_ptr,
             null_mut(),
-            &mut sd_ptr
+            &mut sd_ptr,
         )
     };
 
     if error_code != winerror::ERROR_SUCCESS {
-        return Err(std::io::Error::from_raw_os_error(error_code as i32))
+        return Err(std::io::Error::from_raw_os_error(error_code as i32));
     }
 
     // Assumptions:
@@ -106,17 +105,21 @@ pub fn get_file_data(path: &PathBuf) -> Result<(Owner, Permissions), io::Error> 
             winnt::WinWorldSid,
             null_mut(),
             world_sid.as_mut_ptr() as *mut _,
-            &mut world_sid_len)
+            &mut world_sid_len,
+        )
     };
 
     if result == 0 {
         // Failed to create the SID
         // Assumptions: Same as the other identical calls
-        unsafe { winapi::um::winbase::LocalFree(sd_ptr); }
+        unsafe {
+            winapi::um::winbase::LocalFree(sd_ptr);
+        }
 
         // Assumptions: None (GetLastError shouldn't ever fail)
-        return Err(io::Error::from_raw_os_error(
-                unsafe { winapi::um::errhandlingapi::GetLastError() } as i32));
+        return Err(io::Error::from_raw_os_error(unsafe {
+            winapi::um::errhandlingapi::GetLastError()
+        } as i32));
     }
 
     // Assumptions:
@@ -129,17 +132,11 @@ pub fn get_file_data(path: &PathBuf) -> Result<(Owner, Permissions), io::Error> 
     // Assumptions:
     // - xxxxx_trustee are still valid (including underlying SID)
     // - dacl_ptr is still valid
-    let owner_access_mask = unsafe {
-        get_acl_access_mask(dacl_ptr as *mut _, &mut owner_trustee)
-    }?;
+    let owner_access_mask = unsafe { get_acl_access_mask(dacl_ptr as *mut _, &mut owner_trustee) }?;
 
-    let group_access_mask = unsafe {
-        get_acl_access_mask(dacl_ptr as *mut _, &mut group_trustee)
-    }?;
+    let group_access_mask = unsafe { get_acl_access_mask(dacl_ptr as *mut _, &mut group_trustee) }?;
 
-    let world_access_mask = unsafe {
-        get_acl_access_mask(dacl_ptr as *mut _, &mut world_trustee)
-    }?;
+    let world_access_mask = unsafe { get_acl_access_mask(dacl_ptr as *mut _, &mut world_trustee) }?;
 
     let has_bit = |field: u32, bit: u32| field & bit != 0;
 
@@ -167,7 +164,9 @@ pub fn get_file_data(path: &PathBuf) -> Result<(Owner, Permissions), io::Error> 
     // - The free succeeds (currently unchecked -- there's no real recovery
     //   options. It's not much memory, so leaking it on failure is
     //   *probably* fine)
-    unsafe { winapi::um::winbase::LocalFree(sd_ptr); }
+    unsafe {
+        winapi::um::winbase::LocalFree(sd_ptr);
+    }
 
     Ok((owner, permissions))
 }
@@ -178,7 +177,10 @@ pub fn get_file_data(path: &PathBuf) -> Result<(Owner, Permissions), io::Error> 
 /// - acl_ptr points to a valid ACL data structure
 /// - trustee_ptr points to a valid trustee data structure
 /// - Both remain valid through the function call (no long-term requirement)
-unsafe fn get_acl_access_mask(acl_ptr: *mut c_void, trustee_ptr: *mut TRUSTEE_W) -> Result<u32, io::Error> {
+unsafe fn get_acl_access_mask(
+    acl_ptr: *mut c_void,
+    trustee_ptr: *mut TRUSTEE_W,
+) -> Result<u32, io::Error> {
     let mut access_mask = 0;
 
     // Assumptions:
@@ -187,7 +189,8 @@ unsafe fn get_acl_access_mask(acl_ptr: *mut c_void, trustee_ptr: *mut TRUSTEE_W)
     let err_code = winapi::um::aclapi::GetEffectiveRightsFromAclW(
         acl_ptr as *mut _,
         trustee_ptr,
-        &mut access_mask);
+        &mut access_mask,
+    );
 
     if err_code == winerror::ERROR_SUCCESS {
         Ok(access_mask)
@@ -254,7 +257,9 @@ unsafe fn lookup_account_sid(sid: *mut c_void) -> Result<(Vec<u16>, Vec<u16>), s
         } else {
             // Some other failure
             // Assumptions: None (GetLastError shouldn't ever fail)
-            return Err(io::Error::from_raw_os_error(winapi::um::errhandlingapi::GetLastError() as i32));
+            return Err(io::Error::from_raw_os_error(
+                winapi::um::errhandlingapi::GetLastError() as i32,
+            ));
         }
     }
 }
@@ -312,7 +317,9 @@ mod test {
             for msb in 0..=256u16 {
                 let val = msb << 8 | lsb;
 
-                if val != 0 { vec.push(val) }
+                if val != 0 {
+                    vec.push(val)
+                }
             }
 
             vec.push(0);

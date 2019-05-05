@@ -11,10 +11,7 @@ pub struct Owner {
 impl Owner {
     #[cfg_attr(unix, allow(dead_code))]
     pub fn new(user: String, group: String) -> Self {
-        Self {
-            user,
-            group,
-        }
+        Self { user, group }
     }
 }
 

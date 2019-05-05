@@ -282,7 +282,7 @@ fn get_visible_width(input: &str) -> usize {
     if input.starts_with("\u{1b}[") {
         let m_pos = input.find('m');
         if let Some(len) = m_pos {
-            nb_invisible_char = len + 3  // 1 (index -> length) + 2 ( compensate for color reset chars )
+            nb_invisible_char = len + 3 // 1 (index -> length) + 2 ( compensate for color reset chars )
         }
     }
 
