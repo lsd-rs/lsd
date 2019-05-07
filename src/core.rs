@@ -20,9 +20,15 @@ impl Core {
         // terminal_size allows us to know if the stdout is a tty or not.
         let tty_available = terminal_size().is_some();
 
+        // determine color output availability (and initialize color output (for Windows 10))
+        #[cfg(not(target_os = "windows"))]
+        let console_color_ok = true;
+        #[cfg(target_os = "windows")]
+        let console_color_ok = ansi_term::enable_ansi_support().is_ok();
+
         let mut inner_flags = flags;
 
-        let color_theme = match (tty_available, flags.color) {
+        let color_theme = match (tty_available && console_color_ok, flags.color) {
             (_, WhenFlag::Never) | (false, WhenFlag::Auto) => color::Theme::NoColor,
             _ => color::Theme::Default,
         };
