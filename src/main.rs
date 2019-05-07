@@ -17,6 +17,7 @@ extern crate term_grid;
 extern crate terminal_size;
 extern crate time;
 extern crate unicode_width;
+extern crate wild;
 
 #[cfg(unix)]
 extern crate users;
@@ -38,7 +39,7 @@ use crate::flags::Flags;
 use std::path::PathBuf;
 
 fn main() {
-    let matches = app::build().get_matches();
+    let matches = app::build().get_matches_from(wild::args_os());
 
     let inputs = matches
         .values_of("FILE")
