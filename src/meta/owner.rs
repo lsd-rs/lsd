@@ -2,7 +2,7 @@ use crate::color::{ColoredString, Colors, Elem};
 #[cfg(unix)]
 use std::fs::Metadata;
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct Owner {
     user: String,
     group: String,

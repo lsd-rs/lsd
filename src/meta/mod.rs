@@ -25,7 +25,7 @@ use std::fs::read_link;
 use std::io::{Error, ErrorKind};
 use std::path::PathBuf;
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct Meta {
     pub name: Name,
     pub path: PathBuf,
