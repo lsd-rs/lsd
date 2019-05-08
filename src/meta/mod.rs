@@ -44,21 +44,25 @@ impl Meta {
         path: &PathBuf,
         depth: usize,
         display: Display,
-    ) -> Result<Self, std::io::Error> {
-        let mut meta = Self::from_path(path)?;
+    ) -> Result<Option<Vec<Meta>>, std::io::Error> {
+        let meta = Self::from_path(path)?;
 
         if depth == 0 {
-            return Ok(meta);
+            return Ok(None);
+        }
+
+        if display == Display::DisplayDirectoryItself {
+            return Ok(None);
         }
 
         match meta.file_type {
             FileType::Directory { .. } => (),
-            _ => return Ok(meta),
+            _ => return Ok(None),
         }
 
         if let Err(err) = meta.path.read_dir() {
             eprintln!("cannot access '{}': {}", path.display(), err);
-            return Ok(meta);
+            return Ok(None);
         }
         let mut content = Vec::new();
 
@@ -95,8 +99,8 @@ impl Meta {
                 }
             }
 
-            let entry_meta =
-                match Self::from_path_recursive(&path.to_path_buf(), depth - 1, display) {
+            let mut entry_meta =
+                match Self::from_path(&path.to_path_buf()) {
                     Ok(res) => res,
                     Err(err) => {
                         eprintln!("cannot access '{}': {}", path.display(), err);
@@ -104,14 +108,18 @@ impl Meta {
                     }
                 };
 
+            match Self::from_path_recursive(&path.to_path_buf(), depth - 1, display) {
+                Ok(content) => entry_meta.content = content,
+                Err(err) => {
+                    eprintln!("cannot access '{}': {}", path.display(), err);
+                    continue;
+                }
+            };
+
             content.push(entry_meta);
         }
 
-        if !content.is_empty() {
-            meta.content = Some(content);
-        }
-
-        Ok(meta)
+        Ok(Some(content))
     }
 
     pub fn from_path(path: &PathBuf) -> Result<Self, std::io::Error> {

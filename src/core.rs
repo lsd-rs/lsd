@@ -68,20 +68,22 @@ impl Core {
 
         for path in paths {
             let absolute_path = match fs::canonicalize(&path) {
-                Ok(path) => path,
+                Ok(path) => path.to_path_buf(),
                 Err(err) => {
                     eprintln!("cannot access '{}': {}", path.display(), err);
                     continue;
                 }
             };
 
-            match Meta::from_path_recursive(
-                &fs::canonicalize(&absolute_path.to_path_buf()).unwrap(),
-                depth,
-                self.flags.display,
-            ) {
+            match Meta::from_path(&absolute_path) {
                 Ok(meta) => meta_list.push(meta),
                 Err(err) => eprintln!("cannot access '{}': {}", path.display(), err),
+            };
+
+            match Meta::from_path_recursive(&absolute_path, depth, self.flags.display) {
+                Ok(Some(content)) => meta_list.extend(content),
+                Ok(None) => (),
+                Err(err) => println!("cannot access '{}': {}", path.display(), err),
             };
         }
 
