@@ -40,13 +40,11 @@ pub struct Meta {
 }
 
 impl Meta {
-    pub fn from_path_recursive(
-        path: &PathBuf,
+    pub fn recurse_into(
+        &self,
         depth: usize,
         display: Display,
     ) -> Result<Option<Vec<Meta>>, std::io::Error> {
-        let meta = Self::from_path(path)?;
-
         if depth == 0 {
             return Ok(None);
         }
@@ -55,27 +53,29 @@ impl Meta {
             return Ok(None);
         }
 
-        match meta.file_type {
+        match self.file_type {
             FileType::Directory { .. } => (),
             _ => return Ok(None),
         }
 
-        if let Err(err) = meta.path.read_dir() {
-            eprintln!("cannot access '{}': {}", path.display(), err);
+        // TODO: Don't read_dir twice; see later.
+        if let Err(err) = self.path.read_dir() {
+            eprintln!("cannot access '{}': {}", self.path.display(), err);
             return Ok(None);
         }
-        let mut content = Vec::new();
+
+        let mut content: Vec<Meta> = Vec::new();
 
         if let Display::DisplayAll = display {
             let mut current_meta;
             let mut parent_meta;
 
-            let parent_path = match path.parent() {
+            let parent_path = match self.path.parent() {
                 None => PathBuf::from("/"),
                 Some(path) => PathBuf::from(path),
             };
 
-            current_meta = Self::from_path(&path)?;
+            current_meta = self.clone();
             current_meta.name.name = ".".to_string();
 
             parent_meta = Self::from_path(&parent_path)?;
@@ -85,7 +85,7 @@ impl Meta {
             content.push(parent_meta);
         }
 
-        for entry in meta.path.read_dir()? {
+        for entry in self.path.read_dir()? {
             let path = entry?.path();
 
             if let Display::DisplayOnlyVisible = display {
@@ -99,16 +99,15 @@ impl Meta {
                 }
             }
 
-            let mut entry_meta =
-                match Self::from_path(&path.to_path_buf()) {
-                    Ok(res) => res,
-                    Err(err) => {
-                        eprintln!("cannot access '{}': {}", path.display(), err);
-                        continue;
-                    }
-                };
+            let mut entry_meta = match Self::from_path(&path.to_path_buf()) {
+                Ok(res) => res,
+                Err(err) => {
+                    eprintln!("cannot access '{}': {}", path.display(), err);
+                    continue;
+                }
+            };
 
-            match Self::from_path_recursive(&path.to_path_buf(), depth - 1, display) {
+            match entry_meta.recurse_into(depth - 1, display) {
                 Ok(content) => entry_meta.content = content,
                 Err(err) => {
                     eprintln!("cannot access '{}': {}", path.display(), err);
