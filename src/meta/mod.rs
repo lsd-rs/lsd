@@ -58,11 +58,13 @@ impl Meta {
             _ => return Ok(None),
         }
 
-        // TODO: Don't read_dir twice; see later.
-        if let Err(err) = self.path.read_dir() {
-            eprintln!("cannot access '{}': {}", self.path.display(), err);
-            return Ok(None);
-        }
+        let entries = match self.path.read_dir() {
+            Ok(entries) => entries,
+            Err(err) => {
+                eprintln!("cannot access '{}': {}", self.path.display(), err);
+                return Ok(None);
+            }
+        };
 
         let mut content: Vec<Meta> = Vec::new();
 
@@ -85,7 +87,7 @@ impl Meta {
             content.push(parent_meta);
         }
 
-        for entry in self.path.read_dir()? {
+        for entry in entries {
             let path = entry?.path();
 
             if let Display::DisplayOnlyVisible = display {
