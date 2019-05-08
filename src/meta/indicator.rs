@@ -3,7 +3,7 @@ use crate::flags::Flags;
 use crate::meta::FileType;
 use ansi_term::ANSIString;
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct Indicator(&'static str);
 
 impl From<FileType> for Indicator {
