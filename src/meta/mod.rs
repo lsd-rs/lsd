@@ -57,7 +57,7 @@ impl Meta {
         }
 
         if let Err(err) = meta.path.read_dir() {
-            println!("cannot access '{}': {}", path.display(), err);
+            eprintln!("cannot access '{}': {}", path.display(), err);
             return Ok(meta);
         }
         let mut content = Vec::new();
@@ -99,7 +99,7 @@ impl Meta {
                 match Self::from_path_recursive(&path.to_path_buf(), depth - 1, display) {
                     Ok(res) => res,
                     Err(err) => {
-                        println!("cannot access '{}': {}", path.display(), err);
+                        eprintln!("cannot access '{}': {}", path.display(), err);
                         continue;
                     }
                 };
