@@ -90,9 +90,9 @@ impl FileType {
 mod test {
     use super::FileType;
     use crate::color::{Colors, Theme};
+    use crate::meta::Meta;
     #[cfg(unix)]
     use crate::meta::Permissions;
-    use crate::meta::Meta;
     use ansi_term::Colour;
     #[cfg(unix)]
     use std::fs::File;
@@ -123,7 +123,8 @@ mod test {
     #[test]
     fn test_dir_type() {
         let tmp_dir = TempDir::new("test_dir_type").expect("failed to create temp dir");
-        let meta = Meta::from_path(&tmp_dir.path().to_path_buf()).expect("failed to get tempdir path");
+        let meta =
+            Meta::from_path(&tmp_dir.path().to_path_buf()).expect("failed to get tempdir path");
         let metadata = tmp_dir.path().metadata().expect("failed to get metas");
 
         let colors = Colors::new(Theme::NoLscolors);
