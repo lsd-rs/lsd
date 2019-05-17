@@ -1,9 +1,11 @@
+#![feature(proc_macro_hygiene)]
 #![allow(
     clippy::cast_precision_loss,
     clippy::cast_sign_loss,
     clippy::match_same_arms,
     clippy::cast_possible_wrap
 )]
+
 
 #[macro_use]
 extern crate clap;
