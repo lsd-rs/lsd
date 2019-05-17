@@ -76,7 +76,7 @@ impl Core {
             let absolute_path = match fs::canonicalize(&path) {
                 Ok(path) => path,
                 Err(err) => {
-                    println!("couldn't access '{}': {}", path.display(), err);
+                    eprintln!("cannot access '{}': {}", path.display(), err);
                     continue;
                 }
             };
@@ -87,7 +87,7 @@ impl Core {
                 self.flags.display,
             ) {
                 Ok(meta) => meta_list.push(meta),
-                Err(err) => println!("cannot access '{}': {}", path.display(), err),
+                Err(err) => eprintln!("cannot access '{}': {}", path.display(), err),
             };
         }
 
