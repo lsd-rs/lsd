@@ -171,7 +171,7 @@ pub fn build() -> App<'static, 'static> {
                 .multiple(true)
                 .number_of_values(1)
                 .require_delimiter(true)
-                .possible_values(&["permission", "user", "group", "size", "date", "name","namewithoutsymlink" ])
+                .possible_values(&["permission", "user", "group", "size", "date", "name"])
                 .default_value("permission,user,group,size,date,name")
                 .help("Specify the blocks that will be displayed and in what order"),
         )
@@ -179,5 +179,11 @@ pub fn build() -> App<'static, 'static> {
             Arg::with_name("classic")
                 .long("classic")
                 .help("Enable classic mode (no colors or icons)"),
+        )
+        .arg(
+            Arg::with_name("no-symlink")
+                .long("no-symlink")
+                .multiple(true)
+                .help("Do not display symlink target"),
         )
 }
