@@ -266,7 +266,7 @@ fn display_folder_path(meta: &Meta) -> String {
 
 fn get_short_output(meta: &Meta, colors: &Colors, icons: &Icons, flags: &Flags) -> String {
     let strings: &[ANSIString] = &[
-        meta.name.render(colors, icons, None),
+        meta.name.render(colors, icons),
         meta.indicator.render(&flags),
     ];
 
@@ -298,28 +298,31 @@ fn get_long_output(
             Block::Date => strings.push(meta.date.render(colors, padding_rules.date, &flags)),
             Block::Name => {
                 if flags.no_symlink {
-                    strings.push(meta.name.render(colors, icons, Some(padding_rules.name)));
+                    strings.push(meta.name.render(colors, icons));
+                    strings
+                        .push(ANSIString::from(" ".to_string().repeat(
+                            padding_rules.name - meta.name.name_string(icons).len(),
+                        )))
                 } else {
                     match meta.symlink.symlink_string() {
-                        Some(_) => {
-                            strings.push(meta.name.render(colors, icons, None));
+                        Some(s) => {
+                            strings.push(meta.name.render(colors, icons));
                             strings.push(meta.indicator.render(&flags));
-                            strings.push(meta.symlink.render(
-                                colors,
-                                Some(
-                                    padding_rules.name_with_symlink
-                                        - meta.name.name_string(icons).len(),
-                                ),
-                            ));
+                            strings.push(meta.symlink.render(colors));
+                            strings.push(ANSIString::from(" ".to_string().repeat(
+                                padding_rules.name_with_symlink
+                                    - meta.name.name_string(icons).len()
+                                    - s.len(),
+                            )))
                         }
                         None => {
-                            strings.push(meta.name.render(
-                                colors,
-                                icons,
-                                Some(padding_rules.name_with_symlink + 3),
-                            ));
+                            strings.push(meta.name.render(colors, icons));
                             strings.push(meta.indicator.render(&flags));
-                            strings.push(meta.symlink.render(colors, None));
+                            strings.push(meta.symlink.render(colors));
+                            strings.push(ANSIString::from(" ".to_string().repeat(
+                                padding_rules.name_with_symlink + 3
+                                    - meta.name.name_string(icons).len(),
+                            )))
                         }
                     }
                 }
@@ -460,7 +463,6 @@ mod tests {
             let output = name.render(
                 &Colors::new(color::Theme::NoColor),
                 &Icons::new(icon::Theme::NoIcon),
-                None,
             );
 
             assert_eq!(get_visible_width(&output), *l);
@@ -492,7 +494,6 @@ mod tests {
                 .render(
                     &Colors::new(color::Theme::NoColor),
                     &Icons::new(icon::Theme::Fancy),
-                    None,
                 )
                 .to_string();
 
@@ -524,7 +525,6 @@ mod tests {
                 .render(
                     &Colors::new(color::Theme::NoLscolors),
                     &Icons::new(icon::Theme::NoIcon),
-                    None,
                 )
                 .to_string();
 
@@ -560,7 +560,6 @@ mod tests {
                 .render(
                     &Colors::new(color::Theme::NoColor),
                     &Icons::new(icon::Theme::NoIcon),
-                    None,
                 )
                 .to_string();
 

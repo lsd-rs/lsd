@@ -47,13 +47,8 @@ impl Name {
         content
     }
 
-    pub fn render(&self, colors: &Colors, icons: &Icons, name_alignment: Option<usize>) -> ColoredString {
-        let mut content = self.name_string(&icons);
-        if let Some(na) = name_alignment {
-            for _ in 0..(na - content.len()) {
-                content.push(' ');
-            }
-        }
+    pub fn render(&self, colors: &Colors, icons: &Icons) -> ColoredString {
+        let content = self.name_string(&icons);
 
         let elem = match self.file_type {
             FileType::CharDevice => Elem::CharDevice,
@@ -136,7 +131,7 @@ mod test {
 
         assert_eq!(
             Colour::Fixed(184).paint("  file.txt"),
-            name.render(&colors, &icons, None)
+            name.render(&colors, &icons)
         );
     }
 
@@ -154,7 +149,7 @@ mod test {
 
         assert_eq!(
             Colour::Fixed(33).paint("  directory"),
-            meta.name.render(&colors, &icons, None)
+            meta.name.render(&colors, &icons)
         );
     }
 
@@ -181,7 +176,7 @@ mod test {
 
         assert_eq!(
             Colour::Fixed(44).paint("  target.tmp"),
-            name.render(&colors, &icons, None)
+            name.render(&colors, &icons)
         );
     }
 
@@ -207,7 +202,7 @@ mod test {
 
         assert_eq!(
             Colour::Fixed(184).paint("  pipe.tmp"),
-            name.render(&colors, &icons, None)
+            name.render(&colors, &icons)
         );
     }
 
@@ -226,7 +221,7 @@ mod test {
 
         assert_eq!(
             "file.txt",
-            meta.name.render(&colors, &icons, None).to_string().as_str()
+            meta.name.render(&colors, &icons).to_string().as_str()
         );
     }
 
