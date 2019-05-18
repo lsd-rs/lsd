@@ -16,6 +16,7 @@ pub struct Flags {
     pub icon_theme: IconTheme,
     pub recursion_depth: usize,
     pub blocks: Vec<Block>,
+    pub no_symlink: bool,
 }
 
 impl Flags {
@@ -89,6 +90,7 @@ impl Flags {
             }
             None => usize::max_value(),
         };
+        let no_symlink = matches.is_present("no-symlink");
 
         Ok(Self {
             display,
@@ -122,6 +124,7 @@ impl Flags {
             } else {
                 DirOrderFlag::from(dir_order_inputs[dir_order_inputs.len() - 1])
             },
+            no_symlink,
         })
     }
 }
@@ -150,6 +153,7 @@ impl Default for Flags {
                 Block::Date,
                 Block::Name,
             ],
+            no_symlink: false,
         }
     }
 }
@@ -163,7 +167,6 @@ pub enum Block {
     Size,
     Date,
     Name,
-    NameWithSymlink,
 }
 impl<'a> From<&'a str> for Block {
     fn from(block: &'a str) -> Self {
@@ -174,8 +177,7 @@ impl<'a> From<&'a str> for Block {
             "group" => Block::Group,
             "size" => Block::Size,
             "date" => Block::Date,
-            "name" => Block::NameWithSymlink,
-            "namewithoutsymlink" => Block::Name,
+            "name" => Block::Name,
             _ => panic!("invalid \"time\" flag: {}", block),
         }
     }
