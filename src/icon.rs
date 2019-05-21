@@ -308,7 +308,7 @@ impl Icons {
 #[cfg(test)]
 mod test {
     use super::{Icons, Theme, ICON_SPACE};
-    use crate::meta::{FileType, Name, Permissions};
+    use crate::meta::Meta;
     use std::fs::File;
     use tempdir::TempDir;
 
@@ -317,12 +317,10 @@ mod test {
         let tmp_dir = TempDir::new("test_file_type").expect("failed to create temp dir");
         let file_path = tmp_dir.path().join("file.txt");
         File::create(&file_path).expect("failed to create file");
-        let meta = file_path.metadata().expect("failed to get metas");
+        let meta = Meta::from_path(&file_path).unwrap();
 
-        let file_type = FileType::new(&meta, &Permissions::from(&meta));
-        let name = Name::new(&file_path, file_type);
         let icon = Icons::new(Theme::NoIcon);
-        let icon = icon.get(&name);
+        let icon = icon.get(&meta.name);
 
         assert_eq!(icon, "");
     }
@@ -332,12 +330,10 @@ mod test {
         let tmp_dir = TempDir::new("test_file_type").expect("failed to create temp dir");
         let file_path = tmp_dir.path().join("file");
         File::create(&file_path).expect("failed to create file");
-        let meta = file_path.metadata().expect("failed to get metas");
+        let meta = Meta::from_path(&file_path).unwrap();
 
-        let file_type = FileType::new(&meta, &Permissions::from(&meta));
-        let name = Name::new(&file_path, file_type);
         let icon = Icons::new(Theme::Fancy);
-        let icon = icon.get(&name);
+        let icon = icon.get(&meta.name);
 
         assert_eq!(icon, format!("{}{}", "\u{f016}", ICON_SPACE)); // 
     }
@@ -347,12 +343,10 @@ mod test {
         let tmp_dir = TempDir::new("test_file_type").expect("failed to create temp dir");
         let file_path = tmp_dir.path().join("file");
         File::create(&file_path).expect("failed to create file");
-        let meta = file_path.metadata().expect("failed to get metas");
+        let meta = Meta::from_path(&file_path).unwrap();
 
-        let file_type = FileType::new(&meta, &Permissions::from(&meta));
-        let name = Name::new(&file_path, file_type);
         let icon = Icons::new(Theme::Unicode);
-        let icon = icon.get(&name);
+        let icon = icon.get(&meta.name);
 
         assert_eq!(icon, format!("{}{}", "\u{1f5cb}", ICON_SPACE));
     }
@@ -361,12 +355,10 @@ mod test {
     fn get_directory_icon() {
         let tmp_dir = TempDir::new("test_file_type").expect("failed to create temp dir");
         let file_path = tmp_dir.path();
-        let meta = file_path.metadata().expect("failed to get metas");
+        let meta = Meta::from_path(&file_path.to_path_buf()).unwrap();
 
-        let file_type = FileType::new(&meta, &Permissions::from(&meta));
-        let name = Name::new(&file_path, file_type);
         let icon = Icons::new(Theme::Fancy);
-        let icon = icon.get(&name);
+        let icon = icon.get(&meta.name);
 
         assert_eq!(icon, format!("{}{}", "\u{f115}", ICON_SPACE)); // 
     }
@@ -375,12 +367,10 @@ mod test {
     fn get_directory_icon_unicode() {
         let tmp_dir = TempDir::new("test_file_type").expect("failed to create temp dir");
         let file_path = tmp_dir.path();
-        let meta = file_path.metadata().expect("failed to get metas");
+        let meta = Meta::from_path(&file_path.to_path_buf()).unwrap();
 
-        let file_type = FileType::new(&meta, &Permissions::from(&meta));
-        let name = Name::new(&file_path, file_type);
         let icon = Icons::new(Theme::Unicode);
-        let icon = icon.get(&name);
+        let icon = icon.get(&meta.name);
 
         assert_eq!(icon, format!("{}{}", "\u{1f5c1}", ICON_SPACE));
     }
@@ -389,12 +379,10 @@ mod test {
     fn get_directory_icon_with_ext() {
         let tmp_dir = TempDir::new("test_file_type.rs").expect("failed to create temp dir");
         let file_path = tmp_dir.path();
-        let meta = file_path.metadata().expect("failed to get metas");
+        let meta = Meta::from_path(&file_path.to_path_buf()).unwrap();
 
-        let file_type = FileType::new(&meta, &Permissions::from(&meta));
-        let name = Name::new(&file_path, file_type);
         let icon = Icons::new(Theme::Fancy);
-        let icon = icon.get(&name);
+        let icon = icon.get(&meta.name);
 
         assert_eq!(icon, format!("{}{}", "\u{f115}", ICON_SPACE)); // 
     }
@@ -406,12 +394,10 @@ mod test {
         for (file_name, file_icon) in &Icons::get_default_icons_by_name() {
             let file_path = tmp_dir.path().join(file_name);
             File::create(&file_path).expect("failed to create file");
-            let meta = file_path.metadata().expect("failed to get metas");
+            let meta = Meta::from_path(&file_path).unwrap();
 
-            let file_type = FileType::new(&meta, &Permissions::from(&meta));
-            let name = Name::new(&file_path, file_type);
             let icon = Icons::new(Theme::Fancy);
-            let icon = icon.get(&name);
+            let icon = icon.get(&meta.name);
 
             assert_eq!(icon, format!("{}{}", file_icon, ICON_SPACE));
         }
@@ -424,12 +410,10 @@ mod test {
         for (ext, file_icon) in &Icons::get_default_icons_by_extension() {
             let file_path = tmp_dir.path().join(format!("file.{}", ext));
             File::create(&file_path).expect("failed to create file");
-            let meta = file_path.metadata().expect("failed to get metas");
+            let meta = Meta::from_path(&file_path).unwrap();
 
-            let file_type = FileType::new(&meta, &Permissions::from(&meta));
-            let name = Name::new(&file_path, file_type);
             let icon = Icons::new(Theme::Fancy);
-            let icon = icon.get(&name);
+            let icon = icon.get(&meta.name);
 
             assert_eq!(icon, format!("{}{}", file_icon, ICON_SPACE));
         }

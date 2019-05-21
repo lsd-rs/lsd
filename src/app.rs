@@ -103,6 +103,17 @@ pub fn build() -> App<'static, 'static> {
                 .help("Stop recursing into directories after reaching specified depth"),
         )
         .arg(
+            Arg::with_name("directory-only")
+                .short("d")
+                .long("directory-only")
+                .conflicts_with("all")
+                .conflicts_with("almost-all")
+                .conflicts_with("depth")
+                .conflicts_with("recursive")
+                .conflicts_with("tree")
+                .help("Display directories themselves, and not their contents"),
+        )
+        .arg(
             Arg::with_name("size")
                 .long("size")
                 .possible_value("default")

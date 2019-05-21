@@ -4,9 +4,9 @@ use crate::meta::filetype::FileType;
 use std::cmp::{Ordering, PartialOrd};
 use std::path::Path;
 
-#[derive(Debug, Eq)]
+#[derive(Clone, Debug, Eq)]
 pub struct Name {
-   pub name: String,
+    pub name: String,
     path: String,
     extension: Option<String>,
     file_type: FileType,
@@ -96,16 +96,21 @@ mod test {
     use crate::color::{self, Colors};
     use crate::icon::{self, Icons};
     use crate::meta::FileType;
+    use crate::meta::Meta;
+    #[cfg(unix)]
     use crate::meta::Permissions;
     use ansi_term::Colour;
     use std::cmp::Ordering;
     use std::fs::{self, File};
+    #[cfg(unix)]
     use std::os::unix::fs::symlink;
     use std::path::Path;
+    #[cfg(unix)]
     use std::process::Command;
     use tempdir::TempDir;
 
     #[test]
+    #[cfg(unix)] // Windows uses different default permissions
     fn test_print_file_name() {
         let tmp_dir = TempDir::new("test_print_file_name").expect("failed to create temp dir");
         let icons = Icons::new(icon::Theme::Fancy);
@@ -133,19 +138,18 @@ mod test {
         // Chreate the directory
         let dir_path = tmp_dir.path().join("directory");
         fs::create_dir(&dir_path).expect("failed to create the dir");
-        let meta = dir_path.metadata().expect("failed to get metas");
+        let meta = Meta::from_path(&dir_path).unwrap();
 
         let colors = Colors::new(color::Theme::NoLscolors);
-        let file_type = FileType::new(&meta, &Permissions::from(&meta));
-        let name = Name::new(&dir_path, file_type);
 
         assert_eq!(
             Colour::Fixed(33).paint("  directory"),
-            name.render(&colors, &icons)
+            meta.name.render(&colors, &icons)
         );
     }
 
     #[test]
+    #[cfg(unix)] // Symlinks are hard on Windows
     fn test_print_symlink_name() {
         let tmp_dir = TempDir::new("test_symlink_name").expect("failed to create temp dir");
         let icons = Icons::new(icon::Theme::Fancy);
@@ -172,6 +176,7 @@ mod test {
     }
 
     #[test]
+    #[cfg(unix)]
     fn test_print_other_type_name() {
         let tmp_dir = TempDir::new("test_other_type_name").expect("failed to create temp dir");
         let icons = Icons::new(icon::Theme::Fancy);
@@ -205,15 +210,13 @@ mod test {
         // Create the file;
         let file_path = tmp_dir.path().join("file.txt");
         File::create(&file_path).expect("failed to create file");
-        let meta = file_path.metadata().expect("failed to get metas");
+        let meta = Meta::from_path(&file_path).unwrap();
 
         let colors = Colors::new(color::Theme::NoColor);
-        let file_type = FileType::new(&meta, &Permissions::from(&meta));
-        let name = Name::new(&file_path, file_type);
 
         assert_eq!(
             "file.txt",
-            name.render(&colors, &icons).to_string().as_str()
+            meta.name.render(&colors, &icons).to_string().as_str()
         );
     }
 

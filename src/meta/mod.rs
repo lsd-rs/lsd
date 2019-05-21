@@ -7,6 +7,9 @@ mod permissions;
 mod size;
 mod symlink;
 
+#[cfg(windows)]
+mod windows_utils;
+
 pub use self::date::Date;
 pub use self::filetype::FileType;
 pub use self::indicator::Indicator;
@@ -22,7 +25,7 @@ use std::fs::read_link;
 use std::io::{Error, ErrorKind};
 use std::path::PathBuf;
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct Meta {
     pub name: Name,
     pub path: PathBuf,
@@ -37,38 +40,44 @@ pub struct Meta {
 }
 
 impl Meta {
-    pub fn from_path_recursive(
-        path: &PathBuf,
+    pub fn recurse_into(
+        &self,
         depth: usize,
         display: Display,
-    ) -> Result<Self, std::io::Error> {
-        let mut meta = Self::from_path(path)?;
-
+    ) -> Result<Option<Vec<Meta>>, std::io::Error> {
         if depth == 0 {
-            return Ok(meta);
+            return Ok(None);
         }
 
-        match meta.file_type {
+        if display == Display::DisplayDirectoryItself {
+            return Ok(None);
+        }
+
+        match self.file_type {
             FileType::Directory { .. } => (),
-            _ => return Ok(meta),
+            _ => return Ok(None),
         }
 
-        if let Err(err) = meta.path.read_dir() {
-            println!("cannot access '{}': {}", path.display(), err);
-            return Ok(meta);
-        }
-        let mut content = Vec::new();
+        let entries = match self.path.read_dir() {
+            Ok(entries) => entries,
+            Err(err) => {
+                eprintln!("cannot access '{}': {}", self.path.display(), err);
+                return Ok(None);
+            }
+        };
+
+        let mut content: Vec<Meta> = Vec::new();
 
         if let Display::DisplayAll = display {
             let mut current_meta;
             let mut parent_meta;
 
-            let parent_path = match path.parent() {
+            let parent_path = match self.path.parent() {
                 None => PathBuf::from("/"),
                 Some(path) => PathBuf::from(path),
             };
 
-            current_meta = Self::from_path(&path)?;
+            current_meta = self.clone();
             current_meta.name.name = ".".to_string();
 
             parent_meta = Self::from_path(&parent_path)?;
@@ -78,7 +87,7 @@ impl Meta {
             content.push(parent_meta);
         }
 
-        for entry in meta.path.read_dir()? {
+        for entry in entries {
             let path = entry?.path();
 
             if let Display::DisplayOnlyVisible = display {
@@ -92,23 +101,26 @@ impl Meta {
                 }
             }
 
-            let entry_meta =
-                match Self::from_path_recursive(&path.to_path_buf(), depth - 1, display) {
-                    Ok(res) => res,
-                    Err(err) => {
-                        println!("cannot access '{}': {}", path.display(), err);
-                        continue;
-                    }
-                };
+            let mut entry_meta = match Self::from_path(&path.to_path_buf()) {
+                Ok(res) => res,
+                Err(err) => {
+                    eprintln!("cannot access '{}': {}", path.display(), err);
+                    continue;
+                }
+            };
+
+            match entry_meta.recurse_into(depth - 1, display) {
+                Ok(content) => entry_meta.content = content,
+                Err(err) => {
+                    eprintln!("cannot access '{}': {}", path.display(), err);
+                    continue;
+                }
+            };
 
             content.push(entry_meta);
         }
 
-        if !content.is_empty() {
-            meta.content = Some(content);
-        }
-
-        Ok(meta)
+        Ok(Some(content))
     }
 
     pub fn from_path(path: &PathBuf) -> Result<Self, std::io::Error> {
@@ -120,7 +132,14 @@ impl Meta {
             path.metadata()?
         };
 
+        #[cfg(unix)]
+        let owner = Owner::from(&metadata);
+        #[cfg(unix)]
         let permissions = Permissions::from(&metadata);
+
+        #[cfg(windows)]
+        let (owner, permissions) = windows_utils::get_file_data(&path)?;
+
         let file_type = FileType::new(&metadata, &permissions);
         let name = Name::new(&path, file_type);
 
@@ -130,7 +149,7 @@ impl Meta {
             size: Size::from(&metadata),
             date: Date::from(&metadata),
             indicator: Indicator::from(file_type),
-            owner: Owner::from(&metadata),
+            owner,
             permissions,
             name,
             file_type,

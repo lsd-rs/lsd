@@ -60,13 +60,6 @@ fn inner_display_one_line(
 
     // print the files first.
     for meta in &metas {
-        // The first iteration (depth == 0) correspond to the inputs given by
-        // the user. If the user enter a folder name it should not print the
-        // folder meta but its content.
-        if let (0, FileType::Directory { .. }) = (depth, meta.file_type) {
-            continue;
-        }
-
         if let Layout::OneLine { long: true } = flags.layout {
             output += &get_long_output(&meta, &colors, &icons, flags, padding_rules.unwrap());
         } else {
@@ -110,13 +103,6 @@ fn inner_display_grid(
 
     // print the files first.
     for meta in &metas {
-        // The first iteration (depth == 0) correspond to the inputs given by
-        // the user. If the user enter a folder name it should not print the
-        // folder meta but its content.
-        if let (0, FileType::Directory { .. }) = (depth, meta.file_type) {
-            continue;
-        }
-
         let line_output = get_short_output(&meta, &colors, &icons, flags);
         grid.add(Cell {
             width: get_visible_width(&line_output),
@@ -282,7 +268,7 @@ fn get_visible_width(input: &str) -> usize {
     if input.starts_with("\u{1b}[") {
         let m_pos = input.find('m');
         if let Some(len) = m_pos {
-            nb_invisible_char = len + 3  // 1 (index -> length) + 2 ( compensate for color reset chars )
+            nb_invisible_char = len + 3 // 1 (index -> length) + 2 ( compensate for color reset chars )
         }
     }
 

@@ -31,6 +31,8 @@ impl Flags {
             Display::DisplayAll
         } else if matches.is_present("almost-all") {
             Display::DisplayAlmostAll
+        } else if matches.is_present("directory-only") {
+            Display::DisplayDirectoryItself
         } else {
             Display::DisplayOnlyVisible
         };
@@ -135,6 +137,7 @@ impl Default for Flags {
 pub enum Display {
     DisplayAll,
     DisplayAlmostAll,
+    DisplayDirectoryItself,
     DisplayOnlyVisible,
 }
 

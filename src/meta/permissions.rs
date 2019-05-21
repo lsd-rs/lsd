@@ -1,7 +1,6 @@
 use crate::color::{ColoredString, Colors, Elem};
 use ansi_term::ANSIStrings;
 use std::fs::Metadata;
-use std::os::unix::fs::PermissionsExt;
 
 #[derive(Debug, PartialEq, Eq, Copy, Clone)]
 pub struct Permissions {
@@ -23,7 +22,10 @@ pub struct Permissions {
 }
 
 impl<'a> From<&'a Metadata> for Permissions {
+    #[cfg(unix)]
     fn from(meta: &Metadata) -> Self {
+        use std::os::unix::fs::PermissionsExt;
+
         let bits = meta.permissions().mode();
         let has_bit = |bit| bits & bit == bit;
 
@@ -44,6 +46,11 @@ impl<'a> From<&'a Metadata> for Permissions {
             setgid: has_bit(modes::SETGID),
             setuid: has_bit(modes::SETUID),
         }
+    }
+
+    #[cfg(windows)]
+    fn from(_: &Metadata) -> Self {
+        panic!("Cannot get permissions from metadata on Windows")
     }
 }
 
@@ -98,6 +105,7 @@ impl Permissions {
 
 // More readable aliases for the permission bits exposed by libc.
 #[allow(trivial_numeric_casts)]
+#[cfg(unix)]
 mod modes {
     use libc;
 

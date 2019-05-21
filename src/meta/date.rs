@@ -5,7 +5,7 @@ use std::fs::Metadata;
 use std::time::UNIX_EPOCH;
 use time::{Duration, Timespec};
 
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Date(time::Tm);
 
 impl<'a> From<&'a Metadata> for Date {
@@ -61,9 +61,45 @@ mod test {
     use crate::color::{Colors, Theme};
     use crate::flags::{DateFlag, Flags};
     use ansi_term::Colour;
-    use std::process::Command;
+    use std::io;
+    use std::path::Path;
+    use std::process::{Command, ExitStatus};
     use std::{env, fs};
     use time;
+
+    #[cfg(unix)]
+    fn cross_platform_touch(path: &Path, date: &time::Tm) -> io::Result<ExitStatus> {
+        Command::new("touch")
+            .arg("-t")
+            .arg(date.strftime("%Y%m%d%H%M.%S").unwrap().to_string())
+            .arg(&path)
+            .status()
+    }
+
+    #[cfg(windows)]
+    fn cross_platform_touch(path: &Path, date: &time::Tm) -> io::Result<ExitStatus> {
+        use std::process::Stdio;
+
+        let copy_success = Command::new("cmd")
+            .arg("/C")
+            .arg("copy")
+            .arg("NUL")
+            .arg(path)
+            .stdout(Stdio::null()) // Windows doesn't have a quiet flag
+            .status()?
+            .success();
+
+        assert!(copy_success, "failed to create empty file");
+
+        Command::new("powershell")
+            .arg("-Command")
+            .arg("$(Get-Item")
+            .arg(path)
+            .arg(").lastwritetime=$(Get-Date \"")
+            .arg(date.strftime("%m/%d/%Y %H:%M:%S").unwrap().to_string())
+            .arg("\")")
+            .status()
+    }
 
     #[test]
     fn test_an_hour_old_file_color() {
@@ -72,14 +108,10 @@ mod test {
 
         let creation_date = (time::now() - time::Duration::seconds(4)).to_local();
 
-        let success = Command::new("touch")
-            .arg("-t")
-            .arg(creation_date.strftime("%Y%m%d%H%M.%S").unwrap().to_string())
-            .arg(&file_path)
-            .status()
+        let success = cross_platform_touch(&file_path, &creation_date)
             .unwrap()
             .success();
-        assert_eq!(true, success, "failed to exec touch");
+        assert!(success, "failed to exec touch");
 
         let colors = Colors::new(Theme::Default);
         let date = Date::from(&file_path.metadata().unwrap());
@@ -100,14 +132,10 @@ mod test {
 
         let creation_date = (time::now() - time::Duration::hours(4)).to_local();
 
-        let success = Command::new("touch")
-            .arg("-t")
-            .arg(creation_date.strftime("%Y%m%d%H%M.%S").unwrap().to_string())
-            .arg(&file_path)
-            .status()
+        let success = cross_platform_touch(&file_path, &creation_date)
             .unwrap()
             .success();
-        assert_eq!(true, success, "failed to exec touch");
+        assert!(success, "failed to exec touch");
 
         let colors = Colors::new(Theme::Default);
         let date = Date::from(&file_path.metadata().unwrap());
@@ -126,22 +154,12 @@ mod test {
         let mut file_path = env::temp_dir();
         file_path.push("test_a_several_days_old_file_color.tmp");
 
-        let creation_date = time::now() - time::Duration::days(2);
+        let creation_date = time::now_utc() - time::Duration::days(2);
 
-        let success = Command::new("touch")
-            .arg("-t")
-            .arg(
-                creation_date
-                    .to_local()
-                    .strftime("%Y%m%d%H%M.%S")
-                    .unwrap()
-                    .to_string(),
-            )
-            .arg(&file_path)
-            .status()
+        let success = cross_platform_touch(&file_path, &creation_date.to_local())
             .unwrap()
             .success();
-        assert_eq!(true, success, "failed to exec touch");
+        assert!(success, "failed to exec touch");
 
         let colors = Colors::new(Theme::Default);
         let date = Date::from(&file_path.metadata().unwrap());
@@ -162,20 +180,10 @@ mod test {
 
         let creation_date = time::now() - time::Duration::days(2);
 
-        let success = Command::new("touch")
-            .arg("-t")
-            .arg(
-                creation_date
-                    .to_local()
-                    .strftime("%Y%m%d%H%M.%S")
-                    .unwrap()
-                    .to_string(),
-            )
-            .arg(&file_path)
-            .status()
+        let success = cross_platform_touch(&file_path, &creation_date.to_local())
             .unwrap()
             .success();
-        assert_eq!(true, success, "failed to exec touch");
+        assert!(success, "failed to exec touch");
 
         let colors = Colors::new(Theme::Default);
         let date = Date::from(&file_path.metadata().unwrap());

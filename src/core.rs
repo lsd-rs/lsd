@@ -1,6 +1,6 @@
 use crate::color::{self, Colors};
 use crate::display;
-use crate::flags::{Flags, IconTheme, Layout, WhenFlag};
+use crate::flags::{Display, Flags, IconTheme, Layout, WhenFlag};
 use crate::icon::{self, Icons};
 use crate::meta::Meta;
 use crate::sort;
@@ -20,9 +20,15 @@ impl Core {
         // terminal_size allows us to know if the stdout is a tty or not.
         let tty_available = terminal_size().is_some();
 
+        // determine color output availability (and initialize color output (for Windows 10))
+        #[cfg(not(target_os = "windows"))]
+        let console_color_ok = true;
+        #[cfg(target_os = "windows")]
+        let console_color_ok = ansi_term::enable_ansi_support().is_ok();
+
         let mut inner_flags = flags;
 
-        let color_theme = match (tty_available, flags.color) {
+        let color_theme = match (tty_available && console_color_ok, flags.color) {
             (_, WhenFlag::Never) | (false, WhenFlag::Auto) => color::Theme::NoColor,
             _ => color::Theme::Default,
         };
@@ -67,20 +73,35 @@ impl Core {
 
         for path in paths {
             let absolute_path = match fs::canonicalize(&path) {
-                Ok(path) => path,
+                Ok(path) => path.to_path_buf(),
                 Err(err) => {
-                    println!("couldn't access '{}': {}", path.display(), err);
+                    eprintln!("cannot access '{}': {}", path.display(), err);
                     continue;
                 }
             };
 
-            match Meta::from_path_recursive(
-                &fs::canonicalize(&absolute_path.to_path_buf()).unwrap(),
-                depth,
-                self.flags.display,
-            ) {
-                Ok(meta) => meta_list.push(meta),
-                Err(err) => println!("cannot access '{}': {}", path.display(), err),
+            let meta = match Meta::from_path(&absolute_path) {
+                Ok(meta) => meta,
+                Err(err) => {
+                    eprintln!("cannot access '{}': {}", path.display(), err);
+                    continue;
+                }
+            };
+
+            match self.flags.display {
+                Display::DisplayDirectoryItself => {
+                    meta_list.push(meta);
+                }
+                _ => {
+                    match meta.recurse_into(depth, self.flags.display) {
+                        Ok(Some(content)) => meta_list.extend(content),
+                        Ok(None) => (),
+                        Err(err) => {
+                            eprintln!("cannot access '{}': {}", path.display(), err);
+                            continue;
+                        }
+                    };
+                }
             };
         }
 
