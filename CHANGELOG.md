@@ -31,10 +31,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add the --depth parameter for the -R and --tree options from [jorpic](https://github.com/jorpic)
 - Add the directory-order flag
 - Add a basic unicode support from [loewenheim](https://github.com/loewenheim)
-- Add the background color for the files with the setuid permission from [loewenheim](https://github.com/loewenheim)
+- Add the background color for the files with the setup permission from [loewenheim](https://github.com/loewenheim)
 
 ### Changed
-- Do not use the the custom icons for the directoriesa from [cat12079801](https://github.com/cat12079801)
+- Do not use the the custom icons for the directories from [cat12079801](https://github.com/cat12079801)
 
 ### Fixed
 - Fix the --icon=never in case of no tiiy
@@ -50,7 +50,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Add the sort by time flag from [boxdot](https://github.com/boxdot)
 - Add the reverse sort flag from [boxdot](https://github.com/boxdot)
-- Add the suport to the arm-unknown-linux-gnueabihf platform
+- Add the support to the arm-unknown-linux-gnueabihf platform
 
 ### Fixed
 - Fix the width calculation when using the grid output from [kkk669](https://github.com/kkk669)
@@ -71,7 +71,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.9.0] - 2018-12-12
 ### Added
-- Add a custom color for all the spectial files (char / pipe / block)
+- Add a custom color for all the special files (char / pipe / block)
 - Add some tests on metas
 - Add the green colorization for the executable file from [LippyBoy](https://github.com/LippyBoy)
 - Add the rust and swift icons from [LippyBoy](https://github.com/LippyBoy)
@@ -151,7 +151,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.4.0] - 2018-12-01
 ### Added
-- Add the setuid/setgid/sticky bit support
+- Add the setup/setgid/sticky bit support
 - Add the support for al lthe special files (block / char / pipe / ...)
 
 
