@@ -2,7 +2,7 @@ use crate::color::{ColoredString, Colors, Elem};
 use crate::flags::{Flags, SizeFlag};
 use std::fs::Metadata;
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Unit {
     None,
     Byte,
@@ -12,7 +12,7 @@ pub enum Unit {
     Tera,
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Size {
     value: u64,
     unit: Unit,
