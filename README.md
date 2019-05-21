@@ -140,4 +140,10 @@ As this is being updated regularly, don't forget to rebase your fork before crea
 
 ## Credits
 
-Special thanks to [sharkdp](https://github.com/sharkdp) and his superb [fd](https://github.com/sharkdp/fd) from which I have stolen a lot of stuff.
+Special thanks to:
+
+- [meain](https://github.com/meain) for all his contributions and reviews
+- [danieldulaney](https://github.com/danieldulaney) for the Windows integration
+- [sharkdp](https://github.com/sharkdp) and his superb [fd](https://github.com/sharkdp/fd) from which I have stolen a lot of CI stuff.
+- [athityakumar](https://github.com/athityakumar) for the project [colorls](https://github.com/athityakumar/colorls)
+- All the other contributors
