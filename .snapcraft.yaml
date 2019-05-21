@@ -16,3 +16,6 @@ parts:
 apps:
   lsd:
     command: bin/lsd
+    plugs:
+      - home
+      - removable-media
