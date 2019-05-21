@@ -51,7 +51,7 @@ sudo dpkg -i lsd_7.2.0_amd64.deb  # adapt version number and architecture
 
 ### On Gentoo
 
-Package available on [package.gentoo.org](https://packages.gentoo.org/packages/sys-apps/lsd) (maintainned by Georgy Yakovlev)
+Package available on [package.gentoo.org](https://packages.gentoo.org/packages/sys-apps/lsd) (maintained by Georgy Yakovlev)
 
 ### From Snap
 
