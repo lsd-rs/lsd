@@ -3,7 +3,7 @@ use ansi_term::{ANSIString, ANSIStrings};
 use std::fs::read_link;
 use std::path::Path;
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct SymLink {
     target: Option<String>,
     valid: bool,

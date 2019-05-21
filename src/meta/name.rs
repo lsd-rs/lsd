@@ -4,7 +4,7 @@ use crate::meta::filetype::FileType;
 use std::cmp::{Ordering, PartialOrd};
 use std::path::Path;
 
-#[derive(Debug, Eq)]
+#[derive(Clone, Debug, Eq)]
 pub struct Name {
     pub name: String,
     path: String,

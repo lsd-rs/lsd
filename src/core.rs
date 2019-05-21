@@ -1,6 +1,6 @@
 use crate::color::{self, Colors};
 use crate::display;
-use crate::flags::{Flags, IconTheme, Layout, WhenFlag};
+use crate::flags::{Display, Flags, IconTheme, Layout, WhenFlag};
 use crate::icon::{self, Icons};
 use crate::meta::Meta;
 use crate::sort;
@@ -74,20 +74,35 @@ impl Core {
 
         for path in paths {
             let absolute_path = match fs::canonicalize(&path) {
-                Ok(path) => path,
+                Ok(path) => path.to_path_buf(),
                 Err(err) => {
                     eprintln!("cannot access '{}': {}", path.display(), err);
                     continue;
                 }
             };
 
-            match Meta::from_path_recursive(
-                &fs::canonicalize(&absolute_path.to_path_buf()).unwrap(),
-                depth,
-                self.flags.display,
-            ) {
-                Ok(meta) => meta_list.push(meta),
-                Err(err) => eprintln!("cannot access '{}': {}", path.display(), err),
+            let meta = match Meta::from_path(&absolute_path) {
+                Ok(meta) => meta,
+                Err(err) => {
+                    eprintln!("cannot access '{}': {}", path.display(), err);
+                    continue;
+                }
+            };
+
+            match self.flags.display {
+                Display::DisplayDirectoryItself => {
+                    meta_list.push(meta);
+                }
+                _ => {
+                    match meta.recurse_into(depth, self.flags.display) {
+                        Ok(Some(content)) => meta_list.extend(content),
+                        Ok(None) => (),
+                        Err(err) => {
+                            eprintln!("cannot access '{}': {}", path.display(), err);
+                            continue;
+                        }
+                    };
+                }
             };
         }
 
