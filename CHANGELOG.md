@@ -4,6 +4,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.15.0] - 2019-05-23
+### Added
+- Add the maxOS installation instructions from [salOmax](https://github.com/sal0max)
+- Add the `--size` flag from [meain](https://github.com/meain)
+- Add the current and parent directory from [hemreari](https://github.com/hemreari)
+- Add the `--almost-all` flag from [hemreari](https://github.com/hemreari)
+- Add the `--group-dirs` flag support for the `--tree` display from [JD557](https://github.com/JD557)
+- Add the Windows support from [danieldulaney](https://github.com/danieldulaney)
+- Add the `--directory-only` from from [alienap](https://github.com/allenap)
+- Add the `--sizesort` flag from [hjanuschka](https://github.com/hjanuschka)
+
+### Changed
+- Change the permissions colors to stick with the ANSI colors from [meain](https://github.com/meain)
+- Print errors to stderr from [atanunq](https://github.com/atanunq)
+
+### Fixed
+- Fix ANSI colors for Windows 10 from [rivy](https://github.com/rivy)
+- Fix some snapcraft permission errors from [Peltoche](https://github.com/Peltoche)
+- Fix the multi values flag parsing from [meain](https://github.com/meain)
+- Fix the `ls -lh ..` bug from [hemreari](https://github.com/hemreari)
+- Fix the wildcard for the windows build from [rivy](https://github.com/rivy)
+
 ## [0.14.0] - 2019-03-12
 ### Added
 - Add the `-h` option for retro compatibility from [khross](https://github.com/khross)
