@@ -201,7 +201,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Change the component alignement by using term_grid
 
 
-[Unreleased]: https://github.com/Peltoche/lsd/compare/0.14.0...HEAD
+[Unreleased]: https://github.com/Peltoche/lsd/compare/0.15.0...HEAD
+[0.15.0]: https://github.com/Peltoche/lsd/compare/0.14.1...0.15.0
 [0.14.0]: https://github.com/Peltoche/lsd/compare/0.13.1...0.14.0
 [0.13.0]: https://github.com/Peltoche/lsd/compare/0.12.1...0.13.0
 [0.12.0]: https://github.com/Peltoche/lsd/compare/0.11.1...0.12.0
