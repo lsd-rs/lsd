@@ -123,6 +123,7 @@ impl Icons {
         m.insert("npmignore", "\u{e71e}"); // ""
         m.insert("rubydoc", "\u{e73b}"); // ""
         m.insert("yarn.lock", "\u{e718}"); // ""
+        m.insert("Cargo.lock", "\u{e7a8}"); // ""
 
         m
     }
