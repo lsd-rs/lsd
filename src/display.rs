@@ -1,5 +1,5 @@
 use crate::color::Colors;
-use crate::flags::{Flags, Layout};
+use crate::flags::{Display, Flags, Layout};
 use crate::icon::Icons;
 use crate::meta::{FileType, Meta};
 use ansi_term::{ANSIString, ANSIStrings};
@@ -58,8 +58,18 @@ fn inner_display_one_line(
         })
     }
 
+    // The first iteration (depth == 0) corresponds to the inputs given by the
+    // user. We defer displaying directories given by the user unless we've been
+    // asked to display the directory itself (rather than its contents).
+    let skip_dirs = (depth == 0) && (flags.display != Display::DisplayDirectoryItself);
+
     // print the files first.
     for meta in &metas {
+        // Maybe skip showing the directory meta now; show its contents later.
+        if let (true, FileType::Directory { .. }) = (skip_dirs, meta.file_type) {
+            continue;
+        }
+
         if let Layout::OneLine { long: true } = flags.layout {
             output += &get_long_output(&meta, &colors, &icons, flags, padding_rules.unwrap());
         } else {
@@ -101,8 +111,18 @@ fn inner_display_grid(
         direction: Direction::TopToBottom,
     });
 
+    // The first iteration (depth == 0) corresponds to the inputs given by the
+    // user. We defer displaying directories given by the user unless we've been
+    // asked to display the directory itself (rather than its contents).
+    let skip_dirs = (depth == 0) && (flags.display != Display::DisplayDirectoryItself);
+
     // print the files first.
     for meta in &metas {
+        // Maybe skip showing the directory meta now; show its contents later.
+        if let (true, FileType::Directory { .. }) = (skip_dirs, meta.file_type) {
+            continue;
+        }
+
         let line_output = get_short_output(&meta, &colors, &icons, flags);
         grid.add(Cell {
             width: get_visible_width(&line_output),

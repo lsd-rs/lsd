@@ -80,7 +80,7 @@ impl Core {
                 }
             };
 
-            let meta = match Meta::from_path(&absolute_path) {
+            let mut meta = match Meta::from_path(&absolute_path) {
                 Ok(meta) => meta,
                 Err(err) => {
                     eprintln!("cannot access '{}': {}", path.display(), err);
@@ -94,8 +94,10 @@ impl Core {
                 }
                 _ => {
                     match meta.recurse_into(depth, self.flags.display) {
-                        Ok(Some(content)) => meta_list.extend(content),
-                        Ok(None) => (),
+                        Ok(content) => {
+                            meta.content = content;
+                            meta_list.push(meta);
+                        }
                         Err(err) => {
                             eprintln!("cannot access '{}': {}", path.display(), err);
                             continue;
