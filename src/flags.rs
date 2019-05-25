@@ -50,7 +50,9 @@ impl Flags {
             SortOrder::Default
         };
         let layout = if matches.is_present("tree") {
-            Layout::Tree
+            Layout::Tree {
+                long: matches.is_present("long"),
+            }
         } else if matches.is_present("long") {
             Layout::OneLine { long: true }
         } else if matches.is_present("oneline") {
@@ -60,15 +62,23 @@ impl Flags {
         };
         let recursive = matches.is_present("recursive");
         let recursion_depth = match matches.value_of("depth") {
-            Some(str) if recursive || layout == Layout::Tree => match str.parse::<usize>() {
-                Ok(val) => val,
-                Err(_) => {
-                    return Err(Error::with_description(
-                        "The argument '--depth' requires a valid positive number",
-                        ErrorKind::ValueValidation,
-                    ));
+            Some(str)
+                if recursive
+                    || layout
+                        == Layout::Tree {
+                            long: matches.is_present("long"),
+                        } =>
+            {
+                match str.parse::<usize>() {
+                    Ok(val) => val,
+                    Err(_) => {
+                        return Err(Error::with_description(
+                            "The argument '--depth' requires a valid positive number",
+                            ErrorKind::ValueValidation,
+                        ));
+                    }
                 }
-            },
+            }
             Some(_) => {
                 return Err(Error::with_description(
                     "The argument '--depth' requires '--tree' or '--recursive'",
@@ -241,7 +251,7 @@ impl<'a> From<&'a str> for IconTheme {
 #[derive(Clone, Debug, Copy, PartialEq, Eq)]
 pub enum Layout {
     Grid,
-    Tree,
+    Tree { long: bool },
     OneLine { long: bool },
 }
 
