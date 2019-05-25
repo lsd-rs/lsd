@@ -64,8 +64,13 @@ impl Core {
 
     fn fetch(&self, paths: Vec<PathBuf>) -> Vec<Meta> {
         let mut meta_list = Vec::with_capacity(paths.len());
+        let tree_layout_true = Layout::Tree { long: true };
+        let tree_layout_false = Layout::Tree { long: false };
 
-        let depth = if self.flags.recursive || self.flags.layout == Layout::Tree {
+        let depth = if self.flags.recursive
+            || self.flags.layout == tree_layout_true
+            || self.flags.layout == tree_layout_false
+        {
             self.flags.recursion_depth
         } else {
             1
@@ -125,7 +130,7 @@ impl Core {
             Layout::OneLine { .. } => {
                 display::one_line(metas, self.flags, &self.colors, &self.icons)
             }
-            Layout::Tree => display::tree(metas, self.flags, &self.colors, &self.icons),
+            Layout::Tree { .. } => display::tree(metas, self.flags, &self.colors, &self.icons),
             Layout::Grid => display::grid(metas, self.flags, &self.colors, &self.icons),
         };
         print!("{}", output);

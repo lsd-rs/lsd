@@ -177,6 +177,18 @@ fn inner_display_tree(
     let mut output = String::new();
     let last_idx = metas.len();
 
+    let mut padding_rules = None;
+    if let Layout::Tree { long: true } = flags.layout {
+        // Defining the padding rules is costly and so shouldn't be done several
+        // times. That's why it's done outside the loop.
+        padding_rules = Some(PaddingRules {
+            user: detect_user_length(&metas),
+            group: detect_group_length(&metas),
+            size: detect_size_lengths(&metas, flags),
+            date: detect_date_length(&metas, flags),
+        })
+    }
+
     for (idx, meta) in metas.into_iter().enumerate() {
         let is_last_folder_elem = idx + 1 != last_idx;
 
@@ -191,7 +203,11 @@ fn inner_display_tree(
             output += " ";
         }
 
-        output += &get_short_output(&meta, &colors, &icons, flags);
+        if let Layout::Tree { long: true } = flags.layout {
+            output += &get_long_output(&meta, &colors, &icons, flags, padding_rules.unwrap());
+        } else {
+            output += &get_short_output(&meta, &colors, &icons, flags);
+        }
         output += "\n";
 
         if meta.content.is_some() {
