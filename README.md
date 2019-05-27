@@ -58,7 +58,7 @@ sudo emerge sys-apps/lsd
 ### From Snap
 
 ```sh
-sudo snap install lsd --classic
+sudo snap install lsd
 ```
 
 ### On macOS
