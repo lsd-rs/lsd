@@ -64,16 +64,10 @@ impl Core {
 
     fn fetch(&self, paths: Vec<PathBuf>) -> Vec<Meta> {
         let mut meta_list = Vec::with_capacity(paths.len());
-        let tree_layout_true = Layout::Tree { long: true };
-        let tree_layout_false = Layout::Tree { long: false };
-
-        let depth = if self.flags.recursive
-            || self.flags.layout == tree_layout_true
-            || self.flags.layout == tree_layout_false
-        {
-            self.flags.recursion_depth
-        } else {
-            1
+        let depth = match self.flags.layout {
+            Layout::Tree { .. } => self.flags.recursion_depth,
+            _ if self.flags.recursive => self.flags.recursion_depth,
+            _ => 1,
         };
 
         for path in paths {
