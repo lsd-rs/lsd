@@ -12,6 +12,12 @@ matrix:
     - os: linux
       rust: stable
       env: TARGET=i686-unknown-linux-gnu
+    - os: linux
+      rust: stable
+      env: TARGET=x86_64-unknown-linux-musl
+    - os: linux
+      rust: stable
+      env: TARGET=i686-unknown-linux-musl
     - os: osx
       rust: stable
       env: TARGET=x86_64-apple-darwin
