@@ -330,8 +330,10 @@ fn get_long_output(
                 }
             }
         };
-        strings.push(ANSIString::from(" ")); // TODO do not add this space to the end
+        strings.push(ANSIString::from(" "));
     }
+
+    strings.pop(); // remove the last space
 
     ANSIStrings(&strings).to_string()
 }
