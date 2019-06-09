@@ -311,11 +311,11 @@ mod test {
     use super::{Icons, Theme, ICON_SPACE};
     use crate::meta::Meta;
     use std::fs::File;
-    use tempdir::TempDir;
+    use tempfile::tempdir;
 
     #[test]
     fn get_no_icon() {
-        let tmp_dir = TempDir::new("test_file_type").expect("failed to create temp dir");
+        let tmp_dir = tempdir().expect("failed to create temp dir");
         let file_path = tmp_dir.path().join("file.txt");
         File::create(&file_path).expect("failed to create file");
         let meta = Meta::from_path(&file_path).unwrap();
@@ -328,7 +328,7 @@ mod test {
 
     #[test]
     fn get_default_file_icon() {
-        let tmp_dir = TempDir::new("test_file_type").expect("failed to create temp dir");
+        let tmp_dir = tempdir().expect("failed to create temp dir");
         let file_path = tmp_dir.path().join("file");
         File::create(&file_path).expect("failed to create file");
         let meta = Meta::from_path(&file_path).unwrap();
@@ -341,7 +341,7 @@ mod test {
 
     #[test]
     fn get_default_file_icon_unicode() {
-        let tmp_dir = TempDir::new("test_file_type").expect("failed to create temp dir");
+        let tmp_dir = tempdir().expect("failed to create temp dir");
         let file_path = tmp_dir.path().join("file");
         File::create(&file_path).expect("failed to create file");
         let meta = Meta::from_path(&file_path).unwrap();
@@ -354,7 +354,7 @@ mod test {
 
     #[test]
     fn get_directory_icon() {
-        let tmp_dir = TempDir::new("test_file_type").expect("failed to create temp dir");
+        let tmp_dir = tempdir().expect("failed to create temp dir");
         let file_path = tmp_dir.path();
         let meta = Meta::from_path(&file_path.to_path_buf()).unwrap();
 
@@ -366,7 +366,7 @@ mod test {
 
     #[test]
     fn get_directory_icon_unicode() {
-        let tmp_dir = TempDir::new("test_file_type").expect("failed to create temp dir");
+        let tmp_dir = tempdir().expect("failed to create temp dir");
         let file_path = tmp_dir.path();
         let meta = Meta::from_path(&file_path.to_path_buf()).unwrap();
 
@@ -378,7 +378,7 @@ mod test {
 
     #[test]
     fn get_directory_icon_with_ext() {
-        let tmp_dir = TempDir::new("test_file_type.rs").expect("failed to create temp dir");
+        let tmp_dir = tempdir().expect("failed to create temp dir");
         let file_path = tmp_dir.path();
         let meta = Meta::from_path(&file_path.to_path_buf()).unwrap();
 
@@ -390,7 +390,7 @@ mod test {
 
     #[test]
     fn get_icon_by_name() {
-        let tmp_dir = TempDir::new("test_file_type").expect("failed to create temp dir");
+        let tmp_dir = tempdir().expect("failed to create temp dir");
 
         for (file_name, file_icon) in &Icons::get_default_icons_by_name() {
             let file_path = tmp_dir.path().join(file_name);
@@ -406,7 +406,7 @@ mod test {
 
     #[test]
     fn get_icon_by_extension() {
-        let tmp_dir = TempDir::new("test_file_type").expect("failed to create temp dir");
+        let tmp_dir = tempdir().expect("failed to create temp dir");
 
         for (ext, file_icon) in &Icons::get_default_icons_by_extension() {
             let file_path = tmp_dir.path().join(format!("file.{}", ext));
