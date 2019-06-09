@@ -91,11 +91,11 @@ mod tests {
     use crate::flags::Flags;
     use std::fs::{create_dir, File};
     use std::process::Command;
-    use tempdir::TempDir;
+    use tempfile::tempdir;
 
     #[test]
     fn test_sort_by_meta_by_name_with_dirs_first() {
-        let tmp_dir = TempDir::new("test_dir").expect("failed to create temp dir");
+        let tmp_dir = tempdir().expect("failed to create temp dir");
 
         // Create the file;
         let path_a = tmp_dir.path().join("zzz");
@@ -120,7 +120,7 @@ mod tests {
 
     #[test]
     fn test_sort_by_meta_by_name_with_files_first() {
-        let tmp_dir = TempDir::new("test_dir").expect("failed to create temp dir");
+        let tmp_dir = tempdir().expect("failed to create temp dir");
 
         // Create the file;
         let path_a = tmp_dir.path().join("zzz");
@@ -144,7 +144,7 @@ mod tests {
 
     #[test]
     fn test_sort_by_meta_by_name_unordered() {
-        let tmp_dir = TempDir::new("test_dir").expect("failed to create temp dir");
+        let tmp_dir = tempdir().expect("failed to create temp dir");
 
         // Create the file;
         let path_a = tmp_dir.path().join("aaa");
@@ -169,7 +169,7 @@ mod tests {
 
     #[test]
     fn test_sort_by_meta_by_name_unordered_2() {
-        let tmp_dir = TempDir::new("test_dir").expect("failed to create temp dir");
+        let tmp_dir = tempdir().expect("failed to create temp dir");
 
         // Create the file;
         let path_a = tmp_dir.path().join("zzz");
@@ -194,7 +194,7 @@ mod tests {
 
     #[test]
     fn test_sort_by_meta_by_time() {
-        let tmp_dir = TempDir::new("test_dir").expect("failed to create temp dir");
+        let tmp_dir = tempdir().expect("failed to create temp dir");
 
         // Create the file;
         let path_a = tmp_dir.path().join("aaa");

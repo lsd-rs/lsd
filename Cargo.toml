@@ -41,7 +41,7 @@ features = ["suggestions", "color", "wrap_help"]
 version = "2.32.0"
 
 [dev-dependencies]
-tempdir = "0.3.7"
+tempfile = "3"
 
 [features]
 sudo = []

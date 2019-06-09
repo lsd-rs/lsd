@@ -102,12 +102,12 @@ mod test {
     use std::os::unix::net::UnixListener;
     #[cfg(unix)]
     use std::process::Command;
-    use tempdir::TempDir;
+    use tempfile::tempdir;
 
     #[test]
     #[cfg(unix)] // Windows uses different default permissions
     fn test_file_type() {
-        let tmp_dir = TempDir::new("test_file_type").expect("failed to create temp dir");
+        let tmp_dir = tempdir().expect("failed to create temp dir");
 
         // Create the file;
         let file_path = tmp_dir.path().join("file.txt");
@@ -122,7 +122,7 @@ mod test {
 
     #[test]
     fn test_dir_type() {
-        let tmp_dir = TempDir::new("test_dir_type").expect("failed to create temp dir");
+        let tmp_dir = tempdir().expect("failed to create temp dir");
         let meta =
             Meta::from_path(&tmp_dir.path().to_path_buf()).expect("failed to get tempdir path");
         let metadata = tmp_dir.path().metadata().expect("failed to get metas");
@@ -136,7 +136,7 @@ mod test {
     #[test]
     #[cfg(unix)] // Symlink support is *hard* on Windows
     fn test_symlink_type() {
-        let tmp_dir = TempDir::new("test_symlink_type").expect("failed to create temp dir");
+        let tmp_dir = tempdir().expect("failed to create temp dir");
 
         // Create the file;
         let file_path = tmp_dir.path().join("file.tmp");
@@ -158,7 +158,7 @@ mod test {
     #[test]
     #[cfg(unix)] // Windows pipes aren't like Unix pipes
     fn test_pipe_type() {
-        let tmp_dir = TempDir::new("test_pipe_type").expect("failed to create temp dir");
+        let tmp_dir = tempdir().expect("failed to create temp dir");
 
         // Create the pipe;
         let pipe_path = tmp_dir.path().join("pipe.tmp");
@@ -179,7 +179,7 @@ mod test {
     #[test]
     #[cfg(feature = "sudo")]
     fn test_char_device_type() {
-        let tmp_dir = TempDir::new("test_char_device_type").expect("failed to create temp dir");
+        let tmp_dir = tempdir().expect("failed to create temp dir");
 
         // Create the char device;
         let char_device_path = tmp_dir.path().join("char-device.tmp");
@@ -204,7 +204,7 @@ mod test {
     #[test]
     #[cfg(unix)] // Sockets don't work the same way on Windows
     fn test_socket_type() {
-        let tmp_dir = TempDir::new("test_socket_type").expect("failed to create temp dir");
+        let tmp_dir = tempdir().expect("failed to create temp dir");
 
         // Create the socket;
         let socket_path = tmp_dir.path().join("socket.tmp");

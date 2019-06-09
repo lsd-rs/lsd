@@ -12,7 +12,7 @@ extern crate chrono_humanize;
 extern crate libc;
 extern crate lscolors;
 #[cfg(test)]
-extern crate tempdir;
+extern crate tempfile;
 extern crate term_grid;
 extern crate terminal_size;
 extern crate time;

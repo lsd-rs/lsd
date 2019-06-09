@@ -112,12 +112,12 @@ mod test {
     use std::path::Path;
     #[cfg(unix)]
     use std::process::Command;
-    use tempdir::TempDir;
+    use tempfile::tempdir;
 
     #[test]
     #[cfg(unix)] // Windows uses different default permissions
     fn test_print_file_name() {
-        let tmp_dir = TempDir::new("test_print_file_name").expect("failed to create temp dir");
+        let tmp_dir = tempdir().expect("failed to create temp dir");
         let icons = Icons::new(icon::Theme::Fancy);
 
         // Create the file;
@@ -137,7 +137,7 @@ mod test {
 
     #[test]
     fn test_print_dir_name() {
-        let tmp_dir = TempDir::new("test_print_dir_name").expect("failed to create temp dir");
+        let tmp_dir = tempdir().expect("failed to create temp dir");
         let icons = Icons::new(icon::Theme::Fancy);
 
         // Chreate the directory
@@ -156,7 +156,7 @@ mod test {
     #[test]
     #[cfg(unix)] // Symlinks are hard on Windows
     fn test_print_symlink_name() {
-        let tmp_dir = TempDir::new("test_symlink_name").expect("failed to create temp dir");
+        let tmp_dir = tempdir().expect("failed to create temp dir");
         let icons = Icons::new(icon::Theme::Fancy);
 
         // Create the file;
@@ -183,7 +183,7 @@ mod test {
     #[test]
     #[cfg(unix)]
     fn test_print_other_type_name() {
-        let tmp_dir = TempDir::new("test_other_type_name").expect("failed to create temp dir");
+        let tmp_dir = tempdir().expect("failed to create temp dir");
         let icons = Icons::new(icon::Theme::Fancy);
 
         // Create the pipe;
@@ -208,8 +208,7 @@ mod test {
 
     #[test]
     fn test_print_without_icon_or_color() {
-        let tmp_dir =
-            TempDir::new("test_print_without_icon_or_color").expect("failed to create temp dir");
+        let tmp_dir = tempdir().expect("failed to create temp dir");
         let icons = Icons::new(icon::Theme::NoIcon);
 
         // Create the file;
