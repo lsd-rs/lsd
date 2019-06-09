@@ -190,6 +190,8 @@ fn inner_display_tree(
             group: detect_group_length(&metas),
             size: detect_size_lengths(&metas, flags),
             date: detect_date_length(&metas, flags),
+            name: detect_name_length(&metas, &icons),
+            name_with_symlink: detect_name_with_symlink_length(&metas, &icons),
         })
     }
 
