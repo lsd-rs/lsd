@@ -33,6 +33,8 @@ project but with some little differences.  For example it is written in rust and
 
 Install the patched fonts of powerline nerd-font and/or font-awesome. Have a look at the [Nerd Font README](https://github.com/ryanoasis/nerd-fonts/blob/master/readme.md) for more installation instructions. Don't forget to setup your terminal in order to use the correct font.
 
+See [this issue comment](https://github.com/Peltoche/lsd/issues/199#issuecomment-494218334) for detailed instructions on how to configure iTerm2 font settings correctly.
+
 ### Archlinux
 
 ```sh
