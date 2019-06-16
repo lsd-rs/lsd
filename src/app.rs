@@ -125,6 +125,12 @@ pub fn build() -> App<'static, 'static> {
                 .help("How to display size"),
         )
         .arg(
+            Arg::with_name("total-size")
+                .long("total-size")
+                .multiple(true)
+                .help("Display the total size of directories"),
+        )
+        .arg(
             Arg::with_name("date")
                 .long("date")
                 .possible_value("date")
