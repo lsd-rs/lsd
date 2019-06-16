@@ -1,7 +1,7 @@
 use crate::color::Colors;
 use crate::flags::{Block, Display, Flags, Layout};
 use crate::icon::Icons;
-use crate::meta::{FileType, Meta};
+use crate::meta::{FileType, Meta, Size};
 use ansi_term::{ANSIString, ANSIStrings};
 use term_grid::{Cell, Direction, Filling, Grid, GridOptions};
 use terminal_size::terminal_size;
@@ -400,12 +400,16 @@ fn detect_size_lengths(metas: &[Meta], flags: &Flags) -> (usize, usize) {
     let mut max_unit_size: usize = 0;
 
     for meta in metas {
-        if meta.size.render_value().len() > max_value_length {
-            max_value_length = meta.size.render_value().len();
+        let unit = meta.size.get_unit(flags);
+        let value_len = meta.size.render_value(&unit).len();
+        let unit_len = Size::render_unit(&unit, &flags).len();
+        
+        if value_len > max_value_length {
+            max_value_length = value_len;
         }
 
-        if meta.size.render_unit(&flags).len() > max_unit_size {
-            max_unit_size = meta.size.render_unit(&flags).len();
+        if unit_len > max_unit_size {
+            max_unit_size = unit_len;
         }
     }
 

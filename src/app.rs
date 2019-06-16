@@ -118,6 +118,7 @@ pub fn build() -> App<'static, 'static> {
                 .long("size")
                 .possible_value("default")
                 .possible_value("short")
+                .possible_value("bytes")
                 .default_value("default")
                 .multiple(true)
                 .number_of_values(1)
