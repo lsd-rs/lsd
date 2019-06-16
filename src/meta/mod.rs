@@ -101,7 +101,7 @@ impl Meta {
                 }
             }
 
-            let mut entry_meta = match Self::from_path(&path.to_path_buf()) {
+            let mut entry_meta = match Self::from_path(&path) {
                 Ok(res) => res,
                 Err(err) => {
                     eprintln!("cannot access '{}': {}", path.display(), err);
@@ -121,6 +121,66 @@ impl Meta {
         }
 
         Ok(Some(content))
+    }
+
+    pub fn calculate_total_size(&mut self) {
+        if let FileType::Directory{ uid: _ } = self.file_type {
+            if let Some(metas) = &mut self.content {
+                let mut size_accumulated = self.size.get_bytes();
+                for x in &mut metas.iter_mut() {
+                    x.calculate_total_size();
+                    size_accumulated += x.size.get_bytes();
+                }
+                self.size = Size::new(size_accumulated);
+            } else { // possibility that 'depth' limited the recursion in 'recurse_into'
+                self.size = Size::new(Meta::calculate_total_file_size(&self.path));
+            }
+        }
+    }
+
+    fn calculate_total_file_size(path: &PathBuf) -> u64 {
+        let metadata = if read_link(&path).is_ok() {
+            // If the file is a link, retrieve the metadata without following
+            // the link.
+            path.symlink_metadata()
+        } else {
+            path.metadata()
+        };
+        let metadata = match metadata {
+            Ok(meta) => meta,
+            Err(err) => {
+                eprintln!("cannot access '{}': {}", path.display(), err);
+                return 0;
+            }
+        };
+        let file_type = metadata.file_type();
+        if file_type.is_file() {
+            metadata.len()
+        } else if file_type.is_dir() {
+            let mut size = metadata.len();
+
+            let entries = match path.read_dir() {
+                Ok(entries) => entries,
+                Err(err) => {
+                    eprintln!("cannot access '{}': {}", path.display(), err);
+                    return size;
+                }
+            };
+            for entry in entries {
+                let path = match entry {
+                    Ok(entry) => entry.path(),
+                    Err(err) => {
+                        eprintln!("cannot access '{}': {}", path.display(), err);
+                        continue;
+                    }
+                };
+                size += Meta::calculate_total_file_size(&path);
+            }
+            size
+        }
+        else {
+            0
+        }
     }
 
     pub fn from_path(path: &PathBuf) -> Result<Self, std::io::Error> {

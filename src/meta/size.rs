@@ -25,6 +25,10 @@ impl<'a> From<&'a Metadata> for Size {
 }
 
 impl Size {
+    pub fn new(bytes: u64) -> Self {
+        Self { bytes: bytes }
+    }
+
     pub fn get_bytes(&self) -> u64 {
         self.bytes
     }
