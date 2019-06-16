@@ -195,6 +195,7 @@ pub enum Display {
 pub enum SizeFlag {
     Default,
     Short,
+    Bytes,
 }
 
 impl<'a> From<&'a str> for SizeFlag {
@@ -202,6 +203,7 @@ impl<'a> From<&'a str> for SizeFlag {
         match size {
             "default" => SizeFlag::Default,
             "short" => SizeFlag::Short,
+            "bytes" => SizeFlag::Bytes,
             _ => panic!("invalid \"size\" flag: {}", size),
         }
     }
