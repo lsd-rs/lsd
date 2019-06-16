@@ -132,7 +132,7 @@ mod test {
 
     #[test]
     fn render_byte() {
-        let size = Size { bytes: 42 }; // == 42 bytes
+        let size = Size::new(42); // == 42 bytes
         let mut flags = Flags::default();
         let unit = size.get_unit(&flags);
 
@@ -147,7 +147,7 @@ mod test {
 
     #[test]
     fn render_kilobyte() {
-        let size = Size { bytes: 42 * 1024 }; // 42 kilobytes
+        let size = Size::new(42 * 1024); // 42 kilobytes
         let mut flags = Flags::default();
         let unit = size.get_unit(&flags);
 
@@ -159,7 +159,7 @@ mod test {
 
     #[test]
     fn render_megabyte() {
-        let size = Size { bytes: 42 * 1024 * 1024 }; // 42 megabytes
+        let size = Size::new(42 * 1024 * 1024); // 42 megabytes
         let mut flags = Flags::default();
         let unit = size.get_unit(&flags);
 
@@ -171,7 +171,7 @@ mod test {
 
     #[test]
     fn render_gigabyte() {
-        let size = Size { bytes: 42 * 1024 * 1024 * 1024 }; // 42 gigabytes
+        let size = Size::new(42 * 1024 * 1024 * 1024); // 42 gigabytes
         let mut flags = Flags::default();
         let unit = size.get_unit(&flags);
 
@@ -183,7 +183,7 @@ mod test {
 
     #[test]
     fn render_terabyte() {
-        let size = Size { bytes: 42 * 1024 * 1024 * 1024 * 1024 }; // 42 terabytes
+        let size = Size::new(42 * 1024 * 1024 * 1024 * 1024); // 42 terabytes
         let mut flags = Flags::default();
         let unit = size.get_unit(&flags);
 
@@ -195,7 +195,7 @@ mod test {
 
     #[test]
     fn render_with_a_fraction() {
-        let size = Size { bytes: 42 * 1024 + 103 }; // 42.1 kilobytes
+        let size = Size::new(42 * 1024 + 103); // 42.1 kilobytes
         let flags = Flags::default();
         let unit = size.get_unit(&flags);
 
@@ -205,7 +205,7 @@ mod test {
 
     #[test]
     fn render_with_a_truncated_fraction() {
-        let size = Size { bytes: 42 * 1024 + 1 }; // 42.001 kilobytes == 42 kilobytes
+        let size = Size::new(42 * 1024 + 1); // 42.001 kilobytes == 42 kilobytes
         let flags = Flags::default();
         let unit = size.get_unit(&flags);
 
