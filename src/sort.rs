@@ -23,15 +23,12 @@ pub fn by_meta(a: &Meta, b: &Meta, flags: &Flags) -> Ordering {
 }
 
 fn by_size(a: &Meta, b: &Meta, flags: &Flags) -> Ordering {
-
     if flags.sort_order == SortOrder::Default {
         b.size.get_bytes().cmp(&a.size.get_bytes())
     } else {
         a.size.get_bytes().cmp(&b.size.get_bytes())
     }
 }
-
-
 
 fn by_name(a: &Meta, b: &Meta, flags: &Flags) -> Ordering {
     if flags.sort_order == SortOrder::Default {
