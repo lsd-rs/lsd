@@ -30,8 +30,12 @@ impl Indicator {
         }
     }
 
-    pub fn len(&self) -> usize {
-        self.0.len()
+    pub fn len(&self, flags: &Flags) -> usize {
+        if flags.display_indicators {
+            self.0.len()
+        } else {
+            0
+        }
     }
 }
 
