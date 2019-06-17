@@ -1,5 +1,5 @@
 use crate::color::Colors;
-use crate::flags::{Display, Flags, Layout, Block};
+use crate::flags::{Block, Display, Flags, Layout};
 use crate::icon::Icons;
 use crate::meta::{FileType, Meta};
 use ansi_term::{ANSIString, ANSIStrings};
@@ -314,6 +314,7 @@ fn get_long_output(
                             strings.push(ANSIString::from(" ".to_string().repeat(
                                 padding_rules.name_with_symlink
                                     - meta.name.name_string(icons).len()
+                                    - meta.indicator.len()
                                     - s.len(),
                             )))
                         }
@@ -323,7 +324,8 @@ fn get_long_output(
                             strings.push(meta.symlink.render(colors));
                             strings.push(ANSIString::from(" ".to_string().repeat(
                                 padding_rules.name_with_symlink + 3
-                                    - meta.name.name_string(icons).len(),
+                                    - meta.name.name_string(icons).len()
+                                    - meta.indicator.len(),
                             )))
                         }
                     }
