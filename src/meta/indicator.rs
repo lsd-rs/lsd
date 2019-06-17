@@ -29,6 +29,10 @@ impl Indicator {
             ANSIString::from("")
         }
     }
+
+    pub fn len(&self) -> usize {
+        self.0.len()
+    }
 }
 
 #[cfg(test)]
