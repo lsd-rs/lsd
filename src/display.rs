@@ -314,7 +314,7 @@ fn get_long_output(
                             strings.push(ANSIString::from(" ".to_string().repeat(
                                 padding_rules.name_with_symlink
                                     - meta.name.name_string(icons).len()
-                                    - meta.indicator.len()
+                                    - meta.indicator.len(&flags)
                                     - s.len(),
                             )))
                         }
@@ -325,7 +325,7 @@ fn get_long_output(
                             strings.push(ANSIString::from(" ".to_string().repeat(
                                 padding_rules.name_with_symlink + 3
                                     - meta.name.name_string(icons).len()
-                                    - meta.indicator.len(),
+                                    - meta.indicator.len(&flags),
                             )))
                         }
                     }
