@@ -1,5 +1,5 @@
 use crate::color::Colors;
-use crate::flags::{Display, Flags, Layout, Block};
+use crate::flags::{Block, Display, Flags, Layout};
 use crate::icon::Icons;
 use crate::meta::{FileType, Meta};
 use ansi_term::{ANSIString, ANSIStrings};
@@ -57,8 +57,8 @@ fn inner_display_one_line(
             group: detect_group_length(&metas),
             size: detect_size_lengths(&metas, &flags),
             date: detect_date_length(&metas, &flags),
-            name: detect_name_length(&metas, &icons),
-            name_with_symlink: detect_name_with_symlink_length(&metas, &icons),
+            name: detect_name_length(&metas, &icons, &flags),
+            name_with_symlink: detect_name_with_symlink_length(&metas, &icons, &flags),
         })
     }
 
@@ -190,8 +190,8 @@ fn inner_display_tree(
             group: detect_group_length(&metas),
             size: detect_size_lengths(&metas, flags),
             date: detect_date_length(&metas, flags),
-            name: detect_name_length(&metas, &icons),
-            name_with_symlink: detect_name_with_symlink_length(&metas, &icons),
+            name: detect_name_length(&metas, &icons, &flags),
+            name_with_symlink: detect_name_with_symlink_length(&metas, &icons, &flags),
         })
     }
 
@@ -301,10 +301,12 @@ fn get_long_output(
             Block::Name => {
                 if flags.no_symlink {
                     strings.push(meta.name.render(colors, icons));
-                    strings
-                        .push(ANSIString::from(" ".to_string().repeat(
-                            padding_rules.name - meta.name.name_string(icons).len(),
-                        )))
+                    strings.push(meta.indicator.render(&flags));
+                    strings.push(ANSIString::from(" ".to_string().repeat(
+                        padding_rules.name
+                            - meta.indicator.len(&flags)
+                            - meta.name.name_string(icons).len(),
+                    )))
                 } else {
                     match meta.symlink.symlink_string() {
                         Some(s) => {
@@ -313,7 +315,9 @@ fn get_long_output(
                             strings.push(meta.symlink.render(colors));
                             strings.push(ANSIString::from(" ".to_string().repeat(
                                 padding_rules.name_with_symlink
+                                    - 3 //  3 = ( arrow + 2 spaces) for symlink;
                                     - meta.name.name_string(icons).len()
+                                    - meta.indicator.len(&flags)
                                     - s.len(),
                             )))
                         }
@@ -322,8 +326,9 @@ fn get_long_output(
                             strings.push(meta.indicator.render(&flags));
                             strings.push(meta.symlink.render(colors));
                             strings.push(ANSIString::from(" ".to_string().repeat(
-                                padding_rules.name_with_symlink + 3
-                                    - meta.name.name_string(icons).len(),
+                                padding_rules.name_with_symlink
+                                    - meta.name.name_string(icons).len()
+                                    - meta.indicator.len(&flags),
                             )))
                         }
                     }
@@ -407,25 +412,26 @@ fn detect_size_lengths(metas: &[Meta], flags: &Flags) -> (usize, usize) {
     (max_value_length, max_unit_size)
 }
 
-fn detect_name_length(metas: &[Meta], icons: &Icons) -> usize {
+fn detect_name_length(metas: &[Meta], icons: &Icons, flags: &Flags) -> usize {
     let mut max_value_length: usize = 0;
 
     for meta in metas {
-        if meta.name.name_string(&icons).len() > max_value_length {
-            max_value_length = meta.name.name_string(&icons).len();
+        let len = meta.name.name_string(&icons).len() + meta.indicator.len(&flags);
+        if len > max_value_length {
+            max_value_length = len;
         }
     }
 
     max_value_length
 }
 
-fn detect_name_with_symlink_length(metas: &[Meta], icons: &Icons) -> usize {
+fn detect_name_with_symlink_length(metas: &[Meta], icons: &Icons, flags: &Flags) -> usize {
     let mut max_value_length: usize = 0;
 
     for meta in metas {
-        let mut len = meta.name.name_string(&icons).len();
+        let mut len = meta.name.name_string(&icons).len() + meta.indicator.len(&flags);
         if let Some(syml) = meta.symlink.symlink_string() {
-            len += syml.len();
+            len += syml.len() + 3  // 3 = ( arrow + 2 spaces) for symlink;
         }
         if len > max_value_length {
             max_value_length = len;
