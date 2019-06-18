@@ -4,9 +4,13 @@ use crate::flags::{Display, Flags, IconTheme, Layout, WhenFlag};
 use crate::icon::{self, Icons};
 use crate::meta::Meta;
 use crate::sort;
-use std::fs;
+use std::{fs, io};
 use std::path::PathBuf;
+use std::os::unix::io::AsRawFd;
+#[cfg(target_os = "windows")]
 use terminal_size::terminal_size;
+
+use super::libc;
 
 pub struct Core {
     flags: Flags,
@@ -17,12 +21,16 @@ pub struct Core {
 
 impl Core {
     pub fn new(flags: Flags) -> Self {
-        // terminal_size allows us to know if the stdout is a tty or not.
-        let tty_available = terminal_size().is_some();
-
-        // determine color output availability (and initialize color output (for Windows 10))
+        // Check through libc if stdout is a tty. Unix specific so not on windows.
+        // Determine color output availability (and initialize color output (for Windows 10))
+        #[cfg(not(target_os = "windows"))]
+        let tty_available = unsafe { libc::isatty(io::stdout().as_raw_fd()) == 1 };
         #[cfg(not(target_os = "windows"))]
         let console_color_ok = true;
+
+        #[cfg(target_os = "windows")]
+        let tty_available = terminal_size().is_some(); // terminal_size allows us to know if the stdout is a tty or not.
+        
         #[cfg(target_os = "windows")]
         let console_color_ok = ansi_term::enable_ansi_support().is_ok();
 
@@ -33,8 +41,8 @@ impl Core {
             _ => color::Theme::Default,
         };
 
-        let icon_theme = match (tty_available, flags.icon, flags.icon_theme) {
-            (_, WhenFlag::Never, _) | (false, WhenFlag::Auto, _) => icon::Theme::NoIcon,
+        let icon_theme = match (tty_available, flags.icon, flags.icon_theme, ) {
+            (_, WhenFlag::Never, _) | (false, WhenFlag::Auto, _) | (true, _, _) => icon::Theme::NoIcon,
             (_, _, IconTheme::Fancy) => icon::Theme::Fancy,
             (_, _, IconTheme::Unicode) => icon::Theme::Unicode,
         };
