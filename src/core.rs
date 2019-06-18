@@ -41,7 +41,7 @@ impl Core {
             _ => color::Theme::Default,
         };
 
-        let icon_theme = match (tty_available, flags.icon, flags.icon_theme, ) {
+        let icon_theme = match (tty_available, flags.icon, flags.icon_theme) {
             (_, WhenFlag::Never, _) | (false, WhenFlag::Auto, _) | (true, _, _) => icon::Theme::NoIcon,
             (_, _, IconTheme::Fancy) => icon::Theme::Fancy,
             (_, _, IconTheme::Unicode) => icon::Theme::Unicode,
