@@ -6,11 +6,13 @@ use crate::meta::Meta;
 use crate::sort;
 use std::{fs, io};
 use std::path::PathBuf;
+
+#[cfg(not(target_os = "windows"))]
 use std::os::unix::io::AsRawFd;
+use super::libc;
+
 #[cfg(target_os = "windows")]
 use terminal_size::terminal_size;
-
-use super::libc;
 
 pub struct Core {
     flags: Flags,
@@ -25,6 +27,7 @@ impl Core {
         // Determine color output availability (and initialize color output (for Windows 10))
         #[cfg(not(target_os = "windows"))]
         let tty_available = unsafe { libc::isatty(io::stdout().as_raw_fd()) == 1 };
+
         #[cfg(not(target_os = "windows"))]
         let console_color_ok = true;
 
