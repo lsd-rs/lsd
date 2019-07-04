@@ -71,15 +71,12 @@ impl Core {
         };
 
         for path in paths {
-            let absolute_path = match fs::canonicalize(&path) {
-                Ok(path) => path.to_path_buf(),
-                Err(err) => {
-                    eprintln!("cannot access '{}': {}", path.display(), err);
-                    continue;
-                }
-            };
+            if let Err(err) = fs::canonicalize(&path) {
+                eprintln!("cannot access '{}': {}", path.display(), err);
+                continue;
+            }
 
-            let mut meta = match Meta::from_path(&absolute_path) {
+            let mut meta = match Meta::from_path(&path) {
                 Ok(meta) => meta,
                 Err(err) => {
                     eprintln!("cannot access '{}': {}", path.display(), err);
