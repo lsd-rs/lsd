@@ -12,9 +12,9 @@ pub fn by_meta(a: &Meta, b: &Meta, flags: &Flags) -> Ordering {
             DirOrderFlag::Last => by_name_with_files_first(a, b, &flags),
         },
         SortFlag::Size => match flags.directory_order {
-            DirOrderFlag::First => by_size(a, b, flags),
-            DirOrderFlag::None => by_size(a, b, flags),
-            DirOrderFlag::Last => by_size(a, b, flags),
+            DirOrderFlag::First => by_size_with_dirs_first(a, b, &flags),
+            DirOrderFlag::None => by_size(a, b, &flags),
+            DirOrderFlag::Last => by_size_with_files_first(a, b, &flags),
         },
         SortFlag::Time => match flags.directory_order {
             DirOrderFlag::First => by_date_with_dirs_first(a, b, &flags),
@@ -30,6 +30,24 @@ fn by_size(a: &Meta, b: &Meta, flags: &Flags) -> Ordering {
         b.size.get_bytes().cmp(&a.size.get_bytes())
     } else {
         a.size.get_bytes().cmp(&b.size.get_bytes())
+    }
+}
+
+fn by_size_with_dirs_first(a: &Meta, b: &Meta, flags: &Flags) -> Ordering {
+    match (a.file_type, b.file_type) {
+        (FileType::Directory { .. }, FileType::Directory { .. }) => by_size(a, b, &flags),
+        (FileType::Directory { .. }, _) => Ordering::Less,
+        (_, FileType::Directory { .. }) => Ordering::Greater,
+        _ => by_size(a, b, &flags),
+    }
+}
+
+fn by_size_with_files_first(a: &Meta, b: &Meta, flags: &Flags) -> Ordering {
+    match (a.file_type, b.file_type) {
+        (FileType::Directory { .. }, FileType::Directory { .. }) => by_size(a, b, &flags),
+        (FileType::Directory { .. }, _) => Ordering::Greater,
+        (_, FileType::Directory { .. }) => Ordering::Less,
+        _ => by_size(a, b, &flags),
     }
 }
 
