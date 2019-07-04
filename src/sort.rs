@@ -126,7 +126,6 @@ pub fn by_extension(metas: Vec<Meta>, flags: &Flags) -> Vec<Meta> {
     'start: for m in metas.clone() {
         for e in extensions.clone() {
             if e == grab_extension(&m.path) {
-                extensions.remove_item(&e);
                 for i in 0..items.len() {
                     if &items[i].0 == &e.0 && &items[i].1[0].1 == &e.1 {
                         items[i].1.push((m.name.name.clone(), e.1));
