@@ -5,6 +5,8 @@
     clippy::cast_possible_wrap
 )]
 
+#![feature(vec_remove_item)]
+
 #[macro_use]
 extern crate clap;
 extern crate ansi_term;

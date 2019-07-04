@@ -1,6 +1,6 @@
 use crate::color::{self, Colors};
 use crate::display;
-use crate::flags::{Display, Flags, IconTheme, Layout, WhenFlag};
+use crate::flags::{Display, Flags, IconTheme, Layout, WhenFlag, SortFlag};
 use crate::icon::{self, Icons};
 use crate::meta::Meta;
 use crate::sort;
@@ -121,7 +121,11 @@ impl Core {
     }
 
     fn sort(&self, metas: &mut Vec<Meta>) {
-        metas.sort_unstable_by(|a, b| sort::by_meta(a, b, &self.flags));
+        if &self.flags.sort_by == &SortFlag::Extension {
+            *metas = sort::by_extension(metas.to_vec(), &self.flags);
+        } else {
+            metas.sort_unstable_by(|a, b| sort::by_meta(a, b, &self.flags));
+        }
 
         for meta in metas {
             if let Some(ref mut content) = meta.content {

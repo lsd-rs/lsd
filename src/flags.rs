@@ -40,18 +40,23 @@ impl Flags {
             Display::DisplayOnlyVisible
         };
 
+        // TODO make it so that timesort doesnt get wierd priority over other forms of sorting if several different sorts are given.
         let sort_by = if matches.is_present("timesort") {
             SortFlag::Time
         } else if matches.is_present("sizesort") {
             SortFlag::Size
+        } else if matches.is_present("extensionsort") {
+            SortFlag::Extension
         } else {
             SortFlag::Name
         };
+
         let sort_order = if matches.is_present("reverse") {
             SortOrder::Reverse
         } else {
             SortOrder::Default
         };
+
         let layout = if matches.is_present("tree") {
             Layout::Tree {
                 long: matches.is_present("long"),
@@ -63,6 +68,7 @@ impl Flags {
         } else {
             Layout::Grid
         };
+
         let recursive = matches.is_present("recursive");
         let recursion_depth = match matches.value_of("depth") {
             Some(str)
@@ -152,6 +158,7 @@ impl Default for Flags {
                 Block::Size,
                 Block::Date,
                 Block::Name,
+                Block::Extension,
             ],
             no_symlink: false,
         }
@@ -167,7 +174,9 @@ pub enum Block {
     Size,
     Date,
     Name,
+    Extension,
 }
+
 impl<'a> From<&'a str> for Block {
     fn from(block: &'a str) -> Self {
         match block {
@@ -178,6 +187,7 @@ impl<'a> From<&'a str> for Block {
             "size" => Block::Size,
             "date" => Block::Date,
             "name" => Block::Name,
+            "extension" => Block::Extension,
             _ => panic!("invalid \"time\" flag: {}", block),
         }
     }
@@ -229,6 +239,7 @@ pub enum WhenFlag {
     Auto,
     Never,
 }
+
 impl<'a> From<&'a str> for WhenFlag {
     fn from(when: &'a str) -> Self {
         match when {
@@ -245,6 +256,7 @@ pub enum SortFlag {
     Name,
     Time,
     Size,
+    Extension,
 }
 
 #[derive(Clone, Debug, Copy, PartialEq, Eq)]

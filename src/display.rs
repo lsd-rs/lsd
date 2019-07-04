@@ -334,6 +334,7 @@ fn get_long_output(
                     }
                 }
             }
+            Block::Extension => panic!("Sorting by exstensions combined with the get_long_output() function is not supported yet"),
         };
         strings.push(ANSIString::from(" "));
     }

@@ -186,4 +186,11 @@ pub fn build() -> App<'static, 'static> {
                 .multiple(true)
                 .help("Do not display symlink target"),
         )
+        .arg(
+            Arg::with_name("extensionsort")
+                .short("X")
+                .long("extensionsort")
+                .multiple(true)
+                .help("Sort output by file extension"),
+        )
 }
