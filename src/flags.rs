@@ -17,6 +17,7 @@ pub struct Flags {
     pub recursion_depth: usize,
     pub blocks: Vec<Block>,
     pub no_symlink: bool,
+    pub total_size: bool,
 }
 
 impl Flags {
@@ -91,6 +92,7 @@ impl Flags {
             None => usize::max_value(),
         };
         let no_symlink = matches.is_present("no-symlink");
+        let total_size = matches.is_present("total-size");
 
         Ok(Self {
             display,
@@ -125,6 +127,7 @@ impl Flags {
                 DirOrderFlag::from(dir_order_inputs[dir_order_inputs.len() - 1])
             },
             no_symlink,
+            total_size,
         })
     }
 }
@@ -154,6 +157,7 @@ impl Default for Flags {
                 Block::Name,
             ],
             no_symlink: false,
+            total_size: false,
         }
     }
 }
@@ -195,6 +199,7 @@ pub enum Display {
 pub enum SizeFlag {
     Default,
     Short,
+    Bytes,
 }
 
 impl<'a> From<&'a str> for SizeFlag {
@@ -202,6 +207,7 @@ impl<'a> From<&'a str> for SizeFlag {
         match size {
             "default" => SizeFlag::Default,
             "short" => SizeFlag::Short,
+            "bytes" => SizeFlag::Bytes,
             _ => panic!("invalid \"size\" flag: {}", size),
         }
     }
