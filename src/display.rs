@@ -74,6 +74,11 @@ fn inner_display_one_line(
             continue;
         }
 
+		// TODO: Figure out why this breaks file icon rendering.
+		if flags.indent {
+			output.push_str("    ");
+		}
+
         if let Layout::OneLine { long: true } = flags.layout {
             output += &get_long_output(&meta, &colors, &icons, &flags, padding_rules.unwrap());
         } else {
