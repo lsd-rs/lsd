@@ -4,12 +4,12 @@ use crate::flags::{Display, Flags, IconTheme, Layout, WhenFlag};
 use crate::icon::{self, Icons};
 use crate::meta::Meta;
 use crate::sort;
-use std::{fs, io};
 use std::path::PathBuf;
+use std::{fs, io};
 
+use super::libc;
 #[cfg(not(target_os = "windows"))]
 use std::os::unix::io::AsRawFd;
-use super::libc;
 
 #[cfg(target_os = "windows")]
 use terminal_size::terminal_size;
@@ -33,7 +33,7 @@ impl Core {
 
         #[cfg(target_os = "windows")]
         let tty_available = terminal_size().is_some(); // terminal_size allows us to know if the stdout is a tty or not.
-        
+
         #[cfg(target_os = "windows")]
         let console_color_ok = ansi_term::enable_ansi_support().is_ok();
 
@@ -45,7 +45,7 @@ impl Core {
         };
 
         let icon_theme = match (tty_available, flags.icon, flags.icon_theme) {
-            (_, WhenFlag::Never, _) | (false, WhenFlag::Auto, _) | (true, _, _) => icon::Theme::NoIcon,
+            (_, WhenFlag::Never, _) | (false, WhenFlag::Auto, _) => icon::Theme::NoIcon,
             (_, _, IconTheme::Fancy) => icon::Theme::Fancy,
             (_, _, IconTheme::Unicode) => icon::Theme::Unicode,
         };
