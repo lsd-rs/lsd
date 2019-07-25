@@ -35,10 +35,16 @@ Install the patched fonts of powerline nerd-font and/or font-awesome. Have a loo
 
 See [this issue comment](https://github.com/Peltoche/lsd/issues/199#issuecomment-494218334) for detailed instructions on how to configure iTerm2 font settings correctly.
 
-### Archlinux
+### On Archlinux
 
 ```sh
 pacman -S lsd
+```
+
+### On Fedora
+
+```sh
+dnf install lsd
 ```
 
 ### On Ubuntu
