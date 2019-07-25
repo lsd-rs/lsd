@@ -75,7 +75,7 @@ fn inner_display_one_line(
         }
 
 		// TODO: Figure out why this breaks file icon rendering.
-		if flags.indent {
+		if flags.prefix_indent {
 			output.push_str("    ");
 		}
 
