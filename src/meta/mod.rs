@@ -21,6 +21,7 @@ pub use self::symlink::SymLink;
 pub use crate::flags::Display;
 pub use crate::icon::Icons;
 
+use std::fs;
 use std::fs::read_link;
 use std::io::{Error, ErrorKind};
 use std::path::PathBuf;
@@ -72,7 +73,8 @@ impl Meta {
             let mut current_meta;
             let mut parent_meta;
 
-            let parent_path = match self.path.parent() {
+            let absolute_path = fs::canonicalize(&self.path)?;
+            let parent_path = match absolute_path.parent() {
                 None => PathBuf::from("/"),
                 Some(path) => PathBuf::from(path),
             };
@@ -124,7 +126,7 @@ impl Meta {
     }
 
     pub fn calculate_total_size(&mut self) {
-        if let FileType::Directory{ uid: _ } = self.file_type {
+        if let FileType::Directory { uid: _ } = self.file_type {
             if let Some(metas) = &mut self.content {
                 let mut size_accumulated = self.size.get_bytes();
                 for x in &mut metas.iter_mut() {
@@ -132,7 +134,8 @@ impl Meta {
                     size_accumulated += x.size.get_bytes();
                 }
                 self.size = Size::new(size_accumulated);
-            } else { // possibility that 'depth' limited the recursion in 'recurse_into'
+            } else {
+                // possibility that 'depth' limited the recursion in 'recurse_into'
                 self.size = Size::new(Meta::calculate_total_file_size(&self.path));
             }
         }
@@ -177,8 +180,7 @@ impl Meta {
                 size += Meta::calculate_total_file_size(&path);
             }
             size
-        }
-        else {
+        } else {
             0
         }
     }
