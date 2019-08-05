@@ -198,6 +198,7 @@ pub fn build() -> App<'static, 'static> {
             .long("symlink-arrow")
             .multiple(true)
             .number_of_values(1)
+            .allow_hyphen_values(true)
             .default_value("\u{21d2}")
             .help("Specify a string to be used as the symlink arrow")
         )
