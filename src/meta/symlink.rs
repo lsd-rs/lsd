@@ -1,4 +1,5 @@
 use crate::color::{ColoredString, Colors, Elem};
+use crate::flags::Flags;
 use ansi_term::{ANSIString, ANSIStrings};
 use std::fs::read_link;
 use std::path::Path;
@@ -51,7 +52,7 @@ impl SymLink {
         }
     }
 
-    pub fn render(&self, colors: &Colors) -> ColoredString {
+    pub fn render(&self, flags: &Flags, colors: &Colors) -> ColoredString {
         if let Some(target_string) = self.symlink_string() {
             let elem = if self.valid {
                 &Elem::SymLink
@@ -60,7 +61,7 @@ impl SymLink {
             };
 
             let strings: &[ColoredString] = &[
-                ColoredString::from(" \u{21d2} "), // ⇒
+                ColoredString::from(format!(" {} ", flags.symlink_arrow)),
                 colors.colorize(target_string, elem),
             ];
 

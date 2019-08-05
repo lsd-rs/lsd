@@ -5,9 +5,8 @@ use crate::icon::{self, Icons};
 use crate::meta::Meta;
 use crate::sort;
 use std::path::PathBuf;
-use std::{fs, io};
+use std::fs;
 
-use super::libc;
 #[cfg(not(target_os = "windows"))]
 use std::os::unix::io::AsRawFd;
 

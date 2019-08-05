@@ -17,6 +17,7 @@ pub struct Flags {
     pub recursion_depth: usize,
     pub blocks: Vec<Block>,
     pub no_symlink: bool,
+    pub symlink_arrow: String,
     pub total_size: bool,
 }
 
@@ -30,6 +31,7 @@ impl Flags {
         let date_inputs: Vec<&str> = matches.values_of("date").unwrap().collect();
         let dir_order_inputs: Vec<&str> = matches.values_of("group-dirs").unwrap().collect();
         let blocks_inputs: Vec<&str> = matches.values_of("blocks").unwrap().collect();
+        let symlink_arrow: Vec<&str> = matches.values_of("symlink-arrow").unwrap().collect();
 
         let display = if matches.is_present("all") {
             Display::DisplayAll
@@ -126,8 +128,9 @@ impl Flags {
             } else {
                 DirOrderFlag::from(dir_order_inputs[dir_order_inputs.len() - 1])
             },
-            no_symlink,
-            total_size,
+            no_symlink: no_symlink,
+            symlink_arrow: String::from(symlink_arrow[symlink_arrow.len() - 1]),
+            total_size: total_size,
         })
     }
 }
@@ -157,6 +160,7 @@ impl Default for Flags {
                 Block::Name,
             ],
             no_symlink: false,
+            symlink_arrow: String::from("\u{21d2}"),
             total_size: false,
         }
     }

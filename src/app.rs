@@ -193,4 +193,12 @@ pub fn build() -> App<'static, 'static> {
                 .multiple(true)
                 .help("Do not display symlink target"),
         )
+        .arg(
+            Arg::with_name("symlink-arrow")
+            .long("symlink-arrow")
+            .multiple(true)
+            .number_of_values(1)
+            .default_value("\u{21d2}")
+            .help("Specify a string to be used as the symlink arrow")
+        )
 }

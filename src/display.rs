@@ -312,10 +312,10 @@ fn get_long_output(
                         Some(s) => {
                             strings.push(meta.name.render(colors, icons));
                             strings.push(meta.indicator.render(&flags));
-                            strings.push(meta.symlink.render(colors));
+                            strings.push(meta.symlink.render(&flags, colors));
                             strings.push(ANSIString::from(" ".to_string().repeat(
                                 padding_rules.name_with_symlink
-                                    - 3 //  3 = ( arrow + 2 spaces) for symlink;
+                                    - flags.symlink_arrow.len() + 2 //  3 = ( arrow + 2 spaces) for symlink;
                                     - meta.name.name_string(icons).len()
                                     - meta.indicator.len(&flags)
                                     - s.len(),
@@ -324,7 +324,7 @@ fn get_long_output(
                         None => {
                             strings.push(meta.name.render(colors, icons));
                             strings.push(meta.indicator.render(&flags));
-                            strings.push(meta.symlink.render(colors));
+                            strings.push(meta.symlink.render(&flags, colors));
                             strings.push(ANSIString::from(" ".to_string().repeat(
                                 padding_rules.name_with_symlink
                                     - meta.name.name_string(icons).len()
@@ -403,7 +403,7 @@ fn detect_size_lengths(metas: &[Meta], flags: &Flags) -> (usize, usize) {
         let unit = meta.size.get_unit(flags);
         let value_len = meta.size.render_value(&unit).len();
         let unit_len = Size::render_unit(&unit, &flags).len();
-        
+
         if value_len > max_value_length {
             max_value_length = value_len;
         }
@@ -435,7 +435,7 @@ fn detect_name_with_symlink_length(metas: &[Meta], icons: &Icons, flags: &Flags)
     for meta in metas {
         let mut len = meta.name.name_string(&icons).len() + meta.indicator.len(&flags);
         if let Some(syml) = meta.symlink.symlink_string() {
-            len += syml.len() + 3  // 3 = ( arrow + 2 spaces) for symlink;
+            len += syml.len() + flags.symlink_arrow.len() + 2  // 3 = ( arrow + 2 spaces) for symlink;
         }
         if len > max_value_length {
             max_value_length = len;
