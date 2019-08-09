@@ -33,8 +33,7 @@ impl Size {
         self.bytes
     }
 
-    pub fn get_unit(&self, flags: &Flags) -> Unit
-    {
+    pub fn get_unit(&self, flags: &Flags) -> Unit {
         if self.bytes < 1024 || flags.size == SizeFlag::Bytes {
             Unit::Byte
         } else if self.bytes < 1024 * 1024 {
@@ -54,6 +53,7 @@ impl Size {
         value_alignment: usize,
         unit_alignment: usize,
         flags: &Flags,
+        apply_padding: bool,
     ) -> ColoredString {
         let mut content = String::with_capacity(value_alignment + unit_alignment + 1);
 
@@ -72,8 +72,10 @@ impl Size {
         }
         content += &Size::render_unit(&unit, &flags);
 
-        for _ in 0..(unit_alignment - unit_str.len()) {
-            content.push(' ');
+        if apply_padding {
+            for _ in 0..(unit_alignment - unit_str.len()) {
+                content.push(' ');
+            }
         }
 
         self.paint(&unit, colors, content)
@@ -95,10 +97,17 @@ impl Size {
         match unit {
             Unit::None => "".to_string(),
             Unit::Byte => self.bytes.to_string(),
-            Unit::Kilo => ((( self.bytes as f64 ) / 1024.0 * 10.0).round() / 10.0).to_string(),
-            Unit::Mega => ((( self.bytes as f64 ) / (1024.0 * 1024.0) * 10.0).round() / 10.0).to_string(),
-            Unit::Giga => ((( self.bytes as f64 ) / (1024.0 * 1024.0 * 1024.0) * 10.0).round() / 10.0).to_string(),
-            Unit::Tera => ((( self.bytes as f64 ) / (1024.0 * 1024.0 * 1024.0 * 1024.0) * 10.0).round() / 10.0).to_string(),
+            Unit::Kilo => (((self.bytes as f64) / 1024.0 * 10.0).round() / 10.0).to_string(),
+            Unit::Mega => {
+                (((self.bytes as f64) / (1024.0 * 1024.0) * 10.0).round() / 10.0).to_string()
+            }
+            Unit::Giga => (((self.bytes as f64) / (1024.0 * 1024.0 * 1024.0) * 10.0).round()
+                / 10.0)
+                .to_string(),
+            Unit::Tera => {
+                (((self.bytes as f64) / (1024.0 * 1024.0 * 1024.0 * 1024.0) * 10.0).round() / 10.0)
+                    .to_string()
+            }
         }
     }
 
@@ -120,7 +129,7 @@ impl Size {
                 Unit::Giga => String::from("G"),
                 Unit::Tera => String::from("T"),
             },
-            SizeFlag::Bytes => String::from("")
+            SizeFlag::Bytes => String::from(""),
         }
     }
 }

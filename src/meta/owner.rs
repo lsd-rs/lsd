@@ -44,22 +44,36 @@ impl Owner {
         self.group.clone()
     }
 
-    pub fn render_user(&self, colors: &Colors, user_alignment: usize) -> ColoredString {
+    pub fn render_user(
+        &self,
+        colors: &Colors,
+        user_alignment: usize,
+        apply_padding: bool,
+    ) -> ColoredString {
         let mut res = String::with_capacity(user_alignment - self.user.len());
 
-        for _ in 0..(user_alignment - self.user.len()) {
-            res.push(' ');
+        if apply_padding {
+            for _ in 0..(user_alignment - self.user.len()) {
+                res.push(' ');
+            }
         }
 
         res += &self.user;
         colors.colorize(res, &Elem::User)
     }
 
-    pub fn render_group(&self, colors: &Colors, group_alignment: usize) -> ColoredString {
+    pub fn render_group(
+        &self,
+        colors: &Colors,
+        group_alignment: usize,
+        apply_padding: bool,
+    ) -> ColoredString {
         let mut res = String::with_capacity(group_alignment - self.group.len());
 
-        for _ in 0..(group_alignment - self.group.len()) {
-            res.push(' ');
+        if apply_padding {
+            for _ in 0..(group_alignment - self.group.len()) {
+                res.push(' ');
+            }
         }
 
         res += &self.group;

@@ -287,53 +287,75 @@ fn get_long_output(
     padding_rules: PaddingRules,
 ) -> String {
     let mut strings: Vec<ANSIString> = Vec::new();
-    for block in flags.blocks.iter() {
+    let mut blocks = flags.blocks.iter().peekable();
+    while let Some(block) = blocks.next() {
+        let apply_padding = blocks.peek().is_some();
         match block {
             Block::Permission => {
                 strings.push(meta.file_type.render(colors));
                 strings.push(meta.permissions.render(colors));
             }
-            Block::User => strings.push(meta.owner.render_user(colors, padding_rules.user)),
-            Block::Group => strings.push(meta.owner.render_group(colors, padding_rules.group)),
+            Block::User => strings.push(meta.owner.render_user(
+                colors,
+                padding_rules.user,
+                apply_padding,
+            )),
+            Block::Group => strings.push(meta.owner.render_group(
+                colors,
+                padding_rules.group,
+                apply_padding,
+            )),
             Block::Size => strings.push(meta.size.render(
                 colors,
                 padding_rules.size.0,
                 padding_rules.size.1,
                 &flags,
+                apply_padding,
             )),
-            Block::Date => strings.push(meta.date.render(colors, padding_rules.date, &flags)),
+            Block::Date => {
+                strings.push(
+                    meta.date
+                        .render(colors, padding_rules.date, &flags, apply_padding),
+                )
+            }
             Block::Name => {
                 if flags.no_symlink {
                     strings.push(meta.name.render(colors, icons));
                     strings.push(meta.indicator.render(&flags));
-                    strings.push(ANSIString::from(" ".to_string().repeat(
-                        padding_rules.name
-                            - meta.indicator.len(&flags)
-                            - meta.name.name_string(icons).len(),
-                    )))
+                    if apply_padding {
+                        strings.push(ANSIString::from(" ".to_string().repeat(
+                            padding_rules.name
+                                - meta.indicator.len(&flags)
+                                - meta.name.name_string(icons).len(),
+                        )))
+                    }
                 } else {
                     match meta.symlink.symlink_string() {
                         Some(s) => {
                             strings.push(meta.name.render(colors, icons));
                             strings.push(meta.indicator.render(&flags));
                             strings.push(meta.symlink.render(colors));
-                            strings.push(ANSIString::from(" ".to_string().repeat(
-                                padding_rules.name_with_symlink
-                                    - 3 //  3 = ( arrow + 2 spaces) for symlink;
-                                    - meta.name.name_string(icons).len()
-                                    - meta.indicator.len(&flags)
-                                    - s.len(),
-                            )))
+                            if apply_padding {
+                                strings.push(ANSIString::from(" ".to_string().repeat(
+                                    padding_rules.name_with_symlink
+                                            - 3 //  3 = ( arrow + 2 spaces) for symlink;
+                                            - meta.name.name_string(icons).len()
+                                            - meta.indicator.len(&flags)
+                                            - s.len(),
+                                )))
+                            }
                         }
                         None => {
                             strings.push(meta.name.render(colors, icons));
                             strings.push(meta.indicator.render(&flags));
                             strings.push(meta.symlink.render(colors));
-                            strings.push(ANSIString::from(" ".to_string().repeat(
-                                padding_rules.name_with_symlink
-                                    - meta.name.name_string(icons).len()
-                                    - meta.indicator.len(&flags),
-                            )))
+                            if apply_padding {
+                                strings.push(ANSIString::from(" ".to_string().repeat(
+                                    padding_rules.name_with_symlink
+                                        - meta.name.name_string(icons).len()
+                                        - meta.indicator.len(&flags),
+                                )))
+                            }
                         }
                     }
                 }
@@ -407,7 +429,7 @@ fn detect_size_lengths(metas: &[Meta], flags: &Flags) -> (usize, usize) {
         let unit = meta.size.get_unit(flags);
         let value_len = meta.size.render_value(&unit).len();
         let unit_len = Size::render_unit(&unit, &flags).len();
-        
+
         if value_len > max_value_length {
             max_value_length = value_len;
         }
@@ -439,7 +461,7 @@ fn detect_name_with_symlink_length(metas: &[Meta], icons: &Icons, flags: &Flags)
     for meta in metas {
         let mut len = meta.name.name_string(&icons).len() + meta.indicator.len(&flags);
         if let Some(syml) = meta.symlink.symlink_string() {
-            len += syml.len() + 3  // 3 = ( arrow + 2 spaces) for symlink;
+            len += syml.len() + 3 // 3 = ( arrow + 2 spaces) for symlink;
         }
         if len > max_value_length {
             max_value_length = len;

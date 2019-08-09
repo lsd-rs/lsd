@@ -25,7 +25,13 @@ impl<'a> From<&'a Metadata> for Date {
 }
 
 impl Date {
-    pub fn render(&self, colors: &Colors, date_alignment: usize, flags: &Flags) -> ColoredString {
+    pub fn render(
+        &self,
+        colors: &Colors,
+        date_alignment: usize,
+        flags: &Flags,
+        apply_padding: bool,
+    ) -> ColoredString {
         let mut content = String::with_capacity(date_alignment + 1);
         let now = time::now();
 
@@ -41,8 +47,10 @@ impl Date {
         let date_string = &self.date_string(&flags);
         content += date_string;
 
-        for _ in 0..(date_alignment - date_string.len()) {
-            content.push(' ');
+        if apply_padding {
+            for _ in 0..(date_alignment - date_string.len()) {
+                content.push(' ');
+            }
         }
         colors.colorize(content, elem)
     }
