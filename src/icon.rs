@@ -58,9 +58,35 @@ impl Icons {
 
         let mut res = String::with_capacity(4 + ICON_SPACE.len()); // 4 == max icon size
 
-        // Check directory.
-        if let FileType::Directory { .. } = name.file_type() {
+        // Check file types
+        let file_type: FileType = name.file_type();
+
+        if let FileType::Directory { .. } = file_type {
             res += self.default_folder_icon;
+            res += ICON_SPACE;
+            return res;
+        } else if let FileType::SymLink = file_type {
+            res += "\u{e27c}"; // ""
+            res += ICON_SPACE;
+            return res;
+        } else if let FileType::Socket = file_type {
+            res += "\u{f6a7}"; // ""
+            res += ICON_SPACE;
+            return res;
+        } else if let FileType::Pipe = file_type {
+            res += "\u{f731}"; // ""
+            res += ICON_SPACE;
+            return res;
+        } else if let FileType::CharDevice = file_type {
+            res += "\u{e601}"; // ""
+            res += ICON_SPACE;
+            return res;
+        } else if let FileType::BlockDevice = file_type {
+            res += "\u{fc29}"; // "ﰩ"
+            res += ICON_SPACE;
+            return res;
+        } else if let FileType::Special = file_type {
+            res += "\u{f2dc}"; // ""
             res += ICON_SPACE;
             return res;
         }
