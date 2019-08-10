@@ -134,6 +134,30 @@ mod test {
     }
 
     #[test]
+    fn test_an_hour_old_file_color_no_padding() {
+        let mut file_path = env::temp_dir();
+        file_path.push("test_an_hour_old_file_color_no_padding.tmp");
+
+        let creation_date = (time::now() - time::Duration::seconds(4)).to_local();
+
+        let success = cross_platform_touch(&file_path, &creation_date)
+            .unwrap()
+            .success();
+        assert!(success, "failed to exec touch");
+
+        let colors = Colors::new(Theme::Default);
+        let date = Date::from(&file_path.metadata().unwrap());
+        let flags = Flags::default();
+
+        assert_eq!(
+            Colour::Fixed(40).paint(creation_date.ctime().to_string()),
+            date.render(&colors, creation_date.ctime().to_string().len()+30, &flags, false)
+        );
+
+        fs::remove_file(file_path).unwrap();
+    }
+
+    #[test]
     fn test_a_day_old_file_color() {
         let mut file_path = env::temp_dir();
         file_path.push("test_a_day_old_file_color.tmp");
