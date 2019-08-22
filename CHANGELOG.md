@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.16.0] - 2019-08-02
+### Added
+- Add the flag `--blocks` from [meain](https://github.com/meain)
+- Add the flag `--no-symlink` from [meain](https://github.com/meain)
+- Add the `bytes` option to the `--size` flag from [Philipp-M](https://github.com/Philipp-M)
+- Add the flag `--total-size` from [Philipp-M](https://github.com/Philipp-M)
+- Add some icons from [JayXon](https://github.com/JayXon)
+
+### Changed
+- The flag `--tree` now works with the flag `--long` from [Monkeypac](https://github.com/Monkeypac)
+
+### Fixed
+- Fix the padding before the file name
+
 ## [0.15.1] - 2019-05-24
 ### Added
 - Add the `Cargo.lock` icon from Holcomb
