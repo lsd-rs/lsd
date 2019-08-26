@@ -37,6 +37,7 @@ pub fn build() -> App<'static, 'static> {
                 .long("icon")
                 .possible_value("always")
                 .possible_value("auto")
+                .possible_value("long")
                 .possible_value("never")
                 .default_value("auto")
                 .multiple(true)

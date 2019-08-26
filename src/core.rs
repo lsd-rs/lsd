@@ -44,10 +44,10 @@ impl Core {
             _ => color::Theme::Default,
         };
 
-        let icon_theme = match (tty_available, flags.icon, flags.icon_theme) {
-            (_, WhenFlag::Never, _) | (false, WhenFlag::Auto, _) => icon::Theme::NoIcon,
-            (_, _, IconTheme::Fancy) => icon::Theme::Fancy,
-            (_, _, IconTheme::Unicode) => icon::Theme::Unicode,
+        let icon_theme = match (tty_available, flags.icon, flags.long_mode, flags.icon_theme) {
+            (_, WhenFlag::Never, _, _) | (false, WhenFlag::Auto, _ , _) | (_, WhenFlag::Long, false, _) => icon::Theme::NoIcon,
+            (_, _, _, IconTheme::Fancy) => icon::Theme::Fancy,
+            (_, _, _, IconTheme::Unicode) => icon::Theme::Unicode,
         };
 
         if !tty_available {

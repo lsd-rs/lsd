@@ -4,6 +4,7 @@ use clap::{ArgMatches, Error, ErrorKind};
 pub struct Flags {
     pub display: Display,
     pub layout: Layout,
+    pub long_mode: bool,
     pub display_indicators: bool,
     pub recursive: bool,
     pub sort_by: SortFlag,
@@ -97,6 +98,7 @@ impl Flags {
         Ok(Self {
             display,
             layout,
+            long_mode: matches.is_present("long") || matches.is_present("tree"),
             display_indicators: matches.is_present("indicators"),
             recursive,
             recursion_depth,
@@ -137,6 +139,7 @@ impl Default for Flags {
         Self {
             display: Display::DisplayOnlyVisible,
             layout: Layout::Grid,
+            long_mode: false,
             display_indicators: false,
             recursive: false,
             recursion_depth: usize::max_value(),
@@ -234,6 +237,7 @@ pub enum WhenFlag {
     Always,
     Auto,
     Never,
+    Long,
 }
 impl<'a> From<&'a str> for WhenFlag {
     fn from(when: &'a str) -> Self {
@@ -241,6 +245,7 @@ impl<'a> From<&'a str> for WhenFlag {
             "always" => WhenFlag::Always,
             "auto" => WhenFlag::Auto,
             "never" => WhenFlag::Never,
+            "long" => WhenFlag::Long,
             _ => panic!("invalid \"when\" flag: {}", when),
         }
     }
