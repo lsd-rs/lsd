@@ -13,7 +13,6 @@
 - [Configurations](#configurations)
   * [Required](#required)
   * [Optional](#optional)
-- [Benchmark](#benchmark)
 - [F.A.Q.](#faq)
 - [Contributors](#contributors)
 - [Credits](#credits)
@@ -112,17 +111,6 @@ file  (~/.bashrc, ~/.zshrc, etc.) just under the alias above :
   alias lla='ls -la'
   alias lt='ls --tree'
   ```
-
-
-## Benchmark
-
-Result from `hyperfine --warmup 10 'lsd -la /etc/*' 'colorls -la /etc/*' 'exa -la /etc/*' --export-markdown out.md`:
-
-| Command | Mean [ms] | Min…Max [ms] |
-|:---|---:|---:|
-| `lsd -la /etc/*` | 9.8 ± 0.7 | 8.6…11.9 |
-| `colorls -la /etc/*` | 387.3 ± 4.1 | 379.8…393.6 |
-| `exa -la /etc/*` | 15.4 ± 1.8 | 14.0…24.0 |
 
 ## F.A.Q.
 
