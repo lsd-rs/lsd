@@ -20,7 +20,7 @@
 ## Description
 
 This project is heavily inspired by the super [colorls](https://github.com/athityakumar/colorls)
-project but with some little differences.  For example it is written in rust and not in ruby which makes it much faster ([see the benchmarks](#benchmark)).
+project but with some little differences.  For example it is written in rust and not in ruby which makes it much faster.
 
 ## Screenshot
 
