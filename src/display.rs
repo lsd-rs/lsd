@@ -74,6 +74,10 @@ fn inner_display_one_line(
             continue;
         }
 
+		if flags.prefix_indent {
+			output.push_str("    ");
+		}
+
         if let Layout::OneLine { long: true } = flags.layout {
             output += &get_long_output(&meta, &colors, &icons, &flags, padding_rules.unwrap());
         } else {
