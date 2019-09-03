@@ -77,7 +77,7 @@ impl Colors {
         };
         let lscolors = match theme {
             Theme::NoColor => None,
-            Theme::Default => LsColors::from_env(),
+            Theme::Default => Some(LsColors::from_env().unwrap_or_default()),
             Theme::NoLscolors => None,
         };
 
