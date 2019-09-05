@@ -1,8 +1,8 @@
 use crate::color::{self, Colors};
 use crate::display;
-use crate::flags::{Display, Flags, IconTheme, Layout, WhenFlag};
+use crate::flags::{Display, Flags, IconTheme, Layout, WhenFlag, DirOrderFlag};
 use crate::icon::{self, Icons};
-use crate::meta::Meta;
+use crate::meta::{Meta, FileType};
 use crate::sort;
 use std::path::PathBuf;
 use std::{fs, io};
@@ -69,9 +69,15 @@ impl Core {
     pub fn run(self, paths: Vec<PathBuf>) {
         let mut meta_list = self.fetch(paths);
 
-        self.sort(&mut meta_list);
+        match self.flags.directory_order {
+            DirOrderFlag::None => self.sort(&mut meta_list),
+            other => {
+                meta_list = self.sort_with_dir(meta_list, other);
+            },
+        }
         self.display(meta_list)
     }
+
 
     fn fetch(&self, paths: Vec<PathBuf>) -> Vec<Meta> {
         let mut meta_list = Vec::with_capacity(paths.len());
@@ -129,6 +135,35 @@ impl Core {
             if let Some(ref mut content) = meta.content {
                 self.sort(content);
             }
+        }
+    }
+
+    fn sort_with_dir(&self, metas: Vec<Meta>, order: DirOrderFlag) -> Vec<Meta> {
+        let mut directories = Vec::new();
+        let mut other = Vec::new();
+
+        for meta in metas.into_iter() {
+            match meta.file_type {
+                FileType::Directory{uid: _} => directories.push(meta),
+                _ => other.push(meta),
+            }
+        }
+
+        self.sort(&mut directories);
+        self.sort(&mut other);
+
+        match order {
+            DirOrderFlag::First => {
+                directories.append(&mut other);
+                directories
+            },
+            DirOrderFlag::Last => {
+                other.append(&mut directories);
+                other
+            },
+            DirOrderFlag::None => {
+                panic!("Should not sort")
+            },
         }
     }
 
