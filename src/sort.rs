@@ -4,21 +4,9 @@ use std::cmp::Ordering;
 
 pub fn by_meta(a: &Meta, b: &Meta, flags: &Flags) -> Ordering {
     match flags.sort_by {
-        SortFlag::Name => match flags.directory_order {
-            DirOrderFlag::First => by_name_with_dirs_first(a, b, &flags),
-            DirOrderFlag::None => by_name(a, b, &flags),
-            DirOrderFlag::Last => by_name_with_files_first(a, b, &flags),
-        },
-        SortFlag::Size => match flags.directory_order {
-            DirOrderFlag::First => by_size_with_dirs_first(a, b, &flags),
-            DirOrderFlag::None => by_size(a, b, &flags),
-            DirOrderFlag::Last => by_size_with_files_first(a, b, &flags),
-        },
-        SortFlag::Time => match flags.directory_order {
-            DirOrderFlag::First => by_date_with_dirs_first(a, b, &flags),
-            DirOrderFlag::None => by_date(a, b, &flags),
-            DirOrderFlag::Last => by_date_with_files_first(a, b, &flags),
-        },
+        SortFlag::Name => by_name(a, b, &flags),
+        SortFlag::Size => by_size(a, b, &flags),
+        SortFlag::Time => by_date(a, b, &flags),
     }
 }
 
@@ -30,24 +18,6 @@ fn by_size(a: &Meta, b: &Meta, flags: &Flags) -> Ordering {
     }
 }
 
-fn by_size_with_dirs_first(a: &Meta, b: &Meta, flags: &Flags) -> Ordering {
-    match (a.file_type, b.file_type) {
-        (FileType::Directory { .. }, FileType::Directory { .. }) => by_size(a, b, &flags),
-        (FileType::Directory { .. }, _) => Ordering::Less,
-        (_, FileType::Directory { .. }) => Ordering::Greater,
-        _ => by_size(a, b, &flags),
-    }
-}
-
-fn by_size_with_files_first(a: &Meta, b: &Meta, flags: &Flags) -> Ordering {
-    match (a.file_type, b.file_type) {
-        (FileType::Directory { .. }, FileType::Directory { .. }) => by_size(a, b, &flags),
-        (FileType::Directory { .. }, _) => Ordering::Greater,
-        (_, FileType::Directory { .. }) => Ordering::Less,
-        _ => by_size(a, b, &flags),
-    }
-}
-
 fn by_name(a: &Meta, b: &Meta, flags: &Flags) -> Ordering {
     if flags.sort_order == SortOrder::Default {
         a.name.cmp(&b.name)
@@ -56,47 +26,11 @@ fn by_name(a: &Meta, b: &Meta, flags: &Flags) -> Ordering {
     }
 }
 
-fn by_name_with_dirs_first(a: &Meta, b: &Meta, flags: &Flags) -> Ordering {
-    match (a.file_type, b.file_type) {
-        (FileType::Directory { .. }, FileType::Directory { .. }) => by_name(a, b, &flags),
-        (FileType::Directory { .. }, _) => Ordering::Less,
-        (_, FileType::Directory { .. }) => Ordering::Greater,
-        _ => by_name(a, b, &flags),
-    }
-}
-
-fn by_name_with_files_first(a: &Meta, b: &Meta, flags: &Flags) -> Ordering {
-    match (a.file_type, b.file_type) {
-        (FileType::Directory { .. }, FileType::Directory { .. }) => by_name(a, b, &flags),
-        (FileType::Directory { .. }, _) => Ordering::Greater,
-        (_, FileType::Directory { .. }) => Ordering::Less,
-        _ => by_name(a, b, &flags),
-    }
-}
-
 fn by_date(a: &Meta, b: &Meta, flags: &Flags) -> Ordering {
     if flags.sort_order == SortOrder::Default {
         b.date.cmp(&a.date).then(a.name.cmp(&b.name))
     } else {
         a.date.cmp(&b.date).then(b.name.cmp(&a.name))
-    }
-}
-
-fn by_date_with_dirs_first(a: &Meta, b: &Meta, flags: &Flags) -> Ordering {
-    match (a.file_type, b.file_type) {
-        (FileType::Directory { .. }, FileType::Directory { .. }) => by_date(a, b, &flags),
-        (FileType::Directory { .. }, _) => Ordering::Less,
-        (_, FileType::Directory { .. }) => Ordering::Greater,
-        _ => by_date(a, b, &flags),
-    }
-}
-
-fn by_date_with_files_first(a: &Meta, b: &Meta, flags: &Flags) -> Ordering {
-    match (a.file_type, b.file_type) {
-        (FileType::Directory { .. }, FileType::Directory { .. }) => by_date(a, b, &flags),
-        (FileType::Directory { .. }, _) => Ordering::Greater,
-        (_, FileType::Directory { .. }) => Ordering::Less,
-        _ => by_date(a, b, &flags),
     }
 }
 
