@@ -2,6 +2,60 @@ use crate::flags::{DirOrderFlag, Flags, SortFlag, SortOrder};
 use crate::meta::{FileType, Meta};
 use std::cmp::Ordering;
 
+pub fn call(flags: &Flags, mut metas: Vec<Meta>) -> Vec<Meta> {
+    sort_with_dir(metas, &flags)
+}
+
+fn sort_with_dir(mut metas: Vec<Meta>, flags: &Flags) -> Vec<Meta> {
+    match flags.directory_order {
+        DirOrderFlag::First => {
+            println!("first");
+            let (mut directories, mut other) = split_dirs(metas, flags);
+            directories.append(&mut other);
+            return directories
+        },
+        DirOrderFlag::Last => {
+            println!("last");
+
+            let (mut directories, mut other) = split_dirs(metas, flags);
+            other.append(&mut directories);
+            return other
+        },
+        DirOrderFlag::None => {
+            sort(flags, &mut metas);
+            return metas
+        },
+    }
+}
+
+fn split_dirs(metas: Vec<Meta>, flags: &Flags) -> (Vec<Meta>, Vec<Meta>) {
+    let mut directories = Vec::new();
+    let mut other = Vec::new();
+
+    for meta in metas.into_iter() {
+        match meta.file_type {
+            FileType::Directory{uid: _} => directories.push(meta),
+            _ => other.push(meta),
+        }
+    }
+
+    sort(flags, &mut directories);
+    sort(flags, &mut other);
+
+    (directories, other)
+}
+
+
+pub fn sort(flags: &Flags, metas: &mut Vec<Meta>) {
+    metas.sort_unstable_by(|a, b| by_meta(a, b, flags));
+
+    for meta in metas {
+        if let Some(ref mut content) = meta.content {
+            sort(flags, content);
+        }
+    }
+}
+
 pub fn by_meta(a: &Meta, b: &Meta, flags: &Flags) -> Ordering {
     match flags.sort_by {
         SortFlag::Name => by_name(a, b, &flags),
@@ -59,12 +113,10 @@ mod tests {
         let mut flags = Flags::default();
         flags.directory_order = DirOrderFlag::First;
 
-        //  Sort with the dirs first
-        assert_eq!(by_meta(&meta_a, &meta_z, &flags), Ordering::Greater);
-
-        //  Sort with the dirs first (the dirs stay first)
-        flags.sort_order = SortOrder::Reverse;
-        assert_eq!(by_meta(&meta_a, &meta_z, &flags), Ordering::Greater);
+        let mut sorted = call(&flags, vec![meta_a, meta_z]);
+        if let FileType::Directory { .. } = sorted.pop().unwrap().file_type {
+            panic!("Wasn't a directory")
+        }
     }
 
     #[test]
@@ -84,11 +136,11 @@ mod tests {
         let mut flags = Flags::default();
         flags.directory_order = DirOrderFlag::Last;
 
-        // Sort with file first
-        assert_eq!(by_meta(&meta_a, &meta_z, &flags), Ordering::Less);
+        let mut sorted = call(&flags, vec![meta_a, meta_z]);
 
-        // Sort with file first reversed (thie files stay first)
-        assert_eq!(by_meta(&meta_a, &meta_z, &flags), Ordering::Less);
+        if let FileType::File { .. } = sorted.pop().unwrap().file_type {
+            panic!("Wasn't a directory")
+        }
     }
 
     #[test]

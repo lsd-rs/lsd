@@ -68,13 +68,7 @@ impl Core {
 
     pub fn run(self, paths: Vec<PathBuf>) {
         let mut meta_list = self.fetch(paths);
-
-        match self.flags.directory_order {
-            DirOrderFlag::None => self.sort(&mut meta_list),
-            other => {
-                meta_list = self.sort_with_dir(meta_list, other);
-            },
-        }
+        meta_list = sort::call(&self.flags, meta_list);
         self.display(meta_list)
     }
 
@@ -126,45 +120,6 @@ impl Core {
         }
 
         meta_list
-    }
-
-    fn sort(&self, metas: &mut Vec<Meta>) {
-        metas.sort_unstable_by(|a, b| sort::by_meta(a, b, &self.flags));
-
-        for meta in metas {
-            if let Some(ref mut content) = meta.content {
-                self.sort(content);
-            }
-        }
-    }
-
-    fn sort_with_dir(&self, metas: Vec<Meta>, order: DirOrderFlag) -> Vec<Meta> {
-        let mut directories = Vec::new();
-        let mut other = Vec::new();
-
-        for meta in metas.into_iter() {
-            match meta.file_type {
-                FileType::Directory{uid: _} => directories.push(meta),
-                _ => other.push(meta),
-            }
-        }
-
-        self.sort(&mut directories);
-        self.sort(&mut other);
-
-        match order {
-            DirOrderFlag::First => {
-                directories.append(&mut other);
-                directories
-            },
-            DirOrderFlag::Last => {
-                other.append(&mut directories);
-                other
-            },
-            DirOrderFlag::None => {
-                panic!("Should not sort")
-            },
-        }
     }
 
     fn display(&self, metas: Vec<Meta>) {
