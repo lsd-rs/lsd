@@ -19,6 +19,7 @@ pub struct Core {
     icons: Icons,
     //display: Display,
     colors: Colors,
+    sorter: sort::Sorter,
 }
 
 impl Core {
@@ -58,11 +59,14 @@ impl Core {
             inner_flags.layout = Layout::OneLine;
         };
 
+        let sorter = sort::create_sorter(&flags);
+
         Self {
             flags,
             //display: Display::new(inner_flags),
             colors: Colors::new(color_theme),
             icons: Icons::new(icon_theme),
+            sorter,
         }
     }
 
@@ -118,8 +122,7 @@ impl Core {
     }
 
     fn sort(&self, metas: &mut Vec<Meta>) {
-        let sorter = sort::create_sorter(&self.flags);
-        metas.sort_unstable_by(|a, b| (sorter)(a, b));
+        metas.sort_unstable_by(|a, b| (self.sorter)(a, b));
 
         for meta in metas {
             if let Some(ref mut content) = meta.content {
