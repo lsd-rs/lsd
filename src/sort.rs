@@ -2,7 +2,9 @@ use crate::flags::{DirOrderFlag, Flags, SortFlag, SortOrder};
 use crate::meta::{FileType, Meta};
 use std::cmp::Ordering;
 
-pub fn create_sorter(flags: &Flags) -> Box<dyn Fn(&Meta, &Meta) -> Ordering> {
+pub type Sorter = Box<dyn Fn(&Meta, &Meta) -> Ordering>;
+
+pub fn create_sorter(flags: &Flags) -> Sorter {
     let dir_fn = match flags.directory_order {
         DirOrderFlag::First => with_dirs_first,
         DirOrderFlag::Last => with_dirs_last,
