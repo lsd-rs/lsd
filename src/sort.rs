@@ -2,126 +2,65 @@ use crate::flags::{DirOrderFlag, Flags, SortFlag, SortOrder};
 use crate::meta::{FileType, Meta};
 use std::cmp::Ordering;
 
-pub fn by_meta(a: &Meta, b: &Meta, flags: &Flags) -> Ordering {
-    match flags.sort_by {
-        SortFlag::Name => match flags.directory_order {
-            DirOrderFlag::First => by_name_with_dirs_first(a, b, &flags),
-            DirOrderFlag::None => by_name(a, b, &flags),
-            DirOrderFlag::Last => by_name_with_files_first(a, b, &flags),
-        },
-        SortFlag::Size => match flags.directory_order {
-            DirOrderFlag::First => by_size_with_dirs_first(a, b, &flags),
-            DirOrderFlag::None => by_size(a, b, &flags),
-            DirOrderFlag::Last => by_size_with_files_first(a, b, &flags),
-        },
-        SortFlag::Time => match flags.directory_order {
-            DirOrderFlag::First => by_date_with_dirs_first(a, b, &flags),
-            DirOrderFlag::None => by_date(a, b, &flags),
-            DirOrderFlag::Last => by_date_with_files_first(a, b, &flags),
-        },
-    }
+pub type Sorter = Box<dyn Fn(&Meta, &Meta) -> Ordering>;
+
+pub fn create_sorter(flags: &Flags) -> Sorter {
+    let mut sorters: Vec<(SortOrder, Sorter)> = vec![];
+    match flags.directory_order {
+        DirOrderFlag::First => {
+            sorters.push((SortOrder::Default, Box::new(with_dirs_first)));
+        }
+        DirOrderFlag::Last => {
+            sorters.push((SortOrder::Reverse, Box::new(with_dirs_first)));
+        }
+        DirOrderFlag::None => {}
+    };
+    let other_sort = match flags.sort_by {
+        SortFlag::Name => by_name,
+        SortFlag::Size => by_size,
+        SortFlag::Time => by_date,
+    };
+    sorters.push((flags.sort_order, Box::new(other_sort)));
+
+    Box::new(move |a, b| {
+        for (direction, sorter) in sorters.iter() {
+            match (sorter)(a, b) {
+                Ordering::Equal => continue,
+                ordering => {
+                    return match direction {
+                        SortOrder::Reverse => ordering.reverse(),
+                        SortOrder::Default => ordering,
+                    }
+                }
+            }
+        }
+        Ordering::Equal
+    })
 }
 
-fn by_size(a: &Meta, b: &Meta, flags: &Flags) -> Ordering {
-    if flags.sort_order == SortOrder::Default {
-        b.size.get_bytes().cmp(&a.size.get_bytes())
-    } else {
-        a.size.get_bytes().cmp(&b.size.get_bytes())
-    }
-}
-
-fn by_size_with_dirs_first(a: &Meta, b: &Meta, flags: &Flags) -> Ordering {
+fn with_dirs_first(a: &Meta, b: &Meta) -> Ordering {
     match (a.file_type, b.file_type) {
-        (FileType::Directory { .. }, FileType::Directory { .. }) => by_size(a, b, &flags),
-        (FileType::Directory { .. }, FileType::SymLink { is_dir: true }) => by_size(a, b, &flags),
-        (FileType::SymLink { is_dir: true }, FileType::Directory { .. }) => by_size(a, b, &flags),
+        (FileType::Directory { .. }, FileType::Directory { .. }) => Ordering::Equal,
+        (FileType::Directory { .. }, FileType::SymLink { is_dir: true }) => Ordering::Equal,
+        (FileType::SymLink { is_dir: true }, FileType::Directory { .. }) => Ordering::Equal,
         (FileType::Directory { .. }, _) => Ordering::Less,
         (_, FileType::Directory { .. }) => Ordering::Greater,
         (FileType::SymLink { is_dir: true }, _) => Ordering::Less,
         (_, FileType::SymLink { is_dir: true }) => Ordering::Greater,
-        _ => by_size(a, b, &flags),
+        _ => Ordering::Equal,
     }
 }
 
-fn by_size_with_files_first(a: &Meta, b: &Meta, flags: &Flags) -> Ordering {
-    match (a.file_type, b.file_type) {
-        (FileType::Directory { .. }, FileType::Directory { .. }) => by_size(a, b, &flags),
-        (FileType::Directory { .. }, FileType::SymLink { is_dir: true }) => by_size(a, b, &flags),
-        (FileType::SymLink { is_dir: true }, FileType::Directory { .. }) => by_size(a, b, &flags),
-        (FileType::Directory { .. }, _) => Ordering::Greater,
-        (_, FileType::Directory { .. }) => Ordering::Less,
-        (FileType::SymLink { is_dir: true }, _) => Ordering::Greater,
-        (_, FileType::SymLink { is_dir: true }) => Ordering::Less,
-        _ => by_size(a, b, &flags),
-    }
+fn by_size(a: &Meta, b: &Meta) -> Ordering {
+    b.size.get_bytes().cmp(&a.size.get_bytes())
 }
 
-fn by_name(a: &Meta, b: &Meta, flags: &Flags) -> Ordering {
-    if flags.sort_order == SortOrder::Default {
-        a.name.cmp(&b.name)
-    } else {
-        b.name.cmp(&a.name)
-    }
+fn by_name(a: &Meta, b: &Meta) -> Ordering {
+    a.name.cmp(&b.name)
 }
 
-fn by_name_with_dirs_first(a: &Meta, b: &Meta, flags: &Flags) -> Ordering {
-    match (a.file_type, b.file_type) {
-        (FileType::Directory { .. }, FileType::Directory { .. }) => by_name(a, b, &flags),
-        (FileType::Directory { .. }, FileType::SymLink { is_dir: true }) => by_name(a, b, &flags),
-        (FileType::SymLink { is_dir: true }, FileType::Directory { .. }) => by_name(a, b, &flags),
-        (FileType::Directory { .. }, _) => Ordering::Less,
-        (_, FileType::Directory { .. }) => Ordering::Greater,
-        (FileType::SymLink { is_dir: true }, _) => Ordering::Less,
-        (_, FileType::SymLink { is_dir: true }) => Ordering::Greater,
-        _ => by_name(a, b, &flags),
-    }
-}
-
-fn by_name_with_files_first(a: &Meta, b: &Meta, flags: &Flags) -> Ordering {
-    match (a.file_type, b.file_type) {
-        (FileType::Directory { .. }, FileType::Directory { .. }) => by_name(a, b, &flags),
-        (FileType::Directory { .. }, FileType::SymLink { is_dir: true }) => by_name(a, b, &flags),
-        (FileType::SymLink { is_dir: true }, FileType::Directory { .. }) => by_name(a, b, &flags),
-        (FileType::Directory { .. }, _) => Ordering::Greater,
-        (_, FileType::Directory { .. }) => Ordering::Less,
-        (FileType::SymLink { is_dir: true }, _) => Ordering::Greater,
-        (_, FileType::SymLink { is_dir: true }) => Ordering::Less,
-        _ => by_name(a, b, &flags),
-    }
-}
-
-fn by_date(a: &Meta, b: &Meta, flags: &Flags) -> Ordering {
-    if flags.sort_order == SortOrder::Default {
-        b.date.cmp(&a.date).then(a.name.cmp(&b.name))
-    } else {
-        a.date.cmp(&b.date).then(b.name.cmp(&a.name))
-    }
-}
-
-fn by_date_with_dirs_first(a: &Meta, b: &Meta, flags: &Flags) -> Ordering {
-    match (a.file_type, b.file_type) {
-        (FileType::Directory { .. }, FileType::Directory { .. }) => by_date(a, b, &flags),
-        (FileType::Directory { .. }, FileType::SymLink { is_dir: true }) => by_date(a, b, &flags),
-        (FileType::SymLink { is_dir: true }, FileType::Directory { .. }) => by_date(a, b, &flags),
-        (FileType::Directory { .. }, _) => Ordering::Less,
-        (_, FileType::Directory { .. }) => Ordering::Greater,
-        (FileType::SymLink { is_dir: true }, _) => Ordering::Less,
-        (_, FileType::SymLink { is_dir: true }) => Ordering::Greater,
-        _ => by_date(a, b, &flags),
-    }
-}
-
-fn by_date_with_files_first(a: &Meta, b: &Meta, flags: &Flags) -> Ordering {
-    match (a.file_type, b.file_type) {
-        (FileType::Directory { .. }, FileType::Directory { .. }) => by_date(a, b, &flags),
-        (FileType::Directory { .. }, FileType::SymLink { is_dir: true }) => by_date(a, b, &flags),
-        (FileType::SymLink { is_dir: true }, FileType::Directory { .. }) => by_date(a, b, &flags),
-        (FileType::Directory { .. }, _) => Ordering::Greater,
-        (_, FileType::Directory { .. }) => Ordering::Less,
-        (FileType::SymLink { is_dir: true }, _) => Ordering::Greater,
-        (_, FileType::SymLink { is_dir: true }) => Ordering::Less,
-        _ => by_date(a, b, &flags),
-    }
+fn by_date(a: &Meta, b: &Meta) -> Ordering {
+    b.date.cmp(&a.date).then(a.name.cmp(&b.name))
 }
 
 #[cfg(test)]
@@ -133,7 +72,7 @@ mod tests {
     use tempfile::tempdir;
 
     #[test]
-    fn test_sort_by_meta_by_name_with_dirs_first() {
+    fn test_sort_create_sorter_by_name_with_dirs_first() {
         let tmp_dir = tempdir().expect("failed to create temp dir");
 
         // Create the file;
@@ -150,15 +89,18 @@ mod tests {
         flags.directory_order = DirOrderFlag::First;
 
         //  Sort with the dirs first
-        assert_eq!(by_meta(&meta_a, &meta_z, &flags), Ordering::Greater);
+        let sorter = create_sorter(&flags);
+        assert_eq!((sorter)(&meta_a, &meta_z), Ordering::Greater);
 
         //  Sort with the dirs first (the dirs stay first)
         flags.sort_order = SortOrder::Reverse;
-        assert_eq!(by_meta(&meta_a, &meta_z, &flags), Ordering::Greater);
+
+        let sorter = create_sorter(&flags);
+        assert_eq!((sorter)(&meta_a, &meta_z), Ordering::Greater);
     }
 
     #[test]
-    fn test_sort_by_meta_by_name_with_files_first() {
+    fn test_sort_create_sorter_by_name_with_files_first() {
         let tmp_dir = tempdir().expect("failed to create temp dir");
 
         // Create the file;
@@ -175,14 +117,16 @@ mod tests {
         flags.directory_order = DirOrderFlag::Last;
 
         // Sort with file first
-        assert_eq!(by_meta(&meta_a, &meta_z, &flags), Ordering::Less);
+        let sorter = create_sorter(&flags);
+        assert_eq!((sorter)(&meta_a, &meta_z), Ordering::Less);
 
         // Sort with file first reversed (thie files stay first)
-        assert_eq!(by_meta(&meta_a, &meta_z, &flags), Ordering::Less);
+        let sorter = create_sorter(&flags);
+        assert_eq!((sorter)(&meta_a, &meta_z), Ordering::Less);
     }
 
     #[test]
-    fn test_sort_by_meta_by_name_unordered() {
+    fn test_sort_create_sorter_by_name_unordered() {
         let tmp_dir = tempdir().expect("failed to create temp dir");
 
         // Create the file;
@@ -199,15 +143,18 @@ mod tests {
         flags.directory_order = DirOrderFlag::None;
 
         // Sort by name unordered
-        assert_eq!(by_meta(&meta_a, &meta_z, &flags), Ordering::Less);
+        let sorter = create_sorter(&flags);
+        assert_eq!((sorter)(&meta_a, &meta_z), Ordering::Less);
 
         // Sort by name unordered
         flags.sort_order = SortOrder::Reverse;
-        assert_eq!(by_meta(&meta_a, &meta_z, &flags), Ordering::Greater);
+
+        let sorter = create_sorter(&flags);
+        assert_eq!((sorter)(&meta_a, &meta_z), Ordering::Greater);
     }
 
     #[test]
-    fn test_sort_by_meta_by_name_unordered_2() {
+    fn test_sort_create_sorter_by_name_unordered_2() {
         let tmp_dir = tempdir().expect("failed to create temp dir");
 
         // Create the file;
@@ -224,15 +171,18 @@ mod tests {
         flags.directory_order = DirOrderFlag::None;
 
         // Sort by name unordered
-        assert_eq!(by_meta(&meta_a, &meta_z, &flags), Ordering::Greater);
+        let sorter = create_sorter(&flags);
+        assert_eq!((sorter)(&meta_a, &meta_z), Ordering::Greater);
 
         // Sort by name unordered reversed
         flags.sort_order = SortOrder::Reverse;
-        assert_eq!(by_meta(&meta_a, &meta_z, &flags), Ordering::Less);
+
+        let sorter = create_sorter(&flags);
+        assert_eq!((sorter)(&meta_a, &meta_z), Ordering::Less);
     }
 
     #[test]
-    fn test_sort_by_meta_by_time() {
+    fn test_sort_create_sorter_by_time() {
         let tmp_dir = tempdir().expect("failed to create temp dir");
 
         // Create the file;
@@ -270,10 +220,12 @@ mod tests {
         flags.sort_by = SortFlag::Time;
 
         // Sort by time
-        assert_eq!(by_meta(&meta_a, &meta_z, &flags), Ordering::Less);
+        let sorter = create_sorter(&flags);
+        assert_eq!((sorter)(&meta_a, &meta_z), Ordering::Less);
 
         // Sort by time reversed
         flags.sort_order = SortOrder::Reverse;
-        assert_eq!(by_meta(&meta_a, &meta_z, &flags), Ordering::Greater);
+        let sorter = create_sorter(&flags);
+        assert_eq!((sorter)(&meta_a, &meta_z), Ordering::Greater);
     }
 }
