@@ -1,4 +1,5 @@
 use clap::{ArgMatches, Error, ErrorKind};
+use globset::{Glob, GlobSet, GlobSetBuilder};
 
 #[derive(Clone, Debug)]
 pub struct Flags {
@@ -19,6 +20,7 @@ pub struct Flags {
     pub blocks: Vec<Block>,
     pub no_symlink: bool,
     pub total_size: bool,
+    pub ignore_globs: GlobSet,
 }
 
 impl Flags {
@@ -31,6 +33,11 @@ impl Flags {
         let date_inputs: Vec<&str> = matches.values_of("date").unwrap().collect();
         let dir_order_inputs: Vec<&str> = matches.values_of("group-dirs").unwrap().collect();
         let blocks_inputs: Vec<&str> = matches.values_of("blocks").unwrap().collect();
+        let ignore_globs_inputs: Vec<&str> = if matches.is_present("ignore-glob") {
+            matches.values_of("ignore-glob").unwrap().collect()
+        } else {
+            vec![]
+        };
 
         let display = if matches.is_present("all") {
             Display::DisplayAll
@@ -95,6 +102,24 @@ impl Flags {
         let no_symlink = matches.is_present("no-symlink");
         let total_size = matches.is_present("total-size");
 
+        let mut ignore_globs_builder = GlobSetBuilder::new();
+        for pattern in ignore_globs_inputs {
+            let glob = match Glob::new(pattern) {
+                Ok(g) => g,
+                Err(e) => {
+                    return Err(Error::with_description(&e.to_string(), ErrorKind::ValueValidation));
+                }
+            };
+            ignore_globs_builder.add(glob);
+        }
+
+        let ignore_globs = match ignore_globs_builder.build() {
+            Ok(globs) => globs,
+            Err(e) => {
+                return Err(Error::with_description(&e.to_string(), ErrorKind::ValueValidation));
+            }
+        };
+
         Ok(Self {
             display,
             layout,
@@ -105,6 +130,7 @@ impl Flags {
             sort_order,
             size: SizeFlag::from(size_inputs[size_inputs.len() - 1]),
             blocks: blocks_inputs.into_iter().map(|b| Block::from(b)).collect(),
+            ignore_globs,
             // Take only the last value
             date: if classic_mode {
                 DateFlag::Date
@@ -161,6 +187,7 @@ impl Default for Flags {
             ],
             no_symlink: false,
             total_size: false,
+            ignore_globs: GlobSet::empty(),
         }
     }
 }
