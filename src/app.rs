@@ -199,4 +199,13 @@ pub fn build() -> App<'static, 'static> {
                 .multiple(true)
                 .help("Do not display symlink target"),
         )
+        .arg(
+            Arg::with_name("ignore-glob")
+                .short("I")
+                .long("ignore-glob")
+                .multiple(true)
+                .number_of_values(1)
+                .value_name("pattern")
+                .help("Do not display paths matching the glob pattern(s)"),
+        )
 }
