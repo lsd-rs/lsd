@@ -1,12 +1,13 @@
 use clap::{ArgMatches, Error, ErrorKind};
 
+
 #[derive(Clone, Debug)]
 pub struct Flags {
     pub display: Display,
     pub layout: Layout,
     pub display_indicators: bool,
     pub recursive: bool,
-    pub sort_by: SortFlag,
+    pub sort_by: Vec<SortFlag>,
     pub sort_order: SortOrder,
     pub directory_order: DirOrderFlag,
     pub size: SizeFlag,
@@ -42,13 +43,27 @@ impl Flags {
             Display::DisplayOnlyVisible
         };
 
-        let sort_by = if matches.is_present("timesort") {
-            SortFlag::Time
-        } else if matches.is_present("sizesort") {
-            SortFlag::Size
+        let sort_by: Vec<SortFlag> = if matches.is_present("sort") {
+            matches
+                .values_of("sort")
+                .unwrap()
+                .map(|opt| match opt {
+                    "name" => SortFlag::Name,
+                    "size" => SortFlag::Size,
+                    "time" => SortFlag::Time,
+                    unknown => panic!("Unknown attribute: {} passed to sort valid attributes are [name, time, size]", unknown)
+                })
+            .collect()
         } else {
-            SortFlag::Name
+            vec![if matches.is_present("timesort") {
+                SortFlag::Time
+            } else if matches.is_present("sizesort") {
+                SortFlag::Size
+            } else {
+                SortFlag::Name
+            }]
         };
+
         let sort_order = if matches.is_present("reverse") {
             SortOrder::Reverse
         } else {
@@ -142,7 +157,7 @@ impl Default for Flags {
             display_indicators: false,
             recursive: false,
             recursion_depth: usize::max_value(),
-            sort_by: SortFlag::Name,
+            sort_by: vec![SortFlag::Name],
             sort_order: SortOrder::Default,
             directory_order: DirOrderFlag::None,
             size: SizeFlag::Default,

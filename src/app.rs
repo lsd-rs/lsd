@@ -1,4 +1,4 @@
-use clap::{App, Arg};
+use clap::{App, Arg, ArgGroup};
 
 pub fn build() -> App<'static, 'static> {
     App::new("lsd")
@@ -151,6 +151,7 @@ pub fn build() -> App<'static, 'static> {
                 .short("t")
                 .long("timesort")
                 .multiple(true)
+                .group("single_sort")
                 .help("Sort by time modified"),
         )
         .arg(
@@ -158,6 +159,7 @@ pub fn build() -> App<'static, 'static> {
                 .short("S")
                 .long("sizesort")
                 .multiple(true)
+                .group("single_sort")
                 .help("Sort by size"),
         )
         .arg(
@@ -165,6 +167,7 @@ pub fn build() -> App<'static, 'static> {
                 .short("r")
                 .long("reverse")
                 .multiple(true)
+                .group("single_sort")
                 .help("Reverse the order of the sort"),
         )
         .arg(
@@ -198,5 +201,16 @@ pub fn build() -> App<'static, 'static> {
                 .long("no-symlink")
                 .multiple(true)
                 .help("Do not display symlink target"),
+        )
+        .arg(
+            Arg::with_name("sort")
+                .long("sort")
+                .use_delimiter(true)
+                .require_equals(true)
+                .help("Sort by specifying order of attributes separated by \",\" [possible attributes: name, time, size]")
+        )
+        .group(
+            ArgGroup::with_name("single_sort")
+                .conflicts_with("sort")
         )
 }

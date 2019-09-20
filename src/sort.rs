@@ -21,8 +21,9 @@ pub fn create_sorter(flags: &Flags) -> Sorter {
         _ => {},
     };
 
-    // Map dir flags to Vec of functions
-    sorters.push((find_sorter(&flags.sort_by), is_reverse));
+    for sort_type in &flags.sort_by {
+        sorters.push((find_sorter(sort_type), is_reverse));
+    }
 
     Box::new(
         move |a, b| {
