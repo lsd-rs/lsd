@@ -4,48 +4,41 @@ use std::cmp::Ordering;
 
 pub type Sorter = Box<dyn Fn(&Meta, &Meta) -> Ordering>;
 
+fn find_sorter(flag: &SortFlag) -> Sorter {
+    match flag {
+        SortFlag::Name => Box::new(by_name),
+        SortFlag::Size => Box::new(by_size),
+        SortFlag::Time => Box::new(by_date),
+    }
+}
+
 pub fn create_sorter(flags: &Flags) -> Sorter {
-    let dir_fn = match flags.directory_order {
-        DirOrderFlag::First => with_dirs_first,
-        DirOrderFlag::Last => with_dirs_last,
-        DirOrderFlag::None => noop,
+    let mut sorters: Vec<(Sorter, bool)> = Vec::new();
+    let is_reverse = flags.sort_order == SortOrder::Reverse;
+    match flags.directory_order {
+        DirOrderFlag::First => sorters.push((Box::new(by_dirs), false)),
+        DirOrderFlag::Last => sorters.push((Box::new(by_dirs), true)),
+        _ => {},
     };
 
     // Map dir flags to Vec of functions
-    let other_sort = match flags.sort_by {
-        SortFlag::Name => by_name,
-        SortFlag::Size => by_size,
-        SortFlag::Time => by_date,
-    };
-
-    let sorters = [other_sort];
-    let reverse = flags.sort_order == SortOrder::Reverse;
+    sorters.push((find_sorter(&flags.sort_by), is_reverse));
 
     Box::new(
         move |a, b| {
-            match (dir_fn)(a, b) {
-                Ordering::Equal => {},
-                Ordering::Greater => return Ordering::Greater,
-                Ordering::Less => return Ordering::Less,
-            };
-
-            for sorter in sorters.iter() {
+            for (sorter, is_reverse) in sorters.iter() {
                 match (sorter)(a, b) {
                     Ordering::Equal => continue,
-                    Ordering::Greater => {
-                        if reverse {
-                            return Ordering::Less
+                    order => {
+                        if *is_reverse {
+                            return match order {
+                                Ordering::Less => Ordering::Greater,
+                                Ordering::Greater => Ordering::Less,
+                                equal => equal,
+                            }
                         } else {
-                            return Ordering::Greater
+                            return order
                         }
-                    },
-                    Ordering::Less => {
-                        if reverse {
-                            return Ordering::Greater
-                        } else {
-                            return Ordering::Less
-                        }
-
                     },
                 }
             }
@@ -54,24 +47,11 @@ pub fn create_sorter(flags: &Flags) -> Sorter {
 }
 
 
-fn noop(_: &Meta, _: &Meta) -> Ordering {
-    Ordering::Equal
-}
-
-fn with_dirs_first(a: &Meta, b: &Meta) -> Ordering {
+fn by_dirs(a: &Meta, b: &Meta) -> Ordering {
     match (a.file_type, b.file_type) {
         (FileType::Directory { .. }, FileType::Directory { .. }) => Ordering::Equal,
         (FileType::Directory { .. }, _) => Ordering::Less,
         (_, FileType::Directory { .. }) => Ordering::Greater,
-        (_, _) => Ordering::Equal,
-    }
-}
-
-fn with_dirs_last(a: &Meta, b: &Meta) -> Ordering {
-    match (a.file_type, b.file_type) {
-        (FileType::Directory { .. }, FileType::Directory { .. }) => Ordering::Equal,
-        (FileType::Directory { .. }, _) => Ordering::Greater,
-        (_, FileType::Directory { .. }) => Ordering::Less,
         (_, _) => Ordering::Equal,
     }
 }
