@@ -12,6 +12,7 @@ pub struct Flags {
     pub size: SizeFlag,
     pub date: DateFlag,
     pub color: WhenFlag,
+    pub prefix_indent: bool,
     pub icon: WhenFlag,
     pub icon_theme: IconTheme,
     pub recursion_depth: usize,
@@ -117,6 +118,7 @@ impl Flags {
             } else {
                 WhenFlag::from(color_inputs[color_inputs.len() - 1])
             },
+            prefix_indent: matches.is_present("prefix-indent"),
             icon: if classic_mode {
                 WhenFlag::Never
             } else {
@@ -149,6 +151,7 @@ impl Default for Flags {
             size: SizeFlag::Default,
             date: DateFlag::Date,
             color: WhenFlag::Auto,
+            prefix_indent: false,
             icon: WhenFlag::Auto,
             icon_theme: IconTheme::Fancy,
             blocks: vec![
