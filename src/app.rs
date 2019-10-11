@@ -207,6 +207,6 @@ pub fn build() -> App<'static, 'static> {
                 .number_of_values(1)
                 .value_name("pattern")
                 .default_value("")
-                .help("Do not display paths matching the glob pattern(s)"),
+                .help("Do not display files/directories with names matching the glob pattern(s)"),
         )
 }
