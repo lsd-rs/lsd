@@ -33,11 +33,7 @@ impl Flags {
         let date_inputs: Vec<&str> = matches.values_of("date").unwrap().collect();
         let dir_order_inputs: Vec<&str> = matches.values_of("group-dirs").unwrap().collect();
         let blocks_inputs: Vec<&str> = matches.values_of("blocks").unwrap().collect();
-        let ignore_globs_inputs: Vec<&str> = if matches.is_present("ignore-glob") {
-            matches.values_of("ignore-glob").unwrap().collect()
-        } else {
-            vec![]
-        };
+        let ignore_globs_inputs: Vec<&str> = matches.values_of("ignore-glob").unwrap().collect();
 
         let display = if matches.is_present("all") {
             Display::DisplayAll
