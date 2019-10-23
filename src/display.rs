@@ -387,7 +387,7 @@ fn detect_size_lengths(metas: &[Meta], flags: &Flags) -> (usize, usize) {
     let mut max_unit_size: usize = 0;
 
     for meta in metas {
-        let value_len = meta.size.size_string(flags).len();
+        let value_len = meta.size.value_string(flags).len();
         let unit_len = meta.size.unit_string(&flags).len();
 
         if value_len > max_value_length {
