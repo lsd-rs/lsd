@@ -1,5 +1,5 @@
 use crate::color::Colors;
-use crate::flags::{Block, Display, Flags, Layout};
+use crate::flags::{Block, Display, Flags};
 use crate::icon::Icons;
 use crate::meta::{FileType, Meta};
 use ansi_term::{ANSIString, ANSIStrings};
@@ -57,12 +57,7 @@ fn inner_display_one_line(
             output.push_str("    ");
         }
 
-        if let Layout::OneLine { long: true } = flags.layout {
-            output += &get_long_output(&meta, &colors, &icons, &flags, &padding_rules);
-        } else {
-            output += &get_short_output(&meta, &colors, &icons, &flags);
-        }
-
+        output += &get_output(&meta, &colors, &icons, &flags, &padding_rules);
         output.push('\n');
     }
 
@@ -98,6 +93,8 @@ fn inner_display_grid(
 ) -> String {
     let mut output = String::new();
 
+    let padding_rules = get_padding_rules(&metas, flags, icons);
+
     let mut grid = Grid::new(GridOptions {
         filling: Filling::Spaces(2),
         direction: Direction::TopToBottom,
@@ -115,7 +112,7 @@ fn inner_display_grid(
             continue;
         }
 
-        let line_output = get_short_output(&meta, &colors, &icons, &flags);
+        let line_output = get_output(&meta, &colors, &icons, &flags, &padding_rules);
         grid.add(Cell {
             width: get_visible_width(&line_output),
             contents: line_output,
@@ -185,11 +182,7 @@ fn inner_display_tree(
             output += " ";
         }
 
-        if let Layout::Tree { long: true } = flags.layout {
-            output += &get_long_output(&meta, &colors, &icons, &flags, &padding_rules);
-        } else {
-            output += &get_short_output(&meta, &colors, &icons, &flags);
-        }
+        output += &get_output(&meta, &colors, &icons, &flags, &padding_rules);
         output += "\n";
 
         if meta.content.is_some() {
@@ -242,16 +235,7 @@ fn display_folder_path(meta: &Meta) -> String {
     output
 }
 
-fn get_short_output(meta: &Meta, colors: &Colors, icons: &Icons, flags: &Flags) -> String {
-    let strings: &[ANSIString] = &[
-        meta.name.render(colors, icons),
-        meta.indicator.render(&flags),
-    ];
-
-    ANSIStrings(strings).to_string()
-}
-
-fn get_long_output(
+fn get_output(
     meta: &Meta,
     colors: &Colors,
     icons: &Icons,

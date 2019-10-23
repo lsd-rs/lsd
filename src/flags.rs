@@ -18,7 +18,6 @@ pub struct Flags {
     pub icon_theme: IconTheme,
     pub recursion_depth: usize,
     pub blocks: Vec<Block>,
-    pub no_symlink: bool,
     pub total_size: bool,
     pub ignore_globs: GlobSet,
 }
@@ -32,8 +31,12 @@ impl Flags {
         let size_inputs: Vec<&str> = matches.values_of("size").unwrap().collect();
         let date_inputs: Vec<&str> = matches.values_of("date").unwrap().collect();
         let dir_order_inputs: Vec<&str> = matches.values_of("group-dirs").unwrap().collect();
-        let blocks_inputs: Vec<&str> = matches.values_of("blocks").unwrap().collect();
         let ignore_globs_inputs: Vec<&str> = matches.values_of("ignore-glob").unwrap().collect();
+        let blocks_inputs: Vec<&str> = if let Some(blocks) = matches.values_of("blocks") {
+            blocks.collect()
+        } else {
+            vec![]
+        };
 
         let display = if matches.is_present("all") {
             Display::DisplayAll
@@ -52,38 +55,36 @@ impl Flags {
         } else {
             SortFlag::Name
         };
+
         let sort_order = if matches.is_present("reverse") {
             SortOrder::Reverse
         } else {
             SortOrder::Default
         };
+
         let layout = if matches.is_present("tree") {
-            Layout::Tree {
-                long: matches.is_present("long"),
-            }
+            Layout::Tree
         } else if matches.is_present("long") {
-            Layout::OneLine { long: true }
+            Layout::OneLine
         } else if matches.is_present("oneline") {
-            Layout::OneLine { long: false }
+            Layout::OneLine
+        } else if blocks_inputs.len() > 1 {
+            Layout::OneLine
         } else {
             Layout::Grid
         };
+
         let recursive = matches.is_present("recursive");
-        let recursion_input = matches.values_of("depth").and_then(|values| values.last());
-        let recursion_depth = match recursion_input {
-            Some(str) if recursive || layout == Layout::Tree {
-                long: matches.is_present("long"),
-            } => {
-                match str.parse::<usize>() {
-                    Ok(val) => val,
-                    Err(_) => {
-                        return Err(Error::with_description(
-                            "The argument '--depth' requires a valid positive number",
-                            ErrorKind::ValueValidation,
-                        ));
-                    }
+        let recursion_depth = match matches.value_of("depth") {
+            Some(str) if recursive || layout == Layout::Tree => match str.parse::<usize>() {
+                Ok(val) => val,
+                Err(_) => {
+                    return Err(Error::with_description(
+                        "The argument '--depth' requires a valid positive number",
+                        ErrorKind::ValueValidation,
+                    ));
                 }
-            }
+            },
             Some(_) => {
                 return Err(Error::with_description(
                     "The argument '--depth' requires '--tree' or '--recursive'",
@@ -92,7 +93,28 @@ impl Flags {
             }
             None => usize::max_value(),
         };
-        let no_symlink = matches.is_present("no-symlink");
+
+        let mut blocks: Vec<Block> = if !blocks_inputs.is_empty() {
+            blocks_inputs.into_iter().map(|b| Block::from(b)).collect()
+        } else if matches.is_present("long") {
+            vec![
+                Block::Permission,
+                Block::User,
+                Block::Group,
+                Block::Size,
+                Block::Date,
+                Block::Name,
+            ]
+        } else {
+            vec![Block::NameWithSymlink]
+        };
+
+        if matches.is_present("no-symlink") {
+            if let Ok(idx) = blocks.binary_search(&Block::NameWithSymlink) {
+                blocks[idx] = Block::Name;
+            }
+        }
+
         let total_size = matches.is_present("total-size");
 
         let mut ignore_globs_builder = GlobSetBuilder::new();
@@ -128,8 +150,8 @@ impl Flags {
             sort_by,
             sort_order,
             size: SizeFlag::from(size_inputs[size_inputs.len() - 1]),
-            blocks: blocks_inputs.into_iter().map(Block::from).collect(),
             ignore_globs,
+            blocks,
             // Take only the last value
             date: if classic_mode {
                 DateFlag::Date
@@ -153,7 +175,6 @@ impl Flags {
             } else {
                 DirOrderFlag::from(dir_order_inputs[dir_order_inputs.len() - 1])
             },
-            no_symlink,
             total_size,
         })
     }
@@ -176,15 +197,7 @@ impl Default for Flags {
             prefix_indent: false,
             icon: WhenFlag::Auto,
             icon_theme: IconTheme::Fancy,
-            blocks: vec![
-                Block::Permission,
-                Block::User,
-                Block::Group,
-                Block::Size,
-                Block::Date,
-                Block::Name,
-            ],
-            no_symlink: false,
+            blocks: vec![],
             total_size: false,
             ignore_globs: GlobSet::empty(),
         }
@@ -331,8 +344,8 @@ impl<'a> From<&'a str> for IconTheme {
 #[derive(Clone, Debug, Copy, PartialEq, Eq)]
 pub enum Layout {
     Grid,
-    Tree { long: bool },
-    OneLine { long: bool },
+    Tree,
+    OneLine,
 }
 
 #[cfg(test)]
@@ -366,7 +379,7 @@ mod test {
     #[test]
     fn test_duplicate_depth() {
         let matches = app::build()
-            .get_matches_from_safe(vec!["lsd",  "--tree", "--depth", "1", "--depth", "2"])
+            .get_matches_from_safe(vec!["lsd", "--tree", "--depth", "1", "--depth", "2"])
             .unwrap();
         let res = Flags::from_matches(&matches);
 
@@ -377,7 +390,7 @@ mod test {
     #[test]
     fn test_missing_depth() {
         let matches = app::build()
-            .get_matches_from_safe(vec!["lsd",  "--tree"])
+            .get_matches_from_safe(vec!["lsd", "--tree"])
             .unwrap();
         let res = Flags::from_matches(&matches);
 

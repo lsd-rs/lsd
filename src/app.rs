@@ -185,8 +185,15 @@ pub fn build() -> App<'static, 'static> {
                 .multiple(true)
                 .number_of_values(1)
                 .require_delimiter(true)
-                .possible_values(&["permission", "user", "group", "size", "date", "name"])
-                .default_value("permission,user,group,size,date,name")
+                .possible_values(&[
+                    "permission",
+                    "user",
+                    "group",
+                    "size",
+                    "date",
+                    "name",
+                    "name-with-symlink",
+                ])
                 .help("Specify the blocks that will be displayed and in what order"),
         )
         .arg(
