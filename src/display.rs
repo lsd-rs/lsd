@@ -24,11 +24,11 @@ struct PaddingRules {
     name_with_symlink: usize,
 }
 
-pub fn one_line(metas: Vec<Meta>, flags: &Flags, colors: &Colors, icons: &Icons) -> String {
+pub fn one_line(metas: &[Meta], flags: &Flags, colors: &Colors, icons: &Icons) -> String {
     inner_display_one_line(metas, &flags, colors, icons, 0)
 }
 
-pub fn grid(metas: Vec<Meta>, flags: &Flags, colors: &Colors, icons: &Icons) -> String {
+pub fn grid(metas: &[Meta], flags: &Flags, colors: &Colors, icons: &Icons) -> String {
     let term_width = match terminal_size() {
         Some((w, _)) => Some(w.0 as usize),
         None => None,
@@ -37,12 +37,12 @@ pub fn grid(metas: Vec<Meta>, flags: &Flags, colors: &Colors, icons: &Icons) -> 
     inner_display_grid(metas, &flags, colors, icons, 0, term_width)
 }
 
-pub fn tree(metas: Vec<Meta>, flags: &Flags, colors: &Colors, icons: &Icons) -> String {
+pub fn tree(metas: &[Meta], flags: &Flags, colors: &Colors, icons: &Icons) -> String {
     inner_display_tree(metas, &flags, colors, icons, 0, "")
 }
 
 fn inner_display_one_line(
-    metas: Vec<Meta>,
+    metas: &[Meta],
     flags: &Flags,
     colors: &Colors,
     icons: &Icons,
@@ -58,7 +58,7 @@ fn inner_display_one_line(
     let skip_dirs = (depth == 0) && (flags.display != Display::DisplayDirectoryItself);
 
     // print the files first.
-    for meta in &metas {
+    for meta in metas {
         // Maybe skip showing the directory meta now; show its contents later.
         if let (true, FileType::Directory { .. }) = (skip_dirs, meta.file_type) {
             continue;
@@ -86,8 +86,13 @@ fn inner_display_one_line(
                 output += &display_folder_path(&meta);
             }
 
-            output +=
-                &inner_display_one_line(meta.content.unwrap(), &flags, colors, icons, depth + 1);
+            output += &inner_display_one_line(
+                meta.content.as_ref().unwrap(),
+                &flags,
+                colors,
+                icons,
+                depth + 1,
+            );
         }
     }
 
@@ -95,7 +100,7 @@ fn inner_display_one_line(
 }
 
 fn inner_display_grid(
-    metas: Vec<Meta>,
+    metas: &[Meta],
     flags: &Flags,
     colors: &Colors,
     icons: &Icons,
@@ -115,7 +120,7 @@ fn inner_display_grid(
     let skip_dirs = (depth == 0) && (flags.display != Display::DisplayDirectoryItself);
 
     // print the files first.
-    for meta in &metas {
+    for meta in metas {
         // Maybe skip showing the directory meta now; show its contents later.
         if let (true, FileType::Directory { .. }) = (skip_dirs, meta.file_type) {
             continue;
@@ -151,7 +156,7 @@ fn inner_display_grid(
             }
 
             output += &inner_display_grid(
-                meta.content.unwrap(),
+                &meta.content.as_ref().unwrap(),
                 &flags,
                 colors,
                 icons,
@@ -165,7 +170,7 @@ fn inner_display_grid(
 }
 
 fn inner_display_tree(
-    metas: Vec<Meta>,
+    metas: &[Meta],
     flags: &Flags,
     colors: &Colors,
     icons: &Icons,
@@ -210,7 +215,7 @@ fn inner_display_tree(
             }
 
             output += &inner_display_tree(
-                meta.content.unwrap(),
+                &meta.content.as_ref().unwrap(),
                 &flags,
                 colors,
                 icons,

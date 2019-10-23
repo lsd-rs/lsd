@@ -71,7 +71,7 @@ impl Core {
         let mut meta_list = self.fetch(paths);
 
         self.sort(&mut meta_list);
-        self.display(meta_list)
+        self.display(&meta_list)
     }
 
     fn fetch(&self, paths: Vec<PathBuf>) -> Vec<Meta> {
@@ -133,13 +133,13 @@ impl Core {
         }
     }
 
-    fn display(&self, metas: Vec<Meta>) {
+    fn display(&self, metas: &[Meta]) {
         let output = match self.flags.layout {
             Layout::OneLine { .. } => {
-                display::one_line(metas, &self.flags, &self.colors, &self.icons)
+                display::one_line(&metas, &self.flags, &self.colors, &self.icons)
             }
-            Layout::Tree { .. } => display::tree(metas, &self.flags, &self.colors, &self.icons),
-            Layout::Grid => display::grid(metas, &self.flags, &self.colors, &self.icons),
+            Layout::Tree { .. } => display::tree(&metas, &self.flags, &self.colors, &self.icons),
+            Layout::Grid => display::grid(&metas, &self.flags, &self.colors, &self.icons),
         };
         print!("{}", output);
     }
