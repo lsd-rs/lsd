@@ -1,5 +1,6 @@
 use crate::color::{ColoredString, Colors, Elem};
 use crate::flags::{Flags, SizeFlag};
+use ansi_term::ANSIStrings;
 use std::fs::Metadata;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -50,47 +51,57 @@ impl Size {
     pub fn render(
         &self,
         colors: &Colors,
-        value_alignment: usize,
-        unit_alignment: usize,
         flags: &Flags,
+        val_alignment: usize,
+        unit_alignment: usize,
     ) -> ColoredString {
-        let mut content = String::with_capacity(value_alignment + unit_alignment + 1);
+        let val_content = self.render_value(colors, flags);
+        let unit_content = self.render_unit(colors, flags);
 
-        let unit = self.get_unit(flags);
-
-        let value_str = self.render_value(&unit);
-        let unit_str = Size::render_unit(&unit, &flags);
-
-        for _ in 0..(value_alignment - value_str.len()) {
-            content.push(' ');
+        let mut left_pad = String::with_capacity(val_alignment - val_content.len());
+        for _ in 0..left_pad.capacity() {
+            left_pad.push(' ');
         }
 
-        content += &self.render_value(&unit);
-        if flags.size == SizeFlag::Default {
-            content.push(' ');
-        }
-        content += &Size::render_unit(&unit, &flags);
-
-        for _ in 0..(unit_alignment - unit_str.len()) {
-            content.push(' ');
+        let mut right_pad = String::with_capacity(unit_alignment - unit_content.len());
+        for _ in 0..right_pad.capacity() {
+            right_pad.push(' ');
         }
 
-        self.paint(&unit, colors, content)
+        let strings: &[ColoredString] = &[
+            ColoredString::from(left_pad),
+            val_content,
+            unit_content,
+            ColoredString::from(right_pad),
+        ];
+
+        let res = ANSIStrings(strings).to_string();
+        ColoredString::from(res)
     }
 
-    fn paint(&self, unit: &Unit, colors: &Colors, content: String) -> ColoredString {
-        if unit == &Unit::None {
+    fn paint(&self, colors: &Colors, flags: &Flags, content: String) -> ColoredString {
+        let unit = self.get_unit(flags);
+
+        if unit == Unit::None {
             colors.colorize(content, &Elem::NonFile)
-        } else if unit == &Unit::Byte || unit == &Unit::Kilo {
+        } else if unit == Unit::Byte || unit == Unit::Kilo {
             colors.colorize(content, &Elem::FileSmall)
-        } else if unit == &Unit::Mega {
+        } else if unit == Unit::Mega {
             colors.colorize(content, &Elem::FileMedium)
         } else {
             colors.colorize(content, &Elem::FileLarge)
         }
     }
 
-    pub fn render_value(&self, unit: &Unit) -> String {
+    pub fn render_value(&self, colors: &Colors, flags: &Flags) -> ColoredString {
+        let content = self.size_string(flags);
+
+        self.paint(colors, flags, content)
+    }
+
+    pub fn size_string(&self, flags: &Flags) -> String {
+        let unit = self.get_unit(flags);
+
         match unit {
             Unit::None => "".to_string(),
             Unit::Byte => self.bytes.to_string(),
@@ -108,7 +119,15 @@ impl Size {
         }
     }
 
-    pub fn render_unit(unit: &Unit, flags: &Flags) -> String {
+    pub fn render_unit(&self, colors: &Colors, flags: &Flags) -> ColoredString {
+        let content = self.unit_string(flags);
+
+        self.paint(colors, flags, content)
+    }
+
+    pub fn unit_string(&self, flags: &Flags) -> String {
+        let unit = self.get_unit(flags);
+
         match flags.size {
             SizeFlag::Default => match unit {
                 Unit::None => String::from("-"),

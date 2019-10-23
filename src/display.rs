@@ -1,7 +1,7 @@
 use crate::color::Colors;
 use crate::flags::{Block, Display, Flags, Layout};
 use crate::icon::Icons;
-use crate::meta::{FileType, Meta, Size};
+use crate::meta::{FileType, Meta};
 use ansi_term::{ANSIString, ANSIStrings};
 use term_grid::{Cell, Direction, Filling, Grid, GridOptions};
 use terminal_size::terminal_size;
@@ -306,10 +306,12 @@ fn get_long_output(
             Block::Group => strings.push(meta.owner.render_group(colors, padding_rules.group)),
             Block::Size => strings.push(meta.size.render(
                 colors,
+                &flags,
                 padding_rules.size_val,
                 padding_rules.size_unit,
-                &flags,
             )),
+            Block::SizeValue => strings.push(meta.size.render_value(colors, flags)),
+            Block::SizeUnit => strings.push(meta.size.render_unit(colors, flags)),
             Block::Date => strings.push(meta.date.render(colors, padding_rules.date, &flags)),
             Block::Name => {
                 if flags.no_symlink {
@@ -413,9 +415,8 @@ fn detect_size_lengths(metas: &[Meta], flags: &Flags) -> (usize, usize) {
     let mut max_unit_size: usize = 0;
 
     for meta in metas {
-        let unit = meta.size.get_unit(flags);
-        let value_len = meta.size.render_value(&unit).len();
-        let unit_len = Size::render_unit(&unit, &flags).len();
+        let value_len = meta.size.size_string(flags).len();
+        let unit_len = meta.size.unit_string(&flags).len();
 
         if value_len > max_value_length {
             max_value_length = value_len;
