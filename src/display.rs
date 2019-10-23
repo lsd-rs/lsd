@@ -3,6 +3,7 @@ use crate::flags::{Block, Display, Flags, Layout};
 use crate::icon::Icons;
 use crate::meta::{FileType, Meta};
 use ansi_term::{ANSIString, ANSIStrings};
+use std::collections::HashMap;
 use term_grid::{Cell, Direction, Filling, Grid, GridOptions};
 use terminal_size::terminal_size;
 use unicode_width::UnicodeWidthStr;
@@ -49,23 +50,7 @@ fn inner_display_one_line(
 ) -> String {
     let mut output = String::new();
 
-    let mut padding_rules = None;
-    if let Layout::OneLine { long: true } = flags.layout {
-        // Defining the padding rules is costly and so shouldn't be done several
-        // times. That's why it's done outside the loop.
-
-        let (size_val, size_unit) = detect_size_lengths(&metas, &flags);
-
-        padding_rules = Some(PaddingRules {
-            user: detect_user_length(&metas),
-            group: detect_group_length(&metas),
-            size_val,
-            size_unit,
-            date: detect_date_length(&metas, &flags),
-            name: detect_name_length(&metas, &icons, &flags),
-            name_with_symlink: detect_name_with_symlink_length(&metas, &icons, &flags),
-        })
-    }
+    let padding_rules = get_padding_rules(&metas, flags, icons);
 
     // The first iteration (depth == 0) corresponds to the inputs given by the
     // user. We defer displaying directories given by the user unless we've been
@@ -84,7 +69,7 @@ fn inner_display_one_line(
         }
 
         if let Layout::OneLine { long: true } = flags.layout {
-            output += &get_long_output(&meta, &colors, &icons, &flags, padding_rules.unwrap());
+            output += &get_long_output(&meta, &colors, &icons, &flags, &padding_rules);
         } else {
             output += &get_short_output(&meta, &colors, &icons, &flags);
         }
@@ -190,23 +175,7 @@ fn inner_display_tree(
     let mut output = String::new();
     let last_idx = metas.len();
 
-    let mut padding_rules = None;
-    if let Layout::Tree { long: true } = flags.layout {
-        // Defining the padding rules is costly and so shouldn't be done several
-        // times. That's why it's done outside the loop.
-
-        let (size_val, size_unit) = detect_size_lengths(&metas, &flags);
-
-        padding_rules = Some(PaddingRules {
-            user: detect_user_length(&metas),
-            group: detect_group_length(&metas),
-            size_val,
-            size_unit,
-            date: detect_date_length(&metas, flags),
-            name: detect_name_length(&metas, &icons, &flags),
-            name_with_symlink: detect_name_with_symlink_length(&metas, &icons, &flags),
-        })
-    }
+    let padding_rules = get_padding_rules(&metas, flags, icons);
 
     for (idx, meta) in metas.into_iter().enumerate() {
         let is_last_folder_elem = idx + 1 != last_idx;
@@ -223,7 +192,7 @@ fn inner_display_tree(
         }
 
         if let Layout::Tree { long: true } = flags.layout {
-            output += &get_long_output(&meta, &colors, &icons, &flags, padding_rules.unwrap());
+            output += &get_long_output(&meta, &colors, &icons, &flags, &padding_rules);
         } else {
             output += &get_short_output(&meta, &colors, &icons, &flags);
         }
@@ -293,7 +262,7 @@ fn get_long_output(
     colors: &Colors,
     icons: &Icons,
     flags: &Flags,
-    padding_rules: PaddingRules,
+    padding_rules: &HashMap<Block, usize>,
 ) -> String {
     let mut strings: Vec<ANSIString> = Vec::new();
     for block in flags.blocks.iter() {
@@ -302,50 +271,59 @@ fn get_long_output(
                 strings.push(meta.file_type.render(colors));
                 strings.push(meta.permissions.render(colors));
             }
-            Block::User => strings.push(meta.owner.render_user(colors, padding_rules.user)),
-            Block::Group => strings.push(meta.owner.render_group(colors, padding_rules.group)),
+            Block::User => {
+                strings.push(meta.owner.render_user(colors, padding_rules[&Block::User]))
+            }
+            Block::Group => strings.push(
+                meta.owner
+                    .render_group(colors, padding_rules[&Block::Group]),
+            ),
             Block::Size => strings.push(meta.size.render(
                 colors,
                 &flags,
-                padding_rules.size_val,
-                padding_rules.size_unit,
+                padding_rules[&Block::SizeValue],
+                padding_rules[&Block::SizeUnit],
             )),
             Block::SizeValue => strings.push(meta.size.render_value(colors, flags)),
             Block::SizeUnit => strings.push(meta.size.render_unit(colors, flags)),
-            Block::Date => strings.push(meta.date.render(colors, padding_rules.date, &flags)),
+            Block::Date => strings.push(meta.date.render(
+                colors,
+                padding_rules[&Block::Date],
+                &flags,
+            )),
             Block::Name => {
-                if flags.no_symlink {
-                    strings.push(meta.name.render(colors, icons));
-                    strings.push(meta.indicator.render(&flags));
-                    strings.push(ANSIString::from(" ".to_string().repeat(
-                        padding_rules.name
-                            - meta.indicator.len(&flags)
-                            - meta.name.name_string(icons).len(),
-                    )))
-                } else {
-                    match meta.symlink.symlink_string() {
-                        Some(s) => {
-                            strings.push(meta.name.render(colors, icons));
-                            strings.push(meta.indicator.render(&flags));
-                            strings.push(meta.symlink.render(colors));
-                            strings.push(ANSIString::from(" ".to_string().repeat(
-                                padding_rules.name_with_symlink
+                strings.push(meta.name.render(colors, icons));
+                strings.push(meta.indicator.render(&flags));
+                strings.push(ANSIString::from(" ".to_string().repeat(
+                    padding_rules[&Block::Name]
+                        - meta.indicator.len(&flags)
+                        - meta.name.name_string(icons).len(),
+                )))
+            }
+            Block::NameWithSymlink => {
+                match meta.symlink.symlink_string() {
+                    Some(s) => {
+                        strings.push(meta.name.render(colors, icons));
+                        strings.push(meta.indicator.render(&flags));
+                        strings.push(meta.symlink.render(colors));
+                        strings.push(ANSIString::from(" ".to_string().repeat(
+                            padding_rules[&Block::NameWithSymlink]
+                                //padding_rules.name_with_symlink
                                     - 3 //  3 = ( arrow + 2 spaces) for symlink;
                                     - meta.name.name_string(icons).len()
                                     - meta.indicator.len(&flags)
                                     - s.len(),
-                            )))
-                        }
-                        None => {
-                            strings.push(meta.name.render(colors, icons));
-                            strings.push(meta.indicator.render(&flags));
-                            strings.push(meta.symlink.render(colors));
-                            strings.push(ANSIString::from(" ".to_string().repeat(
-                                padding_rules.name_with_symlink
-                                    - meta.name.name_string(icons).len()
-                                    - meta.indicator.len(&flags),
-                            )))
-                        }
+                        )))
+                    }
+                    None => {
+                        strings.push(meta.name.render(colors, icons));
+                        strings.push(meta.indicator.render(&flags));
+                        strings.push(meta.symlink.render(colors));
+                        strings.push(ANSIString::from(" ".to_string().repeat(
+                            padding_rules[&Block::NameWithSymlink]
+                                - meta.name.name_string(icons).len()
+                                - meta.indicator.len(&flags),
+                        )))
                     }
                 }
             }
@@ -457,6 +435,38 @@ fn detect_name_with_symlink_length(metas: &[Meta], icons: &Icons, flags: &Flags)
     }
 
     max_value_length
+}
+
+fn get_padding_rules(metas: &[Meta], flags: &Flags, icons: &Icons) -> HashMap<Block, usize> {
+    let mut padding_rules: HashMap<Block, usize> = HashMap::new();
+
+    for block in flags.blocks.iter() {
+        match block {
+            Block::SizeValue => None,
+            Block::Permission => padding_rules.insert(Block::Permission, 10),
+            Block::SizeUnit => None,
+            Block::User => padding_rules.insert(Block::User, detect_user_length(&metas)),
+            Block::Group => padding_rules.insert(Block::Group, detect_group_length(&metas)),
+            Block::Date => padding_rules.insert(Block::Date, detect_date_length(&metas, &flags)),
+            Block::Name => {
+                padding_rules.insert(Block::Name, detect_name_length(&metas, &icons, &flags))
+            }
+            Block::NameWithSymlink => padding_rules.insert(
+                Block::Name,
+                detect_name_with_symlink_length(&metas, &icons, &flags),
+            ),
+            Block::Size => {
+                let (size_val, size_unit) = detect_size_lengths(&metas, &flags);
+
+                padding_rules.insert(Block::SizeValue, size_val);
+                padding_rules.insert(Block::SizeUnit, size_unit);
+
+                None
+            }
+        };
+    }
+
+    padding_rules
 }
 
 #[cfg(test)]

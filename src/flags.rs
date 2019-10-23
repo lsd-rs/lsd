@@ -191,7 +191,7 @@ impl Default for Flags {
     }
 }
 
-#[derive(Clone, Debug, Copy, PartialEq, Eq)]
+#[derive(Clone, Debug, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub enum Block {
     // FileType,
     Permission,
@@ -202,6 +202,7 @@ pub enum Block {
     SizeUnit,
     Date,
     Name,
+    NameWithSymlink,
 }
 impl<'a> From<&'a str> for Block {
     fn from(block: &'a str) -> Self {
@@ -215,6 +216,7 @@ impl<'a> From<&'a str> for Block {
             "size_unit" => Block::SizeUnit,
             "date" => Block::Date,
             "name" => Block::Name,
+            "name-with-sym" => Block::NameWithSymlink,
             _ => panic!("invalid \"time\" flag: {}", block),
         }
     }
