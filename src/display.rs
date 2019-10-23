@@ -13,17 +13,6 @@ const LINE: &str = "\u{2502}  "; // "├  "
 const CORNER: &str = "\u{2514}\u{2500}\u{2500}"; // "└──"
 const BLANK: &str = "   ";
 
-#[derive(Debug, Copy, Clone)]
-struct PaddingRules {
-    user: usize,
-    group: usize,
-    size_val: usize,
-    size_unit: usize,
-    date: usize,
-    name: usize,
-    name_with_symlink: usize,
-}
-
 pub fn one_line(metas: &[Meta], flags: &Flags, colors: &Colors, icons: &Icons) -> String {
     inner_display_one_line(metas, &flags, colors, icons, 0)
 }
