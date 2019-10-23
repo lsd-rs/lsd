@@ -16,7 +16,8 @@ const BLANK: &str = "   ";
 struct PaddingRules {
     user: usize,
     group: usize,
-    size: (usize, usize),
+    size_val: usize,
+    size_unit: usize,
     date: usize,
     name: usize,
     name_with_symlink: usize,
@@ -52,10 +53,14 @@ fn inner_display_one_line(
     if let Layout::OneLine { long: true } = flags.layout {
         // Defining the padding rules is costly and so shouldn't be done several
         // times. That's why it's done outside the loop.
+
+        let (size_val, size_unit) = detect_size_lengths(&metas, &flags);
+
         padding_rules = Some(PaddingRules {
             user: detect_user_length(&metas),
             group: detect_group_length(&metas),
-            size: detect_size_lengths(&metas, &flags),
+            size_val,
+            size_unit,
             date: detect_date_length(&metas, &flags),
             name: detect_name_length(&metas, &icons, &flags),
             name_with_symlink: detect_name_with_symlink_length(&metas, &icons, &flags),
@@ -189,10 +194,14 @@ fn inner_display_tree(
     if let Layout::Tree { long: true } = flags.layout {
         // Defining the padding rules is costly and so shouldn't be done several
         // times. That's why it's done outside the loop.
+
+        let (size_val, size_unit) = detect_size_lengths(&metas, &flags);
+
         padding_rules = Some(PaddingRules {
             user: detect_user_length(&metas),
             group: detect_group_length(&metas),
-            size: detect_size_lengths(&metas, flags),
+            size_val,
+            size_unit,
             date: detect_date_length(&metas, flags),
             name: detect_name_length(&metas, &icons, &flags),
             name_with_symlink: detect_name_with_symlink_length(&metas, &icons, &flags),
@@ -297,8 +306,8 @@ fn get_long_output(
             Block::Group => strings.push(meta.owner.render_group(colors, padding_rules.group)),
             Block::Size => strings.push(meta.size.render(
                 colors,
-                padding_rules.size.0,
-                padding_rules.size.1,
+                padding_rules.size_val,
+                padding_rules.size_unit,
                 &flags,
             )),
             Block::Date => strings.push(meta.date.render(colors, padding_rules.date, &flags)),
