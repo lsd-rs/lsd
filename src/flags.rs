@@ -198,6 +198,8 @@ pub enum Block {
     User,
     Group,
     Size,
+    SizeValue,
+    SizeUnit,
     Date,
     Name,
 }
@@ -209,6 +211,8 @@ impl<'a> From<&'a str> for Block {
             "user" => Block::User,
             "group" => Block::Group,
             "size" => Block::Size,
+            "size_value" => Block::SizeValue,
+            "size_unit" => Block::SizeUnit,
             "date" => Block::Date,
             "name" => Block::Name,
             _ => panic!("invalid \"time\" flag: {}", block),
