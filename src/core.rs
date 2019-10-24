@@ -134,13 +134,12 @@ impl Core {
     }
 
     fn display(&self, metas: &[Meta]) {
-        let output = match self.flags.layout {
-            Layout::OneLine { .. } => {
-                display::one_line(&metas, &self.flags, &self.colors, &self.icons)
-            }
-            Layout::Tree { .. } => display::tree(&metas, &self.flags, &self.colors, &self.icons),
-            Layout::Grid => display::grid(&metas, &self.flags, &self.colors, &self.icons),
+        let output = if self.flags.layout == Layout::Tree {
+            display::tree(&metas, &self.flags, &self.colors, &self.icons)
+        } else {
+            display::grid(&metas, &self.flags, &self.colors, &self.icons)
         };
+
         print!("{}", output);
     }
 }
