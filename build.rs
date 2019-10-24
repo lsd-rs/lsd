@@ -19,7 +19,7 @@ include!("src/app.rs");
 
 fn main() {
     match version_check::is_min_version("1.31.0") {
-        Some((true, _)) => {}
+        Some(true) => {}
         // rustc version too small or can't figure it out
         _ => {
             writeln!(&mut io::stderr(), "'lsd' requires rustc >= 1.31.0").unwrap();
