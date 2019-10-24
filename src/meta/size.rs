@@ -48,13 +48,7 @@ impl Size {
         }
     }
 
-    pub fn render(
-        &self,
-        colors: &Colors,
-        flags: &Flags,
-        val_alignment: usize,
-        unit_alignment: usize,
-    ) -> ColoredString {
+    pub fn render(&self, colors: &Colors, flags: &Flags, val_alignment: usize) -> ColoredString {
         let val_content = self.render_value(colors, flags);
         let unit_content = self.render_unit(colors, flags);
 
@@ -63,16 +57,11 @@ impl Size {
             left_pad.push(' ');
         }
 
-        let mut right_pad = String::with_capacity(unit_alignment - unit_content.len());
-        for _ in 0..right_pad.capacity() {
-            right_pad.push(' ');
-        }
-
         let strings: &[ColoredString] = &[
             ColoredString::from(left_pad),
             val_content,
+            ColoredString::from(" "),
             unit_content,
-            ColoredString::from(right_pad),
         ];
 
         let res = ANSIStrings(strings).to_string();
