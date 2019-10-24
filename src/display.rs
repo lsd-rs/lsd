@@ -129,8 +129,22 @@ fn inner_display_tree(
 
     let mut grid = Grid::new(GridOptions {
         filling: Filling::Spaces(2),
-        direction: Direction::TopToBottom,
+        direction: Direction::LeftToRight,
     });
+
+    for meta in metas.into_iter() {
+        for block in get_output(&meta, &colors, &icons, &flags, &padding_rules) {
+            let block_str = block.to_string();
+
+            grid.add(Cell {
+                width: get_visible_width(&block_str),
+                contents: block_str,
+            });
+        }
+    }
+
+    let content = grid.fit_into_columns(flags.blocks.len()).to_string();
+    let mut lines = content.lines();
 
     for (idx, meta) in metas.into_iter().enumerate() {
         let is_last_folder_elem = idx + 1 != last_idx;
@@ -146,14 +160,8 @@ fn inner_display_tree(
             output += " ";
         }
 
-        for block in get_output(&meta, &colors, &icons, &flags, &padding_rules) {
-            let block_str = block.to_string();
-
-            grid.add(Cell {
-                width: get_visible_width(&block_str),
-                contents: block_str,
-            });
-        }
+        output += lines.next().unwrap().clone();
+        output += "\n";
 
         if meta.content.is_some() {
             let mut new_prefix = String::from(prefix);
