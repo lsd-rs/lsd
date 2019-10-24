@@ -39,7 +39,7 @@ fn inner_display_one_line(
 ) -> String {
     let mut output = String::new();
 
-    let padding_rules = get_padding_rules(&metas, flags, icons);
+    let padding_rules = get_padding_rules(&metas, flags);
     let mut grid = Grid::new(GridOptions {
         filling: Filling::Spaces(1),
         direction: Direction::LeftToRight,
@@ -107,7 +107,7 @@ fn inner_display_grid(
 ) -> String {
     let mut output = String::new();
 
-    let padding_rules = get_padding_rules(&metas, flags, icons);
+    let padding_rules = get_padding_rules(&metas, flags);
 
     let mut grid = Grid::new(GridOptions {
         filling: Filling::Spaces(2),
@@ -183,7 +183,7 @@ fn inner_display_tree(
     let mut output = String::new();
     let last_idx = metas.len();
 
-    let padding_rules = get_padding_rules(&metas, flags, icons);
+    let padding_rules = get_padding_rules(&metas, flags);
 
     let mut grid = Grid::new(GridOptions {
         filling: Filling::Spaces(2),
@@ -290,60 +290,25 @@ fn get_output<'a>(
             )),
             Block::SizeValue => strings.push(meta.size.render_value(colors, flags)),
             Block::SizeUnit => strings.push(meta.size.render_unit(colors, flags)),
-            Block::Date => strings.push(meta.date.render(
-                colors,
-                padding_rules[&Block::Date],
-                &flags,
-            )),
+            Block::Date => strings.push(meta.date.render(colors, &flags)),
             Block::Name => {
                 let s: &[ColoredString] = &[
                     meta.name.render(colors, icons),
                     meta.indicator.render(&flags),
-                    ANSIString::from(" ".to_string().repeat(
-                        padding_rules[&Block::Name]
-                            - meta.indicator.len(&flags)
-                            - meta.name.name_string(icons).len(),
-                    )),
                 ];
 
                 let res = ANSIStrings(s).to_string();
                 strings.push(ColoredString::from(res));
             }
             Block::NameWithSymlink => {
-                match meta.symlink.symlink_string() {
-                    Some(s) => {
-                        let s2: &[ColoredString] = &[
-                            meta.name.render(colors, icons),
-                            meta.indicator.render(&flags),
-                            meta.symlink.render(colors),
-                            ANSIString::from(" ".to_string().repeat(
-                                padding_rules[&Block::NameWithSymlink]
-                        - 3 //  3 = ( arrow + 2 spaces) for symlink;
-                        - meta.name.name_string(icons).len()
-                        - meta.indicator.len(&flags)
-                        - s.len(),
-                            )),
-                        ];
+                let s2: &[ColoredString] = &[
+                    meta.name.render(colors, icons),
+                    meta.indicator.render(&flags),
+                    meta.symlink.render(colors),
+                ];
 
-                        let res = ANSIStrings(s2).to_string();
-                        strings.push(ColoredString::from(res));
-                    }
-                    None => {
-                        let s: &[ColoredString] = &[
-                            meta.name.render(colors, icons),
-                            meta.indicator.render(&flags),
-                            meta.symlink.render(colors),
-                            ANSIString::from(" ".to_string().repeat(
-                                padding_rules[&Block::NameWithSymlink]
-                                    - meta.indicator.len(&flags)
-                                    - meta.name.name_string(icons).len(),
-                            )),
-                        ];
-
-                        let res = ANSIStrings(s).to_string();
-                        strings.push(ColoredString::from(res));
-                    }
-                }
+                let res = ANSIStrings(s2).to_string();
+                strings.push(ColoredString::from(res));
             }
         };
     }
@@ -367,44 +332,6 @@ fn get_visible_width(input: &str) -> usize {
     UnicodeWidthStr::width(input) - nb_invisible_char
 }
 
-fn detect_user_length(metas: &[Meta]) -> usize {
-    let mut max: usize = 0;
-
-    for meta in metas {
-        let user = meta.owner.user();
-        if user.len() > max {
-            max = user.len();
-        }
-    }
-
-    max
-}
-
-fn detect_group_length(metas: &[Meta]) -> usize {
-    let mut max: usize = 0;
-
-    for meta in metas {
-        let group = meta.owner.group();
-        if group.len() > max {
-            max = group.len();
-        }
-    }
-
-    max
-}
-
-fn detect_date_length(metas: &[Meta], flags: &Flags) -> usize {
-    let mut max_value_length: usize = 0;
-
-    for meta in metas {
-        if meta.date.date_string(&flags).len() > max_value_length {
-            max_value_length = meta.date.date_string(&flags).len();
-        }
-    }
-
-    max_value_length
-}
-
 fn detect_size_lengths(metas: &[Meta], flags: &Flags) -> (usize, usize) {
     let mut max_value_length: usize = 0;
     let mut max_unit_size: usize = 0;
@@ -425,62 +352,14 @@ fn detect_size_lengths(metas: &[Meta], flags: &Flags) -> (usize, usize) {
     (max_value_length, max_unit_size)
 }
 
-fn detect_name_length(metas: &[Meta], icons: &Icons, flags: &Flags) -> usize {
-    let mut max_value_length: usize = 0;
-
-    for meta in metas {
-        let len = meta.name.name_string(&icons).len() + meta.indicator.len(&flags);
-        if len > max_value_length {
-            max_value_length = len;
-        }
-    }
-
-    max_value_length
-}
-
-fn detect_name_with_symlink_length(metas: &[Meta], icons: &Icons, flags: &Flags) -> usize {
-    let mut max_value_length: usize = 0;
-
-    for meta in metas {
-        let mut len = meta.name.name_string(&icons).len() + meta.indicator.len(&flags);
-        if let Some(syml) = meta.symlink.symlink_string() {
-            len += syml.len() + 3 // 3 = ( arrow + 2 spaces) for symlink;
-        }
-        if len > max_value_length {
-            max_value_length = len;
-        }
-    }
-
-    max_value_length
-}
-
-fn get_padding_rules(metas: &[Meta], flags: &Flags, icons: &Icons) -> HashMap<Block, usize> {
+fn get_padding_rules(metas: &[Meta], flags: &Flags) -> HashMap<Block, usize> {
     let mut padding_rules: HashMap<Block, usize> = HashMap::new();
 
-    for block in flags.blocks.iter() {
-        match block {
-            Block::SizeValue => None,
-            Block::Permission => padding_rules.insert(Block::Permission, 10),
-            Block::SizeUnit => None,
-            Block::User => padding_rules.insert(Block::User, detect_user_length(&metas)),
-            Block::Group => padding_rules.insert(Block::Group, detect_group_length(&metas)),
-            Block::Date => padding_rules.insert(Block::Date, detect_date_length(&metas, &flags)),
-            Block::Name => {
-                padding_rules.insert(Block::Name, detect_name_length(&metas, &icons, &flags))
-            }
-            Block::NameWithSymlink => padding_rules.insert(
-                Block::NameWithSymlink,
-                detect_name_with_symlink_length(&metas, &icons, &flags),
-            ),
-            Block::Size => {
-                let (size_val, size_unit) = detect_size_lengths(&metas, &flags);
+    if flags.blocks.contains(&Block::Size) {
+        let (size_val, size_unit) = detect_size_lengths(&metas, &flags);
 
-                padding_rules.insert(Block::SizeValue, size_val);
-                padding_rules.insert(Block::SizeUnit, size_unit);
-
-                None
-            }
-        };
+        padding_rules.insert(Block::SizeValue, size_val);
+        padding_rules.insert(Block::SizeUnit, size_unit);
     }
 
     padding_rules

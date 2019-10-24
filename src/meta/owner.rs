@@ -36,14 +36,6 @@ impl<'a> From<&'a Metadata> for Owner {
 }
 
 impl Owner {
-    pub fn user(&self) -> String {
-        self.user.clone()
-    }
-
-    pub fn group(&self) -> String {
-        self.group.clone()
-    }
-
     pub fn render_user(&self, colors: &Colors) -> ColoredString {
         colors.colorize(self.user.clone(), &Elem::User)
     }
