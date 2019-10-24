@@ -1,5 +1,5 @@
 use crate::color::{ColoredString, Colors};
-use crate::flags::{Block, Display, Flags};
+use crate::flags::{Block, Display, Flags, Layout};
 use crate::icon::Icons;
 use crate::meta::{FileType, Meta};
 use ansi_term::{ANSIString, ANSIStrings};
@@ -12,10 +12,6 @@ const EDGE: &str = "\u{251c}\u{2500}\u{2500}"; // "├──"
 const LINE: &str = "\u{2502}  "; // "├  "
 const CORNER: &str = "\u{2514}\u{2500}\u{2500}"; // "└──"
 const BLANK: &str = "   ";
-
-pub fn one_line(metas: &[Meta], flags: &Flags, colors: &Colors, icons: &Icons) -> String {
-    inner_display_one_line(metas, &flags, colors, icons, 0)
-}
 
 pub fn grid(metas: &[Meta], flags: &Flags, colors: &Colors, icons: &Icons) -> String {
     let term_width = match terminal_size() {
@@ -30,19 +26,24 @@ pub fn tree(metas: &[Meta], flags: &Flags, colors: &Colors, icons: &Icons) -> St
     inner_display_tree(metas, &flags, colors, icons, 0, "")
 }
 
-fn inner_display_one_line(
+fn inner_display_grid(
     metas: &[Meta],
     flags: &Flags,
     colors: &Colors,
     icons: &Icons,
     depth: usize,
+    term_width: Option<usize>,
 ) -> String {
     let mut output = String::new();
 
     let padding_rules = get_padding_rules(&metas, flags);
     let mut grid = Grid::new(GridOptions {
         filling: Filling::Spaces(1),
-        direction: Direction::LeftToRight,
+        direction: if flags.layout == Layout::OneLine {
+            Direction::LeftToRight
+        } else {
+            Direction::TopToBottom
+        },
     });
 
     // The first iteration (depth == 0) corresponds to the inputs given by the
@@ -73,80 +74,21 @@ fn inner_display_one_line(
         }
     }
 
-    output += &grid.fit_into_columns(flags.blocks.len()).to_string();
-
-    let should_display_folder_path = should_display_folder_path(depth, &metas);
-
-    // print the folder content
-    for meta in metas {
-        if meta.content.is_some() {
-            if should_display_folder_path {
-                output += &display_folder_path(&meta);
+    if flags.layout == Layout::Grid {
+        if let Some(tw) = term_width {
+            if let Some(gridded_output) = grid.fit_into_width(tw) {
+                output += &gridded_output.to_string();
+            } else {
+                //does not fit into grid, usually because (some) filename(s)
+                //are longer or almost as long as term_width
+                //print line by line instead!
+                output += &grid.fit_into_columns(1).to_string();
             }
-
-            output += &inner_display_one_line(
-                meta.content.as_ref().unwrap(),
-                &flags,
-                colors,
-                icons,
-                depth + 1,
-            );
-        }
-    }
-
-    output
-}
-
-fn inner_display_grid(
-    metas: &[Meta],
-    flags: &Flags,
-    colors: &Colors,
-    icons: &Icons,
-    depth: usize,
-    term_width: Option<usize>,
-) -> String {
-    let mut output = String::new();
-
-    let padding_rules = get_padding_rules(&metas, flags);
-
-    let mut grid = Grid::new(GridOptions {
-        filling: Filling::Spaces(2),
-        direction: Direction::TopToBottom,
-    });
-
-    // The first iteration (depth == 0) corresponds to the inputs given by the
-    // user. We defer displaying directories given by the user unless we've been
-    // asked to display the directory itself (rather than its contents).
-    let skip_dirs = (depth == 0) && (flags.display != Display::DisplayDirectoryItself);
-
-    // print the files first.
-    for meta in metas {
-        // Maybe skip showing the directory meta now; show its contents later.
-        if let (true, FileType::Directory { .. }) = (skip_dirs, meta.file_type) {
-            continue;
-        }
-
-        for block in get_output(&meta, &colors, &icons, &flags, &padding_rules) {
-            let block_str = block.to_string();
-
-            grid.add(Cell {
-                width: get_visible_width(&block_str),
-                contents: block_str,
-            });
-        }
-    }
-
-    if let Some(tw) = term_width {
-        if let Some(gridded_output) = grid.fit_into_width(tw) {
-            output += &gridded_output.to_string();
         } else {
-            //does not fit into grid, usually because (some) filename(s)
-            //are longer or almost as long as term_width
-            //print line by line instead!
             output += &grid.fit_into_columns(1).to_string();
         }
     } else {
-        output += &grid.fit_into_columns(1).to_string();
+        output += &grid.fit_into_columns(flags.blocks.len()).to_string();
     }
 
     let should_display_folder_path = should_display_folder_path(depth, &metas);
@@ -159,7 +101,7 @@ fn inner_display_grid(
             }
 
             output += &inner_display_grid(
-                &meta.content.as_ref().unwrap(),
+                meta.content.as_ref().unwrap(),
                 &flags,
                 colors,
                 icons,
