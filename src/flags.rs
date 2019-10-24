@@ -103,7 +103,7 @@ impl Flags {
                 Block::Group,
                 Block::Size,
                 Block::Date,
-                Block::Name,
+                Block::NameWithSymlink,
             ]
         } else {
             vec![Block::NameWithSymlink]
@@ -229,7 +229,7 @@ impl<'a> From<&'a str> for Block {
             "size_unit" => Block::SizeUnit,
             "date" => Block::Date,
             "name" => Block::Name,
-            "name-with-sym" => Block::NameWithSymlink,
+            "name-with-symlink" => Block::NameWithSymlink,
             _ => panic!("invalid \"time\" flag: {}", block),
         }
     }
