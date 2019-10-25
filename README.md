@@ -4,6 +4,8 @@
 [![Build Status](https://travis-ci.org/Peltoche/lsd.svg?branch=master)](https://travis-ci.org/Peltoche/lsd)
 [![Latest version](https://img.shields.io/crates/v/lsd.svg)](https://crates.io/crates/lsd)
 [![Snap Status](https://build.snapcraft.io/badge/Peltoche/lsd.svg)](https://build.snapcraft.io/user/Peltoche/lsd)
+[![Scarf Version](https://scarf.sh/package/badge/lsd)](https://scarf.sh/package/scarf/lsd)
+
 
 # Table of Contents
 
@@ -74,6 +76,14 @@ via [Homebrew](https://brew.sh/):
 
 ```sh
 brew install lsd
+```
+
+### From Scarf
+
+If you'd like to support lsd, please consider installing with the [Scarf package manager](https://scarf.sh/package/scarf/lsd):
+
+```sh
+scarf install lsd
 ```
 
 ### From Sources
