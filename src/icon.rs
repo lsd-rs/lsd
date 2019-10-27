@@ -202,6 +202,8 @@ impl Icons {
         m.insert("erb", "\u{e73b}"); // ""
         m.insert("erl", "\u{e7b1}"); // ""
         m.insert("exe", "\u{f17a}"); // ""
+        m.insert("ex", "\u{e62d}"); // ""
+        m.insert("exs", "\u{e62d}");
         m.insert("fish", "\u{f489}"); // ""
         m.insert("flac", "\u{f001}"); // ""
         m.insert("flv", "\u{f03d}"); // ""
