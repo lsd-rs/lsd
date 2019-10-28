@@ -76,6 +76,23 @@ via [Homebrew](https://brew.sh/):
 brew install lsd
 ```
 
+### On NixOS/From nix
+
+```sh
+nix-env -iA nixos.lsd
+```
+
+Or add `lsd` to your `configuration.nix` like so:
+
+```nix
+# ...
+environment.systemPackages = with pkgs; [
+  # other packages ...
+  lsd
+];
+# ...
+```
+
 ### From Sources
 
 With Rust's package manager cargo, you can install lsd via:
