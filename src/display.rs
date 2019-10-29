@@ -242,23 +242,22 @@ fn get_output<'a>(
             Block::SizeUnit => strings.push(meta.size.render_unit(colors, flags)),
             Block::Date => strings.push(meta.date.render(colors, &flags)),
             Block::Name => {
-                let s: &[ColoredString] = &[
-                    meta.name.render(colors, icons),
-                    meta.indicator.render(&flags),
-                ];
+                let s: String = if flags.no_symlink {
+                    ANSIStrings(&[
+                        meta.name.render(colors, icons),
+                        meta.indicator.render(&flags),
+                    ])
+                    .to_string()
+                } else {
+                    ANSIStrings(&[
+                        meta.name.render(colors, icons),
+                        meta.indicator.render(&flags),
+                        meta.symlink.render(colors),
+                    ])
+                    .to_string()
+                };
 
-                let res = ANSIStrings(s).to_string();
-                strings.push(ColoredString::from(res));
-            }
-            Block::NameWithSymlink => {
-                let s2: &[ColoredString] = &[
-                    meta.name.render(colors, icons),
-                    meta.indicator.render(&flags),
-                    meta.symlink.render(colors),
-                ];
-
-                let res = ANSIStrings(s2).to_string();
-                strings.push(ColoredString::from(res));
+                strings.push(ColoredString::from(s));
             }
         };
     }

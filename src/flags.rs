@@ -18,6 +18,7 @@ pub struct Flags {
     pub icon_theme: IconTheme,
     pub recursion_depth: usize,
     pub blocks: Vec<Block>,
+    pub no_symlink: bool,
     pub total_size: bool,
     pub ignore_globs: GlobSet,
 }
@@ -94,7 +95,7 @@ impl Flags {
             None => usize::max_value(),
         };
 
-        let mut blocks: Vec<Block> = if !blocks_inputs.is_empty() {
+        let blocks: Vec<Block> = if !blocks_inputs.is_empty() {
             blocks_inputs.into_iter().map(|b| Block::from(b)).collect()
         } else if matches.is_present("long") {
             vec![
@@ -103,19 +104,11 @@ impl Flags {
                 Block::Group,
                 Block::Size,
                 Block::Date,
-                Block::NameWithSymlink,
+                Block::Name,
             ]
         } else {
-            vec![Block::NameWithSymlink]
+            vec![Block::Name]
         };
-
-        if matches.is_present("no-symlink") {
-            if let Ok(idx) = blocks.binary_search(&Block::NameWithSymlink) {
-                blocks[idx] = Block::Name;
-            }
-        }
-
-        let total_size = matches.is_present("total-size");
 
         let mut ignore_globs_builder = GlobSetBuilder::new();
         for pattern in ignore_globs_inputs {
@@ -175,7 +168,8 @@ impl Flags {
             } else {
                 DirOrderFlag::from(dir_order_inputs[dir_order_inputs.len() - 1])
             },
-            total_size,
+            no_symlink: matches.is_present("no-symlink"),
+            total_size: matches.is_present("total-size"),
         })
     }
 }
@@ -198,6 +192,7 @@ impl Default for Flags {
             icon: WhenFlag::Auto,
             icon_theme: IconTheme::Fancy,
             blocks: vec![],
+            no_symlink: false,
             total_size: false,
             ignore_globs: GlobSet::empty(),
         }
@@ -206,7 +201,6 @@ impl Default for Flags {
 
 #[derive(Clone, Debug, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub enum Block {
-    // FileType,
     Permission,
     User,
     Group,
@@ -215,7 +209,6 @@ pub enum Block {
     SizeUnit,
     Date,
     Name,
-    NameWithSymlink,
 }
 impl<'a> From<&'a str> for Block {
     fn from(block: &'a str) -> Self {
@@ -229,7 +222,6 @@ impl<'a> From<&'a str> for Block {
             "size_unit" => Block::SizeUnit,
             "date" => Block::Date,
             "name" => Block::Name,
-            "name-with-symlink" => Block::NameWithSymlink,
             _ => panic!("invalid \"time\" flag: {}", block),
         }
     }
