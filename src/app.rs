@@ -54,12 +54,6 @@ pub fn build() -> App<'static, 'static> {
                 .help("Whether to use fancy or unicode icons"),
         )
         .arg(
-            Arg::with_name("prefix-indent")
-                .long("prefix-indent")
-                .multiple(false)
-                .help("Prefix tab indent before file and directory names in output"),
-        )
-        .arg(
             Arg::with_name("indicators")
                 .short("F")
                 .long("classify")

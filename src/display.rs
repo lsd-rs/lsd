@@ -58,10 +58,6 @@ fn inner_display_grid(
             continue;
         }
 
-        if flags.prefix_indent {
-            output.push_str("    ");
-        }
-
         let blocks = get_output(&meta, &colors, &icons, &flags, &padding_rules);
 
         for block in blocks {
