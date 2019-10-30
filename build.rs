@@ -18,7 +18,7 @@ use std::process::exit;
 include!("src/app.rs");
 
 fn main() {
-    match version_check::is_min_version("1.31.0") {
+    match version_check::is_min_version("1.33.0") {
         Some(true) => {}
         // rustc version too small or can't figure it out
         _ => {
