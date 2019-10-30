@@ -63,14 +63,13 @@ impl Flags {
             SortOrder::Default
         };
 
-        let layout = if matches.is_present("tree") {
+        let layout = if matches.is_present("long")
+            || matches.is_present("oneline")
+            || blocks_inputs.len() > 1
+        {
+            Layout::OneLine
+        } else if matches.is_present("tree") {
             Layout::Tree
-        } else if matches.is_present("long") {
-            Layout::OneLine
-        } else if matches.is_present("oneline") {
-            Layout::OneLine
-        } else if blocks_inputs.len() > 1 {
-            Layout::OneLine
         } else {
             Layout::Grid
         };
@@ -96,7 +95,7 @@ impl Flags {
         };
 
         let blocks: Vec<Block> = if !blocks_inputs.is_empty() {
-            blocks_inputs.into_iter().map(|b| Block::from(b)).collect()
+            blocks_inputs.into_iter().map(Block::from).collect()
         } else if matches.is_present("long") {
             vec![
                 Block::Permission,

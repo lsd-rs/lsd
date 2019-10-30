@@ -132,7 +132,7 @@ fn inner_display_tree(
         direction: Direction::LeftToRight,
     });
 
-    for meta in metas.into_iter() {
+    for meta in metas.iter() {
         for block in get_output(&meta, &colors, &icons, &flags, &padding_rules) {
             let block_str = block.to_string();
 
@@ -146,7 +146,7 @@ fn inner_display_tree(
     let content = grid.fit_into_columns(flags.blocks.len()).to_string();
     let mut lines = content.lines();
 
-    for (idx, meta) in metas.into_iter().enumerate() {
+    for (idx, meta) in metas.iter().enumerate() {
         let is_last_folder_elem = idx + 1 != last_idx;
 
         if depth > 0 {
@@ -160,7 +160,7 @@ fn inner_display_tree(
             output += " ";
         }
 
-        output += lines.next().unwrap().clone();
+        output += &String::from(lines.next().unwrap());
         output += "\n";
 
         if meta.content.is_some() {
@@ -274,7 +274,7 @@ fn get_visible_width(input: &str) -> usize {
 
         let m_pos = s.find('m');
         if let Some(len) = m_pos {
-            nb_invisible_char = nb_invisible_char + len
+            nb_invisible_char += len
         }
     }
 
