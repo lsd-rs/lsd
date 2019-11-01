@@ -196,6 +196,7 @@ impl Icons {
         m.insert("ebook", "\u{e28b}"); // ""
         m.insert("editorconfig", "\u{e615}"); // ""
         m.insert("ejs", "\u{e618}"); // ""
+        m.insert("elm", "\u{e62c}"); // ""
         m.insert("env", "\u{f462}"); // ""
         m.insert("eot", "\u{f031}"); // ""
         m.insert("epub", "\u{e28a}"); // ""
