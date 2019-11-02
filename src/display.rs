@@ -221,6 +221,9 @@ fn get_output<'a>(
     let mut strings: Vec<ANSIString> = Vec::new();
     for block in flags.blocks.iter() {
         match block {
+            Block::INode => {
+                strings.push(meta.inode.render(colors));
+            }
             Block::Permission => {
                 let s: &[ColoredString] = &[
                     meta.file_type.render(colors),

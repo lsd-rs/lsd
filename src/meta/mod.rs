@@ -1,6 +1,7 @@
 mod date;
 mod filetype;
 mod indicator;
+mod inode;
 mod name;
 mod owner;
 mod permissions;
@@ -13,6 +14,7 @@ mod windows_utils;
 pub use self::date::Date;
 pub use self::filetype::FileType;
 pub use self::indicator::Indicator;
+pub use self::inode::INode;
 pub use self::name::Name;
 pub use self::owner::Owner;
 pub use self::permissions::Permissions;
@@ -40,6 +42,7 @@ pub struct Meta {
     pub size: Size,
     pub symlink: SymLink,
     pub indicator: Indicator,
+    pub inode: INode,
     pub content: Option<Vec<Meta>>,
 }
 
@@ -211,8 +214,10 @@ impl Meta {
 
         let file_type = FileType::new(&metadata, &permissions);
         let name = Name::new(&path, file_type);
+        let inode = INode::from(&metadata);
 
         Ok(Self {
+            inode,
             path: path.to_path_buf(),
             symlink: SymLink::from(path.as_path()),
             size: Size::from(&metadata),
