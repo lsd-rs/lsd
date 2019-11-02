@@ -205,6 +205,7 @@ pub enum Block {
     SizeValue,
     Date,
     Name,
+    INode,
 }
 impl<'a> From<&'a str> for Block {
     fn from(block: &'a str) -> Self {
@@ -217,6 +218,7 @@ impl<'a> From<&'a str> for Block {
             "size_value" => Block::SizeValue,
             "date" => Block::Date,
             "name" => Block::Name,
+            "inode" => Block::INode,
             _ => panic!("invalid \"time\" flag: {}", block),
         }
     }
