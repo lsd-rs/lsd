@@ -85,49 +85,11 @@ pub fn get_file_data(path: &PathBuf) -> Result<(Owner, Permissions), io::Error> 
     // This structure will be returned
     let owner = Owner::new(owner, group);
 
-    // Get the size and allocate bytes for a 1-sub-authority SID
-    // 1 sub-authority because the Windows World SID is always S-1-1-0, with
-    // only a single sub-authority.
-    //
-    // Assumptions: None
-    // "This function cannot fail"
-    //     -- Windows Dev Center docs
-    let mut world_sid_len: u32 = unsafe { winapi::um::securitybaseapi::GetSidLengthRequired(1) };
-    let mut world_sid = vec![0u8; world_sid_len as usize];
-
-    // Assumptions:
-    // - world_sid_len is no larger than the number of bytes available at
-    //   world_sid
-    // - world_sid is appropriately aligned (if there are strange crashes this
-    //   might be why)
-    let result = unsafe {
-        winapi::um::securitybaseapi::CreateWellKnownSid(
-            winnt::WinWorldSid,
-            null_mut(),
-            world_sid.as_mut_ptr() as *mut _,
-            &mut world_sid_len,
-        )
-    };
-
-    if result == 0 {
-        // Failed to create the SID
-        // Assumptions: Same as the other identical calls
-        unsafe {
-            winapi::um::winbase::LocalFree(sd_ptr);
-        }
-
-        // Assumptions: None (GetLastError shouldn't ever fail)
-        return Err(io::Error::from_raw_os_error(unsafe {
-            winapi::um::errhandlingapi::GetLastError()
-        } as i32));
-    }
-
     // Assumptions:
     // - xxxxx_sid_ptr are valid pointers to SIDs
     // - xxxxx_trustee is only valid as long as its SID pointer is
     let mut owner_trustee = unsafe { trustee_from_sid(owner_sid_ptr) };
     let mut group_trustee = unsafe { trustee_from_sid(group_sid_ptr) };
-    let mut world_trustee = unsafe { trustee_from_sid(world_sid.as_mut_ptr() as *mut _) };
 
     // Assumptions:
     // - xxxxx_trustee are still valid (including underlying SID)
@@ -135,8 +97,6 @@ pub fn get_file_data(path: &PathBuf) -> Result<(Owner, Permissions), io::Error> 
     let owner_access_mask = unsafe { get_acl_access_mask(dacl_ptr as *mut _, &mut owner_trustee) }?;
 
     let group_access_mask = unsafe { get_acl_access_mask(dacl_ptr as *mut _, &mut group_trustee) }?;
-
-    let world_access_mask = unsafe { get_acl_access_mask(dacl_ptr as *mut _, &mut world_trustee) }?;
 
     let has_bit = |field: u32, bit: u32| field & bit != 0;
 
@@ -149,9 +109,9 @@ pub fn get_file_data(path: &PathBuf) -> Result<(Owner, Permissions), io::Error> 
         group_write: has_bit(group_access_mask, winnt::FILE_GENERIC_WRITE),
         group_execute: has_bit(group_access_mask, winnt::FILE_GENERIC_EXECUTE),
 
-        other_read: has_bit(world_access_mask, winnt::FILE_GENERIC_READ),
-        other_write: has_bit(world_access_mask, winnt::FILE_GENERIC_WRITE),
-        other_execute: has_bit(world_access_mask, winnt::FILE_GENERIC_EXECUTE),
+        other_read: false,
+        other_write: false,
+        other_execute: false,
 
         sticky: false,
         setuid: false,
