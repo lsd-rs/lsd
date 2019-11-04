@@ -62,13 +62,13 @@ impl Flags {
             SortOrder::Default
         };
 
-        let layout = if matches.is_present("long")
+        let layout = if matches.is_present("tree") {
+            Layout::Tree
+        } else if matches.is_present("long")
             || matches.is_present("oneline")
             || blocks_inputs.len() > 1
         {
             Layout::OneLine
-        } else if matches.is_present("tree") {
-            Layout::Tree
         } else {
             Layout::Grid
         };
