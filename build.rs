@@ -22,7 +22,7 @@ fn main() {
         Some(true) => {}
         // rustc version too small or can't figure it out
         _ => {
-            writeln!(&mut io::stderr(), "'lsd' requires rustc >= 1.31.0").unwrap();
+            writeln!(&mut io::stderr(), "'lsd' requires rustc >= 1.33.0").unwrap();
             exit(1);
         }
     }
