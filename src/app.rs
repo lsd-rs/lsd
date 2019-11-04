@@ -134,8 +134,6 @@ pub fn build() -> App<'static, 'static> {
         .arg(
             Arg::with_name("date")
                 .long("date")
-                .possible_value("date")
-                .possible_value("relative")
                 .default_value("date")
                 .multiple(true)
                 .number_of_values(1)
