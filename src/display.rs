@@ -235,7 +235,6 @@ fn get_output<'a>(
                 padding_rules[&Block::SizeValue],
             )),
             Block::SizeValue => strings.push(meta.size.render_value(colors, flags)),
-            Block::SizeUnit => strings.push(meta.size.render_unit(colors, flags)),
             Block::Date => strings.push(meta.date.render(colors, &flags)),
             Block::Name => {
                 let s: String = if flags.no_symlink {
@@ -277,34 +276,27 @@ fn get_visible_width(input: &str) -> usize {
     UnicodeWidthStr::width(input) - nb_invisible_char
 }
 
-fn detect_size_lengths(metas: &[Meta], flags: &Flags) -> (usize, usize) {
+fn detect_size_lengths(metas: &[Meta], flags: &Flags) -> usize {
     let mut max_value_length: usize = 0;
-    let mut max_unit_size: usize = 0;
 
     for meta in metas {
         let value_len = meta.size.value_string(flags).len();
-        let unit_len = meta.size.unit_string(&flags).len();
 
         if value_len > max_value_length {
             max_value_length = value_len;
         }
-
-        if unit_len > max_unit_size {
-            max_unit_size = unit_len;
-        }
     }
 
-    (max_value_length, max_unit_size)
+    max_value_length
 }
 
 fn get_padding_rules(metas: &[Meta], flags: &Flags) -> HashMap<Block, usize> {
     let mut padding_rules: HashMap<Block, usize> = HashMap::new();
 
     if flags.blocks.contains(&Block::Size) {
-        let (size_val, size_unit) = detect_size_lengths(&metas, &flags);
+        let size_val = detect_size_lengths(&metas, &flags);
 
         padding_rules.insert(Block::SizeValue, size_val);
-        padding_rules.insert(Block::SizeUnit, size_unit);
     }
 
     padding_rules
