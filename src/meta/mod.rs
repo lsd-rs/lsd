@@ -26,6 +26,8 @@ use std::fs::read_link;
 use std::io::{Error, ErrorKind};
 use std::path::PathBuf;
 
+use globset::GlobSet;
+
 #[derive(Clone, Debug)]
 pub struct Meta {
     pub name: Name,
@@ -45,6 +47,7 @@ impl Meta {
         &self,
         depth: usize,
         display: Display,
+        ignore_globs: &GlobSet,
     ) -> Result<Option<Vec<Meta>>, std::io::Error> {
         if depth == 0 {
             return Ok(None);
@@ -92,12 +95,16 @@ impl Meta {
         for entry in entries {
             let path = entry?.path();
 
-            if let Display::DisplayOnlyVisible = display {
-                if path
+            let name = path
                     .file_name()
-                    .ok_or_else(|| Error::new(ErrorKind::InvalidInput, "invalid file name"))?
-                    .to_string_lossy()
-                    .starts_with('.')
+                    .ok_or_else(|| Error::new(ErrorKind::InvalidInput, "invalid file name"))?;
+
+            if ignore_globs.is_match(&name) {
+                continue;
+            }
+
+            if let Display::DisplayOnlyVisible = display {
+                if name.to_string_lossy().starts_with('.')
                 {
                     continue;
                 }
@@ -111,7 +118,7 @@ impl Meta {
                 }
             };
 
-            match entry_meta.recurse_into(depth - 1, display) {
+            match entry_meta.recurse_into(depth - 1, display, ignore_globs) {
                 Ok(content) => entry_meta.content = content,
                 Err(err) => {
                     eprintln!("cannot access '{}': {}", path.display(), err);

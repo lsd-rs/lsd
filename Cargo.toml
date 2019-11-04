@@ -29,6 +29,7 @@ chrono-humanize = "0.0.11"
 unicode-width = "0.1.5"
 lscolors = "0.5.0"
 wild = "2.0.1"
+globset = "0.4.4"
 
 [target.'cfg(unix)'.dependencies]
 users = "0.9.0"
@@ -41,6 +42,9 @@ features = ["suggestions", "color", "wrap_help"]
 version = "2.32.0"
 
 [dev-dependencies]
+assert_cmd = "0.11.1"
+assert_fs = "0.11.3"
+predicates = "1.0.1"
 tempfile = "3"
 
 [features]

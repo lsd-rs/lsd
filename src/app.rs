@@ -200,12 +200,22 @@ pub fn build() -> App<'static, 'static> {
                 .help("Do not display symlink target"),
         )
         .arg(
+            Arg::with_name("ignore-glob")
+                .short("I")
+                .long("ignore-glob")
+                .multiple(true)
+                .number_of_values(1)
+                .value_name("pattern")
+                .default_value("")
+                .help("Do not display files/directories with names matching the glob pattern(s)"),
+        )
+        .arg(
             Arg::with_name("symlink-arrow")
-            .long("symlink-arrow")
-            .multiple(true)
-            .number_of_values(1)
-            .allow_hyphen_values(true)
-            .default_value("\u{21d2}")
-            .help("Specify a string to be used as the symlink arrow")
+                .long("symlink-arrow")
+                .multiple(true)
+                .number_of_values(1)
+                .allow_hyphen_values(true)
+                .default_value("\u{21d2}")
+                .help("Specify a string to be used as the symlink arrow")
         )
 }
