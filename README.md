@@ -101,6 +101,11 @@ With Rust's package manager cargo, you can install lsd via:
 cargo install lsd
 ```
 
+If you want to install the latest master branch commit:
+```sh
+cargo install --git https://github.com/Peltoche/lsd.git --branch master
+```
+
 ### From Binaries
 
 The [release page](https://github.com/Peltoche/lsd/releases) includes precompiled binaries for Linux and macOS.
