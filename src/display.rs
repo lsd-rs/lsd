@@ -38,7 +38,7 @@ fn inner_display_grid(
 
     let padding_rules = get_padding_rules(&metas, flags);
     let mut grid = Grid::new(GridOptions {
-        filling: Filling::Spaces(2),
+        filling: Filling::Spaces(1),
         direction: if flags.layout == Layout::OneLine {
             Direction::LeftToRight
         } else {
@@ -124,7 +124,7 @@ fn inner_display_tree(
     let padding_rules = get_padding_rules(&metas, flags);
 
     let mut grid = Grid::new(GridOptions {
-        filling: Filling::Spaces(2),
+        filling: Filling::Spaces(1),
         direction: Direction::LeftToRight,
     });
 
