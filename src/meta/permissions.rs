@@ -77,7 +77,7 @@ impl Permissions {
             // Group permissions
             bit(self.group_read, "r", &Elem::Read),
             bit(self.group_write, "w", &Elem::Write),
-            match (self.group_execute, self.setuid) {
+            match (self.group_execute, self.setgid) {
                 (false, false) => colors.colorize(String::from("-"), &Elem::NoAccess),
                 (true, false) => colors.colorize(String::from("x"), &Elem::Exec),
                 (false, true) => colors.colorize(String::from("S"), &Elem::ExecSticky),
