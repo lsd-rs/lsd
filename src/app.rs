@@ -1,5 +1,6 @@
 use clap::{App, Arg};
 
+
 pub fn build() -> App<'static, 'static> {
     App::new("lsd")
         .version(crate_version!())
@@ -134,6 +135,7 @@ pub fn build() -> App<'static, 'static> {
         .arg(
             Arg::with_name("date")
                 .long("date")
+                .validator(validate_date_argument)
                 .default_value("date")
                 .multiple(true)
                 .number_of_values(1)
@@ -201,4 +203,17 @@ pub fn build() -> App<'static, 'static> {
                 .default_value("")
                 .help("Do not display files/directories with names matching the glob pattern(s)"),
         )
+}
+
+fn validate_date_argument(arg: String) -> Result<(), String> {
+    use std::error::Error;
+    if arg.starts_with("+") {
+        time::now().strftime(&arg).map(drop).map_err(|err| err.description().to_string())
+    } else if &arg == "date" {
+        Result::Ok(())
+    } else if &arg == "relative" {
+        Result::Ok(())
+    } else {
+        Result::Err("possible values: date, relative".to_owned())
+    }
 }

@@ -18,6 +18,7 @@ path = "src/main.rs"
 [build-dependencies]
 clap = "2.33.*"
 version_check = "0.9.*"
+time = "0.1.*"
 
 [dependencies]
 ansi_term = "0.12.*"
