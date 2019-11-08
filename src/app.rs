@@ -1,6 +1,5 @@
 use clap::{App, Arg};
 
-
 pub fn build() -> App<'static, 'static> {
     App::new("lsd")
         .version(crate_version!())
@@ -208,7 +207,7 @@ pub fn build() -> App<'static, 'static> {
 fn validate_date_argument(arg: String) -> Result<(), String> {
     use std::error::Error;
     if arg.starts_with("+") {
-        time::now().strftime(&arg).map(drop).map_err(|err| err.description().to_string())
+        validate_time_format(&arg).map_err(|err| err.description().to_string())
     } else if &arg == "date" {
         Result::Ok(())
     } else if &arg == "relative" {
@@ -216,4 +215,27 @@ fn validate_date_argument(arg: String) -> Result<(), String> {
     } else {
         Result::Err("possible values: date, relative".to_owned())
     }
+}
+
+fn validate_time_format(formatter: &str) -> Result<(), time::ParseError> {
+    let mut chars = formatter.chars();
+    loop {
+        match chars.next() {
+            Some('%') => match chars.next() {
+                Some('A') | Some('a') | Some('B') | Some('b') | Some('C') | Some('c')
+                | Some('D') | Some('d') | Some('e') | Some('F') | Some('f') | Some('G')
+                | Some('g') | Some('H') | Some('h') | Some('I') | Some('j') | Some('k')
+                | Some('l') | Some('M') | Some('m') | Some('n') | Some('P') | Some('p')
+                | Some('R') | Some('r') | Some('S') | Some('s') | Some('T') | Some('t')
+                | Some('U') | Some('u') | Some('V') | Some('v') | Some('W') | Some('w')
+                | Some('X') | Some('x') | Some('Y') | Some('y') | Some('Z') | Some('z')
+                | Some('+') | Some('%') => (),
+                Some(c) => return Err(time::ParseError::InvalidFormatSpecifier(c)),
+                None => return Err(time::ParseError::MissingFormatConverter),
+            },
+            None => break,
+            _ => continue,
+        }
+    }
+    Ok(())
 }
