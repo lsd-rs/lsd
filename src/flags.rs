@@ -260,7 +260,7 @@ impl<'a> From<&'a str> for DateFlag {
         match time {
             "date" => DateFlag::Date,
             "relative" => DateFlag::Relative,
-            time if time.starts_with("+") => DateFlag::Formatted(time[1..].to_owned()),
+            time if time.starts_with('+') => DateFlag::Formatted(time[1..].to_owned()),
             _ => panic!("invalid \"time\" flag: {}", time),
         }
     }
