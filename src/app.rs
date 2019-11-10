@@ -208,15 +208,10 @@ fn validate_date_argument(arg: String) -> Result<(), String> {
     use std::error::Error;
     if arg.starts_with('+') {
         validate_time_format(&arg).map_err(|err| err.description().to_string())
-    } else if &arg == "date" {
-        Result::Ok(())
-    } else if &arg == "relative" {
+    } else if &arg == "date" || &arg == "relative" {
         Result::Ok(())
     } else {
-        Result::Err(
-            "possible values: date, relative, +date-time-format"
-            .to_owned()
-        )
+        Result::Err("possible values: date, relative, +date-time-format".to_owned())
     }
 }
 
