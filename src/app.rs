@@ -138,7 +138,7 @@ pub fn build() -> App<'static, 'static> {
                 .default_value("date")
                 .multiple(true)
                 .number_of_values(1)
-                .help("How to display date"),
+                .help("How to display date [possible values: date, relative, +date-time-format]"),
         )
         .arg(
             Arg::with_name("timesort")
@@ -213,7 +213,10 @@ fn validate_date_argument(arg: String) -> Result<(), String> {
     } else if &arg == "relative" {
         Result::Ok(())
     } else {
-        Result::Err("possible values: date, relative".to_owned())
+        Result::Err(
+            "possible values: date, relative, +date-time-format"
+            .to_owned()
+        )
     }
 }
 
