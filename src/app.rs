@@ -206,7 +206,7 @@ pub fn build() -> App<'static, 'static> {
 
 fn validate_date_argument(arg: String) -> Result<(), String> {
     use std::error::Error;
-    if arg.starts_with("+") {
+    if arg.starts_with('+') {
         validate_time_format(&arg).map_err(|err| err.description().to_string())
     } else if &arg == "date" {
         Result::Ok(())
