@@ -1,6 +1,6 @@
 name: CICD
 
-# spell-checker:ignore CICD MSVC clippy mkdir musl rustfmt softprops toolchain
+# spell-checker:ignore CICD MSVC MacOS SHAs clippy esac gnueabihf mkdir musl rustfmt softprops toolchain
 
 env:
   PROJECT_NAME: lsd
@@ -14,7 +14,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ ubuntu-latest, windows-latest ]
+        os: [ ubuntu-latest, windows-latest, macos-latest ]
     steps:
     - uses: actions/checkout@v1
     - name: Install `rust` toolchain
@@ -45,9 +45,78 @@ jobs:
           - arm-unknown-linux-gnueabihf
           - i686-unknown-linux-gnu
           - i686-unknown-linux-musl
-          - x86_64-apple-darwin
+          # - x86_64-apple-darwin
           - x86_64-unknown-linux-gnu
           - x86_64-unknown-linux-musl
+          # - i686-pc-windows-gnu
+          # - x86_64-pc-windows-gnu
+    env:
+      EXE_suffix: ""
+    steps:
+    - uses: actions/checkout@v1
+    - name: Parse branch info
+      id: branch_info
+      shell: bash
+      run: |
+        # ref: <https://github.community/t5/GitHub-Actions/How-to-get-just-the-tag-name/td-p/31595/page/2>
+        SOURCE_NAME=${GITHUB_REF#refs/*/}
+        unset SOURCE_BRANCH; case ${GITHUB_REF} in refs/heads/*) SOURCE_BRANCH=${GITHUB_REF#refs/heads/};; esac;
+        unset SOURCE_TAG; case ${GITHUB_REF} in refs/tags/*) SOURCE_TAG=${GITHUB_REF#refs/tags/};; esac;
+        SOURCE_SHAS=${GITHUB_SHA:0:8}
+        PKG_NAME=${PROJECT_NAME}-${SOURCE_TAG:-$SOURCE_SHAS}-${{ matrix.target }}${EXE_suffix}
+        echo ::set-output name=SOURCE_NAME::${SOURCE_NAME}
+        echo ::set-output name=SOURCE_BRANCH::${SOURCE_BRANCH}
+        echo ::set-output name=SOURCE_TAG::${SOURCE_TAG}
+        echo ::set-output name=SOURCE_SHAS::${SOURCE_SHAS}
+        echo ::set-output name=PKG_NAME::${PKG_NAME}
+    - name: Create all needed build/work directories
+      shell: bash
+      run: mkdir -p 'package'
+    - name: Install `rust` toolchain
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: stable
+        target: ${{ matrix.target }}
+        override: true
+        profile: minimal # minimal component installation (ie, no documentation)
+    - name: Build
+      uses: actions-rs/cargo@v1
+      with:
+        use-cross: true
+        command: build
+        args: --release --target=${{ matrix.target }}
+    - name: Test
+      uses: actions-rs/cargo@v1
+      with:
+        use-cross: true
+        command: test
+        args: --target=${{ matrix.target }}
+    - name: Archive executable artifacts
+      uses: actions/upload-artifact@master
+      with:
+        name: ${{ env.PROJECT_NAME }}-${{ matrix.target }}
+        path: target/${{ matrix.target }}/release/${{ env.PROJECT_NAME }}${{ env.EXE_suffix }}
+    - name: Package
+      shell: bash
+      run: cp 'target/${{ matrix.target }}/release/${{ env.PROJECT_NAME }}${{ env.EXE_suffix }}' 'package/${{ steps.branch_info.outputs.PKG_NAME }}'
+    - name: Publish
+      uses: softprops/action-gh-release@v1
+      if: startsWith(github.ref, 'refs/tags/v')
+      with:
+        files: package/${{ steps.branch_info.outputs.PKG_NAME }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build_mac:
+    name: Build (mac)
+    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        target:
+          - x86_64-apple-darwin
+          # - x86_64-unknown-linux-gnu
+          # - x86_64-unknown-linux-musl
           # - i686-pc-windows-gnu
           # - x86_64-pc-windows-gnu
     env:
