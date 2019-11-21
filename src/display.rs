@@ -74,9 +74,9 @@ fn inner_display_one_line(
             continue;
         }
 
-		if flags.prefix_indent {
-			output.push_str("    ");
-		}
+        if flags.prefix_indent {
+            output.push_str("    ");
+        }
 
         if let Layout::OneLine { long: true } = flags.layout {
             output += &get_long_output(&meta, &colors, &icons, &flags, padding_rules.unwrap());
@@ -407,7 +407,7 @@ fn detect_size_lengths(metas: &[Meta], flags: &Flags) -> (usize, usize) {
         let unit = meta.size.get_unit(flags);
         let value_len = meta.size.render_value(&unit).len();
         let unit_len = Size::render_unit(&unit, &flags).len();
-        
+
         if value_len > max_value_length {
             max_value_length = value_len;
         }
@@ -439,7 +439,7 @@ fn detect_name_with_symlink_length(metas: &[Meta], icons: &Icons, flags: &Flags)
     for meta in metas {
         let mut len = meta.name.name_string(&icons).len() + meta.indicator.len(&flags);
         if let Some(syml) = meta.symlink.symlink_string() {
-            len += syml.len() + 3  // 3 = ( arrow + 2 spaces) for symlink;
+            len += syml.len() + 3 // 3 = ( arrow + 2 spaces) for symlink;
         }
         if len > max_value_length {
             max_value_length = len;

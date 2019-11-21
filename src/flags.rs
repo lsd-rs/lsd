@@ -103,7 +103,10 @@ impl Flags {
             let glob = match Glob::new(pattern) {
                 Ok(g) => g,
                 Err(e) => {
-                    return Err(Error::with_description(&e.to_string(), ErrorKind::ValueValidation));
+                    return Err(Error::with_description(
+                        &e.to_string(),
+                        ErrorKind::ValueValidation,
+                    ));
                 }
             };
             ignore_globs_builder.add(glob);
@@ -112,7 +115,10 @@ impl Flags {
         let ignore_globs = match ignore_globs_builder.build() {
             Ok(globs) => globs,
             Err(e) => {
-                return Err(Error::with_description(&e.to_string(), ErrorKind::ValueValidation));
+                return Err(Error::with_description(
+                    &e.to_string(),
+                    ErrorKind::ValueValidation,
+                ));
             }
         };
 
