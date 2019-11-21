@@ -96,16 +96,15 @@ impl Meta {
             let path = entry?.path();
 
             let name = path
-                    .file_name()
-                    .ok_or_else(|| Error::new(ErrorKind::InvalidInput, "invalid file name"))?;
+                .file_name()
+                .ok_or_else(|| Error::new(ErrorKind::InvalidInput, "invalid file name"))?;
 
             if ignore_globs.is_match(&name) {
                 continue;
             }
 
             if let Display::DisplayOnlyVisible = display {
-                if name.to_string_lossy().starts_with('.')
-                {
+                if name.to_string_lossy().starts_with('.') {
                     continue;
                 }
             }
