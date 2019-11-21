@@ -54,6 +54,13 @@ jobs:
       EXE_suffix: ""
     steps:
     - uses: actions/checkout@v1
+    - name: Setup target-specific options
+      id: cargo_options
+      shell: bash
+      run: |
+        # test only binary for arm-type targets
+        unset TEST_OPTIONS; case ${{ matrix.target }} in arm-*) TEST_OPTIONS="--bin ${PROJECT_NAME}";; esac;
+        echo ::set-output name=TEST_OPTIONS::${TEST_OPTIONS}
     - name: Parse branch info
       id: branch_info
       shell: bash
@@ -90,7 +97,7 @@ jobs:
       with:
         use-cross: true
         command: test
-        args: --target=${{ matrix.target }}
+        args: --target=${{ matrix.target }} ${{ steps.cargo_options.outputs.TEST_OPTIONS}}
     - name: Archive executable artifacts
       uses: actions/upload-artifact@master
       with:
