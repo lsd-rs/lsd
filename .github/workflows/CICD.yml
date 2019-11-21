@@ -42,7 +42,10 @@ jobs:
       fail-fast: false
       matrix:
         target:
+          - arm-unknown-linux-gnueabihf
           - i686-unknown-linux-gnu
+          - i686-unknown-linux-musl
+          - x86_64-apple-darwin
           - x86_64-unknown-linux-gnu
           - x86_64-unknown-linux-musl
           # - i686-pc-windows-gnu
@@ -51,12 +54,21 @@ jobs:
       EXE_suffix: ""
     steps:
     - uses: actions/checkout@v1
-    - name: Parse any commit tag
-      id: parse_tag
+    - name: Parse branch info
+      id: branch_info
       shell: bash
       run: |
-        echo ::set-output name=TAG::${GITHUB_REF#refs/tags/}
-        echo ::set-output name=PKG::${{ env.PROJECT_NAME }}-${GITHUB_REF#refs/tags/}-${{ matrix.target }}${{ env.EXE_suffix }}
+        # ref: <https://github.community/t5/GitHub-Actions/How-to-get-just-the-tag-name/td-p/31595/page/2>
+        SOURCE_NAME=${GITHUB_REF#refs/*/}
+        unset SOURCE_BRANCH; case ${GITHUB_REF} in refs/heads/*) SOURCE_BRANCH=${GITHUB_REF#refs/heads/};; esac;
+        unset SOURCE_TAG; case ${GITHUB_REF} in refs/tags/*) SOURCE_TAG=${GITHUB_REF#refs/tags/};; esac;
+        SOURCE_SHAS=${GITHUB_SHA:0:8}
+        PKG_NAME=${PROJECT_NAME}-${SOURCE_TAG:-$SOURCE_SHAS}-${{ matrix.target }}${EXE_suffix}
+        echo ::set-output name=SOURCE_NAME::${SOURCE_NAME}
+        echo ::set-output name=SOURCE_BRANCH::${SOURCE_BRANCH}
+        echo ::set-output name=SOURCE_TAG::${SOURCE_TAG}
+        echo ::set-output name=SOURCE_SHAS::${SOURCE_SHAS}
+        echo ::set-output name=PKG_NAME::${PKG_NAME}
     - name: Create all needed build/work directories
       shell: bash
       run: mkdir -p 'package'
@@ -86,12 +98,12 @@ jobs:
         path: target/${{ matrix.target }}/release/${{ env.PROJECT_NAME }}${{ env.EXE_suffix }}
     - name: Package
       shell: bash
-      run: cp 'target/${{ matrix.target }}/release/${{ env.PROJECT_NAME }}${{ env.EXE_suffix }}' 'package/${{ steps.get_tag.outputs.PKG }}'
+      run: cp 'target/${{ matrix.target }}/release/${{ env.PROJECT_NAME }}${{ env.EXE_suffix }}' 'package/${{ steps.branch_info.outputs.PKG_NAME }}'
     - name: Publish
       uses: softprops/action-gh-release@v1
       if: startsWith(github.ref, 'refs/tags/v')
       with:
-        files: package/${{ steps.get_tag.outputs.PKG }}
+        files: package/${{ steps.branch_info.outputs.PKG_NAME }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -110,12 +122,21 @@ jobs:
       EXE_suffix: .exe
     steps:
     - uses: actions/checkout@v1
-    - name: Parse any commit tag
-      id: parse_tag
+    - name: Parse branch info
+      id: branch_info
       shell: bash
       run: |
-        echo ::set-output name=TAG::${GITHUB_REF#refs/tags/}
-        echo ::set-output name=PKG::${{ env.PROJECT_NAME }}-${GITHUB_REF#refs/tags/}-${{ matrix.target }}${{ env.EXE_suffix }}
+        # ref: <https://github.community/t5/GitHub-Actions/How-to-get-just-the-tag-name/td-p/31595/page/2>
+        SOURCE_NAME=${GITHUB_REF#refs/*/}
+        unset SOURCE_BRANCH; case ${GITHUB_REF} in refs/heads/*) SOURCE_BRANCH=${GITHUB_REF#refs/heads/};; esac;
+        unset SOURCE_TAG; case ${GITHUB_REF} in refs/tags/*) SOURCE_TAG=${GITHUB_REF#refs/tags/};; esac;
+        SOURCE_SHAS=${GITHUB_SHA:0:8}
+        PKG_NAME=${PROJECT_NAME}-${SOURCE_TAG:-$SOURCE_SHAS}-${{ matrix.target }}${EXE_suffix}
+        echo ::set-output name=SOURCE_NAME::${SOURCE_NAME}
+        echo ::set-output name=SOURCE_BRANCH::${SOURCE_BRANCH}
+        echo ::set-output name=SOURCE_TAG::${SOURCE_TAG}
+        echo ::set-output name=SOURCE_SHAS::${SOURCE_SHAS}
+        echo ::set-output name=PKG_NAME::${PKG_NAME}
     - name: Create all needed build/work directories
       shell: bash
       run: mkdir -p 'package'
@@ -145,11 +166,11 @@ jobs:
         path: target/${{ matrix.target }}/release/${{ env.PROJECT_NAME }}${{ env.EXE_suffix }}
     - name: Package
       shell: bash
-      run: cp 'target/${{ matrix.target }}/release/${{ env.PROJECT_NAME }}${{ env.EXE_suffix }}' 'package/${{ steps.get_tag.outputs.PKG }}'
+      run: cp 'target/${{ matrix.target }}/release/${{ env.PROJECT_NAME }}${{ env.EXE_suffix }}' 'package/${{ steps.branch_info.outputs.PKG_NAME }}'
     - name: Publish
       uses: softprops/action-gh-release@v1
       if: startsWith(github.ref, 'refs/tags/v')
       with:
-        files: package/${{ steps.get_tag.outputs.PKG }}
+        files: package/${{ steps.branch_info.outputs.PKG_NAME }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
