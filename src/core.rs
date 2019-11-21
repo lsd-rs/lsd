@@ -4,10 +4,11 @@ use crate::flags::{Display, Flags, IconTheme, Layout, WhenFlag};
 use crate::icon::{self, Icons};
 use crate::meta::Meta;
 use crate::sort;
+use std::fs;
 use std::path::PathBuf;
-use std::{fs, io};
 
-use super::libc;
+#[cfg(not(target_os = "windows"))]
+use std::io;
 #[cfg(not(target_os = "windows"))]
 use std::os::unix::io::AsRawFd;
 
