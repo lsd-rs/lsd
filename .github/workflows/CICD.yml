@@ -8,6 +8,33 @@ env:
 on: [push, pull_request]
 
 jobs:
+  style:
+    name: Style
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ ubuntu-latest, windows-latest ]
+    steps:
+    - uses: actions/checkout@v1
+    - name: Install `rust` toolchain
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: stable
+        override: true
+        profile: minimal # minimal component installation (ie, no documentation)
+        components: rustfmt, clippy
+    - name: "`fmt` testing"
+      uses: actions-rs/cargo@v1
+      with:
+        command: fmt
+        args: --all -- --check
+    - name: "`clippy` testing"
+      uses: actions-rs/cargo@v1
+      with:
+        command: clippy
+        args: -- -D warnings
+
   build_linux:
     name: Build (linux)
     runs-on: ubuntu-latest
@@ -40,7 +67,6 @@ jobs:
         target: ${{ matrix.target }}
         override: true
         profile: minimal # minimal component installation (ie, no documentation)
-        components: rustfmt, clippy
     - name: Build
       uses: actions-rs/cargo@v1
       with:
@@ -53,16 +79,6 @@ jobs:
         use-cross: true
         command: test
         args: --target=${{ matrix.target }}
-    - name: "`fmt` testing"
-      uses: actions-rs/cargo@v1
-      with:
-        command: fmt
-        args: --all -- --check
-    - name: "`clippy` testing"
-      uses: actions-rs/cargo@v1
-      with:
-        command: clippy
-        args: -- -D warnings
     - name: Archive executable artifacts
       uses: actions/upload-artifact@master
       with:
@@ -110,7 +126,6 @@ jobs:
         target: ${{ matrix.target }}
         override: true
         profile: minimal # minimal component installation (ie, no documentation)
-        components: rustfmt, clippy
     - name: Build
       uses: actions-rs/cargo@v1
       with:
@@ -123,16 +138,6 @@ jobs:
         use-cross: true
         command: test
         args: --target=${{ matrix.target }}
-    - name: "`fmt` testing"
-      uses: actions-rs/cargo@v1
-      with:
-        command: fmt
-        args: --all -- --check
-    - name: "`clippy` testing"
-      uses: actions-rs/cargo@v1
-      with:
-        command: clippy
-        args: -- -D warnings
     - name: Archive executable artifacts
       uses: actions/upload-artifact@master
       with:
