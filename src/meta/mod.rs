@@ -132,7 +132,7 @@ impl Meta {
     }
 
     pub fn calculate_total_size(&mut self) {
-        if let FileType::Directory { uid: _ } = self.file_type {
+        if let FileType::Directory { .. } = self.file_type {
             if let Some(metas) = &mut self.content {
                 let mut size_accumulated = self.size.get_bytes();
                 for x in &mut metas.iter_mut() {

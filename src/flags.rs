@@ -131,7 +131,7 @@ impl Flags {
             sort_by,
             sort_order,
             size: SizeFlag::from(size_inputs[size_inputs.len() - 1]),
-            blocks: blocks_inputs.into_iter().map(|b| Block::from(b)).collect(),
+            blocks: blocks_inputs.into_iter().map(Block::from).collect(),
             ignore_globs,
             // Take only the last value
             date: if classic_mode {
