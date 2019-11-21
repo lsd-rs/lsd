@@ -1,0 +1,150 @@
+name: CICD
+
+# spell-checker:ignore CICD MSVC clippy mkdir musl rustfmt softprops toolchain
+
+env:
+  PROJECT_NAME: lsd
+
+on: [push, pull_request]
+
+jobs:
+  build_linux:
+    name: Build (linux)
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        target:
+          - i686-unknown-linux-gnu
+          - x86_64-unknown-linux-gnu
+          - x86_64-unknown-linux-musl
+          # - i686-pc-windows-gnu
+          # - x86_64-pc-windows-gnu
+    env:
+      EXE_suffix: ""
+    steps:
+    - uses: actions/checkout@v1
+    - name: Parse any commit tag
+      id: parse_tag
+      shell: bash
+      run: |
+        echo ::set-output name=TAG::${GITHUB_REF#refs/tags/}
+        echo ::set-output name=PKG::${{ env.PROJECT_NAME }}-${GITHUB_REF#refs/tags/}-${{ matrix.target }}${{ env.EXE_suffix }}
+    - name: Create all needed build/work directories
+      shell: bash
+      run: mkdir -p 'package'
+    - name: Install `rust` toolchain
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: stable
+        target: ${{ matrix.target }}
+        override: true
+        profile: minimal # minimal component installation (ie, no documentation)
+        components: rustfmt, clippy
+    - name: Build
+      uses: actions-rs/cargo@v1
+      with:
+        use-cross: true
+        command: build
+        args: --release --target=${{ matrix.target }}
+    - name: Test
+      uses: actions-rs/cargo@v1
+      with:
+        use-cross: true
+        command: test
+        args: --target=${{ matrix.target }}
+    - name: "`fmt` testing"
+      uses: actions-rs/cargo@v1
+      with:
+        command: fmt
+        args: --all -- --check
+    - name: "`clippy` testing"
+      uses: actions-rs/cargo@v1
+      with:
+        command: clippy
+        args: -- -D warnings
+    - name: Archive executable artifacts
+      uses: actions/upload-artifact@master
+      with:
+        name: ${{ env.PROJECT_NAME }}-${{ matrix.target }}
+        path: target/${{ matrix.target }}/release/${{ env.PROJECT_NAME }}${{ env.EXE_suffix }}
+    - name: Package
+      shell: bash
+      run: cp 'target/${{ matrix.target }}/release/${{ env.PROJECT_NAME }}${{ env.EXE_suffix }}' 'package/${{ steps.get_tag.outputs.PKG }}'
+    - name: Publish
+      uses: softprops/action-gh-release@v1
+      if: startsWith(github.ref, 'refs/tags/v')
+      with:
+        files: package/${{ steps.get_tag.outputs.PKG }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build_windows:
+    name: Build (windows)
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        target:
+          # - i686-pc-windows-gnu
+          - i686-pc-windows-msvc
+          # - x86_64-pc-windows-gnu
+          - x86_64-pc-windows-msvc
+    env:
+      EXE_suffix: .exe
+    steps:
+    - uses: actions/checkout@v1
+    - name: Parse any commit tag
+      id: parse_tag
+      shell: bash
+      run: |
+        echo ::set-output name=TAG::${GITHUB_REF#refs/tags/}
+        echo ::set-output name=PKG::${{ env.PROJECT_NAME }}-${GITHUB_REF#refs/tags/}-${{ matrix.target }}${{ env.EXE_suffix }}
+    - name: Create all needed build/work directories
+      shell: bash
+      run: mkdir -p 'package'
+    - name: Install `rust` toolchain
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: stable
+        target: ${{ matrix.target }}
+        override: true
+        profile: minimal # minimal component installation (ie, no documentation)
+        components: rustfmt, clippy
+    - name: Build
+      uses: actions-rs/cargo@v1
+      with:
+        use-cross: true
+        command: build
+        args: --release --target=${{ matrix.target }}
+    - name: Test
+      uses: actions-rs/cargo@v1
+      with:
+        use-cross: true
+        command: test
+        args: --target=${{ matrix.target }}
+    - name: "`fmt` testing"
+      uses: actions-rs/cargo@v1
+      with:
+        command: fmt
+        args: --all -- --check
+    - name: "`clippy` testing"
+      uses: actions-rs/cargo@v1
+      with:
+        command: clippy
+        args: -- -D warnings
+    - name: Archive executable artifacts
+      uses: actions/upload-artifact@master
+      with:
+        name: ${{ env.PROJECT_NAME }}-${{ matrix.target }}
+        path: target/${{ matrix.target }}/release/${{ env.PROJECT_NAME }}${{ env.EXE_suffix }}
+    - name: Package
+      shell: bash
+      run: cp 'target/${{ matrix.target }}/release/${{ env.PROJECT_NAME }}${{ env.EXE_suffix }}' 'package/${{ steps.get_tag.outputs.PKG }}'
+    - name: Publish
+      uses: softprops/action-gh-release@v1
+      if: startsWith(github.ref, 'refs/tags/v')
+      with:
+        files: package/${{ steps.get_tag.outputs.PKG }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
