@@ -36,7 +36,7 @@ jobs:
         args: -- -D warnings
 
   build_linux:
-    name: Build (linux)
+    name: Build/linux
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -59,15 +59,15 @@ jobs:
       shell: bash
       run: |
         # ref: <https://github.community/t5/GitHub-Actions/How-to-get-just-the-tag-name/td-p/31595/page/2>
-        SOURCE_NAME=${GITHUB_REF#refs/*/}
-        unset SOURCE_BRANCH; case ${GITHUB_REF} in refs/heads/*) SOURCE_BRANCH=${GITHUB_REF#refs/heads/};; esac;
-        unset SOURCE_TAG; case ${GITHUB_REF} in refs/tags/*) SOURCE_TAG=${GITHUB_REF#refs/tags/};; esac;
-        SOURCE_SHAS=${GITHUB_SHA:0:8}
-        PKG_NAME=${PROJECT_NAME}-${SOURCE_TAG:-$SOURCE_SHAS}-${{ matrix.target }}${EXE_suffix}
-        echo ::set-output name=SOURCE_NAME::${SOURCE_NAME}
-        echo ::set-output name=SOURCE_BRANCH::${SOURCE_BRANCH}
-        echo ::set-output name=SOURCE_TAG::${SOURCE_TAG}
-        echo ::set-output name=SOURCE_SHAS::${SOURCE_SHAS}
+        REF_NAME=${GITHUB_REF#refs/*/}
+        unset REF_BRANCH; case ${GITHUB_REF} in refs/heads/*) REF_BRANCH=${GITHUB_REF#refs/heads/};; esac;
+        unset REF_TAG; case ${GITHUB_REF} in refs/tags/*) REF_TAG=${GITHUB_REF#refs/tags/};; esac;
+        REF_SHAS=${GITHUB_SHA:0:8}
+        PKG_NAME=${PROJECT_NAME}-${REF_TAG:-$REF_SHAS}-${{ matrix.target }}${EXE_suffix}
+        echo ::set-output name=REF_NAME::${REF_NAME}
+        echo ::set-output name=REF_BRANCH::${REF_BRANCH}
+        echo ::set-output name=REF_TAG::${REF_TAG}
+        echo ::set-output name=REF_SHAS::${REF_SHAS}
         echo ::set-output name=PKG_NAME::${PKG_NAME}
     - name: Create all needed build/work directories
       shell: bash
@@ -108,7 +108,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   build_mac:
-    name: Build (mac)
+    name: Build/mac
     runs-on: macos-latest
     strategy:
       fail-fast: false
@@ -128,15 +128,15 @@ jobs:
       shell: bash
       run: |
         # ref: <https://github.community/t5/GitHub-Actions/How-to-get-just-the-tag-name/td-p/31595/page/2>
-        SOURCE_NAME=${GITHUB_REF#refs/*/}
-        unset SOURCE_BRANCH; case ${GITHUB_REF} in refs/heads/*) SOURCE_BRANCH=${GITHUB_REF#refs/heads/};; esac;
-        unset SOURCE_TAG; case ${GITHUB_REF} in refs/tags/*) SOURCE_TAG=${GITHUB_REF#refs/tags/};; esac;
-        SOURCE_SHAS=${GITHUB_SHA:0:8}
-        PKG_NAME=${PROJECT_NAME}-${SOURCE_TAG:-$SOURCE_SHAS}-${{ matrix.target }}${EXE_suffix}
-        echo ::set-output name=SOURCE_NAME::${SOURCE_NAME}
-        echo ::set-output name=SOURCE_BRANCH::${SOURCE_BRANCH}
-        echo ::set-output name=SOURCE_TAG::${SOURCE_TAG}
-        echo ::set-output name=SOURCE_SHAS::${SOURCE_SHAS}
+        REF_NAME=${GITHUB_REF#refs/*/}
+        unset REF_BRANCH; case ${GITHUB_REF} in refs/heads/*) REF_BRANCH=${GITHUB_REF#refs/heads/};; esac;
+        unset REF_TAG; case ${GITHUB_REF} in refs/tags/*) REF_TAG=${GITHUB_REF#refs/tags/};; esac;
+        REF_SHAS=${GITHUB_SHA:0:8}
+        PKG_NAME=${PROJECT_NAME}-${REF_TAG:-$REF_SHAS}-${{ matrix.target }}${EXE_suffix}
+        echo ::set-output name=REF_NAME::${REF_NAME}
+        echo ::set-output name=REF_BRANCH::${REF_BRANCH}
+        echo ::set-output name=REF_TAG::${REF_TAG}
+        echo ::set-output name=REF_SHAS::${REF_SHAS}
         echo ::set-output name=PKG_NAME::${PKG_NAME}
     - name: Create all needed build/work directories
       shell: bash
@@ -177,7 +177,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   build_windows:
-    name: Build (windows)
+    name: Build/windows
     runs-on: windows-latest
     strategy:
       fail-fast: false
@@ -196,15 +196,15 @@ jobs:
       shell: bash
       run: |
         # ref: <https://github.community/t5/GitHub-Actions/How-to-get-just-the-tag-name/td-p/31595/page/2>
-        SOURCE_NAME=${GITHUB_REF#refs/*/}
-        unset SOURCE_BRANCH; case ${GITHUB_REF} in refs/heads/*) SOURCE_BRANCH=${GITHUB_REF#refs/heads/};; esac;
-        unset SOURCE_TAG; case ${GITHUB_REF} in refs/tags/*) SOURCE_TAG=${GITHUB_REF#refs/tags/};; esac;
-        SOURCE_SHAS=${GITHUB_SHA:0:8}
-        PKG_NAME=${PROJECT_NAME}-${SOURCE_TAG:-$SOURCE_SHAS}-${{ matrix.target }}${EXE_suffix}
-        echo ::set-output name=SOURCE_NAME::${SOURCE_NAME}
-        echo ::set-output name=SOURCE_BRANCH::${SOURCE_BRANCH}
-        echo ::set-output name=SOURCE_TAG::${SOURCE_TAG}
-        echo ::set-output name=SOURCE_SHAS::${SOURCE_SHAS}
+        REF_NAME=${GITHUB_REF#refs/*/}
+        unset REF_BRANCH; case ${GITHUB_REF} in refs/heads/*) REF_BRANCH=${GITHUB_REF#refs/heads/};; esac;
+        unset REF_TAG; case ${GITHUB_REF} in refs/tags/*) REF_TAG=${GITHUB_REF#refs/tags/};; esac;
+        REF_SHAS=${GITHUB_SHA:0:8}
+        PKG_NAME=${PROJECT_NAME}-${REF_TAG:-$REF_SHAS}-${{ matrix.target }}${EXE_suffix}
+        echo ::set-output name=REF_NAME::${REF_NAME}
+        echo ::set-output name=REF_BRANCH::${REF_BRANCH}
+        echo ::set-output name=REF_TAG::${REF_TAG}
+        echo ::set-output name=REF_SHAS::${REF_SHAS}
         echo ::set-output name=PKG_NAME::${PKG_NAME}
     - name: Create all needed build/work directories
       shell: bash
