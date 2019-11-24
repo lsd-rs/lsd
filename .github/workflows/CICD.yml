@@ -74,6 +74,10 @@ jobs:
         # * test only binary for arm-type targets
         unset CARGO_TEST_OPTIONS; case ${{ matrix.target }} in arm-*) CARGO_TEST_OPTIONS="--bin ${PROJECT_NAME}";; esac;
         echo ::set-output name=CARGO_TEST_OPTIONS::${CARGO_TEST_OPTIONS}
+        # * strip final executable?
+        STRIP="strip"; case ${{ matrix.target }} in arm-*) STRIP="";; *-pc-windows-*) STRIP="";; esac;
+        echo set-output name=STRIP::${STRIP}
+        echo ::set-output name=STRIP::${STRIP}
     - name: Create all needed build/work directories
       shell: bash
       run: mkdir -p 'package'
@@ -103,7 +107,9 @@ jobs:
         path: target/${{ matrix.target }}/release/${{ env.PROJECT_NAME }}${{ env.EXE_suffix }}
     - name: Package
       shell: bash
-      run: cp 'target/${{ matrix.target }}/release/${{ env.PROJECT_NAME }}${{ steps.vars.outputs.EXE_suffix }}' 'package/${{ steps.vars.outputs.PKG_NAME }}'
+      run: |
+        cp 'target/${{ matrix.target }}/release/${{ env.PROJECT_NAME }}${{ steps.vars.outputs.EXE_suffix }}' 'package/${{ steps.vars.outputs.PKG_NAME }}'
+        if [ -n "${{ steps.vars.outputs.STRIP }}" ]; then "${{ steps.vars.outputs.STRIP }}" 'package/${{ steps.vars.outputs.PKG_NAME }}'; fi
     - name: Publish
       uses: softprops/action-gh-release@v1
       if: steps.vars.outputs.DEPLOY
@@ -148,6 +154,10 @@ jobs:
         # * test only binary for arm-type targets
         unset CARGO_TEST_OPTIONS; case ${{ matrix.target }} in arm-*) CARGO_TEST_OPTIONS="--bin ${PROJECT_NAME}";; esac;
         echo ::set-output name=CARGO_TEST_OPTIONS::${CARGO_TEST_OPTIONS}
+        # * strip final executable?
+        STRIP="strip"; case ${{ matrix.target }} in arm-*) STRIP="";; *-pc-windows-*) STRIP="";; esac;
+        echo set-output name=STRIP::${STRIP}
+        echo ::set-output name=STRIP::${STRIP}
     - name: Create all needed build/work directories
       shell: bash
       run: mkdir -p 'package'
@@ -177,7 +187,9 @@ jobs:
         path: target/${{ matrix.target }}/release/${{ env.PROJECT_NAME }}${{ env.EXE_suffix }}
     - name: Package
       shell: bash
-      run: cp 'target/${{ matrix.target }}/release/${{ env.PROJECT_NAME }}${{ steps.vars.outputs.EXE_suffix }}' 'package/${{ steps.vars.outputs.PKG_NAME }}'
+      run: |
+        cp 'target/${{ matrix.target }}/release/${{ env.PROJECT_NAME }}${{ steps.vars.outputs.EXE_suffix }}' 'package/${{ steps.vars.outputs.PKG_NAME }}'
+        if [ -n "${{ steps.vars.outputs.STRIP }}" ]; then "${{ steps.vars.outputs.STRIP }}" 'package/${{ steps.vars.outputs.PKG_NAME }}'; fi
     - name: Publish
       uses: softprops/action-gh-release@v1
       if: steps.vars.outputs.DEPLOY
@@ -224,6 +236,10 @@ jobs:
         # * test only binary for arm-type targets
         unset CARGO_TEST_OPTIONS; case ${{ matrix.target }} in arm-*) CARGO_TEST_OPTIONS="--bin ${PROJECT_NAME}";; esac;
         echo ::set-output name=CARGO_TEST_OPTIONS::${CARGO_TEST_OPTIONS}
+        # * strip final executable?
+        STRIP="strip"; case ${{ matrix.target }} in arm-*) STRIP="";; *-pc-windows-*) STRIP="";; esac;
+        echo set-output name=STRIP::${STRIP}
+        echo ::set-output name=STRIP::${STRIP}
     - name: Create all needed build/work directories
       shell: bash
       run: mkdir -p 'package'
@@ -253,7 +269,9 @@ jobs:
         path: target/${{ matrix.target }}/release/${{ env.PROJECT_NAME }}${{ env.EXE_suffix }}
     - name: Package
       shell: bash
-      run: cp 'target/${{ matrix.target }}/release/${{ env.PROJECT_NAME }}${{ steps.vars.outputs.EXE_suffix }}' 'package/${{ steps.vars.outputs.PKG_NAME }}'
+      run: |
+        cp 'target/${{ matrix.target }}/release/${{ env.PROJECT_NAME }}${{ steps.vars.outputs.EXE_suffix }}' 'package/${{ steps.vars.outputs.PKG_NAME }}'
+        if [ -n "${{ steps.vars.outputs.STRIP }}" ]; then "${{ steps.vars.outputs.STRIP }}" 'package/${{ steps.vars.outputs.PKG_NAME }}'; fi
     - name: Publish
       uses: softprops/action-gh-release@v1
       if: steps.vars.outputs.DEPLOY
