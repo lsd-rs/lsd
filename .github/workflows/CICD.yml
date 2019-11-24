@@ -55,6 +55,8 @@ jobs:
       run: |
         # determine EXE suffix
         EXE_suffix=""; case ${{ matrix.target }} in *-pc-windows-*) EXE_suffix=".exe";; esac;
+        echo set-output name=EXE_suffix::${EXE_suffix}
+        echo ::set-output name=EXE_suffix::${EXE_suffix}
         # parse branch/reference info
         # ref: <https://github.community/t5/GitHub-Actions/How-to-get-just-the-tag-name/td-p/31595/page/2>
         REF_NAME=${GITHUB_REF#refs/*/}
@@ -62,6 +64,11 @@ jobs:
         unset REF_TAG; case ${GITHUB_REF} in refs/tags/*) REF_TAG=${GITHUB_REF#refs/tags/};; esac;
         REF_SHAS=${GITHUB_SHA:0:8}
         PKG_NAME=${PROJECT_NAME}-${REF_TAG:-$REF_SHAS}-${{ matrix.target }}${EXE_suffix}
+        echo set-output name=REF_NAME::${REF_NAME}
+        echo set-output name=REF_BRANCH::${REF_BRANCH}
+        echo set-output name=REF_TAG::${REF_TAG}
+        echo set-output name=REF_SHAS::${REF_SHAS}
+        echo set-output name=PKG_NAME::${PKG_NAME}
         echo ::set-output name=REF_NAME::${REF_NAME}
         echo ::set-output name=REF_BRANCH::${REF_BRANCH}
         echo ::set-output name=REF_TAG::${REF_TAG}
@@ -69,10 +76,12 @@ jobs:
         echo ::set-output name=PKG_NAME::${PKG_NAME}
         # deployable tag? (ie, leading "vM" or "M"; M == version number)
         unset DEPLOY; if [[ $REF_TAG =~ ^[vV]?[0-9].* ]]; then DEPLOY=true; fi
+        echo set-output name=DEPLOY::${DEPLOY}
         echo ::set-output name=DEPLOY::${DEPLOY}
         # target-specific options
         # * test only binary for arm-type targets
         unset CARGO_TEST_OPTIONS; case ${{ matrix.target }} in arm-*) CARGO_TEST_OPTIONS="--bin ${PROJECT_NAME}";; esac;
+        echo set-output name=CARGO_TEST_OPTIONS::${CARGO_TEST_OPTIONS}
         echo ::set-output name=CARGO_TEST_OPTIONS::${CARGO_TEST_OPTIONS}
         # * strip final executable?
         STRIP="strip"; case ${{ matrix.target }} in arm-*) STRIP="";; *-pc-windows-*) STRIP="";; esac;
@@ -135,6 +144,8 @@ jobs:
       run: |
         # determine EXE suffix
         EXE_suffix=""; case ${{ matrix.target }} in *-pc-windows-*) EXE_suffix=".exe";; esac;
+        echo set-output name=EXE_suffix::${EXE_suffix}
+        echo ::set-output name=EXE_suffix::${EXE_suffix}
         # parse branch/reference info
         # ref: <https://github.community/t5/GitHub-Actions/How-to-get-just-the-tag-name/td-p/31595/page/2>
         REF_NAME=${GITHUB_REF#refs/*/}
@@ -142,6 +153,11 @@ jobs:
         unset REF_TAG; case ${GITHUB_REF} in refs/tags/*) REF_TAG=${GITHUB_REF#refs/tags/};; esac;
         REF_SHAS=${GITHUB_SHA:0:8}
         PKG_NAME=${PROJECT_NAME}-${REF_TAG:-$REF_SHAS}-${{ matrix.target }}${EXE_suffix}
+        echo set-output name=REF_NAME::${REF_NAME}
+        echo set-output name=REF_BRANCH::${REF_BRANCH}
+        echo set-output name=REF_TAG::${REF_TAG}
+        echo set-output name=REF_SHAS::${REF_SHAS}
+        echo set-output name=PKG_NAME::${PKG_NAME}
         echo ::set-output name=REF_NAME::${REF_NAME}
         echo ::set-output name=REF_BRANCH::${REF_BRANCH}
         echo ::set-output name=REF_TAG::${REF_TAG}
@@ -149,10 +165,12 @@ jobs:
         echo ::set-output name=PKG_NAME::${PKG_NAME}
         # deployable tag? (ie, leading "vM" or "M"; M == version number)
         unset DEPLOY; if [[ $REF_TAG =~ ^[vV]?[0-9].* ]]; then DEPLOY=true; fi
+        echo set-output name=DEPLOY::${DEPLOY}
         echo ::set-output name=DEPLOY::${DEPLOY}
         # target-specific options
         # * test only binary for arm-type targets
         unset CARGO_TEST_OPTIONS; case ${{ matrix.target }} in arm-*) CARGO_TEST_OPTIONS="--bin ${PROJECT_NAME}";; esac;
+        echo set-output name=CARGO_TEST_OPTIONS::${CARGO_TEST_OPTIONS}
         echo ::set-output name=CARGO_TEST_OPTIONS::${CARGO_TEST_OPTIONS}
         # * strip final executable?
         STRIP="strip"; case ${{ matrix.target }} in arm-*) STRIP="";; *-pc-windows-*) STRIP="";; esac;
@@ -217,6 +235,8 @@ jobs:
       run: |
         # determine EXE suffix
         EXE_suffix=""; case ${{ matrix.target }} in *-pc-windows-*) EXE_suffix=".exe";; esac;
+        echo set-output name=EXE_suffix::${EXE_suffix}
+        echo ::set-output name=EXE_suffix::${EXE_suffix}
         # parse branch/reference info
         # ref: <https://github.community/t5/GitHub-Actions/How-to-get-just-the-tag-name/td-p/31595/page/2>
         REF_NAME=${GITHUB_REF#refs/*/}
@@ -224,6 +244,11 @@ jobs:
         unset REF_TAG; case ${GITHUB_REF} in refs/tags/*) REF_TAG=${GITHUB_REF#refs/tags/};; esac;
         REF_SHAS=${GITHUB_SHA:0:8}
         PKG_NAME=${PROJECT_NAME}-${REF_TAG:-$REF_SHAS}-${{ matrix.target }}${EXE_suffix}
+        echo set-output name=REF_NAME::${REF_NAME}
+        echo set-output name=REF_BRANCH::${REF_BRANCH}
+        echo set-output name=REF_TAG::${REF_TAG}
+        echo set-output name=REF_SHAS::${REF_SHAS}
+        echo set-output name=PKG_NAME::${PKG_NAME}
         echo ::set-output name=REF_NAME::${REF_NAME}
         echo ::set-output name=REF_BRANCH::${REF_BRANCH}
         echo ::set-output name=REF_TAG::${REF_TAG}
@@ -231,10 +256,12 @@ jobs:
         echo ::set-output name=PKG_NAME::${PKG_NAME}
         # deployable tag? (ie, leading "vM" or "M"; M == version number)
         unset DEPLOY; if [[ $REF_TAG =~ ^[vV]?[0-9].* ]]; then DEPLOY=true; fi
+        echo set-output name=DEPLOY::${DEPLOY}
         echo ::set-output name=DEPLOY::${DEPLOY}
         # target-specific options
         # * test only binary for arm-type targets
         unset CARGO_TEST_OPTIONS; case ${{ matrix.target }} in arm-*) CARGO_TEST_OPTIONS="--bin ${PROJECT_NAME}";; esac;
+        echo set-output name=CARGO_TEST_OPTIONS::${CARGO_TEST_OPTIONS}
         echo ::set-output name=CARGO_TEST_OPTIONS::${CARGO_TEST_OPTIONS}
         # * strip final executable?
         STRIP="strip"; case ${{ matrix.target }} in arm-*) STRIP="";; *-pc-windows-*) STRIP="";; esac;
