@@ -113,7 +113,7 @@ jobs:
       uses: actions/upload-artifact@master
       with:
         name: ${{ env.PROJECT_NAME }}-${{ matrix.target }}
-        path: target/${{ matrix.target }}/release/${{ env.PROJECT_NAME }}${{ env.EXE_suffix }}
+        path: target/${{ matrix.target }}/release/${{ env.PROJECT_NAME }}${{ steps.vars.outputs.EXE_suffix }}
     - name: Package
       shell: bash
       run: |
@@ -202,7 +202,7 @@ jobs:
       uses: actions/upload-artifact@master
       with:
         name: ${{ env.PROJECT_NAME }}-${{ matrix.target }}
-        path: target/${{ matrix.target }}/release/${{ env.PROJECT_NAME }}${{ env.EXE_suffix }}
+        path: target/${{ matrix.target }}/release/${{ env.PROJECT_NAME }}${{ steps.vars.outputs.EXE_suffix }}
     - name: Package
       shell: bash
       run: |
@@ -293,7 +293,7 @@ jobs:
       uses: actions/upload-artifact@master
       with:
         name: ${{ env.PROJECT_NAME }}-${{ matrix.target }}
-        path: target/${{ matrix.target }}/release/${{ env.PROJECT_NAME }}${{ env.EXE_suffix }}
+        path: target/${{ matrix.target }}/release/${{ env.PROJECT_NAME }}${{ steps.vars.outputs.EXE_suffix }}
     - name: Package
       shell: bash
       run: |
