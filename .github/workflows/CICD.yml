@@ -14,7 +14,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ ubuntu-latest, windows-latest, macos-latest ]
+        os: [ ubuntu-latest, macos-latest, windows-latest ]
     steps:
     - uses: actions/checkout@v1
     - name: Install `rust` toolchain
@@ -45,26 +45,17 @@ jobs:
           - arm-unknown-linux-gnueabihf
           - i686-unknown-linux-gnu
           - i686-unknown-linux-musl
-          # - x86_64-apple-darwin
           - x86_64-unknown-linux-gnu
           - x86_64-unknown-linux-musl
-          # - i686-pc-windows-gnu
-          # - x86_64-pc-windows-gnu
-    env:
-      EXE_suffix: ""
     steps:
     - uses: actions/checkout@v1
-    - name: Setup target-specific options
-      id: cargo_options
+    - name: Initialize workflow variables
+      id: vars
       shell: bash
       run: |
-        # test only binary for arm-type targets
-        unset TEST_OPTIONS; case ${{ matrix.target }} in arm-*) TEST_OPTIONS="--bin ${PROJECT_NAME}";; esac;
-        echo ::set-output name=TEST_OPTIONS::${TEST_OPTIONS}
-    - name: Parse branch info
-      id: branch_info
-      shell: bash
-      run: |
+        # determine EXE suffix
+        EXE_suffix=""; case ${{ matrix.target }} in *-pc-windows-*) EXE_suffix=".exe";; esac;
+        # parse branch/reference info
         # ref: <https://github.community/t5/GitHub-Actions/How-to-get-just-the-tag-name/td-p/31595/page/2>
         REF_NAME=${GITHUB_REF#refs/*/}
         unset REF_BRANCH; case ${GITHUB_REF} in refs/heads/*) REF_BRANCH=${GITHUB_REF#refs/heads/};; esac;
@@ -76,6 +67,13 @@ jobs:
         echo ::set-output name=REF_TAG::${REF_TAG}
         echo ::set-output name=REF_SHAS::${REF_SHAS}
         echo ::set-output name=PKG_NAME::${PKG_NAME}
+        # deployable tag? (ie, leading "vM" or "M"; M == version number)
+        unset DEPLOY; if [[ $REF_TAG =~ ^[vV]?[0-9].* ]]; then DEPLOY=true; fi
+        echo ::set-output name=DEPLOY::${DEPLOY}
+        # target-specific options
+        # * test only binary for arm-type targets
+        unset CARGO_TEST_OPTIONS; case ${{ matrix.target }} in arm-*) CARGO_TEST_OPTIONS="--bin ${PROJECT_NAME}";; esac;
+        echo ::set-output name=CARGO_TEST_OPTIONS::${CARGO_TEST_OPTIONS}
     - name: Create all needed build/work directories
       shell: bash
       run: mkdir -p 'package'
@@ -97,7 +95,7 @@ jobs:
       with:
         use-cross: true
         command: test
-        args: --target=${{ matrix.target }} ${{ steps.cargo_options.outputs.TEST_OPTIONS}}
+        args: --target=${{ matrix.target }} ${{ steps.vars.outputs.CARGO_TEST_OPTIONS}}
     - name: Archive executable artifacts
       uses: actions/upload-artifact@master
       with:
@@ -105,12 +103,12 @@ jobs:
         path: target/${{ matrix.target }}/release/${{ env.PROJECT_NAME }}${{ env.EXE_suffix }}
     - name: Package
       shell: bash
-      run: cp 'target/${{ matrix.target }}/release/${{ env.PROJECT_NAME }}${{ env.EXE_suffix }}' 'package/${{ steps.branch_info.outputs.PKG_NAME }}'
+      run: cp 'target/${{ matrix.target }}/release/${{ env.PROJECT_NAME }}${{ steps.vars.outputs.EXE_suffix }}' 'package/${{ steps.vars.outputs.PKG_NAME }}'
     - name: Publish
       uses: softprops/action-gh-release@v1
-      if: startsWith(github.ref, 'refs/tags/v')
+      if: steps.vars.outputs.DEPLOY
       with:
-        files: package/${{ steps.branch_info.outputs.PKG_NAME }}
+        files: package/${{ steps.vars.outputs.PKG_NAME }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -121,19 +119,17 @@ jobs:
       fail-fast: false
       matrix:
         target:
+          - i686-apple-darwin
           - x86_64-apple-darwin
-          # - x86_64-unknown-linux-gnu
-          # - x86_64-unknown-linux-musl
-          # - i686-pc-windows-gnu
-          # - x86_64-pc-windows-gnu
-    env:
-      EXE_suffix: ""
     steps:
     - uses: actions/checkout@v1
-    - name: Parse branch info
-      id: branch_info
+    - name: Initialize workflow variables
+      id: vars
       shell: bash
       run: |
+        # determine EXE suffix
+        EXE_suffix=""; case ${{ matrix.target }} in *-pc-windows-*) EXE_suffix=".exe";; esac;
+        # parse branch/reference info
         # ref: <https://github.community/t5/GitHub-Actions/How-to-get-just-the-tag-name/td-p/31595/page/2>
         REF_NAME=${GITHUB_REF#refs/*/}
         unset REF_BRANCH; case ${GITHUB_REF} in refs/heads/*) REF_BRANCH=${GITHUB_REF#refs/heads/};; esac;
@@ -145,6 +141,13 @@ jobs:
         echo ::set-output name=REF_TAG::${REF_TAG}
         echo ::set-output name=REF_SHAS::${REF_SHAS}
         echo ::set-output name=PKG_NAME::${PKG_NAME}
+        # deployable tag? (ie, leading "vM" or "M"; M == version number)
+        unset DEPLOY; if [[ $REF_TAG =~ ^[vV]?[0-9].* ]]; then DEPLOY=true; fi
+        echo ::set-output name=DEPLOY::${DEPLOY}
+        # target-specific options
+        # * test only binary for arm-type targets
+        unset CARGO_TEST_OPTIONS; case ${{ matrix.target }} in arm-*) CARGO_TEST_OPTIONS="--bin ${PROJECT_NAME}";; esac;
+        echo ::set-output name=CARGO_TEST_OPTIONS::${CARGO_TEST_OPTIONS}
     - name: Create all needed build/work directories
       shell: bash
       run: mkdir -p 'package'
@@ -166,7 +169,7 @@ jobs:
       with:
         use-cross: true
         command: test
-        args: --target=${{ matrix.target }}
+        args: --target=${{ matrix.target }} ${{ steps.vars.outputs.CARGO_TEST_OPTIONS}}
     - name: Archive executable artifacts
       uses: actions/upload-artifact@master
       with:
@@ -174,12 +177,12 @@ jobs:
         path: target/${{ matrix.target }}/release/${{ env.PROJECT_NAME }}${{ env.EXE_suffix }}
     - name: Package
       shell: bash
-      run: cp 'target/${{ matrix.target }}/release/${{ env.PROJECT_NAME }}${{ env.EXE_suffix }}' 'package/${{ steps.branch_info.outputs.PKG_NAME }}'
+      run: cp 'target/${{ matrix.target }}/release/${{ env.PROJECT_NAME }}${{ steps.vars.outputs.EXE_suffix }}' 'package/${{ steps.vars.outputs.PKG_NAME }}'
     - name: Publish
       uses: softprops/action-gh-release@v1
-      if: startsWith(github.ref, 'refs/tags/v')
+      if: steps.vars.outputs.DEPLOY
       with:
-        files: package/${{ steps.branch_info.outputs.PKG_NAME }}
+        files: package/${{ steps.vars.outputs.PKG_NAME }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -194,14 +197,15 @@ jobs:
           - i686-pc-windows-msvc
           # - x86_64-pc-windows-gnu
           - x86_64-pc-windows-msvc
-    env:
-      EXE_suffix: .exe
     steps:
     - uses: actions/checkout@v1
-    - name: Parse branch info
-      id: branch_info
+    - name: Initialize workflow variables
+      id: vars
       shell: bash
       run: |
+        # determine EXE suffix
+        EXE_suffix=""; case ${{ matrix.target }} in *-pc-windows-*) EXE_suffix=".exe";; esac;
+        # parse branch/reference info
         # ref: <https://github.community/t5/GitHub-Actions/How-to-get-just-the-tag-name/td-p/31595/page/2>
         REF_NAME=${GITHUB_REF#refs/*/}
         unset REF_BRANCH; case ${GITHUB_REF} in refs/heads/*) REF_BRANCH=${GITHUB_REF#refs/heads/};; esac;
@@ -213,6 +217,13 @@ jobs:
         echo ::set-output name=REF_TAG::${REF_TAG}
         echo ::set-output name=REF_SHAS::${REF_SHAS}
         echo ::set-output name=PKG_NAME::${PKG_NAME}
+        # deployable tag? (ie, leading "vM" or "M"; M == version number)
+        unset DEPLOY; if [[ $REF_TAG =~ ^[vV]?[0-9].* ]]; then DEPLOY=true; fi
+        echo ::set-output name=DEPLOY::${DEPLOY}
+        # target-specific options
+        # * test only binary for arm-type targets
+        unset CARGO_TEST_OPTIONS; case ${{ matrix.target }} in arm-*) CARGO_TEST_OPTIONS="--bin ${PROJECT_NAME}";; esac;
+        echo ::set-output name=CARGO_TEST_OPTIONS::${CARGO_TEST_OPTIONS}
     - name: Create all needed build/work directories
       shell: bash
       run: mkdir -p 'package'
@@ -234,7 +245,7 @@ jobs:
       with:
         use-cross: true
         command: test
-        args: --target=${{ matrix.target }}
+        args: --target=${{ matrix.target }} ${{ steps.vars.outputs.CARGO_TEST_OPTIONS}}
     - name: Archive executable artifacts
       uses: actions/upload-artifact@master
       with:
@@ -242,11 +253,11 @@ jobs:
         path: target/${{ matrix.target }}/release/${{ env.PROJECT_NAME }}${{ env.EXE_suffix }}
     - name: Package
       shell: bash
-      run: cp 'target/${{ matrix.target }}/release/${{ env.PROJECT_NAME }}${{ env.EXE_suffix }}' 'package/${{ steps.branch_info.outputs.PKG_NAME }}'
+      run: cp 'target/${{ matrix.target }}/release/${{ env.PROJECT_NAME }}${{ steps.vars.outputs.EXE_suffix }}' 'package/${{ steps.vars.outputs.PKG_NAME }}'
     - name: Publish
       uses: softprops/action-gh-release@v1
-      if: startsWith(github.ref, 'refs/tags/v')
+      if: steps.vars.outputs.DEPLOY
       with:
-        files: package/${{ steps.branch_info.outputs.PKG_NAME }}
+        files: package/${{ steps.vars.outputs.PKG_NAME }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
