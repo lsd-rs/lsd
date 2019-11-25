@@ -87,6 +87,10 @@ jobs:
       id: vars
       shell: bash
       run: |
+        # staging directory
+        STAGING='_staging'
+        echo set-output name=STAGING::${STAGING}
+        echo ::set-output name=STAGING::${STAGING}
         # determine EXE suffix
         EXE_suffix="" ; case ${{ matrix.target }} in *-pc-windows-*) EXE_suffix=".exe" ;; esac;
         echo set-output name=EXE_suffix::${EXE_suffix}
@@ -96,16 +100,23 @@ jobs:
         unset REF_BRANCH ; case ${GITHUB_REF} in refs/heads/*) REF_BRANCH=${GITHUB_REF#refs/heads/} ;; esac;
         unset REF_TAG ; case ${GITHUB_REF} in refs/tags/*) REF_TAG=${GITHUB_REF#refs/tags/} ;; esac;
         REF_SHAS=${GITHUB_SHA:0:8}
-        PKG_NAME=${PROJECT_NAME}-${REF_TAG:-$REF_SHAS}-${{ matrix.target }}${EXE_suffix}
         echo set-output name=REF_NAME::${REF_NAME}
         echo set-output name=REF_BRANCH::${REF_BRANCH}
         echo set-output name=REF_TAG::${REF_TAG}
         echo set-output name=REF_SHAS::${REF_SHAS}
-        echo set-output name=PKG_NAME::${PKG_NAME}
         echo ::set-output name=REF_NAME::${REF_NAME}
         echo ::set-output name=REF_BRANCH::${REF_BRANCH}
         echo ::set-output name=REF_TAG::${REF_TAG}
         echo ::set-output name=REF_SHAS::${REF_SHAS}
+        # package name
+        PKG_suffix=".tar.gz" ; case ${{ matrix.target }} in *-pc-windows-*) PKG_suffix=".zip" ;; esac;
+        PKG_BASENAME=${PROJECT_NAME}-${REF_TAG:-$REF_SHAS}-${{ matrix.target }}
+        PKG_NAME=${PKG_BASENAME}${PKG_suffix}
+        echo set-output name=PKG_suffix::${PKG_suffix}
+        echo set-output name=PKG_BASENAME::${PKG_BASENAME}
+        echo set-output name=PKG_NAME::${PKG_NAME}
+        echo ::set-output name=PKG_suffix::${PKG_suffix}
+        echo ::set-output name=PKG_BASENAME::${PKG_BASENAME}
         echo ::set-output name=PKG_NAME::${PKG_NAME}
         # deployable tag? (ie, leading "vM" or "M"; M == version number)
         unset DEPLOY ; if [[ $REF_TAG =~ ^[vV]?[0-9].* ]]; then DEPLOY=true ; fi
@@ -116,13 +127,16 @@ jobs:
         unset CARGO_TEST_OPTIONS ; case ${{ matrix.target }} in arm-*) CARGO_TEST_OPTIONS="--bin ${PROJECT_NAME}" ;; esac;
         echo set-output name=CARGO_TEST_OPTIONS::${CARGO_TEST_OPTIONS}
         echo ::set-output name=CARGO_TEST_OPTIONS::${CARGO_TEST_OPTIONS}
-        # * strip final executable?
+        # * strip executable?
         STRIP="strip"; case ${{ matrix.target }} in arm-*) STRIP="";; *-pc-windows-*) STRIP="";; esac;
         echo set-output name=STRIP::${STRIP}
         echo ::set-output name=STRIP::${STRIP}
     - name: Create all needed build/work directories
       shell: bash
-      run: mkdir -p 'package'
+      run: |
+        mkdir -p '${{ steps.vars.outputs.STAGING }}'
+        mkdir -p '${{ steps.vars.outputs.STAGING }}/${{ steps.vars.outputs.PKG_BASENAME }}'
+        mkdir -p '${{ steps.vars.outputs.STAGING }}/${{ steps.vars.outputs.PKG_BASENAME }}/autocomplete'
     - name: Install `rust` toolchain
       uses: actions-rs/toolchain@v1
       with:
@@ -150,12 +164,29 @@ jobs:
     - name: Package
       shell: bash
       run: |
-        cp 'target/${{ matrix.target }}/release/${{ env.PROJECT_NAME }}${{ steps.vars.outputs.EXE_suffix }}' 'package/${{ steps.vars.outputs.PKG_NAME }}'
-        if [ -n "${{ steps.vars.outputs.STRIP }}" ]; then "${{ steps.vars.outputs.STRIP }}" 'package/${{ steps.vars.outputs.PKG_NAME }}'; fi
+        # binary
+        cp 'target/${{ matrix.target }}/release/${{ env.PROJECT_NAME }}${{ steps.vars.outputs.EXE_suffix }}' '${{ steps.vars.outputs.STAGING }}/${{ steps.vars.outputs.PKG_BASENAME }}/'
+        # `strip` binary (if needed)
+        if [ -n "${{ steps.vars.outputs.STRIP }}" ]; then "${{ steps.vars.outputs.STRIP }}" '${{ steps.vars.outputs.STAGING }}/${{ steps.vars.outputs.PKG_BASENAME }}/${{ env.PROJECT_NAME }}${{ steps.vars.outputs.EXE_suffix }}' ; fi
+        # README and LICENSE
+        cp README.md '${{ steps.vars.outputs.STAGING }}/${{ steps.vars.outputs.PKG_BASENAME }}/'
+        cp LICENSE '${{ steps.vars.outputs.STAGING }}/${{ steps.vars.outputs.PKG_BASENAME }}/'
+        # autocomplete
+        cp 'target/${{ matrix.target }}/release/build/${{ env.PROJECT_NAME }}-'*/'out/${{ env.PROJECT_NAME }}.bash' '${{ steps.vars.outputs.STAGING }}/${{ steps.vars.outputs.PKG_BASENAME }}/autocomplete/${{ env.PROJECT_NAME }}.bash-completion'
+        cp 'target/${{ matrix.target }}/release/build/${{ env.PROJECT_NAME }}-'*/'out/${{ env.PROJECT_NAME }}.fish' '${{ steps.vars.outputs.STAGING }}/${{ steps.vars.outputs.PKG_BASENAME }}/autocomplete/'
+        cp 'target/${{ matrix.target }}/release/build/${{ env.PROJECT_NAME }}-'*/'out/_${{ env.PROJECT_NAME }}' '${{ steps.vars.outputs.STAGING }}/${{ steps.vars.outputs.PKG_BASENAME }}/autocomplete/'
+        # base compressed package
+        pushd '${{ steps.vars.outputs.STAGING }}/' >/dev/null
+        case ${{ matrix.target }} in
+          *-pc-windows-*) 7z -y a '${{ steps.vars.outputs.PKG_NAME }}' '${{ steps.vars.outputs.PKG_BASENAME }}'/* | tail -2 ;;
+          *) tar czf '${{ steps.vars.outputs.PKG_NAME }}' '${{ steps.vars.outputs.PKG_BASENAME }}'/* ;;
+        esac;
+        popd >/dev/null
     - name: Publish
       uses: softprops/action-gh-release@v1
       if: steps.vars.outputs.DEPLOY
       with:
-        files: package/${{ steps.vars.outputs.PKG_NAME }}
+        files: |
+          ${{ steps.vars.outputs.STAGING }}/${{ steps.vars.outputs.PKG_NAME }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
