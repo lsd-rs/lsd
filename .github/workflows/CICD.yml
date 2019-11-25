@@ -83,6 +83,12 @@ jobs:
             os: windows-latest
     steps:
     - uses: actions/checkout@v1
+    - name: Install any prerequisites
+      shell: bash
+      run: |
+        case ${{ matrix.target }} in
+          arm-unknown-linux-gnueabihf) sudo apt-get -y update ; sudo apt-get -y install gcc-arm-linux-gnueabihf ;;
+        esac
     - name: Initialize workflow variables
       id: vars
       shell: bash
@@ -128,7 +134,7 @@ jobs:
         echo set-output name=CARGO_TEST_OPTIONS::${CARGO_TEST_OPTIONS}
         echo ::set-output name=CARGO_TEST_OPTIONS::${CARGO_TEST_OPTIONS}
         # * strip executable?
-        STRIP="strip"; case ${{ matrix.target }} in arm-*) STRIP="";; *-pc-windows-*) STRIP="";; esac;
+        STRIP="strip" ; case ${{ matrix.target }} in arm-unknown-linux-gnueabihf) STRIP="arm-linux-gnueabihf-strip" ;; *-pc-windows-*) STRIP="" ;; esac;
         echo set-output name=STRIP::${STRIP}
         echo ::set-output name=STRIP::${STRIP}
     - name: Create all needed build/work directories
