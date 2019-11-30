@@ -1,9 +1,11 @@
 name: CICD
 
-# spell-checker:ignore CICD CODECOV MSVC MacOS SHAs buildable clippy esac gnueabihf libssl mkdir musl popd pushd rustfmt softprops toolchain
+# spell-checker:ignore CICD CODECOV MSVC MacOS Peltoche SHAs buildable clippy dpkg esac fakeroot gnueabihf halium libssl mkdir musl popd printf pushd rustfmt softprops toolchain
 
 env:
   PROJECT_NAME: lsd
+  PROJECT_DESC: "An ls command with a lot of pretty colors."
+  PROJECT_AUTH: "Peltoche <peltoche@halium.fr>"
 
 on: [push, pull_request]
 
@@ -128,6 +130,27 @@ jobs:
         unset DEPLOY ; if [[ $REF_TAG =~ ^[vV]?[0-9].* ]]; then DEPLOY=true ; fi
         echo set-output name=DEPLOY::${DEPLOY}
         echo ::set-output name=DEPLOY::${DEPLOY}
+        # DPKG architecture?
+        unset DPKG_ARCH ; case ${{ matrix.target }} in i686-*-linux-*) DPKG_ARCH=i686 ;; x86_64-*-linux-*) DPKG_ARCH=amd64 ;; esac;
+        echo set-output name=DPKG_ARCH::${DPKG_ARCH}
+        echo ::set-output name=DPKG_ARCH::${DPKG_ARCH}
+        # DPKG version?
+        unset DPKG_VERSION ; if [[ $REF_TAG =~ ^[vV]?[0-9].* ]]; then DPKG_VERSION=${REF_TAG/#[vV]/} ; fi
+        echo set-output name=DPKG_VERSION::${DPKG_VERSION}
+        echo ::set-output name=DPKG_VERSION::${DPKG_VERSION}
+        # DPKG base name/conflicts?
+        DPKG_BASENAME=${PROJECT_NAME}
+        DPKG_CONFLICTS=${PROJECT_NAME}-musl
+        case ${{ matrix.target }} in *-musl) DPKG_BASENAME=${PROJECT_NAME}-musl ; DPKG_CONFLICTS=${PROJECT_NAME} ;; esac;
+        echo set-output name=DPKG_BASENAME::${DPKG_BASENAME}
+        echo set-output name=DPKG_CONFLICTS::${DPKG_CONFLICTS}
+        echo ::set-output name=DPKG_BASENAME::${DPKG_BASENAME}
+        echo ::set-output name=DPKG_CONFLICTS::${DPKG_CONFLICTS}
+        # DPKG name
+        unset DPKG_NAME;
+        if [[ -n $DPKG_ARCH && -n $DPKG_VERSION ]]; then DPKG_NAME="${DPKG_BASENAME}_${DPKG_VERSION}_${DPKG_ARCH}.deb" ; fi
+        echo set-output name=DPKG_NAME::${DPKG_NAME}
+        echo ::set-output name=DPKG_NAME::${DPKG_NAME}
         # target-specific options
         # * test only binary for arm-type targets
         unset CARGO_TEST_OPTIONS ; case ${{ matrix.target }} in arm-*) CARGO_TEST_OPTIONS="--bin ${PROJECT_NAME}" ;; esac;
@@ -143,6 +166,7 @@ jobs:
         mkdir -p '${{ steps.vars.outputs.STAGING }}'
         mkdir -p '${{ steps.vars.outputs.STAGING }}/${{ steps.vars.outputs.PKG_BASENAME }}'
         mkdir -p '${{ steps.vars.outputs.STAGING }}/${{ steps.vars.outputs.PKG_BASENAME }}/autocomplete'
+        mkdir -p '${{ steps.vars.outputs.STAGING }}/dpkg'
     - name: Install `rust` toolchain
       uses: actions-rs/toolchain@v1
       with:
@@ -188,12 +212,33 @@ jobs:
           *) tar czf '${{ steps.vars.outputs.PKG_NAME }}' '${{ steps.vars.outputs.PKG_BASENAME }}'/* ;;
         esac;
         popd >/dev/null
+        # dpkg
+        if [ -n "${{ steps.vars.outputs.DPKG_NAME }}" ]; then
+          DPKG_DIR="${{ steps.vars.outputs.STAGING }}/dpkg"
+          # binary
+          install -Dm755 'target/${{ matrix.target }}/release/${{ env.PROJECT_NAME }}${{ steps.vars.outputs.EXE_suffix }}' "${DPKG_DIR}/usr/bin/${{ env.PROJECT_NAME }}${{ steps.vars.outputs.EXE_suffix }}"
+          if [ -n "${{ steps.vars.outputs.STRIP }}" ]; then "${{ steps.vars.outputs.STRIP }}" "${DPKG_DIR}/usr/bin/${{ env.PROJECT_NAME }}${{ steps.vars.outputs.EXE_suffix }}" ; fi
+          # README and LICENSE
+          install -Dm644 README.md "${DPKG_DIR}/usr/share/doc/${{ env.PROJECT_NAME }}/README.md"
+          install -Dm644 LICENSE "${DPKG_DIR}/usr/share/doc/${{ env.PROJECT_NAME }}/LICENSE"
+          # (auto-)completions
+          install -Dm644 'target/${{ matrix.target }}/release/build/${{ env.PROJECT_NAME }}-'*/'out/${{ env.PROJECT_NAME }}.bash' "${DPKG_DIR}/usr/share/bash-completion/completions/${{ env.PROJECT_NAME }}"
+          install -Dm644 'target/${{ matrix.target }}/release/build/${{ env.PROJECT_NAME }}-'*/'out/${{ env.PROJECT_NAME }}.fish' "${DPKG_DIR}/usr/share/fish/completions/completions/${{ env.PROJECT_NAME }}.fish"
+          install -Dm644 'target/${{ matrix.target }}/release/build/${{ env.PROJECT_NAME }}-'*/'out/_${{ env.PROJECT_NAME }}' "${DPKG_DIR}/usr/share/zsh/vendor-completions/_${{ env.PROJECT_NAME }}"
+          # control file
+          mkdir -p "${DPKG_DIR}/DEBIAN"
+          printf "Package: ${{ steps.vars.outputs.DPKG_BASENAME }}\nVersion: ${{ steps.vars.outputs.DPKG_VERSION }}\nSection: utils\nPriority: optional\nMaintainer: ${{ env.PROJECT_AUTH }}\nArchitecture: ${{ steps.vars.outputs.DPKG_ARCH }}\nProvides: ${{ env.PROJECT_NAME }}\nConflicts: ${{ steps.vars.outputs.DPKG_CONFLICTS }}\nDescription: ${{ env.PROJECT_DESC }}\n" > "${DPKG_DIR}/DEBIAN/control"
+          ## cat "${DPKG_DIR}/DEBIAN/control"
+          # build dpkg
+          fakeroot dpkg-deb --build "${DPKG_DIR}" "${{ steps.vars.outputs.STAGING }}/${{ steps.vars.outputs.DPKG_NAME }}"
+        fi
     - name: Publish
       uses: softprops/action-gh-release@v1
       if: steps.vars.outputs.DEPLOY
       with:
         files: |
           ${{ steps.vars.outputs.STAGING }}/${{ steps.vars.outputs.PKG_NAME }}
+          ${{ steps.vars.outputs.STAGING }}/${{ steps.vars.outputs.DPKG_NAME }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
