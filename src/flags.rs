@@ -69,7 +69,7 @@ impl Flags {
             Layout::Grid
         };
         let recursive = matches.is_present("recursive");
-        let recursion_depth = match matches.value_of("depth") {
+        let recursion_depth = match matches.values_of("depth") {
             Some(str)
                 if recursive
                     || layout
@@ -77,7 +77,7 @@ impl Flags {
                             long: matches.is_present("long"),
                         } =>
             {
-                match str.parse::<usize>() {
+                match str.last().unwrap().parse::<usize>() {
                     Ok(val) => val,
                     Err(_) => {
                         return Err(Error::with_description(
@@ -358,5 +358,27 @@ mod test {
 
         assert!(res.is_err());
         assert_eq!(res.unwrap_err().kind, ErrorKind::MissingRequiredArgument);
+    }
+
+    #[test]
+    fn test_duplicate_depth() {
+        let matches = app::build()
+            .get_matches_from_safe(vec!["lsd",  "--tree", "--depth", "1", "--depth", "2"])
+            .unwrap();
+        let res = Flags::from_matches(&matches);
+
+        assert!(res.is_ok());
+        assert_eq!(res.unwrap().recursion_depth, 2);
+    }
+
+    #[test]
+    fn test_missing_depth() {
+        let matches = app::build()
+            .get_matches_from_safe(vec!["lsd",  "--tree"])
+            .unwrap();
+        let res = Flags::from_matches(&matches);
+
+        assert!(res.is_ok());
+        assert_eq!(res.unwrap().recursion_depth, usize::max_value());
     }
 }
