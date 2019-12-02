@@ -65,7 +65,7 @@ jobs:
           - i686-unknown-linux-musl
           - x86_64-unknown-linux-gnu
           - x86_64-unknown-linux-musl
-          # - i686-apple-darwin ## (deprecated/un-buildable)
+          # - i686-apple-darwin ## (deprecated/un-buildable with Xcode > 9.4; refs: <https://forums.developer.apple.com/thread/100211>, <https://forums.developer.apple.com/thread/108704>)
           - x86_64-apple-darwin
           - i686-pc-windows-gnu
           - i686-pc-windows-msvc
@@ -87,8 +87,6 @@ jobs:
           - target: x86_64-unknown-linux-musl
             os: ubuntu-latest
             cross: true
-          - target: i686-apple-darwin
-            os: macos-latest
           - target: x86_64-apple-darwin
             os: macos-latest
           - target: i686-pc-windows-gnu
