@@ -67,9 +67,9 @@ jobs:
           - x86_64-unknown-linux-musl
           # - i686-apple-darwin ## (deprecated/un-buildable)
           - x86_64-apple-darwin
-          # - i686-pc-windows-gnu ## gnu targets on Windows are broken when alternate `gcc` compilers are in the PATH (refs: <https://github.com/rust-lang/rust/issues/47048>, <https://github.com/rust-lang/rust/issues/53454>, <https://github.com/rust-lang/cargo/issues/6754>)
+          - i686-pc-windows-gnu
           - i686-pc-windows-msvc
-          # - x86_64-pc-windows-gnu ## gnu targets on Windows are broken when alternate `gcc` compilers are in the PATH (refs: <https://github.com/rust-lang/rust/issues/47048>, <https://github.com/rust-lang/rust/issues/53454>, <https://github.com/rust-lang/cargo/issues/6754>)
+          - x86_64-pc-windows-gnu
           - x86_64-pc-windows-msvc
         include:
           - target: arm-unknown-linux-gnueabihf
@@ -93,10 +93,12 @@ jobs:
             os: macos-latest
           - target: i686-pc-windows-gnu
             os: windows-latest
+            toolchain: stable-i686-pc-windows-gnu ## gnu targets on Windows are broken for the standard *-pc-windows-msvc toolchain (refs: <https://github.com/rust-lang/rust/issues/47048>, <https://github.com/rust-lang/rust/issues/53454>, <https://github.com/rust-lang/cargo/issues/6754>)
           - target: i686-pc-windows-msvc
             os: windows-latest
           - target: x86_64-pc-windows-gnu
             os: windows-latest
+            toolchain: stable-x86_64-pc-windows-gnu ## gnu targets on Windows are broken for the standard *-pc-windows-msvc toolchain (refs: <https://github.com/rust-lang/rust/issues/47048>, <https://github.com/rust-lang/rust/issues/53454>, <https://github.com/rust-lang/cargo/issues/6754>)
           - target: x86_64-pc-windows-msvc
             os: windows-latest
     steps:
@@ -111,6 +113,11 @@ jobs:
       id: vars
       shell: bash
       run: |
+        # toolchain
+        TOOLCHAIN="stable" ; case ${{ matrix.target }} in *-pc-windows-gnu) TOOLCHAIN="stable-${{ matrix.target }}" ;; esac;
+        if [ -n "${{ matrix.toolchain }}" ]; then TOOLCHAIN="${{ matrix.toolchain }}" ; fi
+        echo set-output name=TOOLCHAIN::${TOOLCHAIN}
+        echo ::set-output name=TOOLCHAIN::${TOOLCHAIN}
         # staging directory
         STAGING='_staging'
         echo set-output name=STAGING::${STAGING}
@@ -173,7 +180,7 @@ jobs:
         echo set-output name=CARGO_TEST_OPTIONS::${CARGO_TEST_OPTIONS}
         echo ::set-output name=CARGO_TEST_OPTIONS::${CARGO_TEST_OPTIONS}
         # * strip executable?
-        STRIP="strip" ; case ${{ matrix.target }} in arm-unknown-linux-gnueabihf) STRIP="arm-linux-gnueabihf-strip" ;; *-pc-windows-*) STRIP="" ;; esac;
+        STRIP="strip" ; case ${{ matrix.target }} in arm-unknown-linux-gnueabihf) STRIP="arm-linux-gnueabihf-strip" ;; *-pc-windows-msvc) STRIP="" ;; esac;
         echo set-output name=STRIP::${STRIP}
         echo ::set-output name=STRIP::${STRIP}
     - name: Create all needed build/work directories
@@ -186,7 +193,7 @@ jobs:
     - name: Install `rust` toolchain
       uses: actions-rs/toolchain@v1
       with:
-        toolchain: stable
+        toolchain: ${{ steps.vars.outputs.TOOLCHAIN }}
         target: ${{ matrix.target }}
         override: true
         profile: minimal # minimal component installation (ie, no documentation)
