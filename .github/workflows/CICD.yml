@@ -6,6 +6,7 @@ env:
   PROJECT_NAME: lsd
   PROJECT_DESC: "An ls command with a lot of pretty colors."
   PROJECT_AUTH: "Peltoche <peltoche@halium.fr>"
+  RUST_MIN_SRV: "1.31.0"
 
 on: [push, pull_request]
 
@@ -36,6 +37,21 @@ jobs:
       with:
         command: clippy
         args: -- -D warnings
+
+  min_version:
+    name: MinSRV # Minimum supported rust version
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: Install `rust` toolchain (v${{ env.RUST_MIN_SRV }})
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: ${{ env.RUST_MIN_SRV }}
+        profile: minimal # minimal component installation (ie, no documentation)
+    - name: Test
+      uses: actions-rs/cargo@v1
+      with:
+        command: test
 
   build:
     name: Build
