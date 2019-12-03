@@ -69,15 +69,12 @@ impl Flags {
             Layout::Grid
         };
         let recursive = matches.is_present("recursive");
-        let recursion_depth = match matches.values_of("depth") {
-            Some(str)
-                if recursive
-                    || layout
-                        == Layout::Tree {
-                            long: matches.is_present("long"),
-                        } =>
-            {
-                match str.last().unwrap().parse::<usize>() {
+        let recursion_input = matches.values_of("depth").and_then(|values| values.last());
+        let recursion_depth = match recursion_input {
+            Some(str) if recursive || layout == Layout::Tree {
+                long: matches.is_present("long"),
+            } => {
+                match str.parse::<usize>() {
                     Ok(val) => val,
                     Err(_) => {
                         return Err(Error::with_description(
