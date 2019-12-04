@@ -26,15 +26,14 @@ impl<'a> From<&'a Metadata> for Size {
 
 impl Size {
     pub fn new(bytes: u64) -> Self {
-        Self { bytes: bytes }
+        Self { bytes }
     }
 
     pub fn get_bytes(&self) -> u64 {
         self.bytes
     }
 
-    pub fn get_unit(&self, flags: &Flags) -> Unit
-    {
+    pub fn get_unit(&self, flags: &Flags) -> Unit {
         if self.bytes < 1024 || flags.size == SizeFlag::Bytes {
             Unit::Byte
         } else if self.bytes < 1024 * 1024 {
@@ -95,10 +94,17 @@ impl Size {
         match unit {
             Unit::None => "".to_string(),
             Unit::Byte => self.bytes.to_string(),
-            Unit::Kilo => ((( self.bytes as f64 ) / 1024.0 * 10.0).round() / 10.0).to_string(),
-            Unit::Mega => ((( self.bytes as f64 ) / (1024.0 * 1024.0) * 10.0).round() / 10.0).to_string(),
-            Unit::Giga => ((( self.bytes as f64 ) / (1024.0 * 1024.0 * 1024.0) * 10.0).round() / 10.0).to_string(),
-            Unit::Tera => ((( self.bytes as f64 ) / (1024.0 * 1024.0 * 1024.0 * 1024.0) * 10.0).round() / 10.0).to_string(),
+            Unit::Kilo => (((self.bytes as f64) / 1024.0 * 10.0).round() / 10.0).to_string(),
+            Unit::Mega => {
+                (((self.bytes as f64) / (1024.0 * 1024.0) * 10.0).round() / 10.0).to_string()
+            }
+            Unit::Giga => (((self.bytes as f64) / (1024.0 * 1024.0 * 1024.0) * 10.0).round()
+                / 10.0)
+                .to_string(),
+            Unit::Tera => {
+                (((self.bytes as f64) / (1024.0 * 1024.0 * 1024.0 * 1024.0) * 10.0).round() / 10.0)
+                    .to_string()
+            }
         }
     }
 
@@ -120,7 +126,7 @@ impl Size {
                 Unit::Giga => String::from("G"),
                 Unit::Tera => String::from("T"),
             },
-            SizeFlag::Bytes => String::from("")
+            SizeFlag::Bytes => String::from(""),
         }
     }
 }
