@@ -33,6 +33,7 @@ jobs:
         command: fmt
         args: --all -- --check
     - name: "`clippy` testing"
+      if: success() || failure() # run regardless of prior step ("`fmt` testing") success/failure
       uses: actions-rs/cargo@v1
       with:
         command: clippy
