@@ -37,14 +37,16 @@ fn inner_display_grid(
     let mut output = String::new();
 
     let padding_rules = get_padding_rules(&metas, flags);
-    let mut grid = Grid::new(GridOptions {
-        filling: Filling::Spaces(2),
-        direction: if flags.layout == Layout::OneLine {
-            Direction::LeftToRight
-        } else {
-            Direction::TopToBottom
-        },
-    });
+    let mut grid = match flags.layout {
+        Layout::OneLine => Grid::new(GridOptions {
+            filling: Filling::Spaces(1),
+            direction: Direction::LeftToRight,
+        }),
+        _ => Grid::new(GridOptions {
+            filling: Filling::Spaces(2),
+            direction: Direction::TopToBottom,
+        }),
+    };
 
     // The first iteration (depth == 0) corresponds to the inputs given by the
     // user. We defer displaying directories given by the user unless we've been
