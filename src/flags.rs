@@ -74,7 +74,8 @@ impl Flags {
         };
 
         let recursive = matches.is_present("recursive");
-        let recursion_depth = match matches.value_of("depth") {
+        let recursion_input = matches.values_of("depth").and_then(|values| values.last());
+        let recursion_depth = match recursion_input {
             Some(str) if recursive || layout == Layout::Tree => match str.parse::<usize>() {
                 Ok(val) => val,
                 Err(_) => {
