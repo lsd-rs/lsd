@@ -13,12 +13,12 @@ impl<'a> From<&'a Metadata> for INode {
 
         let index = meta.ino();
 
-        Self { index: index }
+        Self { index }
     }
 
     #[cfg(windows)]
     fn from(_: &Metadata) -> Self {
-        panic!("Cannot get inode on Windows")
+        Self { index: 0 }
     }
 }
 
@@ -29,6 +29,7 @@ impl INode {
 }
 
 #[cfg(test)]
+#[cfg(unix)]
 mod tests {
     use super::INode;
     use std::env;
@@ -36,7 +37,6 @@ mod tests {
     use std::path::Path;
     use std::process::{Command, ExitStatus};
 
-    #[cfg(unix)]
     fn cross_platform_touch(path: &Path) -> io::Result<ExitStatus> {
         Command::new("touch").arg(&path).status()
     }
