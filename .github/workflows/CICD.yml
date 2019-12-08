@@ -13,11 +13,11 @@ on: [push, pull_request]
 jobs:
   style:
     name: Style
-    runs-on: ${{ matrix.os }}
+    runs-on: ${{ matrix.job.os }}
     strategy:
       fail-fast: false
       matrix:
-        os: [ ubuntu-latest, macos-latest, windows-latest ]
+        job: [ { os: ubuntu-latest }, { os: macos-latest }, { os: windows-latest } ]
     steps:
     - uses: actions/checkout@v1
     - name: Install `rust` toolchain
@@ -56,56 +56,27 @@ jobs:
 
   build:
     name: Build
-    runs-on: ${{ matrix.os }}
+    runs-on: ${{ matrix.job.os }}
     strategy:
       fail-fast: false
       matrix:
-        target:
-          - arm-unknown-linux-gnueabihf
-          - i686-unknown-linux-gnu
-          - i686-unknown-linux-musl
-          - x86_64-unknown-linux-gnu
-          - x86_64-unknown-linux-musl
-          # - i686-apple-darwin ## (deprecated/un-buildable with Xcode > 9.4; refs: <https://forums.developer.apple.com/thread/100211>, <https://forums.developer.apple.com/thread/108704>)
-          - x86_64-apple-darwin
-          - i686-pc-windows-gnu
-          - i686-pc-windows-msvc
-          - x86_64-pc-windows-gnu
-          - x86_64-pc-windows-msvc
-        include:
-          - target: arm-unknown-linux-gnueabihf
-            os: ubuntu-latest
-            cross: true
-          - target: i686-unknown-linux-gnu
-            os: ubuntu-latest
-            cross: true
-          - target: i686-unknown-linux-musl
-            os: ubuntu-latest
-            cross: true
-          - target: x86_64-unknown-linux-gnu
-            os: ubuntu-latest
-            cross: true
-          - target: x86_64-unknown-linux-musl
-            os: ubuntu-latest
-            cross: true
-          - target: x86_64-apple-darwin
-            os: macos-latest
-          - target: i686-pc-windows-gnu
-            os: windows-latest
-            toolchain: stable-i686-pc-windows-gnu ## gnu targets on Windows are broken for the standard *-pc-windows-msvc toolchain (refs: <https://github.com/rust-lang/rust/issues/47048>, <https://github.com/rust-lang/rust/issues/53454>, <https://github.com/rust-lang/cargo/issues/6754>)
-          - target: i686-pc-windows-msvc
-            os: windows-latest
-          - target: x86_64-pc-windows-gnu
-            os: windows-latest
-            toolchain: stable-x86_64-pc-windows-gnu ## gnu targets on Windows are broken for the standard *-pc-windows-msvc toolchain (refs: <https://github.com/rust-lang/rust/issues/47048>, <https://github.com/rust-lang/rust/issues/53454>, <https://github.com/rust-lang/cargo/issues/6754>)
-          - target: x86_64-pc-windows-msvc
-            os: windows-latest
+        job:
+          - { os: ubuntu-latest  , target: arm-unknown-linux-gnueabihf , use-cross: use-cross }
+          - { os: ubuntu-latest  , target: i686-unknown-linux-gnu      , use-cross: use-cross }
+          - { os: ubuntu-latest  , target: i686-unknown-linux-musl     , use-cross: use-cross }
+          - { os: ubuntu-latest  , target: x86_64-unknown-linux-gnu    , use-cross: use-cross }
+          - { os: ubuntu-latest  , target: x86_64-unknown-linux-musl   , use-cross: use-cross }
+          - { os: macos-latest   , target: x86_64-apple-darwin }
+          - { os: windows-latest , target: i686-pc-windows-gnu }
+          - { os: windows-latest , target: i686-pc-windows-msvc }
+          - { os: windows-latest , target: x86_64-pc-windows-gnu }
+          - { os: windows-latest , target: x86_64-pc-windows-msvc }
     steps:
     - uses: actions/checkout@v1
     - name: Install any prerequisites
       shell: bash
       run: |
-        case ${{ matrix.target }} in
+        case ${{ matrix.job.target }} in
           arm-unknown-linux-gnueabihf) sudo apt-get -y update ; sudo apt-get -y install gcc-arm-linux-gnueabihf ;;
         esac
     - name: Initialize workflow variables
@@ -113,8 +84,11 @@ jobs:
       shell: bash
       run: |
         # toolchain
-        TOOLCHAIN="stable" ; case ${{ matrix.target }} in *-pc-windows-gnu) TOOLCHAIN="stable-${{ matrix.target }}" ;; esac;
-        if [ -n "${{ matrix.toolchain }}" ]; then TOOLCHAIN="${{ matrix.toolchain }}" ; fi
+        TOOLCHAIN="stable" ## default to "stable" toolchain
+        # * specify alternate TOOLCHAIN for *-pc-windows-gnu targets; gnu targets on Windows are broken for the standard *-pc-windows-msvc toolchain (refs: <https://github.com/rust-lang/rust/issues/47048>, <https://github.com/rust-lang/rust/issues/53454>, <https://github.com/rust-lang/cargo/issues/6754>)
+        case ${{ matrix.job.target }} in *-pc-windows-gnu) TOOLCHAIN="stable-${{ matrix.job.target }}" ;; esac;
+        # * use requested TOOLCHAIN if specified
+        if [ -n "${{ matrix.job.toolchain }}" ]; then TOOLCHAIN="${{ matrix.job.toolchain }}" ; fi
         echo set-output name=TOOLCHAIN::${TOOLCHAIN}
         echo ::set-output name=TOOLCHAIN::${TOOLCHAIN}
         # staging directory
@@ -122,7 +96,7 @@ jobs:
         echo set-output name=STAGING::${STAGING}
         echo ::set-output name=STAGING::${STAGING}
         # determine EXE suffix
-        EXE_suffix="" ; case ${{ matrix.target }} in *-pc-windows-*) EXE_suffix=".exe" ;; esac;
+        EXE_suffix="" ; case ${{ matrix.job.target }} in *-pc-windows-*) EXE_suffix=".exe" ;; esac;
         echo set-output name=EXE_suffix::${EXE_suffix}
         echo ::set-output name=EXE_suffix::${EXE_suffix}
         # parse commit reference info
@@ -139,8 +113,8 @@ jobs:
         echo ::set-output name=REF_TAG::${REF_TAG}
         echo ::set-output name=REF_SHAS::${REF_SHAS}
         # package name
-        PKG_suffix=".tar.gz" ; case ${{ matrix.target }} in *-pc-windows-*) PKG_suffix=".zip" ;; esac;
-        PKG_BASENAME=${PROJECT_NAME}-${REF_TAG:-$REF_SHAS}-${{ matrix.target }}
+        PKG_suffix=".tar.gz" ; case ${{ matrix.job.target }} in *-pc-windows-*) PKG_suffix=".zip" ;; esac;
+        PKG_BASENAME=${PROJECT_NAME}-${REF_TAG:-$REF_SHAS}-${{ matrix.job.target }}
         PKG_NAME=${PKG_BASENAME}${PKG_suffix}
         echo set-output name=PKG_suffix::${PKG_suffix}
         echo set-output name=PKG_BASENAME::${PKG_BASENAME}
@@ -149,11 +123,11 @@ jobs:
         echo ::set-output name=PKG_BASENAME::${PKG_BASENAME}
         echo ::set-output name=PKG_NAME::${PKG_NAME}
         # deployable tag? (ie, leading "vM" or "M"; M == version number)
-        unset DEPLOY ; if [[ $REF_TAG =~ ^[vV]?[0-9].* ]]; then DEPLOY=true ; fi
-        echo set-output name=DEPLOY::${DEPLOY}
+        unset DEPLOY ; if [[ $REF_TAG =~ ^[vV]?[0-9].* ]]; then DEPLOY='true' ; fi
+        echo set-output name=DEPLOY::${DEPLOY:-<empty>/false}
         echo ::set-output name=DEPLOY::${DEPLOY}
         # DPKG architecture?
-        unset DPKG_ARCH ; case ${{ matrix.target }} in i686-*-linux-*) DPKG_ARCH=i686 ;; x86_64-*-linux-*) DPKG_ARCH=amd64 ;; esac;
+        unset DPKG_ARCH ; case ${{ matrix.job.target }} in i686-*-linux-*) DPKG_ARCH=i686 ;; x86_64-*-linux-*) DPKG_ARCH=amd64 ;; esac;
         echo set-output name=DPKG_ARCH::${DPKG_ARCH}
         echo ::set-output name=DPKG_ARCH::${DPKG_ARCH}
         # DPKG version?
@@ -163,7 +137,7 @@ jobs:
         # DPKG base name/conflicts?
         DPKG_BASENAME=${PROJECT_NAME}
         DPKG_CONFLICTS=${PROJECT_NAME}-musl
-        case ${{ matrix.target }} in *-musl) DPKG_BASENAME=${PROJECT_NAME}-musl ; DPKG_CONFLICTS=${PROJECT_NAME} ;; esac;
+        case ${{ matrix.job.target }} in *-musl) DPKG_BASENAME=${PROJECT_NAME}-musl ; DPKG_CONFLICTS=${PROJECT_NAME} ;; esac;
         echo set-output name=DPKG_BASENAME::${DPKG_BASENAME}
         echo set-output name=DPKG_CONFLICTS::${DPKG_CONFLICTS}
         echo ::set-output name=DPKG_BASENAME::${DPKG_BASENAME}
@@ -174,12 +148,16 @@ jobs:
         echo set-output name=DPKG_NAME::${DPKG_NAME}
         echo ::set-output name=DPKG_NAME::${DPKG_NAME}
         # target-specific options
+        # * CARGO_USE_CROSS (truthy)
+        CARGO_USE_CROSS='true' ; case '${{ matrix.job.use-cross }}' in ''|0|f|false|n|no) unset CARGO_USE_CROSS ;; esac;
+        echo set-output name=CARGO_USE_CROSS::${CARGO_USE_CROSS:-<empty>/false}
+        echo ::set-output name=CARGO_USE_CROSS::${CARGO_USE_CROSS}
         # * test only binary for arm-type targets
-        unset CARGO_TEST_OPTIONS ; case ${{ matrix.target }} in arm-*) CARGO_TEST_OPTIONS="--bin ${PROJECT_NAME}" ;; esac;
+        unset CARGO_TEST_OPTIONS ; case ${{ matrix.job.target }} in arm-*) CARGO_TEST_OPTIONS="--bin ${PROJECT_NAME}" ;; esac;
         echo set-output name=CARGO_TEST_OPTIONS::${CARGO_TEST_OPTIONS}
         echo ::set-output name=CARGO_TEST_OPTIONS::${CARGO_TEST_OPTIONS}
         # * strip executable?
-        STRIP="strip" ; case ${{ matrix.target }} in arm-unknown-linux-gnueabihf) STRIP="arm-linux-gnueabihf-strip" ;; *-pc-windows-msvc) STRIP="" ;; esac;
+        STRIP="strip" ; case ${{ matrix.job.target }} in arm-unknown-linux-gnueabihf) STRIP="arm-linux-gnueabihf-strip" ;; *-pc-windows-msvc) STRIP="" ;; esac;
         echo set-output name=STRIP::${STRIP}
         echo ::set-output name=STRIP::${STRIP}
     - name: Create all needed build/work directories
@@ -193,43 +171,43 @@ jobs:
       uses: actions-rs/toolchain@v1
       with:
         toolchain: ${{ steps.vars.outputs.TOOLCHAIN }}
-        target: ${{ matrix.target }}
+        target: ${{ matrix.job.target }}
         override: true
         profile: minimal # minimal component installation (ie, no documentation)
     - name: Build
       uses: actions-rs/cargo@v1
       with:
-        use-cross: ${{ matrix.cross }}
+        use-cross: ${{ steps.vars.outputs.CARGO_USE_CROSS }}
         command: build
-        args: --release --target=${{ matrix.target }}
+        args: --release --target=${{ matrix.job.target }}
     - name: Test
       uses: actions-rs/cargo@v1
       with:
-        use-cross: ${{ matrix.cross }}
+        use-cross: ${{ steps.vars.outputs.CARGO_USE_CROSS }}
         command: test
-        args: --target=${{ matrix.target }} ${{ steps.vars.outputs.CARGO_TEST_OPTIONS}}
+        args: --target=${{ matrix.job.target }} ${{ steps.vars.outputs.CARGO_TEST_OPTIONS}}
     - name: Archive executable artifacts
       uses: actions/upload-artifact@master
       with:
-        name: ${{ env.PROJECT_NAME }}-${{ matrix.target }}
-        path: target/${{ matrix.target }}/release/${{ env.PROJECT_NAME }}${{ steps.vars.outputs.EXE_suffix }}
+        name: ${{ env.PROJECT_NAME }}-${{ matrix.job.target }}
+        path: target/${{ matrix.job.target }}/release/${{ env.PROJECT_NAME }}${{ steps.vars.outputs.EXE_suffix }}
     - name: Package
       shell: bash
       run: |
         # binary
-        cp 'target/${{ matrix.target }}/release/${{ env.PROJECT_NAME }}${{ steps.vars.outputs.EXE_suffix }}' '${{ steps.vars.outputs.STAGING }}/${{ steps.vars.outputs.PKG_BASENAME }}/'
+        cp 'target/${{ matrix.job.target }}/release/${{ env.PROJECT_NAME }}${{ steps.vars.outputs.EXE_suffix }}' '${{ steps.vars.outputs.STAGING }}/${{ steps.vars.outputs.PKG_BASENAME }}/'
         # `strip` binary (if needed)
         if [ -n "${{ steps.vars.outputs.STRIP }}" ]; then "${{ steps.vars.outputs.STRIP }}" '${{ steps.vars.outputs.STAGING }}/${{ steps.vars.outputs.PKG_BASENAME }}/${{ env.PROJECT_NAME }}${{ steps.vars.outputs.EXE_suffix }}' ; fi
         # README and LICENSE
         cp README.md '${{ steps.vars.outputs.STAGING }}/${{ steps.vars.outputs.PKG_BASENAME }}/'
         cp LICENSE '${{ steps.vars.outputs.STAGING }}/${{ steps.vars.outputs.PKG_BASENAME }}/'
         # autocomplete
-        cp 'target/${{ matrix.target }}/release/build/${{ env.PROJECT_NAME }}-'*/'out/${{ env.PROJECT_NAME }}.bash' '${{ steps.vars.outputs.STAGING }}/${{ steps.vars.outputs.PKG_BASENAME }}/autocomplete/${{ env.PROJECT_NAME }}.bash-completion'
-        cp 'target/${{ matrix.target }}/release/build/${{ env.PROJECT_NAME }}-'*/'out/${{ env.PROJECT_NAME }}.fish' '${{ steps.vars.outputs.STAGING }}/${{ steps.vars.outputs.PKG_BASENAME }}/autocomplete/'
-        cp 'target/${{ matrix.target }}/release/build/${{ env.PROJECT_NAME }}-'*/'out/_${{ env.PROJECT_NAME }}' '${{ steps.vars.outputs.STAGING }}/${{ steps.vars.outputs.PKG_BASENAME }}/autocomplete/'
+        cp 'target/${{ matrix.job.target }}/release/build/${{ env.PROJECT_NAME }}-'*/'out/${{ env.PROJECT_NAME }}.bash' '${{ steps.vars.outputs.STAGING }}/${{ steps.vars.outputs.PKG_BASENAME }}/autocomplete/${{ env.PROJECT_NAME }}.bash-completion'
+        cp 'target/${{ matrix.job.target }}/release/build/${{ env.PROJECT_NAME }}-'*/'out/${{ env.PROJECT_NAME }}.fish' '${{ steps.vars.outputs.STAGING }}/${{ steps.vars.outputs.PKG_BASENAME }}/autocomplete/'
+        cp 'target/${{ matrix.job.target }}/release/build/${{ env.PROJECT_NAME }}-'*/'out/_${{ env.PROJECT_NAME }}' '${{ steps.vars.outputs.STAGING }}/${{ steps.vars.outputs.PKG_BASENAME }}/autocomplete/'
         # base compressed package
         pushd '${{ steps.vars.outputs.STAGING }}/' >/dev/null
-        case ${{ matrix.target }} in
+        case ${{ matrix.job.target }} in
           *-pc-windows-*) 7z -y a '${{ steps.vars.outputs.PKG_NAME }}' '${{ steps.vars.outputs.PKG_BASENAME }}'/* | tail -2 ;;
           *) tar czf '${{ steps.vars.outputs.PKG_NAME }}' '${{ steps.vars.outputs.PKG_BASENAME }}'/* ;;
         esac;
@@ -238,15 +216,15 @@ jobs:
         if [ -n "${{ steps.vars.outputs.DPKG_NAME }}" ]; then
           DPKG_DIR="${{ steps.vars.outputs.STAGING }}/dpkg"
           # binary
-          install -Dm755 'target/${{ matrix.target }}/release/${{ env.PROJECT_NAME }}${{ steps.vars.outputs.EXE_suffix }}' "${DPKG_DIR}/usr/bin/${{ env.PROJECT_NAME }}${{ steps.vars.outputs.EXE_suffix }}"
+          install -Dm755 'target/${{ matrix.job.target }}/release/${{ env.PROJECT_NAME }}${{ steps.vars.outputs.EXE_suffix }}' "${DPKG_DIR}/usr/bin/${{ env.PROJECT_NAME }}${{ steps.vars.outputs.EXE_suffix }}"
           if [ -n "${{ steps.vars.outputs.STRIP }}" ]; then "${{ steps.vars.outputs.STRIP }}" "${DPKG_DIR}/usr/bin/${{ env.PROJECT_NAME }}${{ steps.vars.outputs.EXE_suffix }}" ; fi
           # README and LICENSE
           install -Dm644 README.md "${DPKG_DIR}/usr/share/doc/${{ env.PROJECT_NAME }}/README.md"
           install -Dm644 LICENSE "${DPKG_DIR}/usr/share/doc/${{ env.PROJECT_NAME }}/LICENSE"
           # (auto-)completions
-          install -Dm644 'target/${{ matrix.target }}/release/build/${{ env.PROJECT_NAME }}-'*/'out/${{ env.PROJECT_NAME }}.bash' "${DPKG_DIR}/usr/share/bash-completion/completions/${{ env.PROJECT_NAME }}"
-          install -Dm644 'target/${{ matrix.target }}/release/build/${{ env.PROJECT_NAME }}-'*/'out/${{ env.PROJECT_NAME }}.fish' "${DPKG_DIR}/usr/share/fish/completions/completions/${{ env.PROJECT_NAME }}.fish"
-          install -Dm644 'target/${{ matrix.target }}/release/build/${{ env.PROJECT_NAME }}-'*/'out/_${{ env.PROJECT_NAME }}' "${DPKG_DIR}/usr/share/zsh/vendor-completions/_${{ env.PROJECT_NAME }}"
+          install -Dm644 'target/${{ matrix.job.target }}/release/build/${{ env.PROJECT_NAME }}-'*/'out/${{ env.PROJECT_NAME }}.bash' "${DPKG_DIR}/usr/share/bash-completion/completions/${{ env.PROJECT_NAME }}"
+          install -Dm644 'target/${{ matrix.job.target }}/release/build/${{ env.PROJECT_NAME }}-'*/'out/${{ env.PROJECT_NAME }}.fish' "${DPKG_DIR}/usr/share/fish/completions/completions/${{ env.PROJECT_NAME }}.fish"
+          install -Dm644 'target/${{ matrix.job.target }}/release/build/${{ env.PROJECT_NAME }}-'*/'out/_${{ env.PROJECT_NAME }}' "${DPKG_DIR}/usr/share/zsh/vendor-completions/_${{ env.PROJECT_NAME }}"
           # control file
           mkdir -p "${DPKG_DIR}/DEBIAN"
           printf "Package: ${{ steps.vars.outputs.DPKG_BASENAME }}\nVersion: ${{ steps.vars.outputs.DPKG_VERSION }}\nSection: utils\nPriority: optional\nMaintainer: ${{ env.PROJECT_AUTH }}\nArchitecture: ${{ steps.vars.outputs.DPKG_ARCH }}\nProvides: ${{ env.PROJECT_NAME }}\nConflicts: ${{ steps.vars.outputs.DPKG_CONFLICTS }}\nDescription: ${{ env.PROJECT_DESC }}\n" > "${DPKG_DIR}/DEBIAN/control"
@@ -266,12 +244,12 @@ jobs:
 
   coverage:
     name: Code Coverage
-    runs-on: ${{ matrix.os }}
+    runs-on: ${{ matrix.job.os }}
     strategy:
       fail-fast: true
       matrix:
-        # os: [ ubuntu-latest, macos-latest, windows-latest ]
-        os: [ ubuntu-latest ] ## cargo-tarpaulin is currently only available on linux
+        # job: [ { os: ubuntu-latest }, { os: macos-latest }, { os: windows-latest } ]
+        job: [ { os: ubuntu-latest } ] ## cargo-tarpaulin is currently only available on linux
     steps:
     - uses: actions/checkout@v1
     # - name: Reattach HEAD ## may be needed for accurate code coverage info
