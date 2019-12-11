@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+### Added
+- Add some new icons from  [optikfluffel](https://github.com/optikfluffel) and [JiNova](https://github.com/JiNova)
+- Add some installation instructions for NixOS/nix from [06kellyjac](https://github.com/06kellyjac)
+- Add the --ignore-glob flag from [sumitsahrawat](https://github.com/sumitsahrawat)
+
+### Changed
+- Allow the usage of multiple `--depth` flag arguments from [abazylewicz](https://github.com/abazylewicz)
+- Let lscolors apply default colors if LS_COLORS is not defined  from [meain](https://github.com/meain)
+- Use the block system for all the display logic
+
 ## [0.16.0] - 2019-08-02
 ### Added
 - Add the flag `--blocks` from [meain](https://github.com/meain)
@@ -225,7 +236,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Change the component alignement by using term_grid
 
 
-[Unreleased]: https://github.com/Peltoche/lsd/compare/0.15.1...HEAD
+[Unreleased]: https://github.com/Peltoche/lsd/compare/0.16.0...HEAD
+[0.16.0]: https://github.com/Peltoche/lsd/compare/0.15.1...0.16.0
 [0.15.1]: https://github.com/Peltoche/lsd/compare/0.15.0...0.15.1
 [0.15.0]: https://github.com/Peltoche/lsd/compare/0.14.1...0.15.0
 [0.14.0]: https://github.com/Peltoche/lsd/compare/0.13.1...0.14.0
