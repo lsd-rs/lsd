@@ -20,6 +20,7 @@ pub use self::size::Size;
 pub use self::symlink::SymLink;
 pub use crate::flags::Display;
 pub use crate::icon::Icons;
+use crate::print_error;
 
 use std::fs;
 use std::fs::read_link;
@@ -65,7 +66,7 @@ impl Meta {
         let entries = match self.path.read_dir() {
             Ok(entries) => entries,
             Err(err) => {
-                eprintln!("cannot access '{}': {}", self.path.display(), err);
+                print_error!("cannot access '{}': {}", self.path.display(), err);
                 return Ok(None);
             }
         };
@@ -112,7 +113,7 @@ impl Meta {
             let mut entry_meta = match Self::from_path(&path) {
                 Ok(res) => res,
                 Err(err) => {
-                    eprintln!("cannot access '{}': {}", path.display(), err);
+                    print_error!("cannot access '{}': {}", path.display(), err);
                     continue;
                 }
             };
@@ -120,7 +121,7 @@ impl Meta {
             match entry_meta.recurse_into(depth - 1, display, ignore_globs) {
                 Ok(content) => entry_meta.content = content,
                 Err(err) => {
-                    eprintln!("cannot access '{}': {}", path.display(), err);
+                    print_error!("cannot access '{}': {}", path.display(), err);
                     continue;
                 }
             };
@@ -158,7 +159,7 @@ impl Meta {
         let metadata = match metadata {
             Ok(meta) => meta,
             Err(err) => {
-                eprintln!("cannot access '{}': {}", path.display(), err);
+                print_error!("cannot access '{}': {}", path.display(), err);
                 return 0;
             }
         };
@@ -171,7 +172,7 @@ impl Meta {
             let entries = match path.read_dir() {
                 Ok(entries) => entries,
                 Err(err) => {
-                    eprintln!("cannot access '{}': {}", path.display(), err);
+                    print_error!("cannot access '{}': {}", path.display(), err);
                     return size;
                 }
             };
@@ -179,7 +180,7 @@ impl Meta {
                 let path = match entry {
                     Ok(entry) => entry.path(),
                     Err(err) => {
-                        eprintln!("cannot access '{}': {}", path.display(), err);
+                        print_error!("cannot access '{}': {}", path.display(), err);
                         continue;
                     }
                 };
