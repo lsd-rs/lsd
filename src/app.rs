@@ -187,7 +187,6 @@ pub fn build() -> App<'static, 'static> {
                     "name",
                     "inode",
                 ])
-                .default_value("permission,user,group,size,date,name")
                 .help("Specify the blocks that will be displayed and in what order"),
         )
         .arg(

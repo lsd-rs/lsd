@@ -4,6 +4,7 @@ use std::fs::Metadata;
 #[derive(Debug, PartialEq, Eq, Copy, Clone)]
 pub struct INode {
     index: u64,
+    valide: bool,
 }
 
 impl<'a> From<&'a Metadata> for INode {
@@ -13,17 +14,27 @@ impl<'a> From<&'a Metadata> for INode {
 
         let index = meta.ino();
 
-        Self { index }
+        Self {
+            index: index,
+            valide: true,
+        }
     }
 
     #[cfg(windows)]
     fn from(_: &Metadata) -> Self {
-        Self { index: 0 }
+        Self {
+            index: 0,
+            valide: false,
+        }
     }
 }
 
 impl INode {
     pub fn render(&self, colors: &Colors) -> ColoredString {
+        if !self.valide {
+            return colors.colorize(String::from("-"), &Elem::SymLink);
+        }
+
         colors.colorize(self.index.to_string(), &Elem::SymLink)
     }
 }
