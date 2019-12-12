@@ -15,7 +15,7 @@ impl<'a> From<&'a Metadata> for INode {
         let index = meta.ino();
 
         Self {
-            index: index,
+            index,
             valide: true,
         }
     }
