@@ -3,8 +3,7 @@ use std::fs::Metadata;
 
 #[derive(Debug, PartialEq, Eq, Copy, Clone)]
 pub struct INode {
-    index: u64,
-    valide: bool,
+    index: Option<u64>,
 }
 
 impl<'a> From<&'a Metadata> for INode {
@@ -14,28 +13,21 @@ impl<'a> From<&'a Metadata> for INode {
 
         let index = meta.ino();
 
-        Self {
-            index,
-            valide: true,
-        }
+        Self { index: Some(index) }
     }
 
     #[cfg(windows)]
     fn from(_: &Metadata) -> Self {
-        Self {
-            index: 0,
-            valide: false,
-        }
+        Self { index: None }
     }
 }
 
 impl INode {
     pub fn render(&self, colors: &Colors) -> ColoredString {
-        if !self.valide {
-            return colors.colorize(String::from("-"), &Elem::SymLink);
+        match self.index {
+            Some(i) => colors.colorize(i.to_string(), &Elem::INode{ valid: true }),
+            None => colors.colorize(String::from("-"), &Elem::INode{ valid: false }),
         }
-
-        colors.colorize(self.index.to_string(), &Elem::SymLink)
     }
 }
 
@@ -61,6 +53,10 @@ mod tests {
         assert!(success, "failed to exec touch");
 
         let inode = INode::from(&file_path.metadata().unwrap());
-        assert_ne!(inode.index, 0);
+
+        #[cfg(unix)]
+        assert!(inode.index.is_some());
+        #[cfg(windows)]
+        assert!(inode.index.is_none());
     }
 }
