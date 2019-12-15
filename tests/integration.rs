@@ -87,31 +87,45 @@ fn test_list_all_populated_directory() {
 }
 
 #[test]
-#[cfg(unix)]
 fn test_list_inode_populated_directory() {
     let dir = tempdir();
     dir.child("one").touch().unwrap();
     dir.child("two").touch().unwrap();
+
+    #[cfg(unix)]
+    let matched = "\\d+ one\n\\d+ two\n$";
+    #[cfg(windows)]
+    let matched = "- one\n\\- two\n$";
+
     cmd()
-        .arg("--blocks")
-        .arg("inode,name")
+        .arg("--inode")
         .arg(dir.path())
         .assert()
-        .stdout(predicate::str::is_match("\\d+ one\n\\d+ two\n$").unwrap());
+        .stdout(predicate::str::is_match(matched).unwrap());
+    cmd()
+        .arg("-i")
+        .arg(dir.path())
+        .assert()
+        .stdout(predicate::str::is_match(matched).unwrap());
 }
 
 #[test]
-#[cfg(windows)]
-fn test_list_inode_populated_directory() {
+fn test_list_block_inode_populated_directory() {
     let dir = tempdir();
     dir.child("one").touch().unwrap();
     dir.child("two").touch().unwrap();
+
+    #[cfg(unix)]
+    let matched = "\\d+ one\n\\d+ two\n$";
+    #[cfg(windows)]
+    let matched = "- one\n\\- two\n$";
+
     cmd()
         .arg("--blocks")
         .arg("inode,name")
         .arg(dir.path())
         .assert()
-        .stdout(predicate::str::is_match("- one\n\\- two\n$").unwrap());
+        .stdout(predicate::str::is_match(matched).unwrap());
 }
 
 fn cmd() -> Command {
