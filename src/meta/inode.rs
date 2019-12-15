@@ -25,8 +25,8 @@ impl<'a> From<&'a Metadata> for INode {
 impl INode {
     pub fn render(&self, colors: &Colors) -> ColoredString {
         match self.index {
-            Some(i) => colors.colorize(i.to_string(), &Elem::INode{ valid: true }),
-            None => colors.colorize(String::from("-"), &Elem::INode{ valid: false }),
+            Some(i) => colors.colorize(i.to_string(), &Elem::INode { valid: true }),
+            None => colors.colorize(String::from("-"), &Elem::INode { valid: false }),
         }
     }
 }

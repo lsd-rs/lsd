@@ -46,7 +46,7 @@ pub enum Elem {
     /// INode
     INode {
         valid: bool,
-    }
+    },
 }
 
 impl Elem {
@@ -156,7 +156,7 @@ impl Colors {
                 } else {
                     Some("di")
                 }
-            },
+            }
             Elem::SymLink => Some("ln"),
             Elem::Pipe => Some("pi"),
             Elem::Socket => Some("so"),
