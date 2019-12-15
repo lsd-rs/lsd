@@ -42,6 +42,11 @@ pub enum Elem {
     FileLarge,
     FileMedium,
     FileSmall,
+
+    /// INode
+    INode {
+        valid: bool,
+    }
 }
 
 impl Elem {
@@ -151,13 +156,17 @@ impl Colors {
                 } else {
                     Some("di")
                 }
-            }
+            },
             Elem::SymLink => Some("ln"),
             Elem::Pipe => Some("pi"),
             Elem::Socket => Some("so"),
             Elem::BlockDevice => Some("bd"),
             Elem::CharDevice => Some("cd"),
             Elem::BrokenSymLink => Some("or"),
+            Elem::INode { valid } => match valid {
+                true => Some("so"),
+                false => Some("no"),
+            },
             _ => None,
         };
 
@@ -232,6 +241,10 @@ impl Colors {
         m.insert(Elem::FileSmall, Colour::Fixed(229)); // Wheat1
         m.insert(Elem::FileMedium, Colour::Fixed(216)); // LightSalmon1
         m.insert(Elem::FileLarge, Colour::Fixed(172)); // Orange3
+
+        // INode
+        m.insert(Elem::INode { valid: true }, Colour::Fixed(13)); // Pink
+        m.insert(Elem::INode { valid: false }, Colour::Fixed(245)); // Grey
 
         m
     }
