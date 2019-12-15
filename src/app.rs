@@ -210,6 +210,14 @@ pub fn build() -> App<'static, 'static> {
                 .default_value("")
                 .help("Do not display files/directories with names matching the glob pattern(s)"),
         )
+        .arg(
+            Arg::with_name("inode")
+                .short("i")
+                .long("inode")
+                .multiple(true)
+                .conflicts_with("blocks")
+                .help("Display inode and file names"),
+        )
 }
 
 fn validate_date_argument(arg: String) -> Result<(), String> {
