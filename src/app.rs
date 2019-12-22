@@ -215,8 +215,7 @@ pub fn build() -> App<'static, 'static> {
                 .short("i")
                 .long("inode")
                 .multiple(true)
-                .conflicts_with("blocks")
-                .help("Display inode and file names"),
+                .help("Display inode(Linux only)"),
         )
 }
 

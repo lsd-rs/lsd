@@ -128,6 +128,12 @@ fn test_list_block_inode_populated_directory() {
         .stdout(predicate::str::is_match(matched).unwrap());
 }
 
+#[test]
+fn test_list_inode_with_long_ok() {
+    let dir = tempdir();
+    cmd().arg("-i").arg("-l").arg(dir.path()).assert().success();
+}
+
 fn cmd() -> Command {
     Command::cargo_bin(env!("CARGO_PKG_NAME")).unwrap()
 }

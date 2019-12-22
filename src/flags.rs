@@ -98,8 +98,7 @@ impl Flags {
             None => usize::max_value(),
         };
 
-        let blocks: Vec<Block> = match () {
-            _ if inode => vec![Block::INode, Block::Name],
+        let mut blocks: Vec<Block> = match () {
             _ if !blocks_inputs.is_empty() => blocks_inputs.into_iter().map(Block::from).collect(),
             _ if matches.is_present("long") => vec![
                 Block::Permission,
@@ -111,6 +110,11 @@ impl Flags {
             ],
             _ => vec![Block::Name],
         };
+
+        // Add inode as first column if with inode flag
+        if inode && !blocks.contains(&Block::INode) {
+            blocks.insert(0, Block::INode);
+        }
 
         let mut ignore_globs_builder = GlobSetBuilder::new();
         for pattern in ignore_globs_inputs {
