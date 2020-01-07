@@ -41,9 +41,10 @@ impl Date {
     }
 
     pub fn date_string(&self, flags: &Flags) -> String {
-        match flags.date {
+        match &flags.date {
             DateFlag::Date => self.0.ctime().to_string(),
             DateFlag::Relative => format!("{}", HumanTime::from(self.0 - time::now())),
+            DateFlag::Formatted(format) => self.0.to_local().strftime(&format).unwrap().to_string(),
         }
     }
 }

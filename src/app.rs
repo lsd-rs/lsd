@@ -134,12 +134,11 @@ pub fn build() -> App<'static, 'static> {
         .arg(
             Arg::with_name("date")
                 .long("date")
-                .possible_value("date")
-                .possible_value("relative")
+                .validator(validate_date_argument)
                 .default_value("date")
                 .multiple(true)
                 .number_of_values(1)
-                .help("How to display date"),
+                .help("How to display date [possible values: date, relative, +date-time-format]"),
         )
         .arg(
             Arg::with_name("timesort")
@@ -203,4 +202,38 @@ pub fn build() -> App<'static, 'static> {
                 .default_value("")
                 .help("Do not display files/directories with names matching the glob pattern(s)"),
         )
+}
+
+fn validate_date_argument(arg: String) -> Result<(), String> {
+    use std::error::Error;
+    if arg.starts_with('+') {
+        validate_time_format(&arg).map_err(|err| err.description().to_string())
+    } else if &arg == "date" || &arg == "relative" {
+        Result::Ok(())
+    } else {
+        Result::Err("possible values: date, relative, +date-time-format".to_owned())
+    }
+}
+
+fn validate_time_format(formatter: &str) -> Result<(), time::ParseError> {
+    let mut chars = formatter.chars();
+    loop {
+        match chars.next() {
+            Some('%') => match chars.next() {
+                Some('A') | Some('a') | Some('B') | Some('b') | Some('C') | Some('c')
+                | Some('D') | Some('d') | Some('e') | Some('F') | Some('f') | Some('G')
+                | Some('g') | Some('H') | Some('h') | Some('I') | Some('j') | Some('k')
+                | Some('l') | Some('M') | Some('m') | Some('n') | Some('P') | Some('p')
+                | Some('R') | Some('r') | Some('S') | Some('s') | Some('T') | Some('t')
+                | Some('U') | Some('u') | Some('V') | Some('v') | Some('W') | Some('w')
+                | Some('X') | Some('x') | Some('Y') | Some('y') | Some('Z') | Some('z')
+                | Some('+') | Some('%') => (),
+                Some(c) => return Err(time::ParseError::InvalidFormatSpecifier(c)),
+                None => return Err(time::ParseError::MissingFormatConverter),
+            },
+            None => break,
+            _ => continue,
+        }
+    }
+    Ok(())
 }

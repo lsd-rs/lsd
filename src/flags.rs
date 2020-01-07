@@ -248,10 +248,11 @@ impl<'a> From<&'a str> for SizeFlag {
     }
 }
 
-#[derive(Clone, Debug, Copy, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum DateFlag {
     Date,
     Relative,
+    Formatted(String),
 }
 
 impl<'a> From<&'a str> for DateFlag {
@@ -259,6 +260,7 @@ impl<'a> From<&'a str> for DateFlag {
         match time {
             "date" => DateFlag::Date,
             "relative" => DateFlag::Relative,
+            time if time.starts_with('+') => DateFlag::Formatted(time[1..].to_owned()),
             _ => panic!("invalid \"time\" flag: {}", time),
         }
     }
