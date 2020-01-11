@@ -215,7 +215,7 @@ pub fn build() -> App<'static, 'static> {
                 .short("i")
                 .long("inode")
                 .multiple(true)
-                .help("Display inode(Linux only)"),
+                .help("Display the index number of each file"),
         )
 }
 
