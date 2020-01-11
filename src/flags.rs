@@ -98,17 +98,19 @@ impl Flags {
             None => usize::max_value(),
         };
 
-        let mut blocks: Vec<Block> = match () {
-            _ if !blocks_inputs.is_empty() => blocks_inputs.into_iter().map(Block::from).collect(),
-            _ if matches.is_present("long") => vec![
+        let mut blocks: Vec<Block> = if !blocks_inputs.is_empty() {
+            blocks_inputs.into_iter().map(Block::from).collect()
+        } else if matches.is_present("long") {
+            vec![
                 Block::Permission,
                 Block::User,
                 Block::Group,
                 Block::Size,
                 Block::Date,
                 Block::Name,
-            ],
-            _ => vec![Block::Name],
+            ]
+        } else {
+            vec![Block::Name]
         };
 
         // Add inode as first column if with inode flag
