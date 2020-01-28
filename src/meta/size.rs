@@ -57,14 +57,13 @@ impl Size {
             left_pad.push(' ');
         }
 
-        let strings: &[ColoredString] = &[
-            ColoredString::from(left_pad),
-            val_content,
-            ColoredString::from(" "),
-            unit_content,
-        ];
+        let mut strings: Vec<ColoredString> = vec![ColoredString::from(left_pad), val_content];
+        if flags.size != SizeFlag::Short {
+            strings.push(ColoredString::from(" "));
+        }
+        strings.push(unit_content);
 
-        let res = ANSIStrings(strings).to_string();
+        let res = ANSIStrings(&strings).to_string();
         ColoredString::from(res)
     }
 
