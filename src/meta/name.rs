@@ -2,12 +2,10 @@ use crate::color::{ColoredString, Colors, Elem};
 use crate::icon::Icons;
 use crate::meta::filetype::FileType;
 use std::cmp::{Ordering, PartialOrd};
-use std::path::{Path, PathBuf};
+use std::path::{Path, PathBuf, Component};
 use std::ffi::OsStr;
 
 pub enum DisplayOption<'a> {
-    Parent,
-    Current,
     FileName,
     Relative{base_path: &'a Path},
 }
@@ -16,19 +14,26 @@ pub enum DisplayOption<'a> {
 pub struct Name {
     path: PathBuf,
     extension: Option<String>,
+    pub display_name: String,
     file_type: FileType,
 }
 
 impl Name {
     pub fn file_name(&self) -> &str {
-        self.path.file_name().and_then(OsStr::to_str).unwrap_or("?")
+        self.path.file_name().and_then(OsStr::to_str).unwrap()
     }
 
     fn relative_path(&self, base_path: &Path) -> std::borrow::Cow<'_, str> {
-        if let Ok(relative_path) = self.path.strip_prefix(base_path) {
-            relative_path.to_string_lossy()
+        if self.path.starts_with(Component::ParentDir) {
+            self.path.to_string_lossy()
+        } else if self.path.starts_with(base_path) {
+            let relative_path = self.path.strip_prefix(base_path).unwrap().to_string_lossy();
+            if relative_path == "" { std::borrow::Cow::Borrowed(".")
+            } else {
+                relative_path
+            }
         } else {
-            std::borrow::Cow::Borrowed("?")
+            std::borrow::Cow::Borrowed(&self.display_name)
         }
     }
 
@@ -45,14 +50,13 @@ impl Name {
         Self {
             path: PathBuf::from(path),
             extension,
+            display_name: path.file_name().and_then(OsStr::to_str).unwrap_or("?").to_owned(),
             file_type,
         }
     }
 
     pub fn render(&self, colors: &Colors, icons: &Icons, display_option: &DisplayOption) -> ColoredString {
         let content = match display_option {
-            DisplayOption::Parent => format!("{}..", icons.get(self)),
-            DisplayOption::Current => format!("{}.", icons.get(self)),
             DisplayOption::FileName => format!("{}{}", icons.get(self), self.file_name()),
             DisplayOption::Relative{base_path} => format!("{}{}", icons.get(self), self.relative_path(base_path)),
         };
@@ -82,13 +86,13 @@ impl Name {
 
 impl Ord for Name {
     fn cmp(&self, other: &Self) -> Ordering {
-        self.path.cmp(&other.path)
+        self.display_name.cmp(&other.display_name)
     }
 }
 
 impl PartialOrd for Name {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        self.path.partial_cmp(&other.path)
+        self.display_name.partial_cmp(&other.display_name)
     }
 }
 
