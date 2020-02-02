@@ -2,6 +2,7 @@ use crate::color::{ColoredString, Colors};
 use crate::flags::{Block, Display, Flags, Layout};
 use crate::icon::Icons;
 use crate::meta::{FileType, Meta};
+use crate::meta::name::DisplayOption;
 use ansi_term::{ANSIString, ANSIStrings};
 use std::collections::HashMap;
 use term_grid::{Cell, Direction, Filling, Grid, GridOptions};
@@ -59,8 +60,10 @@ fn inner_display_grid(
         if let (true, FileType::Directory { .. }) = (skip_dirs, meta.file_type) {
             continue;
         }
+        
+        let display_option = DisplayOption::Current;
 
-        let blocks = get_output(&meta, &colors, &icons, &flags, &padding_rules);
+        let blocks = get_output(&meta, &colors, &icons, &flags, display_option, &padding_rules);
 
         for block in blocks {
             let block_str = block.to_string();
@@ -131,7 +134,7 @@ fn inner_display_tree(
     });
 
     for meta in metas.iter() {
-        for block in get_output(&meta, &colors, &icons, &flags, &padding_rules) {
+        for block in get_output(&meta, &colors, &icons, &flags, DisplayOption::FileName, &padding_rules) {
             let block_str = block.to_string();
 
             grid.add(Cell {
@@ -216,6 +219,7 @@ fn get_output<'a>(
     colors: &'a Colors,
     icons: &'a Icons,
     flags: &'a Flags,
+    display_option: DisplayOption,
     padding_rules: &HashMap<Block, usize>,
 ) -> Vec<ANSIString<'a>> {
     let mut strings: Vec<ANSIString> = Vec::new();
@@ -242,13 +246,13 @@ fn get_output<'a>(
             Block::Name => {
                 let s: String = if flags.no_symlink {
                     ANSIStrings(&[
-                        meta.name.render(colors, icons),
+                        meta.name.render(colors, icons, &display_option),
                         meta.indicator.render(&flags),
                     ])
                     .to_string()
                 } else {
                     ANSIStrings(&[
-                        meta.name.render(colors, icons),
+                        meta.name.render(colors, icons, &display_option),
                         meta.indicator.render(&flags),
                         meta.symlink.render(colors),
                     ])
