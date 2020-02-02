@@ -27,7 +27,7 @@ use crate::print_error;
 use std::fs;
 use std::fs::read_link;
 use std::io::{Error, ErrorKind};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use globset::GlobSet;
 
@@ -49,6 +49,7 @@ pub struct Meta {
 impl Meta {
     pub fn recurse_into(
         &self,
+        base_path: &Path,
         depth: usize,
         display: Display,
         ignore_globs: &GlobSet,
@@ -77,8 +78,8 @@ impl Meta {
         let mut content: Vec<Meta> = Vec::new();
 
         if let Display::DisplayAll = display {
-            let mut current_meta;
-            let mut parent_meta;
+            let current_meta;
+            let parent_meta;
 
             let absolute_path = fs::canonicalize(&self.path)?;
             let parent_path = match absolute_path.parent() {
@@ -86,11 +87,12 @@ impl Meta {
                 Some(path) => PathBuf::from(path),
             };
 
+            //replace it by display
             current_meta = self.clone();
-            current_meta.name.name = ".".to_string();
+            //current_meta.name.path = PathBuf::from(".");
 
             parent_meta = Self::from_path(&parent_path)?;
-            parent_meta.name.name = "..".to_string();
+            //parent_meta.name.name = "..".to_string();
 
             content.push(current_meta);
             content.push(parent_meta);
@@ -121,7 +123,7 @@ impl Meta {
                 }
             };
 
-            match entry_meta.recurse_into(depth - 1, display, ignore_globs) {
+            match entry_meta.recurse_into(base_path, depth - 1, display, ignore_globs) {
                 Ok(content) => entry_meta.content = content,
                 Err(err) => {
                     print_error!("lsd: {}: {}\n", path.display(), err);
@@ -195,7 +197,7 @@ impl Meta {
         }
     }
 
-    pub fn from_path(path: &PathBuf) -> Result<Self, std::io::Error> {
+    pub fn from_path(path: &Path) -> Result<Self, std::io::Error> {
         let metadata = if read_link(path).is_ok() {
             // If the file is a link, retrieve the metadata without following
             // the link.
@@ -219,7 +221,7 @@ impl Meta {
         Ok(Self {
             inode,
             path: path.to_path_buf(),
-            symlink: SymLink::from(path.as_path()),
+            symlink: SymLink::from(path),
             size: Size::from(&metadata),
             date: Date::from(&metadata),
             indicator: Indicator::from(file_type),

@@ -91,26 +91,25 @@ impl Icons {
             return res;
         }
 
-        // Check the known names.
-        if let Some(icon) = self.icons_by_name.get(name.name().as_str()) {
+        if let Some(icon) = name.file_name()
+            .map(std::ffi::OsStr::to_string_lossy)
+            .and_then(|file_name| self.icons_by_name.get(file_name.as_ref())) {
+            // Use the known names.
             res += icon;
             res += ICON_SPACE;
-            return res;
+            res
+        } else if let Some(icon) = name.extension()
+            .and_then(|extension| self.icons_by_extension.get(extension)) {
+            // Use the known extensions.
+            res += icon;
+            res += ICON_SPACE;
+            res
+        } else {
+            // Use the default icons.
+            res += self.default_file_icon;
+            res += ICON_SPACE;
+            res
         }
-
-        // Check the known extensions.
-        if let Some(extension) = name.extension() {
-            if let Some(icon) = self.icons_by_extension.get(extension.as_str()) {
-                res += icon;
-                res += ICON_SPACE;
-                return res;
-            }
-        }
-
-        // Use the default icons.
-        res += self.default_file_icon;
-        res += ICON_SPACE;
-        res
     }
 
     fn get_default_icons_by_name() -> HashMap<&'static str, &'static str> {
