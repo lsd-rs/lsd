@@ -2,23 +2,22 @@ use crate::color::{ColoredString, Colors, Elem};
 use crate::icon::Icons;
 use crate::meta::filetype::FileType;
 use std::cmp::{Ordering, PartialOrd};
-use std::path::Path;
+use std::path::{Path, PathBuf};
+use std::ffi::OsStr;
 
 #[derive(Clone, Debug, Eq)]
 pub struct Name {
-    pub name: String,
-    path: String,
+    path: PathBuf,
     extension: Option<String>,
     file_type: FileType,
 }
 
 impl Name {
-    pub fn new(path: &Path, file_type: FileType) -> Self {
-        let name = match path.file_name() {
-            Some(name) => name.to_string_lossy().to_string(),
-            None => path.to_string_lossy().to_string(),
-        };
+    pub fn file_name(&self) -> Option<&OsStr> {
+        self.path.file_name()
+    }
 
+    pub fn new(path: &Path, file_type: FileType) -> Self {
         let mut extension = None;
         if let Some(res) = path.extension() {
             extension = Some(
@@ -28,11 +27,8 @@ impl Name {
             );
         }
 
-        let path_string = path.to_string_lossy().to_string();
-
         Self {
-            name,
-            path: path_string,
+            path: PathBuf::from(path),
             extension,
             file_type,
         }
@@ -40,11 +36,9 @@ impl Name {
 
     pub fn name_string(&self, icons: &Icons) -> String {
         let icon = icons.get(self);
-        let mut content = String::with_capacity(icon.len() + self.name.len() + 3 /* spaces */);
+        let display = &self.path.to_string_lossy();
 
-        content += icon.as_str();
-        content += &self.name;
-        content
+        format!("{}{}", icon.as_str(), display)
     }
 
     pub fn render(&self, colors: &Colors, icons: &Icons) -> ColoredString {
@@ -64,12 +58,8 @@ impl Name {
         colors.colorize_using_path(content, &self.path, &elem)
     }
 
-    pub fn name(&self) -> String {
-        self.name.clone()
-    }
-
-    pub fn extension(&self) -> Option<String> {
-        self.extension.clone()
+    pub fn extension(&self) -> Option<&str> {
+        self.extension.as_ref().map(|string| string.as_str())
     }
 
     pub fn file_type(&self) -> FileType {
@@ -79,19 +69,19 @@ impl Name {
 
 impl Ord for Name {
     fn cmp(&self, other: &Self) -> Ordering {
-        self.name.to_lowercase().cmp(&other.name.to_lowercase())
+        self.path.cmp(&other.path)
     }
 }
 
 impl PartialOrd for Name {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        Some(self.name.to_lowercase().cmp(&other.name.to_lowercase()))
+        self.path.partial_cmp(&other.path)
     }
 }
 
 impl PartialEq for Name {
     fn eq(&self, other: &Self) -> bool {
-        self.name.eq_ignore_ascii_case(&other.name)
+        self.path.eq(&other.path)
     }
 }
 
@@ -172,7 +162,7 @@ mod test {
 
         let colors = Colors::new(color::Theme::NoLscolors);
         let file_type = FileType::new(&meta, &Permissions::from(&meta));
-        let name = Name::new(&symlink_path, file_type);
+        let name = Name::new(&tmp_dir.into_path(), &symlink_path, file_type);
 
         assert_eq!(
             Colour::Fixed(44).paint(" target.tmp"),
@@ -198,7 +188,7 @@ mod test {
 
         let colors = Colors::new(color::Theme::NoLscolors);
         let file_type = FileType::new(&meta, &Permissions::from(&meta));
-        let name = Name::new(&pipe_path, file_type);
+        let name = Name::new(&tmp_dir.into_path(), &pipe_path, file_type);
 
         assert_eq!(
             Colour::Fixed(184).paint(" pipe.tmp"),
@@ -229,6 +219,7 @@ mod test {
         let path = Path::new("some-file.txt");
 
         let name = Name::new(
+            Path::new("/"),
             &path,
             FileType::File {
                 uid: false,
@@ -236,7 +227,7 @@ mod test {
             },
         );
 
-        assert_eq!(Some(String::from("txt")), name.extension());
+        assert_eq!(Some("txt"), name.extension());
     }
 
     #[test]
@@ -244,6 +235,7 @@ mod test {
         let path = Path::new(".gitignore");
 
         let name = Name::new(
+            Path::new("/"),
             &path,
             FileType::File {
                 uid: false,
@@ -258,6 +250,7 @@ mod test {
     fn test_order_impl_is_case_insensitive() {
         let path_1 = Path::new("AAAA");
         let name_1 = Name::new(
+            Path::new("/"),
             &path_1,
             FileType::File {
                 uid: false,
@@ -267,6 +260,7 @@ mod test {
 
         let path_2 = Path::new("aaaa");
         let name_2 = Name::new(
+            Path::new("/"),
             &path_2,
             FileType::File {
                 uid: false,
@@ -281,6 +275,7 @@ mod test {
     fn test_partial_order_impl() {
         let path_a = Path::new("aaaa");
         let name_a = Name::new(
+            Path::new("/"),
             &path_a,
             FileType::File {
                 uid: false,
@@ -290,6 +285,7 @@ mod test {
 
         let path_z = Path::new("zzzz");
         let name_z = Name::new(
+            Path::new("/"),
             &path_z,
             FileType::File {
                 uid: false,
@@ -304,6 +300,7 @@ mod test {
     fn test_partial_order_impl_is_case_insensitive() {
         let path_a = Path::new("aaaa");
         let name_a = Name::new(
+            Path::new("/"),
             &path_a,
             FileType::File {
                 uid: false,
@@ -313,6 +310,7 @@ mod test {
 
         let path_z = Path::new("ZZZZ");
         let name_z = Name::new(
+            Path::new("/"),
             &path_z,
             FileType::File {
                 uid: false,
@@ -327,6 +325,7 @@ mod test {
     fn test_partial_eq_impl() {
         let path_1 = Path::new("aaaa");
         let name_1 = Name::new(
+            Path::new("/"),
             &path_1,
             FileType::File {
                 uid: false,
@@ -336,6 +335,7 @@ mod test {
 
         let path_2 = Path::new("aaaa");
         let name_2 = Name::new(
+            Path::new("/"),
             &path_2,
             FileType::File {
                 uid: false,
@@ -350,6 +350,7 @@ mod test {
     fn test_partial_eq_impl_is_case_insensitive() {
         let path_1 = Path::new("AAAA");
         let name_1 = Name::new(
+            Path::new("/"),
             &path_1,
             FileType::File {
                 uid: false,
@@ -359,6 +360,7 @@ mod test {
 
         let path_2 = Path::new("aaaa");
         let name_2 = Name::new(
+            Path::new("/"),
             &path_2,
             FileType::File {
                 uid: false,
