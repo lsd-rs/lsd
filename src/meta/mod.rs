@@ -2,7 +2,7 @@ mod date;
 mod filetype;
 mod indicator;
 mod inode;
-mod name;
+pub mod name;
 mod owner;
 mod permissions;
 mod size;

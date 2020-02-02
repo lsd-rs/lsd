@@ -5,6 +5,13 @@ use std::cmp::{Ordering, PartialOrd};
 use std::path::{Path, PathBuf};
 use std::ffi::OsStr;
 
+pub enum DisplayOption<'a> {
+    Parent,
+    Current,
+    FileName,
+    Relative{base_path: &'a Path},
+}
+
 #[derive(Clone, Debug, Eq)]
 pub struct Name {
     path: PathBuf,
@@ -13,8 +20,16 @@ pub struct Name {
 }
 
 impl Name {
-    pub fn file_name(&self) -> Option<&OsStr> {
-        self.path.file_name()
+    pub fn file_name(&self) -> &str {
+        self.path.file_name().and_then(OsStr::to_str).unwrap_or("?")
+    }
+
+    fn relative_path(&self, base_path: &Path) -> std::borrow::Cow<'_, str> {
+        if let Ok(relative_path) = self.path.strip_prefix(base_path) {
+            relative_path.to_string_lossy()
+        } else {
+            std::borrow::Cow::Borrowed("?")
+        }
     }
 
     pub fn new(path: &Path, file_type: FileType) -> Self {
@@ -34,15 +49,13 @@ impl Name {
         }
     }
 
-    pub fn name_string(&self, icons: &Icons) -> String {
-        let icon = icons.get(self);
-        let display = &self.path.to_string_lossy();
-
-        format!("{}{}", icon.as_str(), display)
-    }
-
-    pub fn render(&self, colors: &Colors, icons: &Icons) -> ColoredString {
-        let content = self.name_string(&icons);
+    pub fn render(&self, colors: &Colors, icons: &Icons, display_option: &DisplayOption) -> ColoredString {
+        let content = match display_option {
+            DisplayOption::Parent => format!("{}..", icons.get(self)),
+            DisplayOption::Current => format!("{}.", icons.get(self)),
+            DisplayOption::FileName => format!("{}{}", icons.get(self), self.file_name()),
+            DisplayOption::Relative{base_path} => format!("{}{}", icons.get(self), self.relative_path(base_path)),
+        };
 
         let elem = match self.file_type {
             FileType::CharDevice => Elem::CharDevice,
@@ -219,7 +232,6 @@ mod test {
         let path = Path::new("some-file.txt");
 
         let name = Name::new(
-            Path::new("/"),
             &path,
             FileType::File {
                 uid: false,
@@ -235,7 +247,6 @@ mod test {
         let path = Path::new(".gitignore");
 
         let name = Name::new(
-            Path::new("/"),
             &path,
             FileType::File {
                 uid: false,
@@ -250,7 +261,6 @@ mod test {
     fn test_order_impl_is_case_insensitive() {
         let path_1 = Path::new("AAAA");
         let name_1 = Name::new(
-            Path::new("/"),
             &path_1,
             FileType::File {
                 uid: false,
@@ -260,7 +270,6 @@ mod test {
 
         let path_2 = Path::new("aaaa");
         let name_2 = Name::new(
-            Path::new("/"),
             &path_2,
             FileType::File {
                 uid: false,
@@ -275,7 +284,6 @@ mod test {
     fn test_partial_order_impl() {
         let path_a = Path::new("aaaa");
         let name_a = Name::new(
-            Path::new("/"),
             &path_a,
             FileType::File {
                 uid: false,
@@ -285,7 +293,6 @@ mod test {
 
         let path_z = Path::new("zzzz");
         let name_z = Name::new(
-            Path::new("/"),
             &path_z,
             FileType::File {
                 uid: false,
@@ -300,7 +307,6 @@ mod test {
     fn test_partial_order_impl_is_case_insensitive() {
         let path_a = Path::new("aaaa");
         let name_a = Name::new(
-            Path::new("/"),
             &path_a,
             FileType::File {
                 uid: false,
@@ -310,7 +316,6 @@ mod test {
 
         let path_z = Path::new("ZZZZ");
         let name_z = Name::new(
-            Path::new("/"),
             &path_z,
             FileType::File {
                 uid: false,
@@ -325,7 +330,6 @@ mod test {
     fn test_partial_eq_impl() {
         let path_1 = Path::new("aaaa");
         let name_1 = Name::new(
-            Path::new("/"),
             &path_1,
             FileType::File {
                 uid: false,
@@ -335,7 +339,6 @@ mod test {
 
         let path_2 = Path::new("aaaa");
         let name_2 = Name::new(
-            Path::new("/"),
             &path_2,
             FileType::File {
                 uid: false,
@@ -350,7 +353,6 @@ mod test {
     fn test_partial_eq_impl_is_case_insensitive() {
         let path_1 = Path::new("AAAA");
         let name_1 = Name::new(
-            Path::new("/"),
             &path_1,
             FileType::File {
                 uid: false,
@@ -360,7 +362,6 @@ mod test {
 
         let path_2 = Path::new("aaaa");
         let name_2 = Name::new(
-            Path::new("/"),
             &path_2,
             FileType::File {
                 uid: false,

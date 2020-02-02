@@ -91,15 +91,13 @@ impl Icons {
             return res;
         }
 
-        if let Some(icon) = name.file_name()
-            .map(std::ffi::OsStr::to_string_lossy)
-            .and_then(|file_name| self.icons_by_name.get(file_name.as_ref())) {
+        if let Some(icon) = self.icons_by_name.get(name.file_name()) {
             // Use the known names.
             res += icon;
             res += ICON_SPACE;
             res
         } else if let Some(icon) = name.extension()
-            .and_then(|extension| self.icons_by_extension.get(extension)) {
+            .and_then(|extension| self.icons_by_extension.get(extension)){
             // Use the known extensions.
             res += icon;
             res += ICON_SPACE;
