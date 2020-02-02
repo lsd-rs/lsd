@@ -5,6 +5,7 @@ use crate::meta::{FileType, Meta};
 use crate::meta::name::DisplayOption;
 use ansi_term::{ANSIString, ANSIStrings};
 use std::collections::HashMap;
+use std::path::Path;
 use term_grid::{Cell, Direction, Filling, Grid, GridOptions};
 use terminal_size::terminal_size;
 use unicode_width::UnicodeWidthStr;
@@ -20,7 +21,9 @@ pub fn grid(metas: &[Meta], flags: &Flags, colors: &Colors, icons: &Icons) -> St
         None => None,
     };
 
-    inner_display_grid(metas, &flags, colors, icons, 0, term_width)
+    let current_dir = std::env::current_dir().unwrap();
+
+    inner_display_grid(&current_dir, metas, &flags, colors, icons, 0, term_width)
 }
 
 pub fn tree(metas: &[Meta], flags: &Flags, colors: &Colors, icons: &Icons) -> String {
@@ -28,6 +31,7 @@ pub fn tree(metas: &[Meta], flags: &Flags, colors: &Colors, icons: &Icons) -> St
 }
 
 fn inner_display_grid(
+    base_path: &Path,
     metas: &[Meta],
     flags: &Flags,
     colors: &Colors,
@@ -55,15 +59,15 @@ fn inner_display_grid(
     let skip_dirs = (depth == 0) && (flags.display != Display::DisplayDirectoryItself);
 
     // print the files first.
-    for meta in metas {
+    for (index, meta) in metas.iter().enumerate() {
         // Maybe skip showing the directory meta now; show its contents later.
         if let (true, FileType::Directory { .. }) = (skip_dirs, meta.file_type) {
             continue;
         }
-        
-        let display_option = DisplayOption::Current;
 
-        let blocks = get_output(&meta, &colors, &icons, &flags, display_option, &padding_rules);
+        let display_option = DisplayOption::Relative{ base_path };
+
+        let blocks = get_output(&meta, &colors, &icons, &flags, &display_option, &padding_rules);
 
         for block in blocks {
             let block_str = block.to_string();
@@ -102,6 +106,7 @@ fn inner_display_grid(
             }
 
             output += &inner_display_grid(
+                &meta.path,
                 meta.content.as_ref().unwrap(),
                 &flags,
                 colors,
@@ -134,7 +139,7 @@ fn inner_display_tree(
     });
 
     for meta in metas.iter() {
-        for block in get_output(&meta, &colors, &icons, &flags, DisplayOption::FileName, &padding_rules) {
+        for block in get_output(&meta, &colors, &icons, &flags, &DisplayOption::FileName, &padding_rules) {
             let block_str = block.to_string();
 
             grid.add(Cell {
@@ -219,7 +224,7 @@ fn get_output<'a>(
     colors: &'a Colors,
     icons: &'a Icons,
     flags: &'a Flags,
-    display_option: DisplayOption,
+    display_option: &DisplayOption,
     padding_rules: &HashMap<Block, usize>,
 ) -> Vec<ANSIString<'a>> {
     let mut strings: Vec<ANSIString> = Vec::new();
@@ -341,6 +346,7 @@ mod tests {
             let output = name.render(
                 &Colors::new(color::Theme::NoColor),
                 &Icons::new(icon::Theme::NoIcon),
+                &DisplayOption::FileName
             );
 
             assert_eq!(get_visible_width(&output), *l);
@@ -372,6 +378,7 @@ mod tests {
                 .render(
                     &Colors::new(color::Theme::NoColor),
                     &Icons::new(icon::Theme::Fancy),
+                    &DisplayOption::FileName
                 )
                 .to_string();
 
@@ -403,6 +410,7 @@ mod tests {
                 .render(
                     &Colors::new(color::Theme::NoLscolors),
                     &Icons::new(icon::Theme::NoIcon),
+                    &DisplayOption::FileName
                 )
                 .to_string();
 
@@ -438,6 +446,7 @@ mod tests {
                 .render(
                     &Colors::new(color::Theme::NoColor),
                     &Icons::new(icon::Theme::NoIcon),
+                    &DisplayOption::FileName
                 )
                 .to_string();
 

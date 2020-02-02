@@ -78,8 +78,8 @@ impl Meta {
         let mut content: Vec<Meta> = Vec::new();
 
         if let Display::DisplayAll = display {
-            let current_meta;
-            let parent_meta;
+            let mut current_meta;
+            let mut parent_meta;
 
             let absolute_path = fs::canonicalize(&self.path)?;
             let parent_path = match absolute_path.parent() {
@@ -87,12 +87,11 @@ impl Meta {
                 Some(path) => PathBuf::from(path),
             };
 
-            //replace it by display
             current_meta = self.clone();
-            //current_meta.name.path = PathBuf::from(".");
+            current_meta.name.display_name = ".".to_owned();
 
             parent_meta = Self::from_path(&parent_path)?;
-            //parent_meta.name.name = "..".to_string();
+            parent_meta.name.display_name = "..".to_owned();
 
             content.push(current_meta);
             content.push(parent_meta);
