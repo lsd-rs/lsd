@@ -45,7 +45,10 @@ impl Name {
     }
 
     pub fn file_name(&self) -> &str {
-        self.path.file_name().and_then(OsStr::to_str).unwrap_or(&self.name)
+        self.path
+            .file_name()
+            .and_then(OsStr::to_str)
+            .unwrap_or(&self.name)
     }
 
     fn relative_path<T: AsRef<Path> + Clone>(&self, base_path: T) -> PathBuf {
