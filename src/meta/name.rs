@@ -51,6 +51,10 @@ impl Name {
     fn relative_path<T: AsRef<Path> + Clone>(&self, base_path: T) -> PathBuf {
         let base_path = base_path.as_ref();
 
+        if self.path == base_path {
+            return PathBuf::from(AsRef::<Path>::as_ref(&Component::CurDir));
+        }
+
         let shared_components: PathBuf = self
             .path
             .components()
