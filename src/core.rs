@@ -95,7 +95,12 @@ impl Core {
                     meta_list.push(meta);
                 }
                 _ => {
-                    match meta.recurse_into(base_path, depth, self.flags.display, &self.flags.ignore_globs) {
+                    match meta.recurse_into(
+                        base_path,
+                        depth,
+                        self.flags.display,
+                        &self.flags.ignore_globs,
+                    ) {
                         Ok(content) => {
                             meta.content = content;
                             meta_list.push(meta);

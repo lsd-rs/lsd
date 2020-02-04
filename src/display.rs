@@ -1,11 +1,10 @@
 use crate::color::{ColoredString, Colors};
 use crate::flags::{Block, Display, Flags, Layout};
 use crate::icon::Icons;
-use crate::meta::{FileType, Meta};
 use crate::meta::name::DisplayOption;
+use crate::meta::{FileType, Meta};
 use ansi_term::{ANSIString, ANSIStrings};
 use std::collections::HashMap;
-use std::path::Path;
 use term_grid::{Cell, Direction, Filling, Grid, GridOptions};
 use terminal_size::terminal_size;
 use unicode_width::UnicodeWidthStr;
@@ -23,7 +22,17 @@ pub fn grid(metas: &[Meta], flags: &Flags, colors: &Colors, icons: &Icons) -> St
 
     let current_dir = std::env::current_dir().unwrap();
 
-    inner_display_grid(&current_dir, metas, &flags, colors, icons, 0, term_width)
+    inner_display_grid(
+        &DisplayOption::Relative {
+            base_path: &current_dir,
+        },
+        metas,
+        &flags,
+        colors,
+        icons,
+        0,
+        term_width,
+    )
 }
 
 pub fn tree(metas: &[Meta], flags: &Flags, colors: &Colors, icons: &Icons) -> String {
@@ -31,7 +40,7 @@ pub fn tree(metas: &[Meta], flags: &Flags, colors: &Colors, icons: &Icons) -> St
 }
 
 fn inner_display_grid(
-    base_path: &Path,
+    display_option: &DisplayOption,
     metas: &[Meta],
     flags: &Flags,
     colors: &Colors,
@@ -59,15 +68,20 @@ fn inner_display_grid(
     let skip_dirs = (depth == 0) && (flags.display != Display::DisplayDirectoryItself);
 
     // print the files first.
-    for (index, meta) in metas.iter().enumerate() {
+    for meta in metas.iter() {
         // Maybe skip showing the directory meta now; show its contents later.
         if let (true, FileType::Directory { .. }) = (skip_dirs, meta.file_type) {
             continue;
         }
 
-        let display_option = DisplayOption::Relative{ base_path };
-
-        let blocks = get_output(&meta, &colors, &icons, &flags, &display_option, &padding_rules);
+        let blocks = get_output(
+            &meta,
+            &colors,
+            &icons,
+            &flags,
+            &display_option,
+            &padding_rules,
+        );
 
         for block in blocks {
             let block_str = block.to_string();
@@ -105,8 +119,16 @@ fn inner_display_grid(
                 output += &display_folder_path(&meta);
             }
 
+            let display_option = if should_display_folder_path {
+                DisplayOption::FileName
+            } else {
+                DisplayOption::Relative {
+                    base_path: &meta.path,
+                }
+            };
+
             output += &inner_display_grid(
-                &meta.path,
+                &display_option,
                 meta.content.as_ref().unwrap(),
                 &flags,
                 colors,
@@ -139,7 +161,14 @@ fn inner_display_tree(
     });
 
     for meta in metas.iter() {
-        for block in get_output(&meta, &colors, &icons, &flags, &DisplayOption::FileName, &padding_rules) {
+        for block in get_output(
+            &meta,
+            &colors,
+            &icons,
+            &flags,
+            &DisplayOption::FileName,
+            &padding_rules,
+        ) {
             let block_str = block.to_string();
 
             grid.add(Cell {
@@ -346,7 +375,7 @@ mod tests {
             let output = name.render(
                 &Colors::new(color::Theme::NoColor),
                 &Icons::new(icon::Theme::NoIcon),
-                &DisplayOption::FileName
+                &DisplayOption::FileName,
             );
 
             assert_eq!(get_visible_width(&output), *l);
@@ -378,7 +407,7 @@ mod tests {
                 .render(
                     &Colors::new(color::Theme::NoColor),
                     &Icons::new(icon::Theme::Fancy),
-                    &DisplayOption::FileName
+                    &DisplayOption::FileName,
                 )
                 .to_string();
 
@@ -410,7 +439,7 @@ mod tests {
                 .render(
                     &Colors::new(color::Theme::NoLscolors),
                     &Icons::new(icon::Theme::NoIcon),
-                    &DisplayOption::FileName
+                    &DisplayOption::FileName,
                 )
                 .to_string();
 
@@ -446,7 +475,7 @@ mod tests {
                 .render(
                     &Colors::new(color::Theme::NoColor),
                     &Icons::new(icon::Theme::NoIcon),
-                    &DisplayOption::FileName
+                    &DisplayOption::FileName,
                 )
                 .to_string();
 

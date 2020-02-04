@@ -96,8 +96,10 @@ impl Icons {
             res += icon;
             res += ICON_SPACE;
             res
-        } else if let Some(icon) = name.extension()
-            .and_then(|extension| self.icons_by_extension.get(extension)){
+        } else if let Some(icon) = name
+            .extension()
+            .and_then(|extension| self.icons_by_extension.get(extension))
+        {
             // Use the known extensions.
             res += icon;
             res += ICON_SPACE;
