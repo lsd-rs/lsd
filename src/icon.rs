@@ -56,60 +56,38 @@ impl Icons {
             return String::new();
         }
 
-        let mut res = String::with_capacity(4 + ICON_SPACE.len()); // 4 == max icon size
-
         // Check file types
         let file_type: FileType = name.file_type();
 
-        if let FileType::Directory { .. } = file_type {
-            res += self.default_folder_icon;
-            res += ICON_SPACE;
-            return res;
+        let icon = if let FileType::Directory { .. } = file_type {
+            self.default_folder_icon
         } else if let FileType::SymLink = file_type {
-            res += "\u{e27c}"; // ""
-            res += ICON_SPACE;
-            return res;
+            "\u{e27c}" // ""
         } else if let FileType::Socket = file_type {
-            res += "\u{f6a7}"; // ""
-            res += ICON_SPACE;
-            return res;
+            "\u{f6a7}" // ""
         } else if let FileType::Pipe = file_type {
-            res += "\u{f731}"; // ""
-            res += ICON_SPACE;
-            return res;
+            "\u{f731}" // ""
         } else if let FileType::CharDevice = file_type {
-            res += "\u{e601}"; // ""
-            res += ICON_SPACE;
-            return res;
+            "\u{e601}" // ""
         } else if let FileType::BlockDevice = file_type {
-            res += "\u{fc29}"; // "ﰩ"
-            res += ICON_SPACE;
-            return res;
+            "\u{fc29}" // "ﰩ"
         } else if let FileType::Special = file_type {
-            res += "\u{f2dc}"; // ""
-            res += ICON_SPACE;
-            return res;
-        }
-
-        if let Some(icon) = self.icons_by_name.get(name.file_name()) {
+            "\u{f2dc}" // ""
+        } else if let Some(icon) = self.icons_by_name.get(name.file_name()) {
             // Use the known names.
-            res += icon;
-            res += ICON_SPACE;
-            res
+            icon
         } else if let Some(icon) = name
             .extension()
             .and_then(|extension| self.icons_by_extension.get(extension))
         {
             // Use the known extensions.
-            res += icon;
-            res += ICON_SPACE;
-            res
+            icon
         } else {
             // Use the default icons.
-            res += self.default_file_icon;
-            res += ICON_SPACE;
-            res
-        }
+            self.default_file_icon
+        };
+
+        format!("{}{}", icon, ICON_SPACE)
     }
 
     fn get_default_icons_by_name() -> HashMap<&'static str, &'static str> {
