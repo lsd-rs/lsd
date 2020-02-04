@@ -20,12 +20,8 @@ pub fn grid(metas: &[Meta], flags: &Flags, colors: &Colors, icons: &Icons) -> St
         None => None,
     };
 
-    let current_dir = std::env::current_dir().unwrap();
-
     inner_display_grid(
-        &DisplayOption::Relative {
-            base_path: &current_dir,
-        },
+        &DisplayOption::None,
         metas,
         &flags,
         colors,

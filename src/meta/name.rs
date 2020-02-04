@@ -9,6 +9,7 @@ use std::path::{Component, Path, PathBuf};
 pub enum DisplayOption<'a> {
     FileName,
     Relative { base_path: &'a Path },
+    None,
 }
 
 #[derive(Clone, Debug, Eq)]
@@ -48,24 +49,12 @@ impl Name {
     }
 
     fn relative_path<T: AsRef<Path> + Clone>(&self, base_path: T) -> PathBuf {
-        use std::borrow::Cow;
-        let target_path = if self.path.is_absolute() {
-            Cow::Borrowed(&self.path)
-        } else {
-            Cow::Owned(self.path.canonicalize().unwrap())
-        };
-
-        let base_path = if base_path.as_ref().is_absolute() {
-            Cow::Borrowed(base_path.as_ref())
-        } else {
-            Cow::Owned(base_path.as_ref().canonicalize().unwrap())
-        };
-
-        if target_path == base_path {
+        let base_path = base_path.as_ref();
+        if self.path == base_path {
             return PathBuf::from(".");
         }
 
-        let shared_components: PathBuf = target_path
+        let shared_components: PathBuf = self.path
             .components()
             .zip(base_path.components())
             .take_while(|(target_component, base_component)| target_component == base_component)
@@ -78,7 +67,7 @@ impl Name {
             .components()
             .map(|_| Component::ParentDir)
             .chain(
-                target_path
+                self.path
                     .strip_prefix(&shared_components)
                     .unwrap()
                     .components(),
@@ -99,6 +88,7 @@ impl Name {
                 icons.get(self),
                 self.relative_path(base_path).to_string_lossy()
             ),
+            DisplayOption::None => format!("{}{}", icons.get(self), self.path.to_string_lossy())
         };
 
         let elem = match self.file_type {
