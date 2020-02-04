@@ -54,7 +54,8 @@ impl Name {
             return PathBuf::from(".");
         }
 
-        let shared_components: PathBuf = self.path
+        let shared_components: PathBuf = self
+            .path
             .components()
             .zip(base_path.components())
             .take_while(|(target_component, base_component)| target_component == base_component)
@@ -88,7 +89,7 @@ impl Name {
                 icons.get(self),
                 self.relative_path(base_path).to_string_lossy()
             ),
-            DisplayOption::None => format!("{}{}", icons.get(self), self.path.to_string_lossy())
+            DisplayOption::None => format!("{}{}", icons.get(self), self.path.to_string_lossy()),
         };
 
         let elem = match self.file_type {
