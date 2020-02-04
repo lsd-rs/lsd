@@ -62,7 +62,7 @@ impl Name {
         };
 
         if target_path == base_path {
-            return PathBuf::from("");
+            return PathBuf::from(".");
         }
 
         let shared_components: PathBuf = target_path
