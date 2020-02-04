@@ -68,7 +68,7 @@ fn inner_display_grid(
     let skip_dirs = (depth == 0) && (flags.display != Display::DisplayDirectoryItself);
 
     // print the files first.
-    for meta in metas.iter() {
+    for meta in metas {
         // Maybe skip showing the directory meta now; show its contents later.
         if let (true, FileType::Directory { .. }) = (skip_dirs, meta.file_type) {
             continue;

@@ -13,13 +13,36 @@ pub enum DisplayOption<'a> {
 
 #[derive(Clone, Debug, Eq)]
 pub struct Name {
+    pub name: String,
     path: PathBuf,
     extension: Option<String>,
-    pub display_name: String,
     file_type: FileType,
 }
 
 impl Name {
+    pub fn new(path: &Path, file_type: FileType) -> Self {
+        let name = match path.file_name() {
+            Some(name) => name.to_string_lossy().to_string(),
+            None => path.to_string_lossy().to_string(),
+        };
+
+        let mut extension = None;
+        if let Some(res) = path.extension() {
+            extension = Some(
+                res.to_str()
+                    .expect("failed to encode file name")
+                    .to_string(),
+            );
+        }
+
+        Self {
+            name,
+            path: PathBuf::from(path),
+            extension,
+            file_type,
+        }
+    }
+
     pub fn file_name(&self) -> &str {
         self.path.file_name().and_then(OsStr::to_str).unwrap()
     }
@@ -63,28 +86,6 @@ impl Name {
             .collect()
     }
 
-    pub fn new(path: &Path, file_type: FileType) -> Self {
-        let mut extension = None;
-        if let Some(res) = path.extension() {
-            extension = Some(
-                res.to_str()
-                    .expect("failed to encode file name")
-                    .to_string(),
-            );
-        }
-
-        Self {
-            path: PathBuf::from(path),
-            extension,
-            display_name: path
-                .file_name()
-                .and_then(OsStr::to_str)
-                .unwrap_or("?")
-                .to_owned(),
-            file_type,
-        }
-    }
-
     pub fn render(
         &self,
         colors: &Colors,
@@ -125,25 +126,21 @@ impl Name {
 
 impl Ord for Name {
     fn cmp(&self, other: &Self) -> Ordering {
-        self.display_name
-            .to_lowercase()
-            .cmp(&other.display_name.to_lowercase())
+        self.name.to_lowercase().cmp(&other.name.to_lowercase())
     }
 }
 
 impl PartialOrd for Name {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        self.display_name
+        self.name
             .to_lowercase()
-            .partial_cmp(&other.display_name.to_lowercase())
+            .partial_cmp(&other.name.to_lowercase())
     }
 }
 
 impl PartialEq for Name {
     fn eq(&self, other: &Self) -> bool {
-        self.display_name
-            .to_lowercase()
-            .eq(&other.display_name.to_lowercase())
+        self.name.eq_ignore_ascii_case(&other.name.to_lowercase())
     }
 }
 

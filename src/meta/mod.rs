@@ -49,7 +49,6 @@ pub struct Meta {
 impl Meta {
     pub fn recurse_into(
         &self,
-        base_path: &Path,
         depth: usize,
         display: Display,
         ignore_globs: &GlobSet,
@@ -88,10 +87,10 @@ impl Meta {
             };
 
             current_meta = self.clone();
-            current_meta.name.display_name = ".".to_owned();
+            current_meta.name.name = ".".to_owned();
 
             parent_meta = Self::from_path(&parent_path)?;
-            parent_meta.name.display_name = "..".to_owned();
+            parent_meta.name.name = "..".to_owned();
 
             content.push(current_meta);
             content.push(parent_meta);
@@ -122,7 +121,7 @@ impl Meta {
                 }
             };
 
-            match entry_meta.recurse_into(base_path, depth - 1, display, ignore_globs) {
+            match entry_meta.recurse_into(depth - 1, display, ignore_globs) {
                 Ok(content) => entry_meta.content = content,
                 Err(err) => {
                     print_error!("lsd: {}: {}\n", path.display(), err);
