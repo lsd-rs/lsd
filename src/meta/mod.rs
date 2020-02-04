@@ -24,10 +24,9 @@ pub use crate::flags::Display;
 pub use crate::icon::Icons;
 use crate::print_error;
 
-use std::fs;
 use std::fs::read_link;
 use std::io::{Error, ErrorKind};
-use std::path::{Path, PathBuf};
+use std::path::{Component, Path, PathBuf};
 
 use globset::GlobSet;
 
@@ -78,19 +77,11 @@ impl Meta {
 
         if let Display::DisplayAll = display {
             let mut current_meta;
-            let mut parent_meta;
-
-            let absolute_path = fs::canonicalize(&self.path)?;
-            let parent_path = match absolute_path.parent() {
-                None => PathBuf::from("/"),
-                Some(path) => PathBuf::from(path),
-            };
 
             current_meta = self.clone();
             current_meta.name.name = ".".to_owned();
 
-            parent_meta = Self::from_path(&parent_path)?;
-            parent_meta.name.name = "..".to_owned();
+            let parent_meta = Self::from_path(&self.path.join(Component::ParentDir))?;
 
             content.push(current_meta);
             content.push(parent_meta);

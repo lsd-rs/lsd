@@ -115,12 +115,8 @@ fn inner_display_grid(
                 output += &display_folder_path(&meta);
             }
 
-            let display_option = if should_display_folder_path {
-                DisplayOption::FileName
-            } else {
-                DisplayOption::Relative {
-                    base_path: &meta.path,
-                }
+            let display_option = DisplayOption::Relative {
+                base_path: &meta.path,
             };
 
             output += &inner_display_grid(
