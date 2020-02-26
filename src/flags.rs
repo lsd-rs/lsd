@@ -13,9 +13,9 @@ pub struct Flags {
     pub size: SizeFlag,
     pub date: DateFlag,
     pub color: WhenFlag,
-    pub prefix_indent: bool,
     pub icon: WhenFlag,
     pub icon_theme: IconTheme,
+    pub inode: bool,
     pub recursion_depth: usize,
     pub blocks: Vec<Block>,
     pub no_symlink: bool,
@@ -32,8 +32,14 @@ impl Flags {
         let size_inputs: Vec<&str> = matches.values_of("size").unwrap().collect();
         let date_inputs: Vec<&str> = matches.values_of("date").unwrap().collect();
         let dir_order_inputs: Vec<&str> = matches.values_of("group-dirs").unwrap().collect();
-        let blocks_inputs: Vec<&str> = matches.values_of("blocks").unwrap().collect();
         let ignore_globs_inputs: Vec<&str> = matches.values_of("ignore-glob").unwrap().collect();
+        // inode set layout to oneline and blocks to inode,name
+        let inode = matches.is_present("inode");
+        let blocks_inputs: Vec<&str> = if let Some(blocks) = matches.values_of("blocks") {
+            blocks.collect()
+        } else {
+            vec![]
+        };
 
         let display = if matches.is_present("all") {
             Display::DisplayAll
@@ -52,41 +58,37 @@ impl Flags {
         } else {
             SortFlag::Name
         };
+
         let sort_order = if matches.is_present("reverse") {
             SortOrder::Reverse
         } else {
             SortOrder::Default
         };
+
         let layout = if matches.is_present("tree") {
-            Layout::Tree {
-                long: matches.is_present("long"),
-            }
-        } else if matches.is_present("long") {
-            Layout::OneLine { long: true }
-        } else if matches.is_present("oneline") {
-            Layout::OneLine { long: false }
+            Layout::Tree
+        } else if matches.is_present("long")
+            || matches.is_present("oneline")
+            || blocks_inputs.len() > 1
+            || inode
+        {
+            Layout::OneLine
         } else {
             Layout::Grid
         };
+
         let recursive = matches.is_present("recursive");
-        let recursion_depth = match matches.value_of("depth") {
-            Some(str)
-                if recursive
-                    || layout
-                        == Layout::Tree {
-                            long: matches.is_present("long"),
-                        } =>
-            {
-                match str.parse::<usize>() {
-                    Ok(val) => val,
-                    Err(_) => {
-                        return Err(Error::with_description(
-                            "The argument '--depth' requires a valid positive number",
-                            ErrorKind::ValueValidation,
-                        ));
-                    }
+        let recursion_input = matches.values_of("depth").and_then(|values| values.last());
+        let recursion_depth = match recursion_input {
+            Some(str) if recursive || layout == Layout::Tree => match str.parse::<usize>() {
+                Ok(val) => val,
+                Err(_) => {
+                    return Err(Error::with_description(
+                        "The argument '--depth' requires a valid positive number",
+                        ErrorKind::ValueValidation,
+                    ));
                 }
-            }
+            },
             Some(_) => {
                 return Err(Error::with_description(
                     "The argument '--depth' requires '--tree' or '--recursive'",
@@ -95,15 +97,36 @@ impl Flags {
             }
             None => usize::max_value(),
         };
-        let no_symlink = matches.is_present("no-symlink");
-        let total_size = matches.is_present("total-size");
+
+        let mut blocks: Vec<Block> = if !blocks_inputs.is_empty() {
+            blocks_inputs.into_iter().map(Block::from).collect()
+        } else if matches.is_present("long") {
+            vec![
+                Block::Permission,
+                Block::User,
+                Block::Group,
+                Block::Size,
+                Block::Date,
+                Block::Name,
+            ]
+        } else {
+            vec![Block::Name]
+        };
+
+        // Add inode as first column if with inode flag
+        if inode && !blocks.contains(&Block::INode) {
+            blocks.insert(0, Block::INode);
+        }
 
         let mut ignore_globs_builder = GlobSetBuilder::new();
         for pattern in ignore_globs_inputs {
             let glob = match Glob::new(pattern) {
                 Ok(g) => g,
                 Err(e) => {
-                    return Err(Error::with_description(&e.to_string(), ErrorKind::ValueValidation));
+                    return Err(Error::with_description(
+                        &e.to_string(),
+                        ErrorKind::ValueValidation,
+                    ));
                 }
             };
             ignore_globs_builder.add(glob);
@@ -112,7 +135,10 @@ impl Flags {
         let ignore_globs = match ignore_globs_builder.build() {
             Ok(globs) => globs,
             Err(e) => {
-                return Err(Error::with_description(&e.to_string(), ErrorKind::ValueValidation));
+                return Err(Error::with_description(
+                    &e.to_string(),
+                    ErrorKind::ValueValidation,
+                ));
             }
         };
 
@@ -125,8 +151,8 @@ impl Flags {
             sort_by,
             sort_order,
             size: SizeFlag::from(size_inputs[size_inputs.len() - 1]),
-            blocks: blocks_inputs.into_iter().map(|b| Block::from(b)).collect(),
             ignore_globs,
+            blocks,
             // Take only the last value
             date: if classic_mode {
                 DateFlag::Date
@@ -138,7 +164,6 @@ impl Flags {
             } else {
                 WhenFlag::from(color_inputs[color_inputs.len() - 1])
             },
-            prefix_indent: matches.is_present("prefix-indent"),
             icon: if classic_mode {
                 WhenFlag::Never
             } else {
@@ -150,8 +175,9 @@ impl Flags {
             } else {
                 DirOrderFlag::from(dir_order_inputs[dir_order_inputs.len() - 1])
             },
-            no_symlink,
-            total_size,
+            no_symlink: matches.is_present("no-symlink"),
+            total_size: matches.is_present("total-size"),
+            inode,
         })
     }
 }
@@ -170,33 +196,27 @@ impl Default for Flags {
             size: SizeFlag::Default,
             date: DateFlag::Date,
             color: WhenFlag::Auto,
-            prefix_indent: false,
             icon: WhenFlag::Auto,
             icon_theme: IconTheme::Fancy,
-            blocks: vec![
-                Block::Permission,
-                Block::User,
-                Block::Group,
-                Block::Size,
-                Block::Date,
-                Block::Name,
-            ],
+            blocks: vec![],
             no_symlink: false,
             total_size: false,
             ignore_globs: GlobSet::empty(),
+            inode: false,
         }
     }
 }
 
-#[derive(Clone, Debug, Copy, PartialEq, Eq)]
+#[derive(Clone, Debug, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub enum Block {
-    // FileType,
     Permission,
     User,
     Group,
     Size,
+    SizeValue,
     Date,
     Name,
+    INode,
 }
 impl<'a> From<&'a str> for Block {
     fn from(block: &'a str) -> Self {
@@ -206,8 +226,10 @@ impl<'a> From<&'a str> for Block {
             "user" => Block::User,
             "group" => Block::Group,
             "size" => Block::Size,
+            "size_value" => Block::SizeValue,
             "date" => Block::Date,
             "name" => Block::Name,
+            "inode" => Block::INode,
             _ => panic!("invalid \"time\" flag: {}", block),
         }
     }
@@ -239,10 +261,11 @@ impl<'a> From<&'a str> for SizeFlag {
     }
 }
 
-#[derive(Clone, Debug, Copy, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum DateFlag {
     Date,
     Relative,
+    Formatted(String),
 }
 
 impl<'a> From<&'a str> for DateFlag {
@@ -250,6 +273,7 @@ impl<'a> From<&'a str> for DateFlag {
         match time {
             "date" => DateFlag::Date,
             "relative" => DateFlag::Relative,
+            time if time.starts_with('+') => DateFlag::Formatted(time[1..].to_owned()),
             _ => panic!("invalid \"time\" flag: {}", time),
         }
     }
@@ -322,8 +346,8 @@ impl<'a> From<&'a str> for IconTheme {
 #[derive(Clone, Debug, Copy, PartialEq, Eq)]
 pub enum Layout {
     Grid,
-    Tree { long: bool },
-    OneLine { long: bool },
+    Tree,
+    OneLine,
 }
 
 #[cfg(test)]
@@ -352,5 +376,27 @@ mod test {
 
         assert!(res.is_err());
         assert_eq!(res.unwrap_err().kind, ErrorKind::MissingRequiredArgument);
+    }
+
+    #[test]
+    fn test_duplicate_depth() {
+        let matches = app::build()
+            .get_matches_from_safe(vec!["lsd", "--tree", "--depth", "1", "--depth", "2"])
+            .unwrap();
+        let res = Flags::from_matches(&matches);
+
+        assert!(res.is_ok());
+        assert_eq!(res.unwrap().recursion_depth, 2);
+    }
+
+    #[test]
+    fn test_missing_depth() {
+        let matches = app::build()
+            .get_matches_from_safe(vec!["lsd", "--tree"])
+            .unwrap();
+        let res = Flags::from_matches(&matches);
+
+        assert!(res.is_ok());
+        assert_eq!(res.unwrap().recursion_depth, usize::max_value());
     }
 }

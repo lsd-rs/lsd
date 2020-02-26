@@ -1,5 +1,6 @@
 use crate::color::{ColoredString, Colors, Elem};
 use crate::flags::{Flags, SizeFlag};
+use ansi_term::ANSIStrings;
 use std::fs::Metadata;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -26,15 +27,14 @@ impl<'a> From<&'a Metadata> for Size {
 
 impl Size {
     pub fn new(bytes: u64) -> Self {
-        Self { bytes: bytes }
+        Self { bytes }
     }
 
     pub fn get_bytes(&self) -> u64 {
         self.bytes
     }
 
-    pub fn get_unit(&self, flags: &Flags) -> Unit
-    {
+    pub fn get_unit(&self, flags: &Flags) -> Unit {
         if self.bytes < 1024 || flags.size == SizeFlag::Bytes {
             Unit::Byte
         } else if self.bytes < 1024 * 1024 {
@@ -48,61 +48,75 @@ impl Size {
         }
     }
 
-    pub fn render(
-        &self,
-        colors: &Colors,
-        value_alignment: usize,
-        unit_alignment: usize,
-        flags: &Flags,
-    ) -> ColoredString {
-        let mut content = String::with_capacity(value_alignment + unit_alignment + 1);
+    pub fn render(&self, colors: &Colors, flags: &Flags, val_alignment: usize) -> ColoredString {
+        let val_content = self.render_value(colors, flags);
+        let unit_content = self.render_unit(colors, flags);
 
-        let unit = self.get_unit(flags);
-
-        let value_str = self.render_value(&unit);
-        let unit_str = Size::render_unit(&unit, &flags);
-
-        for _ in 0..(value_alignment - value_str.len()) {
-            content.push(' ');
+        let mut left_pad = String::with_capacity(val_alignment - val_content.len());
+        for _ in 0..left_pad.capacity() {
+            left_pad.push(' ');
         }
 
-        content += &self.render_value(&unit);
-        if flags.size == SizeFlag::Default {
-            content.push(' ');
-        }
-        content += &Size::render_unit(&unit, &flags);
+        let strings: &[ColoredString] = &[
+            ColoredString::from(left_pad),
+            val_content,
+            ColoredString::from(" "),
+            unit_content,
+        ];
 
-        for _ in 0..(unit_alignment - unit_str.len()) {
-            content.push(' ');
-        }
-
-        self.paint(&unit, colors, content)
+        let res = ANSIStrings(strings).to_string();
+        ColoredString::from(res)
     }
 
-    fn paint(&self, unit: &Unit, colors: &Colors, content: String) -> ColoredString {
-        if unit == &Unit::None {
+    fn paint(&self, colors: &Colors, flags: &Flags, content: String) -> ColoredString {
+        let unit = self.get_unit(flags);
+
+        if unit == Unit::None {
             colors.colorize(content, &Elem::NonFile)
-        } else if unit == &Unit::Byte || unit == &Unit::Kilo {
+        } else if unit == Unit::Byte || unit == Unit::Kilo {
             colors.colorize(content, &Elem::FileSmall)
-        } else if unit == &Unit::Mega {
+        } else if unit == Unit::Mega {
             colors.colorize(content, &Elem::FileMedium)
         } else {
             colors.colorize(content, &Elem::FileLarge)
         }
     }
 
-    pub fn render_value(&self, unit: &Unit) -> String {
+    pub fn render_value(&self, colors: &Colors, flags: &Flags) -> ColoredString {
+        let content = self.value_string(flags);
+
+        self.paint(colors, flags, content)
+    }
+
+    pub fn value_string(&self, flags: &Flags) -> String {
+        let unit = self.get_unit(flags);
+
         match unit {
             Unit::None => "".to_string(),
             Unit::Byte => self.bytes.to_string(),
-            Unit::Kilo => ((( self.bytes as f64 ) / 1024.0 * 10.0).round() / 10.0).to_string(),
-            Unit::Mega => ((( self.bytes as f64 ) / (1024.0 * 1024.0) * 10.0).round() / 10.0).to_string(),
-            Unit::Giga => ((( self.bytes as f64 ) / (1024.0 * 1024.0 * 1024.0) * 10.0).round() / 10.0).to_string(),
-            Unit::Tera => ((( self.bytes as f64 ) / (1024.0 * 1024.0 * 1024.0 * 1024.0) * 10.0).round() / 10.0).to_string(),
+            Unit::Kilo => (((self.bytes as f64) / 1024.0 * 10.0).round() / 10.0).to_string(),
+            Unit::Mega => {
+                (((self.bytes as f64) / (1024.0 * 1024.0) * 10.0).round() / 10.0).to_string()
+            }
+            Unit::Giga => (((self.bytes as f64) / (1024.0 * 1024.0 * 1024.0) * 10.0).round()
+                / 10.0)
+                .to_string(),
+            Unit::Tera => {
+                (((self.bytes as f64) / (1024.0 * 1024.0 * 1024.0 * 1024.0) * 10.0).round() / 10.0)
+                    .to_string()
+            }
         }
     }
 
-    pub fn render_unit(unit: &Unit, flags: &Flags) -> String {
+    pub fn render_unit(&self, colors: &Colors, flags: &Flags) -> ColoredString {
+        let content = self.unit_string(flags);
+
+        self.paint(colors, flags, content)
+    }
+
+    pub fn unit_string(&self, flags: &Flags) -> String {
+        let unit = self.get_unit(flags);
+
         match flags.size {
             SizeFlag::Default => match unit {
                 Unit::None => String::from("-"),
@@ -120,7 +134,7 @@ impl Size {
                 Unit::Giga => String::from("G"),
                 Unit::Tera => String::from("T"),
             },
-            SizeFlag::Bytes => String::from("")
+            SizeFlag::Bytes => String::from(""),
         }
     }
 }
@@ -134,82 +148,75 @@ mod test {
     fn render_byte() {
         let size = Size::new(42); // == 42 bytes
         let mut flags = Flags::default();
-        let unit = size.get_unit(&flags);
 
-        assert_eq!(size.render_value(&unit).as_str(), "42");
+        assert_eq!(size.value_string(&flags).as_str(), "42");
 
-        assert_eq!(Size::render_unit(&unit, &flags).as_str(), "B");
+        assert_eq!(size.unit_string(&flags).as_str(), "B");
         flags.size = SizeFlag::Short;
-        assert_eq!(Size::render_unit(&unit, &flags).as_str(), "B");
+        assert_eq!(size.unit_string(&flags).as_str(), "B");
         flags.size = SizeFlag::Bytes;
-        assert_eq!(Size::render_unit(&unit, &flags).as_str(), "");
+        assert_eq!(size.unit_string(&flags).as_str(), "");
     }
 
     #[test]
     fn render_kilobyte() {
         let size = Size::new(42 * 1024); // 42 kilobytes
         let mut flags = Flags::default();
-        let unit = size.get_unit(&flags);
 
-        assert_eq!(size.render_value(&unit).as_str(), "42");
-        assert_eq!(Size::render_unit(&unit, &flags).as_str(), "KB");
+        assert_eq!(size.value_string(&flags).as_str(), "42");
+        assert_eq!(size.unit_string(&flags).as_str(), "KB");
         flags.size = SizeFlag::Short;
-        assert_eq!(Size::render_unit(&unit, &flags).as_str(), "K");
+        assert_eq!(size.unit_string(&flags).as_str(), "K");
     }
 
     #[test]
     fn render_megabyte() {
         let size = Size::new(42 * 1024 * 1024); // 42 megabytes
         let mut flags = Flags::default();
-        let unit = size.get_unit(&flags);
 
-        assert_eq!(size.render_value(&unit).as_str(), "42");
-        assert_eq!(Size::render_unit(&unit, &flags).as_str(), "MB");
+        assert_eq!(size.value_string(&flags).as_str(), "42");
+        assert_eq!(size.unit_string(&flags).as_str(), "MB");
         flags.size = SizeFlag::Short;
-        assert_eq!(Size::render_unit(&unit, &flags).as_str(), "M");
+        assert_eq!(size.unit_string(&flags).as_str(), "M");
     }
 
     #[test]
     fn render_gigabyte() {
         let size = Size::new(42 * 1024 * 1024 * 1024); // 42 gigabytes
         let mut flags = Flags::default();
-        let unit = size.get_unit(&flags);
 
-        assert_eq!(size.render_value(&unit).as_str(), "42");
-        assert_eq!(Size::render_unit(&unit, &flags).as_str(), "GB");
+        assert_eq!(size.value_string(&flags).as_str(), "42");
+        assert_eq!(size.unit_string(&flags).as_str(), "GB");
         flags.size = SizeFlag::Short;
-        assert_eq!(Size::render_unit(&unit, &flags).as_str(), "G");
+        assert_eq!(size.unit_string(&flags).as_str(), "G");
     }
 
     #[test]
     fn render_terabyte() {
         let size = Size::new(42 * 1024 * 1024 * 1024 * 1024); // 42 terabytes
         let mut flags = Flags::default();
-        let unit = size.get_unit(&flags);
 
-        assert_eq!(size.render_value(&unit).as_str(), "42");
-        assert_eq!(Size::render_unit(&unit, &flags).as_str(), "TB");
+        assert_eq!(size.value_string(&flags).as_str(), "42");
+        assert_eq!(size.unit_string(&flags).as_str(), "TB");
         flags.size = SizeFlag::Short;
-        assert_eq!(Size::render_unit(&unit, &flags).as_str(), "T");
+        assert_eq!(size.unit_string(&flags).as_str(), "T");
     }
 
     #[test]
     fn render_with_a_fraction() {
         let size = Size::new(42 * 1024 + 103); // 42.1 kilobytes
         let flags = Flags::default();
-        let unit = size.get_unit(&flags);
 
-        assert_eq!(size.render_value(&unit).as_str(), "42.1");
-        assert_eq!(Size::render_unit(&unit, &flags).as_str(), "KB");
+        assert_eq!(size.value_string(&flags).as_str(), "42.1");
+        assert_eq!(size.unit_string(&flags).as_str(), "KB");
     }
 
     #[test]
     fn render_with_a_truncated_fraction() {
         let size = Size::new(42 * 1024 + 1); // 42.001 kilobytes == 42 kilobytes
         let flags = Flags::default();
-        let unit = size.get_unit(&flags);
 
-        assert_eq!(size.render_value(&unit).as_str(), "42");
-        assert_eq!(Size::render_unit(&unit, &flags).as_str(), "KB");
+        assert_eq!(size.value_string(&flags).as_str(), "42");
+        assert_eq!(size.unit_string(&flags).as_str(), "KB");
     }
 }

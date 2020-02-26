@@ -3,11 +3,12 @@ use crate::display;
 use crate::flags::{Display, Flags, IconTheme, Layout, WhenFlag};
 use crate::icon::{self, Icons};
 use crate::meta::Meta;
-use crate::sort;
+use crate::{print_error, print_output, sort};
+use std::fs;
 use std::path::PathBuf;
-use std::{fs, io};
 
-use super::libc;
+#[cfg(not(target_os = "windows"))]
+use std::io;
 #[cfg(not(target_os = "windows"))]
 use std::os::unix::io::AsRawFd;
 
@@ -55,7 +56,7 @@ impl Core {
             //
             // Most of the programs does not handle correctly the ansi colors
             // or require a raw output (like the `wc` command).
-            inner_flags.layout = Layout::OneLine { long: false };
+            inner_flags.layout = Layout::OneLine;
         };
 
         Self {
@@ -70,7 +71,7 @@ impl Core {
         let mut meta_list = self.fetch(paths);
 
         self.sort(&mut meta_list);
-        self.display(meta_list)
+        self.display(&meta_list)
     }
 
     fn fetch(&self, paths: Vec<PathBuf>) -> Vec<Meta> {
@@ -83,14 +84,14 @@ impl Core {
 
         for path in paths {
             if let Err(err) = fs::canonicalize(&path) {
-                eprintln!("cannot access '{}': {}", path.display(), err);
+                print_error!("cannot access '{}': {}", path.display(), err);
                 continue;
             }
 
             let mut meta = match Meta::from_path(&path) {
                 Ok(meta) => meta,
                 Err(err) => {
-                    eprintln!("cannot access '{}': {}", path.display(), err);
+                    print_error!("cannot access '{}': {}", path.display(), err);
                     continue;
                 }
             };
@@ -106,7 +107,7 @@ impl Core {
                             meta_list.push(meta);
                         }
                         Err(err) => {
-                            eprintln!("cannot access '{}': {}", path.display(), err);
+                            print_error!("cannot access '{}': {}", path.display(), err);
                             continue;
                         }
                     };
@@ -132,14 +133,13 @@ impl Core {
         }
     }
 
-    fn display(&self, metas: Vec<Meta>) {
-        let output = match self.flags.layout {
-            Layout::OneLine { .. } => {
-                display::one_line(metas, &self.flags, &self.colors, &self.icons)
-            }
-            Layout::Tree { .. } => display::tree(metas, &self.flags, &self.colors, &self.icons),
-            Layout::Grid => display::grid(metas, &self.flags, &self.colors, &self.icons),
+    fn display(&self, metas: &[Meta]) {
+        let output = if self.flags.layout == Layout::Tree {
+            display::tree(&metas, &self.flags, &self.colors, &self.icons)
+        } else {
+            display::grid(&metas, &self.flags, &self.colors, &self.icons)
         };
-        print!("{}", output);
+
+        print_output!("{}", output);
     }
 }

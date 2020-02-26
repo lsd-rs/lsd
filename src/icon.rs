@@ -16,7 +16,7 @@ pub enum Theme {
     Unicode,
 }
 
-const ICON_SPACE: &str = "  ";
+const ICON_SPACE: &str = " ";
 
 // In order to add a new icon, write the unicode value like "\ue5fb" then
 // run the command below in vim:
@@ -181,6 +181,10 @@ impl Icons {
         m.insert("conf", "\u{e615}"); // ""
         m.insert("cp", "\u{e61d}"); // ""
         m.insert("cpp", "\u{e61d}"); // ""
+        m.insert("cs", "\u{f81a}"); // ""
+        m.insert("cshtml", "\u{f1fa}"); // ""
+        m.insert("csproj", "\u{f81a}"); // ""
+        m.insert("csx", "\u{f81a}"); // ""
         m.insert("csh", "\u{f489}"); // ""
         m.insert("css", "\u{e749}"); // ""
         m.insert("csv", "\u{f1c3}"); // ""
@@ -278,6 +282,7 @@ impl Icons {
         m.insert("r", "\u{f25d}"); // ""
         m.insert("rakefile", "\u{e21e}"); // ""
         m.insert("rar", "\u{f410}"); // ""
+        m.insert("razor", "\u{f1fa}"); // ""
         m.insert("rb", "\u{e21e}"); // ""
         m.insert("rdata", "\u{f25d}"); // ""
         m.insert("rdb", "\u{e76d}"); // ""
@@ -299,6 +304,7 @@ impl Icons {
         m.insert("sh", "\u{f489}"); // ""
         m.insert("shell", "\u{f489}"); // ""
         m.insert("slim", "\u{e73b}"); // ""
+        m.insert("sln", "\u{e70c}"); // ""
         m.insert("sql", "\u{f1c0}"); // ""
         m.insert("sqlite3", "\u{e7c4}"); // ""
         m.insert("styl", "\u{e600}"); // ""

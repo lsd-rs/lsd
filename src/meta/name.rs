@@ -130,7 +130,7 @@ mod test {
         let name = Name::new(&file_path, file_type);
 
         assert_eq!(
-            Colour::Fixed(184).paint("  file.txt"),
+            Colour::Fixed(184).paint(" file.txt"),
             name.render(&colors, &icons)
         );
     }
@@ -148,7 +148,7 @@ mod test {
         let colors = Colors::new(color::Theme::NoLscolors);
 
         assert_eq!(
-            Colour::Fixed(33).paint("  directory"),
+            Colour::Fixed(33).paint(" directory"),
             meta.name.render(&colors, &icons)
         );
     }
@@ -175,7 +175,7 @@ mod test {
         let name = Name::new(&symlink_path, file_type);
 
         assert_eq!(
-            Colour::Fixed(44).paint("  target.tmp"),
+            Colour::Fixed(44).paint(" target.tmp"),
             name.render(&colors, &icons)
         );
     }
@@ -201,7 +201,7 @@ mod test {
         let name = Name::new(&pipe_path, file_type);
 
         assert_eq!(
-            Colour::Fixed(184).paint("  pipe.tmp"),
+            Colour::Fixed(184).paint(" pipe.tmp"),
             name.render(&colors, &icons)
         );
     }

@@ -36,33 +36,11 @@ impl<'a> From<&'a Metadata> for Owner {
 }
 
 impl Owner {
-    pub fn user(&self) -> String {
-        self.user.clone()
+    pub fn render_user(&self, colors: &Colors) -> ColoredString {
+        colors.colorize(self.user.clone(), &Elem::User)
     }
 
-    pub fn group(&self) -> String {
-        self.group.clone()
-    }
-
-    pub fn render_user(&self, colors: &Colors, user_alignment: usize) -> ColoredString {
-        let mut res = String::with_capacity(user_alignment - self.user.len());
-
-        for _ in 0..(user_alignment - self.user.len()) {
-            res.push(' ');
-        }
-
-        res += &self.user;
-        colors.colorize(res, &Elem::User)
-    }
-
-    pub fn render_group(&self, colors: &Colors, group_alignment: usize) -> ColoredString {
-        let mut res = String::with_capacity(group_alignment - self.group.len());
-
-        for _ in 0..(group_alignment - self.group.len()) {
-            res.push(' ');
-        }
-
-        res += &self.group;
-        colors.colorize(res, &Elem::Group)
+    pub fn render_group(&self, colors: &Colors) -> ColoredString {
+        colors.colorize(self.group.clone(), &Elem::Group)
     }
 }

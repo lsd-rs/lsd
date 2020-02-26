@@ -25,8 +25,7 @@ impl<'a> From<&'a Metadata> for Date {
 }
 
 impl Date {
-    pub fn render(&self, colors: &Colors, date_alignment: usize, flags: &Flags) -> ColoredString {
-        let mut content = String::with_capacity(date_alignment + 1);
+    pub fn render(&self, colors: &Colors, flags: &Flags) -> ColoredString {
         let now = time::now();
 
         let elem;
@@ -38,19 +37,14 @@ impl Date {
             elem = &Elem::Older;
         }
 
-        let date_string = &self.date_string(&flags);
-        content += date_string;
-
-        for _ in 0..(date_alignment - date_string.len()) {
-            content.push(' ');
-        }
-        colors.colorize(content, elem)
+        colors.colorize(self.date_string(&flags), elem)
     }
 
     pub fn date_string(&self, flags: &Flags) -> String {
-        match flags.date {
+        match &flags.date {
             DateFlag::Date => self.0.ctime().to_string(),
             DateFlag::Relative => format!("{}", HumanTime::from(self.0 - time::now())),
+            DateFlag::Formatted(format) => self.0.to_local().strftime(&format).unwrap().to_string(),
         }
     }
 }
@@ -119,7 +113,7 @@ mod test {
 
         assert_eq!(
             Colour::Fixed(40).paint(creation_date.ctime().to_string()),
-            date.render(&colors, creation_date.ctime().to_string().len(), &flags)
+            date.render(&colors, &flags)
         );
 
         fs::remove_file(file_path).unwrap();
@@ -143,7 +137,7 @@ mod test {
 
         assert_eq!(
             Colour::Fixed(42).paint(creation_date.ctime().to_string()),
-            date.render(&colors, creation_date.ctime().to_string().len(), &flags)
+            date.render(&colors, &flags)
         );
 
         fs::remove_file(file_path).unwrap();
@@ -167,7 +161,7 @@ mod test {
 
         assert_eq!(
             Colour::Fixed(36).paint(creation_date.ctime().to_string()),
-            date.render(&colors, creation_date.ctime().to_string().len(), &flags)
+            date.render(&colors, &flags)
         );
 
         fs::remove_file(file_path).unwrap();
@@ -192,8 +186,8 @@ mod test {
         flags.date = DateFlag::Relative;
 
         assert_eq!(
-            Colour::Fixed(36).paint("2 days ago  "),
-            date.render(&colors, 12, &flags)
+            Colour::Fixed(36).paint("2 days ago"),
+            date.render(&colors, &flags)
         );
 
         fs::remove_file(file_path).unwrap();
@@ -227,10 +221,7 @@ mod test {
         let mut flags = Flags::default();
         flags.date = DateFlag::Relative;
 
-        assert_eq!(
-            Colour::Fixed(40).paint("now  "),
-            date.render(&colors, 5, &flags)
-        );
+        assert_eq!(Colour::Fixed(40).paint("now"), date.render(&colors, &flags));
 
         fs::remove_file(file_path).unwrap();
     }

@@ -1,6 +1,7 @@
 mod date;
 mod filetype;
 mod indicator;
+mod inode;
 mod name;
 mod owner;
 mod permissions;
@@ -13,6 +14,7 @@ mod windows_utils;
 pub use self::date::Date;
 pub use self::filetype::FileType;
 pub use self::indicator::Indicator;
+pub use self::inode::INode;
 pub use self::name::Name;
 pub use self::owner::Owner;
 pub use self::permissions::Permissions;
@@ -20,6 +22,7 @@ pub use self::size::Size;
 pub use self::symlink::SymLink;
 pub use crate::flags::Display;
 pub use crate::icon::Icons;
+use crate::print_error;
 
 use std::fs;
 use std::fs::read_link;
@@ -39,6 +42,7 @@ pub struct Meta {
     pub size: Size,
     pub symlink: SymLink,
     pub indicator: Indicator,
+    pub inode: INode,
     pub content: Option<Vec<Meta>>,
 }
 
@@ -65,7 +69,7 @@ impl Meta {
         let entries = match self.path.read_dir() {
             Ok(entries) => entries,
             Err(err) => {
-                eprintln!("cannot access '{}': {}", self.path.display(), err);
+                print_error!("cannot access '{}': {}", self.path.display(), err);
                 return Ok(None);
             }
         };
@@ -96,16 +100,15 @@ impl Meta {
             let path = entry?.path();
 
             let name = path
-                    .file_name()
-                    .ok_or_else(|| Error::new(ErrorKind::InvalidInput, "invalid file name"))?;
+                .file_name()
+                .ok_or_else(|| Error::new(ErrorKind::InvalidInput, "invalid file name"))?;
 
             if ignore_globs.is_match(&name) {
                 continue;
             }
 
             if let Display::DisplayOnlyVisible = display {
-                if name.to_string_lossy().starts_with('.')
-                {
+                if name.to_string_lossy().starts_with('.') {
                     continue;
                 }
             }
@@ -113,7 +116,7 @@ impl Meta {
             let mut entry_meta = match Self::from_path(&path) {
                 Ok(res) => res,
                 Err(err) => {
-                    eprintln!("cannot access '{}': {}", path.display(), err);
+                    print_error!("cannot access '{}': {}", path.display(), err);
                     continue;
                 }
             };
@@ -121,7 +124,7 @@ impl Meta {
             match entry_meta.recurse_into(depth - 1, display, ignore_globs) {
                 Ok(content) => entry_meta.content = content,
                 Err(err) => {
-                    eprintln!("cannot access '{}': {}", path.display(), err);
+                    print_error!("cannot access '{}': {}", path.display(), err);
                     continue;
                 }
             };
@@ -133,7 +136,7 @@ impl Meta {
     }
 
     pub fn calculate_total_size(&mut self) {
-        if let FileType::Directory { uid: _ } = self.file_type {
+        if let FileType::Directory { .. } = self.file_type {
             if let Some(metas) = &mut self.content {
                 let mut size_accumulated = self.size.get_bytes();
                 for x in &mut metas.iter_mut() {
@@ -159,7 +162,7 @@ impl Meta {
         let metadata = match metadata {
             Ok(meta) => meta,
             Err(err) => {
-                eprintln!("cannot access '{}': {}", path.display(), err);
+                print_error!("cannot access '{}': {}", path.display(), err);
                 return 0;
             }
         };
@@ -172,7 +175,7 @@ impl Meta {
             let entries = match path.read_dir() {
                 Ok(entries) => entries,
                 Err(err) => {
-                    eprintln!("cannot access '{}': {}", path.display(), err);
+                    print_error!("cannot access '{}': {}", path.display(), err);
                     return size;
                 }
             };
@@ -180,7 +183,7 @@ impl Meta {
                 let path = match entry {
                     Ok(entry) => entry.path(),
                     Err(err) => {
-                        eprintln!("cannot access '{}': {}", path.display(), err);
+                        print_error!("cannot access '{}': {}", path.display(), err);
                         continue;
                     }
                 };
@@ -211,8 +214,10 @@ impl Meta {
 
         let file_type = FileType::new(&metadata, &permissions);
         let name = Name::new(&path, file_type);
+        let inode = INode::from(&metadata);
 
         Ok(Self {
+            inode,
             path: path.to_path_buf(),
             symlink: SymLink::from(path.as_path()),
             size: Size::from(&metadata),

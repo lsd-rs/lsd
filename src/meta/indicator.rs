@@ -29,14 +29,6 @@ impl Indicator {
             ANSIString::from("")
         }
     }
-
-    pub fn len(&self, flags: &Flags) -> usize {
-        if flags.display_indicators {
-            self.0.len()
-        } else {
-            0
-        }
-    }
 }
 
 #[cfg(test)]
