@@ -6,6 +6,9 @@ use assert_fs::prelude::*;
 use predicates::prelude::*;
 use std::process::Command;
 
+#[cfg(unix)]
+use std::os::unix::fs;
+
 #[test]
 fn test_runs_okay() {
     cmd().assert().success();
@@ -132,6 +135,26 @@ fn test_list_block_inode_populated_directory() {
 fn test_list_inode_with_long_ok() {
     let dir = tempdir();
     cmd().arg("-i").arg("-l").arg(dir.path()).assert().success();
+}
+
+#[cfg(unix)]
+#[test]
+fn test_list_broken_link_ok() {
+    let dir = tempdir();
+    let broken_link = dir.path().join("broken-softlink");
+    let matched = "No such file or directory";
+    fs::symlink("not-existed-file", &broken_link).unwrap();
+
+    cmd()
+        .arg(&broken_link)
+        .assert()
+        .stderr(predicate::str::contains(matched).not());
+
+    cmd()
+        .arg("-l")
+        .arg(broken_link)
+        .assert()
+        .stderr(predicate::str::contains(matched).not());
 }
 
 fn cmd() -> Command {
