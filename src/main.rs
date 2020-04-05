@@ -84,6 +84,10 @@ macro_rules! print_output {
 fn main() {
     let matches = app::build().get_matches_from(wild::args_os());
 
+    // input translate glob FILE without single quote into real names
+    // for example:
+    // * to all files matched
+    // '*' remain as '*'
     let inputs = matches
         .values_of("FILE")
         .expect("failed to retrieve cli value")
