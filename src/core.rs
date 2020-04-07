@@ -85,7 +85,7 @@ impl Core {
             let mut meta = match Meta::from_path(&path) {
                 Ok(meta) => meta,
                 Err(err) => {
-                    print_error!("cannot access '{}': {}", path.display(), err);
+                    print_error!("lsd: {}: {}\n", path.display(), err);
                     continue;
                 }
             };
@@ -101,7 +101,7 @@ impl Core {
                             meta_list.push(meta);
                         }
                         Err(err) => {
-                            print_error!("cannot access '{}': {}", path.display(), err);
+                            print_error!("lsd: {}: {}\n", path.display(), err);
                             continue;
                         }
                     };
