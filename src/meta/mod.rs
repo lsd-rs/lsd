@@ -69,7 +69,7 @@ impl Meta {
         let entries = match self.path.read_dir() {
             Ok(entries) => entries,
             Err(err) => {
-                print_error!("cannot access '{}': {}", self.path.display(), err);
+                print_error!("lsd: {}: {}\n", self.path.display(), err);
                 return Ok(None);
             }
         };
@@ -116,7 +116,7 @@ impl Meta {
             let mut entry_meta = match Self::from_path(&path) {
                 Ok(res) => res,
                 Err(err) => {
-                    print_error!("cannot access '{}': {}", path.display(), err);
+                    print_error!("lsd: {}: {}\n", path.display(), err);
                     continue;
                 }
             };
@@ -124,7 +124,7 @@ impl Meta {
             match entry_meta.recurse_into(depth - 1, display, ignore_globs) {
                 Ok(content) => entry_meta.content = content,
                 Err(err) => {
-                    print_error!("cannot access '{}': {}", path.display(), err);
+                    print_error!("lsd: {}: {}\n", path.display(), err);
                     continue;
                 }
             };
@@ -162,7 +162,7 @@ impl Meta {
         let metadata = match metadata {
             Ok(meta) => meta,
             Err(err) => {
-                print_error!("cannot access '{}': {}", path.display(), err);
+                print_error!("lsd: {}: {}\n", path.display(), err);
                 return 0;
             }
         };
@@ -175,7 +175,7 @@ impl Meta {
             let entries = match path.read_dir() {
                 Ok(entries) => entries,
                 Err(err) => {
-                    print_error!("cannot access '{}': {}", path.display(), err);
+                    print_error!("lsd: {}: {}\n", path.display(), err);
                     return size;
                 }
             };
@@ -183,7 +183,7 @@ impl Meta {
                 let path = match entry {
                     Ok(entry) => entry.path(),
                     Err(err) => {
-                        print_error!("cannot access '{}': {}", path.display(), err);
+                        print_error!("lsd: {}: {}\n", path.display(), err);
                         continue;
                     }
                 };
