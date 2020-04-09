@@ -141,6 +141,7 @@ impl Size {
 #[cfg(test)]
 mod test {
     use super::Size;
+    use crate::color::{Colors, Theme};
     use crate::flags::{Flags, SizeFlag};
 
     #[test]
@@ -217,5 +218,16 @@ mod test {
 
         assert_eq!(size.value_string(&flags).as_str(), "42");
         assert_eq!(size.unit_string(&flags).as_str(), "KB");
+    }
+
+    #[test]
+    fn render_short_nospaces() {
+        let size = Size::new(42 * 1024); // 42 kilobytes
+        let mut flags = Flags::default();
+        flags.size = SizeFlag::Short;
+        let colors = Colors::new(Theme::NoColor);
+
+        assert_eq!(size.render(&colors, &flags, 2).to_string(), "42K");
+        assert_eq!(size.render(&colors, &flags, 3).to_string(), " 42K");
     }
 }
