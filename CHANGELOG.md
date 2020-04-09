@@ -4,6 +4,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+
+## [0.17.0] - 2020-04-09
+### Added
+- Add some icons for the special Unix file types from [xSetech](https://github.com/xSetech)
+- Add some integration tests from [allenap](https://github.com/allenap)
+- Add the flag `--ignore-glob` from [sumitsahrawat](https://github.com/sumitsahrawat)
+- Add the elixir icon from [JiNova](https://github.com/JiNova)
+- Add the NixOS/nix installation instructions from [06kellyjac](https://github.com/06kellyjac)
+- Add the Elm icon from [optikfluffel](https://github.com/optikfluffel)
+- Add the date formatting feature from [dvvvvvv](https://github.com/dvvvvvv)
+- Add the `inode` block from [zwpaper](https://github.com/zwpaper)
+- Add the `--inode` flag from [zwpaper](https://github.com/zwpaper)
+- Add the csharp, sln and razor icons from [jpda](https://github.com/jpda)
+
+### Changed
+- Move all the CI/CD from travis to github actions from [rivy](https://github.com/rivy)
+- Allow the usage of several `--depth` arguments from [abazylewicz](https://github.com/abazylewicz)
+
+### Fixed
+- Fix the GID permissions display from [xduugu](https://github.com/xduugu)
+- Fix the panic if the pipe is closed before the output is written from [Peltoche](https://github.com/Peltoche)
+- Fix the broken softlink display from [zwpaper](https://github.com/zwpaper)
+
 ## [0.16.0] - 2019-08-02
 ### Added
 - Add the flag `--blocks` from [meain](https://github.com/meain)
@@ -225,7 +248,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Change the component alignement by using term_grid
 
 
-[Unreleased]: https://github.com/Peltoche/lsd/compare/0.15.1...HEAD
+[Unreleased]: https://github.com/Peltoche/lsd/compare/0.17.0...HEAD
+[0.17.0]: https://github.com/Peltoche/lsd/compare/0.16.0...0.17.0
+[0.16.0]: https://github.com/Peltoche/lsd/compare/0.15.1...0.16.0
 [0.15.1]: https://github.com/Peltoche/lsd/compare/0.15.0...0.15.1
 [0.15.0]: https://github.com/Peltoche/lsd/compare/0.14.1...0.15.0
 [0.14.0]: https://github.com/Peltoche/lsd/compare/0.13.1...0.14.0

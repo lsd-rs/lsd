@@ -15,6 +15,7 @@ pub struct Flags {
     pub color: WhenFlag,
     pub icon: WhenFlag,
     pub icon_theme: IconTheme,
+    pub inode: bool,
     pub recursion_depth: usize,
     pub blocks: Vec<Block>,
     pub no_symlink: bool,
@@ -32,6 +33,8 @@ impl Flags {
         let date_inputs: Vec<&str> = matches.values_of("date").unwrap().collect();
         let dir_order_inputs: Vec<&str> = matches.values_of("group-dirs").unwrap().collect();
         let ignore_globs_inputs: Vec<&str> = matches.values_of("ignore-glob").unwrap().collect();
+        // inode set layout to oneline and blocks to inode,name
+        let inode = matches.is_present("inode");
         let blocks_inputs: Vec<&str> = if let Some(blocks) = matches.values_of("blocks") {
             blocks.collect()
         } else {
@@ -67,6 +70,7 @@ impl Flags {
         } else if matches.is_present("long")
             || matches.is_present("oneline")
             || blocks_inputs.len() > 1
+            || inode
         {
             Layout::OneLine
         } else {
@@ -94,7 +98,7 @@ impl Flags {
             None => usize::max_value(),
         };
 
-        let blocks: Vec<Block> = if !blocks_inputs.is_empty() {
+        let mut blocks: Vec<Block> = if !blocks_inputs.is_empty() {
             blocks_inputs.into_iter().map(Block::from).collect()
         } else if matches.is_present("long") {
             vec![
@@ -108,6 +112,11 @@ impl Flags {
         } else {
             vec![Block::Name]
         };
+
+        // Add inode as first column if with inode flag
+        if inode && !blocks.contains(&Block::INode) {
+            blocks.insert(0, Block::INode);
+        }
 
         let mut ignore_globs_builder = GlobSetBuilder::new();
         for pattern in ignore_globs_inputs {
@@ -168,6 +177,7 @@ impl Flags {
             },
             no_symlink: matches.is_present("no-symlink"),
             total_size: matches.is_present("total-size"),
+            inode,
         })
     }
 }
@@ -192,6 +202,7 @@ impl Default for Flags {
             no_symlink: false,
             total_size: false,
             ignore_globs: GlobSet::empty(),
+            inode: false,
         }
     }
 }
@@ -205,6 +216,7 @@ pub enum Block {
     SizeValue,
     Date,
     Name,
+    INode,
 }
 impl<'a> From<&'a str> for Block {
     fn from(block: &'a str) -> Self {
@@ -217,6 +229,7 @@ impl<'a> From<&'a str> for Block {
             "size_value" => Block::SizeValue,
             "date" => Block::Date,
             "name" => Block::Name,
+            "inode" => Block::INode,
             _ => panic!("invalid \"time\" flag: {}", block),
         }
     }
@@ -248,10 +261,11 @@ impl<'a> From<&'a str> for SizeFlag {
     }
 }
 
-#[derive(Clone, Debug, Copy, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum DateFlag {
     Date,
     Relative,
+    Formatted(String),
 }
 
 impl<'a> From<&'a str> for DateFlag {
@@ -259,6 +273,7 @@ impl<'a> From<&'a str> for DateFlag {
         match time {
             "date" => DateFlag::Date,
             "relative" => DateFlag::Relative,
+            time if time.starts_with('+') => DateFlag::Formatted(time[1..].to_owned()),
             _ => panic!("invalid \"time\" flag: {}", time),
         }
     }

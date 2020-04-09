@@ -1,9 +1,7 @@
 # LSD (LSDeluxe)
 
 [![license](http://img.shields.io/badge/license-Apache%20v2-orange.svg)](https://raw.githubusercontent.com/Peltoche/ical-rs/master/LICENSE)
-[![Build Status](https://travis-ci.org/Peltoche/lsd.svg?branch=master)](https://travis-ci.org/Peltoche/lsd)
 [![Latest version](https://img.shields.io/crates/v/lsd.svg)](https://crates.io/crates/lsd)
-[![Snap Status](https://build.snapcraft.io/badge/Peltoche/lsd.svg)](https://build.snapcraft.io/user/Peltoche/lsd)
 
 # Table of Contents
 
@@ -115,17 +113,24 @@ The [release page](https://github.com/Peltoche/lsd/releases) includes precompile
 
 ### Required
 
-In order to use lsd instead of the default ls you need to add this to you shell
-configuration file  (~/.bashrc, ~/.zshrc, etc.) :
+Enable nerd fonts for your terminal, URxvt for example:
+
+.Xresources
+```
+URxvt*font:    xft:Hack Nerd Font:style=Regular:size=11
+```
+
+### Optional
+
+
+In order to use lsd when entering the `ls` command, you need to add this to your shell
+configuration file  (~/.bashrc, ~/.zshrc, etc.):
 
   ```sh
   alias ls='lsd'
   ```
 
-### Optional
-
-Some examples of useful aliases. You can add this to you shell configuration
-file  (~/.bashrc, ~/.zshrc, etc.) just under the alias above :
+Some further examples of useful aliases:
 
   ```sh
   alias l='ls -l'

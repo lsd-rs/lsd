@@ -6,6 +6,9 @@ use assert_fs::prelude::*;
 use predicates::prelude::*;
 use std::process::Command;
 
+#[cfg(unix)]
+use std::os::unix::fs;
+
 #[test]
 fn test_runs_okay() {
     cmd().assert().success();
@@ -20,12 +23,35 @@ fn test_list_empty_directory() {
 }
 
 #[test]
+fn test_list_almost_all_empty_directory() {
+    let matched = "";
+    cmd()
+        .arg("--almost-all")
+        .arg(tempdir().path())
+        .assert()
+        .stdout(predicate::eq(matched));
+
+    cmd()
+        .arg("-A")
+        .arg(tempdir().path())
+        .assert()
+        .stdout(predicate::eq(matched));
+}
+
+#[test]
 fn test_list_all_empty_directory() {
+    let matched = "\\.\n\\.\\.\n$";
     cmd()
         .arg("--all")
         .arg(tempdir().path())
         .assert()
-        .stdout(predicate::eq(".\n..\n"));
+        .stdout(predicate::str::is_match(matched).unwrap());
+
+    cmd()
+        .arg("-a")
+        .arg(tempdir().path())
+        .assert()
+        .stdout(predicate::str::is_match(matched).unwrap());
 }
 
 #[test]
@@ -36,7 +62,19 @@ fn test_list_populated_directory() {
     cmd()
         .arg(dir.path())
         .assert()
-        .stdout(predicate::eq("one\ntwo\n"));
+        .stdout(predicate::str::is_match("one\ntwo\n$").unwrap());
+}
+
+#[test]
+fn test_list_almost_all_populated_directory() {
+    let dir = tempdir();
+    dir.child("one").touch().unwrap();
+    dir.child("two").touch().unwrap();
+    cmd()
+        .arg("--almost-all")
+        .arg(dir.path())
+        .assert()
+        .stdout(predicate::str::is_match("one\ntwo\n$").unwrap());
 }
 
 #[test]
@@ -48,7 +86,75 @@ fn test_list_all_populated_directory() {
         .arg("--all")
         .arg(dir.path())
         .assert()
-        .stdout(predicate::eq(".\n..\none\ntwo\n"));
+        .stdout(predicate::str::is_match("\\.\n\\.\\.\none\ntwo\n$").unwrap());
+}
+
+#[test]
+fn test_list_inode_populated_directory() {
+    let dir = tempdir();
+    dir.child("one").touch().unwrap();
+    dir.child("two").touch().unwrap();
+
+    #[cfg(unix)]
+    let matched = "\\d+ one\n\\d+ two\n$";
+    #[cfg(windows)]
+    let matched = "- one\n\\- two\n$";
+
+    cmd()
+        .arg("--inode")
+        .arg(dir.path())
+        .assert()
+        .stdout(predicate::str::is_match(matched).unwrap());
+    cmd()
+        .arg("-i")
+        .arg(dir.path())
+        .assert()
+        .stdout(predicate::str::is_match(matched).unwrap());
+}
+
+#[test]
+fn test_list_block_inode_populated_directory() {
+    let dir = tempdir();
+    dir.child("one").touch().unwrap();
+    dir.child("two").touch().unwrap();
+
+    #[cfg(unix)]
+    let matched = "\\d+ one\n\\d+ two\n$";
+    #[cfg(windows)]
+    let matched = "- one\n\\- two\n$";
+
+    cmd()
+        .arg("--blocks")
+        .arg("inode,name")
+        .arg(dir.path())
+        .assert()
+        .stdout(predicate::str::is_match(matched).unwrap());
+}
+
+#[test]
+fn test_list_inode_with_long_ok() {
+    let dir = tempdir();
+    cmd().arg("-i").arg("-l").arg(dir.path()).assert().success();
+}
+
+#[cfg(unix)]
+#[test]
+fn test_list_broken_link_ok() {
+    let dir = tempdir();
+    let broken_link = dir.path().join("broken-softlink");
+    let matched = "No such file or directory";
+    fs::symlink("not-existed-file", &broken_link).unwrap();
+
+    cmd()
+        .arg(&broken_link)
+        .assert()
+        .stderr(predicate::str::contains(matched).not());
+
+    cmd()
+        .arg("-l")
+        .arg(broken_link)
+        .assert()
+        .stderr(predicate::str::contains(matched).not());
 }
 
 fn cmd() -> Command {
