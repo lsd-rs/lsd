@@ -111,7 +111,7 @@ impl Name {
     }
 
     pub fn extension(&self) -> Option<&str> {
-        self.extension.as_deref()
+        self.extension.as_ref().map(|string| string.as_str())
     }
 
     pub fn file_type(&self) -> FileType {
