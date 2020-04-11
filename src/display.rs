@@ -267,20 +267,21 @@ fn get_output<'a>(
             Block::SizeValue => strings.push(meta.size.render_value(colors, flags)),
             Block::Date => strings.push(meta.date.render(colors, &flags)),
             Block::Name => {
-                let s: String = if flags.no_symlink || flags.dereference {
-                    ANSIStrings(&[
-                        meta.name.render(colors, icons, &display_option),
-                        meta.indicator.render(&flags),
-                    ])
-                    .to_string()
-                } else {
-                    ANSIStrings(&[
-                        meta.name.render(colors, icons, &display_option),
-                        meta.indicator.render(&flags),
-                        meta.symlink.render(colors),
-                    ])
-                    .to_string()
-                };
+                let s: String =
+                    if flags.no_symlink || flags.dereference || flags.layout == Layout::Grid {
+                        ANSIStrings(&[
+                            meta.name.render(colors, icons, &display_option),
+                            meta.indicator.render(&flags),
+                        ])
+                        .to_string()
+                    } else {
+                        ANSIStrings(&[
+                            meta.name.render(colors, icons, &display_option),
+                            meta.indicator.render(&flags),
+                            meta.symlink.render(colors),
+                        ])
+                        .to_string()
+                    };
 
                 strings.push(ColoredString::from(s));
             }
