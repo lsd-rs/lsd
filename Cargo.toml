@@ -43,8 +43,8 @@ features = ["suggestions", "color", "wrap_help"]
 version = "2.33.*"
 
 [dev-dependencies]
-assert_cmd = "0.11.1"
-assert_fs = "0.11.3"
+assert_cmd = "1"
+assert_fs = "1"
 predicates = "1.0.1"
 tempfile = "3"
 
