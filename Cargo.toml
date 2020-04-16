@@ -28,7 +28,7 @@ terminal_size = "0.1.*"
 time = "0.1.*"
 chrono-humanize = "0.0.*"
 unicode-width = "0.1.*"
-lscolors = "0.6.0"
+lscolors = "0.7"
 wild = "2.0.*"
 globset = "0.4.*"
 
