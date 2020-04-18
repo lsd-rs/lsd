@@ -4,6 +4,7 @@ use crate::flags::layout::Layout;
 use crate::flags::permission::PermissionFlag;
 use crate::flags::size::SizeFlag;
 use crate::flags::sorting::{DirGrouping, SortColumn};
+use crate::flags::HyperlinkOption;
 use crate::flags::{ColorOption, ThemeOption};
 ///! This module provides methods to handle the program's config files and operations related to
 ///! this.
@@ -42,6 +43,7 @@ pub struct Config {
     pub no_symlink: Option<bool>,
     pub total_size: Option<bool>,
     pub symlink_arrow: Option<String>,
+    pub hyperlink: Option<HyperlinkOption>,
 }
 
 #[derive(Eq, PartialEq, Debug, Deserialize)]
@@ -92,6 +94,7 @@ impl Config {
             no_symlink: None,
             total_size: None,
             symlink_arrow: None,
+            hyperlink: None,
         }
     }
 
@@ -331,6 +334,7 @@ mod tests {
     use crate::flags::permission::PermissionFlag;
     use crate::flags::size::SizeFlag;
     use crate::flags::sorting::{DirGrouping, SortColumn};
+    use crate::flags::HyperlinkOption;
 
     #[test]
     fn test_read_default() {
@@ -378,6 +382,7 @@ mod tests {
                 no_symlink: Some(false),
                 total_size: Some(false),
                 symlink_arrow: Some("⇒".into()),
+                hyperlink: Some(HyperlinkOption::Never),
             },
             c
         );

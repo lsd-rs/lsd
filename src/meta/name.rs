@@ -1,6 +1,8 @@
 use crate::color::{ColoredString, Colors, Elem};
+use crate::flags::HyperlinkOption;
 use crate::icon::Icons;
 use crate::meta::filetype::FileType;
+use crate::url::Url;
 use std::cmp::{Ordering, PartialOrd};
 use std::ffi::OsStr;
 use std::path::{Component, Path, PathBuf};
@@ -101,10 +103,23 @@ impl Name {
         colors: &Colors,
         icons: &Icons,
         display_option: &DisplayOption,
+        hyperlink: HyperlinkOption,
     ) -> ColoredString {
+        let name = &match hyperlink {
+            HyperlinkOption::Always => {
+                let url = Url::from_file_path(&self.path).expect("absolute path");
+
+                // Crossterm does not support hyperlinks as of now
+                // https://gist.github.com/egmontkob/eb114294efbcd5adb1944c9f3cb5feda
+                format!("\x1B;;{}\x1B\x5C{}\x1B;;\x1B\x5C", url, self.file_name())
+            }
+
+            _ => self.file_name().to_string(),
+        };
+
         let content = match display_option {
             DisplayOption::FileName => {
-                format!("{}{}", icons.get(self), self.escape(self.file_name()))
+                format!("{}{}", icons.get(self), self.escape(name))
             }
             DisplayOption::Relative { base_path } => format!(
                 "{}{}",
@@ -166,12 +181,15 @@ mod test {
     use super::DisplayOption;
     use super::Name;
     use crate::color::{self, Colors};
+    use crate::flags::HyperlinkOption;
     use crate::icon::{self, Icons};
     use crate::meta::FileType;
     use crate::meta::Meta;
     #[cfg(unix)]
     use crate::meta::Permissions;
     use crossterm::style::{Color, Stylize};
+    #[cfg(unix)]
+    use crate::url::Url;
     use std::cmp::Ordering;
     use std::fs::{self, File};
     #[cfg(unix)]
@@ -198,7 +216,12 @@ mod test {
 
         assert_eq!(
             " file.txt".to_string().with(Color::AnsiValue(184)),
-            name.render(&colors, &icons, &DisplayOption::FileName)
+            name.render(
+                &colors,
+                &icons,
+                &DisplayOption::FileName,
+                HyperlinkOption::Never
+            )
         );
     }
 
@@ -207,7 +230,7 @@ mod test {
         let tmp_dir = tempdir().expect("failed to create temp dir");
         let icons = Icons::new(icon::Theme::Fancy, " ".to_string());
 
-        // Chreate the directory
+        // Create the directory
         let dir_path = tmp_dir.path().join("directory");
         fs::create_dir(&dir_path).expect("failed to create the dir");
         let meta = Meta::from_path(&dir_path, false).unwrap();
@@ -216,8 +239,13 @@ mod test {
 
         assert_eq!(
             " directory".to_string().with(Color::AnsiValue(33)),
-            meta.name.render(&colors, &icons, &DisplayOption::FileName)
-        );
+            meta.name.render(
+                &colors,
+                &icons,
+                &DisplayOption::FileName,
+                HyperlinkOption::Never
+            )
+       );
     }
 
     #[test]
@@ -244,7 +272,12 @@ mod test {
 
         assert_eq!(
             " target.tmp".to_string().with(Color::AnsiValue(44)),
-            name.render(&colors, &icons, &DisplayOption::FileName)
+            name.render(
+                &colors,
+                &icons,
+                &DisplayOption::FileName,
+                HyperlinkOption::Never
+            )
         );
     }
 
@@ -272,7 +305,12 @@ mod test {
 
         assert_eq!(
             " target.d".to_string().with(Color::AnsiValue(44)),
-            name.render(&colors, &icons, &DisplayOption::FileName)
+            name.render(
+                &colors,
+                &icons,
+                &DisplayOption::FileName,
+                HyperlinkOption::Never
+            )
         );
     }
 
@@ -298,7 +336,12 @@ mod test {
 
         assert_eq!(
             " pipe.tmp".to_string().with(Color::AnsiValue(184)),
-            name.render(&colors, &icons, &DisplayOption::FileName)
+            name.render(
+                &colors,
+                &icons,
+                &DisplayOption::FileName,
+                HyperlinkOption::Never
+            )
         );
     }
 
@@ -317,9 +360,42 @@ mod test {
         assert_eq!(
             "file.txt",
             meta.name
-                .render(&colors, &icons, &DisplayOption::FileName)
+                .render(
+                    &colors,
+                    &icons,
+                    &DisplayOption::FileName,
+                    HyperlinkOption::Never
+                )
                 .to_string()
                 .as_str()
+        );
+    }
+
+    #[test]
+    #[cfg(unix)]
+    fn test_print_hyperlink() {
+        let tmp_dir = tempdir().expect("failed to create temp dir");
+        let icons = Icons::new(icon::Theme::Fancy);
+
+        // Create the file;
+        let file_path = tmp_dir.path().join("file.txt");
+        File::create(&file_path).expect("failed to create file");
+        let meta = file_path.metadata().expect("failed to get metas");
+
+        let colors = Colors::new(color::Theme::NoLscolors);
+        let file_type = FileType::new(&meta, &Permissions::from(&meta));
+        let name = Name::new(&file_path, file_type);
+
+        let real_path = std::fs::canonicalize(&file_path).expect("canonicalize");
+        let expected_url = Url::from_file_path(&real_path).expect("absolute path");
+        let expected_text = format!(
+            " \x1B]8;;{}\x1B\x5C{}\x1B]8;;\x1B\x5C",
+            expected_url, "file.txt"
+        );
+
+        assert_eq!(
+            Colour::Fixed(184).paint(expected_text),
+            name.render(&colors, &icons, true)
         );
     }
 
@@ -533,7 +609,12 @@ mod test {
 
         assert_eq!(
             " file\\ttab.txt".to_string().with(Color::AnsiValue(184)),
-            name.render(&colors, &icons, &DisplayOption::FileName)
+            name.render(
+                &colors,
+                &icons,
+                &DisplayOption::FileName,
+                HyperlinkOption::Never
+            )
         );
 
         let file_path = tmp_dir.path().join("file\nnewline.txt");
@@ -548,7 +629,12 @@ mod test {
             " file\\nnewline.txt"
                 .to_string()
                 .with(Color::AnsiValue(184)),
-            name.render(&colors, &icons, &DisplayOption::FileName)
+            name.render(
+                &colors,
+                &icons,
+                &DisplayOption::FileName,
+                HyperlinkOption::Never
+            )
         );
     }
 }

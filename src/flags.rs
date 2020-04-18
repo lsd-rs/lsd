@@ -14,6 +14,7 @@ pub mod sorting;
 pub mod symlink_arrow;
 pub mod symlinks;
 pub mod total_size;
+pub mod hyperlink;
 
 pub use blocks::Block;
 pub use blocks::Blocks;
@@ -22,6 +23,7 @@ pub use color::{ColorOption, ThemeOption};
 pub use date::DateFlag;
 pub use dereference::Dereference;
 pub use display::Display;
+pub use hyperlink::HyperlinkOption;
 pub use icons::IconOption;
 pub use icons::IconSeparator;
 pub use icons::IconTheme;
@@ -66,6 +68,7 @@ pub struct Flags {
     pub sorting: Sorting,
     pub total_size: TotalSize,
     pub symlink_arrow: SymlinkArrow,
+    pub hyperlink: HyperlinkOption,
 }
 
 impl Flags {
@@ -93,6 +96,7 @@ impl Flags {
             sorting: Sorting::configure_from(matches, config),
             total_size: TotalSize::configure_from(matches, config),
             symlink_arrow: SymlinkArrow::configure_from(matches, config),
+            hyperlink: HyperlinkOption::configure_from(matches, config),
         })
     }
 }

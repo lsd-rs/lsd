@@ -289,7 +289,8 @@ fn get_output<'a>(
             Block::Date => block_vec.push(meta.date.render(colors, flags)),
             Block::Name => {
                 block_vec.extend(vec![
-                    meta.name.render(colors, icons, display_option),
+                    meta.name
+                        .render(colors, icons, display_option, flags.hyperlink),
                     meta.indicator.render(flags),
                 ]);
                 if !(flags.no_symlink.0 || flags.dereference.0 || flags.layout == Layout::Grid) {
@@ -395,6 +396,7 @@ mod tests {
                     &Colors::new(color::ThemeOption::NoColor),
                     &Icons::new(icon::Theme::NoIcon, " ".to_string()),
                     &DisplayOption::FileName,
+                    false,
                 )
                 .to_string();
 
@@ -428,6 +430,7 @@ mod tests {
                     &Colors::new(color::ThemeOption::NoColor),
                     &Icons::new(icon::Theme::Fancy, " ".to_string()),
                     &DisplayOption::FileName,
+                    false,
                 )
                 .to_string();
 
@@ -460,6 +463,7 @@ mod tests {
                     &Colors::new(color::ThemeOption::NoLscolors),
                     &Icons::new(icon::Theme::NoIcon, " ".to_string()),
                     &DisplayOption::FileName,
+                    false,
                 )
                 .to_string();
 
@@ -501,6 +505,7 @@ mod tests {
                     &Colors::new(color::ThemeOption::NoColor),
                     &Icons::new(icon::Theme::NoIcon, " ".to_string()),
                     &DisplayOption::FileName,
+                    false,
                 )
                 .to_string();
 

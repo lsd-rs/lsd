@@ -318,6 +318,17 @@ pub fn build() -> App<'static, 'static> {
                 .takes_value(false)
                 .help("Print security context (label) of each file"),
         )
+        .arg(
+            Arg::with_name("hyperlink")
+                .long("hyperlink")
+                .possible_value("always")
+                .possible_value("auto")
+                .possible_value("never")
+                .default_value("auto")
+                .multiple(true)
+                .number_of_values(1)
+                .help("Attach hyperlink to filenames"),
+        )
 }
 
 fn validate_date_argument(arg: String) -> Result<(), String> {
