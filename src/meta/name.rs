@@ -45,7 +45,8 @@ impl Name {
 
         content += icon.as_str();
         if *hyperlink {
-            let url = Url::from_file_path(&self.path).expect("absolute path");
+            let real_path = std::fs::canonicalize(&self.path).expect("canonicalize");
+            let url = Url::from_file_path(&real_path).expect("absolute path");
 
             // ansi_term does not yet support hyperlink, as such, we must
             // implemented ourselves
@@ -258,7 +259,8 @@ mod test {
         let file_type = FileType::new(&meta, &Permissions::from(&meta));
         let name = Name::new(&file_path, file_type);
 
-        let expected_url = Url::from_file_path(file_path).expect("absolute path");
+        let real_path = std::fs::canonicalize(&file_path).expect("canonicalize");
+        let expected_url = Url::from_file_path(&real_path).expect("absolute path");
         let expected_text = format!(" \x1B;;{}\x1B\x5C{}\x1B;;\x1B\x5C", expected_url, "file.txt");
 
         assert_eq!(
