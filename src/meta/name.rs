@@ -39,12 +39,12 @@ impl Name {
         }
     }
 
-    pub fn name_string(&self, icons: &Icons, hyperlink: &bool) -> String {
+    pub fn name_string(&self, icons: &Icons, hyperlink: bool) -> String {
         let icon = icons.get(self);
         let mut content = String::with_capacity(icon.len() + self.name.len() + 3 /* spaces */);
 
         content += icon.as_str();
-        if *hyperlink {
+        if hyperlink {
             let real_path = std::fs::canonicalize(&self.path).expect("canonicalize");
             let url = Url::from_file_path(&real_path).expect("absolute path");
 
@@ -66,8 +66,8 @@ impl Name {
         content
     }
 
-    pub fn render(&self, colors: &Colors, icons: &Icons, hyperlink: &bool) -> ColoredString {
-        let content = self.name_string(&icons, &hyperlink);
+    pub fn render(&self, colors: &Colors, icons: &Icons, hyperlink: bool) -> ColoredString {
+        let content = self.name_string(&icons, hyperlink);
 
         let elem = match self.file_type {
             FileType::CharDevice => Elem::CharDevice,
@@ -151,7 +151,7 @@ mod test {
 
         assert_eq!(
             Colour::Fixed(184).paint(" file.txt"),
-            name.render(&colors, &icons, &false)
+            name.render(&colors, &icons, false)
         );
     }
 
@@ -169,7 +169,7 @@ mod test {
 
         assert_eq!(
             Colour::Fixed(33).paint(" directory"),
-            meta.name.render(&colors, &icons, &false)
+            meta.name.render(&colors, &icons, false)
         );
     }
 
@@ -196,7 +196,7 @@ mod test {
 
         assert_eq!(
             Colour::Fixed(44).paint(" target.tmp"),
-            name.render(&colors, &icons, &false)
+            name.render(&colors, &icons, false)
         );
     }
 
@@ -222,7 +222,7 @@ mod test {
 
         assert_eq!(
             Colour::Fixed(184).paint(" pipe.tmp"),
-            name.render(&colors, &icons, &false)
+            name.render(&colors, &icons, false)
         );
     }
 
@@ -241,7 +241,7 @@ mod test {
         assert_eq!(
             "file.txt",
             meta.name
-                .render(&colors, &icons, &false)
+                .render(&colors, &icons, false)
                 .to_string()
                 .as_str()
         );
@@ -271,7 +271,7 @@ mod test {
 
         assert_eq!(
             Colour::Fixed(184).paint(expected_text),
-            name.render(&colors, &icons, &true)
+            name.render(&colors, &icons, true)
         );
     }
 
