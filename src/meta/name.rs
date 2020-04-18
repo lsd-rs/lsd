@@ -243,6 +243,27 @@ mod test {
     }
 
     #[test]
+    #[cfg(unix)]
+    fn test_print_hyperlink() {
+        let tmp_dir = tempdir().expect("failed to create temp dir");
+        let icons = Icons::new(icon::Theme::Fancy);
+
+        // Create the file;
+        let file_path = tmp_dir.path().join("file.txt");
+        File::create(&file_path).expect("failed to create file");
+        let meta = file_path.metadata().expect("failed to get metas");
+
+        let colors = Colors::new(color::Theme::NoLscolors);
+        let file_type = FileType::new(&meta, &Permissions::from(&meta));
+        let name = Name::new(&file_path, file_type);
+
+        assert_eq!(
+            Colour::Fixed(184).paint(" file.txt"),
+            name.render(&colors, &icons, &true)
+        );
+    }
+
+    #[test]
     fn test_extensions_with_valid_file() {
         let path = Path::new("some-file.txt");
 
