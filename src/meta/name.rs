@@ -120,6 +120,7 @@ mod test {
     use crate::icon::{self, Icons};
     use crate::meta::FileType;
     use crate::meta::Meta;
+    use crate::url::Url;
     #[cfg(unix)]
     use crate::meta::Permissions;
     use ansi_term::Colour;
@@ -257,8 +258,11 @@ mod test {
         let file_type = FileType::new(&meta, &Permissions::from(&meta));
         let name = Name::new(&file_path, file_type);
 
+        let expected_url = Url::from_file_path(file_path).expect("absolute path");
+        let expected_text = format!(" \x1B;;{}\x1B\x5C{}\x1B;;\x1B\x5C", expected_url, "file.txt");
+
         assert_eq!(
-            Colour::Fixed(184).paint(" file.txt"),
+            Colour::Fixed(184).paint(expected_text),
             name.render(&colors, &icons, &true)
         );
     }
