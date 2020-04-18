@@ -1,5 +1,5 @@
 use crate::color::{ColoredString, Colors};
-use crate::flags::{Block, Display, Flags, Layout};
+use crate::flags::{Block, Display, Flags, Layout, WhenFlag};
 use crate::icon::Icons;
 use crate::meta::{FileType, Meta};
 use ansi_term::{ANSIString, ANSIStrings};
@@ -219,6 +219,7 @@ fn get_output<'a>(
     padding_rules: &HashMap<Block, usize>,
 ) -> Vec<ANSIString<'a>> {
     let mut strings: Vec<ANSIString> = Vec::new();
+    let hyperlink = flags.hyperlink == WhenFlag::Always;
     for block in flags.blocks.iter() {
         match block {
             Block::INode => strings.push(meta.inode.render(colors)),
@@ -242,13 +243,13 @@ fn get_output<'a>(
             Block::Name => {
                 let s: String = if flags.no_symlink {
                     ANSIStrings(&[
-                        meta.name.render(colors, icons),
+                        meta.name.render(colors, icons, &hyperlink),
                         meta.indicator.render(&flags),
                     ])
                     .to_string()
                 } else {
                     ANSIStrings(&[
-                        meta.name.render(colors, icons),
+                        meta.name.render(colors, icons, &hyperlink),
                         meta.indicator.render(&flags),
                         meta.symlink.render(colors),
                     ])
@@ -337,6 +338,7 @@ mod tests {
             let output = name.render(
                 &Colors::new(color::Theme::NoColor),
                 &Icons::new(icon::Theme::NoIcon),
+                &false,
             );
 
             assert_eq!(get_visible_width(&output), *l);
@@ -368,6 +370,7 @@ mod tests {
                 .render(
                     &Colors::new(color::Theme::NoColor),
                     &Icons::new(icon::Theme::Fancy),
+                    &false,
                 )
                 .to_string();
 
@@ -399,6 +402,7 @@ mod tests {
                 .render(
                     &Colors::new(color::Theme::NoLscolors),
                     &Icons::new(icon::Theme::NoIcon),
+                    &false,
                 )
                 .to_string();
 
@@ -434,6 +438,7 @@ mod tests {
                 .render(
                     &Colors::new(color::Theme::NoColor),
                     &Icons::new(icon::Theme::NoIcon),
+                    &false,
                 )
                 .to_string();
 

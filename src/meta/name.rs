@@ -38,17 +38,21 @@ impl Name {
         }
     }
 
-    pub fn name_string(&self, icons: &Icons) -> String {
+    pub fn name_string(&self, icons: &Icons, hyperlink: &bool) -> String {
         let icon = icons.get(self);
         let mut content = String::with_capacity(icon.len() + self.name.len() + 3 /* spaces */);
 
         content += icon.as_str();
-        content += &self.name;
+        content += if *hyperlink {
+            &self.name // <- TODO: Modify this line to render hyperlink
+        } else {
+            &self.name
+        };
         content
     }
 
-    pub fn render(&self, colors: &Colors, icons: &Icons) -> ColoredString {
-        let content = self.name_string(&icons);
+    pub fn render(&self, colors: &Colors, icons: &Icons, hyperlink: &bool) -> ColoredString {
+        let content = self.name_string(&icons, &hyperlink);
 
         let elem = match self.file_type {
             FileType::CharDevice => Elem::CharDevice,
@@ -131,7 +135,7 @@ mod test {
 
         assert_eq!(
             Colour::Fixed(184).paint(" file.txt"),
-            name.render(&colors, &icons)
+            name.render(&colors, &icons, &false)
         );
     }
 
@@ -140,7 +144,7 @@ mod test {
         let tmp_dir = tempdir().expect("failed to create temp dir");
         let icons = Icons::new(icon::Theme::Fancy);
 
-        // Chreate the directory
+        // Create the directory
         let dir_path = tmp_dir.path().join("directory");
         fs::create_dir(&dir_path).expect("failed to create the dir");
         let meta = Meta::from_path(&dir_path).unwrap();
@@ -149,7 +153,7 @@ mod test {
 
         assert_eq!(
             Colour::Fixed(33).paint(" directory"),
-            meta.name.render(&colors, &icons)
+            meta.name.render(&colors, &icons, &false)
         );
     }
 
@@ -176,7 +180,7 @@ mod test {
 
         assert_eq!(
             Colour::Fixed(44).paint(" target.tmp"),
-            name.render(&colors, &icons)
+            name.render(&colors, &icons, &false)
         );
     }
 
@@ -202,7 +206,7 @@ mod test {
 
         assert_eq!(
             Colour::Fixed(184).paint(" pipe.tmp"),
-            name.render(&colors, &icons)
+            name.render(&colors, &icons, &false)
         );
     }
 
@@ -220,7 +224,7 @@ mod test {
 
         assert_eq!(
             "file.txt",
-            meta.name.render(&colors, &icons).to_string().as_str()
+            meta.name.render(&colors, &icons, &false).to_string().as_str()
         );
     }
 
