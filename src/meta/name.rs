@@ -123,6 +123,7 @@ mod test {
     use crate::meta::Meta;
     #[cfg(unix)]
     use crate::meta::Permissions;
+    #[cfg(unix)]
     use crate::url::Url;
     use ansi_term::Colour;
     use std::cmp::Ordering;
