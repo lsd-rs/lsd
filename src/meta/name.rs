@@ -121,9 +121,9 @@ mod test {
     use crate::icon::{self, Icons};
     use crate::meta::FileType;
     use crate::meta::Meta;
-    use crate::url::Url;
     #[cfg(unix)]
     use crate::meta::Permissions;
+    use crate::url::Url;
     use ansi_term::Colour;
     use std::cmp::Ordering;
     use std::fs::{self, File};
@@ -240,7 +240,10 @@ mod test {
 
         assert_eq!(
             "file.txt",
-            meta.name.render(&colors, &icons, &false).to_string().as_str()
+            meta.name
+                .render(&colors, &icons, &false)
+                .to_string()
+                .as_str()
         );
     }
 
@@ -261,7 +264,10 @@ mod test {
 
         let real_path = std::fs::canonicalize(&file_path).expect("canonicalize");
         let expected_url = Url::from_file_path(&real_path).expect("absolute path");
-        let expected_text = format!(" \x1B]8;;{}\x1B\x5C{}\x1B]8;;\x1B\x5C", expected_url, "file.txt");
+        let expected_text = format!(
+            " \x1B]8;;{}\x1B\x5C{}\x1B]8;;\x1B\x5C",
+            expected_url, "file.txt"
+        );
 
         assert_eq!(
             Colour::Fixed(184).paint(expected_text),

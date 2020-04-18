@@ -226,7 +226,7 @@ pub fn build() -> App<'static, 'static> {
                 .default_value("auto")
                 .multiple(true)
                 .number_of_values(1)
-                .help("Attach hyperlink to filenames")
+                .help("Attach hyperlink to filenames"),
         )
 }
 
