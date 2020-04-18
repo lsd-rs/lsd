@@ -23,7 +23,7 @@ jobs:
     - name: Install `rust` toolchain
       uses: actions-rs/toolchain@v1
       with:
-        toolchain: stable
+        toolchain: ${{ env.RUST_MIN_SRV }}
         override: true
         profile: minimal # minimal component installation (ie, no documentation)
         components: rustfmt, clippy
