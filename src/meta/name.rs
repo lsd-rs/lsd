@@ -1,6 +1,7 @@
 use crate::color::{ColoredString, Colors, Elem};
 use crate::icon::Icons;
 use crate::meta::filetype::FileType;
+use crate::url::Url;
 use std::cmp::{Ordering, PartialOrd};
 use std::path::Path;
 
@@ -43,11 +44,24 @@ impl Name {
         let mut content = String::with_capacity(icon.len() + self.name.len() + 3 /* spaces */);
 
         content += icon.as_str();
-        content += if *hyperlink {
-            &self.name // <- TODO: Modify this line to render hyperlink
+        if *hyperlink {
+            let url = Url::from_file_path(&self.path).expect("absolute path");
+
+            // ansi_term does not yet support hyperlink, as such, we must
+            // implemented ourselves
+            // issue: https://github.com/ogham/rust-ansi-term/issues/60
+
+            // activate hyperlink mode
+            content += "\x1B;;";
+            content += url.as_str();
+            content += "\x1B\x5C";
+            content += &self.name;
+
+            // deactivate hyperlink mode
+            content += "\x1B;;\x1B\x5C";
         } else {
-            &self.name
-        };
+            content += &self.name;
+        }
         content
     }
 

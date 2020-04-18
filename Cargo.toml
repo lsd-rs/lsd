@@ -31,6 +31,7 @@ unicode-width = "0.1.*"
 lscolors = "0.7"
 wild = "2.0.*"
 globset = "0.4.*"
+url = "2.1.*"
 
 [target.'cfg(unix)'.dependencies]
 users = "0.9.*"

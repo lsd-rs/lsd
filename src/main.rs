@@ -18,6 +18,7 @@ extern crate terminal_size;
 extern crate time;
 extern crate unicode_width;
 extern crate wild;
+extern crate url;
 
 #[cfg(unix)]
 extern crate users;
