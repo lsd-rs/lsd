@@ -21,6 +21,7 @@ pub struct Flags {
     pub no_symlink: bool,
     pub total_size: bool,
     pub ignore_globs: GlobSet,
+    pub hyperlink: WhenFlag,
 }
 
 impl Flags {
@@ -33,6 +34,7 @@ impl Flags {
         let date_inputs: Vec<&str> = matches.values_of("date").unwrap().collect();
         let dir_order_inputs: Vec<&str> = matches.values_of("group-dirs").unwrap().collect();
         let ignore_globs_inputs: Vec<&str> = matches.values_of("ignore-glob").unwrap().collect();
+        let hyperlink_inputs: Vec<&str> = matches.values_of("hyperlink").unwrap().collect();
         // inode set layout to oneline and blocks to inode,name
         let inode = matches.is_present("inode");
         let blocks_inputs: Vec<&str> = if let Some(blocks) = matches.values_of("blocks") {
@@ -178,6 +180,11 @@ impl Flags {
             no_symlink: matches.is_present("no-symlink"),
             total_size: matches.is_present("total-size"),
             inode,
+            hyperlink: if classic_mode {
+                WhenFlag::Never
+            } else {
+                WhenFlag::from(hyperlink_inputs[hyperlink_inputs.len() - 1])
+            },
         })
     }
 }
@@ -203,6 +210,7 @@ impl Default for Flags {
             total_size: false,
             ignore_globs: GlobSet::empty(),
             inode: false,
+            hyperlink: WhenFlag::Auto,
         }
     }
 }
