@@ -1,5 +1,6 @@
 use clap::{ArgMatches, Error, ErrorKind};
 use globset::{Glob, GlobSet, GlobSetBuilder};
+use std::iter::Iterator;
 
 #[derive(Clone, Debug)]
 pub struct Flags {
@@ -78,7 +79,7 @@ impl Flags {
         };
 
         let recursive = matches.is_present("recursive");
-        let recursion_input = matches.values_of("depth").and_then(|values| values.last());
+        let recursion_input = matches.values_of("depth").and_then(Iterator::last);
         let recursion_depth = match recursion_input {
             Some(str) if recursive || layout == Layout::Tree => match str.parse::<usize>() {
                 Ok(val) => val,
