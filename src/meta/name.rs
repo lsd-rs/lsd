@@ -53,13 +53,13 @@ impl Name {
             // issue: https://github.com/ogham/rust-ansi-term/issues/60
 
             // activate hyperlink mode
-            content += "\x1B;;";
+            content += "\x1B]8;;";
             content += url.as_str();
             content += "\x1B\x5C";
             content += &self.name;
 
             // deactivate hyperlink mode
-            content += "\x1B;;\x1B\x5C";
+            content += "\x1B]8;;\x1B\x5C";
         } else {
             content += &self.name;
         }
@@ -261,7 +261,7 @@ mod test {
 
         let real_path = std::fs::canonicalize(&file_path).expect("canonicalize");
         let expected_url = Url::from_file_path(&real_path).expect("absolute path");
-        let expected_text = format!(" \x1B;;{}\x1B\x5C{}\x1B;;\x1B\x5C", expected_url, "file.txt");
+        let expected_text = format!(" \x1B]8;;{}\x1B\x5C{}\x1B]8;;\x1B\x5C", expected_url, "file.txt");
 
         assert_eq!(
             Colour::Fixed(184).paint(expected_text),
