@@ -20,6 +20,7 @@ extern crate unicode_width;
 extern crate wild;
 extern crate xdg;
 extern crate yaml_rust;
+extern crate url;
 
 #[cfg(unix)]
 extern crate users;
