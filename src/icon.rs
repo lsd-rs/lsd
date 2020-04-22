@@ -152,6 +152,7 @@ impl Icons {
         m.insert("rubydoc", "\u{e73b}"); // ""
         m.insert("yarn.lock", "\u{e718}"); // ""
         m.insert("Cargo.lock", "\u{e7a8}"); // ""
+        m.insert("poetry.lock", "\u{f023}"); // ""
 
         m
     }
