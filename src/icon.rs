@@ -236,7 +236,7 @@ impl Icons {
         m.insert("ico", "\u{f1c5}"); // ""
         m.insert("image", "\u{f1c5}"); // ""
         m.insert("iml", "\u{e7b5}"); // ""
-        m.insert("ini", "\u{f17a}"); // ""
+        m.insert("ini", "\u{e615}"); // ""
         m.insert("ipynb", "\u{e606}"); // ""
         m.insert("jar", "\u{e204}"); // ""
         m.insert("java", "\u{e204}"); // ""
