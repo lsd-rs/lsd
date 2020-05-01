@@ -150,9 +150,6 @@ impl Icons {
         m.insert("node_modules", "\u{e718}"); // ""
         m.insert("npmignore", "\u{e71e}"); // ""
         m.insert("rubydoc", "\u{e73b}"); // ""
-        m.insert("yarn.lock", "\u{e718}"); // ""
-        m.insert("Cargo.lock", "\u{e7a8}"); // ""
-        m.insert("poetry.lock", "\u{f023}"); // ""
 
         m
     }
@@ -250,7 +247,7 @@ impl Icons {
         m.insert("lhs", "\u{e777}"); // ""
         m.insert("license", "\u{f48a}"); // ""
         m.insert("localized", "\u{f179}"); // ""
-        m.insert("lock", "\u{e21e}"); // ""
+        m.insert("lock", "\u{f023}"); // ""
         m.insert("log", "\u{f18d}"); // ""
         m.insert("lua", "\u{e620}"); // ""
         m.insert("m4a", "\u{f001}"); // ""
