@@ -269,7 +269,7 @@ dependencies = [
  "predicates 1.0.4 (registry+https://github.com/rust-lang/crates.io-index)",
  "tempfile 3.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "term_grid 0.1.7 (registry+https://github.com/rust-lang/crates.io-index)",
- "terminal_size 0.1.11 (registry+https://github.com/rust-lang/crates.io-index)",
+ "terminal_size 0.1.12 (registry+https://github.com/rust-lang/crates.io-index)",
  "time 0.1.42 (registry+https://github.com/rust-lang/crates.io-index)",
  "unicode-width 0.1.7 (registry+https://github.com/rust-lang/crates.io-index)",
  "users 0.9.1 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -453,7 +453,7 @@ dependencies = [
 
 [[package]]
 name = "terminal_size"
-version = "0.1.11"
+version = "0.1.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "libc 0.2.68 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -636,7 +636,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 "checksum tempfile 3.1.0 (registry+https://github.com/rust-lang/crates.io-index)" = "7a6e24d9338a0a5be79593e2fa15a648add6138caa803e2d5bc782c371732ca9"
 "checksum term_grid 0.1.7 (registry+https://github.com/rust-lang/crates.io-index)" = "230d3e804faaed5a39b08319efb797783df2fd9671b39b7596490cb486d702cf"
 "checksum term_size 0.3.1 (registry+https://github.com/rust-lang/crates.io-index)" = "9e5b9a66db815dcfd2da92db471106457082577c3c278d4138ab3e3b4e189327"
-"checksum terminal_size 0.1.11 (registry+https://github.com/rust-lang/crates.io-index)" = "248dbcb93f8697c50b85b0492cf559b94667eb24c26934eae73ae5673175ebf6"
+"checksum terminal_size 0.1.12 (registry+https://github.com/rust-lang/crates.io-index)" = "8038f95fc7a6f351163f4b964af631bd26c9e828f7db085f2a84aca56f70d13b"
 "checksum textwrap 0.11.0 (registry+https://github.com/rust-lang/crates.io-index)" = "d326610f408c7a4eb6f51c37c330e496b08506c9457c9d34287ecc38809fb060"
 "checksum thread_local 1.0.1 (registry+https://github.com/rust-lang/crates.io-index)" = "d40c6d1b69745a6ec6fb1ca717914848da4b44ae29d9b3080cbee91d72a69b14"
 "checksum time 0.1.42 (registry+https://github.com/rust-lang/crates.io-index)" = "db8dcfca086c1143c9270ac42a2bbd8a7ee477b78ac8e45b19abfb0cbede4b6f"
