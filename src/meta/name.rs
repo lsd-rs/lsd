@@ -98,8 +98,8 @@ impl Name {
 
         let elem = match self.file_type {
             FileType::CharDevice => Elem::CharDevice,
-            FileType::Directory { uid } => Elem::Dir { uid },
-            FileType::SymLink => Elem::SymLink,
+            FileType::Directory { uid, .. } => Elem::Dir { uid },
+            FileType::SymLink { .. } => Elem::SymLink,
             FileType::File { uid, exec } => Elem::File { uid, exec },
             _ => Elem::File {
                 exec: false,
@@ -171,7 +171,7 @@ mod test {
         let meta = file_path.metadata().expect("failed to get metas");
 
         let colors = Colors::new(color::Theme::NoLscolors);
-        let file_type = FileType::new(&meta, &Permissions::from(&meta));
+        let file_type = FileType::new(&meta, None, &Permissions::from(&meta));
         let name = Name::new(&file_path, file_type);
 
         assert_eq!(
@@ -216,7 +216,7 @@ mod test {
             .expect("failed to get metas");
 
         let colors = Colors::new(color::Theme::NoLscolors);
-        let file_type = FileType::new(&meta, &Permissions::from(&meta));
+        let file_type = FileType::new(&meta, Some(false), &Permissions::from(&meta));
         let name = Name::new(&symlink_path, file_type);
 
         assert_eq!(
@@ -242,7 +242,7 @@ mod test {
         let meta = pipe_path.metadata().expect("failed to get metas");
 
         let colors = Colors::new(color::Theme::NoLscolors);
-        let file_type = FileType::new(&meta, &Permissions::from(&meta));
+        let file_type = FileType::new(&meta, None, &Permissions::from(&meta));
         let name = Name::new(&pipe_path, file_type);
 
         assert_eq!(

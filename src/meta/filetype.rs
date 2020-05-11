@@ -9,7 +9,7 @@ pub enum FileType {
     CharDevice,
     Directory { uid: bool },
     File { uid: bool, exec: bool },
-    SymLink,
+    SymLink { is_dir: bool },
     Pipe,
     Socket,
     Special,
@@ -17,7 +17,7 @@ pub enum FileType {
 
 impl FileType {
     #[cfg(unix)]
-    pub fn new(meta: &Metadata, permissions: &Permissions) -> Self {
+    pub fn new(meta: &Metadata, symlink_is_dir: Option<bool>, permissions: &Permissions) -> Self {
         use std::os::unix::fs::FileTypeExt;
 
         let file_type = meta.file_type();
@@ -34,7 +34,9 @@ impl FileType {
         } else if file_type.is_fifo() {
             FileType::Pipe
         } else if file_type.is_symlink() {
-            FileType::SymLink
+            FileType::SymLink {
+                is_dir: symlink_is_dir.expect("symlink must provide is_dir"),
+            }
         } else if file_type.is_char_device() {
             FileType::CharDevice
         } else if file_type.is_block_device() {
@@ -77,7 +79,7 @@ impl FileType {
                 colors.colorize(String::from("d"), &Elem::Dir { uid: false })
             }
             FileType::Pipe => colors.colorize(String::from("|"), &Elem::Pipe),
-            FileType::SymLink => colors.colorize(String::from("l"), &Elem::SymLink),
+            FileType::SymLink { .. } => colors.colorize(String::from("l"), &Elem::SymLink),
             FileType::BlockDevice => colors.colorize(String::from("b"), &Elem::BlockDevice),
             FileType::CharDevice => colors.colorize(String::from("c"), &Elem::CharDevice),
             FileType::Socket => colors.colorize(String::from("s"), &Elem::Socket),
@@ -115,7 +117,7 @@ mod test {
         let meta = file_path.metadata().expect("failed to get metas");
 
         let colors = Colors::new(Theme::NoLscolors);
-        let file_type = FileType::new(&meta, &Permissions::from(&meta));
+        let file_type = FileType::new(&meta, None, &Permissions::from(&meta));
 
         assert_eq!(Colour::Fixed(184).paint("."), file_type.render(&colors));
     }
@@ -128,7 +130,7 @@ mod test {
         let metadata = tmp_dir.path().metadata().expect("failed to get metas");
 
         let colors = Colors::new(Theme::NoLscolors);
-        let file_type = FileType::new(&metadata, &meta.permissions);
+        let file_type = FileType::new(&metadata, None, &meta.permissions);
 
         assert_eq!(Colour::Fixed(33).paint("d"), file_type.render(&colors));
     }
@@ -150,7 +152,7 @@ mod test {
             .expect("failed to get metas");
 
         let colors = Colors::new(Theme::NoLscolors);
-        let file_type = FileType::new(&meta, &Permissions::from(&meta));
+        let file_type = FileType::new(&meta, Some(false), &Permissions::from(&meta));
 
         assert_eq!(Colour::Fixed(44).paint("l"), file_type.render(&colors));
     }
@@ -171,7 +173,7 @@ mod test {
         let meta = pipe_path.metadata().expect("failed to get metas");
 
         let colors = Colors::new(Theme::NoLscolors);
-        let file_type = FileType::new(&meta, &Permissions::from(&meta));
+        let file_type = FileType::new(&meta, None, &Permissions::from(&meta));
 
         assert_eq!(Colour::Fixed(44).paint("|"), file_type.render(&colors));
     }
@@ -196,7 +198,7 @@ mod test {
         let meta = char_device_path.metadata().expect("failed to get metas");
 
         let colors = Colors::new(Theme::NoLscolors);
-        let file_type = FileType::new(&meta, &Permissions::from(&meta));
+        let file_type = FileType::new(&meta, None, &Permissions::from(&meta));
 
         assert_eq!(Colour::Fixed(44).paint("c"), file_type.render(&colors));
     }
@@ -212,7 +214,7 @@ mod test {
         let meta = socket_path.metadata().expect("failed to get metas");
 
         let colors = Colors::new(Theme::NoLscolors);
-        let file_type = FileType::new(&meta, &Permissions::from(&meta));
+        let file_type = FileType::new(&meta, None, &Permissions::from(&meta));
 
         assert_eq!(Colour::Fixed(44).paint("s"), file_type.render(&colors));
     }
