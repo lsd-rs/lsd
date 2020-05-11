@@ -64,7 +64,7 @@ impl Icons {
         } else if let FileType::SymLink { is_dir: true } = file_type {
             "\u{f482}" // ""
         } else if let FileType::SymLink { is_dir: false } = file_type {
-            "\u{e27c}" // ""
+            "\u{f481}" // ""
         } else if let FileType::Socket = file_type {
             "\u{f6a7}" // ""
         } else if let FileType::Pipe = file_type {
