@@ -7,19 +7,9 @@ use std::fs::Metadata;
 pub enum FileType {
     BlockDevice,
     CharDevice,
-    Directory {
-        uid: bool,
-    },
-    File {
-        uid: bool,
-        exec: bool,
-    },
-    #[cfg(unix)]
-    SymLink {
-        is_dir: bool,
-    },
-    #[cfg(windows)]
-    SymLink,
+    Directory { uid: bool },
+    File { uid: bool, exec: bool },
+    SymLink { is_dir: bool },
     Pipe,
     Socket,
     Special,
