@@ -98,7 +98,7 @@ impl Name {
 
         let elem = match self.file_type {
             FileType::CharDevice => Elem::CharDevice,
-            FileType::Directory { uid, .. } => Elem::Dir { uid },
+            FileType::Directory { uid } => Elem::Dir { uid },
             FileType::SymLink { .. } => Elem::SymLink,
             FileType::File { uid, exec } => Elem::File { uid, exec },
             _ => Elem::File {
