@@ -7,19 +7,9 @@ use std::fs::Metadata;
 pub enum FileType {
     BlockDevice,
     CharDevice,
-    Directory {
-        uid: bool,
-    },
-    File {
-        uid: bool,
-        exec: bool,
-    },
-    #[cfg(unix)]
-    SymLink {
-        is_dir: bool,
-    },
-    #[cfg(windows)]
-    SymLink,
+    Directory { uid: bool },
+    File { uid: bool, exec: bool },
+    SymLink { is_dir: bool },
     Pipe,
     Socket,
     Special,
@@ -59,7 +49,7 @@ impl FileType {
     }
 
     #[cfg(windows)]
-    pub fn new(meta: &Metadata, permissions: &Permissions) -> Self {
+    pub fn new(meta: &Metadata, symlink_is_dir: Option<bool>, permissions: &Permissions) -> Self {
         let file_type = meta.file_type();
 
         if file_type.is_file() {
@@ -72,7 +62,9 @@ impl FileType {
                 uid: permissions.setuid,
             }
         } else if file_type.is_symlink() {
-            FileType::SymLink
+            FileType::SymLink {
+                is_dir: symlink_is_dir.expect("symlink must provide is_dir"),
+            }
         } else {
             FileType::Special
         }
