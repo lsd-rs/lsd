@@ -187,14 +187,14 @@ impl Meta {
     }
 
     pub fn from_path(path: &PathBuf) -> Result<Self, std::io::Error> {
-        // If the file is a link, retrieve the metadata without following
-        // the link, but provides if followed link is_dir. Broken links are files.
         let (metadata, symlink_is_dir) = if read_link(path).is_ok() {
+            // If the file is a link, retrieve the metadata without following
+            // the link, but provides whether followed link is_dir. Broken links are files.
             (
                 path.symlink_metadata()?,
                 match path.metadata() {
                     Ok(m) => Some(m.is_dir()),
-                    Err(_) => Some(false),
+                    Err(_) => Some(false), // broken link
                 },
             )
         } else {
