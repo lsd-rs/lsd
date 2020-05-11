@@ -13,7 +13,7 @@ impl From<FileType> for Indicator {
             FileType::File { exec: true, .. } => "*",
             FileType::Pipe => "|",
             FileType::Socket => "=",
-            FileType::SymLink => "@",
+            FileType::SymLink { .. } => "@",
             _ => "",
         };
 
@@ -75,8 +75,10 @@ mod test {
         let mut flags = Flags::default();
         flags.display_indicators = true;
 
-        let file_type = Indicator::from(FileType::SymLink);
+        let file_type = Indicator::from(FileType::SymLink { is_dir: false });
+        assert_eq!("@", file_type.render(&flags).to_string().as_str());
 
+        let file_type = Indicator::from(FileType::SymLink { is_dir: true });
         assert_eq!("@", file_type.render(&flags).to_string().as_str());
     }
 

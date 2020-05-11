@@ -61,7 +61,9 @@ impl Icons {
 
         let icon = if let FileType::Directory { .. } = file_type {
             self.default_folder_icon
-        } else if let FileType::SymLink = file_type {
+        } else if let FileType::SymLink { is_dir: true } = file_type {
+            "\u{f751}" // ""
+        } else if let FileType::SymLink { is_dir: false } = file_type {
             "\u{e27c}" // ""
         } else if let FileType::Socket = file_type {
             "\u{f6a7}" // ""
