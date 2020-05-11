@@ -33,8 +33,12 @@ fn by_size(a: &Meta, b: &Meta, flags: &Flags) -> Ordering {
 fn by_size_with_dirs_first(a: &Meta, b: &Meta, flags: &Flags) -> Ordering {
     match (a.file_type, b.file_type) {
         (FileType::Directory { .. }, FileType::Directory { .. }) => by_size(a, b, &flags),
+        (FileType::Directory { .. }, FileType::SymLink { is_dir: true }) => by_size(a, b, &flags),
+        (FileType::SymLink { is_dir: true }, FileType::Directory { .. }) => by_size(a, b, &flags),
         (FileType::Directory { .. }, _) => Ordering::Less,
         (_, FileType::Directory { .. }) => Ordering::Greater,
+        (FileType::SymLink { is_dir: true }, _) => Ordering::Less,
+        (_, FileType::SymLink { is_dir: true }) => Ordering::Greater,
         _ => by_size(a, b, &flags),
     }
 }
@@ -42,8 +46,12 @@ fn by_size_with_dirs_first(a: &Meta, b: &Meta, flags: &Flags) -> Ordering {
 fn by_size_with_files_first(a: &Meta, b: &Meta, flags: &Flags) -> Ordering {
     match (a.file_type, b.file_type) {
         (FileType::Directory { .. }, FileType::Directory { .. }) => by_size(a, b, &flags),
+        (FileType::Directory { .. }, FileType::SymLink { is_dir: true }) => by_size(a, b, &flags),
+        (FileType::SymLink { is_dir: true }, FileType::Directory { .. }) => by_size(a, b, &flags),
         (FileType::Directory { .. }, _) => Ordering::Greater,
         (_, FileType::Directory { .. }) => Ordering::Less,
+        (FileType::SymLink { is_dir: true }, _) => Ordering::Greater,
+        (_, FileType::SymLink { is_dir: true }) => Ordering::Less,
         _ => by_size(a, b, &flags),
     }
 }
@@ -59,8 +67,12 @@ fn by_name(a: &Meta, b: &Meta, flags: &Flags) -> Ordering {
 fn by_name_with_dirs_first(a: &Meta, b: &Meta, flags: &Flags) -> Ordering {
     match (a.file_type, b.file_type) {
         (FileType::Directory { .. }, FileType::Directory { .. }) => by_name(a, b, &flags),
+        (FileType::Directory { .. }, FileType::SymLink { is_dir: true }) => by_name(a, b, &flags),
+        (FileType::SymLink { is_dir: true }, FileType::Directory { .. }) => by_name(a, b, &flags),
         (FileType::Directory { .. }, _) => Ordering::Less,
         (_, FileType::Directory { .. }) => Ordering::Greater,
+        (FileType::SymLink { is_dir: true }, _) => Ordering::Less,
+        (_, FileType::SymLink { is_dir: true }) => Ordering::Greater,
         _ => by_name(a, b, &flags),
     }
 }
@@ -68,8 +80,12 @@ fn by_name_with_dirs_first(a: &Meta, b: &Meta, flags: &Flags) -> Ordering {
 fn by_name_with_files_first(a: &Meta, b: &Meta, flags: &Flags) -> Ordering {
     match (a.file_type, b.file_type) {
         (FileType::Directory { .. }, FileType::Directory { .. }) => by_name(a, b, &flags),
+        (FileType::Directory { .. }, FileType::SymLink { is_dir: true }) => by_name(a, b, &flags),
+        (FileType::SymLink { is_dir: true }, FileType::Directory { .. }) => by_name(a, b, &flags),
         (FileType::Directory { .. }, _) => Ordering::Greater,
         (_, FileType::Directory { .. }) => Ordering::Less,
+        (FileType::SymLink { is_dir: true }, _) => Ordering::Greater,
+        (_, FileType::SymLink { is_dir: true }) => Ordering::Less,
         _ => by_name(a, b, &flags),
     }
 }
@@ -85,8 +101,12 @@ fn by_date(a: &Meta, b: &Meta, flags: &Flags) -> Ordering {
 fn by_date_with_dirs_first(a: &Meta, b: &Meta, flags: &Flags) -> Ordering {
     match (a.file_type, b.file_type) {
         (FileType::Directory { .. }, FileType::Directory { .. }) => by_date(a, b, &flags),
+        (FileType::Directory { .. }, FileType::SymLink { is_dir: true }) => by_date(a, b, &flags),
+        (FileType::SymLink { is_dir: true }, FileType::Directory { .. }) => by_date(a, b, &flags),
         (FileType::Directory { .. }, _) => Ordering::Less,
         (_, FileType::Directory { .. }) => Ordering::Greater,
+        (FileType::SymLink { is_dir: true }, _) => Ordering::Less,
+        (_, FileType::SymLink { is_dir: true }) => Ordering::Greater,
         _ => by_date(a, b, &flags),
     }
 }
@@ -94,8 +114,12 @@ fn by_date_with_dirs_first(a: &Meta, b: &Meta, flags: &Flags) -> Ordering {
 fn by_date_with_files_first(a: &Meta, b: &Meta, flags: &Flags) -> Ordering {
     match (a.file_type, b.file_type) {
         (FileType::Directory { .. }, FileType::Directory { .. }) => by_date(a, b, &flags),
+        (FileType::Directory { .. }, FileType::SymLink { is_dir: true }) => by_date(a, b, &flags),
+        (FileType::SymLink { is_dir: true }, FileType::Directory { .. }) => by_date(a, b, &flags),
         (FileType::Directory { .. }, _) => Ordering::Greater,
         (_, FileType::Directory { .. }) => Ordering::Less,
+        (FileType::SymLink { is_dir: true }, _) => Ordering::Greater,
+        (_, FileType::SymLink { is_dir: true }) => Ordering::Less,
         _ => by_date(a, b, &flags),
     }
 }
