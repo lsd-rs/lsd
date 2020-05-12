@@ -220,7 +220,7 @@ mod test {
         let name = Name::new(&symlink_path, file_type);
 
         assert_eq!(
-            Colour::Fixed(44).paint(" target.tmp"),
+            Colour::Fixed(44).paint(" target.tmp"),
             name.render(&colors, &icons, &DisplayOption::FileName)
         );
     }
