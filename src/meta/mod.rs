@@ -192,10 +192,10 @@ impl Meta {
             // the link, but provides whether followed link is_dir. Broken links are files.
             (
                 path.symlink_metadata()?,
-                match path.metadata() {
-                    Ok(m) => Some(m.is_dir()),
-                    Err(_) => Some(false), // broken link
-                },
+                Some(match path.metadata() {
+                    Ok(m) => m.is_dir(),
+                    Err(_) => false, // broken link
+                }),
             )
         } else {
             (path.metadata()?, None)
