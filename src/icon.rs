@@ -261,6 +261,7 @@ impl Icons {
         m.insert("mp4", "\u{f03d}"); // ""
         m.insert("mustache", "\u{e60f}"); // ""
         m.insert("npmignore", "\u{e71e}"); // ""
+		m.insert("opus", "\u{f001}"); // ""
         m.insert("ogg", "\u{f001}"); // ""
         m.insert("ogv", "\u{f03d}"); // ""
         m.insert("otf", "\u{f031}"); // ""
