@@ -2,12 +2,20 @@ use crate::color::{ColoredString, Colors, Elem};
 use crate::icon::Icons;
 use crate::meta::filetype::FileType;
 use std::cmp::{Ordering, PartialOrd};
-use std::path::Path;
+use std::ffi::OsStr;
+use std::path::{Component, Path, PathBuf};
+
+#[derive(Debug)]
+pub enum DisplayOption<'a> {
+    FileName,
+    Relative { base_path: &'a Path },
+    None,
+}
 
 #[derive(Clone, Debug, Eq)]
 pub struct Name {
     pub name: String,
-    path: String,
+    path: PathBuf,
     extension: Option<String>,
     file_type: FileType,
 }
@@ -28,27 +36,65 @@ impl Name {
             );
         }
 
-        let path_string = path.to_string_lossy().to_string();
-
         Self {
             name,
-            path: path_string,
+            path: PathBuf::from(path),
             extension,
             file_type,
         }
     }
 
-    pub fn name_string(&self, icons: &Icons) -> String {
-        let icon = icons.get(self);
-        let mut content = String::with_capacity(icon.len() + self.name.len() + 3 /* spaces */);
-
-        content += icon.as_str();
-        content += &self.name;
-        content
+    pub fn file_name(&self) -> &str {
+        self.path
+            .file_name()
+            .and_then(OsStr::to_str)
+            .unwrap_or(&self.name)
     }
 
-    pub fn render(&self, colors: &Colors, icons: &Icons) -> ColoredString {
-        let content = self.name_string(&icons);
+    fn relative_path<T: AsRef<Path> + Clone>(&self, base_path: T) -> PathBuf {
+        let base_path = base_path.as_ref();
+
+        if self.path == base_path {
+            return PathBuf::from(AsRef::<Path>::as_ref(&Component::CurDir));
+        }
+
+        let shared_components: PathBuf = self
+            .path
+            .components()
+            .zip(base_path.components())
+            .take_while(|(target_component, base_component)| target_component == base_component)
+            .map(|tuple| tuple.0)
+            .collect();
+
+        base_path
+            .strip_prefix(&shared_components)
+            .unwrap()
+            .components()
+            .map(|_| Component::ParentDir)
+            .chain(
+                self.path
+                    .strip_prefix(&shared_components)
+                    .unwrap()
+                    .components(),
+            )
+            .collect()
+    }
+
+    pub fn render(
+        &self,
+        colors: &Colors,
+        icons: &Icons,
+        display_option: &DisplayOption,
+    ) -> ColoredString {
+        let content = match display_option {
+            DisplayOption::FileName => format!("{}{}", icons.get(self), self.file_name()),
+            DisplayOption::Relative { base_path } => format!(
+                "{}{}",
+                icons.get(self),
+                self.relative_path(base_path).to_string_lossy()
+            ),
+            DisplayOption::None => format!("{}{}", icons.get(self), self.path.to_string_lossy()),
+        };
 
         let elem = match self.file_type {
             FileType::CharDevice => Elem::CharDevice,
@@ -64,12 +110,8 @@ impl Name {
         colors.colorize_using_path(content, &self.path, &elem)
     }
 
-    pub fn name(&self) -> String {
-        self.name.clone()
-    }
-
-    pub fn extension(&self) -> Option<String> {
-        self.extension.clone()
+    pub fn extension(&self) -> Option<&str> {
+        self.extension.as_deref()
     }
 
     pub fn file_type(&self) -> FileType {
@@ -85,18 +127,21 @@ impl Ord for Name {
 
 impl PartialOrd for Name {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        Some(self.name.to_lowercase().cmp(&other.name.to_lowercase()))
+        self.name
+            .to_lowercase()
+            .partial_cmp(&other.name.to_lowercase())
     }
 }
 
 impl PartialEq for Name {
     fn eq(&self, other: &Self) -> bool {
-        self.name.eq_ignore_ascii_case(&other.name)
+        self.name.eq_ignore_ascii_case(&other.name.to_lowercase())
     }
 }
 
 #[cfg(test)]
 mod test {
+    use super::DisplayOption;
     use super::Name;
     use crate::color::{self, Colors};
     use crate::icon::{self, Icons};
@@ -109,7 +154,7 @@ mod test {
     use std::fs::{self, File};
     #[cfg(unix)]
     use std::os::unix::fs::symlink;
-    use std::path::Path;
+    use std::path::{Path, PathBuf};
     #[cfg(unix)]
     use std::process::Command;
     use tempfile::tempdir;
@@ -131,7 +176,7 @@ mod test {
 
         assert_eq!(
             Colour::Fixed(184).paint(" file.txt"),
-            name.render(&colors, &icons)
+            name.render(&colors, &icons, &DisplayOption::FileName)
         );
     }
 
@@ -149,7 +194,7 @@ mod test {
 
         assert_eq!(
             Colour::Fixed(33).paint(" directory"),
-            meta.name.render(&colors, &icons)
+            meta.name.render(&colors, &icons, &DisplayOption::FileName)
         );
     }
 
@@ -176,7 +221,7 @@ mod test {
 
         assert_eq!(
             Colour::Fixed(44).paint(" target.tmp"),
-            name.render(&colors, &icons)
+            name.render(&colors, &icons, &DisplayOption::FileName)
         );
     }
 
@@ -202,7 +247,7 @@ mod test {
 
         assert_eq!(
             Colour::Fixed(184).paint(" pipe.tmp"),
-            name.render(&colors, &icons)
+            name.render(&colors, &icons, &DisplayOption::FileName)
         );
     }
 
@@ -220,7 +265,10 @@ mod test {
 
         assert_eq!(
             "file.txt",
-            meta.name.render(&colors, &icons).to_string().as_str()
+            meta.name
+                .render(&colors, &icons, &DisplayOption::FileName)
+                .to_string()
+                .as_str()
         );
     }
 
@@ -236,7 +284,7 @@ mod test {
             },
         );
 
-        assert_eq!(Some(String::from("txt")), name.extension());
+        assert_eq!(Some("txt"), name.extension());
     }
 
     #[test]
@@ -256,7 +304,7 @@ mod test {
 
     #[test]
     fn test_order_impl_is_case_insensitive() {
-        let path_1 = Path::new("AAAA");
+        let path_1 = Path::new("/AAAA");
         let name_1 = Name::new(
             &path_1,
             FileType::File {
@@ -265,7 +313,7 @@ mod test {
             },
         );
 
-        let path_2 = Path::new("aaaa");
+        let path_2 = Path::new("/aaaa");
         let name_2 = Name::new(
             &path_2,
             FileType::File {
@@ -279,7 +327,7 @@ mod test {
 
     #[test]
     fn test_partial_order_impl() {
-        let path_a = Path::new("aaaa");
+        let path_a = Path::new("/aaaa");
         let name_a = Name::new(
             &path_a,
             FileType::File {
@@ -288,7 +336,7 @@ mod test {
             },
         );
 
-        let path_z = Path::new("zzzz");
+        let path_z = Path::new("/zzzz");
         let name_z = Name::new(
             &path_z,
             FileType::File {
@@ -367,5 +415,53 @@ mod test {
         );
 
         assert_eq!(true, name_1 == name_2);
+    }
+
+    #[test]
+    fn test_parent_relative_path() {
+        let name = Name::new(
+            Path::new("/home/parent1/child"),
+            FileType::File {
+                uid: false,
+                exec: false,
+            },
+        );
+        let base_path = Path::new("/home/parent2");
+
+        assert_eq!(
+            PathBuf::from("../parent1/child"),
+            name.relative_path(base_path),
+        )
+    }
+
+    #[test]
+    fn test_current_relative_path() {
+        let name = Name::new(
+            Path::new("/home/parent1/child"),
+            FileType::File {
+                uid: false,
+                exec: false,
+            },
+        );
+        let base_path = PathBuf::from("/home/parent1");
+
+        assert_eq!(PathBuf::from("child"), name.relative_path(base_path),)
+    }
+
+    #[test]
+    fn test_grand_parent_relative_path() {
+        let name = Name::new(
+            Path::new("/home/grand-parent1/parent1/child"),
+            FileType::File {
+                uid: false,
+                exec: false,
+            },
+        );
+        let base_path = PathBuf::from("/home/grand-parent2/parent1");
+
+        assert_eq!(
+            PathBuf::from("../../grand-parent1/parent1/child"),
+            name.relative_path(base_path),
+        )
     }
 }

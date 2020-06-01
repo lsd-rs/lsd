@@ -1,6 +1,7 @@
 use crate::color::{ColoredString, Colors};
 use crate::flags::{Block, Display, Flags, Layout};
 use crate::icon::Icons;
+use crate::meta::name::DisplayOption;
 use crate::meta::{FileType, Meta};
 use ansi_term::{ANSIString, ANSIStrings};
 use std::collections::HashMap;
@@ -19,7 +20,15 @@ pub fn grid(metas: &[Meta], flags: &Flags, colors: &Colors, icons: &Icons) -> St
         None => None,
     };
 
-    inner_display_grid(metas, &flags, colors, icons, 0, term_width)
+    inner_display_grid(
+        &DisplayOption::None,
+        metas,
+        &flags,
+        colors,
+        icons,
+        0,
+        term_width,
+    )
 }
 
 pub fn tree(metas: &[Meta], flags: &Flags, colors: &Colors, icons: &Icons) -> String {
@@ -27,6 +36,7 @@ pub fn tree(metas: &[Meta], flags: &Flags, colors: &Colors, icons: &Icons) -> St
 }
 
 fn inner_display_grid(
+    display_option: &DisplayOption,
     metas: &[Meta],
     flags: &Flags,
     colors: &Colors,
@@ -60,7 +70,14 @@ fn inner_display_grid(
             continue;
         }
 
-        let blocks = get_output(&meta, &colors, &icons, &flags, &padding_rules);
+        let blocks = get_output(
+            &meta,
+            &colors,
+            &icons,
+            &flags,
+            &display_option,
+            &padding_rules,
+        );
 
         for block in blocks {
             let block_str = block.to_string();
@@ -98,7 +115,12 @@ fn inner_display_grid(
                 output += &display_folder_path(&meta);
             }
 
+            let display_option = DisplayOption::Relative {
+                base_path: &meta.path,
+            };
+
             output += &inner_display_grid(
+                &display_option,
                 meta.content.as_ref().unwrap(),
                 &flags,
                 colors,
@@ -131,7 +153,14 @@ fn inner_display_tree(
     });
 
     for meta in metas.iter() {
-        for block in get_output(&meta, &colors, &icons, &flags, &padding_rules) {
+        for block in get_output(
+            &meta,
+            &colors,
+            &icons,
+            &flags,
+            &DisplayOption::FileName,
+            &padding_rules,
+        ) {
             let block_str = block.to_string();
 
             grid.add(Cell {
@@ -216,6 +245,7 @@ fn get_output<'a>(
     colors: &'a Colors,
     icons: &'a Icons,
     flags: &'a Flags,
+    display_option: &DisplayOption,
     padding_rules: &HashMap<Block, usize>,
 ) -> Vec<ANSIString<'a>> {
     let mut strings: Vec<ANSIString> = Vec::new();
@@ -242,13 +272,13 @@ fn get_output<'a>(
             Block::Name => {
                 let s: String = if flags.no_symlink {
                     ANSIStrings(&[
-                        meta.name.render(colors, icons),
+                        meta.name.render(colors, icons, &display_option),
                         meta.indicator.render(&flags),
                     ])
                     .to_string()
                 } else {
                     ANSIStrings(&[
-                        meta.name.render(colors, icons),
+                        meta.name.render(colors, icons, &display_option),
                         meta.indicator.render(&flags),
                         meta.symlink.render(colors),
                     ])
@@ -337,6 +367,7 @@ mod tests {
             let output = name.render(
                 &Colors::new(color::Theme::NoColor),
                 &Icons::new(icon::Theme::NoIcon),
+                &DisplayOption::FileName,
             );
 
             assert_eq!(get_visible_width(&output), *l);
@@ -368,6 +399,7 @@ mod tests {
                 .render(
                     &Colors::new(color::Theme::NoColor),
                     &Icons::new(icon::Theme::Fancy),
+                    &DisplayOption::FileName,
                 )
                 .to_string();
 
@@ -399,6 +431,7 @@ mod tests {
                 .render(
                     &Colors::new(color::Theme::NoLscolors),
                     &Icons::new(icon::Theme::NoIcon),
+                    &DisplayOption::FileName,
                 )
                 .to_string();
 
@@ -434,6 +467,7 @@ mod tests {
                 .render(
                     &Colors::new(color::Theme::NoColor),
                     &Icons::new(icon::Theme::NoIcon),
+                    &DisplayOption::FileName,
                 )
                 .to_string();
 

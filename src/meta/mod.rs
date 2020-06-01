@@ -2,7 +2,7 @@ mod date;
 mod filetype;
 mod indicator;
 mod inode;
-mod name;
+pub mod name;
 mod owner;
 mod permissions;
 mod size;
@@ -24,10 +24,9 @@ pub use crate::flags::Display;
 pub use crate::icon::Icons;
 use crate::print_error;
 
-use std::fs;
 use std::fs::read_link;
 use std::io::{Error, ErrorKind};
-use std::path::PathBuf;
+use std::path::{Component, Path, PathBuf};
 
 use globset::GlobSet;
 
@@ -78,19 +77,11 @@ impl Meta {
 
         if let Display::DisplayAll = display {
             let mut current_meta;
-            let mut parent_meta;
-
-            let absolute_path = fs::canonicalize(&self.path)?;
-            let parent_path = match absolute_path.parent() {
-                None => PathBuf::from("/"),
-                Some(path) => PathBuf::from(path),
-            };
 
             current_meta = self.clone();
-            current_meta.name.name = ".".to_string();
+            current_meta.name.name = ".".to_owned();
 
-            parent_meta = Self::from_path(&parent_path)?;
-            parent_meta.name.name = "..".to_string();
+            let parent_meta = Self::from_path(&self.path.join(Component::ParentDir))?;
 
             content.push(current_meta);
             content.push(parent_meta);
@@ -195,7 +186,7 @@ impl Meta {
         }
     }
 
-    pub fn from_path(path: &PathBuf) -> Result<Self, std::io::Error> {
+    pub fn from_path(path: &Path) -> Result<Self, std::io::Error> {
         let metadata = if read_link(path).is_ok() {
             // If the file is a link, retrieve the metadata without following
             // the link.
@@ -219,7 +210,7 @@ impl Meta {
         Ok(Self {
             inode,
             path: path.to_path_buf(),
-            symlink: SymLink::from(path.as_path()),
+            symlink: SymLink::from(path),
             size: Size::from(&metadata),
             date: Date::from(&metadata),
             indicator: Indicator::from(file_type),

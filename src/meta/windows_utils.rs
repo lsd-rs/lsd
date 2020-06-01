@@ -1,7 +1,7 @@
 use std::ffi::{OsStr, OsString};
 use std::io;
 use std::os::windows::ffi::{OsStrExt, OsStringExt};
-use std::path::PathBuf;
+use std::path::Path;
 use std::ptr::null_mut;
 
 use winapi::ctypes::c_void;
@@ -13,7 +13,7 @@ use super::{Owner, Permissions};
 
 const BUF_SIZE: u32 = 256;
 
-pub fn get_file_data(path: &PathBuf) -> Result<(Owner, Permissions), io::Error> {
+pub fn get_file_data(path: &Path) -> Result<(Owner, Permissions), io::Error> {
     // Overall design:
     // This function allocates some data with GetNamedSecurityInfoW,
     // manipulates it only through WinAPI calls (treating the pointers as

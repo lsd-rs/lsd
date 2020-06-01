@@ -1,6 +1,7 @@
 use ansi_term::{ANSIString, Colour, Style};
 use lscolors::{Indicator, LsColors};
 use std::collections::HashMap;
+use std::path::Path;
 
 #[allow(dead_code)]
 #[derive(Hash, Debug, Eq, PartialEq, Clone)]
@@ -96,7 +97,7 @@ impl Colors {
     pub fn colorize_using_path<'a>(
         &self,
         input: String,
-        path: &str,
+        path: &Path,
         elem: &Elem,
     ) -> ColoredString<'a> {
         let style_from_path = self.style_from_path(path);
@@ -106,7 +107,7 @@ impl Colors {
         }
     }
 
-    fn style_from_path(&self, path: &str) -> Option<Style> {
+    fn style_from_path(&self, path: &Path) -> Option<Style> {
         match &self.lscolors {
             Some(lscolors) => lscolors
                 .style_for_path(path)
