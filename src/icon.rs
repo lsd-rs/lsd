@@ -78,10 +78,16 @@ impl Icons {
         } else if let Some(icon) = self.icons_by_name.get(name.file_name()) {
             // Use the known names.
             icon
-        } else if let Some(icon) = self.icons_by_name.get(String::from(name.file_name()).to_lowercase().as_str()) {
+        } else if let Some(icon) = self
+            .icons_by_name
+            .get(String::from(name.file_name()).to_lowercase().as_str())
+        {
             // Use the known names.
             icon
-        } else if let Some(icon) = self.icons_by_name.get(String::from(name.file_name()).to_uppercase().as_str()) {
+        } else if let Some(icon) = self
+            .icons_by_name
+            .get(String::from(name.file_name()).to_uppercase().as_str())
+        {
             // Use the known names.
             icon
         } else if let Some(icon) = name
@@ -90,16 +96,16 @@ impl Icons {
         {
             // Use the known extensions.
             icon
-        } else if let Some(icon) = name
-            .extension()
-            .and_then(|extension| self.icons_by_extension.get(String::from(extension).to_lowercase().as_str()))
-        {
+        } else if let Some(icon) = name.extension().and_then(|extension| {
+            self.icons_by_extension
+                .get(String::from(extension).to_lowercase().as_str())
+        }) {
             // Use the known extensions.
             icon
-        } else if let Some(icon) = name
-            .extension()
-            .and_then(|extension| self.icons_by_extension.get(String::from(extension).to_uppercase().as_str()))
-        {
+        } else if let Some(icon) = name.extension().and_then(|extension| {
+            self.icons_by_extension
+                .get(String::from(extension).to_uppercase().as_str())
+        }) {
             // Use the known extensions.
             icon
         } else {
