@@ -82,13 +82,13 @@ impl Icons {
             .icons_by_name
             .get(String::from(name.file_name()).to_lowercase().as_str())
         {
-            // Use the known names.
+            // Use the known lower-case names.
             icon
         } else if let Some(icon) = self
             .icons_by_name
             .get(String::from(name.file_name()).to_uppercase().as_str())
         {
-            // Use the known names.
+            // Use the known upper-case names.
             icon
         } else if let Some(icon) = name
             .extension()
@@ -100,13 +100,13 @@ impl Icons {
             self.icons_by_extension
                 .get(String::from(extension).to_lowercase().as_str())
         }) {
-            // Use the known extensions.
+            // Use the known lower-case extensions.
             icon
         } else if let Some(icon) = name.extension().and_then(|extension| {
             self.icons_by_extension
                 .get(String::from(extension).to_uppercase().as_str())
         }) {
-            // Use the known extensions.
+            // Use the known upper-case extensions.
             icon
         } else {
             // Use the default icons.
