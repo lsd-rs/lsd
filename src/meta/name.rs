@@ -216,7 +216,7 @@ mod test {
             .expect("failed to get metas");
 
         let colors = Colors::new(color::Theme::NoLscolors);
-        let file_type = FileType::new(&meta, Some(false), &Permissions::from(&meta));
+        let file_type = FileType::new(&meta, Some(&meta), &Permissions::from(&meta));
         let name = Name::new(&symlink_path, file_type);
 
         assert_eq!(

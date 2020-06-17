@@ -186,17 +186,10 @@ impl Meta {
         }
     }
 
-    pub fn from_path(path: &PathBuf) -> Result<Self, std::io::Error> {
-        let (metadata, symlink_is_dir) = if read_link(path).is_ok() {
-            // If the file is a link, retrieve the metadata without following
-            // the link, but provides whether followed link is_dir. Broken links are files.
-            (
-                path.symlink_metadata()?,
-                Some(match path.metadata() {
-                    Ok(m) => m.is_dir(),
-                    Err(_) => false, // broken link
-                }),
-            )
+    pub fn from_path(path: &Path) -> Result<Self, std::io::Error> {
+        let (metadata, symlink_meta) = if read_link(path).is_ok() {
+            // If the file is a link, retrieve the metadata without following the link
+            (path.symlink_metadata()?, path.metadata().ok())
         } else {
             (path.metadata()?, None)
         };
@@ -209,14 +202,14 @@ impl Meta {
         #[cfg(windows)]
         let (owner, permissions) = windows_utils::get_file_data(&path)?;
 
-        let file_type = FileType::new(&metadata, symlink_is_dir, &permissions);
+        let file_type = FileType::new(&metadata, symlink_meta.as_ref(), &permissions);
         let name = Name::new(&path, file_type);
         let inode = INode::from(&metadata);
 
         Ok(Self {
             inode,
             path: path.to_path_buf(),
-            symlink: SymLink::from(path.as_path()),
+            symlink: SymLink::from(path),
             size: Size::from(&metadata),
             date: Date::from(&metadata),
             indicator: Indicator::from(file_type),
