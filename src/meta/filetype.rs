@@ -54,7 +54,11 @@ impl FileType {
     }
 
     #[cfg(windows)]
-    pub fn new(meta: &Metadata, symlink_is_dir: Option<bool>, permissions: &Permissions) -> Self {
+    pub fn new(
+        meta: &Metadata,
+        symlink_meta: Option<&Metadata>,
+        permissions: &Permissions,
+    ) -> Self {
         let file_type = meta.file_type();
 
         if file_type.is_file() {
@@ -68,7 +72,8 @@ impl FileType {
             }
         } else if file_type.is_symlink() {
             FileType::SymLink {
-                is_dir: symlink_is_dir.expect("symlink must provide is_dir"),
+                // if broken, defaults to false
+                is_dir: symlink_meta.map(|m| m.is_dir()).unwrap_or_default(),
             }
         } else {
             FileType::Special
