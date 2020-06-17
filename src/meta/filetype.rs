@@ -17,7 +17,11 @@ pub enum FileType {
 
 impl FileType {
     #[cfg(unix)]
-    pub fn new(meta: &Metadata, symlink_is_dir: Option<bool>, permissions: &Permissions) -> Self {
+    pub fn new(
+        meta: &Metadata,
+        symlink_meta: Option<&Metadata>,
+        permissions: &Permissions,
+    ) -> Self {
         use std::os::unix::fs::FileTypeExt;
 
         let file_type = meta.file_type();
@@ -35,7 +39,8 @@ impl FileType {
             FileType::Pipe
         } else if file_type.is_symlink() {
             FileType::SymLink {
-                is_dir: symlink_is_dir.expect("symlink must provide is_dir"),
+                // if broken, defaults to false
+                is_dir: symlink_meta.map(|m| m.is_dir()).unwrap_or_default(),
             }
         } else if file_type.is_char_device() {
             FileType::CharDevice
@@ -154,7 +159,7 @@ mod test {
             .expect("failed to get metas");
 
         let colors = Colors::new(Theme::NoLscolors);
-        let file_type = FileType::new(&meta, Some(false), &Permissions::from(&meta));
+        let file_type = FileType::new(&meta, Some(&meta), &Permissions::from(&meta));
 
         assert_eq!(Colour::Fixed(44).paint("l"), file_type.render(&colors));
     }
