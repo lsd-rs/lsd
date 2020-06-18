@@ -277,7 +277,7 @@ jobs:
       run: |
         sudo apt-get -y install libssl-dev
         pushd '${{ steps.vars.outputs.STAGING }}/work' >/dev/null
-        wget --no-verbose https://github.com/xd009642/tarpaulin/releases/download/0.9.3/cargo-tarpaulin-0.9.3-travis.tar.gz
+        wget --no-verbose https://github.com/xd009642/tarpaulin/releases/download/0.13.3/cargo-tarpaulin-0.13.3-travis.tar.gz
         tar xf cargo-tarpaulin-0.9.3-travis.tar.gz
         cp cargo-tarpaulin "$(dirname -- "$(which cargo)")"/
         popd >/dev/null
