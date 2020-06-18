@@ -149,7 +149,7 @@ mod test {
 
     #[test]
     #[cfg(unix)] // Symlink support is *hard* on Windows
-    fn test_symlink_type() {
+    fn test_symlink_type_file() {
         let tmp_dir = tempdir().expect("failed to create temp dir");
 
         // Create the file;
@@ -159,6 +159,28 @@ mod test {
         // Create the symlink
         let symlink_path = tmp_dir.path().join("target.tmp");
         symlink(&file_path, &symlink_path).expect("failed to create symlink");
+        let meta = symlink_path
+            .symlink_metadata()
+            .expect("failed to get metas");
+
+        let colors = Colors::new(Theme::NoLscolors);
+        let file_type = FileType::new(&meta, Some(&meta), &Permissions::from(&meta));
+
+        assert_eq!(Colour::Fixed(44).paint("l"), file_type.render(&colors));
+    }
+
+    #[test]
+    #[cfg(unix)]
+    fn test_symlink_type_dir() {
+        let tmp_dir = tempdir().expect("failed to create temp dir");
+
+        // Create directory
+        let dir_path = tmp_dir.path().join("dir.d");
+        std::fs::create_dir(&dir_path).expect("failed to create dir");
+
+        // Create symlink
+        let symlink_path = tmp_dir.path().join("target.d");
+        symlink(&dir_path, &symlink_path).expect("failed to create symlink");
         let meta = symlink_path
             .symlink_metadata()
             .expect("failed to get metas");
