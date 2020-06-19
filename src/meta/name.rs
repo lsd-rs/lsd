@@ -232,7 +232,7 @@ mod test {
         let tmp_dir = tempdir().expect("failed to create temp dir");
         let icons = Icons::new(icon::Theme::Fancy);
 
-        // Create the file;
+        // Create the directory;
         let dir_path = tmp_dir.path().join("tmp.d");
         std::fs::create_dir(&dir_path).expect("failed to create dir");
 

@@ -187,8 +187,8 @@ impl Meta {
     }
 
     pub fn from_path(path: &Path) -> Result<Self, std::io::Error> {
+        // If the file is a link then retrieve link metadata instead with target metadata (if present).
         let (metadata, symlink_meta) = if read_link(path).is_ok() {
-            // If the file is a link, retrieve link metadata and target meta (if exists).
             (path.symlink_metadata()?, path.metadata().ok())
         } else {
             (path.metadata()?, None)
