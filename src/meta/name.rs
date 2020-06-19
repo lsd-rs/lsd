@@ -200,7 +200,7 @@ mod test {
 
     #[test]
     #[cfg(unix)] // Symlinks are hard on Windows
-    fn test_print_symlink_name() {
+    fn test_print_symlink_name_file() {
         let tmp_dir = tempdir().expect("failed to create temp dir");
         let icons = Icons::new(icon::Theme::Fancy);
 
@@ -214,13 +214,42 @@ mod test {
         let meta = symlink_path
             .symlink_metadata()
             .expect("failed to get metas");
+        let target_meta = symlink_path.metadata().ok();
 
         let colors = Colors::new(color::Theme::NoLscolors);
-        let file_type = FileType::new(&meta, Some(&meta), &Permissions::from(&meta));
+        let file_type = FileType::new(&meta, target_meta.as_ref(), &Permissions::from(&meta));
         let name = Name::new(&symlink_path, file_type);
 
         assert_eq!(
             Colour::Fixed(44).paint(" target.tmp"),
+            name.render(&colors, &icons, &DisplayOption::FileName)
+        );
+    }
+
+    #[test]
+    #[cfg(unix)] // Symlinks are hard on Windows
+    fn test_print_symlink_name_dir() {
+        let tmp_dir = tempdir().expect("failed to create temp dir");
+        let icons = Icons::new(icon::Theme::Fancy);
+
+        // Create the file;
+        let dir_path = tmp_dir.path().join("tmp.d");
+        std::fs::create_dir(&dir_path).expect("failed to create dir");
+
+        // Create the symlink
+        let symlink_path = tmp_dir.path().join("target.d");
+        symlink(&dir_path, &symlink_path).expect("failed to create symlink");
+        let meta = symlink_path
+            .symlink_metadata()
+            .expect("failed to get metas");
+        let target_meta = symlink_path.metadata().ok();
+
+        let colors = Colors::new(color::Theme::NoLscolors);
+        let file_type = FileType::new(&meta, target_meta.as_ref(), &Permissions::from(&meta));
+        let name = Name::new(&symlink_path, file_type);
+
+        assert_eq!(
+            Colour::Fixed(44).paint(" target.d"),
             name.render(&colors, &icons, &DisplayOption::FileName)
         );
     }
