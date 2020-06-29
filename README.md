@@ -97,6 +97,12 @@ environment.systemPackages = with pkgs; [
 pkg install lsd
 ```
 
+### On Windows
+Install with [Scoop](https://scoop.sh):
+```powershell
+scoop install lsd
+```
+
 ### From Sources
 
 With Rust's package manager cargo, you can install lsd via:
