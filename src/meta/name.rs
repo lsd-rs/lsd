@@ -523,6 +523,7 @@ mod test {
     }
 
     #[test]
+    #[cfg(unix)]
     fn test_special_chars_in_filename() {
         let tmp_dir = tempdir().expect("failed to create temp dir");
         let icons = Icons::new(icon::Theme::Fancy);
@@ -541,7 +542,7 @@ mod test {
             name.render(&colors, &icons, &DisplayOption::FileName)
         );
 
-        let file_path = tmp_dir.path().join("file\ntab.txt");
+        let file_path = tmp_dir.path().join("file\nnewline.txt");
         File::create(&file_path).expect("failed to create file");
         let meta = file_path.metadata().expect("failed to get metas");
 
@@ -550,7 +551,7 @@ mod test {
         let name = Name::new(&file_path, file_type);
 
         assert_eq!(
-            Colour::Fixed(184).paint(" file\\ntab.txt"),
+            Colour::Fixed(184).paint(" file\\nnewline.txt"),
             name.render(&colors, &icons, &DisplayOption::FileName)
         );
     }
