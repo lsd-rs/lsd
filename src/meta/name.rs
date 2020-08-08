@@ -521,4 +521,37 @@ mod test {
             name.relative_path(base_path),
         )
     }
+
+    #[test]
+    fn test_special_chars_in_filename() {
+        let tmp_dir = tempdir().expect("failed to create temp dir");
+        let icons = Icons::new(icon::Theme::Fancy);
+
+        // Create the file;
+        let file_path = tmp_dir.path().join("file\ttab.txt");
+        File::create(&file_path).expect("failed to create file");
+        let meta = file_path.metadata().expect("failed to get metas");
+
+        let colors = Colors::new(color::Theme::NoLscolors);
+        let file_type = FileType::new(&meta, None, &Permissions::from(&meta));
+        let name = Name::new(&file_path, file_type);
+
+        assert_eq!(
+            Colour::Fixed(184).paint(" file\\ttab.txt"),
+            name.render(&colors, &icons, &DisplayOption::FileName)
+        );
+
+        let file_path = tmp_dir.path().join("file\ntab.txt");
+        File::create(&file_path).expect("failed to create file");
+        let meta = file_path.metadata().expect("failed to get metas");
+
+        let colors = Colors::new(color::Theme::NoLscolors);
+        let file_type = FileType::new(&meta, None, &Permissions::from(&meta));
+        let name = Name::new(&file_path, file_type);
+
+        assert_eq!(
+            Colour::Fixed(184).paint(" file\\ntab.txt"),
+            name.render(&colors, &icons, &DisplayOption::FileName)
+        );
+    }
 }
