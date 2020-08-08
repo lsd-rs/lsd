@@ -33,7 +33,7 @@ wild = "2.0.*"
 globset = "0.4.*"
 
 [target.'cfg(unix)'.dependencies]
-users = "0.9.*"
+users = "0.10.*"
 
 [target.'cfg(windows)'.dependencies]
 winapi = {version = "0.3.*", features = ["aclapi", "accctrl", "winnt", "winerror", "securitybaseapi", "winbase"]}
