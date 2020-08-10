@@ -217,6 +217,13 @@ pub fn build() -> App<'static, 'static> {
                 .multiple(true)
                 .help("Display the index number of each file"),
         )
+        .arg(
+            Arg::with_name("dereference")
+                .short("L")
+                .long("dereference")
+                .multiple(true)
+                .help("When showing file information for a symbolic link, show information for the file the link references rather than for the link itself"),
+        )
 }
 
 fn validate_date_argument(arg: String) -> Result<(), String> {

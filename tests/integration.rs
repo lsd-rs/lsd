@@ -157,6 +157,33 @@ fn test_list_broken_link_ok() {
         .stderr(predicate::str::contains(matched).not());
 }
 
+#[cfg(unix)]
+#[test]
+fn test_dereference_link_right_type_and_no_link() {
+    let dir = tempdir();
+    dir.child("target").touch().unwrap();
+    let link = dir.path().join("link");
+    let file_type = ".rw";
+    let link_icon = "⇒";
+    fs::symlink("target", &link).unwrap();
+
+    cmd()
+        .arg("-l")
+        .arg("--dereference")
+        .arg(&link)
+        .assert()
+        .stdout(predicate::str::starts_with(file_type))
+        .stdout(predicate::str::contains(link_icon).not());
+
+    cmd()
+        .arg("-l")
+        .arg("-L")
+        .arg(link)
+        .assert()
+        .stdout(predicate::str::starts_with(file_type))
+        .stdout(predicate::str::contains(link_icon).not());
+}
+
 fn cmd() -> Command {
     Command::cargo_bin(env!("CARGO_PKG_NAME")).unwrap()
 }
