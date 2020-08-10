@@ -52,10 +52,7 @@ pub enum Elem {
 
 impl Elem {
     pub fn has_suid(&self) -> bool {
-        match self {
-            Elem::Dir { uid: true } | Elem::File { uid: true, .. } => true,
-            _ => false,
-        }
+        matches!(self, Elem::Dir { uid: true } | Elem::File { uid: true, .. })
     }
 }
 

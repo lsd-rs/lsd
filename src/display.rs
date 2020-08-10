@@ -221,10 +221,7 @@ fn should_display_folder_path(depth: usize, metas: &[Meta]) -> bool {
     } else {
         let folder_number = metas
             .iter()
-            .filter(|x| match x.file_type {
-                FileType::Directory { .. } => true,
-                _ => false,
-            })
+            .filter(|x| matches!(x.file_type, FileType::Directory { .. }))
             .count();
 
         folder_number > 1 || folder_number < metas.len()
@@ -270,7 +267,7 @@ fn get_output<'a>(
             Block::SizeValue => strings.push(meta.size.render_value(colors, flags)),
             Block::Date => strings.push(meta.date.render(colors, &flags)),
             Block::Name => {
-                let s: String = if flags.no_symlink {
+                let s: String = if flags.no_symlink || flags.dereference {
                     ANSIStrings(&[
                         meta.name.render(colors, icons, &display_option),
                         meta.indicator.render(&flags),

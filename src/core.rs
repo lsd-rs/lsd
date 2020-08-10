@@ -82,7 +82,7 @@ impl Core {
         };
 
         for path in paths {
-            let mut meta = match Meta::from_path(&path) {
+            let mut meta = match Meta::from_path(&path, self.flags.dereference) {
                 Ok(meta) => meta,
                 Err(err) => {
                     print_error!("lsd: {}: {}\n", path.display(), err);
@@ -95,7 +95,12 @@ impl Core {
                     meta_list.push(meta);
                 }
                 _ => {
-                    match meta.recurse_into(depth, self.flags.display, &self.flags.ignore_globs) {
+                    match meta.recurse_into(
+                        depth,
+                        self.flags.display,
+                        &self.flags.ignore_globs,
+                        self.flags.dereference,
+                    ) {
                         Ok(content) => {
                             meta.content = content;
                             meta_list.push(meta);

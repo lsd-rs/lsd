@@ -51,6 +51,7 @@ impl Meta {
         depth: usize,
         display: Display,
         ignore_globs: &GlobSet,
+        dereference: bool,
     ) -> Result<Option<Vec<Meta>>, std::io::Error> {
         if depth == 0 {
             return Ok(None);
@@ -81,7 +82,7 @@ impl Meta {
             current_meta = self.clone();
             current_meta.name.name = ".".to_owned();
 
-            let parent_meta = Self::from_path(&self.path.join(Component::ParentDir))?;
+            let parent_meta = Self::from_path(&self.path.join(Component::ParentDir), dereference)?;
 
             content.push(current_meta);
             content.push(parent_meta);
@@ -104,7 +105,7 @@ impl Meta {
                 }
             }
 
-            let mut entry_meta = match Self::from_path(&path) {
+            let mut entry_meta = match Self::from_path(&path, dereference) {
                 Ok(res) => res,
                 Err(err) => {
                     print_error!("lsd: {}: {}\n", path.display(), err);
@@ -112,7 +113,7 @@ impl Meta {
                 }
             };
 
-            match entry_meta.recurse_into(depth - 1, display, ignore_globs) {
+            match entry_meta.recurse_into(depth - 1, display, ignore_globs, dereference) {
                 Ok(content) => entry_meta.content = content,
                 Err(err) => {
                     print_error!("lsd: {}: {}\n", path.display(), err);
@@ -186,9 +187,9 @@ impl Meta {
         }
     }
 
-    pub fn from_path(path: &Path) -> Result<Self, std::io::Error> {
+    pub fn from_path(path: &Path, dereference: bool) -> Result<Self, std::io::Error> {
         // If the file is a link then retrieve link metadata instead with target metadata (if present).
-        let (metadata, symlink_meta) = if read_link(path).is_ok() {
+        let (metadata, symlink_meta) = if read_link(path).is_ok() && !dereference {
             (path.symlink_metadata()?, path.metadata().ok())
         } else {
             (path.metadata()?, None)
