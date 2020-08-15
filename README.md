@@ -1,7 +1,10 @@
 # LSD (LSDeluxe)
 
-[![license](http://img.shields.io/badge/license-Apache%20v2-orange.svg)](https://raw.githubusercontent.com/Peltoche/ical-rs/master/LICENSE)
+[![license](http://img.shields.io/badge/license-Apache%20v2-blue.svg)](https://raw.githubusercontent.com/Peltoche/lsd/master/LICENSE)
 [![Latest version](https://img.shields.io/crates/v/lsd.svg)](https://crates.io/crates/lsd)
+[![build](https://github.com/Peltoche/lsd/workflows/CICD/badge.svg)](https://github.com/Peltoche/lsd/actions)
+[![codecov](https://codecov.io/gh/Peltoche/lsd/branch/master/graph/badge.svg)](https://codecov.io/gh/Peltoche/lsd)
+[![versions](https://img.shields.io/repology/repositories/lsd)](https://repology.org/project/lsd/versions)
 
 # Table of Contents
 
@@ -51,20 +54,16 @@ _... and other Debian-based Linux distributions_
 Download the latest .deb package from the [release page](https://github.com/Peltoche/lsd/releases) and install it via:
 
 ```sh
-sudo dpkg -i lsd_7.2.0_amd64.deb  # adapt version number and architecture
+sudo dpkg -i lsd_0.17.0_amd64.deb # adapt version number and architecture
 ```
 
 ### On Gentoo
+
 ```sh
 sudo emerge sys-apps/lsd
 ```
 (Ebuild maintained by Georgy Yakovlev)
 
-### From Snap
-
-```sh
-sudo snap install lsd
-```
 
 ### On macOS
 
@@ -98,6 +97,7 @@ pkg install lsd
 ```
 
 ### On Windows
+
 Install with [Scoop](https://scoop.sh):
 ```powershell
 scoop install lsd
@@ -119,7 +119,6 @@ cargo install --git https://github.com/Peltoche/lsd.git --branch master
 ### From Binaries
 
 The [release page](https://github.com/Peltoche/lsd/releases) includes precompiled binaries for Linux and macOS.
-
 
 ## Configurations
 
