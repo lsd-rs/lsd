@@ -156,6 +156,26 @@ fn test_list_broken_link_ok() {
         .assert()
         .stderr(predicate::str::contains(matched).not());
 }
+#[cfg(unix)]
+#[test]
+fn test_nosymlink_on_non_long() {
+    let dir = tempdir();
+    dir.child("target").touch().unwrap();
+    let link = dir.path().join("link");
+    let link_icon = "⇒";
+    fs::symlink("target", &link).unwrap();
+
+    cmd()
+        .arg("-l")
+        .arg(&link)
+        .assert()
+        .stdout(predicate::str::contains(link_icon));
+
+    cmd()
+        .arg(&link)
+        .assert()
+        .stdout(predicate::str::contains(link_icon).not());
+}
 
 #[cfg(unix)]
 #[test]
