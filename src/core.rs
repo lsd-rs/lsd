@@ -1,6 +1,6 @@
 use crate::color::{self, Colors};
 use crate::display;
-use crate::flags::{Display, Flags, IconTheme, Layout, WhenFlag};
+use crate::flags::{Display, Flags, IconTheme, Layout, SortOrder, WhenFlag};
 use crate::icon::{self, Icons};
 use crate::meta::Meta;
 use crate::{print_error, print_output, sort};
@@ -19,7 +19,7 @@ pub struct Core {
     icons: Icons,
     //display: Display,
     colors: Colors,
-    sorter: sort::Sorter,
+    sorters: Vec<(SortOrder, sort::SortFn)>,
 }
 
 impl Core {
@@ -59,14 +59,14 @@ impl Core {
             inner_flags.layout = Layout::OneLine;
         };
 
-        let sorter = sort::create_sorter(&flags);
+        let sorters = sort::assemble_sorters(&flags);
 
         Self {
             flags,
             //display: Display::new(inner_flags),
             colors: Colors::new(color_theme),
             icons: Icons::new(icon_theme),
-            sorter,
+            sorters,
         }
     }
 
@@ -122,7 +122,7 @@ impl Core {
     }
 
     fn sort(&self, metas: &mut Vec<Meta>) {
-        metas.sort_unstable_by(|a, b| (self.sorter)(a, b));
+        metas.sort_unstable_by(|a, b| sort::by_meta(&self.sorters, a, b));
 
         for meta in metas {
             if let Some(ref mut content) = meta.content {

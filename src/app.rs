@@ -191,8 +191,8 @@ pub fn build() -> App<'static, 'static> {
         )
         .arg(
             Arg::with_name("classic")
-                .long("classic")
-                .help("Enable classic mode (no colors or icons)"),
+            .long("classic")
+            .help("Enable classic mode (no colors or icons)"),
         )
         .arg(
             Arg::with_name("no-symlink")
