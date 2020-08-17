@@ -79,6 +79,13 @@ impl FileType {
             FileType::Special
         }
     }
+
+    pub fn is_dirlike(self) -> bool {
+        match self {
+            FileType::Directory { .. } | FileType::SymLink { is_dir: true } => true,
+            _ => false,
+        }
+    }
 }
 
 impl FileType {
