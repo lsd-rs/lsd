@@ -1,17 +1,19 @@
 use crate::flags::{DirOrderFlag, Flags, SortFlag, SortOrder};
-use crate::meta::{FileType, Meta};
+use crate::meta::Meta;
 use std::cmp::Ordering;
 
 pub type Sorter = Box<dyn Fn(&Meta, &Meta) -> Ordering>;
 
 pub fn create_sorter(flags: &Flags) -> Sorter {
-    let mut sorters: Vec<(SortOrder, Sorter)> = vec![];
+    type SortFn = fn(&Meta, &Meta) -> Ordering;
+
+    let mut sorters: Vec<(SortOrder, SortFn)> = vec![];
     match flags.directory_order {
         DirOrderFlag::First => {
-            sorters.push((SortOrder::Default, Box::new(with_dirs_first)));
+            sorters.push((SortOrder::Default, with_dirs_first));
         }
         DirOrderFlag::Last => {
-            sorters.push((SortOrder::Reverse, Box::new(with_dirs_first)));
+            sorters.push((SortOrder::Reverse, with_dirs_first));
         }
         DirOrderFlag::None => {}
     };
@@ -20,7 +22,7 @@ pub fn create_sorter(flags: &Flags) -> Sorter {
         SortFlag::Size => by_size,
         SortFlag::Time => by_date,
     };
-    sorters.push((flags.sort_order, Box::new(other_sort)));
+    sorters.push((flags.sort_order, other_sort));
 
     Box::new(move |a, b| {
         for (direction, sorter) in sorters.iter() {
@@ -39,16 +41,7 @@ pub fn create_sorter(flags: &Flags) -> Sorter {
 }
 
 fn with_dirs_first(a: &Meta, b: &Meta) -> Ordering {
-    match (a.file_type, b.file_type) {
-        (FileType::Directory { .. }, FileType::Directory { .. }) => Ordering::Equal,
-        (FileType::Directory { .. }, FileType::SymLink { is_dir: true }) => Ordering::Equal,
-        (FileType::SymLink { is_dir: true }, FileType::Directory { .. }) => Ordering::Equal,
-        (FileType::Directory { .. }, _) => Ordering::Less,
-        (_, FileType::Directory { .. }) => Ordering::Greater,
-        (FileType::SymLink { is_dir: true }, _) => Ordering::Less,
-        (_, FileType::SymLink { is_dir: true }) => Ordering::Greater,
-        _ => Ordering::Equal,
-    }
+    b.file_type.is_dirlike().cmp(&a.file_type.is_dirlike())
 }
 
 fn by_size(a: &Meta, b: &Meta) -> Ordering {
