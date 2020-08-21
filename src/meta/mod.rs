@@ -63,6 +63,7 @@ impl Meta {
 
         match self.file_type {
             FileType::Directory { .. } => (),
+            FileType::SymLink { is_dir: true } => (),
             _ => return Ok(None),
         }
 
