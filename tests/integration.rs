@@ -204,6 +204,21 @@ fn test_dereference_link_right_type_and_no_link() {
         .stdout(predicate::str::contains(link_icon).not());
 }
 
+#[cfg(unix)]
+#[test]
+fn test_show_folder_content_of_symlink() {
+    let dir = tempdir();
+    dir.child("target").child("inside").touch().unwrap();
+    let link = dir.path().join("link");
+    fs::symlink("target", &link).unwrap();
+
+    cmd()
+        .arg(link)
+        .assert()
+        .stdout(predicate::str::starts_with("link").not())
+        .stdout(predicate::str::starts_with("inside"));
+}
+
 fn cmd() -> Command {
     Command::cargo_bin(env!("CARGO_PKG_NAME")).unwrap()
 }
