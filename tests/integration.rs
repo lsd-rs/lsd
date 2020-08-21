@@ -219,6 +219,47 @@ fn test_show_folder_content_of_symlink() {
         .stdout(predicate::str::starts_with("inside"));
 }
 
+#[cfg(unix)]
+#[test]
+fn test_no_show_folder_content_of_symlink_for_long() {
+    let dir = tempdir();
+    dir.child("target").child("inside").touch().unwrap();
+    let link = dir.path().join("link");
+    fs::symlink("target", &link).unwrap();
+
+    cmd()
+        .arg("-l")
+        .arg(link)
+        .assert()
+        .stdout(predicate::str::starts_with("lrw"))
+        .stdout(predicate::str::contains("⇒"));
+
+    cmd()
+        .arg("-l")
+        .arg(dir.path().join("link/"))
+        .assert()
+        .stdout(predicate::str::starts_with(".rw"))
+        .stdout(predicate::str::contains("⇒").not());
+}
+
+#[cfg(unix)]
+#[test]
+fn test_show_folder_of_symlink_for_long_multi() {
+    let dir = tempdir();
+    dir.child("target").child("inside").touch().unwrap();
+    let link = dir.path().join("link");
+    fs::symlink("target", &link).unwrap();
+
+    cmd()
+        .arg("-l")
+        .arg(dir.path().join("link/"))
+        .arg(dir.path().join("link"))
+        .assert()
+        .stdout(predicate::str::starts_with("lrw"))
+        .stdout(predicate::str::contains("link:").not()) // do not show dir content when no /
+        .stdout(predicate::str::contains("link/:"));
+}
+
 fn cmd() -> Command {
     Command::cargo_bin(env!("CARGO_PKG_NAME")).unwrap()
 }

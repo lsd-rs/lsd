@@ -20,15 +20,13 @@ pub use self::owner::Owner;
 pub use self::permissions::Permissions;
 pub use self::size::Size;
 pub use self::symlink::SymLink;
-pub use crate::flags::Display;
+pub use crate::flags::{Display, Flags, Layout};
 pub use crate::icon::Icons;
 use crate::print_error;
 
 use std::fs::read_link;
 use std::io::{Error, ErrorKind};
 use std::path::{Component, Path, PathBuf};
-
-use globset::GlobSet;
 
 #[derive(Clone, Debug)]
 pub struct Meta {
@@ -49,21 +47,23 @@ impl Meta {
     pub fn recurse_into(
         &self,
         depth: usize,
-        display: Display,
-        ignore_globs: &GlobSet,
-        dereference: bool,
+        flags: &Flags,
     ) -> Result<Option<Vec<Meta>>, std::io::Error> {
         if depth == 0 {
             return Ok(None);
         }
 
-        if display == Display::DisplayDirectoryItself {
+        if flags.display == Display::DisplayDirectoryItself {
             return Ok(None);
         }
 
         match self.file_type {
             FileType::Directory { .. } => (),
-            FileType::SymLink { is_dir: true } => (),
+            FileType::SymLink { is_dir: true } => {
+                if flags.layout == Layout::OneLine {
+                    return Ok(None);
+                }
+            }
             _ => return Ok(None),
         }
 
@@ -77,13 +77,14 @@ impl Meta {
 
         let mut content: Vec<Meta> = Vec::new();
 
-        if let Display::DisplayAll = display {
+        if let Display::DisplayAll = flags.display {
             let mut current_meta;
 
             current_meta = self.clone();
             current_meta.name.name = ".".to_owned();
 
-            let parent_meta = Self::from_path(&self.path.join(Component::ParentDir), dereference)?;
+            let parent_meta =
+                Self::from_path(&self.path.join(Component::ParentDir), flags.dereference)?;
 
             content.push(current_meta);
             content.push(parent_meta);
@@ -96,17 +97,17 @@ impl Meta {
                 .file_name()
                 .ok_or_else(|| Error::new(ErrorKind::InvalidInput, "invalid file name"))?;
 
-            if ignore_globs.is_match(&name) {
+            if flags.ignore_globs.is_match(&name) {
                 continue;
             }
 
-            if let Display::DisplayOnlyVisible = display {
+            if let Display::DisplayOnlyVisible = flags.display {
                 if name.to_string_lossy().starts_with('.') {
                     continue;
                 }
             }
 
-            let mut entry_meta = match Self::from_path(&path, dereference) {
+            let mut entry_meta = match Self::from_path(&path, flags.dereference) {
                 Ok(res) => res,
                 Err(err) => {
                     print_error!("lsd: {}: {}\n", path.display(), err);
@@ -114,7 +115,7 @@ impl Meta {
                 }
             };
 
-            match entry_meta.recurse_into(depth - 1, display, ignore_globs, dereference) {
+            match entry_meta.recurse_into(depth - 1, &flags) {
                 Ok(content) => entry_meta.content = content,
                 Err(err) => {
                     print_error!("lsd: {}: {}\n", path.display(), err);

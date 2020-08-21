@@ -68,7 +68,8 @@ fn inner_display_grid(
         // Maybe skip showing the directory meta now; show its contents later.
         if skip_dirs
             && (matches!(meta.file_type, FileType::Directory{..})
-                || matches!(meta.file_type, FileType::SymLink { is_dir: true }))
+                || (matches!(meta.file_type, FileType::SymLink { is_dir: true })
+                    && flags.layout != Layout::OneLine))
         {
             continue;
         }
@@ -109,7 +110,7 @@ fn inner_display_grid(
         output += &grid.fit_into_columns(flags.blocks.len()).to_string();
     }
 
-    let should_display_folder_path = should_display_folder_path(depth, &metas);
+    let should_display_folder_path = should_display_folder_path(depth, &metas, &flags);
 
     // print the folder content
     for meta in metas {
@@ -218,7 +219,7 @@ fn inner_display_tree(
     output
 }
 
-fn should_display_folder_path(depth: usize, metas: &[Meta]) -> bool {
+fn should_display_folder_path(depth: usize, metas: &[Meta], flags: &Flags) -> bool {
     if depth > 0 {
         true
     } else {
@@ -226,7 +227,8 @@ fn should_display_folder_path(depth: usize, metas: &[Meta]) -> bool {
             .iter()
             .filter(|x| {
                 matches!(x.file_type, FileType::Directory { .. })
-                    || matches!(x.file_type, FileType::SymLink { is_dir: true })
+                    || (matches!(x.file_type, FileType::SymLink { is_dir: true })
+                        && flags.layout != Layout::OneLine)
             })
             .count();
 
