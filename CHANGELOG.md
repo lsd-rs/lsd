@@ -4,6 +4,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - ReleaseDate
+### Added
+- Add Support for `--dereference` from [zwpaper](https://github.com/zwpaper)
+- Add more icons for wmv,wma and others from [0jdxt](https://github.com/0jdxt)
+- Add Windows(Scoop) installation instructions from [turtlebasket](https://github.com/turtlebasket)
+- Add opus filetype icon from [nabakolu](https://github.com/nabakolu)
+- Add FreeBSD insallation instructions from [andoriyu](https://github.com/andoriyu)
+### Changed
+- Drop snap support from [zwpaper](https://github.com/zwpaper)
+- Improve `--ignore-glob` help message from [Pingger](https://github.com/Pingger)
+- Separate symlink icons for dirs and files from [0jdxt](https://github.com/0jdxt)
+### Fixed
+- Fix listing of dir contents for symlinked dirs from [meain](https://github.com/meain)
+- Fix grid rendering showing symlink entry files and folders from [meain](https://github.com/meain)
+- Fix handling of special chars from [meain](https://github.com/meain)
+- Fix regression in `--size short` from [meain](https://github.com/meain)
+- Fix handling of relative paths in args from [dvvvvvv](https://github.com/dvvvvvv)
+- Fix handling of broken symlinks from [zwpaper](https://github.com/zwpaper)
+- Fix icons for lock files and ini files from [WhyNotHugo](https://github.com/WhyNotHugo)
 
 ## [0.17.0] - 2020-04-09
 ### Added
