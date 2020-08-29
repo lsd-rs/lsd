@@ -256,7 +256,7 @@ dependencies = [
 
 [[package]]
 name = "lsd"
-version = "0.17.1-pre"
+version = "0.18.0"
 dependencies = [
  "ansi_term 0.12.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "assert_cmd 1.0.1 (registry+https://github.com/rust-lang/crates.io-index)",
