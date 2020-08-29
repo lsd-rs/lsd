@@ -54,7 +54,7 @@ _... and other Debian-based Linux distributions_
 Download the latest .deb package from the [release page](https://github.com/Peltoche/lsd/releases) and install it via:
 
 ```sh
-sudo dpkg -i lsd_0.17.0_amd64.deb # adapt version number and architecture
+sudo dpkg -i lsd_0.18.0_amd64.deb # adapt version number and architecture
 ```
 
 ### On Gentoo
