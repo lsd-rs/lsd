@@ -144,6 +144,8 @@ pub fn build() -> App<'static, 'static> {
             Arg::with_name("timesort")
                 .short("t")
                 .long("timesort")
+                .overrides_with("sizesort")
+                .overrides_with("extensionsort")
                 .multiple(true)
                 .help("Sort by time modified"),
         )
@@ -151,6 +153,8 @@ pub fn build() -> App<'static, 'static> {
             Arg::with_name("sizesort")
                 .short("S")
                 .long("sizesort")
+                .overrides_with("timesort")
+                .overrides_with("extensionsort")
                 .multiple(true)
                 .help("Sort by size"),
         )
@@ -158,6 +162,8 @@ pub fn build() -> App<'static, 'static> {
             Arg::with_name("extensionsort")
                 .short("X")
                 .long("extensionsort")
+                .overrides_with("sizesort")
+                .overrides_with("timesort")
                 .multiple(true)
                 .help("Sort by file extension"),
         )
