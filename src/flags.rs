@@ -361,6 +361,7 @@ pub enum Layout {
 #[cfg(test)]
 mod test {
     use super::Flags;
+    use super::SortFlag;
     use crate::app;
     use clap::ErrorKind;
 
@@ -406,5 +407,32 @@ mod test {
 
         assert!(res.is_ok());
         assert_eq!(res.unwrap().recursion_depth, usize::max_value());
+    }
+
+    #[test]
+    fn test_multi_sort_use_last() {
+        let matches = app::build()
+            .get_matches_from_safe(vec!["lsd", "-t", "-S"])
+            .unwrap();
+        let res = Flags::from_matches(&matches);
+
+        assert!(res.is_ok());
+        assert_eq!(res.unwrap().sort_by, SortFlag::Size);
+
+        let matches = app::build()
+            .get_matches_from_safe(vec!["lsd", "-S", "-t"])
+            .unwrap();
+        let res = Flags::from_matches(&matches);
+
+        assert!(res.is_ok());
+        assert_eq!(res.unwrap().sort_by, SortFlag::Time);
+
+        let matches = app::build()
+            .get_matches_from_safe(vec!["lsd", "-t", "-S", "-X"])
+            .unwrap();
+        let res = Flags::from_matches(&matches);
+
+        assert!(res.is_ok());
+        assert_eq!(res.unwrap().sort_by, SortFlag::Extension);
     }
 }

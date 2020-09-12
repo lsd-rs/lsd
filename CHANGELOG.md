@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased] - ReleaseDate
 ### Added
 - Add support for `--extensionsort` `-X` from [aldhsu](https://github.com/aldhsu)
+### Changed
+- Use last sort flag for sort field from [meain](https://github.com/meain)
 
 ## [0.18.0] - 2020-08-29
 ### Added
