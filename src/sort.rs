@@ -19,6 +19,7 @@ pub fn assemble_sorters(flags: &Flags) -> Vec<(SortOrder, SortFn)> {
         SortFlag::Name => by_name,
         SortFlag::Size => by_size,
         SortFlag::Time => by_date,
+        SortFlag::Extension => by_extension,
     };
     sorters.push((flags.sort_order, other_sort));
     sorters
@@ -53,6 +54,10 @@ fn by_name(a: &Meta, b: &Meta) -> Ordering {
 
 fn by_date(a: &Meta, b: &Meta) -> Ordering {
     b.date.cmp(&a.date).then(a.name.cmp(&b.name))
+}
+
+fn by_extension(a: &Meta, b: &Meta) -> Ordering {
+    a.name.extension().cmp(&b.name.extension())
 }
 
 #[cfg(test)]
@@ -219,5 +224,43 @@ mod tests {
         flags.sort_order = SortOrder::Reverse;
         let sorter = assemble_sorters(&flags);
         assert_eq!(by_meta(&sorter, &meta_a, &meta_z), Ordering::Greater);
+    }
+
+    #[test]
+    fn test_sort_assemble_sorters_by_extension() {
+        let tmp_dir = tempdir().expect("failed to create temp dir");
+
+        // Create the file with rs extension;
+        let path_a = tmp_dir.path().join("aaa.rs");
+        File::create(&path_a).expect("failed to create file");
+        let meta_a = Meta::from_path(&path_a, false).expect("failed to get meta");
+
+        // Create the file with rs extension;
+        let path_z = tmp_dir.path().join("zzz.rs");
+        File::create(&path_z).expect("failed to create file");
+        let meta_z = Meta::from_path(&path_z, false).expect("failed to get meta");
+
+        // Create the file with js extension;
+        let path_j = tmp_dir.path().join("zzz.js");
+        File::create(&path_j).expect("failed to create file");
+        let meta_j = Meta::from_path(&path_j, false).expect("failed to get meta");
+
+        // Create the file with txt extension;
+        let path_t = tmp_dir.path().join("zzz.txt");
+        File::create(&path_t).expect("failed to create file");
+        let meta_t = Meta::from_path(&path_t, false).expect("failed to get meta");
+
+        let mut flags = Flags::default();
+        flags.sort_by = SortFlag::Extension;
+
+        // Sort by extension
+        let sorter = assemble_sorters(&flags);
+        assert_eq!(by_meta(&sorter, &meta_a, &meta_z), Ordering::Equal);
+
+        let sorter = assemble_sorters(&flags);
+        assert_eq!(by_meta(&sorter, &meta_a, &meta_j), Ordering::Greater);
+
+        let sorter = assemble_sorters(&flags);
+        assert_eq!(by_meta(&sorter, &meta_a, &meta_t), Ordering::Less);
     }
 }
