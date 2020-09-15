@@ -155,6 +155,13 @@ pub fn build() -> App<'static, 'static> {
                 .help("Sort by size"),
         )
         .arg(
+            Arg::with_name("extensionsort")
+                .short("X")
+                .long("extensionsort")
+                .multiple(true)
+                .help("Sort by file extension"),
+        )
+        .arg(
             Arg::with_name("reverse")
                 .short("r")
                 .long("reverse")
