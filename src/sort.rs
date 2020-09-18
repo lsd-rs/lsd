@@ -1,5 +1,6 @@
 use crate::flags::{DirOrderFlag, Flags, SortFlag, SortOrder};
 use crate::meta::Meta;
+use human_sort::compare;
 use std::cmp::Ordering;
 
 pub type SortFn = fn(&Meta, &Meta) -> Ordering;
@@ -19,6 +20,7 @@ pub fn assemble_sorters(flags: &Flags) -> Vec<(SortOrder, SortFn)> {
         SortFlag::Name => by_name,
         SortFlag::Size => by_size,
         SortFlag::Time => by_date,
+        SortFlag::Version => by_version,
         SortFlag::Extension => by_extension,
     };
     sorters.push((flags.sort_order, other_sort));
@@ -54,6 +56,10 @@ fn by_name(a: &Meta, b: &Meta) -> Ordering {
 
 fn by_date(a: &Meta, b: &Meta) -> Ordering {
     b.date.cmp(&a.date).then(a.name.cmp(&b.name))
+}
+
+fn by_version(a: &Meta, b: &Meta) -> Ordering {
+    compare(&a.name.name, &b.name.name)
 }
 
 fn by_extension(a: &Meta, b: &Meta) -> Ordering {
@@ -262,5 +268,31 @@ mod tests {
 
         let sorter = assemble_sorters(&flags);
         assert_eq!(by_meta(&sorter, &meta_a, &meta_t), Ordering::Less);
+    }
+
+    #[test]
+    fn test_sort_assemble_sorters_by_version() {
+        let tmp_dir = tempdir().expect("failed to create temp dir");
+
+        let path_a = tmp_dir.path().join("2");
+        File::create(&path_a).expect("failed to create file");
+        let meta_a = Meta::from_path(&path_a, false).expect("failed to get meta");
+
+        let path_b = tmp_dir.path().join("11");
+        File::create(&path_b).expect("failed to create file");
+        let meta_b = Meta::from_path(&path_b, false).expect("failed to get meta");
+
+        let path_c = tmp_dir.path().join("12");
+        File::create(&path_c).expect("failed to create file");
+        let meta_c = Meta::from_path(&path_c, false).expect("failed to get meta");
+
+        let mut flags = Flags::default();
+        flags.sort_by = SortFlag::Version;
+
+        let sorter = assemble_sorters(&flags);
+        assert_eq!(by_meta(&sorter, &meta_b, &meta_a), Ordering::Greater);
+
+        let sorter = assemble_sorters(&flags);
+        assert_eq!(by_meta(&sorter, &meta_b, &meta_c), Ordering::Less);
     }
 }

@@ -260,6 +260,53 @@ fn test_show_folder_of_symlink_for_long_multi() {
         .stdout(predicate::str::contains("link/:"));
 }
 
+#[test]
+fn test_version_sort() {
+    let dir = tempdir();
+    dir.child("0.3.7").touch().unwrap();
+    dir.child("0.11.5").touch().unwrap();
+    dir.child("11a").touch().unwrap();
+    dir.child("0.2").touch().unwrap();
+    dir.child("0.11").touch().unwrap();
+    dir.child("1").touch().unwrap();
+    dir.child("11").touch().unwrap();
+    dir.child("2").touch().unwrap();
+    dir.child("22").touch().unwrap();
+    cmd().arg("-v").arg(dir.path()).assert().stdout(
+        predicate::str::is_match("0.2\n0.3.7\n0.11\n0.11.5\n1\n2\n11\n11a\n22\n$").unwrap(),
+    );
+}
+
+#[test]
+fn test_version_sort_overwrite_by_timesort() {
+    let dir = tempdir();
+    dir.child("2").touch().unwrap();
+    dir.child("11").touch().unwrap();
+    cmd()
+        .arg("-v")
+        .arg("-t")
+        .arg(dir.path())
+        .assert()
+        .stdout(predicate::str::is_match("11\n2\n$").unwrap());
+}
+
+#[test]
+fn test_version_sort_overwrite_by_sizesort() {
+    use std::fs::File;
+    use std::io::Write;
+    let dir = tempdir();
+    dir.child("2").touch().unwrap();
+    let larger = dir.path().join("11");
+    let mut larger_file = File::create(larger).unwrap();
+    writeln!(larger_file, "this is larger").unwrap();
+    cmd()
+        .arg("-v")
+        .arg("-S")
+        .arg(dir.path())
+        .assert()
+        .stdout(predicate::str::is_match("11\n2\n$").unwrap());
+}
+
 fn cmd() -> Command {
     Command::cargo_bin(env!("CARGO_PKG_NAME")).unwrap()
 }
