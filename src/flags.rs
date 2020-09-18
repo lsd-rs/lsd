@@ -60,6 +60,8 @@ impl Flags {
             SortFlag::Size
         } else if matches.is_present("extensionsort") {
             SortFlag::Extension
+        } else if matches.is_present("versionsort") {
+            SortFlag::Version
         } else {
             SortFlag::Name
         };
@@ -308,6 +310,7 @@ pub enum SortFlag {
     Name,
     Time,
     Size,
+    Version,
     Extension,
 }
 

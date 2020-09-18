@@ -146,6 +146,7 @@ pub fn build() -> App<'static, 'static> {
                 .long("timesort")
                 .overrides_with("sizesort")
                 .overrides_with("extensionsort")
+                .overrides_with("versionsort")
                 .multiple(true)
                 .help("Sort by time modified"),
         )
@@ -155,6 +156,7 @@ pub fn build() -> App<'static, 'static> {
                 .long("sizesort")
                 .overrides_with("timesort")
                 .overrides_with("extensionsort")
+                .overrides_with("versionsort")
                 .multiple(true)
                 .help("Sort by size"),
         )
@@ -164,8 +166,18 @@ pub fn build() -> App<'static, 'static> {
                 .long("extensionsort")
                 .overrides_with("sizesort")
                 .overrides_with("timesort")
+                .overrides_with("versionsort")
                 .multiple(true)
                 .help("Sort by file extension"),
+        )
+        .arg(
+            Arg::with_name("versionsort")
+                .short("v")
+                .multiple(true)
+                .overrides_with("timesort")
+                .overrides_with("sizesort")
+                .overrides_with("extensionsort")
+                .help("Natural sort of (version) numbers within text"),
         )
         .arg(
             Arg::with_name("reverse")
