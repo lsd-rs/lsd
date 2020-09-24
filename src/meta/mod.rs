@@ -20,8 +20,9 @@ pub use self::owner::Owner;
 pub use self::permissions::Permissions;
 pub use self::size::Size;
 pub use self::symlink::SymLink;
-pub use crate::flags::{Display, Flags, Layout};
 pub use crate::icon::Icons;
+
+use crate::flags::{Display, Flags, Layout};
 use crate::print_error;
 
 use std::fs::read_link;
@@ -53,7 +54,7 @@ impl Meta {
             return Ok(None);
         }
 
-        if flags.display == Display::DisplayDirectoryItself {
+        if flags.display == Display::DirectoryItself {
             return Ok(None);
         }
 
@@ -77,14 +78,14 @@ impl Meta {
 
         let mut content: Vec<Meta> = Vec::new();
 
-        if let Display::DisplayAll = flags.display {
+        if let Display::All = flags.display {
             let mut current_meta;
 
             current_meta = self.clone();
             current_meta.name.name = ".".to_owned();
 
             let parent_meta =
-                Self::from_path(&self.path.join(Component::ParentDir), flags.dereference)?;
+                Self::from_path(&self.path.join(Component::ParentDir), flags.dereference.0)?;
 
             content.push(current_meta);
             content.push(parent_meta);
@@ -97,7 +98,7 @@ impl Meta {
                 .file_name()
                 .ok_or_else(|| Error::new(ErrorKind::InvalidInput, "invalid file name"))?;
 
-            if flags.ignore_globs.is_match(&name) {
+            if flags.ignore_globs.0.is_match(&name) {
                 continue;
             }
 
@@ -107,7 +108,7 @@ impl Meta {
                 }
             }
 
-            let mut entry_meta = match Self::from_path(&path, flags.dereference) {
+            let mut entry_meta = match Self::from_path(&path, flags.dereference.0) {
                 Ok(res) => res,
                 Err(err) => {
                     print_error!("lsd: {}: {}\n", path.display(), err);

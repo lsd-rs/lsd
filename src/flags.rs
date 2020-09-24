@@ -1,441 +1,127 @@
-use clap::{ArgMatches, Error, ErrorKind};
-use globset::{Glob, GlobSet, GlobSetBuilder};
-use std::iter::Iterator;
+pub mod blocks;
+pub mod color;
+pub mod date;
+pub mod dereference;
+pub mod display;
+pub mod icons;
+pub mod ignore_globs;
+pub mod indicators;
+pub mod layout;
+pub mod recursion;
+pub mod size;
+pub mod sorting;
+pub mod symlinks;
+pub mod total_size;
 
-#[derive(Clone, Debug)]
+pub use blocks::Block;
+pub use blocks::Blocks;
+pub use color::Color;
+pub use color::ColorOption;
+pub use date::DateFlag;
+pub use dereference::Dereference;
+pub use display::Display;
+pub use icons::IconOption;
+pub use icons::IconTheme;
+pub use icons::Icons;
+pub use ignore_globs::IgnoreGlobs;
+pub use indicators::Indicators;
+pub use layout::Layout;
+pub use recursion::Recursion;
+pub use size::SizeFlag;
+pub use sorting::DirGrouping;
+pub use sorting::SortColumn;
+pub use sorting::SortOrder;
+pub use sorting::Sorting;
+pub use symlinks::NoSymlink;
+pub use total_size::TotalSize;
+
+use crate::config_file::Config;
+
+use clap::{ArgMatches, Error};
+
+#[cfg(doc)]
+use yaml_rust::Yaml;
+
+/// A struct to hold all set configuration flags for the application.
+#[derive(Clone, Debug, Default)]
 pub struct Flags {
-    pub display: Display,
-    pub layout: Layout,
-    pub display_indicators: bool,
-    pub recursive: bool,
-    pub sort_by: SortFlag,
-    pub sort_order: SortOrder,
-    pub directory_order: DirOrderFlag,
-    pub size: SizeFlag,
+    pub blocks: Blocks,
+    pub color: Color,
     pub date: DateFlag,
-    pub color: WhenFlag,
-    pub icon: WhenFlag,
-    pub icon_theme: IconTheme,
-    pub inode: bool,
-    pub recursion_depth: usize,
-    pub blocks: Vec<Block>,
-    pub no_symlink: bool,
-    pub total_size: bool,
-    pub ignore_globs: GlobSet,
-    pub dereference: bool,
+    pub dereference: Dereference,
+    pub display: Display,
+    pub display_indicators: Indicators,
+    pub icons: Icons,
+    pub ignore_globs: IgnoreGlobs,
+    pub layout: Layout,
+    pub no_symlink: NoSymlink,
+    pub recursion: Recursion,
+    pub size: SizeFlag,
+    pub sorting: Sorting,
+    pub total_size: TotalSize,
 }
 
 impl Flags {
-    pub fn from_matches(matches: &ArgMatches) -> Result<Self, Error> {
-        let classic_mode = matches.is_present("classic");
-        let color_inputs: Vec<&str> = matches.values_of("color").unwrap().collect();
-        let icon_inputs: Vec<&str> = matches.values_of("icon").unwrap().collect();
-        let icon_theme_inputs: Vec<&str> = matches.values_of("icon-theme").unwrap().collect();
-        let size_inputs: Vec<&str> = matches.values_of("size").unwrap().collect();
-        let date_inputs: Vec<&str> = matches.values_of("date").unwrap().collect();
-        let dir_order_inputs: Vec<&str> = matches.values_of("group-dirs").unwrap().collect();
-        let ignore_globs_inputs: Vec<&str> = matches.values_of("ignore-glob").unwrap().collect();
-        let dereference = matches.is_present("dereference");
-        // inode set layout to oneline and blocks to inode,name
-        let inode = matches.is_present("inode");
-        let blocks_inputs: Vec<&str> = if let Some(blocks) = matches.values_of("blocks") {
-            blocks.collect()
-        } else {
-            vec![]
-        };
-
-        let display = if matches.is_present("all") {
-            Display::DisplayAll
-        } else if matches.is_present("almost-all") {
-            Display::DisplayAlmostAll
-        } else if matches.is_present("directory-only") {
-            Display::DisplayDirectoryItself
-        } else {
-            Display::DisplayOnlyVisible
-        };
-
-        let sort_by = if matches.is_present("timesort") {
-            SortFlag::Time
-        } else if matches.is_present("sizesort") {
-            SortFlag::Size
-        } else if matches.is_present("extensionsort") {
-            SortFlag::Extension
-        } else if matches.is_present("versionsort") {
-            SortFlag::Version
-        } else {
-            SortFlag::Name
-        };
-
-        let sort_order = if matches.is_present("reverse") {
-            SortOrder::Reverse
-        } else {
-            SortOrder::Default
-        };
-
-        let layout = if matches.is_present("tree") {
-            Layout::Tree
-        } else if matches.is_present("long")
-            || matches.is_present("oneline")
-            || blocks_inputs.len() > 1
-            || inode
-        {
-            Layout::OneLine
-        } else {
-            Layout::Grid
-        };
-
-        let recursive = matches.is_present("recursive");
-        let recursion_input = matches.values_of("depth").and_then(Iterator::last);
-        let recursion_depth = match recursion_input {
-            Some(str) if recursive || layout == Layout::Tree => match str.parse::<usize>() {
-                Ok(val) => val,
-                Err(_) => {
-                    return Err(Error::with_description(
-                        "The argument '--depth' requires a valid positive number",
-                        ErrorKind::ValueValidation,
-                    ));
-                }
-            },
-            Some(_) => {
-                return Err(Error::with_description(
-                    "The argument '--depth' requires '--tree' or '--recursive'",
-                    ErrorKind::MissingRequiredArgument,
-                ));
-            }
-            None => usize::max_value(),
-        };
-
-        let mut blocks: Vec<Block> = if !blocks_inputs.is_empty() {
-            blocks_inputs.into_iter().map(Block::from).collect()
-        } else if matches.is_present("long") {
-            vec![
-                Block::Permission,
-                Block::User,
-                Block::Group,
-                Block::Size,
-                Block::Date,
-                Block::Name,
-            ]
-        } else {
-            vec![Block::Name]
-        };
-
-        // Add inode as first column if with inode flag
-        if inode && !blocks.contains(&Block::INode) {
-            blocks.insert(0, Block::INode);
-        }
-
-        let mut ignore_globs_builder = GlobSetBuilder::new();
-        for pattern in ignore_globs_inputs {
-            let glob = match Glob::new(pattern) {
-                Ok(g) => g,
-                Err(e) => {
-                    return Err(Error::with_description(
-                        &e.to_string(),
-                        ErrorKind::ValueValidation,
-                    ));
-                }
-            };
-            ignore_globs_builder.add(glob);
-        }
-
-        let ignore_globs = match ignore_globs_builder.build() {
-            Ok(globs) => globs,
-            Err(e) => {
-                return Err(Error::with_description(
-                    &e.to_string(),
-                    ErrorKind::ValueValidation,
-                ));
-            }
-        };
-
+    /// Set up the `Flags` from either [ArgMatches], a [Config] or its [Default] value.
+    ///
+    /// # Errors
+    ///
+    /// This can return an [Error], when either the building of the ignore globs or the parsing of
+    /// the recursion depth parameter fails.
+    pub fn configure_from(matches: &ArgMatches, config: &Config) -> Result<Self, Error> {
         Ok(Self {
-            display,
-            layout,
-            display_indicators: matches.is_present("indicators"),
-            recursive,
-            recursion_depth,
-            sort_by,
-            sort_order,
-            size: SizeFlag::from(size_inputs[size_inputs.len() - 1]),
-            ignore_globs,
-            blocks,
-            // Take only the last value
-            date: if classic_mode {
-                DateFlag::Date
-            } else {
-                DateFlag::from(date_inputs[date_inputs.len() - 1])
-            },
-            color: if classic_mode {
-                WhenFlag::Never
-            } else {
-                WhenFlag::from(color_inputs[color_inputs.len() - 1])
-            },
-            icon: if classic_mode {
-                WhenFlag::Never
-            } else {
-                WhenFlag::from(icon_inputs[icon_inputs.len() - 1])
-            },
-            icon_theme: IconTheme::from(icon_theme_inputs[icon_theme_inputs.len() - 1]),
-            directory_order: if classic_mode {
-                DirOrderFlag::None
-            } else {
-                DirOrderFlag::from(dir_order_inputs[dir_order_inputs.len() - 1])
-            },
-            no_symlink: matches.is_present("no-symlink"),
-            total_size: matches.is_present("total-size"),
-            inode,
-            dereference,
+            blocks: Blocks::configure_from(matches, config)?,
+            color: Color::configure_from(matches, config),
+            date: DateFlag::configure_from(matches, config),
+            dereference: Dereference::configure_from(matches, config),
+            display: Display::configure_from(matches, config),
+            layout: Layout::configure_from(matches, config),
+            size: SizeFlag::configure_from(matches, config),
+            display_indicators: Indicators::configure_from(matches, config),
+            icons: Icons::configure_from(matches, config),
+            ignore_globs: IgnoreGlobs::configure_from(matches, config)?,
+            no_symlink: NoSymlink::configure_from(matches, config),
+            recursion: Recursion::configure_from(matches, config)?,
+            sorting: Sorting::configure_from(matches, config),
+            total_size: TotalSize::configure_from(matches, config),
         })
     }
 }
 
-impl Default for Flags {
-    fn default() -> Self {
-        Self {
-            display: Display::DisplayOnlyVisible,
-            layout: Layout::Grid,
-            display_indicators: false,
-            recursive: false,
-            recursion_depth: usize::max_value(),
-            sort_by: SortFlag::Name,
-            sort_order: SortOrder::Default,
-            directory_order: DirOrderFlag::None,
-            size: SizeFlag::Default,
-            date: DateFlag::Date,
-            color: WhenFlag::Auto,
-            icon: WhenFlag::Auto,
-            icon_theme: IconTheme::Fancy,
-            blocks: vec![],
-            no_symlink: false,
-            total_size: false,
-            ignore_globs: GlobSet::empty(),
-            inode: false,
-            dereference: false,
+/// A trait to allow a type to be configured by either command line parameters, a configuration
+/// file or a [Default] value.
+pub trait Configurable<T>
+where
+    T: std::default::Default,
+{
+    /// Returns a value from either [ArgMatches], a [Config] or a [Default] value. The first value
+    /// that is not [None] is used. The order of precedence for the value used is:
+    /// - [from_arg_matches](Configurable::from_arg_matches)
+    /// - [from_config](Configurable::from_config)
+    /// - [Default::default]
+    ///
+    /// # Note
+    ///
+    /// The configuration file's Yaml is read in any case, to be able to check for errors and print
+    /// out warnings.
+    fn configure_from(matches: &ArgMatches, config: &Config) -> T {
+        let mut result: T = Default::default();
+
+        if let Some(value) = Self::from_config(config) {
+            result = value;
         }
-    }
-}
 
-#[derive(Clone, Debug, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
-pub enum Block {
-    Permission,
-    User,
-    Group,
-    Size,
-    SizeValue,
-    Date,
-    Name,
-    INode,
-}
-impl<'a> From<&'a str> for Block {
-    fn from(block: &'a str) -> Self {
-        match block {
-            // "filetype" => Block::FileType,
-            "permission" => Block::Permission,
-            "user" => Block::User,
-            "group" => Block::Group,
-            "size" => Block::Size,
-            "size_value" => Block::SizeValue,
-            "date" => Block::Date,
-            "name" => Block::Name,
-            "inode" => Block::INode,
-            _ => panic!("invalid \"time\" flag: {}", block),
+        if let Some(value) = Self::from_arg_matches(matches) {
+            result = value;
         }
-    }
-}
 
-#[derive(Clone, Debug, Copy, PartialEq, Eq)]
-pub enum Display {
-    DisplayAll,
-    DisplayAlmostAll,
-    DisplayDirectoryItself,
-    DisplayOnlyVisible,
-}
-
-#[derive(Clone, Debug, Copy, PartialEq, Eq)]
-pub enum SizeFlag {
-    Default,
-    Short,
-    Bytes,
-}
-
-impl<'a> From<&'a str> for SizeFlag {
-    fn from(size: &'a str) -> Self {
-        match size {
-            "default" => SizeFlag::Default,
-            "short" => SizeFlag::Short,
-            "bytes" => SizeFlag::Bytes,
-            _ => panic!("invalid \"size\" flag: {}", size),
-        }
-    }
-}
-
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub enum DateFlag {
-    Date,
-    Relative,
-    Formatted(String),
-}
-
-impl<'a> From<&'a str> for DateFlag {
-    fn from(time: &'a str) -> Self {
-        match time {
-            "date" => DateFlag::Date,
-            "relative" => DateFlag::Relative,
-            time if time.starts_with('+') => DateFlag::Formatted(time[1..].to_owned()),
-            _ => panic!("invalid \"time\" flag: {}", time),
-        }
-    }
-}
-
-#[derive(Clone, Debug, Copy, PartialEq, Eq)]
-pub enum WhenFlag {
-    Always,
-    Auto,
-    Never,
-}
-impl<'a> From<&'a str> for WhenFlag {
-    fn from(when: &'a str) -> Self {
-        match when {
-            "always" => WhenFlag::Always,
-            "auto" => WhenFlag::Auto,
-            "never" => WhenFlag::Never,
-            _ => panic!("invalid \"when\" flag: {}", when),
-        }
-    }
-}
-
-#[derive(Clone, Debug, Copy, PartialEq, Eq)]
-pub enum SortFlag {
-    Name,
-    Time,
-    Size,
-    Version,
-    Extension,
-}
-
-#[derive(Clone, Debug, Copy, PartialEq, Eq)]
-pub enum SortOrder {
-    Default,
-    Reverse,
-}
-
-#[derive(Clone, Debug, Copy, PartialEq, Eq)]
-pub enum DirOrderFlag {
-    None,
-    First,
-    Last,
-}
-
-impl<'a> From<&'a str> for DirOrderFlag {
-    fn from(when: &'a str) -> Self {
-        match when {
-            "none" => DirOrderFlag::None,
-            "first" => DirOrderFlag::First,
-            "last" => DirOrderFlag::Last,
-            _ => panic!("invalid \"when\" flag: {}", when),
-        }
-    }
-}
-
-#[derive(Clone, Debug, Copy, PartialEq, Eq)]
-pub enum IconTheme {
-    Unicode,
-    Fancy,
-}
-
-impl<'a> From<&'a str> for IconTheme {
-    fn from(theme: &'a str) -> Self {
-        match theme {
-            "fancy" => IconTheme::Fancy,
-            "unicode" => IconTheme::Unicode,
-            _ => panic!("invalid \"icon-theme\" flag: {}", theme),
-        }
-    }
-}
-
-#[derive(Clone, Debug, Copy, PartialEq, Eq)]
-pub enum Layout {
-    Grid,
-    Tree,
-    OneLine,
-}
-
-#[cfg(test)]
-mod test {
-    use super::Flags;
-    use super::SortFlag;
-    use crate::app;
-    use clap::ErrorKind;
-
-    #[test]
-    fn test_validate_depth_value() {
-        let matches = app::build()
-            .get_matches_from_safe(vec!["lsd", "--tree", "--depth", "xx"])
-            .unwrap();
-        let res = Flags::from_matches(&matches);
-
-        assert!(res.is_err());
-        assert_eq!(res.unwrap_err().kind, ErrorKind::ValueValidation);
+        result
     }
 
-    #[test]
-    fn test_useless_depth() {
-        let matches = app::build()
-            .get_matches_from_safe(vec!["lsd", "--depth", "10"])
-            .unwrap();
-        let res = Flags::from_matches(&matches);
+    /// The method to implement the value fetching from command line parameters.
+    fn from_arg_matches(matches: &ArgMatches) -> Option<T>;
 
-        assert!(res.is_err());
-        assert_eq!(res.unwrap_err().kind, ErrorKind::MissingRequiredArgument);
-    }
-
-    #[test]
-    fn test_duplicate_depth() {
-        let matches = app::build()
-            .get_matches_from_safe(vec!["lsd", "--tree", "--depth", "1", "--depth", "2"])
-            .unwrap();
-        let res = Flags::from_matches(&matches);
-
-        assert!(res.is_ok());
-        assert_eq!(res.unwrap().recursion_depth, 2);
-    }
-
-    #[test]
-    fn test_missing_depth() {
-        let matches = app::build()
-            .get_matches_from_safe(vec!["lsd", "--tree"])
-            .unwrap();
-        let res = Flags::from_matches(&matches);
-
-        assert!(res.is_ok());
-        assert_eq!(res.unwrap().recursion_depth, usize::max_value());
-    }
-
-    #[test]
-    fn test_multi_sort_use_last() {
-        let matches = app::build()
-            .get_matches_from_safe(vec!["lsd", "-t", "-S"])
-            .unwrap();
-        let res = Flags::from_matches(&matches);
-
-        assert!(res.is_ok());
-        assert_eq!(res.unwrap().sort_by, SortFlag::Size);
-
-        let matches = app::build()
-            .get_matches_from_safe(vec!["lsd", "-S", "-t"])
-            .unwrap();
-        let res = Flags::from_matches(&matches);
-
-        assert!(res.is_ok());
-        assert_eq!(res.unwrap().sort_by, SortFlag::Time);
-
-        let matches = app::build()
-            .get_matches_from_safe(vec!["lsd", "-t", "-S", "-X"])
-            .unwrap();
-        let res = Flags::from_matches(&matches);
-
-        assert!(res.is_ok());
-        assert_eq!(res.unwrap().sort_by, SortFlag::Extension);
-    }
+    /// The method to implement the value fetching from a configuration file. This should return
+    /// [None], if the [Config] does not have a [Yaml].
+    fn from_config(config: &Config) -> Option<T>;
 }

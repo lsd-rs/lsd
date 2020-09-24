@@ -1,6 +1,6 @@
 use crate::color::{self, Colors};
 use crate::display;
-use crate::flags::{Display, Flags, IconTheme, Layout, SortOrder, WhenFlag};
+use crate::flags::{ColorOption, Display, Flags, IconOption, IconTheme, Layout, SortOrder};
 use crate::icon::{self, Icons};
 use crate::meta::Meta;
 use crate::{print_error, print_output, sort};
@@ -40,13 +40,13 @@ impl Core {
 
         let mut inner_flags = flags.clone();
 
-        let color_theme = match (tty_available && console_color_ok, flags.color) {
-            (_, WhenFlag::Never) | (false, WhenFlag::Auto) => color::Theme::NoColor,
+        let color_theme = match (tty_available && console_color_ok, flags.color.when) {
+            (_, ColorOption::Never) | (false, ColorOption::Auto) => color::Theme::NoColor,
             _ => color::Theme::Default,
         };
 
-        let icon_theme = match (tty_available, flags.icon, flags.icon_theme) {
-            (_, WhenFlag::Never, _) | (false, WhenFlag::Auto, _) => icon::Theme::NoIcon,
+        let icon_theme = match (tty_available, flags.icons.when, flags.icons.theme) {
+            (_, IconOption::Never, _) | (false, IconOption::Auto, _) => icon::Theme::NoIcon,
             (_, _, IconTheme::Fancy) => icon::Theme::Fancy,
             (_, _, IconTheme::Unicode) => icon::Theme::Unicode,
         };
@@ -80,13 +80,13 @@ impl Core {
     fn fetch(&self, paths: Vec<PathBuf>) -> Vec<Meta> {
         let mut meta_list = Vec::with_capacity(paths.len());
         let depth = match self.flags.layout {
-            Layout::Tree { .. } => self.flags.recursion_depth,
-            _ if self.flags.recursive => self.flags.recursion_depth,
+            Layout::Tree { .. } => self.flags.recursion.depth,
+            _ if self.flags.recursion.enabled => self.flags.recursion.depth,
             _ => 1,
         };
 
         for path in paths {
-            let mut meta = match Meta::from_path(&path, self.flags.dereference) {
+            let mut meta = match Meta::from_path(&path, self.flags.dereference.0) {
                 Ok(meta) => meta,
                 Err(err) => {
                     print_error!("lsd: {}: {}\n", path.display(), err);
@@ -95,7 +95,7 @@ impl Core {
             };
 
             match self.flags.display {
-                Display::DisplayDirectoryItself => {
+                Display::DirectoryItself => {
                     meta_list.push(meta);
                 }
                 _ => {
@@ -112,7 +112,7 @@ impl Core {
                 }
             };
         }
-        if self.flags.total_size {
+        if self.flags.total_size.0 {
             for meta in &mut meta_list.iter_mut() {
                 meta.calculate_total_size();
             }
