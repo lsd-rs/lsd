@@ -68,6 +68,11 @@ pub fn build() -> App<'static, 'static> {
                 .help("Display extended file metadata as a table"),
         )
         .arg(
+            Arg::with_name("no-config")
+                .long("no-config")
+                .help("Do not read a configuration file"),
+        )
+        .arg(
             Arg::with_name("oneline")
                 .short("1")
                 .long("oneline")
@@ -173,6 +178,7 @@ pub fn build() -> App<'static, 'static> {
         .arg(
             Arg::with_name("versionsort")
                 .short("v")
+                .long("versionsort")
                 .multiple(true)
                 .overrides_with("timesort")
                 .overrides_with("sizesort")
@@ -261,7 +267,7 @@ fn validate_date_argument(arg: String) -> Result<(), String> {
     }
 }
 
-fn validate_time_format(formatter: &str) -> Result<(), time::ParseError> {
+pub fn validate_time_format(formatter: &str) -> Result<(), time::ParseError> {
     let mut chars = formatter.chars();
     loop {
         match chars.next() {

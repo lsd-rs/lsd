@@ -23,7 +23,7 @@ impl From<FileType> for Indicator {
 
 impl Indicator {
     pub fn render(&self, flags: &Flags) -> ColoredString {
-        if flags.display_indicators {
+        if flags.display_indicators.0 {
             ANSIString::from(self.0)
         } else {
             ANSIString::from("")
@@ -34,13 +34,13 @@ impl Indicator {
 #[cfg(test)]
 mod test {
     use super::Indicator;
-    use crate::flags::Flags;
+    use crate::flags::{Flags, Indicators};
     use crate::meta::FileType;
 
     #[test]
     fn test_directory_indicator() {
         let mut flags = Flags::default();
-        flags.display_indicators = true;
+        flags.display_indicators = Indicators(true);
 
         let file_type = Indicator::from(FileType::Directory { uid: false });
 
@@ -50,7 +50,7 @@ mod test {
     #[test]
     fn test_executable_file_indicator() {
         let mut flags = Flags::default();
-        flags.display_indicators = true;
+        flags.display_indicators = Indicators(true);
 
         let file_type = Indicator::from(FileType::File {
             uid: false,
@@ -63,7 +63,7 @@ mod test {
     #[test]
     fn test_socket_indicator() {
         let mut flags = Flags::default();
-        flags.display_indicators = true;
+        flags.display_indicators = Indicators(true);
 
         let file_type = Indicator::from(FileType::Socket);
 
@@ -73,7 +73,7 @@ mod test {
     #[test]
     fn test_symlink_indicator() {
         let mut flags = Flags::default();
-        flags.display_indicators = true;
+        flags.display_indicators = Indicators(true);
 
         let file_type = Indicator::from(FileType::SymLink { is_dir: false });
         assert_eq!("@", file_type.render(&flags).to_string().as_str());
@@ -85,7 +85,7 @@ mod test {
     #[test]
     fn test_not_represented_indicator() {
         let mut flags = Flags::default();
-        flags.display_indicators = true;
+        flags.display_indicators = Indicators(true);
 
         // The File type doesn't have any indicator
         let file_type = Indicator::from(FileType::File {

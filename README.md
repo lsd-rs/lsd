@@ -11,7 +11,8 @@
 - [Description](#description)
 - [Screenshot](#screenshot)
 - [Installation](#installation)
-- [Configurations](#configurations)
+- [Configuration](#configuration)
+- [External Configurations](#external-configurations)
   * [Required](#required)
   * [Optional](#optional)
 - [F.A.Q.](#faq)
@@ -120,7 +121,143 @@ cargo install --git https://github.com/Peltoche/lsd.git --branch master
 
 The [release page](https://github.com/Peltoche/lsd/releases) includes precompiled binaries for Linux and macOS.
 
-## Configurations
+## Configuration
+
+`lsd` can be configured with a configuration file to set the default options.
+Right now this only supports setting options that can be passed via the command
+line options as well.
+
+### Config file location
+
+#### Non-Windows
+
+On non-Windows systems `lsd` follows the
+[XDG Base Directory Specification](https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html)
+convention for the location of the configuration file. The configuration dir
+`lsd` uses is itself named `lsd`. In that directory it looks first for a file
+called `config.yaml` and if it can't find one, a file named `config.yml`.  
+For most people it should be enough to put their config file at
+`~/.config/lsd/config.yaml`.
+
+#### Windows
+
+On Windows systems `lsd` only looks for the two files in one location:
+`%APPDATA%\lsd\`
+
+### Config file content
+
+This is an example config file with the default values and some additional
+remarks.
+```yaml
+# == Classic ==
+# This is a shorthand to override some of the options to be backwards compatible
+# with `ls`. It affects the "color"->"when", "sorting"->"dir-grouping", "date"
+# and "icons"->"when" options.
+# Possible values: false, true
+classic: false
+
+# == Blocks ==
+# This specifies the columns and their order when using the long and the tree
+# layout.
+# Possible values: permission, user, group, size, size_value, date, name, inode
+blocks:
+  - permission
+  - user
+  - group
+  - size
+  - date
+  - name
+
+# == Color ==
+# This has various color options. (Will be expanded in the future.)
+color:
+  # When to colorize the output.
+  # When "classic" is set, this is set to "never".
+  # Possible values: never, auto, always
+  when: auto
+
+# == Date ==
+# This specifies the date format for the date column. The freeform format
+# accepts an strftime like string.
+# When "classic" is set, this is set to "date".
+# Possible values: date, relative, +<date_format>
+date: date
+
+# == Dereference ==
+# Whether to dereference symbolic links.
+# Possible values: false, true
+dereference: false
+
+# == Display ==
+# What items to display. Do not specify this for the default behavior.
+# Possible values: all, almost-all, directory-only
+# display: all
+
+# == Icons ==
+icons:
+  # When to use icons.
+  # When "classic" is set, this is set to "never".
+  # Possible values: always, auto, never
+  when: auto
+  # Which icon theme to use.
+  # Possible values: fancy, unicode
+  theme: fancy
+
+# == Ignore Globs ==
+# A list of globs to ignore when listing.
+# ignore-globs:
+#   - .git
+
+# == Indicators ==
+# Whether to add indicator characters to certain listed files.
+# Possible values: false, true
+indicators: false
+
+# == Layout ==
+# Which layout to use. "oneline" might be a bit confusing here and should be
+# called "one-per-line". It might be changed in the future.
+# Possible values: grid, tree, oneline
+layout: grid
+
+# == Recursion ==
+recursion:
+  # Whether to enable recursion.
+  # Possible values: false, true
+  enabled: false
+  # How deep the recursion should go. This has to be a positive integer. Leave
+  # it unspecified for (virtually) infinite.
+  # depth: 3
+
+# == Size ==
+# Specifies the format of the size column.
+# Possible values: default, short, bytes
+size: default
+
+# == Sorting ==
+sorting:
+  # Specify what to sort by.
+  # Possible values: extension, name, time, size, version
+  column: name
+  # Whether to reverse the sorting.
+  # Possible values: false, true
+  reverse: false
+  # Whether to group directories together and where.
+  # When "classic" is set, this is set to "none".
+  # Possible values: first, last, none
+  dir-grouping: none
+
+# == No Symlink ==
+# Whether to omit showing symlink targets
+# Possible values: false, true
+no-symlink: false
+
+# == Total size ==
+# Whether to display the total size of directories.
+# Possible values: false, true
+total-size: false
+```
+
+## External Configurations
 
 ### Required
 

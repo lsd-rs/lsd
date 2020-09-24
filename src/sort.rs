@@ -1,4 +1,4 @@
-use crate::flags::{DirOrderFlag, Flags, SortFlag, SortOrder};
+use crate::flags::{DirGrouping, Flags, SortColumn, SortOrder};
 use crate::meta::Meta;
 use human_sort::compare;
 use std::cmp::Ordering;
@@ -7,23 +7,23 @@ pub type SortFn = fn(&Meta, &Meta) -> Ordering;
 
 pub fn assemble_sorters(flags: &Flags) -> Vec<(SortOrder, SortFn)> {
     let mut sorters: Vec<(SortOrder, SortFn)> = vec![];
-    match flags.directory_order {
-        DirOrderFlag::First => {
+    match flags.sorting.dir_grouping {
+        DirGrouping::First => {
             sorters.push((SortOrder::Default, with_dirs_first));
         }
-        DirOrderFlag::Last => {
+        DirGrouping::Last => {
             sorters.push((SortOrder::Reverse, with_dirs_first));
         }
-        DirOrderFlag::None => {}
+        DirGrouping::None => {}
     };
-    let other_sort = match flags.sort_by {
-        SortFlag::Name => by_name,
-        SortFlag::Size => by_size,
-        SortFlag::Time => by_date,
-        SortFlag::Version => by_version,
-        SortFlag::Extension => by_extension,
+    let other_sort = match flags.sorting.column {
+        SortColumn::Name => by_name,
+        SortColumn::Size => by_size,
+        SortColumn::Time => by_date,
+        SortColumn::Version => by_version,
+        SortColumn::Extension => by_extension,
     };
-    sorters.push((flags.sort_order, other_sort));
+    sorters.push((flags.sorting.order, other_sort));
     sorters
 }
 
@@ -89,14 +89,14 @@ mod tests {
         let meta_z = Meta::from_path(&path_z, false).expect("failed to get meta");
 
         let mut flags = Flags::default();
-        flags.directory_order = DirOrderFlag::First;
+        flags.sorting.dir_grouping = DirGrouping::First;
 
         //  Sort with the dirs first
         let sorter = assemble_sorters(&flags);
         assert_eq!(by_meta(&sorter, &meta_a, &meta_z), Ordering::Greater);
 
         //  Sort with the dirs first (the dirs stay first)
-        flags.sort_order = SortOrder::Reverse;
+        flags.sorting.order = SortOrder::Reverse;
 
         let sorter = assemble_sorters(&flags);
         assert_eq!(by_meta(&sorter, &meta_a, &meta_z), Ordering::Greater);
@@ -117,7 +117,7 @@ mod tests {
         let meta_z = Meta::from_path(&path_z, false).expect("failed to get meta");
 
         let mut flags = Flags::default();
-        flags.directory_order = DirOrderFlag::Last;
+        flags.sorting.dir_grouping = DirGrouping::Last;
 
         // Sort with file first
         let sorter = assemble_sorters(&flags);
@@ -143,14 +143,14 @@ mod tests {
         let meta_z = Meta::from_path(&path_z, false).expect("failed to get meta");
 
         let mut flags = Flags::default();
-        flags.directory_order = DirOrderFlag::None;
+        flags.sorting.dir_grouping = DirGrouping::None;
 
         // Sort by name unordered
         let sorter = assemble_sorters(&flags);
         assert_eq!(by_meta(&sorter, &meta_a, &meta_z), Ordering::Less);
 
         // Sort by name unordered
-        flags.sort_order = SortOrder::Reverse;
+        flags.sorting.order = SortOrder::Reverse;
 
         let sorter = assemble_sorters(&flags);
         assert_eq!(by_meta(&sorter, &meta_a, &meta_z), Ordering::Greater);
@@ -171,14 +171,14 @@ mod tests {
         let meta_z = Meta::from_path(&path_z, false).expect("failed to get meta");
 
         let mut flags = Flags::default();
-        flags.directory_order = DirOrderFlag::None;
+        flags.sorting.dir_grouping = DirGrouping::None;
 
         // Sort by name unordered
         let sorter = assemble_sorters(&flags);
         assert_eq!(by_meta(&sorter, &meta_a, &meta_z), Ordering::Greater);
 
         // Sort by name unordered reversed
-        flags.sort_order = SortOrder::Reverse;
+        flags.sorting.order = SortOrder::Reverse;
 
         let sorter = assemble_sorters(&flags);
         assert_eq!(by_meta(&sorter, &meta_a, &meta_z), Ordering::Less);
@@ -220,14 +220,14 @@ mod tests {
         let meta_z = Meta::from_path(&path_z, false).expect("failed to get meta");
 
         let mut flags = Flags::default();
-        flags.sort_by = SortFlag::Time;
+        flags.sorting.column = SortColumn::Time;
 
         // Sort by time
         let sorter = assemble_sorters(&flags);
         assert_eq!(by_meta(&sorter, &meta_a, &meta_z), Ordering::Less);
 
         // Sort by time reversed
-        flags.sort_order = SortOrder::Reverse;
+        flags.sorting.order = SortOrder::Reverse;
         let sorter = assemble_sorters(&flags);
         assert_eq!(by_meta(&sorter, &meta_a, &meta_z), Ordering::Greater);
     }
@@ -257,7 +257,7 @@ mod tests {
         let meta_t = Meta::from_path(&path_t, false).expect("failed to get meta");
 
         let mut flags = Flags::default();
-        flags.sort_by = SortFlag::Extension;
+        flags.sorting.column = SortColumn::Extension;
 
         // Sort by extension
         let sorter = assemble_sorters(&flags);
@@ -287,7 +287,7 @@ mod tests {
         let meta_c = Meta::from_path(&path_c, false).expect("failed to get meta");
 
         let mut flags = Flags::default();
-        flags.sort_by = SortFlag::Version;
+        flags.sorting.column = SortColumn::Version;
 
         let sorter = assemble_sorters(&flags);
         assert_eq!(by_meta(&sorter, &meta_b, &meta_a), Ordering::Greater);

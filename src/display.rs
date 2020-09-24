@@ -61,7 +61,7 @@ fn inner_display_grid(
     // The first iteration (depth == 0) corresponds to the inputs given by the
     // user. We defer displaying directories given by the user unless we've been
     // asked to display the directory itself (rather than its contents).
-    let skip_dirs = (depth == 0) && (flags.display != Display::DisplayDirectoryItself);
+    let skip_dirs = (depth == 0) && (flags.display != Display::DirectoryItself);
 
     // print the files first.
     for meta in metas {
@@ -107,7 +107,7 @@ fn inner_display_grid(
             output += &grid.fit_into_columns(1).to_string();
         }
     } else {
-        output += &grid.fit_into_columns(flags.blocks.len()).to_string();
+        output += &grid.fit_into_columns(flags.blocks.0.len()).to_string();
     }
 
     let should_display_folder_path = should_display_folder_path(depth, &metas, &flags);
@@ -174,7 +174,7 @@ fn inner_display_tree(
         }
     }
 
-    let content = grid.fit_into_columns(flags.blocks.len()).to_string();
+    let content = grid.fit_into_columns(flags.blocks.0.len()).to_string();
     let mut lines = content.lines();
 
     for (idx, meta) in metas.iter().enumerate() {
@@ -254,7 +254,7 @@ fn get_output<'a>(
     padding_rules: &HashMap<Block, usize>,
 ) -> Vec<ANSIString<'a>> {
     let mut strings: Vec<ANSIString> = Vec::new();
-    for block in flags.blocks.iter() {
+    for block in flags.blocks.0.iter() {
         match block {
             Block::INode => strings.push(meta.inode.render(colors)),
             Block::Permission => {
@@ -276,7 +276,7 @@ fn get_output<'a>(
             Block::Date => strings.push(meta.date.render(colors, &flags)),
             Block::Name => {
                 let s: String =
-                    if flags.no_symlink || flags.dereference || flags.layout == Layout::Grid {
+                    if flags.no_symlink.0 || flags.dereference.0 || flags.layout == Layout::Grid {
                         ANSIStrings(&[
                             meta.name.render(colors, icons, &display_option),
                             meta.indicator.render(&flags),
@@ -332,7 +332,7 @@ fn detect_size_lengths(metas: &[Meta], flags: &Flags) -> usize {
 fn get_padding_rules(metas: &[Meta], flags: &Flags) -> HashMap<Block, usize> {
     let mut padding_rules: HashMap<Block, usize> = HashMap::new();
 
-    if flags.blocks.contains(&Block::Size) {
+    if flags.blocks.0.contains(&Block::Size) {
         let size_val = detect_size_lengths(&metas, &flags);
 
         padding_rules.insert(Block::SizeValue, size_val);
