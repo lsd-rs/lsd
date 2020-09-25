@@ -342,6 +342,7 @@ impl<'a> From<&'a str> for DirOrderFlag {
 pub enum IconTheme {
     Unicode,
     Fancy,
+    Emoji,
 }
 
 impl<'a> From<&'a str> for IconTheme {
@@ -349,6 +350,7 @@ impl<'a> From<&'a str> for IconTheme {
         match theme {
             "fancy" => IconTheme::Fancy,
             "unicode" => IconTheme::Unicode,
+            "emoji" => IconTheme::Emoji,
             _ => panic!("invalid \"icon-theme\" flag: {}", theme),
         }
     }

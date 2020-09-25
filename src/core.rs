@@ -49,6 +49,7 @@ impl Core {
             (_, WhenFlag::Never, _) | (false, WhenFlag::Auto, _) => icon::Theme::NoIcon,
             (_, _, IconTheme::Fancy) => icon::Theme::Fancy,
             (_, _, IconTheme::Unicode) => icon::Theme::Unicode,
+            (_, _, IconTheme::Emoji) => icon::Theme::Emoji,
         };
 
         if !tty_available {

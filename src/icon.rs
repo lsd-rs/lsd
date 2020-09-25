@@ -14,6 +14,7 @@ pub enum Theme {
     NoIcon,
     Fancy,
     Unicode,
+    Emoji,
 }
 
 const ICON_SPACE: &str = " ";
@@ -24,22 +25,27 @@ const ICON_SPACE: &str = " ";
 // s#\\u[0-9a-f]*#\=eval('"'.submatch(0).'"')#
 impl Icons {
     pub fn new(theme: Theme) -> Self {
-        let display_icons = theme == Theme::Fancy || theme == Theme::Unicode;
+        let display_icons = theme != Theme::NoIcon;
         let (icons_by_name, icons_by_extension, default_file_icon, default_folder_icon) =
-            if theme == Theme::Fancy {
-                (
+            match theme {
+                Theme::Emoji => (
+                    HashMap::new(),
+                    HashMap::new(),
+                    "\u{1f4c3}", // 📃
+                    "\u{1f4c2}", // 📂
+                ),
+                Theme::Fancy => (
                     Self::get_default_icons_by_name(),
                     Self::get_default_icons_by_extension(),
                     "\u{f016}", // 
                     "\u{f115}", // 
-                )
-            } else {
-                (
+                ),
+                _ => (
                     HashMap::new(),
                     HashMap::new(),
                     "\u{1f5cb}", // 🗋
                     "\u{1f5c1}", // 🗁
-                )
+                ),
             };
 
         Self {
