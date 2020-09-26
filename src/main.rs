@@ -99,7 +99,7 @@ fn main() {
         .map(PathBuf::from)
         .collect();
 
-    let config = if matches.is_present("no-config") {
+    let config = if matches.is_present("ignore-config") {
         Config::with_none()
     } else {
         Config::read_config()

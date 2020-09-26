@@ -68,9 +68,9 @@ pub fn build() -> App<'static, 'static> {
                 .help("Display extended file metadata as a table"),
         )
         .arg(
-            Arg::with_name("no-config")
-                .long("no-config")
-                .help("Do not read a configuration file"),
+            Arg::with_name("ignore-config")
+                .long("ignore-config")
+                .help("Ignore the configuration file"),
         )
         .arg(
             Arg::with_name("oneline")
