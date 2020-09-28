@@ -243,6 +243,7 @@ impl Icons {
         m.insert("mp3", "\u{f001}"); // ""
         m.insert("mp4", "\u{f03d}"); // ""
         m.insert("mustache", "\u{e60f}"); // ""
+        m.insert("nix", "\u{f313}"); // ""
         m.insert("npmignore", "\u{e71e}"); // ""
         m.insert("opus", "\u{f001}"); // ""
         m.insert("ogg", "\u{f001}"); // ""
