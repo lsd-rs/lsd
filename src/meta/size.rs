@@ -25,6 +25,12 @@ impl<'a> From<&'a Metadata> for Size {
     }
 }
 
+macro_rules! trailing_zero {
+    ($number: expr) => {
+        format!("{0:.1$}", $number, if $number < 100.0 { 1 } else { 0 })
+    };
+}
+
 impl Size {
     pub fn new(bytes: u64) -> Self {
         Self { bytes }
@@ -93,17 +99,16 @@ impl Size {
         match unit {
             Unit::None => "".to_string(),
             Unit::Byte => self.bytes.to_string(),
-            Unit::Kilo => (((self.bytes as f64) / 1024.0 * 10.0).round() / 10.0).to_string(),
+            Unit::Kilo => trailing_zero!(((self.bytes as f64) / 1024.0 * 10.0).round() / 10.0),
             Unit::Mega => {
-                (((self.bytes as f64) / (1024.0 * 1024.0) * 10.0).round() / 10.0).to_string()
+                trailing_zero!(((self.bytes as f64) / (1024.0 * 1024.0) * 10.0).round() / 10.0)
             }
-            Unit::Giga => (((self.bytes as f64) / (1024.0 * 1024.0 * 1024.0) * 10.0).round()
-                / 10.0)
-                .to_string(),
-            Unit::Tera => {
-                (((self.bytes as f64) / (1024.0 * 1024.0 * 1024.0 * 1024.0) * 10.0).round() / 10.0)
-                    .to_string()
-            }
+            Unit::Giga => trailing_zero!(
+                ((self.bytes as f64) / (1024.0 * 1024.0 * 1024.0) * 10.0).round() / 10.0
+            ),
+            Unit::Tera => trailing_zero!(
+                ((self.bytes as f64) / (1024.0 * 1024.0 * 1024.0 * 1024.0) * 10.0).round() / 10.0
+            ),
         }
     }
 
@@ -163,7 +168,18 @@ mod test {
         let size = Size::new(42 * 1024); // 42 kilobytes
         let mut flags = Flags::default();
 
-        assert_eq!(size.value_string(&flags).as_str(), "42");
+        assert_eq!(size.value_string(&flags).as_str(), "42.0");
+        assert_eq!(size.unit_string(&flags).as_str(), "KB");
+        flags.size = SizeFlag::Short;
+        assert_eq!(size.unit_string(&flags).as_str(), "K");
+    }
+
+    #[test]
+    fn render_100_plus_kilobyte() {
+        let size = Size::new(420 * 1024 + 420); // 420.4 kilobytes
+        let mut flags = Flags::default();
+
+        assert_eq!(size.value_string(&flags).as_str(), "420");
         assert_eq!(size.unit_string(&flags).as_str(), "KB");
         flags.size = SizeFlag::Short;
         assert_eq!(size.unit_string(&flags).as_str(), "K");
@@ -174,7 +190,18 @@ mod test {
         let size = Size::new(42 * 1024 * 1024); // 42 megabytes
         let mut flags = Flags::default();
 
-        assert_eq!(size.value_string(&flags).as_str(), "42");
+        assert_eq!(size.value_string(&flags).as_str(), "42.0");
+        assert_eq!(size.unit_string(&flags).as_str(), "MB");
+        flags.size = SizeFlag::Short;
+        assert_eq!(size.unit_string(&flags).as_str(), "M");
+    }
+
+    #[test]
+    fn render_100_plus_megabyte() {
+        let size = Size::new(420 * 1024 * 1024 + 420 * 1024); // 420.4 megabytes
+        let mut flags = Flags::default();
+
+        assert_eq!(size.value_string(&flags).as_str(), "420");
         assert_eq!(size.unit_string(&flags).as_str(), "MB");
         flags.size = SizeFlag::Short;
         assert_eq!(size.unit_string(&flags).as_str(), "M");
@@ -185,7 +212,18 @@ mod test {
         let size = Size::new(42 * 1024 * 1024 * 1024); // 42 gigabytes
         let mut flags = Flags::default();
 
-        assert_eq!(size.value_string(&flags).as_str(), "42");
+        assert_eq!(size.value_string(&flags).as_str(), "42.0");
+        assert_eq!(size.unit_string(&flags).as_str(), "GB");
+        flags.size = SizeFlag::Short;
+        assert_eq!(size.unit_string(&flags).as_str(), "G");
+    }
+
+    #[test]
+    fn render_100_plus_gigabyte() {
+        let size = Size::new(420 * 1024 * 1024 * 1024 + 420 * 1024 * 1024); // 420.4 gigabytes
+        let mut flags = Flags::default();
+
+        assert_eq!(size.value_string(&flags).as_str(), "420");
         assert_eq!(size.unit_string(&flags).as_str(), "GB");
         flags.size = SizeFlag::Short;
         assert_eq!(size.unit_string(&flags).as_str(), "G");
@@ -196,7 +234,18 @@ mod test {
         let size = Size::new(42 * 1024 * 1024 * 1024 * 1024); // 42 terabytes
         let mut flags = Flags::default();
 
-        assert_eq!(size.value_string(&flags).as_str(), "42");
+        assert_eq!(size.value_string(&flags).as_str(), "42.0");
+        assert_eq!(size.unit_string(&flags).as_str(), "TB");
+        flags.size = SizeFlag::Short;
+        assert_eq!(size.unit_string(&flags).as_str(), "T");
+    }
+
+    #[test]
+    fn render_100_plus_terabyte() {
+        let size = Size::new(420 * 1024 * 1024 * 1024 * 1024 + 420 * 1024 * 1024 * 1024); // 420.4 terabytes
+        let mut flags = Flags::default();
+
+        assert_eq!(size.value_string(&flags).as_str(), "420");
         assert_eq!(size.unit_string(&flags).as_str(), "TB");
         flags.size = SizeFlag::Short;
         assert_eq!(size.unit_string(&flags).as_str(), "T");
@@ -216,7 +265,7 @@ mod test {
         let size = Size::new(42 * 1024 + 1); // 42.001 kilobytes == 42 kilobytes
         let flags = Flags::default();
 
-        assert_eq!(size.value_string(&flags).as_str(), "42");
+        assert_eq!(size.value_string(&flags).as_str(), "42.0");
         assert_eq!(size.unit_string(&flags).as_str(), "KB");
     }
 
@@ -227,7 +276,7 @@ mod test {
         flags.size = SizeFlag::Short;
         let colors = Colors::new(Theme::NoColor);
 
-        assert_eq!(size.render(&colors, &flags, 2).to_string(), "42K");
-        assert_eq!(size.render(&colors, &flags, 3).to_string(), " 42K");
+        assert_eq!(size.render(&colors, &flags, 4).to_string(), "42.0K");
+        assert_eq!(size.render(&colors, &flags, 5).to_string(), " 42.0K");
     }
 }
