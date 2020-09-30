@@ -59,7 +59,7 @@ impl Core {
             inner_flags.layout = Layout::OneLine;
         };
 
-        let sorters = sort::assemble_sorters(&flags);
+        let sorters = sort::assemble_sorters(&flags.sorters);
 
         Self {
             flags,

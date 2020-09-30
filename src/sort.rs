@@ -1,30 +1,26 @@
-use crate::flags::{DirOrderFlag, Flags, SortFlag, SortOrder};
+use crate::flags::{SortFlag, SortOrder};
 use crate::meta::Meta;
 use human_sort::compare;
 use std::cmp::Ordering;
 
 pub type SortFn = fn(&Meta, &Meta) -> Ordering;
 
-pub fn assemble_sorters(flags: &Flags) -> Vec<(SortOrder, SortFn)> {
-    let mut sorters: Vec<(SortOrder, SortFn)> = vec![];
-    match flags.directory_order {
-        DirOrderFlag::First => {
-            sorters.push((SortOrder::Default, with_dirs_first));
+pub fn assemble_sorters(flags: &[(SortOrder, SortFlag)]) -> Vec<(SortOrder, SortFn)> {
+    fn map_flag_to_sort(sort: &SortFlag) -> SortFn {
+        match sort {
+            SortFlag::Name => by_name,
+            SortFlag::Size => by_size,
+            SortFlag::Time => by_date,
+            SortFlag::Version => by_version,
+            SortFlag::Extension => by_extension,
+            SortFlag::Directory => by_directory,
         }
-        DirOrderFlag::Last => {
-            sorters.push((SortOrder::Reverse, with_dirs_first));
-        }
-        DirOrderFlag::None => {}
-    };
-    let other_sort = match flags.sort_by {
-        SortFlag::Name => by_name,
-        SortFlag::Size => by_size,
-        SortFlag::Time => by_date,
-        SortFlag::Version => by_version,
-        SortFlag::Extension => by_extension,
-    };
-    sorters.push((flags.sort_order, other_sort));
-    sorters
+    }
+
+    flags
+        .iter()
+        .map(|(order, flag)| (*order, map_flag_to_sort(flag)))
+        .collect()
 }
 
 pub fn by_meta(sorters: &[(SortOrder, SortFn)], a: &Meta, b: &Meta) -> Ordering {
@@ -42,7 +38,7 @@ pub fn by_meta(sorters: &[(SortOrder, SortFn)], a: &Meta, b: &Meta) -> Ordering 
     Ordering::Equal
 }
 
-fn with_dirs_first(a: &Meta, b: &Meta) -> Ordering {
+fn by_directory(a: &Meta, b: &Meta) -> Ordering {
     b.file_type.is_dirlike().cmp(&a.file_type.is_dirlike())
 }
 
@@ -69,7 +65,6 @@ fn by_extension(a: &Meta, b: &Meta) -> Ordering {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::flags::Flags;
     use std::fs::{create_dir, File};
     use std::process::Command;
     use tempfile::tempdir;
@@ -88,17 +83,10 @@ mod tests {
         create_dir(&path_z).expect("failed to create dir");
         let meta_z = Meta::from_path(&path_z, false).expect("failed to get meta");
 
-        let mut flags = Flags::default();
-        flags.directory_order = DirOrderFlag::First;
+        let sorters = vec![(SortOrder::Default, SortFlag::Directory)];
 
         //  Sort with the dirs first
-        let sorter = assemble_sorters(&flags);
-        assert_eq!(by_meta(&sorter, &meta_a, &meta_z), Ordering::Greater);
-
-        //  Sort with the dirs first (the dirs stay first)
-        flags.sort_order = SortOrder::Reverse;
-
-        let sorter = assemble_sorters(&flags);
+        let sorter = assemble_sorters(&sorters);
         assert_eq!(by_meta(&sorter, &meta_a, &meta_z), Ordering::Greater);
     }
 
@@ -116,15 +104,10 @@ mod tests {
         create_dir(&path_z).expect("failed to create dir");
         let meta_z = Meta::from_path(&path_z, false).expect("failed to get meta");
 
-        let mut flags = Flags::default();
-        flags.directory_order = DirOrderFlag::Last;
+        let sorters = vec![(SortOrder::Reverse, SortFlag::Directory)];
 
         // Sort with file first
-        let sorter = assemble_sorters(&flags);
-        assert_eq!(by_meta(&sorter, &meta_a, &meta_z), Ordering::Less);
-
-        // Sort with file first reversed (thie files stay first)
-        let sorter = assemble_sorters(&flags);
+        let sorter = assemble_sorters(&sorters);
         assert_eq!(by_meta(&sorter, &meta_a, &meta_z), Ordering::Less);
     }
 
@@ -142,46 +125,17 @@ mod tests {
         create_dir(&path_z).expect("failed to create dir");
         let meta_z = Meta::from_path(&path_z, false).expect("failed to get meta");
 
-        let mut flags = Flags::default();
-        flags.directory_order = DirOrderFlag::None;
+        let sorters = vec![(SortOrder::Default, SortFlag::Name)];
 
         // Sort by name unordered
-        let sorter = assemble_sorters(&flags);
+        let sorter = assemble_sorters(&sorters);
         assert_eq!(by_meta(&sorter, &meta_a, &meta_z), Ordering::Less);
 
         // Sort by name unordered
-        flags.sort_order = SortOrder::Reverse;
+        let sorters = vec![(SortOrder::Reverse, SortFlag::Name)];
 
-        let sorter = assemble_sorters(&flags);
+        let sorter = assemble_sorters(&sorters);
         assert_eq!(by_meta(&sorter, &meta_a, &meta_z), Ordering::Greater);
-    }
-
-    #[test]
-    fn test_sort_assemble_sorters_by_name_unordered_2() {
-        let tmp_dir = tempdir().expect("failed to create temp dir");
-
-        // Create the file;
-        let path_a = tmp_dir.path().join("zzz");
-        File::create(&path_a).expect("failed to create file");
-        let meta_a = Meta::from_path(&path_a, false).expect("failed to get meta");
-
-        // Create a dir;
-        let path_z = tmp_dir.path().join("aaa");
-        create_dir(&path_z).expect("failed to create dir");
-        let meta_z = Meta::from_path(&path_z, false).expect("failed to get meta");
-
-        let mut flags = Flags::default();
-        flags.directory_order = DirOrderFlag::None;
-
-        // Sort by name unordered
-        let sorter = assemble_sorters(&flags);
-        assert_eq!(by_meta(&sorter, &meta_a, &meta_z), Ordering::Greater);
-
-        // Sort by name unordered reversed
-        flags.sort_order = SortOrder::Reverse;
-
-        let sorter = assemble_sorters(&flags);
-        assert_eq!(by_meta(&sorter, &meta_a, &meta_z), Ordering::Less);
     }
 
     #[test]
@@ -219,16 +173,15 @@ mod tests {
         assert_eq!(true, success, "failed to change file timestamp");
         let meta_z = Meta::from_path(&path_z, false).expect("failed to get meta");
 
-        let mut flags = Flags::default();
-        flags.sort_by = SortFlag::Time;
+        let sorters = vec![(SortOrder::Default, SortFlag::Time)];
 
         // Sort by time
-        let sorter = assemble_sorters(&flags);
+        let sorter = assemble_sorters(&sorters);
         assert_eq!(by_meta(&sorter, &meta_a, &meta_z), Ordering::Less);
 
         // Sort by time reversed
-        flags.sort_order = SortOrder::Reverse;
-        let sorter = assemble_sorters(&flags);
+        let sorters = vec![(SortOrder::Reverse, SortFlag::Time)];
+        let sorter = assemble_sorters(&sorters);
         assert_eq!(by_meta(&sorter, &meta_a, &meta_z), Ordering::Greater);
     }
 
@@ -256,17 +209,16 @@ mod tests {
         File::create(&path_t).expect("failed to create file");
         let meta_t = Meta::from_path(&path_t, false).expect("failed to get meta");
 
-        let mut flags = Flags::default();
-        flags.sort_by = SortFlag::Extension;
+        let sorters = vec![(SortOrder::Default, SortFlag::Extension)];
 
         // Sort by extension
-        let sorter = assemble_sorters(&flags);
+        let sorter = assemble_sorters(&sorters);
         assert_eq!(by_meta(&sorter, &meta_a, &meta_z), Ordering::Equal);
 
-        let sorter = assemble_sorters(&flags);
+        let sorter = assemble_sorters(&sorters);
         assert_eq!(by_meta(&sorter, &meta_a, &meta_j), Ordering::Greater);
 
-        let sorter = assemble_sorters(&flags);
+        let sorter = assemble_sorters(&sorters);
         assert_eq!(by_meta(&sorter, &meta_a, &meta_t), Ordering::Less);
     }
 
@@ -286,13 +238,12 @@ mod tests {
         File::create(&path_c).expect("failed to create file");
         let meta_c = Meta::from_path(&path_c, false).expect("failed to get meta");
 
-        let mut flags = Flags::default();
-        flags.sort_by = SortFlag::Version;
+        let sorters = vec![(SortOrder::Default, SortFlag::Version)];
 
-        let sorter = assemble_sorters(&flags);
+        let sorter = assemble_sorters(&sorters);
         assert_eq!(by_meta(&sorter, &meta_b, &meta_a), Ordering::Greater);
 
-        let sorter = assemble_sorters(&flags);
+        let sorter = assemble_sorters(&sorters);
         assert_eq!(by_meta(&sorter, &meta_b, &meta_c), Ordering::Less);
     }
 }
