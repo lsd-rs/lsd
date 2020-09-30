@@ -103,7 +103,10 @@ Install with [Scoop](https://scoop.sh):
 ```powershell
 scoop install lsd
 ```
-
+### On Android (via Termux)
+```sh
+pkg install lsd
+```
 ### From Sources
 
 With Rust's package manager cargo, you can install lsd via:
