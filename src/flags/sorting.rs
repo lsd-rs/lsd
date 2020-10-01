@@ -49,13 +49,14 @@ impl Configurable<Self> for SortColumn {
     /// If either the "timesort" or "sizesort" arguments are passed, this returns the corresponding
     /// `SortColumn` variant in a [Some]. Otherwise this returns [None].
     fn from_arg_matches(matches: &ArgMatches) -> Option<Self> {
-        if matches.is_present("timesort") {
+        let sort = matches.value_of("sort");
+        if matches.is_present("timesort") || sort == Some("time") {
             Some(Self::Time)
-        } else if matches.is_present("sizesort") {
+        } else if matches.is_present("sizesort") || sort == Some("size") {
             Some(Self::Size)
-        } else if matches.is_present("extensionsort") {
+        } else if matches.is_present("extensionsort") || sort == Some("extension") {
             Some(Self::Extension)
-        } else if matches.is_present("versionsort") {
+        } else if matches.is_present("versionsort") || sort == Some("version") {
             Some(Self::Version)
         } else {
             None
@@ -278,6 +279,47 @@ mod test_sort_column {
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         assert_eq!(
             Some(SortColumn::Version),
+            SortColumn::from_arg_matches(&matches)
+        );
+    }
+
+    #[test]
+    fn test_from_arg_matches_sort() {
+        let argv = vec!["lsd", "--sort", "time"];
+        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        assert_eq!(
+            Some(SortColumn::Time),
+            SortColumn::from_arg_matches(&matches)
+        );
+
+        let argv = vec!["lsd", "--sort", "size"];
+        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        assert_eq!(
+            Some(SortColumn::Size),
+            SortColumn::from_arg_matches(&matches)
+        );
+
+        let argv = vec!["lsd", "--sort", "extension"];
+        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        assert_eq!(
+            Some(SortColumn::Extension),
+            SortColumn::from_arg_matches(&matches)
+        );
+
+        let argv = vec!["lsd", "--sort", "version"];
+        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        assert_eq!(
+            Some(SortColumn::Version),
+            SortColumn::from_arg_matches(&matches)
+        );
+    }
+
+    #[test]
+    fn test_multi_sort_use_last() {
+        let argv = vec!["lsd", "--sort", "size", "-t", "-S", "-X", "--sort", "time"];
+        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        assert_eq!(
+            Some(SortColumn::Time),
             SortColumn::from_arg_matches(&matches)
         );
     }
