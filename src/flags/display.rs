@@ -15,6 +15,7 @@ pub enum Display {
     AlmostAll,
     DirectoryItself,
     DisplayOnlyVisible,
+    TreeD,
 }
 
 impl Display {
@@ -45,7 +46,11 @@ impl Configurable<Self> for Display {
         } else if matches.is_present("almost-all") {
             Some(Self::AlmostAll)
         } else if matches.is_present("directory-only") {
-            Some(Self::DirectoryItself)
+            if matches.is_present("tree") {
+                Some(Self::TreeD)
+            } else {
+                Some(Self::DirectoryItself)
+            }
         } else {
             None
         }

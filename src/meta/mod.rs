@@ -116,6 +116,11 @@ impl Meta {
                 }
             };
 
+            // skip files for --tree -d
+            if flags.display == Display::TreeD && !entry_meta.file_type.is_dirlike() {
+                continue;
+            }
+
             match entry_meta.recurse_into(depth - 1, &flags) {
                 Ok(content) => entry_meta.content = content,
                 Err(err) => {
