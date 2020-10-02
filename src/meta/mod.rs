@@ -121,16 +121,19 @@ impl Meta {
 
             if let Display::AutoAll(threshold) = flags.display {
                 if name.to_string_lossy().starts_with('.') {
-                    if dotfiles_count < threshold {
-                        dotfiles_count += 1;
+                    use std::cmp::Ordering::*;
+                    match dotfiles_count.cmp(&threshold) {
+                        Less => {
+                            dotfiles_count += 1;
 
-                        // save to temporary content, will be pushed to head later
-                        dotfiles_content.push(entry_meta);
-                    } else if dotfiles_count == threshold {
-                        // only clean up once
-                        dotfiles_content.clear();
-                    } else {
-                        continue;
+                            // save to temporary content, will be pushed to head later
+                            dotfiles_content.push(entry_meta);
+                        }
+                        Equal => {
+                            // only clean up once
+                            dotfiles_content.clear();
+                        }
+                        _ => continue,
                     }
 
                     // conflict with --tree, so safely skip recurse_into
