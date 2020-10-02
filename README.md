@@ -24,6 +24,8 @@
 This project is heavily inspired by the super [colorls](https://github.com/athityakumar/colorls)
 project but with some little differences.  For example it is written in rust and not in ruby which makes it much faster.
 
+`lsd` will try to display the UTF-8 chars in file name, A `U+FFFD REPLACEMENT CHARACTER`(�) is used to replace the invalid UTF-8 code.
+
 ## Screenshot
 
 ![image](https://raw.githubusercontent.com/Peltoche/lsd/assets/screen_lsd.png)

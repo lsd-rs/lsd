@@ -29,11 +29,9 @@ impl Name {
 
         let mut extension = None;
         if let Some(res) = path.extension() {
-            extension = Some(
-                res.to_str()
-                    .expect("failed to encode file name")
-                    .to_string(),
-            );
+            if let Some(res) = res.to_str() {
+                extension = Some(res.to_string());
+            }
         }
 
         Self {
@@ -91,7 +89,6 @@ impl Name {
             for c in string.chars() {
                 // The `escape_default` method on `char` is *almost* what we want here, but
                 // it still escapes non-ASCII UTF-8 characters, which are still printable.
-
                 if c >= 0x20 as char && c != 0x7f as char {
                     chars.push(c);
                 } else {
