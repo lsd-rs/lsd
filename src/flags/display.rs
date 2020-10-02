@@ -13,6 +13,7 @@ use yaml_rust::Yaml;
 pub enum Display {
     All,
     AlmostAll,
+    AutoAll(u32),
     DirectoryItself,
     DisplayOnlyVisible,
 }
@@ -44,6 +45,15 @@ impl Configurable<Self> for Display {
             Some(Self::All)
         } else if matches.is_present("almost-all") {
             Some(Self::AlmostAll)
+        } else if matches.is_present("auto-all") {
+            // the value is pre-validated
+            Some(Self::AutoAll(
+                matches
+                    .value_of("auto-all")
+                    .unwrap()
+                    .parse::<u32>()
+                    .unwrap(),
+            ))
         } else if matches.is_present("directory-only") {
             Some(Self::DirectoryItself)
         } else {

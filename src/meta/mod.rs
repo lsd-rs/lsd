@@ -91,6 +91,9 @@ impl Meta {
             content.push(parent_meta);
         }
 
+        let mut dotfiles_count = 0;
+        let mut dotfiles_content = Vec::new();
+
         for entry in entries {
             let path = entry?.path();
 
@@ -116,6 +119,25 @@ impl Meta {
                 }
             };
 
+            if let Display::AutoAll(threshold) = flags.display {
+                if name.to_string_lossy().starts_with('.') {
+                    if dotfiles_count < threshold {
+                        dotfiles_count += 1;
+
+                        // save to temporary content, will be pushed to head later
+                        dotfiles_content.push(entry_meta);
+                    } else if dotfiles_count == threshold {
+                        // only clean up once
+                        dotfiles_content.clear();
+                    } else {
+                        continue;
+                    }
+
+                    // conflict with --tree, so safely skip recurse_into
+                    continue;
+                }
+            }
+
             match entry_meta.recurse_into(depth - 1, &flags) {
                 Ok(content) => entry_meta.content = content,
                 Err(err) => {
@@ -125,6 +147,13 @@ impl Meta {
             };
 
             content.push(entry_meta);
+        }
+
+        if let Display::AutoAll(threshold) = flags.display {
+            if dotfiles_count <= threshold {
+                dotfiles_content.append(&mut content);
+                return Ok(Some(dotfiles_content));
+            }
         }
 
         Ok(Some(content))

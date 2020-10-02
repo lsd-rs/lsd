@@ -22,6 +22,17 @@ pub fn build() -> App<'static, 'static> {
                 .help("Do not list implied . and .."),
         )
         .arg(
+            Arg::with_name("auto-all")
+                .overrides_with("almost-all")
+                .overrides_with("all")
+                .conflicts_with("tree")
+                .long("auto-all")
+                .takes_value(true)
+                .value_name("threshold")
+                .validator(|s| s.parse::<u32>().map_err(|_| "auto-all threshold must be non-negative".to_owned()).map(|_| ()))
+                .help("Show dotfiles (excluding . and ..) if the number of dotfiles is fewer than specified number"),
+        )
+        .arg(
             Arg::with_name("color")
                 .long("color")
                 .possible_value("always")

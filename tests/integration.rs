@@ -98,6 +98,34 @@ fn test_list_all_populated_directory() {
 }
 
 #[test]
+fn test_list_autoall_showing_dotfiles() {
+    let dir = tempdir();
+    dir.child(".one").touch().unwrap();
+    dir.child(".two").touch().unwrap();
+    cmd()
+        .arg("--ignore-config")
+        .arg("--auto-all")
+        .arg("2")
+        .arg(dir.path())
+        .assert()
+        .stdout(predicate::str::is_match(".one\n.two\n$").unwrap());
+}
+
+#[test]
+fn test_list_autoall_hiding_dotfiles() {
+    let dir = tempdir();
+    dir.child(".one").touch().unwrap();
+    dir.child(".two").touch().unwrap();
+    cmd()
+        .arg("--ignore-config")
+        .arg("--auto-all")
+        .arg("1")
+        .arg(dir.path())
+        .assert()
+        .stdout(predicate::eq(""));
+}
+
+#[test]
 fn test_list_inode_populated_directory() {
     let dir = tempdir();
     dir.child("one").touch().unwrap();
