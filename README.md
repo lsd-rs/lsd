@@ -106,7 +106,7 @@ scoop install lsd
 ```sh
 pkg install lsd
 ```
-`lsd` require Nerd Font to showing icons properly. [Setup Nerd Font in Termux](https://github.com/Peltoche/lsd/issues/423)
+[Setup Nerd Fonts in Termux](https://github.com/Peltoche/lsd/issues/423)
 ### From Sources
 
 With Rust's package manager cargo, you can install lsd via:
