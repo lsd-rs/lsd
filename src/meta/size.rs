@@ -25,12 +25,6 @@ impl<'a> From<&'a Metadata> for Size {
     }
 }
 
-macro_rules! trailing_zero {
-    ($number: expr) => {
-        format!("{0:.1$}", $number, if $number < 100.0 { 1 } else { 0 })
-    };
-}
-
 impl Size {
     pub fn new(bytes: u64) -> Self {
         Self { bytes }
@@ -38,6 +32,10 @@ impl Size {
 
     pub fn get_bytes(&self) -> u64 {
         self.bytes
+    }
+
+    fn format_size(&self, number: f64) -> String {
+        format!("{0:.1$}", number, if number < 10.0 { 1 } else { 0 })
     }
 
     pub fn get_unit(&self, flags: &Flags) -> Unit {
@@ -99,15 +97,15 @@ impl Size {
         match unit {
             Unit::None => "".to_string(),
             Unit::Byte => self.bytes.to_string(),
-            Unit::Kilo => trailing_zero!(((self.bytes as f64) / 1024.0 * 10.0).round() / 10.0),
+            Unit::Kilo => self.format_size(((self.bytes as f64) / 1024.0 * 10.0).round() / 10.0),
             Unit::Mega => {
-                trailing_zero!(((self.bytes as f64) / (1024.0 * 1024.0) * 10.0).round() / 10.0)
+                self.format_size(((self.bytes as f64) / (1024.0 * 1024.0) * 10.0).round() / 10.0)
             }
-            Unit::Giga => trailing_zero!(
-                ((self.bytes as f64) / (1024.0 * 1024.0 * 1024.0) * 10.0).round() / 10.0
+            Unit::Giga => self.format_size(
+                ((self.bytes as f64) / (1024.0 * 1024.0 * 1024.0) * 10.0).round() / 10.0,
             ),
-            Unit::Tera => trailing_zero!(
-                ((self.bytes as f64) / (1024.0 * 1024.0 * 1024.0 * 1024.0) * 10.0).round() / 10.0
+            Unit::Tera => self.format_size(
+                ((self.bytes as f64) / (1024.0 * 1024.0 * 1024.0 * 1024.0) * 10.0).round() / 10.0,
             ),
         }
     }
@@ -164,11 +162,22 @@ mod test {
     }
 
     #[test]
+    fn render_10_minus_kilobyte() {
+        let size = Size::new(4 * 1024); // 4 kilobytes
+        let mut flags = Flags::default();
+
+        assert_eq!(size.value_string(&flags).as_str(), "4.0");
+        assert_eq!(size.unit_string(&flags).as_str(), "KB");
+        flags.size = SizeFlag::Short;
+        assert_eq!(size.unit_string(&flags).as_str(), "K");
+    }
+
+    #[test]
     fn render_kilobyte() {
         let size = Size::new(42 * 1024); // 42 kilobytes
         let mut flags = Flags::default();
 
-        assert_eq!(size.value_string(&flags).as_str(), "42.0");
+        assert_eq!(size.value_string(&flags).as_str(), "42");
         assert_eq!(size.unit_string(&flags).as_str(), "KB");
         flags.size = SizeFlag::Short;
         assert_eq!(size.unit_string(&flags).as_str(), "K");
@@ -186,11 +195,22 @@ mod test {
     }
 
     #[test]
+    fn render_10_minus_megabyte() {
+        let size = Size::new(4 * 1024 * 1024); // 4 megabytes
+        let mut flags = Flags::default();
+
+        assert_eq!(size.value_string(&flags).as_str(), "4.0");
+        assert_eq!(size.unit_string(&flags).as_str(), "MB");
+        flags.size = SizeFlag::Short;
+        assert_eq!(size.unit_string(&flags).as_str(), "M");
+    }
+
+    #[test]
     fn render_megabyte() {
         let size = Size::new(42 * 1024 * 1024); // 42 megabytes
         let mut flags = Flags::default();
 
-        assert_eq!(size.value_string(&flags).as_str(), "42.0");
+        assert_eq!(size.value_string(&flags).as_str(), "42");
         assert_eq!(size.unit_string(&flags).as_str(), "MB");
         flags.size = SizeFlag::Short;
         assert_eq!(size.unit_string(&flags).as_str(), "M");
@@ -208,11 +228,22 @@ mod test {
     }
 
     #[test]
+    fn render_10_minus_gigabyte() {
+        let size = Size::new(4 * 1024 * 1024 * 1024); // 4 gigabytes
+        let mut flags = Flags::default();
+
+        assert_eq!(size.value_string(&flags).as_str(), "4.0");
+        assert_eq!(size.unit_string(&flags).as_str(), "GB");
+        flags.size = SizeFlag::Short;
+        assert_eq!(size.unit_string(&flags).as_str(), "G");
+    }
+
+    #[test]
     fn render_gigabyte() {
         let size = Size::new(42 * 1024 * 1024 * 1024); // 42 gigabytes
         let mut flags = Flags::default();
 
-        assert_eq!(size.value_string(&flags).as_str(), "42.0");
+        assert_eq!(size.value_string(&flags).as_str(), "42");
         assert_eq!(size.unit_string(&flags).as_str(), "GB");
         flags.size = SizeFlag::Short;
         assert_eq!(size.unit_string(&flags).as_str(), "G");
@@ -230,11 +261,22 @@ mod test {
     }
 
     #[test]
+    fn render_10_minus_terabyte() {
+        let size = Size::new(4 * 1024 * 1024 * 1024 * 1024); // 4 terabytes
+        let mut flags = Flags::default();
+
+        assert_eq!(size.value_string(&flags).as_str(), "4.0");
+        assert_eq!(size.unit_string(&flags).as_str(), "TB");
+        flags.size = SizeFlag::Short;
+        assert_eq!(size.unit_string(&flags).as_str(), "T");
+    }
+
+    #[test]
     fn render_terabyte() {
         let size = Size::new(42 * 1024 * 1024 * 1024 * 1024); // 42 terabytes
         let mut flags = Flags::default();
 
-        assert_eq!(size.value_string(&flags).as_str(), "42.0");
+        assert_eq!(size.value_string(&flags).as_str(), "42");
         assert_eq!(size.unit_string(&flags).as_str(), "TB");
         flags.size = SizeFlag::Short;
         assert_eq!(size.unit_string(&flags).as_str(), "T");
@@ -256,7 +298,7 @@ mod test {
         let size = Size::new(42 * 1024 + 103); // 42.1 kilobytes
         let flags = Flags::default();
 
-        assert_eq!(size.value_string(&flags).as_str(), "42.1");
+        assert_eq!(size.value_string(&flags).as_str(), "42");
         assert_eq!(size.unit_string(&flags).as_str(), "KB");
     }
 
@@ -265,7 +307,7 @@ mod test {
         let size = Size::new(42 * 1024 + 1); // 42.001 kilobytes == 42 kilobytes
         let flags = Flags::default();
 
-        assert_eq!(size.value_string(&flags).as_str(), "42.0");
+        assert_eq!(size.value_string(&flags).as_str(), "42");
         assert_eq!(size.unit_string(&flags).as_str(), "KB");
     }
 
@@ -276,7 +318,7 @@ mod test {
         flags.size = SizeFlag::Short;
         let colors = Colors::new(Theme::NoColor);
 
-        assert_eq!(size.render(&colors, &flags, 4).to_string(), "42.0K");
-        assert_eq!(size.render(&colors, &flags, 5).to_string(), " 42.0K");
+        assert_eq!(size.render(&colors, &flags, 2).to_string(), "42K");
+        assert_eq!(size.render(&colors, &flags, 3).to_string(), " 42K");
     }
 }
