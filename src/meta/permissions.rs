@@ -1,5 +1,6 @@
 use crate::color::{ColoredString, Colors, Elem};
 use ansi_term::ANSIStrings;
+#[cfg(unix)]
 use std::fs::Metadata;
 
 #[derive(Debug, PartialEq, Eq, Copy, Clone)]
@@ -21,8 +22,8 @@ pub struct Permissions {
     pub setuid: bool,
 }
 
+#[cfg(unix)]
 impl<'a> From<&'a Metadata> for Permissions {
-    #[cfg(unix)]
     fn from(meta: &Metadata) -> Self {
         use std::os::unix::fs::PermissionsExt;
 
@@ -46,11 +47,6 @@ impl<'a> From<&'a Metadata> for Permissions {
             setgid: has_bit(modes::SETGID),
             setuid: has_bit(modes::SETUID),
         }
-    }
-
-    #[cfg(windows)]
-    fn from(_: &Metadata) -> Self {
-        panic!("Cannot get permissions from metadata on Windows")
     }
 }
 

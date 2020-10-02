@@ -2,7 +2,7 @@ mod date;
 mod filetype;
 mod indicator;
 mod inode;
-pub mod name;
+mod name;
 mod owner;
 mod permissions;
 mod size;
@@ -15,7 +15,7 @@ pub use self::date::Date;
 pub use self::filetype::FileType;
 pub use self::indicator::Indicator;
 pub use self::inode::INode;
-pub use self::name::Name;
+pub use self::name::{DisplayOption, Name};
 pub use self::owner::Owner;
 pub use self::permissions::Permissions;
 pub use self::size::Size;
@@ -26,7 +26,6 @@ use crate::flags::{Display, Flags, Layout};
 use crate::print_error;
 
 use std::fs::read_link;
-use std::io::{Error, ErrorKind};
 use std::path::{Component, Path, PathBuf};
 
 #[derive(Clone, Debug)]
@@ -50,11 +49,7 @@ impl Meta {
         depth: usize,
         flags: &Flags,
     ) -> Result<Option<Vec<Meta>>, std::io::Error> {
-        if depth == 0 {
-            return Ok(None);
-        }
-
-        if flags.display == Display::DirectoryItself {
+        if depth == 0 || flags.display == Display::DirectoryItself {
             return Ok(None);
         }
 
@@ -79,10 +74,8 @@ impl Meta {
         let mut content: Vec<Meta> = Vec::new();
 
         if let Display::All = flags.display {
-            let mut current_meta;
-
-            current_meta = self.clone();
-            current_meta.name.name = ".".to_owned();
+            let mut current_meta = self.clone();
+            current_meta.name.set_name(".".to_owned());
 
             let parent_meta =
                 Self::from_path(&self.path.join(Component::ParentDir), flags.dereference.0)?;
@@ -92,11 +85,8 @@ impl Meta {
         }
 
         for entry in entries {
-            let path = entry?.path();
-
-            let name = path
-                .file_name()
-                .ok_or_else(|| Error::new(ErrorKind::InvalidInput, "invalid file name"))?;
+            let entry = entry?;
+            let name = entry.file_name();
 
             if flags.ignore_globs.0.is_match(&name) {
                 continue;
@@ -108,10 +98,10 @@ impl Meta {
                 }
             }
 
-            let mut entry_meta = match Self::from_path(&path, flags.dereference.0) {
+            let mut entry_meta = match Self::from_path(&entry.path(), flags.dereference.0) {
                 Ok(res) => res,
                 Err(err) => {
-                    print_error!("lsd: {}: {}\n", path.display(), err);
+                    print_error!("lsd: {:?}: {}\n", entry.path(), err);
                     continue;
                 }
             };
@@ -119,7 +109,7 @@ impl Meta {
             match entry_meta.recurse_into(depth - 1, &flags) {
                 Ok(content) => entry_meta.content = content,
                 Err(err) => {
-                    print_error!("lsd: {}: {}\n", path.display(), err);
+                    print_error!("lsd: {:?}: {}\n", entry.path(), err);
                     continue;
                 }
             };
@@ -192,10 +182,9 @@ impl Meta {
 
     pub fn from_path(path: &Path, dereference: bool) -> Result<Self, std::io::Error> {
         // If the file is a link then retrieve link metadata instead with target metadata (if present).
-        let (metadata, symlink_meta) = if read_link(path).is_ok() && !dereference {
-            (path.symlink_metadata()?, path.metadata().ok())
-        } else {
-            (path.metadata()?, None)
+        let (metadata, symlink_meta) = match path.symlink_metadata() {
+            Ok(metadata) if !dereference => (metadata, path.metadata().ok()),
+            _ => (path.metadata()?, None),
         };
 
         #[cfg(unix)]

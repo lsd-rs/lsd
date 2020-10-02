@@ -8,6 +8,7 @@
 #[macro_use]
 extern crate clap;
 extern crate ansi_term;
+extern crate chrono;
 extern crate chrono_humanize;
 extern crate dirs;
 extern crate libc;
@@ -15,8 +16,6 @@ extern crate lscolors;
 #[cfg(test)]
 extern crate tempfile;
 extern crate term_grid;
-extern crate terminal_size;
-extern crate time;
 extern crate unicode_width;
 extern crate wild;
 extern crate xdg;

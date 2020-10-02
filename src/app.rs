@@ -284,7 +284,24 @@ fn validate_date_argument(arg: String) -> Result<(), String> {
     }
 }
 
-pub fn validate_time_format(formatter: &str) -> Result<(), time::ParseError> {
+#[derive(Debug)]
+pub enum FormatError {
+    InvalidSpecifier(char),
+    MissingConverter,
+}
+
+impl std::fmt::Display for FormatError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::InvalidSpecifier(c) => write!(f, "invalid format specifier: %{}", c),
+            Self::MissingConverter => write!(f, "missing format converter"),
+        }
+    }
+}
+
+impl std::error::Error for FormatError {}
+
+pub fn validate_time_format(formatter: &str) -> Result<(), FormatError> {
     let mut chars = formatter.chars();
     loop {
         match chars.next() {
@@ -297,8 +314,8 @@ pub fn validate_time_format(formatter: &str) -> Result<(), time::ParseError> {
                 | Some('U') | Some('u') | Some('V') | Some('v') | Some('W') | Some('w')
                 | Some('X') | Some('x') | Some('Y') | Some('y') | Some('Z') | Some('z')
                 | Some('+') | Some('%') => (),
-                Some(c) => return Err(time::ParseError::InvalidFormatSpecifier(c)),
-                None => return Err(time::ParseError::MissingFormatConverter),
+                Some(c) => return Err(FormatError::InvalidSpecifier(c)),
+                None => return Err(FormatError::MissingConverter),
             },
             None => break,
             _ => continue,

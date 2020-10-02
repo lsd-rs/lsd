@@ -1,57 +1,46 @@
 use crate::color::{ColoredString, Colors, Elem};
 use crate::flags::{DateFlag, Flags};
+use chrono::{DateTime, Duration, Local};
 use chrono_humanize::HumanTime;
 use std::fs::Metadata;
-use std::time::UNIX_EPOCH;
-use time::{Duration, Timespec};
 
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
-pub struct Date(time::Tm);
+pub struct Date(DateTime<Local>);
 
 impl<'a> From<&'a Metadata> for Date {
     fn from(meta: &'a Metadata) -> Self {
         let modified_time = meta.modified().expect("failed to retrieve modified date");
-
-        let modified_time_since_epoch =
-            modified_time.duration_since(UNIX_EPOCH).unwrap_or_default();
-
-        let time = time::at(Timespec::new(
-            modified_time_since_epoch.as_secs() as i64,
-            modified_time_since_epoch.subsec_nanos() as i32,
-        ));
-
-        Date(time)
+        Date(modified_time.into())
     }
 }
 
 impl Date {
     pub fn render(&self, colors: &Colors, flags: &Flags) -> ColoredString {
-        let now = time::now();
+        let ago = Local::now() - self.0;
 
-        let elem;
-        if self.0 > now - Duration::hours(1) {
-            elem = &Elem::HourOld;
-        } else if self.0 > now - Duration::days(1) {
-            elem = &Elem::DayOld;
+        let elem = if ago < Duration::hours(1) {
+            Elem::HourOld
+        } else if ago < Duration::days(1) {
+            Elem::DayOld
         } else {
-            elem = &Elem::Older;
-        }
+            Elem::Older
+        };
 
-        colors.colorize(self.date_string(&flags), elem)
+        colors.colorize(self.date_string(&flags), &elem)
     }
 
     pub fn date_string(&self, flags: &Flags) -> String {
         match &flags.date {
-            DateFlag::Date => self.0.ctime().to_string(),
-            DateFlag::Relative => format!("{}", HumanTime::from(self.0 - time::now())),
-            DateFlag::Formatted(format) => self.0.to_local().strftime(&format).unwrap().to_string(),
+            DateFlag::Date => self.0.format("%a %b %e %X %G").to_string(),
+            DateFlag::Relative => HumanTime::from(self.0 - Local::now()).to_string(),
+            DateFlag::Formatted(format) => self.0.format(&format).to_string(),
         }
     }
 }
 
 #[cfg(test)]
 mod test {
-    use super::Date;
+    use super::{Date, DateTime, Duration, Local};
     use crate::color::{Colors, Theme};
     use crate::flags::{DateFlag, Flags};
     use ansi_term::Colour;
@@ -59,19 +48,18 @@ mod test {
     use std::path::Path;
     use std::process::{Command, ExitStatus};
     use std::{env, fs};
-    use time;
 
     #[cfg(unix)]
-    fn cross_platform_touch(path: &Path, date: &time::Tm) -> io::Result<ExitStatus> {
+    fn cross_platform_touch(path: &Path, date: &DateTime<Local>) -> io::Result<ExitStatus> {
         Command::new("touch")
             .arg("-t")
-            .arg(date.strftime("%Y%m%d%H%M.%S").unwrap().to_string())
+            .arg(date.format("%Y%m%d%H%M.%S").to_string())
             .arg(&path)
             .status()
     }
 
     #[cfg(windows)]
-    fn cross_platform_touch(path: &Path, date: &time::Tm) -> io::Result<ExitStatus> {
+    fn cross_platform_touch(path: &Path, date: &DateTime<Local>) -> io::Result<ExitStatus> {
         use std::process::Stdio;
 
         let copy_success = Command::new("cmd")
@@ -90,7 +78,7 @@ mod test {
             .arg(format!(
                 r#"$(Get-Item {}).lastwritetime=$(Get-Date "{}")"#,
                 path.display(),
-                date.rfc3339()
+                date.to_rfc3339()
             ))
             .status()
     }
@@ -100,7 +88,7 @@ mod test {
         let mut file_path = env::temp_dir();
         file_path.push("test_an_hour_old_file_color.tmp");
 
-        let creation_date = (time::now() - time::Duration::seconds(4)).to_local();
+        let creation_date = Local::now() - Duration::seconds(4);
 
         let success = cross_platform_touch(&file_path, &creation_date)
             .unwrap()
@@ -112,7 +100,7 @@ mod test {
         let flags = Flags::default();
 
         assert_eq!(
-            Colour::Fixed(40).paint(creation_date.ctime().to_string()),
+            Colour::Fixed(40).paint(creation_date.format("%a %b %e %X %G").to_string()),
             date.render(&colors, &flags)
         );
 
@@ -124,7 +112,7 @@ mod test {
         let mut file_path = env::temp_dir();
         file_path.push("test_a_day_old_file_color.tmp");
 
-        let creation_date = (time::now() - time::Duration::hours(4)).to_local();
+        let creation_date = Local::now() - Duration::hours(4);
 
         let success = cross_platform_touch(&file_path, &creation_date)
             .unwrap()
@@ -136,7 +124,7 @@ mod test {
         let flags = Flags::default();
 
         assert_eq!(
-            Colour::Fixed(42).paint(creation_date.ctime().to_string()),
+            Colour::Fixed(42).paint(creation_date.format("%a %b %e %X %G").to_string()),
             date.render(&colors, &flags)
         );
 
@@ -148,9 +136,9 @@ mod test {
         let mut file_path = env::temp_dir();
         file_path.push("test_a_several_days_old_file_color.tmp");
 
-        let creation_date = time::now_utc() - time::Duration::days(2);
+        let creation_date = Local::now() - Duration::days(2);
 
-        let success = cross_platform_touch(&file_path, &creation_date.to_local())
+        let success = cross_platform_touch(&file_path, &creation_date)
             .unwrap()
             .success();
         assert!(success, "failed to exec touch");
@@ -160,7 +148,7 @@ mod test {
         let flags = Flags::default();
 
         assert_eq!(
-            Colour::Fixed(36).paint(creation_date.ctime().to_string()),
+            Colour::Fixed(36).paint(creation_date.format("%a %b %e %X %G").to_string()),
             date.render(&colors, &flags)
         );
 
@@ -172,7 +160,7 @@ mod test {
         let mut file_path = env::temp_dir();
         file_path.push("test_with_relative_date.tmp");
 
-        let creation_date = time::now() - time::Duration::days(2);
+        let creation_date = Local::now() - Duration::days(2);
 
         let success = cross_platform_touch(&file_path, &creation_date)
             .unwrap()
@@ -198,7 +186,7 @@ mod test {
         let mut file_path = env::temp_dir();
         file_path.push("test_with_relative_date_now.tmp");
 
-        let creation_date = time::now();
+        let creation_date = Local::now();
         let success = cross_platform_touch(&file_path, &creation_date)
             .unwrap()
             .success();

@@ -6,14 +6,6 @@ use crate::meta::Meta;
 use crate::{print_error, print_output, sort};
 use std::path::PathBuf;
 
-#[cfg(not(target_os = "windows"))]
-use std::io;
-#[cfg(not(target_os = "windows"))]
-use std::os::unix::io::AsRawFd;
-
-#[cfg(target_os = "windows")]
-use terminal_size::terminal_size;
-
 pub struct Core {
     flags: Flags,
     icons: Icons,
@@ -24,16 +16,11 @@ pub struct Core {
 
 impl Core {
     pub fn new(flags: Flags) -> Self {
-        // Check through libc if stdout is a tty. Unix specific so not on windows.
-        // Determine color output availability (and initialize color output (for Windows 10))
-        #[cfg(not(target_os = "windows"))]
-        let tty_available = unsafe { libc::isatty(io::stdout().as_raw_fd()) == 1 };
+        // termsize allows us to know if the stdout is a tty or not.
+        let tty_available = termsize::get().is_some();
 
         #[cfg(not(target_os = "windows"))]
         let console_color_ok = true;
-
-        #[cfg(target_os = "windows")]
-        let tty_available = terminal_size().is_some(); // terminal_size allows us to know if the stdout is a tty or not.
 
         #[cfg(target_os = "windows")]
         let console_color_ok = ansi_term::enable_ansi_support().is_ok();

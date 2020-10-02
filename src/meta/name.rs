@@ -1,8 +1,9 @@
 use crate::color::{ColoredString, Colors, Elem};
 use crate::icon::Icons;
 use crate::meta::filetype::FileType;
+
+use std::borrow::Cow;
 use std::cmp::{Ordering, PartialOrd};
-use std::ffi::OsStr;
 use std::path::{Component, Path, PathBuf};
 
 #[derive(Debug)]
@@ -14,86 +15,73 @@ pub enum DisplayOption<'a> {
 
 #[derive(Clone, Debug, Eq)]
 pub struct Name {
-    pub name: String,
+    name: Option<String>,
     path: PathBuf,
-    extension: Option<String>,
     file_type: FileType,
 }
 
 impl Name {
     pub fn new(path: &Path, file_type: FileType) -> Self {
-        let name = match path.file_name() {
-            Some(name) => name.to_string_lossy().to_string(),
-            None => path.to_string_lossy().to_string(),
-        };
-
-        let extension = path
-            .extension()
-            .map(|ext| ext.to_string_lossy().to_string());
-
         Self {
-            name,
-            path: PathBuf::from(path),
-            extension,
+            name: None,
+            path: path.into(),
             file_type,
         }
     }
 
-    pub fn file_name(&self) -> &str {
-        self.path
-            .file_name()
-            .and_then(OsStr::to_str)
-            .unwrap_or(&self.name)
+    pub fn extension(&self) -> Option<Cow<'_, str>> {
+        self.path.extension().map(|e| e.to_string_lossy())
     }
 
-    fn relative_path<T: AsRef<Path> + Clone>(&self, base_path: T) -> PathBuf {
-        let base_path = base_path.as_ref();
+    pub fn set_name(&mut self, new_name: String) {
+        self.name = Some(new_name);
+    }
 
+    pub fn get_name(&self) -> Cow<'_, str> {
+        match &self.name {
+            Some(name) => Cow::from(name),
+            None => match self.path.file_name() {
+                Some(name) => name.to_string_lossy(),
+                None => self.path.to_string_lossy(),
+            },
+        }
+    }
+
+    pub fn file_type(&self) -> FileType {
+        self.file_type
+    }
+
+    fn relative_path(&self, base_path: &Path) -> PathBuf {
         if self.path == base_path {
-            return PathBuf::from(AsRef::<Path>::as_ref(&Component::CurDir));
+            PathBuf::from(AsRef::<Path>::as_ref(&Component::CurDir))
+        } else if let Some(prefix) = self.path.ancestors().find(|a| base_path.starts_with(a)) {
+            std::iter::repeat(Component::ParentDir)
+                .take(
+                    base_path
+                        .strip_prefix(&prefix)
+                        .unwrap()
+                        .components()
+                        .count(),
+                )
+                .chain(self.path.strip_prefix(&prefix).unwrap().components())
+                .collect()
+        } else {
+            PathBuf::new()
         }
-
-        let shared_components: PathBuf = self
-            .path
-            .components()
-            .zip(base_path.components())
-            .take_while(|(target_component, base_component)| target_component == base_component)
-            .map(|tuple| tuple.0)
-            .collect();
-
-        base_path
-            .strip_prefix(&shared_components)
-            .unwrap()
-            .components()
-            .map(|_| Component::ParentDir)
-            .chain(
-                self.path
-                    .strip_prefix(&shared_components)
-                    .unwrap()
-                    .components(),
-            )
-            .collect()
     }
 
-    pub fn escape(&self, string: &str) -> String {
-        if string
-            .chars()
-            .all(|c| c >= 0x20 as char && c != 0x7f as char)
-        {
-            string.to_string()
-        } else {
-            let mut chars = String::new();
-            for c in string.chars() {
-                // The `escape_default` method on `char` is *almost* what we want here, but
-                // it still escapes non-ASCII UTF-8 characters, which are still printable.
-                if c >= 0x20 as char && c != 0x7f as char {
-                    chars.push(c);
-                } else {
-                    chars += &c.escape_default().collect::<String>();
-                }
+    fn escape(&self, string: &str) -> String {
+        let mut chars = String::with_capacity(string.len());
+        for c in string.chars() {
+            // The `escape_default` method on `char` is *almost* what we want here, but
+            // it still escapes non-ASCII UTF-8 characters, which are still printable.
+            if c >= 0x20 as char && c != 0x7f as char {
+                chars.push(c);
+            } else {
+                chars += &c.escape_default().collect::<String>();
             }
-            chars
         }
+        chars
     }
 
     pub fn render(
@@ -102,21 +90,12 @@ impl Name {
         icons: &Icons,
         display_option: &DisplayOption,
     ) -> ColoredString {
-        let content = match display_option {
-            DisplayOption::FileName => {
-                format!("{}{}", icons.get(self), self.escape(self.file_name()))
-            }
-            DisplayOption::Relative { base_path } => format!(
-                "{}{}",
-                icons.get(self),
-                self.escape(&self.relative_path(base_path).to_string_lossy())
-            ),
-            DisplayOption::None => format!(
-                "{}{}",
-                icons.get(self),
-                self.escape(&self.path.to_string_lossy())
-            ),
+        let name: String = if let DisplayOption::Relative { base_path } = display_option {
+            self.escape(&self.relative_path(base_path).to_string_lossy())
+        } else {
+            self.escape(&self.get_name())
         };
+        let content = format!("{}{}", icons.get(self), name);
 
         let elem = match self.file_type {
             FileType::CharDevice => Elem::CharDevice,
@@ -131,33 +110,25 @@ impl Name {
 
         colors.colorize_using_path(content, &self.path, &elem)
     }
-
-    pub fn extension(&self) -> Option<&str> {
-        self.extension.as_deref()
-    }
-
-    pub fn file_type(&self) -> FileType {
-        self.file_type
-    }
 }
 
 impl Ord for Name {
     fn cmp(&self, other: &Self) -> Ordering {
-        self.name.to_lowercase().cmp(&other.name.to_lowercase())
+        self.get_name()
+            .to_ascii_lowercase()
+            .cmp(&other.get_name().to_ascii_lowercase())
     }
 }
 
 impl PartialOrd for Name {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        self.name
-            .to_lowercase()
-            .partial_cmp(&other.name.to_lowercase())
+        Some(self.cmp(other))
     }
 }
 
 impl PartialEq for Name {
     fn eq(&self, other: &Self) -> bool {
-        self.name.eq_ignore_ascii_case(&other.name.to_lowercase())
+        self.get_name().eq_ignore_ascii_case(&other.get_name())
     }
 }
 
@@ -335,7 +306,10 @@ mod test {
             },
         );
 
-        assert_eq!(Some("txt"), name.extension());
+        assert_eq!(
+            Some("txt".to_string()),
+            name.extension().map(|c| c.to_string())
+        );
     }
 
     #[test]
@@ -496,7 +470,7 @@ mod test {
         );
         let base_path = PathBuf::from("/home/parent1");
 
-        assert_eq!(PathBuf::from("child"), name.relative_path(base_path),)
+        assert_eq!(PathBuf::from("child"), name.relative_path(&base_path),)
     }
 
     #[test]
@@ -512,7 +486,7 @@ mod test {
 
         assert_eq!(
             PathBuf::from("../../grand-parent1/parent1/child"),
-            name.relative_path(base_path),
+            name.relative_path(&base_path),
         )
     }
 

@@ -77,13 +77,13 @@ impl Icons {
             "\u{f2dc}" // ""
         } else if let Some(icon) = self
             .icons_by_name
-            .get(name.file_name().to_lowercase().as_str())
+            .get(name.get_name().to_ascii_lowercase().as_str())
         {
             // Use the known names.
             icon
         } else if let Some(icon) = name.extension().and_then(|extension| {
             self.icons_by_extension
-                .get(extension.to_lowercase().as_str())
+                .get(extension.to_ascii_lowercase().as_str())
         }) {
             // Use the known extensions.
             icon

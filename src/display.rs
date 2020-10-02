@@ -1,12 +1,10 @@
 use crate::color::{ColoredString, Colors};
 use crate::flags::{Block, Display, Flags, Layout};
 use crate::icon::Icons;
-use crate::meta::name::DisplayOption;
-use crate::meta::{FileType, Meta};
+use crate::meta::{DisplayOption, FileType, Meta};
 use ansi_term::{ANSIString, ANSIStrings};
 use std::collections::HashMap;
 use term_grid::{Cell, Direction, Filling, Grid, GridOptions};
-use terminal_size::terminal_size;
 use unicode_width::UnicodeWidthStr;
 
 const EDGE: &str = "\u{251c}\u{2500}\u{2500}"; // "├──"
@@ -15,11 +13,6 @@ const CORNER: &str = "\u{2514}\u{2500}\u{2500}"; // "└──"
 const BLANK: &str = "   ";
 
 pub fn grid(metas: &[Meta], flags: &Flags, colors: &Colors, icons: &Icons) -> String {
-    let term_width = match terminal_size() {
-        Some((w, _)) => Some(w.0 as usize),
-        None => None,
-    };
-
     inner_display_grid(
         &DisplayOption::None,
         metas,
@@ -27,7 +20,7 @@ pub fn grid(metas: &[Meta], flags: &Flags, colors: &Colors, icons: &Icons) -> St
         colors,
         icons,
         0,
-        term_width,
+        termsize::get().map(|size| size.cols as usize),
     )
 }
 
