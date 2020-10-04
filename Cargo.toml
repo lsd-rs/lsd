@@ -37,7 +37,7 @@ xdg = "2.1.*"
 yaml-rust = "0.4.*"
 
 [target.'cfg(unix)'.dependencies]
-users = "0.10.*"
+users = "0.11.*"
 
 [target.'cfg(windows)'.dependencies]
 winapi = {version = "0.3.*", features = ["aclapi", "accctrl", "winnt", "winerror", "securitybaseapi", "winbase"]}
