@@ -8,12 +8,12 @@ use crate::config_file::Config;
 use clap::ArgMatches;
 use yaml_rust::Yaml;
 
+type ColumnWithOrder = (SortColumn, SortOrder);
+
 /// A collection of flags on how to sort the output.
-#[derive(Clone, Debug, Copy, PartialEq, Eq, Default)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Sorting {
-    pub column: SortColumn,
-    pub order: SortOrder,
-    pub dir_grouping: DirGrouping,
+    pub columns: Vec<ColumnWithOrder>,
 }
 
 impl Sorting {
@@ -25,10 +25,38 @@ impl Sorting {
         let column = SortColumn::configure_from(matches, config);
         let order = SortOrder::configure_from(matches, config);
         let dir_grouping = DirGrouping::configure_from(matches, config);
+
         Self {
-            column,
-            order,
-            dir_grouping,
+            columns: Self::columns_from_config(column, order, dir_grouping),
+        }
+    }
+
+    fn columns_from_config(
+        column: SortColumn,
+        order: SortOrder,
+        dir_grouping: DirGrouping,
+    ) -> Vec<ColumnWithOrder> {
+        let mut columns = vec![];
+
+        match dir_grouping {
+            DirGrouping::None => {}
+            DirGrouping::First => columns.push((SortColumn::Directory, SortOrder::Default)),
+            DirGrouping::Last => columns.push((SortColumn::Directory, SortOrder::Reverse)),
+        };
+
+        columns.push((column, order));
+        columns
+    }
+}
+
+impl Default for Sorting {
+    fn default() -> Self {
+        let column = SortColumn::default();
+        let order = SortOrder::default();
+        let dir_grouping = DirGrouping::default();
+
+        Self {
+            columns: Self::columns_from_config(column, order, dir_grouping),
         }
     }
 }
@@ -41,6 +69,7 @@ pub enum SortColumn {
     Time,
     Size,
     Version,
+    Directory,
 }
 
 impl Configurable<Self> for SortColumn {

@@ -1,8 +1,9 @@
 use crate::color::{self, Colors};
 use crate::display;
-use crate::flags::{ColorOption, Display, Flags, IconOption, IconTheme, Layout, SortOrder};
+use crate::flags::{ColorOption, Display, Flags, IconOption, IconTheme, Layout};
 use crate::icon::{self, Icons};
 use crate::meta::Meta;
+use crate::sort::FuncWithOrder;
 use crate::{print_error, print_output, sort};
 use std::path::PathBuf;
 
@@ -19,7 +20,7 @@ pub struct Core {
     icons: Icons,
     //display: Display,
     colors: Colors,
-    sorters: Vec<(SortOrder, sort::SortFn)>,
+    sorters: Vec<FuncWithOrder>,
 }
 
 impl Core {
