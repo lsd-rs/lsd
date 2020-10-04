@@ -27,12 +27,9 @@ impl Name {
             None => path.to_string_lossy().to_string(),
         };
 
-        let mut extension = None;
-        if let Some(res) = path.extension() {
-            if let Some(res) = res.to_str() {
-                extension = Some(res.to_string());
-            }
-        }
+        let extension = path
+            .extension()
+            .map(|ext| ext.to_string_lossy().to_string());
 
         Self {
             name,
