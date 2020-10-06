@@ -362,6 +362,42 @@ fn test_version_sort_overwrite_by_sizesort() {
         .stdout(predicate::str::is_match("11\n2\n$").unwrap());
 }
 
+#[test]
+#[cfg(target_os = "linux")]
+fn test_bad_utf_8_extension() {
+    let tmp = tempdir();
+    Command::new("python3")
+        .arg("-c")
+        .arg(format!(
+            r#"import pathlib; pathlib.Path('{}/bad.extension\udca7\udcfd').touch()"#,
+            tmp.path().to_str().unwrap()
+        ))
+        .output()
+        .expect("failed to create file");
+    cmd()
+        .arg(tmp.path())
+        .assert()
+        .stdout(predicate::str::is_match("bad.extension\u{fffd}\u{fffd}\n$").unwrap());
+}
+
+#[test]
+#[cfg(target_os = "linux")]
+fn test_bad_utf_8_name() {
+    let tmp = tempdir();
+    Command::new("python3")
+        .arg("-c")
+        .arg(format!(
+            r#"import pathlib; pathlib.Path('{}/bad-name\udca7\udcfd.ext').touch()"#,
+            tmp.path().to_str().unwrap()
+        ))
+        .output()
+        .expect("failed to create file");
+    cmd()
+        .arg(tmp.path())
+        .assert()
+        .stdout(predicate::str::is_match("bad-name\u{fffd}\u{fffd}.ext\n$").unwrap());
+}
+
 fn cmd() -> Command {
     Command::cargo_bin(env!("CARGO_PKG_NAME")).unwrap()
 }
