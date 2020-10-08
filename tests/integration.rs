@@ -362,40 +362,48 @@ fn test_version_sort_overwrite_by_sizesort() {
         .stdout(predicate::str::is_match("11\n2\n$").unwrap());
 }
 
+#[cfg(test)]
+#[cfg(target_os = "linux")]
+macro_rules! bad_utf8 {
+    ($tmp:expr, $e:expr) => {{
+        let mut fname = format!($e, $tmp.path().to_str().unwrap())
+            .as_bytes()
+            .to_vec();
+        fname.push(0xa7);
+        fname.push(0xfd);
+        fname
+    }};
+    ($tmp:expr, $e:expr, $v:expr) => {{
+        let mut fname = bad_utf8!($tmp, $e);
+        fname.append($v.as_bytes().to_vec().as_mut());
+        fname
+    }};
+}
+
 #[test]
 #[cfg(target_os = "linux")]
 fn test_bad_utf_8_extension() {
     let tmp = tempdir();
-    Command::new("python3")
-        .arg("-c")
-        .arg(format!(
-            r#"import pathlib; pathlib.Path('{}/bad.extension\udca7\udcfd').touch()"#,
-            tmp.path().to_str().unwrap()
-        ))
-        .output()
-        .expect("failed to create file");
+    let fname = unsafe { String::from_utf8_unchecked(bad_utf8!(tmp, "{}/bad.extension")) };
+    std::fs::File::create(fname).expect("failed to create file");
+
     cmd()
         .arg(tmp.path())
         .assert()
-        .stdout(predicate::str::is_match("bad.extension\u{fffd}\u{fffd}\n$").unwrap());
+        .stdout(predicate::str::is_match("bad.extension\u{fffd}\u{fffd}").unwrap());
 }
 
 #[test]
 #[cfg(target_os = "linux")]
 fn test_bad_utf_8_name() {
     let tmp = tempdir();
-    Command::new("python3")
-        .arg("-c")
-        .arg(format!(
-            r#"import pathlib; pathlib.Path('{}/bad-name\udca7\udcfd.ext').touch()"#,
-            tmp.path().to_str().unwrap()
-        ))
-        .output()
-        .expect("failed to create file");
+    let fname = unsafe { String::from_utf8_unchecked(bad_utf8!(tmp, "{}/bad-name", ".ext")) };
+    std::fs::File::create(fname).expect("failed to create file");
+
     cmd()
         .arg(tmp.path())
         .assert()
-        .stdout(predicate::str::is_match("bad-name\u{fffd}\u{fffd}.ext\n$").unwrap());
+        .stdout(predicate::str::is_match("bad-name\u{fffd}\u{fffd}.ext").unwrap());
 }
 
 fn cmd() -> Command {
