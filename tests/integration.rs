@@ -364,46 +364,41 @@ fn test_version_sort_overwrite_by_sizesort() {
 
 #[cfg(test)]
 #[cfg(target_os = "linux")]
-macro_rules! bad_utf8 {
-    ($tmp:expr, $e:expr) => {{
-        let mut fname = format!($e, $tmp.path().to_str().unwrap())
-            .as_bytes()
-            .to_vec();
-        fname.push(0xa7);
-        fname.push(0xfd);
-        fname
-    }};
-    ($tmp:expr, $e:expr, $v:expr) => {{
-        let mut fname = bad_utf8!($tmp, $e);
-        fname.append($v.as_bytes().to_vec().as_mut());
-        fname
-    }};
+fn bad_utf8(tmp: &std::path::Path, pre: &str, suf: &str) -> String {
+    let mut fname = format!("{}/{}", tmp.display(), pre).into_bytes();
+    fname.reserve(2 + suf.len());
+    fname.push(0xa7);
+    fname.push(0xfd);
+    fname.extend(suf.as_bytes());
+    unsafe { String::from_utf8_unchecked(fname) }
 }
 
 #[test]
 #[cfg(target_os = "linux")]
 fn test_bad_utf_8_extension() {
+    use std::fs::File;
     let tmp = tempdir();
-    let fname = unsafe { String::from_utf8_unchecked(bad_utf8!(tmp, "{}/bad.extension")) };
-    std::fs::File::create(fname).expect("failed to create file");
+    let fname = bad_utf8(tmp.path(), "bad.extension", "");
+    File::create(fname).expect("failed to create file");
 
     cmd()
         .arg(tmp.path())
         .assert()
-        .stdout(predicate::str::is_match("bad.extension\u{fffd}\u{fffd}").unwrap());
+        .stdout(predicate::str::is_match("bad.extension\u{fffd}\u{fffd}\n$").unwrap());
 }
 
 #[test]
 #[cfg(target_os = "linux")]
 fn test_bad_utf_8_name() {
+    use std::fs::File;
     let tmp = tempdir();
-    let fname = unsafe { String::from_utf8_unchecked(bad_utf8!(tmp, "{}/bad-name", ".ext")) };
-    std::fs::File::create(fname).expect("failed to create file");
+    let fname = bad_utf8(tmp.path(), "bad-name", ".ext");
+    File::create(fname).expect("failed to create file");
 
     cmd()
         .arg(tmp.path())
         .assert()
-        .stdout(predicate::str::is_match("bad-name\u{fffd}\u{fffd}.ext").unwrap());
+        .stdout(predicate::str::is_match("bad-name\u{fffd}\u{fffd}.ext\n$").unwrap());
 }
 
 fn cmd() -> Command {
