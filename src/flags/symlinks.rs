@@ -46,6 +46,53 @@ impl Configurable<Self> for NoSymlink {
     }
 }
 
+/// The flag showing how to display symbolic arrow.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct SymlinkArrow(String);
+
+impl Configurable<Self> for SymlinkArrow {
+    /// `SymlinkArrow` can not be configured by [ArgMatches]
+    ///
+    /// Return `None`
+    fn from_arg_matches(_: &ArgMatches) -> Option<Self> {
+        None
+    }
+    /// Get a potential `SymlinkArrow` value from a [Config].
+    ///
+    /// If the Config's [Yaml] contains the [String](Yaml::String) value pointed to by
+    /// "symlink-arrow", this returns its value as the value of the `SymlinkArrow`, in a [Some].
+    /// Otherwise this returns [None].
+    fn from_config(config: &Config) -> Option<Self> {
+        if let Some(yaml) = &config.yaml {
+            match &yaml["styles"]["symlink-arrow"] {
+                Yaml::BadValue => None,
+                Yaml::String(value) => Some(SymlinkArrow(value.to_string())),
+                _ => {
+                    config.print_wrong_type_warning("symlink-arrow", "string");
+                    None
+                }
+            }
+        } else {
+            None
+        }
+    }
+}
+
+/// The default value for the `SymlinkArrow` is `\u{21d2}(⇒)`
+impl Default for SymlinkArrow {
+    fn default() -> Self {
+        Self(String::from("\u{21d2}")) // ⇒
+    }
+}
+
+use std::fmt;
+impl fmt::Display for SymlinkArrow {
+    // This trait requires `fmt` with this exact signature.
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::NoSymlink;
@@ -99,6 +146,18 @@ mod test {
         assert_eq!(
             Some(NoSymlink(false)),
             NoSymlink::from_config(&Config::with_yaml(yaml))
+        );
+    }
+
+    use super::SymlinkArrow;
+    #[test]
+    fn test_from_config_arrow_utf8() {
+        let yaml_string = "styles:
+  symlink-arrow: ↹";
+        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
+        assert_eq!(
+            Some(SymlinkArrow(String::from("\u{21B9}"))),
+            SymlinkArrow::from_config(&Config::with_yaml(yaml))
         );
     }
 }

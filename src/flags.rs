@@ -33,6 +33,7 @@ pub use sorting::SortColumn;
 pub use sorting::SortOrder;
 pub use sorting::Sorting;
 pub use symlinks::NoSymlink;
+pub use symlinks::SymlinkArrow;
 pub use total_size::TotalSize;
 
 use crate::config_file::Config;
@@ -59,6 +60,13 @@ pub struct Flags {
     pub size: SizeFlag,
     pub sorting: Sorting,
     pub total_size: TotalSize,
+    pub styles: Styles,
+}
+
+/// A struct to hold the style flags for the application.
+#[derive(Clone, Debug, Default)]
+pub struct Styles {
+    pub symlink_arrow: SymlinkArrow,
 }
 
 impl Flags {
@@ -84,6 +92,9 @@ impl Flags {
             recursion: Recursion::configure_from(matches, config)?,
             sorting: Sorting::configure_from(matches, config),
             total_size: TotalSize::configure_from(matches, config),
+            styles: Styles {
+                symlink_arrow: SymlinkArrow::configure_from(matches, config),
+            },
         })
     }
 }
