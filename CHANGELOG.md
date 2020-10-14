@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - ReleaseDate
 ### Added
+- Add support for using a config file [kmoschcau](https://github.com/kmoschcau)
 - Add support for `--extensionsort` `-X` from [aldhsu](https://github.com/aldhsu)
 ### Changed
 - Use last sort flag for sort field from [meain](https://github.com/meain)
