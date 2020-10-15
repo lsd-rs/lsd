@@ -137,7 +137,6 @@ impl Icons {
         let mut m = HashMap::new();
 
         m.insert("apk", "\u{e70e}"); // ""
-        m.insert("apk", "\u{e70e}"); // ""
         m.insert("avi", "\u{f03d}"); // ""
         m.insert("avro", "\u{e60b}"); // ""
         m.insert("awk", "\u{f489}"); // ""
