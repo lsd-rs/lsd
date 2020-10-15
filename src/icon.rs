@@ -136,6 +136,7 @@ impl Icons {
     fn get_default_icons_by_extension() -> HashMap<&'static str, &'static str> {
         let mut m = HashMap::new();
 
+        m.insert("7z", "\u{f410}"); // ""
         m.insert("apk", "\u{e70e}"); // ""
         m.insert("avi", "\u{f03d}"); // ""
         m.insert("avro", "\u{e60b}"); // ""
@@ -147,6 +148,7 @@ impl Icons {
         m.insert("bat", "\u{f17a}"); // ""
         m.insert("bio", "\u{f910}"); // "蘿"
         m.insert("bmp", "\u{f1c5}"); // ""
+        m.insert("bz2", "\u{f410}"); // ""
         m.insert("c", "\u{e61e}"); // ""
         m.insert("c++", "\u{e61d}"); // ""
         m.insert("cc", "\u{e61d}"); // ""
@@ -230,6 +232,7 @@ impl Icons {
         m.insert("lock", "\u{f023}"); // ""
         m.insert("log", "\u{f18d}"); // ""
         m.insert("lua", "\u{e620}"); // ""
+        m.insert("lz", "\u{f410}"); // ""
         m.insert("m3u", "\u{f910}"); // "蘿"
         m.insert("m3u8", "\u{f910}"); // "蘿"
         m.insert("m4a", "\u{f001}"); // ""
@@ -319,6 +322,7 @@ impl Icons {
         m.insert("xlsx", "\u{f1c3}"); // ""
         m.insert("xml", "\u{e619}"); // ""
         m.insert("xul", "\u{e619}"); // ""
+        m.insert("xz", "\u{f410}"); // ""
         m.insert("yaml", "\u{e60b}"); // ""
         m.insert("yml", "\u{e60b}"); // ""
         m.insert("zip", "\u{f410}"); // ""
