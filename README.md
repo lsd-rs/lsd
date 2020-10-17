@@ -24,8 +24,6 @@
 This project is heavily inspired by the super [colorls](https://github.com/athityakumar/colorls)
 project but with some little differences.  For example it is written in rust and not in ruby which makes it much faster.
 
-`lsd` will try to display the UTF-8 chars in file name, A `U+FFFD REPLACEMENT CHARACTER`(�) is used to replace the invalid UTF-8 code.
-
 ## Screenshot
 
 ![image](https://raw.githubusercontent.com/Peltoche/lsd/assets/screen_lsd.png)
@@ -141,7 +139,7 @@ On non-Windows systems `lsd` follows the
 [XDG Base Directory Specification](https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html)
 convention for the location of the configuration file. The configuration dir
 `lsd` uses is itself named `lsd`. In that directory it looks first for a file
-called `config.yaml` and if it can't find one, a file named `config.yml`.  
+called `config.yaml` and if it can't find one, a file named `config.yml`.
 For most people it should be enough to put their config file at
 `~/.config/lsd/config.yaml`.
 
@@ -309,7 +307,9 @@ For now, the default colors are:
 ||![#d75f87](https://placehold.it/17/d75f87/000000?text=+) No Access|![#00d7d7](https://placehold.it/17/00d7d7/000000?text=+) Pipe/Symlink/Blockdevice/Socket/Special|||
 |||![#d78700](https://placehold.it/17/d78700/000000?text=+) CharDevice|||
 
+### UTF-8 Chars
 
+`lsd` will try to display the UTF-8 chars in file name, A `U+FFFD REPLACEMENT CHARACTER`(�) is used to represent the invalid UTF-8 chars.
 
 ## Contributors
 
