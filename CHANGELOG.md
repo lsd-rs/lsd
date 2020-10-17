@@ -9,8 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Add support for using a config file [kmoschcau](https://github.com/kmoschcau)
 - Add support for `--extensionsort` `-X` from [aldhsu](https://github.com/aldhsu)
+- Add support for `--versionsort` `-v` from [zwpaper](https://github.com/zwpaper)
 ### Changed
 - Use last sort flag for sort field from [meain](https://github.com/meain)
+### Fixed
+- Fix group name show in gid from [zwpaper](https://github.com/zwpaper)
+- Fix panic caused by invalid UTF-8 chars in extension from [zwpaper](https://github.com/zwpaper) and [0jdxt](https://github.com/0jdxt)
 
 ## [0.18.0] - 2020-08-29
 ### Added
