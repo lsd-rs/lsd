@@ -302,6 +302,7 @@ impl Icons {
         m.insert("tiff", "\u{f1c5}"); // ""
         m.insert("ts", "\u{e628}"); // ""
         m.insert("tsx", "\u{e7ba}"); // ""
+        m.insert("ttc", "\u{f031}"); // ""
         m.insert("ttf", "\u{f031}"); // ""
         m.insert("twig", "\u{e61c}"); // ""
         m.insert("txt", "\u{f15c}"); // ""
