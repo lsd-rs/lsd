@@ -259,6 +259,13 @@ no-symlink: false
 # Whether to display the total size of directories.
 # Possible values: false, true
 total-size: false
+
+# == Styles ==
+# How lsd looks like
+#
+# symlink-arrow: chars both ascii and utf8
+styles:
+  symlink-arrow: ⇒
 ```
 
 ## External Configurations
