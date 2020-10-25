@@ -362,8 +362,8 @@ fn test_version_sort_overwrite_by_sizesort() {
         .stdout(predicate::str::is_match("11\n2\n$").unwrap());
 }
 
+#[cfg(not(os = "darwin"))]
 #[cfg(test)]
-#[cfg(target_os = "linux")]
 fn bad_utf8(tmp: &std::path::Path, pre: &str, suf: &str) -> String {
     let mut fname = format!("{}/{}", tmp.display(), pre).into_bytes();
     fname.reserve(2 + suf.len());
@@ -373,8 +373,8 @@ fn bad_utf8(tmp: &std::path::Path, pre: &str, suf: &str) -> String {
     unsafe { String::from_utf8_unchecked(fname) }
 }
 
+#[cfg(not(os = "darwin"))]
 #[test]
-#[cfg(target_os = "linux")]
 fn test_bad_utf_8_extension() {
     use std::fs::File;
     let tmp = tempdir();
@@ -387,8 +387,8 @@ fn test_bad_utf_8_extension() {
         .stdout(predicate::str::is_match("bad.extension\u{fffd}\u{fffd}\n$").unwrap());
 }
 
+#[cfg(not(os = "darwin"))]
 #[test]
-#[cfg(target_os = "linux")]
 fn test_bad_utf_8_name() {
     use std::fs::File;
     let tmp = tempdir();
@@ -399,6 +399,24 @@ fn test_bad_utf_8_name() {
         .arg(tmp.path())
         .assert()
         .stdout(predicate::str::is_match("bad-name\u{fffd}\u{fffd}.ext\n$").unwrap());
+}
+
+#[test]
+fn test_tree_d() {
+    let tmp = tempdir();
+    tmp.child("one").touch().unwrap();
+    tmp.child("two").touch().unwrap();
+    tmp.child("one.d").create_dir_all().unwrap();
+    tmp.child("one.d/one").touch().unwrap();
+    tmp.child("one.d/one.d").create_dir_all().unwrap();
+    tmp.child("two.d").create_dir_all().unwrap();
+
+    cmd()
+        .arg(tmp.path())
+        .arg("--tree")
+        .arg("-d")
+        .assert()
+        .stdout(predicate::str::is_match("├── one.d\n│  └── one.d\n└── two.d\n$").unwrap());
 }
 
 fn cmd() -> Command {
