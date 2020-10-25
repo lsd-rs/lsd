@@ -359,7 +359,6 @@ fn test_version_sort_overwrite_by_sizesort() {
         .stdout(predicate::str::is_match("11\n2\n$").unwrap());
 }
 
-#[cfg(test)]
 #[cfg(target_os = "linux")]
 fn bad_utf8(tmp: &std::path::Path, pre: &str, suf: &str) -> String {
     let mut fname = format!("{}/{}", tmp.display(), pre).into_bytes();
@@ -398,12 +397,10 @@ fn test_bad_utf_8_name() {
         .stdout(predicate::str::is_match("bad-name\u{fffd}\u{fffd}.ext\n$").unwrap());
 }
 
-#[cfg(test)]
 fn cmd() -> Command {
     Command::cargo_bin(env!("CARGO_PKG_NAME")).unwrap()
 }
 
-#[cfg(test)]
 fn tempdir() -> assert_fs::TempDir {
     assert_fs::TempDir::new().unwrap()
 }
