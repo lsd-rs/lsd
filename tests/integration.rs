@@ -379,6 +379,7 @@ fn test_bad_utf_8_extension() {
     use std::fs::File;
     let tmp = tempdir();
     let fname = bad_utf8(tmp.path(), "bad.extension", "");
+    File::create(fname).expect("failed to create file");
 
     cmd()
         .arg(tmp.path())
