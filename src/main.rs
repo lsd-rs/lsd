@@ -102,7 +102,7 @@ fn main() {
     let config = if matches.is_present("ignore-config") {
         Config::with_none()
     } else {
-        Config::read_config()
+        Config::default()
     };
     let flags = Flags::configure_from(&matches, &config).unwrap_or_else(|err| err.exit());
     let core = Core::new(flags);

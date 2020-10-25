@@ -51,10 +51,10 @@ impl Config {
 
     /// This tries to read a configuration file like in the XDG_BASE_DIRS specification and returns
     /// the contents of the YAML config file.
-    pub fn read_config() -> Self {
+    pub fn read_config(name: &str) -> Self {
         let config_file_long_path;
         let config_file_short_path;
-        match Self::config_file_paths() {
+        match Self::config_file_paths(name) {
             Some((long, short)) => {
                 config_file_long_path = long;
                 config_file_short_path = short;
@@ -102,7 +102,7 @@ impl Config {
     /// This provides two paths for a configuration file (the first with the long yaml extension,
     /// the second with the short yml extension), according to the XDG_BASE_DIRS specification.
     #[cfg(not(windows))]
-    pub fn config_file_paths() -> Option<(PathBuf, PathBuf)> {
+    pub fn config_file_paths(name: &str) -> Option<(PathBuf, PathBuf)> {
         let base_dirs;
         match BaseDirectories::with_prefix(CONF_DIR) {
             Ok(result) => base_dirs = result,
@@ -110,13 +110,13 @@ impl Config {
         }
 
         let config_file_long_path;
-        match base_dirs.place_config_file([CONF_FILE_NAME, YAML_LONG_EXT].join(".")) {
+        match base_dirs.place_config_file([name, YAML_LONG_EXT].join(".")) {
             Ok(result) => config_file_long_path = result,
             _ => return None,
         }
 
         let config_file_short_path;
-        match base_dirs.place_config_file([CONF_FILE_NAME, YAML_SHORT_EXT].join(".")) {
+        match base_dirs.place_config_file([name, YAML_SHORT_EXT].join(".")) {
             Ok(result) => config_file_short_path = result,
             _ => return None,
         }
@@ -127,7 +127,7 @@ impl Config {
     /// This provides two paths for a configuration file (the first with the long yaml extension,
     /// the second with the short yml extension) inside the %APPDATA% directory.
     #[cfg(windows)]
-    pub fn config_file_paths() -> Option<(PathBuf, PathBuf)> {
+    pub fn config_file_paths(name: &str) -> Option<(PathBuf, PathBuf)> {
         let mut config_file_long_path;
         match dirs::config_dir() {
             Some(path) => config_file_long_path = path,
@@ -137,8 +137,8 @@ impl Config {
         config_file_long_path.push(CONF_DIR);
         let mut config_file_short_path = config_file_long_path.clone();
 
-        config_file_long_path.push([CONF_FILE_NAME, YAML_LONG_EXT].join("."));
-        config_file_short_path.push([CONF_FILE_NAME, YAML_SHORT_EXT].join("."));
+        config_file_long_path.push([name, YAML_LONG_EXT].join("."));
+        config_file_short_path.push([name, YAML_SHORT_EXT].join("."));
 
         Some((config_file_long_path, config_file_short_path))
     }
@@ -171,5 +171,11 @@ impl Config {
             "The {} config value has to be a {}.",
             name, type_name
         ));
+    }
+}
+
+impl Default for Config {
+    fn default() -> Self {
+        Self::read_config(CONF_FILE_NAME)
     }
 }
