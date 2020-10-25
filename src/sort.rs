@@ -211,7 +211,7 @@ mod tests {
             .arg("-Command")
             .arg("$(Get-Item")
             .arg(&path_z)
-            .arg(").lastwritetime=$(Get-Date \"11/16/1985\")")
+            .arg(").lastwritetime=$(Get-Date \"1985-11-16\")")
             .status()
             .unwrap()
             .success();

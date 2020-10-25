@@ -87,11 +87,11 @@ mod test {
 
         Command::new("powershell")
             .arg("-Command")
-            .arg("$(Get-Item")
-            .arg(path)
-            .arg(").lastwritetime=$(Get-Date \"")
-            .arg(date.strftime("%m/%d/%Y %H:%M:%S").unwrap().to_string())
-            .arg("\")")
+            .arg(format!(
+                r#"$(Get-Item {}).lastwritetime=$(Get-Date "{}")"#,
+                path.display(),
+                date.rfc3339()
+            ))
             .status()
     }
 
@@ -174,7 +174,7 @@ mod test {
 
         let creation_date = time::now() - time::Duration::days(2);
 
-        let success = cross_platform_touch(&file_path, &creation_date.to_local())
+        let success = cross_platform_touch(&file_path, &creation_date)
             .unwrap()
             .success();
         assert!(success, "failed to exec touch");
@@ -199,18 +199,7 @@ mod test {
         file_path.push("test_with_relative_date_now.tmp");
 
         let creation_date = time::now();
-
-        let success = Command::new("touch")
-            .arg("-t")
-            .arg(
-                creation_date
-                    .to_local()
-                    .strftime("%Y%m%d%H%M.%S")
-                    .unwrap()
-                    .to_string(),
-            )
-            .arg(&file_path)
-            .status()
+        let success = cross_platform_touch(&file_path, &creation_date)
             .unwrap()
             .success();
         assert_eq!(true, success, "failed to exec touch");
