@@ -15,7 +15,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Fix group name show in gid from [zwpaper](https://github.com/zwpaper)
 - Fix panic caused by invalid UTF-8 chars in extension from [zwpaper](https://github.com/zwpaper) and [0jdxt](https://github.com/0jdxt)
-- Fix localisation issues in running tests from [0jdxt](https://github.com/0jdxt)
 
 ## [0.18.0] - 2020-08-29
 ### Added
