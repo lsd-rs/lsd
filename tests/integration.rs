@@ -362,8 +362,8 @@ fn test_version_sort_overwrite_by_sizesort() {
         .stdout(predicate::str::is_match("11\n2\n$").unwrap());
 }
 
-#[cfg(not(os = "darwin"))]
 #[cfg(test)]
+#[cfg(not(target_os = "mac"))]
 fn bad_utf8(tmp: &std::path::Path, pre: &str, suf: &str) -> String {
     let mut fname = format!("{}/{}", tmp.display(), pre).into_bytes();
     fname.reserve(2 + suf.len());
@@ -373,8 +373,8 @@ fn bad_utf8(tmp: &std::path::Path, pre: &str, suf: &str) -> String {
     unsafe { String::from_utf8_unchecked(fname) }
 }
 
-#[cfg(not(os = "darwin"))]
 #[test]
+#[cfg(not(target_os = "mac"))]
 fn test_bad_utf_8_extension() {
     use std::fs::File;
     let tmp = tempdir();
@@ -387,8 +387,8 @@ fn test_bad_utf_8_extension() {
         .stdout(predicate::str::is_match("bad.extension\u{fffd}\u{fffd}\n$").unwrap());
 }
 
-#[cfg(not(os = "darwin"))]
 #[test]
+#[cfg(not(target_os = "mac"))]
 fn test_bad_utf_8_name() {
     use std::fs::File;
     let tmp = tempdir();
