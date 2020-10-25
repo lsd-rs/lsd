@@ -103,10 +103,10 @@ fn test_list_inode_populated_directory() {
     dir.child("one").touch().unwrap();
     dir.child("two").touch().unwrap();
 
-    #[cfg(unix)]
-    let matched = "\\d+ one\n\\d+ two\n$";
     #[cfg(windows)]
     let matched = "- one\n\\- two\n$";
+    #[cfg(unix)]
+    let matched = "\\d+ one\n\\d+ two\n$";
 
     cmd()
         .arg("--inode")
@@ -128,9 +128,6 @@ fn test_list_block_inode_populated_directory_without_long() {
     dir.child("one").touch().unwrap();
     dir.child("two").touch().unwrap();
 
-    #[cfg(unix)]
-    let matched = "one\ntwo\n$";
-    #[cfg(windows)]
     let matched = "one\ntwo\n$";
 
     cmd()
@@ -148,10 +145,10 @@ fn test_list_block_inode_populated_directory_with_long() {
     dir.child("one").touch().unwrap();
     dir.child("two").touch().unwrap();
 
-    #[cfg(unix)]
-    let matched = "\\d+ one\n\\d+ two\n$";
     #[cfg(windows)]
     let matched = "- one\n\\- two\n$";
+    #[cfg(unix)]
+    let matched = "\\d+ one\n\\d+ two\n$";
 
     cmd()
         .arg("--long")
