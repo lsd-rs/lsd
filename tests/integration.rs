@@ -363,7 +363,7 @@ fn test_version_sort_overwrite_by_sizesort() {
 }
 
 #[cfg(test)]
-#[cfg(not(target_os = "mac"))]
+#[cfg(target_os = "linux")]
 fn bad_utf8(tmp: &std::path::Path, pre: &str, suf: &str) -> String {
     let mut fname = format!("{}/{}", tmp.display(), pre).into_bytes();
     fname.reserve(2 + suf.len());
@@ -374,12 +374,11 @@ fn bad_utf8(tmp: &std::path::Path, pre: &str, suf: &str) -> String {
 }
 
 #[test]
-#[cfg(not(target_os = "mac"))]
+#[cfg(target_os = "linux")]
 fn test_bad_utf_8_extension() {
     use std::fs::File;
     let tmp = tempdir();
     let fname = bad_utf8(tmp.path(), "bad.extension", "");
-    File::create(fname).expect("failed to create file");
 
     cmd()
         .arg(tmp.path())
@@ -388,25 +387,17 @@ fn test_bad_utf_8_extension() {
 }
 
 #[test]
-#[cfg(not(target_os = "mac"))]
+#[cfg(target_os = "linux")]
 fn test_bad_utf_8_name() {
     use std::fs::File;
     let tmp = tempdir();
     let fname = bad_utf8(tmp.path(), "bad-name", ".ext");
     File::create(fname).expect("failed to create file");
 
-    #[cfg(target_os = "linux")]
-    let match_str = "bad-name\u{fffd}\u{fffd}.ext\n$";
-
-    // when the invalid utf8 filename is read on windows,
-    // some bytes are eaten up
-    #[cfg(target_os = "windows")]
-    let match_str = "bad-name\u{fffd}\u{fffd}xt\n$";
-
     cmd()
         .arg(tmp.path())
         .assert()
-        .stdout(predicate::str::is_match(match_str).unwrap());
+        .stdout(predicate::str::is_match("bad-name\u{fffd}\u{fffd}.ext\n$").unwrap());
 }
 
 #[cfg(test)]
