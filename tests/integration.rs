@@ -395,10 +395,18 @@ fn test_bad_utf_8_name() {
     let fname = bad_utf8(tmp.path(), "bad-name", ".ext");
     File::create(fname).expect("failed to create file");
 
+    #[cfg(target_os = "linux")]
+    let match_str = "bad-name\u{fffd}\u{fffd}.ext\n$";
+
+    // when the invalid utf8 filename is read on windows,
+    // some bytes are eaten up
+    #[cfg(target_os = "windows")]
+    let match_str = "bad-name\u{fffd}\u{fffd}xt\n$";
+
     cmd()
         .arg(tmp.path())
         .assert()
-        .stdout(predicate::str::is_match("bad-name\u{fffd}\u{fffd}.ext\n$").unwrap());
+        .stdout(predicate::str::is_match(match_str).unwrap());
 }
 
 #[cfg(test)]
