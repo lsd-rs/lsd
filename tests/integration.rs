@@ -401,28 +401,12 @@ fn test_bad_utf_8_name() {
         .stdout(predicate::str::is_match("bad-name\u{fffd}\u{fffd}.ext\n$").unwrap());
 }
 
-#[test]
-fn test_tree_d() {
-    let tmp = tempdir();
-    tmp.child("one").touch().unwrap();
-    tmp.child("two").touch().unwrap();
-    tmp.child("one.d").create_dir_all().unwrap();
-    tmp.child("one.d/one").touch().unwrap();
-    tmp.child("one.d/one.d").create_dir_all().unwrap();
-    tmp.child("two.d").create_dir_all().unwrap();
-
-    cmd()
-        .arg(tmp.path())
-        .arg("--tree")
-        .arg("-d")
-        .assert()
-        .stdout(predicate::str::is_match("├── one.d\n│  └── one.d\n└── two.d\n$").unwrap());
-}
-
+#[cfg(test)]
 fn cmd() -> Command {
     Command::cargo_bin(env!("CARGO_PKG_NAME")).unwrap()
 }
 
+#[cfg(test)]
 fn tempdir() -> assert_fs::TempDir {
     assert_fs::TempDir::new().unwrap()
 }
