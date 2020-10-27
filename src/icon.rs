@@ -75,38 +75,17 @@ impl Icons {
             "\u{fc29}" // "ﰩ"
         } else if let FileType::Special = file_type {
             "\u{f2dc}" // ""
-        } else if let Some(icon) = self.icons_by_name.get(name.file_name()) {
-            // Use the known names.
-            icon
         } else if let Some(icon) = self
             .icons_by_name
             .get(String::from(name.file_name()).to_lowercase().as_str())
         {
-            // Use the known lower-case names.
-            icon
-        } else if let Some(icon) = self
-            .icons_by_name
-            .get(String::from(name.file_name()).to_uppercase().as_str())
-        {
-            // Use the known upper-case names.
-            icon
-        } else if let Some(icon) = name
-            .extension()
-            .and_then(|extension| self.icons_by_extension.get(extension))
-        {
-            // Use the known extensions.
+            // Use the known names.
             icon
         } else if let Some(icon) = name.extension().and_then(|extension| {
             self.icons_by_extension
                 .get(String::from(extension).to_lowercase().as_str())
         }) {
-            // Use the known lower-case extensions.
-            icon
-        } else if let Some(icon) = name.extension().and_then(|extension| {
-            self.icons_by_extension
-                .get(String::from(extension).to_uppercase().as_str())
-        }) {
-            // Use the known upper-case extensions.
+            // Use the known extensions.
             icon
         } else {
             // Use the default icons.
@@ -119,7 +98,9 @@ impl Icons {
     fn get_default_icons_by_name() -> HashMap<&'static str, &'static str> {
         let mut m = HashMap::new();
 
-        m.insert(".Trash", "\u{f1f8}"); // ""
+        // Note: filenames must be lower-case
+
+        m.insert(".trash", "\u{f1f8}"); // ""
         m.insert(".atom", "\u{e764}"); // ""
         m.insert(".bashprofile", "\u{e615}"); // ""
         m.insert(".bashrc", "\u{f489}"); // ""
@@ -159,6 +140,8 @@ impl Icons {
 
     fn get_default_icons_by_extension() -> HashMap<&'static str, &'static str> {
         let mut m = HashMap::new();
+
+        // Note: extensions must be lower-case
 
         m.insert("7z", "\u{f410}"); // ""
         m.insert("apk", "\u{e70e}"); // ""
