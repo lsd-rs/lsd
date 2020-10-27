@@ -151,7 +151,7 @@ mod test {
 
     use super::SymlinkArrow;
     #[test]
-    fn test_from_config_arrow_utf8() {
+    fn test_symlink_arrow_from_config_utf8() {
         let yaml_string = "styles:
   symlink-arrow: ↹";
         let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
@@ -159,5 +159,35 @@ mod test {
             Some(SymlinkArrow(String::from("\u{21B9}"))),
             SymlinkArrow::from_config(&Config::with_yaml(yaml))
         );
+    }
+
+    #[test]
+    fn test_symlink_arrow_from_config_type_error() {
+        let yaml_string = "styles:
+  symlink-arrow: false";
+        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
+        assert_eq!(None, SymlinkArrow::from_config(&Config::with_yaml(yaml)));
+    }
+
+    #[test]
+    fn test_symlink_arrow_from_args_none() {
+        use clap::App;
+        assert_eq!(
+            None,
+            SymlinkArrow::from_arg_matches(&App::new("lsd").get_matches())
+        );
+    }
+
+    #[test]
+    fn test_symlink_arrow_default() {
+        assert_eq!(
+            SymlinkArrow(String::from("\u{21d2}")),
+            SymlinkArrow::default()
+        );
+    }
+
+    #[test]
+    fn test_symlink_display() {
+        assert_eq!("⇒", format!("{}", SymlinkArrow::default()));
     }
 }

@@ -72,3 +72,47 @@ impl SymLink {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::Styles;
+    use super::SymLink;
+    use crate::color::{Colors, Theme};
+    use crate::flags::symlinks::SymlinkArrow;
+
+    #[test]
+    fn test_symlink_render_default_valid_target_nocolor() {
+        let link = SymLink {
+            target: Some("/target".to_string()),
+            valid: true,
+        };
+        assert_eq!(
+            format!("{}", " ⇒ /target"),
+            link.render(
+                &Colors::new(Theme::NoColor),
+                &Styles {
+                    symlink_arrow: SymlinkArrow::default()
+                }
+            )
+            .to_string()
+        );
+    }
+
+    #[test]
+    fn test_symlink_render_default_invalid_target_nocolor() {
+        let link = SymLink {
+            target: Some("/target".to_string()),
+            valid: false,
+        };
+        assert_eq!(
+            format!("{}", " ⇒ /target"),
+            link.render(
+                &Colors::new(Theme::NoColor),
+                &Styles {
+                    symlink_arrow: SymlinkArrow::default()
+                }
+            )
+            .to_string()
+        );
+    }
+}
