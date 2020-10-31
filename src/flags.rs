@@ -10,6 +10,7 @@ pub mod layout;
 pub mod recursion;
 pub mod size;
 pub mod sorting;
+pub mod styling;
 pub mod symlinks;
 pub mod total_size;
 
@@ -32,8 +33,8 @@ pub use sorting::DirGrouping;
 pub use sorting::SortColumn;
 pub use sorting::SortOrder;
 pub use sorting::Sorting;
+pub use styling::SymlinkArrow;
 pub use symlinks::NoSymlink;
-pub use symlinks::SymlinkArrow;
 pub use total_size::TotalSize;
 
 use crate::config_file::Config;

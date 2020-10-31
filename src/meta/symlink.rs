@@ -78,7 +78,7 @@ mod tests {
     use super::Styles;
     use super::SymLink;
     use crate::color::{Colors, Theme};
-    use crate::flags::symlinks::SymlinkArrow;
+    use crate::flags::styling::SymlinkArrow;
 
     #[test]
     fn test_symlink_render_default_valid_target_nocolor() {
