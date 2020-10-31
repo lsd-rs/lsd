@@ -260,11 +260,11 @@ no-symlink: false
 # Possible values: false, true
 total-size: false
 
-# == Styles ==
+# == Styling ==
 # How lsd looks like
 #
 # symlink-arrow: chars both ascii and utf8
-styles:
+styling:
   symlink-arrow: ⇒
 ```
 
