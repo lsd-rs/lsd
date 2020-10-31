@@ -5,9 +5,9 @@ use super::Configurable;
 
 use crate::app;
 use crate::config_file::Config;
+use crate::print_error;
 
 use clap::ArgMatches;
-use yaml_rust::Yaml;
 
 /// The flag showing which kind of time stamps to display.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -24,7 +24,7 @@ impl DateFlag {
         match app::validate_time_format(&value) {
             Ok(()) => Some(Self::Formatted(value[1..].to_string())),
             _ => {
-                config.print_warning(&format!("Not a valid date format: {}", value));
+                print_error!("Not a valid date format: {}", value);
                 None
             }
         }
@@ -38,7 +38,7 @@ impl DateFlag {
             "relative" => Some(Self::Relative),
             _ if value.starts_with('+') => Self::from_format_string(&value, &config),
             _ => {
-                config.print_warning(&format!("Not a valid date value: {}", value));
+                print_error!("Not a valid date value: {}", value);
                 None
             }
         }
@@ -76,22 +76,8 @@ impl Configurable<Self> for DateFlag {
     /// is one of "date" or "relative", this returns its corresponding variant in a [Some].
     /// Otherwise this returns [None].
     fn from_config(config: &Config) -> Option<Self> {
-        if let Some(yaml) = &config.yaml {
-            if let Yaml::Boolean(true) = &yaml["classic"] {
-                Some(Self::Date)
-            } else {
-                match &yaml["date"] {
-                    Yaml::BadValue => None,
-                    Yaml::String(value) => Self::from_yaml_string(&value, &config),
-                    _ => {
-                        config.print_wrong_type_warning("date", "string");
-                        None
-                    }
-                }
-            }
-        } else {
-            None
-        }
+        // TODO(zhangwei)
+        None
     }
 }
 
@@ -170,7 +156,7 @@ mod test {
     fn test_from_config_empty() {
         let yaml_string = "---";
         let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
-        assert_eq!(None, DateFlag::from_config(&Config::with_yaml(yaml)));
+        assert_eq!(None, DateFlag::from_config(&Config::with_none()));
     }
 
     #[test]
@@ -179,7 +165,7 @@ mod test {
         let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
         assert_eq!(
             Some(DateFlag::Date),
-            DateFlag::from_config(&Config::with_yaml(yaml))
+            DateFlag::from_config(&Config::with_none())
         );
     }
 
@@ -189,7 +175,7 @@ mod test {
         let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
         assert_eq!(
             Some(DateFlag::Relative),
-            DateFlag::from_config(&Config::with_yaml(yaml))
+            DateFlag::from_config(&Config::with_none())
         );
     }
 
@@ -199,7 +185,7 @@ mod test {
         let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
         assert_eq!(
             Some(DateFlag::Formatted("%F".to_string())),
-            DateFlag::from_config(&Config::with_yaml(yaml))
+            DateFlag::from_config(&Config::with_none())
         );
     }
 
@@ -207,7 +193,7 @@ mod test {
     fn test_from_config_format_invalid() {
         let yaml_string = "date: +%J";
         let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
-        assert_eq!(None, DateFlag::from_config(&Config::with_yaml(yaml)));
+        assert_eq!(None, DateFlag::from_config(&Config::with_none()));
     }
 
     #[test]
@@ -216,7 +202,7 @@ mod test {
         let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
         assert_eq!(
             Some(DateFlag::Date),
-            DateFlag::from_config(&Config::with_yaml(yaml))
+            DateFlag::from_config(&Config::with_none())
         );
     }
 }

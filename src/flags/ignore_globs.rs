@@ -5,7 +5,6 @@ use crate::config_file::Config;
 
 use clap::{ArgMatches, Error, ErrorKind};
 use globset::{Glob, GlobSet, GlobSetBuilder};
-use yaml_rust::Yaml;
 
 /// The struct holding a [GlobSet] and methods to build it.
 #[derive(Clone, Debug)]
@@ -29,7 +28,7 @@ impl IgnoreGlobs {
     pub fn configure_from(matches: &ArgMatches, config: &Config) -> Result<Self, Error> {
         let mut result: Result<Self, Error> = Ok(Default::default());
 
-        if config.has_yaml() {
+        if !matches.is_present("ignore-config") {
             if let Some(value) = Self::from_config(config) {
                 match value {
                     Ok(glob_set) => result = Ok(Self(glob_set)),
@@ -82,31 +81,8 @@ impl IgnoreGlobs {
     /// encountered while building, an [Error] is returned in the Result instead. If the Yaml does
     /// not contain such a key, this returns [None].
     fn from_config(config: &Config) -> Option<Result<GlobSet, Error>> {
-        if let Some(yaml) = &config.yaml {
-            match &yaml["ignore-globs"] {
-                Yaml::BadValue => None,
-                Yaml::Array(values) => {
-                    let mut glob_set_builder = GlobSetBuilder::new();
-                    for yaml_str in values.iter() {
-                        if let Yaml::String(value) = yaml_str {
-                            match Self::create_glob(value) {
-                                Ok(glob) => {
-                                    glob_set_builder.add(glob);
-                                }
-                                Err(err) => return Some(Err(err)),
-                            }
-                        }
-                    }
-                    Some(Self::create_glob_set(&glob_set_builder))
-                }
-                _ => {
-                    config.print_wrong_type_warning("ignore-globs", "string");
-                    None
-                }
-            }
-        } else {
-            None
-        }
+        // TODO(zhangwei)
+        None
     }
 
     /// Create a [Glob] from a provided pattern.
@@ -180,7 +156,7 @@ mod test {
     fn test_from_config_empty() {
         let yaml_string = "---";
         let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
-        assert!(match IgnoreGlobs::from_config(&Config::with_yaml(yaml)) {
+        assert!(match IgnoreGlobs::from_config(&Config::with_none()) {
             None => true,
             _ => false,
         });

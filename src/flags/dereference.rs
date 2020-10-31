@@ -6,7 +6,6 @@ use super::Configurable;
 use crate::config_file::Config;
 
 use clap::ArgMatches;
-use yaml_rust::Yaml;
 
 /// The flag showing whether to dereference symbolic links.
 #[derive(Clone, Debug, Copy, PartialEq, Eq, Default)]
@@ -31,18 +30,8 @@ impl Configurable<Self> for Dereference {
     /// "dereference", this returns its value as the value of the `Dereference`, in a [Some].
     /// Otherwise this returns [None].
     fn from_config(config: &Config) -> Option<Self> {
-        if let Some(yaml) = &config.yaml {
-            match &yaml["dereference"] {
-                Yaml::BadValue => None,
-                Yaml::Boolean(value) => Some(Self(*value)),
-                _ => {
-                    config.print_wrong_type_warning("dereference", "boolean");
-                    None
-                }
-            }
-        } else {
-            None
-        }
+        // TODO(zhangwei)
+        None
     }
 }
 
@@ -82,7 +71,7 @@ mod test {
     fn test_from_config_empty() {
         let yaml_string = "---";
         let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
-        assert_eq!(None, Dereference::from_config(&Config::with_yaml(yaml)));
+        assert_eq!(None, Dereference::from_config(&Config::with_none()));
     }
 
     #[test]
@@ -91,7 +80,7 @@ mod test {
         let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
         assert_eq!(
             Some(Dereference(true)),
-            Dereference::from_config(&Config::with_yaml(yaml))
+            Dereference::from_config(&Config::with_none())
         );
     }
 
@@ -101,7 +90,7 @@ mod test {
         let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
         assert_eq!(
             Some(Dereference(false)),
-            Dereference::from_config(&Config::with_yaml(yaml))
+            Dereference::from_config(&Config::with_none())
         );
     }
 }

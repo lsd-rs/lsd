@@ -1,181 +1,171 @@
+use serde::Deserialize;
+use serde_yaml::Sequence;
+use std::error::Error;
 ///! This module provides methods to handle the program's config files and operations related to
 ///! this.
-use std::fs::File;
-use std::io::prelude::*;
+use std::fs;
+use std::io::BufReader;
 use std::path::PathBuf;
+use xdg::BaseDirectories;
 
 use crate::print_error;
-
-#[cfg(not(windows))]
-use xdg::BaseDirectories;
-use yaml_rust::{Yaml, YamlLoader};
 
 const CONF_DIR: &str = "lsd";
 const CONF_FILE_NAME: &str = "config";
 const YAML_LONG_EXT: &str = "yaml";
-const YAML_SHORT_EXT: &str = "yml";
 
 /// A struct to hold an optional file path [String] and an optional [Yaml], and provides methods
 /// around error handling in a config file.
-#[derive(Clone, Debug)]
+#[derive(Debug, Deserialize)]
 pub struct Config {
-    pub file: Option<String>,
-    pub yaml: Option<Yaml>,
+    pub classic: Option<bool>,
+    pub blocks: Option<Sequence>,
+    pub color: Option<Color>,
+    pub date: Option<String>, // enum?
+    pub dereference: Option<bool>,
+    pub display: Option<String>, // enum?
+    pub icons: Option<Icons>,
+    pub ignore_globs: Option<Sequence>,
+    pub indicators: Option<bool>,
+    pub layout: Option<String>, // enum?
+    pub recursion: Option<Recursion>,
+    pub size: Option<String>, // enum?
+    pub sorting: Option<Sorting>,
+    pub no_symlink: Option<bool>,
+    pub total_size: Option<bool>,
+    pub styling: Option<Styling>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct Color {
+    pub when: String, // enum?
+}
+
+#[derive(Debug, Deserialize)]
+pub struct Icons {
+    pub when: String, // enum?
+    pub theme: String,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct Recursion {
+    pub enabled: bool,
+    pub depth: i32,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct Sorting {
+    pub column: String, // enum?
+    pub reverse: bool,
+    pub dir_grouping: String, // enum?
+}
+
+#[derive(Debug, Deserialize)]
+pub struct Styling {
+    pub symlink_arrow: bool,
 }
 
 impl Config {
     /// This constructs a Config struct without a file [String] and without a [Yaml].
     pub fn with_none() -> Self {
-        Self {
-            file: None,
-            yaml: None,
-        }
+        Self::default()
     }
 
     /// This constructs a Config struct with a passed file [String] and without a [Yaml].
-    pub fn with_file(file: String) -> Self {
-        Self {
-            file: Some(file),
-            yaml: None,
+    // TODO(zhangwei) Box<Error>
+    pub fn with_file(file: String) -> Option<Self> {
+        match fs::read(&file) {
+            Ok(f) => Self::with_yaml(&String::from_utf8_lossy(&f)),
+            Err(e) => {
+                match e.kind() {
+                    std::io::ErrorKind::NotFound => {}
+                    _ => print_error!("bad config file: {}, {}\n", &file, e),
+                };
+                None
+            }
         }
     }
 
     /// This constructs a Config struct with a passed [Yaml] and without a file [String].
-    #[cfg(test)]
-    pub fn with_yaml(yaml: Yaml) -> Self {
-        Self {
-            file: None,
-            yaml: Some(yaml),
-        }
-    }
-
-    /// This tries to read a configuration file like in the XDG_BASE_DIRS specification and returns
-    /// the contents of the YAML config file.
-    pub fn read_config(name: &str) -> Self {
-        let config_file_long_path;
-        let config_file_short_path;
-        match Self::config_file_paths(name) {
-            Some((long, short)) => {
-                config_file_long_path = long;
-                config_file_short_path = short;
-            }
-            _ => return Self::with_none(),
-        }
-
-        let mut out_config;
-        let mut config_file;
-        match File::open(&config_file_long_path) {
-            Ok(result) => {
-                config_file = result;
-                out_config = Self::with_file(config_file_long_path.as_path().display().to_string());
-            }
-            Err(_) => match File::open(&config_file_short_path) {
-                Ok(result) => {
-                    config_file = result;
-                    out_config =
-                        Self::with_file(config_file_short_path.as_path().display().to_string());
-                }
-                Err(_) => return Self::with_none(),
-            },
-        }
-
-        let mut config_content = String::new();
-        if let Err(error) = config_file.read_to_string(&mut config_content) {
-            print_error!("Found a config file, but could not read it: {}", error);
-            return out_config;
-        }
-
-        match YamlLoader::load_from_str(&config_content) {
-            Ok(result) => {
-                if !result.is_empty() {
-                    out_config.yaml = Some(result[0].clone());
-                }
-                out_config
-            }
-            Err(error) => {
-                print_error!("Error parsing config: {}\n", error);
-                out_config
+    fn with_yaml(yaml: &str) -> Option<Self> {
+        match serde_yaml::from_str(yaml) {
+            Ok(c) => Some(c),
+            Err(e) => {
+                print_error!("configuration file format error, {}\n\n", e);
+                None
             }
         }
     }
 
-    /// This provides two paths for a configuration file (the first with the long yaml extension,
-    /// the second with the short yml extension), according to the XDG_BASE_DIRS specification.
+    /// This provides the path for a configuration file, according to the XDG_BASE_DIRS specification.
+    /// not checking the error because this is static
     #[cfg(not(windows))]
-    pub fn config_file_paths(name: &str) -> Option<(PathBuf, PathBuf)> {
-        let base_dirs;
-        match BaseDirectories::with_prefix(CONF_DIR) {
-            Ok(result) => base_dirs = result,
-            _ => return None,
-        }
-
-        let config_file_long_path;
-        match base_dirs.place_config_file([name, YAML_LONG_EXT].join(".")) {
-            Ok(result) => config_file_long_path = result,
-            _ => return None,
-        }
-
-        let config_file_short_path;
-        match base_dirs.place_config_file([name, YAML_SHORT_EXT].join(".")) {
-            Ok(result) => config_file_short_path = result,
-            _ => return None,
-        }
-
-        Some((config_file_long_path, config_file_short_path))
+    fn config_file_path() -> PathBuf {
+        BaseDirectories::with_prefix(CONF_DIR)
+            .unwrap()
+            .place_config_file([CONF_FILE_NAME, YAML_LONG_EXT].join("."))
+            .unwrap()
     }
 
-    /// This provides two paths for a configuration file (the first with the long yaml extension,
-    /// the second with the short yml extension) inside the %APPDATA% directory.
+    /// This provides the path for a configuration file, inside the %APPDATA% directory.
+    /// not checking the error because this is static
     #[cfg(windows)]
-    pub fn config_file_paths(name: &str) -> Option<(PathBuf, PathBuf)> {
-        let mut config_file_long_path;
-        match dirs::config_dir() {
-            Some(path) => config_file_long_path = path,
-            _ => return None,
-        }
-
-        config_file_long_path.push(CONF_DIR);
-        let mut config_file_short_path = config_file_long_path.clone();
-
-        config_file_long_path.push([name, YAML_LONG_EXT].join("."));
-        config_file_short_path.push([name, YAML_SHORT_EXT].join("."));
-
-        Some((config_file_long_path, config_file_short_path))
-    }
-
-    /// Returns whether the Config has a [Yaml].
-    pub fn has_yaml(&self) -> bool {
-        self.yaml.is_some()
-    }
-
-    /// This prints the provided warning message to stderr, prepending the executable name and the
-    /// configuration file path that likely caused the warning.
-    pub fn print_warning(&self, message: &str) {
-        print_error!(
-            "lsd: {} - {}\n",
-            self.file.as_ref().unwrap_or(&String::from("")),
-            message
-        );
-    }
-
-    /// This prints a predetermined warning message to stderr, warning about an invalid value for a
-    /// configuration element.
-    pub fn print_invalid_value_warning(&self, name: &str, value: &str) {
-        self.print_warning(&format!("Not a valid {} value: {}", name, value));
-    }
-
-    /// This prints a predetermined warning message to stderr, warning about a wrong [Yaml] data
-    /// type for a configuration value.
-    pub fn print_wrong_type_warning(&self, name: &str, type_name: &str) {
-        self.print_warning(&format!(
-            "The {} config value has to be a {}.",
-            name, type_name
-        ));
+    fn config_file_path() -> PathBuf {
+        dirs::config_dir()
+            .unwrap()
+            .join(CONF_DIR)
+            .join(CONF_FILE_NAME)
+            .set_extension(YAML_LONG_EXT)
     }
 }
 
 impl Default for Config {
     fn default() -> Self {
-        Self::read_config(CONF_FILE_NAME)
+        if let Some(c) = Self::with_file(Self::config_file_path().to_string_lossy().to_string()) {
+            c
+        } else {
+            Config {
+                classic: Some(false),
+                blocks: None,
+                color: None,
+                date: None,
+                dereference: None,
+                display: None,
+                icons: None,
+                ignore_globs: None,
+                indicators: None,
+                layout: None,
+                recursion: None,
+                size: None,
+                sorting: None,
+                no_symlink: None,
+                total_size: None,
+                styling: None,
+            }
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::Config;
+    #[test]
+    fn test_read_config_ok() {
+        let c = Config::with_yaml("classic: true").unwrap();
+        println!("{:?}", c);
+        assert!(c.classic.unwrap())
+    }
+
+    #[test]
+    fn test_read_config_bad_bool() {
+        let c = Config::with_yaml("classic: notbool");
+        println!("{:?}", c);
+        assert!(c.is_some())
+    }
+
+    #[test]
+    fn test_read_config_file_not_found() {
+        let c = Config::with_file("not-existed".to_string());
+        assert!(c.is_none())
     }
 }

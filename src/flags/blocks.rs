@@ -6,7 +6,6 @@ use std::convert::TryFrom;
 use crate::config_file::Config;
 
 use clap::{ArgMatches, Error, ErrorKind};
-use yaml_rust::Yaml;
 
 /// A struct to hold a [Vec] of [Block]s and to provide methods to create it.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -41,7 +40,7 @@ impl Blocks {
         };
 
         if matches.is_present("long") {
-            if config.has_yaml() {
+            if !matches.is_present("ignore-config") {
                 if let Some(value) = Self::from_config(config) {
                     result = Ok(value);
                 }
@@ -101,15 +100,8 @@ impl Blocks {
     /// of its [String](Yaml::String) values is returned in a `Blocks` in a [Some]. Otherwise it
     /// returns [None].
     fn from_config(config: &Config) -> Option<Self> {
-        if let Some(yaml) = &config.yaml {
-            match &yaml["blocks"] {
-                Yaml::BadValue => None,
-                Yaml::Array(values) => Self::from_yaml_array(values, config),
-                _ => {
-                    config.print_wrong_type_warning("blocks", "array");
-                    None
-                }
-            }
+        if let Some(c) = &config.blocks {
+            None
         } else {
             None
         }
@@ -117,23 +109,23 @@ impl Blocks {
 
     /// Get a [Blocks] from a [Yaml] array. The [Config] is used to log warnings about wrong values
     /// in a Yaml.
-    fn from_yaml_array(values: &[Yaml], config: &Config) -> Option<Self> {
-        let mut blocks: Vec<Block> = vec![];
-        for array_el in values.iter() {
-            match array_el {
-                Yaml::String(value) => match Block::try_from(value.as_str()) {
-                    Ok(block) => blocks.push(block),
-                    Err(err) => config.print_warning(&err),
-                },
-                _ => config.print_warning("The blocks config values have to be strings."),
-            }
-        }
-        if blocks.is_empty() {
-            None
-        } else {
-            Some(Self(blocks))
-        }
-    }
+    // fn from_yaml_array(values: &[Yaml], config: &Config) -> Option<Self> {
+    //     let mut blocks: Vec<Block> = vec![];
+    //     for array_el in values.iter() {
+    //         match array_el {
+    //             Yaml::String(value) => match Block::try_from(value.as_str()) {
+    //                 Ok(block) => blocks.push(block),
+    //                 Err(err) => config.print_warning(&err),
+    //             },
+    //             _ => config.print_warning("The blocks config values have to be strings."),
+    //         }
+    //     }
+    //     if blocks.is_empty() {
+    //         None
+    //     } else {
+    //         Some(Self(blocks))
+    //     }
+    // }
 
     /// This returns a Blocks struct for the long format.
     ///
@@ -424,7 +416,7 @@ mod test_blocks {
     fn test_from_config_empty() {
         let yaml_string = "---";
         let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
-        assert_eq!(None, Blocks::from_config(&Config::with_yaml(yaml)));
+        assert_eq!(None, Blocks::from_config(&Config::with_none()));
     }
 
     #[test]
@@ -432,7 +424,7 @@ mod test_blocks {
         let yaml_string = "blocks:\n  - permission";
         let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
         let blocks = Blocks(vec![Block::Permission]);
-        assert_eq!(Some(blocks), Blocks::from_config(&Config::with_yaml(yaml)));
+        assert_eq!(Some(blocks), Blocks::from_config(&Config::with_none()));
     }
 
     #[test]
@@ -454,7 +446,7 @@ mod test_blocks {
             Block::User,
             Block::Permission,
         ]);
-        assert_eq!(Some(blocks), Blocks::from_config(&Config::with_yaml(yaml)));
+        assert_eq!(Some(blocks), Blocks::from_config(&Config::with_none()));
     }
 
     #[test]
@@ -466,7 +458,7 @@ mod test_blocks {
 ";
         let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
         let blocks = Blocks(vec![Block::Permission, Block::Group, Block::Date]);
-        assert_eq!(Some(blocks), Blocks::from_config(&Config::with_yaml(yaml)));
+        assert_eq!(Some(blocks), Blocks::from_config(&Config::with_none()));
     }
 
     #[test]
@@ -478,7 +470,7 @@ mod test_blocks {
 ";
         let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
         let blocks = Blocks(vec![Block::Permission, Block::Date]);
-        assert_eq!(Some(blocks), Blocks::from_config(&Config::with_yaml(yaml)));
+        assert_eq!(Some(blocks), Blocks::from_config(&Config::with_none()));
     }
 }
 

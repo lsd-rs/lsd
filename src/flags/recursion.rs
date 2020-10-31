@@ -4,7 +4,6 @@
 use crate::config_file::Config;
 
 use clap::{ArgMatches, Error, ErrorKind};
-use yaml_rust::Yaml;
 
 /// The options relating to recursion.
 #[derive(Clone, Debug, Copy, PartialEq, Eq)]
@@ -43,11 +42,11 @@ impl Recursion {
     fn enabled_from(matches: &ArgMatches, config: &Config) -> bool {
         let mut result: bool = Default::default();
 
-        if config.has_yaml() {
-            if let Some(value) = Self::enabled_from_config(config) {
-                result = value;
-            }
-        }
+        // if config.has_yaml() {
+        //     if let Some(value) = Self::enabled_from_config(config) {
+        //         result = value;
+        //     }
+        // }
 
         if let Some(value) = Self::enabled_from_arg_matches(matches) {
             result = value;
@@ -73,18 +72,8 @@ impl Recursion {
     /// If the Config's [Yaml] contains a [Boolean](Yaml::Boolean) value pointed to by "recursion"
     /// -> "enabled", this returns its value in a [Some]. Otherwise this returns [None].
     fn enabled_from_config(config: &Config) -> Option<bool> {
-        if let Some(yaml) = &config.yaml {
-            match &yaml["recursion"]["enabled"] {
-                Yaml::BadValue => None,
-                Yaml::Boolean(value) => Some(*value),
-                _ => {
-                    config.print_wrong_type_warning("recursion->enabled", "boolean");
-                    None
-                }
-            }
-        } else {
-            None
-        }
+        // TODO(zhangwei):
+        None
     }
 
     /// Get the "depth" integer from [ArgMatches], a [Config] or the [Default] value. The first
@@ -105,11 +94,11 @@ impl Recursion {
     fn depth_from(matches: &ArgMatches, config: &Config) -> Result<usize, Error> {
         let mut result: Result<usize, Error> = Ok(usize::max_value());
 
-        if config.has_yaml() {
-            if let Some(value) = Self::depth_from_config(config) {
-                result = Ok(value);
-            }
-        }
+        // if config.has_yaml() {
+        //     if let Some(value) = Self::depth_from_config(config) {
+        //         result = Ok(value);
+        //     }
+        // }
 
         if let Some(value) = Self::depth_from_arg_matches(matches) {
             result = value;
@@ -148,27 +137,8 @@ impl Recursion {
     /// If the Config's [Yaml] contains a positive [Integer](Yaml::Integer) value pointed to by
     /// "recursion" -> "depth", this returns its value in a [Some]. Otherwise this returns [None].
     fn depth_from_config(config: &Config) -> Option<usize> {
-        if let Some(yaml) = &config.yaml {
-            match &yaml["recursion"]["depth"] {
-                Yaml::BadValue => None,
-                Yaml::Integer(value) => {
-                    if *value > 0 {
-                        Some(*value as usize)
-                    } else {
-                        config.print_warning(
-                            "The recursion->depth value has to be greater than zero.",
-                        );
-                        None
-                    }
-                }
-                _ => {
-                    config.print_wrong_type_warning("recursion->depth", "integer");
-                    None
-                }
-            }
-        } else {
-            None
-        }
+        // TODO(zhangwei):
+        None
     }
 }
 
@@ -217,7 +187,7 @@ mod test {
         let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
         assert_eq!(
             None,
-            Recursion::enabled_from_config(&Config::with_yaml(yaml))
+            Recursion::enabled_from_config(&Config::with_none())
         );
     }
 
@@ -227,7 +197,7 @@ mod test {
         let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
         assert_eq!(
             Some(true),
-            Recursion::enabled_from_config(&Config::with_yaml(yaml))
+            Recursion::enabled_from_config(&Config::with_none())
         );
     }
 
@@ -237,7 +207,7 @@ mod test {
         let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
         assert_eq!(
             Some(false),
-            Recursion::enabled_from_config(&Config::with_yaml(yaml))
+            Recursion::enabled_from_config(&Config::with_none())
         );
     }
 
@@ -308,7 +278,7 @@ mod test {
     fn test_depth_from_config_empty() {
         let yaml_string = "---";
         let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
-        assert_eq!(None, Recursion::depth_from_config(&Config::with_yaml(yaml)));
+        assert_eq!(None, Recursion::depth_from_config(&Config::with_none()));
     }
 
     #[test]
@@ -317,7 +287,7 @@ mod test {
         let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
         assert_eq!(
             Some(42),
-            Recursion::depth_from_config(&Config::with_yaml(yaml))
+            Recursion::depth_from_config(&Config::with_none())
         );
     }
 
@@ -325,13 +295,13 @@ mod test {
     fn test_depth_from_config_neg_integer() {
         let yaml_string = "recursion:\n  depth: -42";
         let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
-        assert_eq!(None, Recursion::depth_from_config(&Config::with_yaml(yaml)));
+        assert_eq!(None, Recursion::depth_from_config(&Config::with_none()));
     }
 
     #[test]
     fn test_depth_from_config_string() {
         let yaml_string = "recursion:\n  depth: foo";
         let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
-        assert_eq!(None, Recursion::depth_from_config(&Config::with_yaml(yaml)));
+        assert_eq!(None, Recursion::depth_from_config(&Config::with_none()));
     }
 }
