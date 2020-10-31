@@ -4,9 +4,9 @@
 use super::Configurable;
 
 use crate::config_file::Config;
+use crate::print_error;
 
 use clap::ArgMatches;
-use yaml_rust::Yaml;
 
 /// A collection of flags on how to use colors.
 #[derive(Clone, Debug, Copy, PartialEq, Eq, Default)]
@@ -42,7 +42,7 @@ impl ColorOption {
             "auto" => Some(Self::Auto),
             "never" => Some(Self::Never),
             _ => {
-                config.print_invalid_value_warning("color->when", &value);
+                print_error!("color->when: {}", &value);
                 None
             }
         }
@@ -78,22 +78,11 @@ impl Configurable<Self> for ColorOption {
     /// "when" and it is one of "always", "auto" or "never", this returns its corresponding variant
     /// in a [Some]. Otherwise this returns [None].
     fn from_config(config: &Config) -> Option<Self> {
-        if let Some(yaml) = &config.yaml {
-            if let Yaml::Boolean(true) = &yaml["classic"] {
-                Some(Self::Never)
-            } else {
-                match &yaml["color"]["when"] {
-                    Yaml::BadValue => None,
-                    Yaml::String(value) => Self::from_yaml_string(&value, &config),
-                    _ => {
-                        config.print_wrong_type_warning("color->when", "string");
-                        None
-                    }
-                }
-            }
-        } else {
-            None
+        if let Some(_c) = &config.color {
+            // TODO(zhangwei)
+            return None
         }
+        None
     }
 }
 
@@ -170,7 +159,7 @@ mod test_color_option {
     fn test_from_config_empty() {
         let yaml_string = "---";
         let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
-        assert_eq!(None, ColorOption::from_config(&Config::with_yaml(yaml)));
+        assert_eq!(None, ColorOption::from_config(&Config::with_none()));
     }
 
     #[test]
@@ -179,7 +168,7 @@ mod test_color_option {
         let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
         assert_eq!(
             Some(ColorOption::Always),
-            ColorOption::from_config(&Config::with_yaml(yaml))
+            ColorOption::from_config(&Config::with_none())
         );
     }
 
@@ -189,7 +178,7 @@ mod test_color_option {
         let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
         assert_eq!(
             Some(ColorOption::Auto),
-            ColorOption::from_config(&Config::with_yaml(yaml))
+            ColorOption::from_config(&Config::with_none())
         );
     }
 
@@ -199,7 +188,7 @@ mod test_color_option {
         let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
         assert_eq!(
             Some(ColorOption::Never),
-            ColorOption::from_config(&Config::with_yaml(yaml))
+            ColorOption::from_config(&Config::with_none())
         );
     }
 
@@ -209,7 +198,7 @@ mod test_color_option {
         let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
         assert_eq!(
             Some(ColorOption::Never),
-            ColorOption::from_config(&Config::with_yaml(yaml))
+            ColorOption::from_config(&Config::with_none())
         );
     }
 }

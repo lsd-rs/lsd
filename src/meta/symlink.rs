@@ -95,7 +95,7 @@ mod tests {
             format!("{}", " ⇒ /target"),
             link.render(
                 &Colors::new(Theme::NoColor),
-                &Flags::configure_from(&matches, &Config::with_yaml(yaml)).unwrap()
+                &Flags::configure_from(&matches, &Config::with_none()).unwrap()
             )
             .to_string()
         );
@@ -115,7 +115,7 @@ mod tests {
             format!("{}", " ⇒ /target"),
             link.render(
                 &Colors::new(Theme::NoColor),
-                &Flags::configure_from(&matches, &Config::with_yaml(yaml)).unwrap()
+                &Flags::configure_from(&matches, &Config::with_none()).unwrap()
             )
             .to_string()
         );

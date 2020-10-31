@@ -4,9 +4,9 @@
 use super::Configurable;
 
 use crate::config_file::Config;
+use crate::print_error;
 
 use clap::ArgMatches;
-use yaml_rust::Yaml;
 
 /// A collection of flags on how to use icons.
 #[derive(Clone, Debug, Copy, PartialEq, Eq, Default)]
@@ -46,7 +46,7 @@ impl IconOption {
             "auto" => Some(Self::Auto),
             "never" => Some(Self::Never),
             _ => {
-                config.print_invalid_value_warning("icons->when", &value);
+                print_error!("icons->when: {}", &value);
                 None
             }
         }
@@ -82,22 +82,8 @@ impl Configurable<Self> for IconOption {
     /// "when" and it is one of "always", "auto" or "never", this returns its corresponding variant
     /// in a [Some]. Otherwise this returns [None].
     fn from_config(config: &Config) -> Option<Self> {
-        if let Some(yaml) = &config.yaml {
-            if let Yaml::Boolean(true) = &yaml["classic"] {
-                Some(Self::Never)
-            } else {
-                match &yaml["icons"]["when"] {
-                    Yaml::BadValue => None,
-                    Yaml::String(value) => Self::from_yaml_string(&value, &config),
-                    _ => {
-                        config.print_wrong_type_warning("icons->when", "string");
-                        None
-                    }
-                }
-            }
-        } else {
-            None
-        }
+        // TODO(zhangwei)
+        None
     }
 }
 
@@ -123,7 +109,7 @@ impl IconTheme {
             "fancy" => Some(Self::Fancy),
             "unicode" => Some(Self::Unicode),
             _ => {
-                config.print_invalid_value_warning("icons->theme", &value);
+                print_error!("icons->theme: {}", &value);
                 None
             }
         }
@@ -153,18 +139,8 @@ impl Configurable<Self> for IconTheme {
     /// "theme" and it is one of "fancy" or "unicode", this returns its corresponding variant in a
     /// [Some]. Otherwise this returns [None].
     fn from_config(config: &Config) -> Option<Self> {
-        if let Some(yaml) = &config.yaml {
-            match &yaml["icons"]["theme"] {
-                Yaml::BadValue => None,
-                Yaml::String(value) => Self::from_yaml_string(&value, &config),
-                _ => {
-                    config.print_wrong_type_warning("icons->theme", "string");
-                    None
-                }
-            }
-        } else {
-            None
-        }
+        // TODO(zhangwei):
+        None
     }
 }
 
@@ -241,7 +217,7 @@ mod test_icon_option {
     fn test_from_config_empty() {
         let yaml_string = "---";
         let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
-        assert_eq!(None, IconOption::from_config(&Config::with_yaml(yaml)));
+        assert_eq!(None, IconOption::from_config(&Config::with_none()));
     }
 
     #[test]
@@ -250,7 +226,7 @@ mod test_icon_option {
         let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
         assert_eq!(
             Some(IconOption::Always),
-            IconOption::from_config(&Config::with_yaml(yaml))
+            IconOption::from_config(&Config::with_none())
         );
     }
 
@@ -260,7 +236,7 @@ mod test_icon_option {
         let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
         assert_eq!(
             Some(IconOption::Auto),
-            IconOption::from_config(&Config::with_yaml(yaml))
+            IconOption::from_config(&Config::with_none())
         );
     }
 
@@ -270,7 +246,7 @@ mod test_icon_option {
         let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
         assert_eq!(
             Some(IconOption::Never),
-            IconOption::from_config(&Config::with_yaml(yaml))
+            IconOption::from_config(&Config::with_none())
         );
     }
 
@@ -280,7 +256,7 @@ mod test_icon_option {
         let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
         assert_eq!(
             Some(IconOption::Never),
-            IconOption::from_config(&Config::with_yaml(yaml))
+            IconOption::from_config(&Config::with_none())
         );
     }
 }
@@ -331,7 +307,7 @@ mod test_icon_theme {
     fn test_from_config_empty() {
         let yaml_string = "---";
         let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
-        assert_eq!(None, IconTheme::from_config(&Config::with_yaml(yaml)));
+        assert_eq!(None, IconTheme::from_config(&Config::with_none()));
     }
 
     #[test]
@@ -340,7 +316,7 @@ mod test_icon_theme {
         let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
         assert_eq!(
             Some(IconTheme::Fancy),
-            IconTheme::from_config(&Config::with_yaml(yaml))
+            IconTheme::from_config(&Config::with_none())
         );
     }
 
@@ -350,7 +326,7 @@ mod test_icon_theme {
         let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
         assert_eq!(
             Some(IconTheme::Unicode),
-            IconTheme::from_config(&Config::with_yaml(yaml))
+            IconTheme::from_config(&Config::with_none())
         );
     }
 }

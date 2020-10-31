@@ -4,9 +4,9 @@
 use super::Configurable;
 
 use crate::config_file::Config;
+use crate::print_error;
 
 use clap::ArgMatches;
-use yaml_rust::Yaml;
 
 /// The flag showing which file system nodes to display.
 #[derive(Clone, Debug, Copy, PartialEq, Eq)]
@@ -26,7 +26,7 @@ impl Display {
             "almost-all" => Some(Self::AlmostAll),
             "directory-only" => Some(Self::DirectoryItself),
             _ => {
-                config.print_invalid_value_warning("display", &value);
+                print_error!("display: {}", &value);
                 None
             }
         }
@@ -57,18 +57,8 @@ impl Configurable<Self> for Display {
     /// it is either "all", "almost-all" or "directory-only", this returns the corresponding
     /// `Display` variant in a [Some]. Otherwise this returns [None].
     fn from_config(config: &Config) -> Option<Self> {
-        if let Some(yaml) = &config.yaml {
-            match &yaml["display"] {
-                Yaml::BadValue => None,
-                Yaml::String(value) => Self::from_yaml_string(&value, &config),
-                _ => {
-                    config.print_wrong_type_warning("display", "string");
-                    None
-                }
-            }
-        } else {
-            None
-        }
+        // TODO(zhangwei)
+        None
     }
 }
 
@@ -132,7 +122,7 @@ mod test {
     fn test_from_config_empty() {
         let yaml_string = "---";
         let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
-        assert_eq!(None, Display::from_config(&Config::with_yaml(yaml)));
+        assert_eq!(None, Display::from_config(&Config::with_none()));
     }
 
     #[test]
@@ -141,7 +131,7 @@ mod test {
         let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
         assert_eq!(
             Some(Display::All),
-            Display::from_config(&Config::with_yaml(yaml))
+            Display::from_config(&Config::with_none())
         );
     }
 
@@ -151,7 +141,7 @@ mod test {
         let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
         assert_eq!(
             Some(Display::AlmostAll),
-            Display::from_config(&Config::with_yaml(yaml))
+            Display::from_config(&Config::with_none())
         );
     }
 
@@ -161,7 +151,7 @@ mod test {
         let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
         assert_eq!(
             Some(Display::DirectoryItself),
-            Display::from_config(&Config::with_yaml(yaml))
+            Display::from_config(&Config::with_none())
         );
     }
 }

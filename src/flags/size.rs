@@ -6,7 +6,6 @@ use super::Configurable;
 use crate::config_file::Config;
 
 use clap::ArgMatches;
-use yaml_rust::Yaml;
 
 /// The flag showing which file size units to use.
 #[derive(Clone, Debug, Copy, PartialEq, Eq)]
@@ -44,26 +43,8 @@ impl Configurable<Self> for SizeFlag {
     /// is either "default", "short" or "bytes", this returns the corresponding `SizeFlag` variant
     /// in a [Some]. Otherwise this returns [None].
     fn from_config(config: &Config) -> Option<Self> {
-        if let Some(yaml) = &config.yaml {
-            match &yaml["size"] {
-                Yaml::BadValue => None,
-                Yaml::String(value) => match value.as_ref() {
-                    "default" => Some(Self::Default),
-                    "short" => Some(Self::Short),
-                    "bytes" => Some(Self::Bytes),
-                    _ => {
-                        config.print_invalid_value_warning("size", &value);
-                        None
-                    }
-                },
-                _ => {
-                    config.print_wrong_type_warning("size", "string");
-                    None
-                }
-            }
-        } else {
-            None
-        }
+        // TODO(zhangwei)
+        None
     }
 }
 
@@ -124,7 +105,7 @@ mod test {
     fn test_from_config_empty() {
         let yaml_string = "---";
         let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
-        assert_eq!(None, SizeFlag::from_config(&Config::with_yaml(yaml)));
+        assert_eq!(None, SizeFlag::from_config(&Config::with_none()));
     }
 
     #[test]
@@ -133,7 +114,7 @@ mod test {
         let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
         assert_eq!(
             Some(SizeFlag::Default),
-            SizeFlag::from_config(&Config::with_yaml(yaml))
+            SizeFlag::from_config(&Config::with_none())
         );
     }
 
@@ -143,7 +124,7 @@ mod test {
         let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
         assert_eq!(
             Some(SizeFlag::Short),
-            SizeFlag::from_config(&Config::with_yaml(yaml))
+            SizeFlag::from_config(&Config::with_none())
         );
     }
 
@@ -153,7 +134,7 @@ mod test {
         let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
         assert_eq!(
             Some(SizeFlag::Bytes),
-            SizeFlag::from_config(&Config::with_yaml(yaml))
+            SizeFlag::from_config(&Config::with_none())
         );
     }
 }

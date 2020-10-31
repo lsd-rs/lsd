@@ -3,7 +3,6 @@ use super::Configurable;
 use crate::config_file::Config;
 
 use clap::ArgMatches;
-use yaml_rust::Yaml;
 
 /// The flag showing how to display symbolic arrow.
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -22,18 +21,8 @@ impl Configurable<Self> for SymlinkArrow {
     /// "symlink-arrow", this returns its value as the value of the `SymlinkArrow`, in a [Some].
     /// Otherwise this returns [None].
     fn from_config(config: &Config) -> Option<Self> {
-        if let Some(yaml) = &config.yaml {
-            match &yaml["symlink-arrow"] {
-                Yaml::BadValue => None,
-                Yaml::String(value) => Some(SymlinkArrow(value.to_string())),
-                _ => {
-                    config.print_wrong_type_warning("symlink-arrow", "string");
-                    None
-                }
-            }
-        } else {
-            None
-        }
+        // TODO(zhangwei)
+        None
     }
 }
 
@@ -66,7 +55,7 @@ mod test {
         let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
         assert_eq!(
             Some(SymlinkArrow(String::from("\u{21B9}"))),
-            SymlinkArrow::from_config(&Config::with_yaml(yaml))
+            SymlinkArrow::from_config(&Config::with_none())
         );
     }
 
@@ -74,7 +63,7 @@ mod test {
     fn test_symlink_arrow_from_config_type_error() {
         let yaml_string = "symlink-arrow: false";
         let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
-        assert_eq!(None, SymlinkArrow::from_config(&Config::with_yaml(yaml)));
+        assert_eq!(None, SymlinkArrow::from_config(&Config::with_none()));
     }
 
     #[test]
