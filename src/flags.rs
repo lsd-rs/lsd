@@ -10,7 +10,7 @@ pub mod layout;
 pub mod recursion;
 pub mod size;
 pub mod sorting;
-pub mod styling;
+pub mod symlink_arrow;
 pub mod symlinks;
 pub mod total_size;
 
@@ -33,7 +33,7 @@ pub use sorting::DirGrouping;
 pub use sorting::SortColumn;
 pub use sorting::SortOrder;
 pub use sorting::Sorting;
-pub use styling::SymlinkArrow;
+pub use symlink_arrow::SymlinkArrow;
 pub use symlinks::NoSymlink;
 pub use total_size::TotalSize;
 
@@ -61,12 +61,6 @@ pub struct Flags {
     pub size: SizeFlag,
     pub sorting: Sorting,
     pub total_size: TotalSize,
-    pub styles: Styles,
-}
-
-/// A struct to hold the style flags for the application.
-#[derive(Clone, Debug, Default)]
-pub struct Styles {
     pub symlink_arrow: SymlinkArrow,
 }
 
@@ -93,9 +87,7 @@ impl Flags {
             recursion: Recursion::configure_from(matches, config)?,
             sorting: Sorting::configure_from(matches, config),
             total_size: TotalSize::configure_from(matches, config),
-            styles: Styles {
-                symlink_arrow: SymlinkArrow::configure_from(matches, config),
-            },
+            symlink_arrow: SymlinkArrow::configure_from(matches, config),
         })
     }
 }

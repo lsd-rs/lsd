@@ -286,7 +286,7 @@ fn get_output<'a>(
                         ANSIStrings(&[
                             meta.name.render(colors, icons, &display_option),
                             meta.indicator.render(&flags),
-                            meta.symlink.render(colors, &flags.styles),
+                            meta.symlink.render(colors, &flags),
                         ])
                         .to_string()
                     };

@@ -1,5 +1,5 @@
 use crate::color::{ColoredString, Colors, Elem};
-use crate::flags::Styles;
+use crate::flags::Flags;
 use ansi_term::{ANSIString, ANSIStrings};
 use std::fs::read_link;
 use std::path::Path;
@@ -52,7 +52,7 @@ impl SymLink {
         }
     }
 
-    pub fn render(&self, colors: &Colors, styles: &Styles) -> ColoredString {
+    pub fn render(&self, colors: &Colors, flag: &Flags) -> ColoredString {
         if let Some(target_string) = self.symlink_string() {
             let elem = if self.valid {
                 &Elem::SymLink
@@ -61,7 +61,7 @@ impl SymLink {
             };
 
             let strings: &[ColoredString] = &[
-                ColoredString::from(format!(" {} ", styles.symlink_arrow)), // ⇒ \u{21d2}
+                ColoredString::from(format!(" {} ", flag.symlink_arrow)), // ⇒ \u{21d2}
                 colors.colorize(target_string, elem),
             ];
 
@@ -75,24 +75,27 @@ impl SymLink {
 
 #[cfg(test)]
 mod tests {
-    use super::Styles;
     use super::SymLink;
+    use crate::app;
     use crate::color::{Colors, Theme};
-    use crate::flags::styling::SymlinkArrow;
-
+    use crate::config_file::Config;
+    use crate::flags::Flags;
+    use yaml_rust::YamlLoader;
     #[test]
     fn test_symlink_render_default_valid_target_nocolor() {
         let link = SymLink {
             target: Some("/target".to_string()),
             valid: true,
         };
+        let yaml_string = "---";
+        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
+        let argv = vec!["lsd"];
+        let matches = app::build().get_matches_from_safe(argv).unwrap();
         assert_eq!(
             format!("{}", " ⇒ /target"),
             link.render(
                 &Colors::new(Theme::NoColor),
-                &Styles {
-                    symlink_arrow: SymlinkArrow::default()
-                }
+                &Flags::configure_from(&matches, &Config::with_yaml(yaml)).unwrap()
             )
             .to_string()
         );
@@ -104,13 +107,15 @@ mod tests {
             target: Some("/target".to_string()),
             valid: false,
         };
+        let yaml_string = "---";
+        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
+        let argv = vec!["lsd"];
+        let matches = app::build().get_matches_from_safe(argv).unwrap();
         assert_eq!(
             format!("{}", " ⇒ /target"),
             link.render(
                 &Colors::new(Theme::NoColor),
-                &Styles {
-                    symlink_arrow: SymlinkArrow::default()
-                }
+                &Flags::configure_from(&matches, &Config::with_yaml(yaml)).unwrap()
             )
             .to_string()
         );
