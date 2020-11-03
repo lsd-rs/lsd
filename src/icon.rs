@@ -224,7 +224,7 @@ impl Icons {
         m.insert("js", "\u{e74e}"); // ""
         m.insert("json", "\u{e60b}"); // ""
         m.insert("jsx", "\u{e7ba}"); // ""
-        m.insert("julia","\u{e624}"); // ""
+        m.insert("jl","\u{e624}"); // ""
         m.insert("ksh", "\u{f489}"); // ""
         m.insert("less", "\u{e758}"); // ""
         m.insert("lhs", "\u{e777}"); // ""
