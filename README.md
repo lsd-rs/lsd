@@ -74,6 +74,12 @@ via [Homebrew](https://brew.sh/):
 brew install lsd
 ```
 
+or [MacPorts](https://www.macports.org/):
+
+```sh
+sudo port install lsd
+```
+
 ### On NixOS/From nix
 
 ```sh
