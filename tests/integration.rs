@@ -404,3 +404,67 @@ fn cmd() -> Command {
 fn tempdir() -> assert_fs::TempDir {
     assert_fs::TempDir::new().unwrap()
 }
+
+#[cfg(unix)]
+#[test]
+fn test_lower_case_name_icon_match() {
+    let dir = tempdir();
+    dir.child(".trash").touch().unwrap();
+    let test_file = dir.path().join(".trash");
+
+    cmd()
+        .arg("--icon")
+        .arg("always")
+        .arg("--ignore-config")
+        .arg(test_file)
+        .assert()
+        .stdout(predicate::str::contains("\u{f1f8}"));
+}
+
+#[cfg(unix)]
+#[test]
+fn test_upper_case_name_icon_match() {
+    let dir = tempdir();
+    dir.child(".TRASH").touch().unwrap();
+    let test_file = dir.path().join(".TRASH");
+
+    cmd()
+        .arg("--icon")
+        .arg("always")
+        .arg("--ignore-config")
+        .arg(test_file)
+        .assert()
+        .stdout(predicate::str::contains("\u{f1f8}"));
+}
+
+#[cfg(unix)]
+#[test]
+fn test_lower_case_ext_icon_match() {
+    let dir = tempdir();
+    dir.child("test.7z").touch().unwrap();
+    let test_file = dir.path().join("test.7z");
+
+    cmd()
+        .arg("--icon")
+        .arg("always")
+        .arg("--ignore-config")
+        .arg(test_file)
+        .assert()
+        .stdout(predicate::str::contains("\u{f410}"));
+}
+
+#[cfg(unix)]
+#[test]
+fn test_upper_case_ext_icon_match() {
+    let dir = tempdir();
+    dir.child("test.7Z").touch().unwrap();
+    let test_file = dir.path().join("test.7Z");
+
+    cmd()
+        .arg("--icon")
+        .arg("always")
+        .arg("--ignore-config")
+        .arg(test_file)
+        .assert()
+        .stdout(predicate::str::contains("\u{f410}"));
+}
