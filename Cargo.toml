@@ -33,7 +33,7 @@ wild = "2.0"
 globset = "0.4"
 xdg = "2.1"
 yaml-rust = "0.4"
-termsize = "0.1"
+termize = "0.1"
 chrono = "0.4"
 
 [target.'cfg(unix)'.dependencies]
