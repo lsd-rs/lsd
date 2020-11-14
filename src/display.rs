@@ -20,7 +20,7 @@ pub fn grid(metas: &[Meta], flags: &Flags, colors: &Colors, icons: &Icons) -> St
         colors,
         icons,
         0,
-        termsize::get().map(|size| size.cols as usize),
+        termize::get().map(|size| size.0 as usize),
     )
 }
 
