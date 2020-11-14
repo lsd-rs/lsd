@@ -17,7 +17,7 @@ pub struct Core {
 impl Core {
     pub fn new(flags: Flags) -> Self {
         // termsize allows us to know if the stdout is a tty or not.
-        let tty_available = termsize::get().is_some();
+        let tty_available = termize::get().is_some();
 
         #[cfg(not(target_os = "windows"))]
         let console_color_ok = true;
