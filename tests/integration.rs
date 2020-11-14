@@ -17,7 +17,6 @@ fn test_runs_okay() {
 #[test]
 fn test_list_empty_directory() {
     cmd()
-        .arg("--oneline")
         .arg("--ignore-config")
         .arg(tempdir().path())
         .assert()
@@ -29,7 +28,6 @@ fn test_list_almost_all_empty_directory() {
     let matched = "";
     cmd()
         .arg("--almost-all")
-        .arg("--oneline")
         .arg("--ignore-config")
         .arg(tempdir().path())
         .assert()
@@ -37,7 +35,6 @@ fn test_list_almost_all_empty_directory() {
 
     cmd()
         .arg("-A")
-        .arg("--oneline")
         .arg("--ignore-config")
         .arg(tempdir().path())
         .assert()
@@ -49,7 +46,6 @@ fn test_list_all_empty_directory() {
     let matched = "\\.\n\\.\\.\n$";
     cmd()
         .arg("--all")
-        .arg("--oneline")
         .arg("--ignore-config")
         .arg(tempdir().path())
         .assert()
@@ -57,7 +53,6 @@ fn test_list_all_empty_directory() {
 
     cmd()
         .arg("-a")
-        .arg("--oneline")
         .arg("--ignore-config")
         .arg(tempdir().path())
         .assert()
@@ -70,7 +65,6 @@ fn test_list_populated_directory() {
     dir.child("one").touch().unwrap();
     dir.child("two").touch().unwrap();
     cmd()
-        .arg("--oneline")
         .arg("--ignore-config")
         .arg(dir.path())
         .assert()
@@ -83,7 +77,6 @@ fn test_list_almost_all_populated_directory() {
     dir.child("one").touch().unwrap();
     dir.child("two").touch().unwrap();
     cmd()
-        .arg("--oneline")
         .arg("--almost-all")
         .arg("--ignore-config")
         .arg(dir.path())
@@ -98,7 +91,6 @@ fn test_list_all_populated_directory() {
     dir.child("two").touch().unwrap();
     cmd()
         .arg("--all")
-        .arg("--oneline")
         .arg("--ignore-config")
         .arg(dir.path())
         .assert()
@@ -327,7 +319,6 @@ fn test_version_sort() {
     dir.child("22").touch().unwrap();
     cmd()
         .arg("-v")
-        .arg("--oneline")
         .arg("--ignore-config")
         .arg(dir.path())
         .assert()
@@ -344,7 +335,6 @@ fn test_version_sort_overwrite_by_timesort() {
     cmd()
         .arg("-v")
         .arg("-t")
-        .arg("--oneline")
         .arg("--ignore-config")
         .arg(dir.path())
         .assert()
