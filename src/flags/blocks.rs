@@ -1,9 +1,9 @@
 //! This module defines the [Blocks] struct. To set it up from [ArgMatches], a [Yaml] and its
 //! [Default] value, use its [configure_from](Blocks::configure_from) method.
+use crate::config_file::Config;
+use crate::print_error;
 
 use std::convert::TryFrom;
-
-use crate::config_file::Config;
 
 use clap::{ArgMatches, Error, ErrorKind};
 
@@ -96,12 +96,23 @@ impl Blocks {
 
     /// Get a potential `Blocks` struct from a [Config].
     ///
-    /// If the Config's [Yaml] contains an [Array](Yaml::Array) value pointed to by "blocks", each
     /// of its [String](Yaml::String) values is returned in a `Blocks` in a [Some]. Otherwise it
     /// returns [None].
+    /// Config make sure blocks are Strings, we can unwrap here without panic
     fn from_config(config: &Config) -> Option<Self> {
         if let Some(c) = &config.blocks {
-            None
+            let mut blocks: Vec<Block> = vec![];
+            for b in c.iter() {
+                match Block::try_from(b.as_str().unwrap()) {
+                    Ok(block) => blocks.push(block),
+                    Err(err) => print_error!("bad blocks: {}", err),
+                }
+            }
+            if blocks.is_empty() {
+                None
+            } else {
+                Some(Self(blocks))
+            }
         } else {
             None
         }
@@ -413,18 +424,12 @@ mod test_blocks {
     }
 
     #[test]
-    fn test_from_config_empty() {
-        let yaml_string = "---";
-        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
-        assert_eq!(None, Blocks::from_config(&Config::with_none()));
-    }
-
-    #[test]
     fn test_from_config_one() {
-        let yaml_string = "blocks:\n  - permission";
-        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
+        let mut c = &Config::with_none();
+        c.blocks = Some(vec!["permission"]);
+
         let blocks = Blocks(vec![Block::Permission]);
-        assert_eq!(Some(blocks), Blocks::from_config(&Config::with_none()));
+        assert_eq!(Some(blocks), Blocks::from_config(c));
     }
 
     #[test]

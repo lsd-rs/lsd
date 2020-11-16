@@ -17,12 +17,15 @@ impl Configurable<Self> for SymlinkArrow {
     }
     /// Get a potential `SymlinkArrow` value from a [Config].
     ///
-    /// If the Config's [Yaml] contains the [String](Yaml::String) value pointed to by
-    /// "symlink-arrow", this returns its value as the value of the `SymlinkArrow`, in a [Some].
+    /// If the `Config::symlink-arrow` has value,
+    /// returns its value as the value of the `SymlinkArrow`, in a [Some].
     /// Otherwise this returns [None].
     fn from_config(config: &Config) -> Option<Self> {
-        // TODO(zhangwei)
-        None
+        if let Some(arrow) = &config.symlink_arrow {
+            Some(SymlinkArrow(arrow.to_string()))
+        } else {
+            None
+        }
     }
 }
 

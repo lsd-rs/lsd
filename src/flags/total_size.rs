@@ -26,12 +26,15 @@ impl Configurable<Self> for TotalSize {
 
     /// Get a potential `TotalSize` value from a [Config].
     ///
-    /// If the Config's [Yaml] contains the [Boolean](Yaml::Boolean) value pointed to by
-    /// "total-size", this returns its value as the value of the `TotalSize`, in a [Some].
+    /// If the `Config::total-size` has value,
+    /// this returns it as the value of the `TotalSize`, in a [Some].
     /// Otherwise this returns [None].
     fn from_config(config: &Config) -> Option<Self> {
-        // TODO(zhangwei)
-        None
+        if let Some(total) = config.total_size {
+            Some(Self(total))
+        } else {
+            None
+        }
     }
 }
 

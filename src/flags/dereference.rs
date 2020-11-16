@@ -26,12 +26,14 @@ impl Configurable<Self> for Dereference {
 
     /// Get a potential `Dereference` value from a [Config].
     ///
-    /// If the Config's [Yaml] contains the [Boolean](Yaml::Boolean) value pointed to by
-    /// "dereference", this returns its value as the value of the `Dereference`, in a [Some].
-    /// Otherwise this returns [None].
+    /// If the `Config::dereference` has value, this returns its value
+    /// as the value of the `Dereference`, in a [Some], Otherwise this returns [None].
     fn from_config(config: &Config) -> Option<Self> {
-        // TODO(zhangwei)
-        None
+        if let Some(deref) = &config.dereference {
+            Some(Self(*deref))
+        } else {
+            None
+        }
     }
 }
 

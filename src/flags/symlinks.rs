@@ -26,12 +26,15 @@ impl Configurable<Self> for NoSymlink {
 
     /// Get a potential `NoSymlink` value from a [Config].
     ///
-    /// If the Config's [Yaml] contains the [Boolean](Yaml::Boolean) value pointed to by
-    /// "no-symlink", this returns its value as the value of the `NoSymlink`, in a [Some].
+    /// If the `Config::no-symlink` has value,
+    /// this returns it as the value of the `NoSymlink`, in a [Some].
     /// Otherwise this returns [None].
     fn from_config(config: &Config) -> Option<Self> {
-        // TODO(zhangwei)
-        None
+        if let Some(no_link) = config.no_symlink {
+            Some(Self(no_link))
+        } else {
+            None
+        }
     }
 }
 

@@ -4,6 +4,7 @@
 use super::Configurable;
 
 use crate::config_file::Config;
+use crate::print_error;
 
 use clap::ArgMatches;
 
@@ -64,12 +65,33 @@ impl Configurable<Self> for SortColumn {
 
     /// Get a potential `SortColumn` variant from a [Config].
     ///
-    /// If the Config's [Yaml] contains a [String](Yaml::String) value pointed to by "sorting" ->
-    /// "column" and it is one of "time", "size" or "name", this returns the corresponding variant
-    /// in a [Some]. Otherwise this returns [None].
+    /// If the `Config::sorting::column` has value and is one of "time", "size" or "name",
+    /// this returns the corresponding variant in a [Some].
+    /// Otherwise this returns [None].
     fn from_config(config: &Config) -> Option<Self> {
-        // TODO(zhangwei)
-        None
+        if let Some(sort) = &config.sorting {
+            if let Some(column) = &sort.column {
+                match column.as_ref() {
+                    "extension" => Some(Self::Extension),
+                    "name" => Some(Self::Name),
+                    "size" => Some(Self::Size),
+                    "time" => Some(Self::Time),
+                    "version" => Some(Self::Version),
+                    _ => {
+                        print_error!(
+                            "sorting/column can only be one of \
+                             extension, name, size, time or version, but got {}",
+                            &column
+                        );
+                        None
+                    }
+                }
+            } else {
+                None
+            }
+        } else {
+            None
+        }
     }
 }
 
@@ -102,12 +124,24 @@ impl Configurable<Self> for SortOrder {
 
     /// Get a potential `SortOrder` variant from a [Config].
     ///
-    /// If the Config's [Yaml] contains a [Boolean](Yaml::Boolean) value pointed to by "sorting" ->
-    /// "reverse", this returns a mapped variant in a [Some]. Otherwise [None] is returned. A
-    /// `true` maps to [SortOrder::Reverse] and a `false` maps to [SortOrder::Default].
+    /// If the `Config::sorting::reverse` has value,
+    /// this returns a mapped variant in a [Some].
+    /// Otherwise [None] is returned.
+    /// A `true` maps to [SortOrder::Reverse] while `false` maps to [SortOrder::Default].
     fn from_config(config: &Config) -> Option<Self> {
-        // TODO(zhangwei):
-        None
+        if let Some(sort) = &config.sorting {
+            if let Some(reverse) = sort.reverse {
+                if reverse {
+                    Some(Self::Reverse)
+                } else {
+                    Some(Self::Default)
+                }
+            } else {
+                None
+            }
+        } else {
+            None
+        }
     }
 }
 
@@ -126,6 +160,16 @@ pub enum DirGrouping {
     Last,
 }
 
+impl DirGrouping {
+    fn from_str(value: &str) -> Option<Self> {
+        match value {
+            "first" => Some(Self::First),
+            "last" => Some(Self::Last),
+            "none" => Some(Self::None),
+            _ => None,
+        }
+    }
+}
 impl Configurable<Self> for DirGrouping {
     /// Get a potential `DirGrouping` variant from [ArgMatches].
     ///
@@ -134,28 +178,33 @@ impl Configurable<Self> for DirGrouping {
     /// parameter in a [Some]. Otherwise this returns [None].
     fn from_arg_matches(matches: &ArgMatches) -> Option<Self> {
         if matches.is_present("classic") {
-            Some(Self::None)
-        } else if matches.occurrences_of("group-dirs") > 0 {
-            match matches.value_of("group-dirs") {
-                Some("first") => Some(Self::First),
-                Some("last") => Some(Self::Last),
-                Some("none") => Some(Self::None),
-                _ => panic!("This should not be reachable!"),
-            }
-        } else {
-            None
+            return Some(Self::None);
         }
+
+        if matches.occurrences_of("group-dirs") > 0 {
+            if let Some(group_dirs) = matches.value_of("group-dirs") {
+                return Self::from_str(group_dirs);
+            }
+        }
+        None
     }
 
     /// Get a potential `DirGrouping` variant from a [Config].
     ///
-    /// If the Config's [Yaml] contains a [Boolean](Yaml::Boolean) value pointed to by "classic"
-    /// and its value is `true`, then this returns the the [DirGrouping::None] variant in a [Some].
-    /// Otherwise if the Yaml contains a [String](Yaml::String) value pointed to by "sorting" ->
-    /// "dir-grouping" and it is one of "first", "last" or "none", this returns its corresponding
-    /// variant in a [Some]. Otherwise this returns [None].
+    /// If the `Config::classic` has value and is `true`,
+    /// then this returns the the [DirGrouping::None] variant in a [Some].
+    /// Otherwise if `Config::sorting::dir-grouping` has value and
+    /// is one of "first", "last" or "none", this returns its corresponding variant in a [Some].
+    /// Otherwise this returns [None].
     fn from_config(config: &Config) -> Option<Self> {
-        // TODO(zhangwei):
+        if let Some(true) = config.classic {
+            return Some(Self::None);
+        }
+        if let Some(sort) = &config.sorting {
+            if let Some(group) = &sort.dir_grouping {
+                return Self::from_str(group);
+            }
+        }
         None
     }
 }
