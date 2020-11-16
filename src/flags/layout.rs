@@ -1,9 +1,10 @@
 //! This module defines the [Layout] flag. To set it up from [ArgMatches], a [Yaml] and its
 //! [Default] value, use its [configure_from](Configurable::configure_from) method.
 
-use super::Configurable;
-
 use crate::config_file::Config;
+use crate::print_error;
+
+use super::Configurable;
 
 use clap::ArgMatches;
 
@@ -39,12 +40,26 @@ impl Configurable<Layout> for Layout {
 
     /// Get a potential Layout variant from a [Config].
     ///
-    /// If the Config's [Yaml] contains a [String](Yaml::String) value pointed to by "layout" and
-    /// it is either "tree", "oneline" or "grid", this returns the corresponding `Layout` variant
-    /// in a [Some]. Otherwise this returns [None].
+    /// If the `Config::layout` has value and is one of "tree", "oneline" or "grid",
+    /// this returns the corresponding `Layout` variant in a [Some].
+    /// Otherwise this returns [None].
     fn from_config(config: &Config) -> Option<Self> {
-        // TODO(zhangwei)
-        None
+        if let Some(layout) = &config.layout {
+            match layout.as_ref() {
+                "tree" => Some(Self::Tree),
+                "oneline" => Some(Self::OneLine),
+                "grid" => Some(Self::Grid),
+                _ => {
+                    print_error!(
+                        "layout can only be one of tree, oneline or grid, but got {}",
+                        &layout
+                    );
+                    None
+                }
+            }
+        } else {
+            None
+        }
     }
 }
 

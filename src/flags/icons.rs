@@ -38,15 +38,17 @@ pub enum IconOption {
 }
 
 impl IconOption {
-    /// Get a value from a [Yaml] string. The [Config] is used to log warnings about wrong values
-    /// in a Yaml.
-    fn from_yaml_string(value: &str, config: &Config) -> Option<Self> {
+    /// Get a value from a str.
+    fn from_str(value: &str) -> Option<Self> {
         match value {
             "always" => Some(Self::Always),
             "auto" => Some(Self::Auto),
             "never" => Some(Self::Never),
             _ => {
-                print_error!("icons->when: {}", &value);
+                print_error!(
+                    "icons/when can only be one of auto, always or never, but got {}",
+                    &value
+                );
                 None
             }
         }
@@ -76,14 +78,24 @@ impl Configurable<Self> for IconOption {
 
     /// Get a potential `IconOption` variant from a [Config].
     ///
-    /// If the Configs' [Yaml] contains a [Boolean](Yaml::Boolean) value pointed to by "classic"
-    /// and its value is `true`, then this returns the [IconOption::Never] variant in a [Some].
-    /// Otherwise if the Yaml contains a [String](Yaml::String) value pointed to by "icons" ->
-    /// "when" and it is one of "always", "auto" or "never", this returns its corresponding variant
-    /// in a [Some]. Otherwise this returns [None].
+    /// If the `Configs::classic` has value and is "true" then this returns Some(IconOption::Never).
+    /// Otherwise if the `Config::icon::when` has value and is one of "always", "auto" or "never",
+    /// this returns its corresponding variant in a [Some].
+    /// Otherwise this returns [None].
     fn from_config(config: &Config) -> Option<Self> {
-        // TODO(zhangwei)
-        None
+        if let Some(true) = &config.classic {
+            return Some(Self::Never);
+        }
+
+        if let Some(icon) = &config.icons {
+            if let Some(when) = &icon.when {
+                Self::from_str(&when)
+            } else {
+                None
+            }
+        } else {
+            None
+        }
     }
 }
 
@@ -104,7 +116,7 @@ pub enum IconTheme {
 impl IconTheme {
     /// Get a value from a [Yaml] string. The [Config] is used to log warnings about wrong values
     /// in a Yaml.
-    fn from_yaml_string(value: &str, config: &Config) -> Option<Self> {
+    fn from_str(value: &str) -> Option<Self> {
         match value {
             "fancy" => Some(Self::Fancy),
             "unicode" => Some(Self::Unicode),
@@ -135,12 +147,19 @@ impl Configurable<Self> for IconTheme {
 
     /// Get a potential `IconTheme` variant from a [Config].
     ///
-    /// If the Config's [Yaml] contains a [String](Yaml::String) value pointed to by "icons" ->
-    /// "theme" and it is one of "fancy" or "unicode", this returns its corresponding variant in a
-    /// [Some]. Otherwise this returns [None].
+    /// If the `Config::icons::theme` has value and is one of "fancy" or "unicode",
+    /// this returns its corresponding variant in a [Some].
+    /// Otherwise this returns [None].
     fn from_config(config: &Config) -> Option<Self> {
-        // TODO(zhangwei):
-        None
+        if let Some(icon) = &config.icons {
+            if let Some(theme) = &icon.theme {
+                Self::from_str(&theme)
+            } else {
+                None
+            }
+        } else {
+            None
+        }
     }
 }
 

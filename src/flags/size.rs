@@ -4,6 +4,7 @@
 use super::Configurable;
 
 use crate::config_file::Config;
+use crate::print_error;
 
 use clap::ArgMatches;
 
@@ -18,6 +19,23 @@ pub enum SizeFlag {
     Bytes,
 }
 
+impl SizeFlag {
+    fn from_str(value: &str) -> Option<Self> {
+        match value {
+            "default" => Some(Self::Default),
+            "short" => Some(Self::Short),
+            "bytes" => Some(Self::Bytes),
+            _ => {
+                print_error!(
+                    "size can only be one of default, short or bytes, but got {}",
+                    value
+                );
+                None
+            }
+        }
+    }
+}
+
 impl Configurable<Self> for SizeFlag {
     /// Get a potential `SizeFlag` variant from [ArgMatches].
     ///
@@ -26,24 +44,22 @@ impl Configurable<Self> for SizeFlag {
     /// [None].
     fn from_arg_matches(matches: &ArgMatches) -> Option<Self> {
         if matches.occurrences_of("size") > 0 {
-            match matches.value_of("size") {
-                Some("default") => Some(Self::Default),
-                Some("short") => Some(Self::Short),
-                Some("bytes") => Some(Self::Bytes),
-                _ => panic!("This should not be reachable!"),
+            if let Some(size) = matches.value_of("size") {
+                return Self::from_str(size);
             }
-        } else {
-            None
         }
+        None
     }
 
     /// Get a potential `SizeFlag` variant from a [Config].
     ///
-    /// If the Config's [Yaml] contains a [String](Yaml::String) value, pointed to by "size" and it
-    /// is either "default", "short" or "bytes", this returns the corresponding `SizeFlag` variant
-    /// in a [Some]. Otherwise this returns [None].
+    /// If the `Config::size` has value and is one of "default", "short" or "bytes",
+    /// this returns the corresponding `SizeFlag` variant in a [Some].
+    /// Otherwise this returns [None].
     fn from_config(config: &Config) -> Option<Self> {
-        // TODO(zhangwei)
+        if let Some(size) = &config.size {
+            return Self::from_str(size);
+        }
         None
     }
 }

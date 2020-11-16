@@ -18,9 +18,8 @@ pub enum DateFlag {
 }
 
 impl DateFlag {
-    /// Get a value from a date format string. The [Config] is used to log warnings about wrong
-    /// values in a Yaml.
-    fn from_format_string(value: &str, config: &Config) -> Option<Self> {
+    /// Get a value from a date format string
+    fn from_format_string(value: &str) -> Option<Self> {
         match app::validate_time_format(&value) {
             Ok(()) => Some(Self::Formatted(value[1..].to_string())),
             _ => {
@@ -30,13 +29,12 @@ impl DateFlag {
         }
     }
 
-    /// Get a value from a [Yaml] string. The [Config] is used to log warnings about wrong values
-    /// in a Yaml.
-    fn from_yaml_string(value: &str, config: &Config) -> Option<Self> {
+    /// Get a value from a str.
+    fn from_str(value: &str) -> Option<Self> {
         match value {
             "date" => Some(Self::Date),
             "relative" => Some(Self::Relative),
-            _ if value.starts_with('+') => Self::from_format_string(&value, &config),
+            _ if value.starts_with('+') => Self::from_format_string(&value),
             _ => {
                 print_error!("Not a valid date value: {}", value);
                 None
@@ -70,14 +68,20 @@ impl Configurable<Self> for DateFlag {
 
     /// Get a potential `DateFlag` variant from a [Config].
     ///
-    /// If the Config's [Yaml] contains a [Boolean](Yaml::Boolean) value pointed to by "classic"
-    /// and its value is `true`, then this returns the [DateFlag::Date] variant in a [Some].
-    /// Otherwise if the Yaml contains a [String](Yaml::String) value pointed to by "date" and it
-    /// is one of "date" or "relative", this returns its corresponding variant in a [Some].
+    /// If the `Config::classic` is `true` then this returns the Some(DateFlag::Date),
+    /// Otherwise if the Config::date` has value and is one of "date" or "relative",
+    /// this returns its corresponding variant in a [Some].
     /// Otherwise this returns [None].
     fn from_config(config: &Config) -> Option<Self> {
-        // TODO(zhangwei)
-        None
+        if let Some(true) = &config.classic {
+            return Some(Self::Date);
+        }
+
+        if let Some(date) = &config.date {
+            Self::from_str(&date)
+        } else {
+            None
+        }
     }
 }
 

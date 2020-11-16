@@ -34,25 +34,18 @@ impl Recursion {
     /// - [enabled_from_arg_matches](Recursion::enabled_from_arg_matches)
     /// - [enabled_from_config](Recursion::enabled_from_config)
     /// - [Default::default]
-    ///
-    /// # Note
-    ///
-    /// The configuration file's Yaml is read in any case, to be able to check for errors and print
-    /// out warnings.
     fn enabled_from(matches: &ArgMatches, config: &Config) -> bool {
-        let mut result: bool = Default::default();
-
-        // if config.has_yaml() {
-        //     if let Some(value) = Self::enabled_from_config(config) {
-        //         result = value;
-        //     }
-        // }
-
-        if let Some(value) = Self::enabled_from_arg_matches(matches) {
-            result = value;
+        if let Some(recursion) = &config.recursion {
+            if let Some(enabled) = recursion.enabled {
+                return enabled;
+            }
         }
 
-        result
+        if let Some(value) = Self::enabled_from_arg_matches(matches) {
+            return value;
+        }
+
+        Default::default()
     }
 
     /// Get a potential "enabled" boolean from [ArgMatches].
@@ -67,15 +60,6 @@ impl Recursion {
         }
     }
 
-    /// Get a potential "enabled" boolean from a [Config].
-    ///
-    /// If the Config's [Yaml] contains a [Boolean](Yaml::Boolean) value pointed to by "recursion"
-    /// -> "enabled", this returns its value in a [Some]. Otherwise this returns [None].
-    fn enabled_from_config(config: &Config) -> Option<bool> {
-        // TODO(zhangwei):
-        None
-    }
-
     /// Get the "depth" integer from [ArgMatches], a [Config] or the [Default] value. The first
     /// value that is not [None] is used. The order of precedence for the value used is:
     /// - [depth_from_arg_matches](Recursion::depth_from_arg_matches)
@@ -84,27 +68,24 @@ impl Recursion {
     ///
     /// # Note
     ///
-    /// The configuration file's Yaml is read in any case, to be able to check for errors and print
-    /// out warnings.
+    /// If both configuration file and Args is error, this will return a Max-Uint value.
     ///
     /// # Errors
     ///
     /// If [depth_from_arg_matches](Recursion::depth_from_arg_matches) returns an [Error], this
     /// returns it.
     fn depth_from(matches: &ArgMatches, config: &Config) -> Result<usize, Error> {
-        let mut result: Result<usize, Error> = Ok(usize::max_value());
-
-        // if config.has_yaml() {
-        //     if let Some(value) = Self::depth_from_config(config) {
-        //         result = Ok(value);
-        //     }
-        // }
-
-        if let Some(value) = Self::depth_from_arg_matches(matches) {
-            result = value;
+        if let Some(recursion) = &config.recursion {
+            if let Some(depth) = recursion.depth {
+                return Ok(depth);
+            }
         }
 
-        result
+        if let Some(value) = Self::depth_from_arg_matches(matches) {
+            return value;
+        }
+
+        Ok(usize::max_value())
     }
 
     /// Get a potential "depth" value from [ArgMatches].
@@ -131,15 +112,6 @@ impl Recursion {
         }
         None
     }
-
-    /// Get a potential "depth" value from a [Config].
-    ///
-    /// If the Config's [Yaml] contains a positive [Integer](Yaml::Integer) value pointed to by
-    /// "recursion" -> "depth", this returns its value in a [Some]. Otherwise this returns [None].
-    fn depth_from_config(config: &Config) -> Option<usize> {
-        // TODO(zhangwei):
-        None
-    }
 }
 
 /// The default values for `Recursion` are the boolean default and [prim@usize::max_value()].
@@ -157,10 +129,9 @@ mod test {
     use super::Recursion;
 
     use crate::app;
-    use crate::config_file::Config;
+    use crate::config_file::{self, Config};
 
     use clap::ErrorKind;
-    use yaml_rust::YamlLoader;
 
     #[test]
     fn test_enabled_from_arg_matches_none() {
@@ -177,37 +148,42 @@ mod test {
     }
 
     #[test]
-    fn test_enabled_from_config_none() {
-        assert_eq!(None, Recursion::enabled_from_config(&Config::with_none()));
-    }
-
-    #[test]
     fn test_enabled_from_config_empty() {
-        let yaml_string = "---";
-        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
+        let argv = vec!["lsd"];
         assert_eq!(
-            None,
-            Recursion::enabled_from_config(&Config::with_none())
+            false,
+            Recursion::enabled_from(
+                &app::build().get_matches_from_safe(argv).unwrap(),
+                &Config::with_none()
+            )
         );
     }
 
     #[test]
     fn test_enabled_from_config_true() {
-        let yaml_string = "recursion:\n  enabled: true";
-        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
+        let argv = vec!["lsd"];
+        let mut c = &Config::with_none();
+        c.recursion = Some(config_file::Recursion {
+            enabled: Some(true),
+            depth: None,
+        });
         assert_eq!(
-            Some(true),
-            Recursion::enabled_from_config(&Config::with_none())
+            true,
+            Recursion::enabled_from(&app::build().get_matches_from_safe(argv).unwrap(), &c)
         );
     }
 
     #[test]
     fn test_enabled_from_config_false() {
-        let yaml_string = "recursion:\n  enabled: false";
-        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
+        let argv = vec!["lsd"];
+        let mut c = &Config::with_none();
+        c.recursion = Some(config_file::Recursion {
+            enabled: Some(false),
+            depth: None,
+        });
         assert_eq!(
-            Some(false),
-            Recursion::enabled_from_config(&Config::with_none())
+            false,
+            Recursion::enabled_from(&app::build().get_matches_from_safe(argv).unwrap(), &c)
         );
     }
 
@@ -270,38 +246,29 @@ mod test {
     }
 
     #[test]
-    fn test_depth_from_config_none() {
-        assert_eq!(None, Recursion::depth_from_config(&Config::with_none()));
-    }
-
-    #[test]
-    fn test_depth_from_config_empty() {
-        let yaml_string = "---";
-        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
-        assert_eq!(None, Recursion::depth_from_config(&Config::with_none()));
-    }
-
-    #[test]
-    fn test_depth_from_config_pos_integer() {
-        let yaml_string = "recursion:\n  depth: 42";
-        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
+    fn test_depth_from_config_none_max() {
+        let argv = vec!["lsd"];
         assert_eq!(
-            Some(42),
-            Recursion::depth_from_config(&Config::with_none())
+            usize::max_value(),
+            Recursion::depth_from(
+                &app::build().get_matches_from_safe(argv).unwrap(),
+                &Config::with_none()
+            )
+            .unwrap()
         );
     }
 
     #[test]
-    fn test_depth_from_config_neg_integer() {
-        let yaml_string = "recursion:\n  depth: -42";
-        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
-        assert_eq!(None, Recursion::depth_from_config(&Config::with_none()));
-    }
-
-    #[test]
-    fn test_depth_from_config_string() {
-        let yaml_string = "recursion:\n  depth: foo";
-        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
-        assert_eq!(None, Recursion::depth_from_config(&Config::with_none()));
+    fn test_depth_from_config_pos_integer() {
+        let argv = vec!["lsd"];
+        let mut c = &Config::with_none();
+        c.recursion = Some(config_file::Recursion {
+            enabled: None,
+            depth: Some(42),
+        });
+        assert_eq!(
+            42,
+            Recursion::depth_from(&app::build().get_matches_from_safe(argv).unwrap(), &c).unwrap()
+        );
     }
 }

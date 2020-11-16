@@ -26,12 +26,15 @@ impl Configurable<Self> for Indicators {
 
     /// Get a potential `Indicators` value from a [Config].
     ///
-    /// If the Config's [Yaml] contains the [Boolean](Yaml::Boolean) value pointed to by
-    /// "indicators", this returns its value as the value of the `Indicators`, in a [Some].
+    /// If the `Config::indicators` has value,
+    /// this returns its value as the value of the `Indicators`, in a [Some].
     /// Otherwise this returns [None].
     fn from_config(config: &Config) -> Option<Self> {
-        // TODO(zhangwei)
-        None
+        if let Some(ind) = &config.indicators {
+            Some(Self(*ind))
+        } else {
+            None
+        }
     }
 }
 

@@ -18,15 +18,17 @@ pub enum Display {
 }
 
 impl Display {
-    /// Get a value from a [Yaml] string. The [Config] is used to log warnings about wrong values
-    /// in a Yaml.
-    fn from_yaml_string(value: &str, config: &Config) -> Option<Self> {
+    /// Get a value from a str
+    fn from_str(value: &str) -> Option<Self> {
         match value {
             "all" => Some(Self::All),
             "almost-all" => Some(Self::AlmostAll),
             "directory-only" => Some(Self::DirectoryItself),
             _ => {
-                print_error!("display: {}", &value);
+                print_error!(
+                    "display can only be one of all, almost-all or directory-only, but got {}",
+                    &value
+                );
                 None
             }
         }
@@ -53,12 +55,15 @@ impl Configurable<Self> for Display {
 
     /// Get a potential `Display` variant from a [Config].
     ///
-    /// If the Config's [Yaml] contains a [String](Yaml::String) value pointed to by "display" and
-    /// it is either "all", "almost-all" or "directory-only", this returns the corresponding
-    /// `Display` variant in a [Some]. Otherwise this returns [None].
+    /// If the `Config::display` has value and is one of "all", "almost-all" or "directory-only",
+    /// this returns the corresponding `Display` variant in a [Some].
+    /// Otherwise this returns [None].
     fn from_config(config: &Config) -> Option<Self> {
-        // TODO(zhangwei)
-        None
+        if let Some(disp) = &config.display {
+            Self::from_str(&disp)
+        } else {
+            None
+        }
     }
 }
 

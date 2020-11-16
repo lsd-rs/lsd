@@ -36,13 +36,16 @@ pub enum ColorOption {
 impl ColorOption {
     /// Get a Color value from a [Yaml] string. The [Config] is used to log warnings about wrong
     /// values in a Yaml.
-    fn from_yaml_string(value: &str, config: &Config) -> Option<Self> {
+    fn from_str(value: &str) -> Option<Self> {
         match value {
             "always" => Some(Self::Always),
             "auto" => Some(Self::Auto),
             "never" => Some(Self::Never),
             _ => {
-                print_error!("color->when: {}", &value);
+                print_error!(
+                    "color/when could only be one of auto, always and never, got {}",
+                    &value
+                );
                 None
             }
         }
@@ -59,11 +62,11 @@ impl Configurable<Self> for ColorOption {
         if matches.is_present("classic") {
             Some(Self::Never)
         } else if matches.occurrences_of("color") > 0 {
-            match matches.value_of("color") {
-                Some("always") => Some(Self::Always),
-                Some("auto") => Some(Self::Auto),
-                Some("never") => Some(Self::Never),
-                _ => panic!("This should not be reachable!"),
+            if let Some(color) = matches.value_of("color") {
+                Self::from_str(&color)
+            } else {
+                print_error!("bad color, should never happen");
+                None
             }
         } else {
             None
@@ -72,17 +75,20 @@ impl Configurable<Self> for ColorOption {
 
     /// Get a potential `ColorOption` variant from a [Config].
     ///
-    /// If the Config's [Yaml] contains a [Boolean](Yaml::Boolean) value pointed to by "classic"
-    /// and its value is `true`, then this returns the [ColorOption::Never] variant in a [Some].
-    /// Otherwise if the Yaml contains a [String](Yaml::String) value pointed to by "color" ->
-    /// "when" and it is one of "always", "auto" or "never", this returns its corresponding variant
-    /// in a [Some]. Otherwise this returns [None].
+    /// If the `Config::classic` is `true` then this returns the Some(ColorOption::Never),
+    /// Otherwise if the `Config::color::when` has value and is one of "always", "auto" or "never"
+    /// this returns its corresponding variant in a [Some]. Otherwise this returns [None].
     fn from_config(config: &Config) -> Option<Self> {
-        if let Some(_c) = &config.color {
-            // TODO(zhangwei)
-            return None
+        if let Some(true) = config.classic {
+            return Some(Self::Never);
         }
-        None
+
+        if let Some(color) = &config.color {
+            Self::from_str(&color.when)
+        } else {
+            // TODO: maybe return default value?
+            None
+        }
     }
 }
 
