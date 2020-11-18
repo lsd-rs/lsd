@@ -79,8 +79,6 @@ mod test {
     use crate::config_file::Config;
     use crate::flags::Configurable;
 
-    use yaml_rust::YamlLoader;
-
     #[test]
     fn test_from_arg_matches_none() {
         let argv = vec!["lsd"];
@@ -118,39 +116,23 @@ mod test {
     }
 
     #[test]
-    fn test_from_config_empty() {
-        let yaml_string = "---";
-        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
-        assert_eq!(None, SizeFlag::from_config(&Config::with_none()));
-    }
-
-    #[test]
     fn test_from_config_default() {
-        let yaml_string = "size: default";
-        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
-        assert_eq!(
-            Some(SizeFlag::Default),
-            SizeFlag::from_config(&Config::with_none())
-        );
+        let mut c = Config::with_none();
+        c.size = Some("default".into());
+        assert_eq!(Some(SizeFlag::Default), SizeFlag::from_config(&c));
     }
 
     #[test]
     fn test_from_config_short() {
-        let yaml_string = "size: short";
-        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
-        assert_eq!(
-            Some(SizeFlag::Short),
-            SizeFlag::from_config(&Config::with_none())
-        );
+        let mut c = Config::with_none();
+        c.size = Some("short".into());
+        assert_eq!(Some(SizeFlag::Short), SizeFlag::from_config(&c));
     }
 
     #[test]
     fn test_from_config_bytes() {
-        let yaml_string = "size: bytes";
-        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
-        assert_eq!(
-            Some(SizeFlag::Bytes),
-            SizeFlag::from_config(&Config::with_none())
-        );
+        let mut c = Config::with_none();
+        c.size = Some("bytes".into());
+        assert_eq!(Some(SizeFlag::Bytes), SizeFlag::from_config(&c));
     }
 }

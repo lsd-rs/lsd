@@ -46,8 +46,6 @@ mod test {
     use crate::config_file::Config;
     use crate::flags::Configurable;
 
-    use yaml_rust::YamlLoader;
-
     #[test]
     fn test_from_arg_matches_none() {
         let argv = vec!["lsd"];
@@ -71,29 +69,16 @@ mod test {
     }
 
     #[test]
-    fn test_from_config_empty() {
-        let yaml_string = "---";
-        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
-        assert_eq!(None, Indicators::from_config(&Config::with_none()));
-    }
-
-    #[test]
     fn test_from_config_true() {
-        let yaml_string = "indicators: true";
-        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
-        assert_eq!(
-            Some(Indicators(true)),
-            Indicators::from_config(&Config::with_none())
-        );
+        let mut c = Config::with_none();
+        c.indicators = Some(true);
+        assert_eq!(Some(Indicators(true)), Indicators::from_config(&c));
     }
 
     #[test]
     fn test_from_config_false() {
-        let yaml_string = "indicators: false";
-        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
-        assert_eq!(
-            Some(Indicators(false)),
-            Indicators::from_config(&Config::with_none())
-        );
+        let mut c = Config::with_none();
+        c.indicators = Some(false);
+        assert_eq!(Some(Indicators(false)), Indicators::from_config(&c));
     }
 }

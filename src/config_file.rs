@@ -267,7 +267,7 @@ mod tests {
     fn test_read_config_bad_bool() {
         let c = Config::with_yaml("classic: notbool");
         println!("{:?}", c);
-        assert!(c.is_some())
+        assert!(c.is_none())
     }
 
     #[test]

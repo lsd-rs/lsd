@@ -145,8 +145,6 @@ mod test {
     use crate::app;
     use crate::config_file::Config;
 
-    use yaml_rust::YamlLoader;
-
     // The following tests are implemented using match expressions instead of the assert_eq macro,
     // because clap::Error does not implement PartialEq.
     //
@@ -165,16 +163,6 @@ mod test {
 
     #[test]
     fn test_from_config_none() {
-        assert!(match IgnoreGlobs::from_config(&Config::with_none()) {
-            None => true,
-            _ => false,
-        });
-    }
-
-    #[test]
-    fn test_from_config_empty() {
-        let yaml_string = "---";
-        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
         assert!(match IgnoreGlobs::from_config(&Config::with_none()) {
             None => true,
             _ => false,

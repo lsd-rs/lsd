@@ -162,7 +162,7 @@ mod test {
     #[test]
     fn test_enabled_from_config_true() {
         let argv = vec!["lsd"];
-        let mut c = &Config::with_none();
+        let mut c = Config::with_none();
         c.recursion = Some(config_file::Recursion {
             enabled: Some(true),
             depth: None,
@@ -176,7 +176,7 @@ mod test {
     #[test]
     fn test_enabled_from_config_false() {
         let argv = vec!["lsd"];
-        let mut c = &Config::with_none();
+        let mut c = Config::with_none();
         c.recursion = Some(config_file::Recursion {
             enabled: Some(false),
             depth: None,
@@ -261,7 +261,7 @@ mod test {
     #[test]
     fn test_depth_from_config_pos_integer() {
         let argv = vec!["lsd"];
-        let mut c = &Config::with_none();
+        let mut c = Config::with_none();
         c.recursion = Some(config_file::Recursion {
             enabled: None,
             depth: Some(42),

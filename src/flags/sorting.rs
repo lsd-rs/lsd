@@ -221,10 +221,8 @@ mod test_sort_column {
     use super::SortColumn;
 
     use crate::app;
-    use crate::config_file::Config;
+    use crate::config_file::{Config, Sorting};
     use crate::flags::Configurable;
-
-    use yaml_rust::YamlLoader;
 
     #[test]
     fn test_from_arg_matches_none() {
@@ -320,67 +318,70 @@ mod test_sort_column {
     }
 
     #[test]
-    fn test_from_config_empty() {
-        let yaml_string = "---";
-        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
-        assert_eq!(None, SortColumn::from_config(&Config::with_none()));
-    }
-
-    #[test]
     fn test_from_config_invalid() {
-        let yaml_string = "sorting:\n  column: foo";
-        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
-        assert_eq!(None, SortColumn::from_config(&Config::with_none()));
+        let mut c = Config::with_none();
+        c.sorting = Some(Sorting {
+            column: Some("foo".into()),
+            reverse: None,
+            dir_grouping: None,
+        });
+
+        assert_eq!(None, SortColumn::from_config(&c));
     }
 
     #[test]
     fn test_from_config_extension() {
-        let yaml_string = "sorting:\n  column: extension";
-        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
-        assert_eq!(
-            Some(SortColumn::Extension),
-            SortColumn::from_config(&Config::with_none())
-        );
+        let mut c = Config::with_none();
+        c.sorting = Some(Sorting {
+            column: Some("extension".into()),
+            reverse: None,
+            dir_grouping: None,
+        });
+        assert_eq!(Some(SortColumn::Extension), SortColumn::from_config(&c));
     }
 
     #[test]
     fn test_from_config_name() {
-        let yaml_string = "sorting:\n  column: name";
-        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
-        assert_eq!(
-            Some(SortColumn::Name),
-            SortColumn::from_config(&Config::with_none())
-        );
+        let mut c = Config::with_none();
+        c.sorting = Some(Sorting {
+            column: Some("name".into()),
+            reverse: None,
+            dir_grouping: None,
+        });
+        assert_eq!(Some(SortColumn::Name), SortColumn::from_config(&c));
     }
 
     #[test]
     fn test_from_config_time() {
-        let yaml_string = "sorting:\n  column: time";
-        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
-        assert_eq!(
-            Some(SortColumn::Time),
-            SortColumn::from_config(&Config::with_none())
-        );
+        let mut c = Config::with_none();
+        c.sorting = Some(Sorting {
+            column: Some("time".into()),
+            reverse: None,
+            dir_grouping: None,
+        });
+        assert_eq!(Some(SortColumn::Time), SortColumn::from_config(&c));
     }
 
     #[test]
     fn test_from_config_size() {
-        let yaml_string = "sorting:\n  column: size";
-        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
-        assert_eq!(
-            Some(SortColumn::Size),
-            SortColumn::from_config(&Config::with_none())
-        );
+        let mut c = Config::with_none();
+        c.sorting = Some(Sorting {
+            column: Some("size".into()),
+            reverse: None,
+            dir_grouping: None,
+        });
+        assert_eq!(Some(SortColumn::Size), SortColumn::from_config(&c));
     }
 
     #[test]
     fn test_from_config_version() {
-        let yaml_string = "sorting:\n  column: version";
-        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
-        assert_eq!(
-            Some(SortColumn::Version),
-            SortColumn::from_config(&Config::with_none())
-        );
+        let mut c = Config::with_none();
+        c.sorting = Some(Sorting {
+            column: Some("version".into()),
+            reverse: None,
+            dir_grouping: None,
+        });
+        assert_eq!(Some(SortColumn::Version), SortColumn::from_config(&c));
     }
 }
 
@@ -389,10 +390,8 @@ mod test_sort_order {
     use super::SortOrder;
 
     use crate::app;
-    use crate::config_file::Config;
+    use crate::config_file::{Config, Sorting};
     use crate::flags::Configurable;
-
-    use yaml_rust::YamlLoader;
 
     #[test]
     fn test_from_arg_matches_none() {
@@ -417,30 +416,22 @@ mod test_sort_order {
     }
 
     #[test]
-    fn test_from_config_empty() {
-        let yaml_string = "---";
-        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
-        assert_eq!(None, SortOrder::from_config(&Config::with_none()));
-    }
-
-    #[test]
     fn test_from_config_default() {
-        let yaml_string = "sorting:\n  reverse: false";
-        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
         assert_eq!(
             Some(SortOrder::Default),
-            SortOrder::from_config(&Config::with_none())
+            SortOrder::from_config(&Config::default())
         );
     }
 
     #[test]
     fn test_from_config_reverse() {
-        let yaml_string = "sorting:\n  reverse: true";
-        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
-        assert_eq!(
-            Some(SortOrder::Reverse),
-            SortOrder::from_config(&Config::with_none())
-        );
+        let mut c = Config::with_none();
+        c.sorting = Some(Sorting {
+            column: None,
+            reverse: Some(true),
+            dir_grouping: None,
+        });
+        assert_eq!(Some(SortOrder::Reverse), SortOrder::from_config(&c));
     }
 }
 
@@ -449,10 +440,8 @@ mod test_dir_grouping {
     use super::DirGrouping;
 
     use crate::app;
-    use crate::config_file::Config;
+    use crate::config_file::{Config, Sorting};
     use crate::flags::Configurable;
-
-    use yaml_rust::YamlLoader;
 
     #[test]
     fn test_from_arg_matches_none() {
@@ -507,49 +496,42 @@ mod test_dir_grouping {
     }
 
     #[test]
-    fn test_from_config_empty() {
-        let yaml_string = "---";
-        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
-        assert_eq!(None, DirGrouping::from_config(&Config::with_none()));
-    }
-
-    #[test]
     fn test_from_config_first() {
-        let yaml_string = "sorting:\n  dir-grouping: first";
-        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
-        assert_eq!(
-            Some(DirGrouping::First),
-            DirGrouping::from_config(&Config::with_none())
-        );
+        let mut c = Config::with_none();
+        c.sorting = Some(Sorting {
+            column: None,
+            reverse: None,
+            dir_grouping: Some("first".into()),
+        });
+        assert_eq!(Some(DirGrouping::First), DirGrouping::from_config(&c));
     }
 
     #[test]
     fn test_from_config_last() {
-        let yaml_string = "sorting:\n  dir-grouping: last";
-        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
-        assert_eq!(
-            Some(DirGrouping::Last),
-            DirGrouping::from_config(&Config::with_none())
-        );
+        let mut c = Config::with_none();
+        c.sorting = Some(Sorting {
+            column: None,
+            reverse: None,
+            dir_grouping: Some("last".into()),
+        });
+        assert_eq!(Some(DirGrouping::Last), DirGrouping::from_config(&c));
     }
 
     #[test]
     fn test_from_config_explicit_none() {
-        let yaml_string = "sorting:\n  dir-grouping: none";
-        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
-        assert_eq!(
-            Some(DirGrouping::None),
-            DirGrouping::from_config(&Config::with_none())
-        );
+        let mut c = Config::with_none();
+        c.sorting = Some(Sorting {
+            column: None,
+            reverse: None,
+            dir_grouping: None,
+        });
+        assert_eq!(None, DirGrouping::from_config(&c));
     }
 
     #[test]
     fn test_from_config_classic_mode() {
-        let yaml_string = "classic: true\nsorting:\n  dir-grouping: first";
-        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
-        assert_eq!(
-            Some(DirGrouping::None),
-            DirGrouping::from_config(&Config::with_none())
-        );
+        let mut c = Config::with_none();
+        c.classic = Some(true);
+        assert_eq!(Some(DirGrouping::None), DirGrouping::from_config(&c));
     }
 }

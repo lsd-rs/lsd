@@ -78,8 +78,6 @@ mod test {
     use crate::config_file::Config;
     use crate::flags::Configurable;
 
-    use yaml_rust::YamlLoader;
-
     #[test]
     fn test_from_arg_matches_none() {
         let argv = vec!["lsd"];
@@ -121,39 +119,23 @@ mod test {
     }
 
     #[test]
-    fn test_from_config_empty() {
-        let yaml_string = "---";
-        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
-        assert_eq!(None, Layout::from_config(&Config::with_none()));
-    }
-
-    #[test]
     fn test_from_config_tree() {
-        let yaml_string = "layout: tree";
-        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
-        assert_eq!(
-            Some(Layout::Tree),
-            Layout::from_config(&Config::with_none())
-        );
+        let mut c = Config::with_none();
+        c.layout = Some("tree".into());
+        assert_eq!(Some(Layout::Tree), Layout::from_config(&c));
     }
 
     #[test]
     fn test_from_config_oneline() {
-        let yaml_string = "layout: oneline";
-        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
-        assert_eq!(
-            Some(Layout::OneLine),
-            Layout::from_config(&Config::with_none())
-        );
+        let mut c = Config::with_none();
+        c.layout = Some("oneline".into());
+        assert_eq!(Some(Layout::OneLine), Layout::from_config(&c));
     }
 
     #[test]
     fn test_from_config_grid() {
-        let yaml_string = "layout: grid";
-        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
-        assert_eq!(
-            Some(Layout::Grid),
-            Layout::from_config(&Config::with_none())
-        );
+        let mut c = Config::with_none();
+        c.layout = Some("grid".into());
+        assert_eq!(Some(Layout::Grid), Layout::from_config(&c));
     }
 }
