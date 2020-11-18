@@ -1,5 +1,6 @@
-//! This module defines the [Blocks] struct. To set it up from [ArgMatches], a [Yaml] and its
+//! This module defines the [Blocks] struct. To set it up from [ArgMatches], a [Config] and its
 //! [Default] value, use its [configure_from](Blocks::configure_from) method.
+
 use crate::config_file::Config;
 use crate::print_error;
 
@@ -219,7 +220,6 @@ mod test_blocks {
     use crate::config_file::Config;
 
     use clap::Error;
-    use yaml_rust::YamlLoader;
 
     // The following tests are implemented using match expressions instead of the assert_eq macro,
     // because clap::Error does not implement PartialEq.
@@ -425,25 +425,16 @@ mod test_blocks {
 
     #[test]
     fn test_from_config_one() {
-        let mut c = &Config::with_none();
-        c.blocks = Some(vec!["permission"]);
+        let mut c = Config::with_none();
+        c.blocks = Some(vec!["permission".into()].into());
 
         let blocks = Blocks(vec![Block::Permission]);
-        assert_eq!(Some(blocks), Blocks::from_config(c));
+        assert_eq!(Some(blocks), Blocks::from_config(&c));
     }
 
     #[test]
     fn test_from_config_reversed_default() {
-        let yaml_string = "blocks:
-  - name
-  - date
-  - size
-  - group
-  - user
-  - permission
-";
-        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
-        let blocks = Blocks(vec![
+        let target = Blocks(vec![
             Block::Name,
             Block::Date,
             Block::Size,
@@ -451,31 +442,36 @@ mod test_blocks {
             Block::User,
             Block::Permission,
         ]);
-        assert_eq!(Some(blocks), Blocks::from_config(&Config::with_none()));
+        let mut c = Config::with_none();
+        c.blocks = Some(
+            vec![
+                "name".into(),
+                "date".into(),
+                "size".into(),
+                "group".into(),
+                "user".into(),
+                "permission".into(),
+            ]
+            .into(),
+        );
+
+        assert_eq!(Some(target), Blocks::from_config(&c));
     }
 
     #[test]
     fn test_from_config_every_second_one() {
-        let yaml_string = "blocks:
-  - permission
-  - group
-  - date
-";
-        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
+        let mut c = Config::with_none();
+        c.blocks = Some(vec!["permission".into(), "group".into(), "date".into()].into());
         let blocks = Blocks(vec![Block::Permission, Block::Group, Block::Date]);
-        assert_eq!(Some(blocks), Blocks::from_config(&Config::with_none()));
+        assert_eq!(Some(blocks), Blocks::from_config(&c));
     }
 
     #[test]
     fn test_from_config_invalid_is_ignored() {
-        let yaml_string = "blocks:
-  - permission
-  - foo
-  - date
-";
-        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
+        let mut c = Config::with_none();
+        c.blocks = Some(vec!["permission".into(), "for".into(), "date".into()].into());
         let blocks = Blocks(vec![Block::Permission, Block::Date]);
-        assert_eq!(Some(blocks), Blocks::from_config(&Config::with_none()));
+        assert_eq!(Some(blocks), Blocks::from_config(&c));
     }
 }
 

@@ -100,8 +100,6 @@ mod test {
     use crate::config_file::Config;
     use crate::flags::Configurable;
 
-    use yaml_rust::YamlLoader;
-
     #[test]
     fn test_from_arg_matches_none() {
         let argv = vec!["lsd"];
@@ -157,56 +155,42 @@ mod test {
     }
 
     #[test]
-    fn test_from_config_empty() {
-        let yaml_string = "---";
-        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
-        assert_eq!(None, DateFlag::from_config(&Config::with_none()));
-    }
-
-    #[test]
     fn test_from_config_date() {
-        let yaml_string = "date: date";
-        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
-        assert_eq!(
-            Some(DateFlag::Date),
-            DateFlag::from_config(&Config::with_none())
-        );
+        let mut c = Config::with_none();
+        c.date = Some("date".into());
+
+        assert_eq!(Some(DateFlag::Date), DateFlag::from_config(&c));
     }
 
     #[test]
     fn test_from_config_relative() {
-        let yaml_string = "date: relative";
-        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
-        assert_eq!(
-            Some(DateFlag::Relative),
-            DateFlag::from_config(&Config::with_none())
-        );
+        let mut c = Config::with_none();
+        c.date = Some("relative".into());
+        assert_eq!(Some(DateFlag::Relative), DateFlag::from_config(&c));
     }
 
     #[test]
     fn test_from_config_format() {
-        let yaml_string = "date: +%F";
-        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
+        let mut c = Config::with_none();
+        c.date = Some("+%F".into());
         assert_eq!(
             Some(DateFlag::Formatted("%F".to_string())),
-            DateFlag::from_config(&Config::with_none())
+            DateFlag::from_config(&c)
         );
     }
 
     #[test]
     fn test_from_config_format_invalid() {
-        let yaml_string = "date: +%J";
-        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
-        assert_eq!(None, DateFlag::from_config(&Config::with_none()));
+        let mut c = Config::with_none();
+        c.date = Some("+%J".into());
+        assert_eq!(None, DateFlag::from_config(&c));
     }
 
     #[test]
     fn test_from_config_classic_mode() {
-        let yaml_string = "classic: true\ndate: relative";
-        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
-        assert_eq!(
-            Some(DateFlag::Date),
-            DateFlag::from_config(&Config::with_none())
-        );
+        let mut c = Config::with_none();
+        c.date = Some("relative".into());
+        c.classic = Some(true);
+        assert_eq!(Some(DateFlag::Date), DateFlag::from_config(&c));
     }
 }

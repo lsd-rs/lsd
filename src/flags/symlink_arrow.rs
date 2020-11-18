@@ -49,24 +49,15 @@ mod test {
     use crate::config_file::Config;
     use crate::flags::Configurable;
 
-    use yaml_rust::YamlLoader;
-
     use super::SymlinkArrow;
     #[test]
     fn test_symlink_arrow_from_config_utf8() {
-        let yaml_string = "symlink-arrow: ↹";
-        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
+        let mut c = Config::with_none();
+        c.symlink_arrow = Some("↹".into());
         assert_eq!(
             Some(SymlinkArrow(String::from("\u{21B9}"))),
-            SymlinkArrow::from_config(&Config::with_none())
+            SymlinkArrow::from_config(&c)
         );
-    }
-
-    #[test]
-    fn test_symlink_arrow_from_config_type_error() {
-        let yaml_string = "symlink-arrow: false";
-        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
-        assert_eq!(None, SymlinkArrow::from_config(&Config::with_none()));
     }
 
     #[test]

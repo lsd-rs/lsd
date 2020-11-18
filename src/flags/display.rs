@@ -82,8 +82,6 @@ mod test {
     use crate::config_file::Config;
     use crate::flags::Configurable;
 
-    use yaml_rust::YamlLoader;
-
     #[test]
     fn test_from_arg_matches_none() {
         let argv = vec!["lsd"];
@@ -124,39 +122,23 @@ mod test {
     }
 
     #[test]
-    fn test_from_config_empty() {
-        let yaml_string = "---";
-        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
-        assert_eq!(None, Display::from_config(&Config::with_none()));
-    }
-
-    #[test]
     fn test_from_config_all() {
-        let yaml_string = "display: all";
-        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
-        assert_eq!(
-            Some(Display::All),
-            Display::from_config(&Config::with_none())
-        );
+        let mut c = Config::with_none();
+        c.display = Some("all".into());
+        assert_eq!(Some(Display::All), Display::from_config(&c));
     }
 
     #[test]
     fn test_from_config_almost_all() {
-        let yaml_string = "display: almost-all";
-        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
-        assert_eq!(
-            Some(Display::AlmostAll),
-            Display::from_config(&Config::with_none())
-        );
+        let mut c = Config::with_none();
+        c.display = Some("almost-all".into());
+        assert_eq!(Some(Display::AlmostAll), Display::from_config(&c));
     }
 
     #[test]
     fn test_from_config_directory_only() {
-        let yaml_string = "display: directory-only";
-        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
-        assert_eq!(
-            Some(Display::DirectoryItself),
-            Display::from_config(&Config::with_none())
-        );
+        let mut c = Config::with_none();
+        c.display = Some("directory-only".into());
+        assert_eq!(Some(Display::DirectoryItself), Display::from_config(&c));
     }
 }

@@ -175,10 +175,8 @@ mod test_icon_option {
     use super::IconOption;
 
     use crate::app;
-    use crate::config_file::Config;
+    use crate::config_file::{Config, Icons};
     use crate::flags::Configurable;
-
-    use yaml_rust::YamlLoader;
 
     #[test]
     fn test_from_arg_matches_none() {
@@ -233,50 +231,44 @@ mod test_icon_option {
     }
 
     #[test]
-    fn test_from_config_empty() {
-        let yaml_string = "---";
-        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
-        assert_eq!(None, IconOption::from_config(&Config::with_none()));
-    }
-
-    #[test]
     fn test_from_config_always() {
-        let yaml_string = "icons:\n  when: always";
-        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
-        assert_eq!(
-            Some(IconOption::Always),
-            IconOption::from_config(&Config::with_none())
-        );
+        let mut c = Config::with_none();
+        c.icons = Some(Icons {
+            when: Some("always".into()),
+            theme: None,
+        });
+        assert_eq!(Some(IconOption::Always), IconOption::from_config(&c));
     }
 
     #[test]
     fn test_from_config_auto() {
-        let yaml_string = "icons:\n  when: auto";
-        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
-        assert_eq!(
-            Some(IconOption::Auto),
-            IconOption::from_config(&Config::with_none())
-        );
+        let mut c = Config::with_none();
+        c.icons = Some(Icons {
+            when: Some("auto".into()),
+            theme: None,
+        });
+        assert_eq!(Some(IconOption::Auto), IconOption::from_config(&c));
     }
 
     #[test]
     fn test_from_config_never() {
-        let yaml_string = "icons:\n  when: never";
-        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
-        assert_eq!(
-            Some(IconOption::Never),
-            IconOption::from_config(&Config::with_none())
-        );
+        let mut c = Config::with_none();
+        c.icons = Some(Icons {
+            when: Some("never".into()),
+            theme: None,
+        });
+        assert_eq!(Some(IconOption::Never), IconOption::from_config(&c));
     }
 
     #[test]
     fn test_from_config_classic_mode() {
-        let yaml_string = "classic: true\nicons:\n  when: always";
-        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
-        assert_eq!(
-            Some(IconOption::Never),
-            IconOption::from_config(&Config::with_none())
-        );
+        let mut c = Config::with_none();
+        c.classic = Some(true);
+        c.icons = Some(Icons {
+            when: Some("always".into()),
+            theme: None,
+        });
+        assert_eq!(Some(IconOption::Never), IconOption::from_config(&c));
     }
 }
 
@@ -285,10 +277,8 @@ mod test_icon_theme {
     use super::IconTheme;
 
     use crate::app;
-    use crate::config_file::Config;
+    use crate::config_file::{Config, Icons};
     use crate::flags::Configurable;
-
-    use yaml_rust::YamlLoader;
 
     #[test]
     fn test_from_arg_matches_none() {
@@ -323,29 +313,22 @@ mod test_icon_theme {
     }
 
     #[test]
-    fn test_from_config_empty() {
-        let yaml_string = "---";
-        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
-        assert_eq!(None, IconTheme::from_config(&Config::with_none()));
-    }
-
-    #[test]
     fn test_from_config_fancy() {
-        let yaml_string = "icons:\n  theme: fancy";
-        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
-        assert_eq!(
-            Some(IconTheme::Fancy),
-            IconTheme::from_config(&Config::with_none())
-        );
+        let mut c = Config::with_none();
+        c.icons = Some(Icons {
+            when: None,
+            theme: Some("fancy".into()),
+        });
+        assert_eq!(Some(IconTheme::Fancy), IconTheme::from_config(&c));
     }
 
     #[test]
     fn test_from_config_unicode() {
-        let yaml_string = "icons:\n  theme: unicode";
-        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
-        assert_eq!(
-            Some(IconTheme::Unicode),
-            IconTheme::from_config(&Config::with_none())
-        );
+        let mut c = Config::with_none();
+        c.icons = Some(Icons {
+            when: None,
+            theme: Some("unicode".into()),
+        });
+        assert_eq!(Some(IconTheme::Unicode), IconTheme::from_config(&c));
     }
 }

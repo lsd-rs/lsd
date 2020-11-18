@@ -1,4 +1,4 @@
-//! This module defines the [Color]. To set it up from [ArgMatches], a [Yaml] and its [Default]
+//! This module defines the [Color]. To set it up from [ArgMatches], a [Config] and its [Default]
 //! value, use its [configure_from](Configurable::configure_from) method.
 
 use super::Configurable;
@@ -104,10 +104,8 @@ mod test_color_option {
     use super::ColorOption;
 
     use crate::app;
-    use crate::config_file::Config;
+    use crate::config_file::{self, Config};
     use crate::flags::Configurable;
-
-    use yaml_rust::YamlLoader;
 
     #[test]
     fn test_from_arg_matches_none() {
@@ -162,49 +160,40 @@ mod test_color_option {
     }
 
     #[test]
-    fn test_from_config_empty() {
-        let yaml_string = "---";
-        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
-        assert_eq!(None, ColorOption::from_config(&Config::with_none()));
-    }
-
-    #[test]
     fn test_from_config_always() {
-        let yaml_string = "color:\n  when: always";
-        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
-        assert_eq!(
-            Some(ColorOption::Always),
-            ColorOption::from_config(&Config::with_none())
-        );
+        let mut c = Config::with_none();
+        c.color = Some(config_file::Color {
+            when: "always".into(),
+        });
+
+        assert_eq!(Some(ColorOption::Always), ColorOption::from_config(&c));
     }
 
     #[test]
     fn test_from_config_auto() {
-        let yaml_string = "color:\n  when: auto";
-        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
-        assert_eq!(
-            Some(ColorOption::Auto),
-            ColorOption::from_config(&Config::with_none())
-        );
+        let mut c = Config::with_none();
+        c.color = Some(config_file::Color {
+            when: "auto".into(),
+        });
+        assert_eq!(Some(ColorOption::Auto), ColorOption::from_config(&c));
     }
 
     #[test]
     fn test_from_config_never() {
-        let yaml_string = "color:\n  when: never";
-        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
-        assert_eq!(
-            Some(ColorOption::Never),
-            ColorOption::from_config(&Config::with_none())
-        );
+        let mut c = Config::with_none();
+        c.color = Some(config_file::Color {
+            when: "never".into(),
+        });
+        assert_eq!(Some(ColorOption::Never), ColorOption::from_config(&c));
     }
 
     #[test]
     fn test_from_config_classic_mode() {
-        let yaml_string = "classic: true\ncolor:\n  when: always";
-        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
-        assert_eq!(
-            Some(ColorOption::Never),
-            ColorOption::from_config(&Config::with_none())
-        );
+        let mut c = Config::with_none();
+        c.color = Some(config_file::Color {
+            when: "always".into(),
+        });
+        c.classic = Some(true);
+        assert_eq!(Some(ColorOption::Never), ColorOption::from_config(&c));
     }
 }

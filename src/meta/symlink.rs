@@ -80,15 +80,13 @@ mod tests {
     use crate::color::{Colors, Theme};
     use crate::config_file::Config;
     use crate::flags::Flags;
-    use yaml_rust::YamlLoader;
+
     #[test]
     fn test_symlink_render_default_valid_target_nocolor() {
         let link = SymLink {
             target: Some("/target".to_string()),
             valid: true,
         };
-        let yaml_string = "---";
-        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
         let argv = vec!["lsd"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         assert_eq!(
@@ -107,8 +105,6 @@ mod tests {
             target: Some("/target".to_string()),
             valid: false,
         };
-        let yaml_string = "---";
-        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
         let argv = vec!["lsd"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         assert_eq!(
