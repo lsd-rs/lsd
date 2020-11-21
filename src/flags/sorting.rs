@@ -4,9 +4,9 @@
 use super::Configurable;
 
 use crate::config_file::Config;
-use crate::print_error;
 
 use clap::ArgMatches;
+use serde::Deserialize;
 
 /// A collection of flags on how to sort the output.
 #[derive(Clone, Debug, Copy, PartialEq, Eq, Default)]
@@ -34,7 +34,8 @@ impl Sorting {
 }
 
 /// The flag showing which column to use for sorting.
-#[derive(Clone, Debug, Copy, PartialEq, Eq)]
+#[derive(Clone, Debug, Copy, PartialEq, Eq, Deserialize)]
+#[serde(rename_all = "kebab-case")]
 pub enum SortColumn {
     Extension,
     Name,
@@ -70,25 +71,7 @@ impl Configurable<Self> for SortColumn {
     /// Otherwise this returns [None].
     fn from_config(config: &Config) -> Option<Self> {
         if let Some(sort) = &config.sorting {
-            if let Some(column) = &sort.column {
-                match column.as_ref() {
-                    "extension" => Some(Self::Extension),
-                    "name" => Some(Self::Name),
-                    "size" => Some(Self::Size),
-                    "time" => Some(Self::Time),
-                    "version" => Some(Self::Version),
-                    _ => {
-                        print_error!(
-                            "sorting/column can only be one of \
-                             extension, name, size, time or version, but got {}",
-                            &column
-                        );
-                        None
-                    }
-                }
-            } else {
-                None
-            }
+            sort.column
         } else {
             None
         }
@@ -153,7 +136,8 @@ impl Default for SortOrder {
 }
 
 /// The flag showing where to place directories.
-#[derive(Clone, Debug, Copy, PartialEq, Eq)]
+#[derive(Clone, Debug, Copy, PartialEq, Eq, Deserialize)]
+#[serde(rename_all = "kebab-case")]
 pub enum DirGrouping {
     None,
     First,
@@ -201,9 +185,7 @@ impl Configurable<Self> for DirGrouping {
             return Some(Self::None);
         }
         if let Some(sort) = &config.sorting {
-            if let Some(group) = &sort.dir_grouping {
-                return Self::from_str(group);
-            }
+            return sort.dir_grouping;
         }
         None
     }
@@ -330,22 +312,10 @@ mod test_sort_column {
     }
 
     #[test]
-    fn test_from_config_invalid() {
-        let mut c = Config::with_none();
-        c.sorting = Some(Sorting {
-            column: Some("foo".into()),
-            reverse: None,
-            dir_grouping: None,
-        });
-
-        assert_eq!(None, SortColumn::from_config(&c));
-    }
-
-    #[test]
     fn test_from_config_extension() {
         let mut c = Config::with_none();
         c.sorting = Some(Sorting {
-            column: Some("extension".into()),
+            column: Some(SortColumn::Extension),
             reverse: None,
             dir_grouping: None,
         });
@@ -356,7 +326,7 @@ mod test_sort_column {
     fn test_from_config_name() {
         let mut c = Config::with_none();
         c.sorting = Some(Sorting {
-            column: Some("name".into()),
+            column: Some(SortColumn::Name),
             reverse: None,
             dir_grouping: None,
         });
@@ -367,7 +337,7 @@ mod test_sort_column {
     fn test_from_config_time() {
         let mut c = Config::with_none();
         c.sorting = Some(Sorting {
-            column: Some("time".into()),
+            column: Some(SortColumn::Time),
             reverse: None,
             dir_grouping: None,
         });
@@ -378,7 +348,7 @@ mod test_sort_column {
     fn test_from_config_size() {
         let mut c = Config::with_none();
         c.sorting = Some(Sorting {
-            column: Some("size".into()),
+            column: Some(SortColumn::Size),
             reverse: None,
             dir_grouping: None,
         });
@@ -389,7 +359,7 @@ mod test_sort_column {
     fn test_from_config_version() {
         let mut c = Config::with_none();
         c.sorting = Some(Sorting {
-            column: Some("version".into()),
+            column: Some(SortColumn::Version),
             reverse: None,
             dir_grouping: None,
         });
@@ -529,7 +499,7 @@ mod test_dir_grouping {
         c.sorting = Some(Sorting {
             column: None,
             reverse: None,
-            dir_grouping: Some("first".into()),
+            dir_grouping: Some(DirGrouping::First),
         });
         assert_eq!(Some(DirGrouping::First), DirGrouping::from_config(&c));
     }
@@ -540,7 +510,7 @@ mod test_dir_grouping {
         c.sorting = Some(Sorting {
             column: None,
             reverse: None,
-            dir_grouping: Some("last".into()),
+            dir_grouping: Some(DirGrouping::Last),
         });
         assert_eq!(Some(DirGrouping::Last), DirGrouping::from_config(&c));
     }
@@ -559,6 +529,11 @@ mod test_dir_grouping {
     #[test]
     fn test_from_config_classic_mode() {
         let mut c = Config::with_none();
+        c.sorting = Some(Sorting {
+            column: None,
+            reverse: None,
+            dir_grouping: Some(DirGrouping::Last),
+        });
         c.classic = Some(true);
         assert_eq!(Some(DirGrouping::None), DirGrouping::from_config(&c));
     }

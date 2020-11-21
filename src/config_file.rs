@@ -1,11 +1,16 @@
 ///! This module provides methods to handle the program's config files and operations related to
 ///! this.
+use crate::flags::color::ColorOption;
+use crate::flags::display::Display;
+use crate::flags::icons::IconOption;
+use crate::flags::layout::Layout;
+use crate::flags::size::SizeFlag;
+use crate::flags::sorting::{DirGrouping, SortColumn};
 use crate::print_error;
 
 use std::path::PathBuf;
 
 use serde::Deserialize;
-use serde_yaml::Sequence;
 
 use std::fs;
 
@@ -15,48 +20,51 @@ const YAML_LONG_EXT: &str = "yaml";
 
 /// A struct to hold an optional file path [String] and an optional [Yaml], and provides methods
 /// around error handling in a config file.
-#[derive(Debug, Deserialize)]
+#[derive(Eq, PartialEq, Debug, Deserialize)]
+#[serde(rename_all = "kebab-case")]
+#[serde(deny_unknown_fields)]
 pub struct Config {
     pub classic: Option<bool>,
-    pub blocks: Option<Sequence>,
+    pub blocks: Option<Vec<String>>,
     pub color: Option<Color>,
-    pub date: Option<String>, // enum?
+    pub date: Option<String>,
     pub dereference: Option<bool>,
-    pub display: Option<String>, // enum?
+    pub display: Option<Display>,
     pub icons: Option<Icons>,
-    pub ignore_globs: Option<Sequence>,
+    pub ignore_globs: Option<Vec<String>>,
     pub indicators: Option<bool>,
-    pub layout: Option<String>, // enum?
+    pub layout: Option<Layout>,
     pub recursion: Option<Recursion>,
-    pub size: Option<String>, // enum?
+    pub size: Option<SizeFlag>,
     pub sorting: Option<Sorting>,
     pub no_symlink: Option<bool>,
     pub total_size: Option<bool>,
     pub symlink_arrow: Option<String>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Eq, PartialEq, Debug, Deserialize)]
 pub struct Color {
-    pub when: String, // enum?
+    pub when: ColorOption,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Eq, PartialEq, Debug, Deserialize)]
 pub struct Icons {
-    pub when: Option<String>, // enum?
+    pub when: Option<IconOption>,
     pub theme: Option<String>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Eq, PartialEq, Debug, Deserialize)]
 pub struct Recursion {
     pub enabled: Option<bool>,
     pub depth: Option<usize>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Eq, PartialEq, Debug, Deserialize)]
+#[serde(rename_all = "kebab-case")]
 pub struct Sorting {
-    pub column: Option<String>, // enum?
+    pub column: Option<SortColumn>,
     pub reverse: Option<bool>,
-    pub dir_grouping: Option<String>, // enum?
+    pub dir_grouping: Option<DirGrouping>,
 }
 
 impl Config {
@@ -98,7 +106,7 @@ impl Config {
 
     /// This constructs a Config struct with a passed [Yaml] str.
     fn with_yaml(yaml: &str) -> Option<Self> {
-        match serde_yaml::from_str(yaml) {
+        match serde_yaml::from_str::<Self>(yaml) {
             Ok(c) => Some(c),
             Err(e) => {
                 print_error!("configuration file format error, {}\n\n", e);
@@ -145,8 +153,11 @@ impl Default for Config {
                 return c;
             }
         }
-        Self::with_yaml(
-            r#"---
+        Self::with_yaml(DEFAULT_CONFIG).unwrap()
+    }
+}
+
+const DEFAULT_CONFIG: &str = r#"---
 # == Classic ==
 # This is a shorthand to override some of the options to be backwards compatible
 # with `ls`. It affects the "color"->"when", "sorting"->"dir-grouping", "date"
@@ -256,26 +267,76 @@ total-size: false
 
 # == Symlink arrow ==
 # Specifies how the symlink arrow display, chars in both ascii and utf8
-symlink-arrow: ⇒"#,
-        )
-        .unwrap()
-    }
-}
+symlink-arrow: ⇒
+"#;
 
 #[cfg(test)]
 mod tests {
     use super::Config;
+    use crate::config_file;
+    use crate::flags::color::ColorOption;
+    use crate::flags::icons::IconOption;
+    use crate::flags::layout::Layout;
+    use crate::flags::size::SizeFlag;
+    use crate::flags::sorting::{DirGrouping, SortColumn};
+
+    #[test]
+    fn test_read_default() {
+        let c = Config::with_yaml(config_file::DEFAULT_CONFIG).unwrap();
+        assert_eq!(
+            Config {
+                classic: Some(false),
+                blocks: Some(
+                    vec![
+                        "permission".into(),
+                        "user".into(),
+                        "group".into(),
+                        "size".into(),
+                        "date".into(),
+                        "name".into(),
+                    ]
+                    .into()
+                ),
+                color: Some(config_file::Color {
+                    when: ColorOption::Auto,
+                }),
+                date: Some("date".into()),
+                dereference: Some(false),
+                display: None,
+                icons: Some(config_file::Icons {
+                    when: Some(IconOption::Auto),
+                    theme: Some("fancy".into()),
+                }),
+                ignore_globs: None,
+                indicators: Some(false),
+                layout: Some(Layout::Grid),
+                recursion: Some(config_file::Recursion {
+                    enabled: Some(false),
+                    depth: None,
+                }),
+                size: Some(SizeFlag::Default),
+                sorting: Some(config_file::Sorting {
+                    column: Some(SortColumn::Name),
+                    reverse: Some(false),
+                    dir_grouping: Some(DirGrouping::None),
+                }),
+                no_symlink: Some(false),
+                total_size: Some(false),
+                symlink_arrow: Some("⇒".into()),
+            },
+            c
+        );
+    }
+
     #[test]
     fn test_read_config_ok() {
         let c = Config::with_yaml("classic: true").unwrap();
-        println!("{:?}", c);
         assert!(c.classic.unwrap())
     }
 
     #[test]
     fn test_read_config_bad_bool() {
         let c = Config::with_yaml("classic: notbool");
-        println!("{:?}", c);
         assert!(c.is_none())
     }
 
@@ -283,5 +344,10 @@ mod tests {
     fn test_read_config_file_not_found() {
         let c = Config::with_file("not-existed".to_string());
         assert!(c.is_none())
+    }
+
+    #[test]
+    fn test_read_bad_display() {
+        assert!(Config::with_yaml("display: bad").is_none())
     }
 }

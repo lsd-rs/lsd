@@ -61,7 +61,7 @@ fn inner_display_grid(
     // The first iteration (depth == 0) corresponds to the inputs given by the
     // user. We defer displaying directories given by the user unless we've been
     // asked to display the directory itself (rather than its contents).
-    let skip_dirs = (depth == 0) && (flags.display != Display::DirectoryItself);
+    let skip_dirs = (depth == 0) && (flags.display != Display::DirectoryOnly);
 
     // print the files first.
     for meta in metas {

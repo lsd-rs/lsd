@@ -7,6 +7,7 @@ use crate::config_file::Config;
 use crate::print_error;
 
 use clap::ArgMatches;
+use serde::Deserialize;
 
 /// A collection of flags on how to use icons.
 #[derive(Clone, Debug, Copy, PartialEq, Eq, Default)]
@@ -30,29 +31,12 @@ impl Icons {
 }
 
 /// The flag showing when to use icons in the output.
-#[derive(Clone, Debug, Copy, PartialEq, Eq)]
+#[derive(Clone, Debug, Copy, PartialEq, Eq, Deserialize)]
+#[serde(rename_all = "kebab-case")]
 pub enum IconOption {
     Always,
     Auto,
     Never,
-}
-
-impl IconOption {
-    /// Get a value from a str.
-    fn from_str(value: &str) -> Option<Self> {
-        match value {
-            "always" => Some(Self::Always),
-            "auto" => Some(Self::Auto),
-            "never" => Some(Self::Never),
-            _ => {
-                print_error!(
-                    "icons/when can only be one of auto, always or never, but got {}",
-                    &value
-                );
-                None
-            }
-        }
-    }
 }
 
 impl Configurable<Self> for IconOption {
@@ -88,11 +72,7 @@ impl Configurable<Self> for IconOption {
         }
 
         if let Some(icon) = &config.icons {
-            if let Some(when) = &icon.when {
-                Self::from_str(&when)
-            } else {
-                None
-            }
+            icon.when
         } else {
             None
         }
@@ -234,7 +214,7 @@ mod test_icon_option {
     fn test_from_config_always() {
         let mut c = Config::with_none();
         c.icons = Some(Icons {
-            when: Some("always".into()),
+            when: Some(IconOption::Always),
             theme: None,
         });
         assert_eq!(Some(IconOption::Always), IconOption::from_config(&c));
@@ -244,7 +224,7 @@ mod test_icon_option {
     fn test_from_config_auto() {
         let mut c = Config::with_none();
         c.icons = Some(Icons {
-            when: Some("auto".into()),
+            when: Some(IconOption::Auto),
             theme: None,
         });
         assert_eq!(Some(IconOption::Auto), IconOption::from_config(&c));
@@ -254,7 +234,7 @@ mod test_icon_option {
     fn test_from_config_never() {
         let mut c = Config::with_none();
         c.icons = Some(Icons {
-            when: Some("never".into()),
+            when: Some(IconOption::Never),
             theme: None,
         });
         assert_eq!(Some(IconOption::Never), IconOption::from_config(&c));
@@ -265,7 +245,7 @@ mod test_icon_option {
         let mut c = Config::with_none();
         c.classic = Some(true);
         c.icons = Some(Icons {
-            when: Some("always".into()),
+            when: Some(IconOption::Always),
             theme: None,
         });
         assert_eq!(Some(IconOption::Never), IconOption::from_config(&c));

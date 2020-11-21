@@ -2,14 +2,15 @@
 //! [Default] value, use its [configure_from](Configurable::configure_from) method.
 
 use crate::config_file::Config;
-use crate::print_error;
 
 use super::Configurable;
 
 use clap::ArgMatches;
+use serde::Deserialize;
 
 /// The flag showing which output layout to print.
-#[derive(Clone, Debug, Copy, PartialEq, Eq)]
+#[derive(Clone, Debug, Copy, PartialEq, Eq, Deserialize)]
+#[serde(rename_all = "lowercase")]
 pub enum Layout {
     Grid,
     Tree,
@@ -44,22 +45,7 @@ impl Configurable<Layout> for Layout {
     /// this returns the corresponding `Layout` variant in a [Some].
     /// Otherwise this returns [None].
     fn from_config(config: &Config) -> Option<Self> {
-        if let Some(layout) = &config.layout {
-            match layout.as_ref() {
-                "tree" => Some(Self::Tree),
-                "oneline" => Some(Self::OneLine),
-                "grid" => Some(Self::Grid),
-                _ => {
-                    print_error!(
-                        "layout can only be one of tree, oneline or grid, but got {}",
-                        &layout
-                    );
-                    None
-                }
-            }
-        } else {
-            None
-        }
+        config.layout
     }
 }
 
@@ -121,21 +107,21 @@ mod test {
     #[test]
     fn test_from_config_tree() {
         let mut c = Config::with_none();
-        c.layout = Some("tree".into());
+        c.layout = Some(Layout::Tree);
         assert_eq!(Some(Layout::Tree), Layout::from_config(&c));
     }
 
     #[test]
     fn test_from_config_oneline() {
         let mut c = Config::with_none();
-        c.layout = Some("oneline".into());
+        c.layout = Some(Layout::OneLine);
         assert_eq!(Some(Layout::OneLine), Layout::from_config(&c));
     }
 
     #[test]
     fn test_from_config_grid() {
         let mut c = Config::with_none();
-        c.layout = Some("grid".into());
+        c.layout = Some(Layout::Grid);
         assert_eq!(Some(Layout::Grid), Layout::from_config(&c));
     }
 }
