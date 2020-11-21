@@ -7,7 +7,6 @@ use serde::Deserialize;
 use serde_yaml::Sequence;
 
 use std::fs;
-use xdg::BaseDirectories;
 
 const CONF_DIR: &str = "lsd";
 const CONF_FILE_NAME: &str = "config";
@@ -82,8 +81,7 @@ impl Config {
         }
     }
 
-    /// This constructs a Config struct with a passed file [String] and without a [Yaml].
-    // TODO(zhangwei) Box<Error>
+    /// This constructs a Config struct with a passed file path [String].
     pub fn with_file(file: String) -> Option<Self> {
         match fs::read(&file) {
             Ok(f) => Self::with_yaml(&String::from_utf8_lossy(&f)),
@@ -97,7 +95,7 @@ impl Config {
         }
     }
 
-    /// This constructs a Config struct with a passed [Yaml] and without a file [String].
+    /// This constructs a Config struct with a passed [Yaml] str.
     fn with_yaml(yaml: &str) -> Option<Self> {
         match serde_yaml::from_str(yaml) {
             Ok(c) => Some(c),
@@ -109,34 +107,45 @@ impl Config {
     }
 
     /// This provides the path for a configuration file, according to the XDG_BASE_DIRS specification.
-    /// not checking the error because this is static
+    /// return None if error like PermissionDenied
     #[cfg(not(windows))]
-    fn config_file_path() -> PathBuf {
-        BaseDirectories::with_prefix(CONF_DIR)
-            .unwrap()
-            .place_config_file([CONF_FILE_NAME, YAML_LONG_EXT].join("."))
-            .unwrap()
+    fn config_file_path() -> Option<PathBuf> {
+        use xdg::BaseDirectories;
+        match BaseDirectories::with_prefix(CONF_DIR) {
+            Ok(p) => {
+                if let Ok(p) = p.place_config_file([CONF_FILE_NAME, YAML_LONG_EXT].join(".")) {
+                    return Some(p);
+                }
+            }
+            Err(e) => print_error!("can not open config file: {}", e),
+        }
+        None
     }
 
     /// This provides the path for a configuration file, inside the %APPDATA% directory.
-    /// not checking the error because this is static
+    /// return None if error like PermissionDenied
     #[cfg(windows)]
-    fn config_file_path() -> PathBuf {
-        dirs::config_dir()
-            .unwrap()
-            .join(CONF_DIR)
-            .join(CONF_FILE_NAME)
-            .set_extension(YAML_LONG_EXT)
+    fn config_file_path() -> Option<PathBuf> {
+        if let Some(p) = dirs::config_dir() {
+            return Some(
+                p.join(CONF_DIR)
+                    .join(CONF_FILE_NAME)
+                    .with_extension(YAML_LONG_EXT),
+            );
+        }
+        None
     }
 }
 
 impl Default for Config {
     fn default() -> Self {
-        if let Some(c) = Self::with_file(Self::config_file_path().to_string_lossy().to_string()) {
-            c
-        } else {
-            Self::with_yaml(
-                r#"---
+        if let Some(p) = Self::config_file_path() {
+            if let Some(c) = Self::with_file(p.to_string_lossy().to_string()) {
+                return c;
+            }
+        }
+        Self::with_yaml(
+            r#"---
 # == Classic ==
 # This is a shorthand to override some of the options to be backwards compatible
 # with `ls`. It affects the "color"->"when", "sorting"->"dir-grouping", "date"
@@ -247,9 +256,8 @@ total-size: false
 # == Symlink arrow ==
 # Specifies how the symlink arrow display, chars in both ascii and utf8
 symlink-arrow: ⇒"#,
-            )
-            .unwrap()
-        }
+        )
+        .unwrap()
     }
 }
 
