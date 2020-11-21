@@ -7,6 +7,7 @@ use crate::config_file::Config;
 use crate::print_error;
 
 use clap::ArgMatches;
+use serde::Deserialize;
 
 /// A collection of flags on how to use colors.
 #[derive(Clone, Debug, Copy, PartialEq, Eq, Default)]
@@ -26,7 +27,8 @@ impl Color {
 }
 
 /// The flag showing when to use colors in the output.
-#[derive(Clone, Debug, Copy, PartialEq, Eq)]
+#[derive(Clone, Debug, Copy, PartialEq, Eq, Deserialize)]
+#[serde(rename_all = "kebab-case")]
 pub enum ColorOption {
     Always,
     Auto,
@@ -84,7 +86,7 @@ impl Configurable<Self> for ColorOption {
         }
 
         if let Some(color) = &config.color {
-            Self::from_str(&color.when)
+            Some(color.when)
         } else {
             // TODO: maybe return default value?
             None
@@ -163,7 +165,7 @@ mod test_color_option {
     fn test_from_config_always() {
         let mut c = Config::with_none();
         c.color = Some(config_file::Color {
-            when: "always".into(),
+            when: ColorOption::Always,
         });
 
         assert_eq!(Some(ColorOption::Always), ColorOption::from_config(&c));
@@ -173,7 +175,7 @@ mod test_color_option {
     fn test_from_config_auto() {
         let mut c = Config::with_none();
         c.color = Some(config_file::Color {
-            when: "auto".into(),
+            when: ColorOption::Auto,
         });
         assert_eq!(Some(ColorOption::Auto), ColorOption::from_config(&c));
     }
@@ -182,7 +184,7 @@ mod test_color_option {
     fn test_from_config_never() {
         let mut c = Config::with_none();
         c.color = Some(config_file::Color {
-            when: "never".into(),
+            when: ColorOption::Never,
         });
         assert_eq!(Some(ColorOption::Never), ColorOption::from_config(&c));
     }
@@ -191,7 +193,7 @@ mod test_color_option {
     fn test_from_config_classic_mode() {
         let mut c = Config::with_none();
         c.color = Some(config_file::Color {
-            when: "always".into(),
+            when: ColorOption::Never,
         });
         c.classic = Some(true);
         assert_eq!(Some(ColorOption::Never), ColorOption::from_config(&c));

@@ -4,35 +4,18 @@
 use super::Configurable;
 
 use crate::config_file::Config;
-use crate::print_error;
 
 use clap::ArgMatches;
+use serde::Deserialize;
 
 /// The flag showing which file system nodes to display.
-#[derive(Clone, Debug, Copy, PartialEq, Eq)]
+#[derive(Clone, Debug, Copy, PartialEq, Eq, Deserialize)]
+#[serde(rename_all = "kebab-case")]
 pub enum Display {
     All,
     AlmostAll,
-    DirectoryItself,
-    DisplayOnlyVisible,
-}
-
-impl Display {
-    /// Get a value from a str
-    fn from_str(value: &str) -> Option<Self> {
-        match value {
-            "all" => Some(Self::All),
-            "almost-all" => Some(Self::AlmostAll),
-            "directory-only" => Some(Self::DirectoryItself),
-            _ => {
-                print_error!(
-                    "display can only be one of all, almost-all or directory-only, but got {}",
-                    &value
-                );
-                None
-            }
-        }
-    }
+    DirectoryOnly,
+    VisibleOnly,
 }
 
 impl Configurable<Self> for Display {
@@ -47,7 +30,7 @@ impl Configurable<Self> for Display {
         } else if matches.is_present("almost-all") {
             Some(Self::AlmostAll)
         } else if matches.is_present("directory-only") {
-            Some(Self::DirectoryItself)
+            Some(Self::DirectoryOnly)
         } else {
             None
         }
@@ -59,18 +42,14 @@ impl Configurable<Self> for Display {
     /// this returns the corresponding `Display` variant in a [Some].
     /// Otherwise this returns [None].
     fn from_config(config: &Config) -> Option<Self> {
-        if let Some(disp) = &config.display {
-            Self::from_str(&disp)
-        } else {
-            None
-        }
+        config.display
     }
 }
 
 /// The default value for `Display` is [Display::DisplayOnlyVisible].
 impl Default for Display {
     fn default() -> Self {
-        Self::DisplayOnlyVisible
+        Display::VisibleOnly
     }
 }
 
@@ -111,7 +90,7 @@ mod test {
         let argv = vec!["lsd", "--directory-only"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         assert_eq!(
-            Some(Display::DirectoryItself),
+            Some(Display::DirectoryOnly),
             Display::from_arg_matches(&matches)
         );
     }
@@ -124,21 +103,21 @@ mod test {
     #[test]
     fn test_from_config_all() {
         let mut c = Config::with_none();
-        c.display = Some("all".into());
+        c.display = Some(Display::All);
         assert_eq!(Some(Display::All), Display::from_config(&c));
     }
 
     #[test]
     fn test_from_config_almost_all() {
         let mut c = Config::with_none();
-        c.display = Some("almost-all".into());
+        c.display = Some(Display::AlmostAll);
         assert_eq!(Some(Display::AlmostAll), Display::from_config(&c));
     }
 
     #[test]
     fn test_from_config_directory_only() {
         let mut c = Config::with_none();
-        c.display = Some("directory-only".into());
-        assert_eq!(Some(Display::DirectoryItself), Display::from_config(&c));
+        c.display = Some(Display::DirectoryOnly);
+        assert_eq!(Some(Display::DirectoryOnly), Display::from_config(&c));
     }
 }

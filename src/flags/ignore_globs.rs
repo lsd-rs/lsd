@@ -2,7 +2,6 @@
 //! [Default] value, use the [configure_from](IgnoreGlobs::configure_from) method.
 
 use crate::config_file::Config;
-use crate::print_error;
 
 use clap::{ArgMatches, Error, ErrorKind};
 use globset::{Glob, GlobSet, GlobSetBuilder};
@@ -79,23 +78,17 @@ impl IgnoreGlobs {
     /// If the `Config::ignore-globs` contains an Array of Strings,
     /// each of its values is used to build the [GlobSet]. If the building
     /// succeeds, the [GlobSet] is returned in the [Result] in a [Some]. If any error is
-    /// encountered while building, an [Error] is returned in the Result instead. If the Yaml does
+    /// encountered while building, an [Error] is returned in the Result instead. If the Config does
     /// not contain such a key, this returns [None].
     fn from_config(config: &Config) -> Option<Result<GlobSet, Error>> {
         if let Some(globs) = &config.ignore_globs {
             let mut glob_set_builder = GlobSetBuilder::new();
             for glob in globs.iter() {
-                match glob.as_str() {
-                    Some(glob) => match Self::create_glob(glob) {
-                        Ok(glob) => {
-                            glob_set_builder.add(glob);
-                        }
-                        Err(err) => return Some(Err(err)),
-                    },
-                    None => {
-                        print_error!("ignore-globs must be a string");
-                        continue;
+                match Self::create_glob(glob) {
+                    Ok(glob) => {
+                        glob_set_builder.add(glob);
                     }
+                    Err(err) => return Some(Err(err)),
                 }
             }
             Some(Self::create_glob_set(&glob_set_builder))

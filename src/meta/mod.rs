@@ -54,7 +54,7 @@ impl Meta {
             return Ok(None);
         }
 
-        if flags.display == Display::DirectoryItself && flags.layout != Layout::Tree {
+        if flags.display == Display::DirectoryOnly && flags.layout != Layout::Tree {
             return Ok(None);
         }
 
@@ -103,7 +103,7 @@ impl Meta {
                 continue;
             }
 
-            if let Display::DisplayOnlyVisible = flags.display {
+            if let Display::VisibleOnly = flags.display {
                 if name.to_string_lossy().starts_with('.') {
                     continue;
                 }
@@ -119,7 +119,7 @@ impl Meta {
 
             // skip files for --tree -d
             if flags.layout == Layout::Tree {
-                if let Display::DirectoryItself = flags.display {
+                if let Display::DirectoryOnly = flags.display {
                     if !entry.file_type()?.is_dir() {
                         continue;
                     }

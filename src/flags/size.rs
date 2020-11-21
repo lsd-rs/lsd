@@ -7,9 +7,11 @@ use crate::config_file::Config;
 use crate::print_error;
 
 use clap::ArgMatches;
+use serde::Deserialize;
 
 /// The flag showing which file size units to use.
-#[derive(Clone, Debug, Copy, PartialEq, Eq)]
+#[derive(Clone, Debug, Copy, PartialEq, Eq, Deserialize)]
+#[serde(rename_all = "kebab-case")]
 pub enum SizeFlag {
     /// The variant to show file size with SI unit prefix and a B for bytes.
     Default,
@@ -57,10 +59,7 @@ impl Configurable<Self> for SizeFlag {
     /// this returns the corresponding `SizeFlag` variant in a [Some].
     /// Otherwise this returns [None].
     fn from_config(config: &Config) -> Option<Self> {
-        if let Some(size) = &config.size {
-            return Self::from_str(size);
-        }
-        None
+        config.size
     }
 }
 
@@ -118,21 +117,21 @@ mod test {
     #[test]
     fn test_from_config_default() {
         let mut c = Config::with_none();
-        c.size = Some("default".into());
+        c.size = Some(SizeFlag::Default);
         assert_eq!(Some(SizeFlag::Default), SizeFlag::from_config(&c));
     }
 
     #[test]
     fn test_from_config_short() {
         let mut c = Config::with_none();
-        c.size = Some("short".into());
+        c.size = Some(SizeFlag::Short);
         assert_eq!(Some(SizeFlag::Short), SizeFlag::from_config(&c));
     }
 
     #[test]
     fn test_from_config_bytes() {
         let mut c = Config::with_none();
-        c.size = Some("bytes".into());
+        c.size = Some(SizeFlag::Bytes);
         assert_eq!(Some(SizeFlag::Bytes), SizeFlag::from_config(&c));
     }
 }

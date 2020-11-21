@@ -97,16 +97,16 @@ impl Blocks {
 
     /// Get a potential `Blocks` struct from a [Config].
     ///
-    /// of its [String](Yaml::String) values is returned in a `Blocks` in a [Some]. Otherwise it
+    /// of its [String]values is returned in a `Blocks` in a [Some]. Otherwise it
     /// returns [None].
     /// Config make sure blocks are Strings, we can unwrap here without panic
     fn from_config(config: &Config) -> Option<Self> {
         if let Some(c) = &config.blocks {
             let mut blocks: Vec<Block> = vec![];
             for b in c.iter() {
-                match Block::try_from(b.as_str().unwrap()) {
+                match Block::try_from(b.as_str()) {
                     Ok(block) => blocks.push(block),
-                    Err(err) => print_error!("bad blocks: {}", err),
+                    Err(err) => print_error!("{}.", err),
                 }
             }
             if blocks.is_empty() {

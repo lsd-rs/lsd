@@ -95,7 +95,7 @@ impl Core {
             };
 
             let recurse =
-                self.flags.layout == Layout::Tree || self.flags.display != Display::DirectoryItself;
+                self.flags.layout == Layout::Tree || self.flags.display != Display::DirectoryOnly;
             if recurse {
                 match meta.recurse_into(depth, &self.flags) {
                     Ok(content) => {
