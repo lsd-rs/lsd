@@ -10,7 +10,7 @@ use serde::Deserialize;
 
 /// The flag showing which output layout to print.
 #[derive(Clone, Debug, Copy, PartialEq, Eq, Deserialize)]
-#[serde(rename_all = "kebab-case")]
+#[serde(rename_all = "lowercase")]
 pub enum Layout {
     Grid,
     Tree,
