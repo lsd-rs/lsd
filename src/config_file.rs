@@ -1,6 +1,7 @@
-use crate::print_error;
 ///! This module provides methods to handle the program's config files and operations related to
 ///! this.
+use crate::print_error;
+
 use std::path::PathBuf;
 
 use serde::Deserialize;

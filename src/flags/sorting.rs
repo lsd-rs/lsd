@@ -318,6 +318,18 @@ mod test_sort_column {
     }
 
     #[test]
+    fn test_from_config_none_column() {
+        let mut c = Config::with_none();
+        c.sorting = Some(Sorting {
+            column: None,
+            reverse: None,
+            dir_grouping: None,
+        });
+
+        assert_eq!(None, SortColumn::from_config(&c));
+    }
+
+    #[test]
     fn test_from_config_invalid() {
         let mut c = Config::with_none();
         c.sorting = Some(Sorting {
@@ -424,6 +436,17 @@ mod test_sort_order {
     }
 
     #[test]
+    fn test_from_config_none_reverse() {
+        let mut c = Config::with_none();
+        c.sorting = Some(Sorting {
+            column: None,
+            reverse: None,
+            dir_grouping: None,
+        });
+        assert_eq!(None, SortOrder::from_config(&c));
+    }
+
+    #[test]
     fn test_from_config_reverse() {
         let mut c = Config::with_none();
         c.sorting = Some(Sorting {
@@ -442,6 +465,11 @@ mod test_dir_grouping {
     use crate::app;
     use crate::config_file::{Config, Sorting};
     use crate::flags::Configurable;
+
+    #[test]
+    fn test_from_str_bad_value() {
+        assert_eq!(None, DirGrouping::from_str("bad value"));
+    }
 
     #[test]
     fn test_from_arg_matches_none() {
