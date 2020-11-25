@@ -1,0 +1,188 @@
+///! This module provides methods to create theme from files and operations related to
+///! this.
+use crate::config_file;
+use crate::print_error;
+
+use ansi_term::Colour;
+use serde::Deserialize;
+use std::fs;
+use std::path::Path;
+
+/// A struct holding the theme configuration
+/// Color table: https://upload.wikimedia.org/wikipedia/commons/1/15/Xterm_256color_chart.avg
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "kebab-case")]
+#[serde(deny_unknown_fields)]
+pub struct Theme {
+    pub user: Colour,
+    pub group: Colour,
+    pub permissions: Permissions,
+    pub file_type: FileType,
+    pub modified: Modified,
+    pub size: Size,
+    pub inode: INode,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "kebab-case")]
+#[serde(deny_unknown_fields)]
+pub struct Permissions {
+    pub read: Colour,
+    pub write: Colour,
+    pub exec: Colour,
+    pub exec_sticky: Colour,
+    pub no_access: Colour,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "kebab-case")]
+#[serde(deny_unknown_fields)]
+pub struct FileType {
+    pub file: File,
+    pub dir: Dir,
+    pub pipe: Colour,
+    pub symlink: Symlink,
+    pub block_device: Colour,
+    pub char_device: Colour,
+    pub socket: Colour,
+    pub special: Colour,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "kebab-case")]
+#[serde(deny_unknown_fields)]
+pub struct File {
+    pub exec_uid: Colour,
+    pub uid_no_exec: Colour,
+    pub exec_no_uid: Colour,
+    pub no_exec_no_uid: Colour,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "kebab-case")]
+#[serde(deny_unknown_fields)]
+pub struct Dir {
+    pub uid: Colour,
+    pub no_uid: Colour,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "kebab-case")]
+#[serde(deny_unknown_fields)]
+pub struct Symlink {
+    pub default: Colour,
+    pub broken: Colour,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "kebab-case")]
+#[serde(deny_unknown_fields)]
+pub struct Modified {
+    pub hour_old: Colour,
+    pub day_old: Colour,
+    pub older: Colour,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "kebab-case")]
+#[serde(deny_unknown_fields)]
+pub struct Size {
+    pub none: Colour,
+    pub small: Colour,
+    pub medium: Colour,
+    pub large: Colour,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "kebab-case")]
+#[serde(deny_unknown_fields)]
+pub struct INode {
+    pub valid: Colour,
+    pub invalid: Colour,
+}
+
+impl Theme {
+    /// This read theme from file,
+    /// use the file path if it is absolute
+    /// prefix the config_file dir to it if it is not
+    pub fn from_path(file: &str) -> Option<Self> {
+        let real = if let Some(path) = config_file::Config::expand_home(file) {
+            path
+        } else {
+            print_error!("Bad theme file path: {}.", &file);
+            return None;
+        };
+        let path = if Path::new(&real).is_absolute() {
+            real
+        } else {
+            config_file::Config::config_file_path().unwrap().join(real)
+        };
+        match fs::read(&path) {
+            Ok(f) => Self::with_yaml(&String::from_utf8_lossy(&f)),
+            Err(e) => {
+                print_error!("bad theme file: {}, {}\n", path.to_string_lossy(), e);
+                None
+            }
+        }
+    }
+
+    /// This constructs a Theme struct with a passed [Yaml] str.
+    fn with_yaml(yaml: &str) -> Option<Self> {
+        match serde_yaml::from_str::<Self>(yaml) {
+            Ok(c) => Some(c),
+            Err(e) => {
+                print_error!("theme file format error, {}\n\n", e);
+                None
+            }
+        }
+    }
+    pub fn default_dark() -> Self {
+        Theme {
+            user: Colour::Fixed(230),  // Cornsilk1
+            group: Colour::Fixed(187), // LightYellow3
+            permissions: Permissions {
+                read: Colour::Green,
+                write: Colour::Yellow,
+                exec: Colour::Red,
+                exec_sticky: Colour::Purple,
+                no_access: Colour::Fixed(245), // Grey
+            },
+            file_type: FileType {
+                file: File {
+                    exec_uid: Colour::Fixed(40),        // Green3
+                    uid_no_exec: Colour::Fixed(184),    // Yellow3
+                    exec_no_uid: Colour::Fixed(40),     // Green3
+                    no_exec_no_uid: Colour::Fixed(184), // Yellow3
+                },
+                dir: Dir {
+                    uid: Colour::Fixed(33),    // DodgerBlue1
+                    no_uid: Colour::Fixed(33), // DodgerBlue1
+                },
+                pipe: Colour::Fixed(44), // DarkTurquoise
+                symlink: Symlink {
+                    default: Colour::Fixed(44), // DarkTurquoise
+                    broken: Colour::Fixed(124), // Red3
+                },
+                block_device: Colour::Fixed(44), // DarkTurquoise
+                char_device: Colour::Fixed(172), // Orange3
+                socket: Colour::Fixed(44),       // DarkTurquoise
+                special: Colour::Fixed(44),      // DarkTurquoise
+            },
+            modified: Modified {
+                hour_old: Colour::Fixed(40), // Green3
+                day_old: Colour::Fixed(42),  // SpringGreen2
+                older: Colour::Fixed(36),    // DarkCyan
+            },
+            size: Size {
+                none: Colour::Fixed(245),   // Grey
+                small: Colour::Fixed(229),  // Wheat1
+                medium: Colour::Fixed(216), // LightSalmon1
+                large: Colour::Fixed(172),  // Orange3
+            },
+            inode: INode {
+                valid: Colour::Fixed(13),    // Pink
+                invalid: Colour::Fixed(245), // Grey
+            },
+        }
+    }
+}

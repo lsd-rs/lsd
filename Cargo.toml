@@ -20,7 +20,7 @@ clap = "2.33.*"
 version_check = "0.9.*"
 
 [dependencies]
-ansi_term = "0.12.*"
+ansi_term = { version = "0.12.*", features = ["derive_serde_style"] }
 dirs = "3.0.*"
 libc = "0.2.*"
 human-sort = "0.2.2"
