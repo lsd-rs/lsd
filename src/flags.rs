@@ -17,7 +17,7 @@ pub mod total_size;
 pub use blocks::Block;
 pub use blocks::Blocks;
 pub use color::Color;
-pub use color::ColorOption;
+pub use color::{ColorOption, ThemeOption};
 pub use date::DateFlag;
 pub use dereference::Dereference;
 pub use display::Display;

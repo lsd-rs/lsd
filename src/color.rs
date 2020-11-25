@@ -1,6 +1,11 @@
+mod theme;
+
+use theme::Theme;
+
+use crate::flags::color::ThemeOption;
+
 use ansi_term::{ANSIString, Colour, Style};
 use lscolors::{Indicator, LsColors};
-use std::collections::HashMap;
 use std::path::Path;
 
 #[allow(dead_code)]
@@ -60,37 +65,81 @@ impl Elem {
     pub fn has_suid(&self) -> bool {
         matches!(self, Elem::Dir { uid: true } | Elem::File { uid: true, .. })
     }
+    pub fn get_color(&self, theme: &theme::Theme) -> Colour {
+        match self {
+            Elem::File {
+                exec: true,
+                uid: true,
+            } => theme.file_type.file.exec_uid,
+            Elem::File {
+                exec: false,
+                uid: true,
+            } => theme.file_type.file.uid_no_exec,
+            Elem::File {
+                exec: true,
+                uid: false,
+            } => theme.file_type.file.exec_no_uid,
+            Elem::File {
+                exec: false,
+                uid: false,
+            } => theme.file_type.file.no_exec_no_uid,
+            Elem::SymLink => theme.file_type.symlink.default,
+            Elem::BrokenSymLink => theme.file_type.symlink.broken,
+            Elem::Dir { uid: true } => theme.file_type.dir.uid,
+            Elem::Dir { uid: false } => theme.file_type.dir.no_uid,
+            Elem::Pipe => theme.file_type.pipe,
+            Elem::BlockDevice => theme.file_type.block_device,
+            Elem::CharDevice => theme.file_type.char_device,
+            Elem::Socket => theme.file_type.socket,
+            Elem::Special => theme.file_type.special,
+
+            Elem::Read => theme.permissions.read,
+            Elem::Write => theme.permissions.write,
+            Elem::Exec => theme.permissions.exec,
+            Elem::ExecSticky => theme.permissions.exec_sticky,
+            Elem::NoAccess => theme.permissions.no_access,
+
+            Elem::DayOld => theme.modified.day_old,
+            Elem::HourOld => theme.modified.hour_old,
+            Elem::Older => theme.modified.older,
+
+            Elem::User => theme.user,
+            Elem::Group => theme.group,
+
+            Elem::NonFile => theme.size.none,
+            Elem::FileLarge => theme.size.large,
+            Elem::FileMedium => theme.size.medium,
+            Elem::FileSmall => theme.size.small,
+
+            Elem::INode { valid: false } => theme.inode.valid,
+            Elem::INode { valid: true } => theme.inode.invalid,
+        }
+    }
 }
 
 pub type ColoredString<'a> = ANSIString<'a>;
 
-#[allow(dead_code)]
-#[derive(Debug, Copy, Clone)]
-pub enum Theme {
-    NoColor,
-    Default,
-    NoLscolors,
-}
-
 pub struct Colors {
-    colors: Option<HashMap<Elem, Colour>>,
+    theme: Option<Theme>,
     lscolors: Option<LsColors>,
 }
 
 impl Colors {
-    pub fn new(theme: Theme) -> Self {
-        let colors = match theme {
-            Theme::NoColor => None,
-            Theme::Default => Some(Self::get_light_theme_colour_map()),
-            Theme::NoLscolors => Some(Self::get_light_theme_colour_map()),
+    pub fn new(t: ThemeOption) -> Self {
+        let theme = match t {
+            ThemeOption::NoColor => None,
+            ThemeOption::Default => Some(Theme::default_dark()),
+            ThemeOption::NoLscolors => Some(Theme::default_dark()),
+            ThemeOption::Custom(ref file) => {
+                Some(Theme::from_path(file).unwrap_or_else(Theme::default_dark))
+            }
         };
-        let lscolors = match theme {
-            Theme::NoColor => None,
-            Theme::Default => Some(LsColors::from_env().unwrap_or_default()),
-            Theme::NoLscolors => None,
+        let lscolors = match t {
+            ThemeOption::Default => Some(LsColors::from_env().unwrap_or_default()),
+            _ => None,
         };
 
-        Self { colors, lscolors }
+        Self { theme, lscolors }
     }
 
     pub fn colorize<'a>(&self, input: String, elem: &Elem) -> ColoredString<'a> {
@@ -135,8 +184,8 @@ impl Colors {
     }
 
     fn style_default(&self, elem: &Elem) -> Style {
-        if let Some(ref colors) = self.colors {
-            let style_fg = Style::default().fg(colors[elem]);
+        if let Some(t) = &self.theme {
+            let style_fg = Style::default().fg(elem.get_color(&t));
             if elem.has_suid() {
                 style_fg.on(Colour::Fixed(124)) // Red3
             } else {
@@ -182,82 +231,5 @@ impl Colors {
             Some(ids) => Indicator::from(ids),
             None => None,
         }
-    }
-
-    // You can find the table for each color, code, and display at:
-    //
-    //https://jonasjacek.github.io/colors/
-    fn get_light_theme_colour_map() -> HashMap<Elem, Colour> {
-        let mut m = HashMap::new();
-        // User / Group
-        m.insert(Elem::User, Colour::Fixed(230)); // Cornsilk1
-        m.insert(Elem::Group, Colour::Fixed(187)); // LightYellow3
-
-        // Permissions
-        m.insert(Elem::Read, Colour::Green);
-        m.insert(Elem::Write, Colour::Yellow);
-        m.insert(Elem::Exec, Colour::Red);
-        m.insert(Elem::ExecSticky, Colour::Purple);
-        m.insert(Elem::NoAccess, Colour::Fixed(245)); // Grey
-
-        // File Types
-        m.insert(
-            Elem::File {
-                exec: false,
-                uid: false,
-            },
-            Colour::Fixed(184),
-        ); // Yellow3
-        m.insert(
-            Elem::File {
-                exec: false,
-                uid: true,
-            },
-            Colour::Fixed(184),
-        ); // Yellow3
-        m.insert(
-            Elem::File {
-                exec: true,
-                uid: false,
-            },
-            Colour::Fixed(40),
-        ); // Green3
-        m.insert(
-            Elem::File {
-                exec: true,
-                uid: true,
-            },
-            Colour::Fixed(40),
-        ); // Green3
-        m.insert(Elem::Dir { uid: true }, Colour::Fixed(33)); // DodgerBlue1
-        m.insert(Elem::Dir { uid: false }, Colour::Fixed(33)); // DodgerBlue1
-        m.insert(Elem::Pipe, Colour::Fixed(44)); // DarkTurquoise
-        m.insert(Elem::SymLink, Colour::Fixed(44)); // DarkTurquoise
-        m.insert(Elem::BrokenSymLink, Colour::Fixed(124)); // Red3
-        m.insert(Elem::BlockDevice, Colour::Fixed(44)); // DarkTurquoise
-        m.insert(Elem::CharDevice, Colour::Fixed(172)); // Orange3
-        m.insert(Elem::Socket, Colour::Fixed(44)); // DarkTurquoise
-        m.insert(Elem::Special, Colour::Fixed(44)); // DarkTurquoise
-
-        // Last Time Modified
-        m.insert(Elem::HourOld, Colour::Fixed(40)); // Green3
-        m.insert(Elem::DayOld, Colour::Fixed(42)); // SpringGreen2
-        m.insert(Elem::Older, Colour::Fixed(36)); // DarkCyan
-
-        // Last Time Modified
-        m.insert(Elem::NonFile, Colour::Fixed(245)); // Grey
-        m.insert(Elem::FileSmall, Colour::Fixed(229)); // Wheat1
-        m.insert(Elem::FileMedium, Colour::Fixed(216)); // LightSalmon1
-        m.insert(Elem::FileLarge, Colour::Fixed(172)); // Orange3
-
-        // INode
-        m.insert(Elem::INode { valid: true }, Colour::Fixed(13)); // Pink
-        m.insert(Elem::INode { valid: false }, Colour::Fixed(245)); // Grey
-        m.insert(Elem::Links { valid: true }, Colour::Fixed(13));
-        m.insert(Elem::Links { valid: false }, Colour::Fixed(245));
-
-        // TODO add this after we can use file to configure theme
-        // m.insert(Elem::TreeEdge, Colour::Fixed(44)); // DarkTurquoise
-        m
     }
 }

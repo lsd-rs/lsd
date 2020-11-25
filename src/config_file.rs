@@ -1,14 +1,14 @@
-///! This module provides methods to handle the program's config files and operations related to
-///! this.
-use crate::flags::color::ColorOption;
 use crate::flags::display::Display;
 use crate::flags::icons::{IconOption, IconTheme};
 use crate::flags::layout::Layout;
 use crate::flags::size::SizeFlag;
 use crate::flags::sorting::{DirGrouping, SortColumn};
+use crate::flags::{ColorOption, ThemeOption};
+///! This module provides methods to handle the program's config files and operations related to
+///! this.
 use crate::print_error;
 
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use serde::Deserialize;
 
@@ -44,7 +44,8 @@ pub struct Config {
 
 #[derive(Eq, PartialEq, Debug, Deserialize)]
 pub struct Color {
-    pub when: ColorOption,
+    pub when: Option<ColorOption>,
+    pub theme: Option<ThemeOption>,
 }
 
 #[derive(Eq, PartialEq, Debug, Deserialize)]
@@ -120,13 +121,11 @@ impl Config {
     /// This provides the path for a configuration file, according to the XDG_BASE_DIRS specification.
     /// return None if error like PermissionDenied
     #[cfg(not(windows))]
-    fn config_file_path() -> Option<PathBuf> {
+    pub fn config_file_path() -> Option<PathBuf> {
         use xdg::BaseDirectories;
         match BaseDirectories::with_prefix(CONF_DIR) {
             Ok(p) => {
-                if let Ok(p) = p.place_config_file([CONF_FILE_NAME, YAML_LONG_EXT].join(".")) {
-                    return Some(p);
-                }
+                return Some(p.get_config_home());
             }
             Err(e) => print_error!("Can not open config file: {}.", e),
         }
@@ -136,22 +135,47 @@ impl Config {
     /// This provides the path for a configuration file, inside the %APPDATA% directory.
     /// return None if error like PermissionDenied
     #[cfg(windows)]
-    fn config_file_path() -> Option<PathBuf> {
+    pub fn config_file_path() -> Option<PathBuf> {
         if let Some(p) = dirs::config_dir() {
-            return Some(
-                p.join(CONF_DIR)
-                    .join(CONF_FILE_NAME)
-                    .with_extension(YAML_LONG_EXT),
-            );
+            return Some(p.join(CONF_DIR));
         }
         None
+    }
+
+    /// This expand the `~` in path to HOME dir
+    /// returns the origin one if no `~` found;
+    /// returns None if error happened when getting home dir
+    ///
+    /// Implementing this to reuse the `dirs` dependency, avoid adding new one
+    pub fn expand_home<P: AsRef<Path>>(path: P) -> Option<PathBuf> {
+        let p = path.as_ref();
+        if !p.starts_with("~") {
+            return Some(p.to_path_buf());
+        }
+        if p == Path::new("~") {
+            return dirs::home_dir();
+        }
+        dirs::home_dir().map(|mut h| {
+            if h == Path::new("/") {
+                // Corner case: `h` root directory;
+                // don't prepend extra `/`, just drop the tilde.
+                p.strip_prefix("~").unwrap().to_path_buf()
+            } else {
+                h.push(p.strip_prefix("~/").unwrap());
+                h
+            }
+        })
     }
 }
 
 impl Default for Config {
     fn default() -> Self {
         if let Some(p) = Self::config_file_path() {
-            if let Some(c) = Self::from_file(p.to_string_lossy().to_string()) {
+            if let Some(c) = Self::from_file(
+                p.join([CONF_FILE_NAME, YAML_LONG_EXT].join("."))
+                    .to_string_lossy()
+                    .to_string(),
+            ) {
                 return c;
             }
         }

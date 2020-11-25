@@ -7,14 +7,17 @@ use crate::config_file::Config;
 use crate::print_error;
 
 use clap::ArgMatches;
+use serde::de::{self, Deserializer, Visitor};
 use serde::Deserialize;
 use std::env;
+use std::fmt;
 
 /// A collection of flags on how to use colors.
-#[derive(Clone, Debug, Copy, PartialEq, Eq, Default)]
+#[derive(Clone, Debug, Default)]
 pub struct Color {
     /// When to use color.
     pub when: ColorOption,
+    pub theme: ThemeOption,
 }
 
 impl Color {
@@ -23,7 +26,68 @@ impl Color {
     /// The [ColorOption] is configured with their respective [Configurable] implementation.
     pub fn configure_from(matches: &ArgMatches, config: &Config) -> Self {
         let when = ColorOption::configure_from(matches, config);
-        Self { when }
+        let theme = ThemeOption::from_config(config);
+        Self { when, theme }
+    }
+}
+
+/// ThemeOption could be one of the following:
+/// Custom(*.yaml): use the YAML theme file as theme file
+/// if error happened, use the default theme
+#[derive(PartialEq, Eq, Debug, Clone)]
+pub enum ThemeOption {
+    NoColor,
+    Default,
+    NoLscolors,
+    Custom(String),
+}
+
+impl ThemeOption {
+    fn from_config(config: &Config) -> ThemeOption {
+        if let Some(c) = &config.color {
+            if let Some(t) = &c.theme {
+                return t.clone();
+            }
+        }
+
+        ThemeOption::default()
+    }
+}
+
+impl Default for ThemeOption {
+    fn default() -> Self {
+        ThemeOption::Default
+    }
+}
+
+impl<'de> de::Deserialize<'de> for ThemeOption {
+    fn deserialize<D>(deserializer: D) -> Result<ThemeOption, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        struct ThemeOptionVisitor;
+
+        impl<'de> Visitor<'de> for ThemeOptionVisitor {
+            type Value = ThemeOption;
+
+            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                formatter.write_str("`no-color`, `default`, `no-lscolors` or <theme-file-path>")
+            }
+
+            fn visit_str<E>(self, value: &str) -> Result<ThemeOption, E>
+            where
+                E: de::Error,
+            {
+                match value {
+                    "no-color" => Ok(ThemeOption::NoColor),
+                    "default" => Ok(ThemeOption::Default),
+                    "no-lscolors" => Ok(ThemeOption::NoLscolors),
+                    str => Ok(ThemeOption::Custom(str.to_string())),
+                }
+            }
+        }
+
+        deserializer.deserialize_identifier(ThemeOptionVisitor)
     }
 }
 
