@@ -1,4 +1,4 @@
-//! This module defines the [DateFlag]. To set it up from [ArgMatches], a [Yaml] and its
+//! This module defines the [DateFlag]. To set it up from [ArgMatches], a [Config] and its
 //! [Default] value, use its [configure_from](Configurable::configure_from) method.
 
 use super::Configurable;
@@ -23,7 +23,7 @@ impl DateFlag {
         match app::validate_time_format(&value) {
             Ok(()) => Some(Self::Formatted(value[1..].to_string())),
             _ => {
-                print_error!("Not a valid date format: {}", value);
+                print_error!("Not a valid date format: {}.", value);
                 None
             }
         }
@@ -36,7 +36,7 @@ impl DateFlag {
             "relative" => Some(Self::Relative),
             _ if value.starts_with('+') => Self::from_format_string(&value),
             _ => {
-                print_error!("Not a valid date value: {}", value);
+                print_error!("Not a valid date value: {}.", value);
                 None
             }
         }

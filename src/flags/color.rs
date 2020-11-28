@@ -36,8 +36,7 @@ pub enum ColorOption {
 }
 
 impl ColorOption {
-    /// Get a Color value from a [Yaml] string. The [Config] is used to log warnings about wrong
-    /// values in a Yaml.
+    /// Get a Color value from a [String].
     fn from_str(value: &str) -> Option<Self> {
         match value {
             "always" => Some(Self::Always),
@@ -45,7 +44,7 @@ impl ColorOption {
             "never" => Some(Self::Never),
             _ => {
                 print_error!(
-                    "color/when could only be one of auto, always and never, got {}",
+                    "Config color.when could only be one of auto, always and never, got {}.",
                     &value
                 );
                 None
@@ -67,7 +66,7 @@ impl Configurable<Self> for ColorOption {
             if let Some(color) = matches.value_of("color") {
                 Self::from_str(&color)
             } else {
-                print_error!("bad color, should never happen");
+                print_error!("Bad color args. This should not be reachable!");
                 None
             }
         } else {

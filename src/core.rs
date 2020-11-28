@@ -89,7 +89,7 @@ impl Core {
             let mut meta = match Meta::from_path(&path, self.flags.dereference.0) {
                 Ok(meta) => meta,
                 Err(err) => {
-                    print_error!("lsd: {}: {}\n", path.display(), err);
+                    print_error!("{}: {}.", path.display(), err);
                     continue;
                 }
             };

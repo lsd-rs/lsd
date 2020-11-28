@@ -24,11 +24,6 @@ impl Blocks {
     /// `Blocks` does not contain a [Block] of variant [INode](Block::INode) yet, one is prepended
     /// to the returned value.
     ///
-    /// # Note
-    ///
-    /// The configuration file's Yaml is read in any case, to be able to check for errors and print
-    /// out warnings.
-    ///
     /// # Errors
     ///
     /// This errors if any of the [ArgMatches] parameter arguments causes [Block]'s implementation
@@ -118,26 +113,6 @@ impl Blocks {
             None
         }
     }
-
-    /// Get a [Blocks] from a [Yaml] array. The [Config] is used to log warnings about wrong values
-    /// in a Yaml.
-    // fn from_yaml_array(values: &[Yaml], config: &Config) -> Option<Self> {
-    //     let mut blocks: Vec<Block> = vec![];
-    //     for array_el in values.iter() {
-    //         match array_el {
-    //             Yaml::String(value) => match Block::try_from(value.as_str()) {
-    //                 Ok(block) => blocks.push(block),
-    //                 Err(err) => config.print_warning(&err),
-    //             },
-    //             _ => config.print_warning("The blocks config values have to be strings."),
-    //         }
-    //     }
-    //     if blocks.is_empty() {
-    //         None
-    //     } else {
-    //         Some(Self(blocks))
-    //     }
-    // }
 
     /// This returns a Blocks struct for the long format.
     ///

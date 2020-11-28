@@ -97,7 +97,7 @@ impl Config {
             Err(e) => {
                 match e.kind() {
                     std::io::ErrorKind::NotFound => {}
-                    _ => print_error!("bad config file: {}, {}\n", &file, e),
+                    _ => print_error!("Can not open config file {}: {}.", &file, e),
                 };
                 None
             }
@@ -109,7 +109,7 @@ impl Config {
         match serde_yaml::from_str::<Self>(yaml) {
             Ok(c) => Some(c),
             Err(e) => {
-                print_error!("configuration file format error, {}\n\n", e);
+                print_error!("Configuration file format error, {}.", e);
                 None
             }
         }
@@ -126,7 +126,7 @@ impl Config {
                     return Some(p);
                 }
             }
-            Err(e) => print_error!("can not open config file: {}", e),
+            Err(e) => print_error!("Can not open config file: {}.", e),
         }
         None
     }

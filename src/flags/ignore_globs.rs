@@ -1,4 +1,4 @@
-//! This module defines the [IgnoreGlobs]. To set it up from [ArgMatches], a [Yaml] and its
+//! This module defines the [IgnoreGlobs]. To set it up from [ArgMatches], a [Config] and its
 //! [Default] value, use the [configure_from](IgnoreGlobs::configure_from) method.
 
 use crate::config_file::Config;
@@ -16,11 +16,6 @@ impl IgnoreGlobs {
     /// - [from_arg_matches](IgnoreGlobs::from_arg_matches)
     /// - [from_config](IgnoreGlobs::from_config)
     /// - [Default::default]
-    ///
-    /// # Note
-    ///
-    /// The configuration file's Yaml is read in any case, to be able to check for errors and print
-    /// out warnings.
     ///
     /// # Errors
     ///

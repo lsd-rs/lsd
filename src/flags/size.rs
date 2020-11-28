@@ -1,4 +1,4 @@
-//! This module defines the [SizeFlag]. To set it up from [ArgMatches], a [Yaml] and its
+//! This module defines the [SizeFlag]. To set it up from [ArgMatches], a [Config] and its
 //! [Default] value, use its [configure_from](Configurable::configure_from) method.
 
 use super::Configurable;
@@ -29,7 +29,7 @@ impl SizeFlag {
             "bytes" => Some(Self::Bytes),
             _ => {
                 print_error!(
-                    "size can only be one of default, short or bytes, but got {}",
+                    "Size can only be one of default, short or bytes, but got {}.",
                     value
                 );
                 None
