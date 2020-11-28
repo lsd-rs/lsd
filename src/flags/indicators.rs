@@ -1,4 +1,4 @@
-//! This module defines the [Indicators] flag. To set it up from [ArgMatches], a [Yaml] and its
+//! This module defines the [Indicators] flag. To set it up from [ArgMatches], a [Config] and its
 //! [Default] value, use the [configure_from](Configurable::configure_from) method.
 
 use super::Configurable;

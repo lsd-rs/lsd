@@ -1,4 +1,4 @@
-//! This module defines the [Sorting] options. To set it up from [ArgMatches], a [Yaml]
+//! This module defines the [Sorting] options. To set it up from [ArgMatches], a [Config]
 //! and its [Default] value, use the [configure_from](Sorting::configure_from) method.
 
 use super::Configurable;

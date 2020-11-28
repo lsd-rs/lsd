@@ -1,4 +1,4 @@
-//! This module defines the [IconOption]. To set it up from [ArgMatches], a [Yaml] and its
+//! This module defines the [IconOption]. To set it up from [ArgMatches], a [Config] and its
 //! [Default] value, use its [configure_from](Configurable::configure_from) method.
 
 use super::Configurable;
@@ -94,14 +94,13 @@ pub enum IconTheme {
 }
 
 impl IconTheme {
-    /// Get a value from a [Yaml] string. The [Config] is used to log warnings about wrong values
-    /// in a Yaml.
+    /// Get a value from a string.
     fn from_str(value: &str) -> Option<Self> {
         match value {
             "fancy" => Some(Self::Fancy),
             "unicode" => Some(Self::Unicode),
             _ => {
-                print_error!("icons->theme: {}", &value);
+                print_error!("Bad icons.theme config, {}", &value);
                 None
             }
         }

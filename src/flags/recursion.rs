@@ -1,4 +1,4 @@
-//! This module defines the [Recursion] options. To set it up from [ArgMatches], a [Yaml] and its
+//! This module defines the [Recursion] options. To set it up from [ArgMatches], a [Config] and its
 //! [Default] value, use the [configure_from](Recursion::configure_from) method.
 
 use crate::config_file::Config;

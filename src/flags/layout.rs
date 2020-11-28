@@ -1,4 +1,4 @@
-//! This module defines the [Layout] flag. To set it up from [ArgMatches], a [Yaml] and its
+//! This module defines the [Layout] flag. To set it up from [ArgMatches], a [Config] and its
 //! [Default] value, use its [configure_from](Configurable::configure_from) method.
 
 use crate::config_file::Config;
