@@ -100,6 +100,20 @@ pub enum IconTheme {
     Fancy,
 }
 
+impl IconTheme {
+    /// Get a value from a string.
+    fn from_str(value: &str) -> Option<Self> {
+        match value {
+            "fancy" => Some(Self::Fancy),
+            "unicode" => Some(Self::Unicode),
+            _ => {
+                print_error!("Bad icons.theme config, {}", &value);
+                None
+            }
+        }
+    }
+}
+
 impl Configurable<Self> for IconTheme {
     /// Get a potential `IconTheme` variant from [ArgMatches].
     ///
