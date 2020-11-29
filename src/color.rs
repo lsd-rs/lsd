@@ -233,3 +233,30 @@ impl Colors {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::Colors;
+    use crate::color::Theme;
+    use crate::color::ThemeOption;
+    #[test]
+    fn test_color_new_no_color_theme() {
+        assert!(Colors::new(ThemeOption::NoColor).theme.is_none());
+    }
+
+    #[test]
+    fn test_color_new_default_theme() {
+        assert_eq!(
+            Colors::new(ThemeOption::Default).theme,
+            Some(Theme::default_dark()),
+        );
+    }
+
+    #[test]
+    fn test_color_new_bad_custom_theme() {
+        assert_eq!(
+            Colors::new(ThemeOption::Custom("not_existed".to_string())).theme,
+            Some(Theme::default_dark()),
+        );
+    }
+}

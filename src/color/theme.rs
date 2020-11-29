@@ -10,7 +10,7 @@ use std::path::Path;
 
 /// A struct holding the theme configuration
 /// Color table: https://upload.wikimedia.org/wikipedia/commons/1/15/Xterm_256color_chart.avg
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, PartialEq)]
 #[serde(rename_all = "kebab-case")]
 #[serde(deny_unknown_fields)]
 pub struct Theme {
@@ -23,7 +23,7 @@ pub struct Theme {
     pub inode: INode,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, PartialEq)]
 #[serde(rename_all = "kebab-case")]
 #[serde(deny_unknown_fields)]
 pub struct Permissions {
@@ -34,7 +34,7 @@ pub struct Permissions {
     pub no_access: Colour,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, PartialEq)]
 #[serde(rename_all = "kebab-case")]
 #[serde(deny_unknown_fields)]
 pub struct FileType {
@@ -48,7 +48,7 @@ pub struct FileType {
     pub special: Colour,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, PartialEq)]
 #[serde(rename_all = "kebab-case")]
 #[serde(deny_unknown_fields)]
 pub struct File {
@@ -58,7 +58,7 @@ pub struct File {
     pub no_exec_no_uid: Colour,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, PartialEq)]
 #[serde(rename_all = "kebab-case")]
 #[serde(deny_unknown_fields)]
 pub struct Dir {
@@ -66,7 +66,7 @@ pub struct Dir {
     pub no_uid: Colour,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, PartialEq)]
 #[serde(rename_all = "kebab-case")]
 #[serde(deny_unknown_fields)]
 pub struct Symlink {
@@ -74,7 +74,7 @@ pub struct Symlink {
     pub broken: Colour,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, PartialEq)]
 #[serde(rename_all = "kebab-case")]
 #[serde(deny_unknown_fields)]
 pub struct Modified {
@@ -83,7 +83,7 @@ pub struct Modified {
     pub older: Colour,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, PartialEq)]
 #[serde(rename_all = "kebab-case")]
 #[serde(deny_unknown_fields)]
 pub struct Size {
@@ -93,7 +93,7 @@ pub struct Size {
     pub large: Colour,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, PartialEq)]
 #[serde(rename_all = "kebab-case")]
 #[serde(deny_unknown_fields)]
 pub struct INode {
@@ -184,5 +184,101 @@ impl Theme {
                 invalid: Colour::Fixed(245), // Grey
             },
         }
+    }
+
+    #[cfg(test)]
+    pub fn default_yaml() -> &'static str {
+        r#"---
+user:
+  Fixed: 230
+group:
+  Fixed: 187
+permissions:
+  read: Green
+  write: Yellow
+  exec: Red
+  exec-sticky: Purple
+  no-access:
+    Fixed: 245
+file-type:
+  file:
+    exec-uid:
+      Fixed: 40
+    uid-no-exec:
+      Fixed: 184
+    exec-no-uid:
+      Fixed: 40
+    no-exec-no-uid:
+      Fixed: 184
+  dir:
+    uid:
+      Fixed: 33
+    no-uid:
+      Fixed: 33
+  pipe:
+    Fixed: 44
+  symlink:
+    default:
+      Fixed: 44
+    broken:
+      Fixed: 124
+  block-device:
+    Fixed: 44
+  char-device:
+    Fixed: 172
+  socket:
+    Fixed: 44
+  special:
+    Fixed: 44
+modified:
+  hour-old:
+    Fixed: 40
+  day-old:
+    Fixed: 42
+  older:
+    Fixed: 36
+size:
+  none:
+    Fixed: 245
+  small:
+    Fixed: 229
+  medium:
+    Fixed: 216
+  large:
+    Fixed: 172
+inode:
+  valid:
+    Fixed: 13
+  invalid:
+    Fixed: 245
+"#
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::Theme;
+
+    #[test]
+    fn test_default_theme() {
+        assert_eq!(
+            Theme::default_dark(),
+            Theme::with_yaml(Theme::default_yaml()).unwrap()
+        );
+    }
+
+    #[test]
+    fn test_default_theme_file() {
+        use std::fs::File;
+        use std::io::Write;
+        let dir = assert_fs::TempDir::new().unwrap();
+        let theme = dir.path().join("theme.yaml");
+        let mut file = File::create(&theme).unwrap();
+        writeln!(file, "{}", Theme::default_yaml()).unwrap();
+
+        assert_eq!(
+            Theme::default_dark(),
+            Theme::from_path(theme.to_str().unwrap()).unwrap()
+        );
     }
 }
