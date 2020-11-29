@@ -2,7 +2,7 @@ mod theme;
 
 use theme::Theme;
 
-use crate::flags::color::ThemeOption;
+pub use crate::flags::color::ThemeOption;
 
 use ansi_term::{ANSIString, Colour, Style};
 use lscolors::{Indicator, LsColors};

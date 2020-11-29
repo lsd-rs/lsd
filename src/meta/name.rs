@@ -192,7 +192,7 @@ mod test {
         File::create(&file_path).expect("failed to create file");
         let meta = file_path.metadata().expect("failed to get metas");
 
-        let colors = Colors::new(color::Theme::NoLscolors);
+        let colors = Colors::new(color::ThemeOption::NoLscolors);
         let file_type = FileType::new(&meta, None, &Permissions::from(&meta));
         let name = Name::new(&file_path, file_type);
 
@@ -212,7 +212,7 @@ mod test {
         fs::create_dir(&dir_path).expect("failed to create the dir");
         let meta = Meta::from_path(&dir_path, false).unwrap();
 
-        let colors = Colors::new(color::Theme::NoLscolors);
+        let colors = Colors::new(color::ThemeOption::NoLscolors);
 
         assert_eq!(
             Colour::Fixed(33).paint(" directory"),
@@ -238,7 +238,7 @@ mod test {
             .expect("failed to get metas");
         let target_meta = symlink_path.metadata().ok();
 
-        let colors = Colors::new(color::Theme::NoLscolors);
+        let colors = Colors::new(color::ThemeOption::NoLscolors);
         let file_type = FileType::new(&meta, target_meta.as_ref(), &Permissions::from(&meta));
         let name = Name::new(&symlink_path, file_type);
 
@@ -266,7 +266,7 @@ mod test {
             .expect("failed to get metas");
         let target_meta = symlink_path.metadata().ok();
 
-        let colors = Colors::new(color::Theme::NoLscolors);
+        let colors = Colors::new(color::ThemeOption::NoLscolors);
         let file_type = FileType::new(&meta, target_meta.as_ref(), &Permissions::from(&meta));
         let name = Name::new(&symlink_path, file_type);
 
@@ -292,7 +292,7 @@ mod test {
         assert_eq!(true, success, "failed to exec mkfifo");
         let meta = pipe_path.metadata().expect("failed to get metas");
 
-        let colors = Colors::new(color::Theme::NoLscolors);
+        let colors = Colors::new(color::ThemeOption::NoLscolors);
         let file_type = FileType::new(&meta, None, &Permissions::from(&meta));
         let name = Name::new(&pipe_path, file_type);
 
@@ -312,7 +312,7 @@ mod test {
         File::create(&file_path).expect("failed to create file");
         let meta = Meta::from_path(&file_path, false).unwrap();
 
-        let colors = Colors::new(color::Theme::NoColor);
+        let colors = Colors::new(color::ThemeOption::NoColor);
 
         assert_eq!(
             "file.txt",
@@ -527,7 +527,7 @@ mod test {
         File::create(&file_path).expect("failed to create file");
         let meta = file_path.metadata().expect("failed to get metas");
 
-        let colors = Colors::new(color::Theme::NoLscolors);
+        let colors = Colors::new(color::ThemeOption::NoLscolors);
         let file_type = FileType::new(&meta, None, &Permissions::from(&meta));
         let name = Name::new(&file_path, file_type);
 
@@ -540,7 +540,7 @@ mod test {
         File::create(&file_path).expect("failed to create file");
         let meta = file_path.metadata().expect("failed to get metas");
 
-        let colors = Colors::new(color::Theme::NoLscolors);
+        let colors = Colors::new(color::ThemeOption::NoLscolors);
         let file_type = FileType::new(&meta, None, &Permissions::from(&meta));
         let name = Name::new(&file_path, file_type);
 

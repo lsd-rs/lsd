@@ -249,7 +249,8 @@ mod test_color_option {
     fn test_from_config_always() {
         let mut c = Config::with_none();
         c.color = Some(config_file::Color {
-            when: ColorOption::Always,
+            when: Some(ColorOption::Always),
+            theme: None,
         });
 
         assert_eq!(Some(ColorOption::Always), ColorOption::from_config(&c));
@@ -259,7 +260,8 @@ mod test_color_option {
     fn test_from_config_auto() {
         let mut c = Config::with_none();
         c.color = Some(config_file::Color {
-            when: ColorOption::Auto,
+            when: Some(ColorOption::Auto),
+            theme: None,
         });
         assert_eq!(Some(ColorOption::Auto), ColorOption::from_config(&c));
     }
@@ -268,7 +270,8 @@ mod test_color_option {
     fn test_from_config_never() {
         let mut c = Config::with_none();
         c.color = Some(config_file::Color {
-            when: ColorOption::Never,
+            when: Some(ColorOption::Never),
+            theme: None,
         });
         assert_eq!(Some(ColorOption::Never), ColorOption::from_config(&c));
     }
@@ -277,7 +280,8 @@ mod test_color_option {
     fn test_from_config_classic_mode() {
         let mut c = Config::with_none();
         c.color = Some(config_file::Color {
-            when: ColorOption::Always,
+            when: Some(ColorOption::Always),
+            theme: None,
         });
         c.classic = Some(true);
         assert_eq!(Some(ColorOption::Never), ColorOption::from_config(&c));

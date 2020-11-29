@@ -73,7 +73,7 @@ impl SymLink {
 mod tests {
     use super::SymLink;
     use crate::app;
-    use crate::color::{Colors, Theme};
+    use crate::color::{Colors, ThemeOption};
     use crate::config_file::Config;
     use crate::flags::Flags;
 
@@ -88,7 +88,7 @@ mod tests {
         assert_eq!(
             format!("{}", " ⇒ /target"),
             link.render(
-                &Colors::new(Theme::NoColor),
+                &Colors::new(ThemeOption::NoColor),
                 &Flags::configure_from(&matches, &Config::with_none()).unwrap()
             )
             .to_string()
@@ -106,7 +106,7 @@ mod tests {
         assert_eq!(
             format!("{}", " ⇒ /target"),
             link.render(
-                &Colors::new(Theme::NoColor),
+                &Colors::new(ThemeOption::NoColor),
                 &Flags::configure_from(&matches, &Config::with_none()).unwrap()
             )
             .to_string()
