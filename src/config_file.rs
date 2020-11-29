@@ -210,6 +210,7 @@ color:
   # When "classic" is set, this is set to "never".
   # Possible values: never, auto, always
   when: auto
+  theme: default
 
 # == Date ==
 # This specifies the date format for the date column. The freeform format
@@ -310,7 +311,7 @@ impl Config {
 mod tests {
     use super::Config;
     use crate::config_file;
-    use crate::flags::color::ColorOption;
+    use crate::flags::color::{ColorOption, ThemeOption};
     use crate::flags::icons::{IconOption, IconTheme};
     use crate::flags::layout::Layout;
     use crate::flags::size::SizeFlag;
@@ -334,7 +335,8 @@ mod tests {
                     .into()
                 ),
                 color: Some(config_file::Color {
-                    when: ColorOption::Auto,
+                    when: Some(ColorOption::Auto),
+                    theme: Some(ThemeOption::Default)
                 }),
                 date: None,
                 dereference: Some(false),

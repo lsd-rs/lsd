@@ -53,7 +53,7 @@ impl Date {
 #[cfg(test)]
 mod test {
     use super::Date;
-    use crate::color::{Colors, Theme};
+    use crate::color::{Colors, ThemeOption};
     use crate::flags::{DateFlag, Flags};
     use ansi_term::Colour;
     use chrono::{DateTime, Duration, Local};
@@ -108,7 +108,7 @@ mod test {
             .success();
         assert!(success, "failed to exec touch");
 
-        let colors = Colors::new(Theme::Default);
+        let colors = Colors::new(ThemeOption::Default);
         let date = Date::from(&file_path.metadata().unwrap());
         let flags = Flags::default();
 
@@ -132,7 +132,7 @@ mod test {
             .success();
         assert!(success, "failed to exec touch");
 
-        let colors = Colors::new(Theme::Default);
+        let colors = Colors::new(ThemeOption::Default);
         let date = Date::from(&file_path.metadata().unwrap());
         let flags = Flags::default();
 
@@ -156,7 +156,7 @@ mod test {
             .success();
         assert!(success, "failed to exec touch");
 
-        let colors = Colors::new(Theme::Default);
+        let colors = Colors::new(ThemeOption::Default);
         let date = Date::from(&file_path.metadata().unwrap());
         let flags = Flags::default();
 
@@ -180,7 +180,7 @@ mod test {
             .success();
         assert!(success, "failed to exec touch");
 
-        let colors = Colors::new(Theme::Default);
+        let colors = Colors::new(ThemeOption::Default);
         let date = Date::from(&file_path.metadata().unwrap());
 
         let mut flags = Flags::default();
@@ -205,7 +205,7 @@ mod test {
             .success();
         assert_eq!(true, success, "failed to exec touch");
 
-        let colors = Colors::new(Theme::Default);
+        let colors = Colors::new(ThemeOption::Default);
         let date = Date::from(&file_path.metadata().unwrap());
 
         let mut flags = Flags::default();

@@ -153,7 +153,7 @@ impl Size {
 #[cfg(test)]
 mod test {
     use super::Size;
-    use crate::color::{Colors, Theme};
+    use crate::color::{Colors, ThemeOption};
     use crate::flags::{Flags, SizeFlag};
 
     #[test]
@@ -325,7 +325,7 @@ mod test {
         let size = Size::new(42 * 1024); // 42 kilobytes
         let mut flags = Flags::default();
         flags.size = SizeFlag::Short;
-        let colors = Colors::new(Theme::NoColor);
+        let colors = Colors::new(ThemeOption::NoColor);
 
         assert_eq!(size.render(&colors, &flags, Some(2)).to_string(), "42K");
         assert_eq!(size.render(&colors, &flags, Some(3)).to_string(), " 42K");
