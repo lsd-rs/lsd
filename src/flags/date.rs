@@ -69,7 +69,7 @@ impl Configurable<Self> for DateFlag {
     /// Get a potential `DateFlag` variant from a [Config].
     ///
     /// If the `Config::classic` is `true` then this returns the Some(DateFlag::Date),
-    /// Otherwise if the Config::date` has value and is one of "date" or "relative",
+    /// Otherwise if the `Config::date` has value and is one of "date" or "relative",
     /// this returns its corresponding variant in a [Some].
     /// Otherwise this returns [None].
     fn from_config(config: &Config) -> Option<Self> {

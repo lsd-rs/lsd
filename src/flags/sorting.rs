@@ -150,7 +150,10 @@ impl DirGrouping {
             "first" => Some(Self::First),
             "last" => Some(Self::Last),
             "none" => Some(Self::None),
-            _ => None,
+            _ => panic!(
+                "Group Dir can only be one of first, last or none, but got {}.",
+                value
+            ),
         }
     }
 }
@@ -295,12 +298,12 @@ mod test_sort_column {
     }
 
     #[test]
-    fn test_from_config_none() {
+    fn test_from_config_empty() {
         assert_eq!(None, SortColumn::from_config(&Config::with_none()));
     }
 
     #[test]
-    fn test_from_config_none_column() {
+    fn test_from_config_empty_column() {
         let mut c = Config::with_none();
         c.sorting = Some(Sorting {
             column: None,
@@ -393,20 +396,20 @@ mod test_sort_order {
     }
 
     #[test]
-    fn test_from_config_none() {
+    fn test_from_config_empty() {
         assert_eq!(None, SortOrder::from_config(&Config::with_none()));
     }
 
     #[test]
-    fn test_from_config_default() {
+    fn test_from_config_default_config() {
         assert_eq!(
-            Some(SortOrder::Default),
+            Some(SortOrder::default()),
             SortOrder::from_config(&Config::default())
         );
     }
 
     #[test]
-    fn test_from_config_none_reverse() {
+    fn test_from_config_empty_reverse() {
         let mut c = Config::with_none();
         c.sorting = Some(Sorting {
             column: None,
@@ -437,6 +440,9 @@ mod test_dir_grouping {
     use crate::flags::Configurable;
 
     #[test]
+    #[should_panic(
+        expected = "Group Dir can only be one of first, last or none, but got bad value."
+    )]
     fn test_from_str_bad_value() {
         assert_eq!(None, DirGrouping::from_str("bad value"));
     }
@@ -489,7 +495,7 @@ mod test_dir_grouping {
     }
 
     #[test]
-    fn test_from_config_none() {
+    fn test_from_config_empty() {
         assert_eq!(None, DirGrouping::from_config(&Config::with_none()));
     }
 
@@ -516,7 +522,7 @@ mod test_dir_grouping {
     }
 
     #[test]
-    fn test_from_config_explicit_none() {
+    fn test_from_config_explicit_empty() {
         let mut c = Config::with_none();
         c.sorting = Some(Sorting {
             column: None,

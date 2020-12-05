@@ -32,17 +32,16 @@ impl Recursion {
     /// Get the "enabled" boolean from [ArgMatches], a [Config] or the [Default] value. The first
     /// value that is not [None] is used. The order of precedence for the value used is:
     /// - [enabled_from_arg_matches](Recursion::enabled_from_arg_matches)
-    /// - [enabled_from_config](Recursion::enabled_from_config)
+    /// - [Config.recursion.enabled]
     /// - [Default::default]
     fn enabled_from(matches: &ArgMatches, config: &Config) -> bool {
+        if let Some(value) = Self::enabled_from_arg_matches(matches) {
+            return value;
+        }
         if let Some(recursion) = &config.recursion {
             if let Some(enabled) = recursion.enabled {
                 return enabled;
             }
-        }
-
-        if let Some(value) = Self::enabled_from_arg_matches(matches) {
-            return value;
         }
 
         Default::default()
@@ -63,7 +62,7 @@ impl Recursion {
     /// Get the "depth" integer from [ArgMatches], a [Config] or the [Default] value. The first
     /// value that is not [None] is used. The order of precedence for the value used is:
     /// - [depth_from_arg_matches](Recursion::depth_from_arg_matches)
-    /// - [depth_from_config](Recursion::depth_from_config)
+    /// - [Config.recursion.depth]
     /// - [Default::default]
     ///
     /// # Note
@@ -75,14 +74,14 @@ impl Recursion {
     /// If [depth_from_arg_matches](Recursion::depth_from_arg_matches) returns an [Error], this
     /// returns it.
     fn depth_from(matches: &ArgMatches, config: &Config) -> Result<usize, Error> {
+        if let Some(value) = Self::depth_from_arg_matches(matches) {
+            return value;
+        }
+
         if let Some(recursion) = &config.recursion {
             if let Some(depth) = recursion.depth {
                 return Ok(depth);
             }
-        }
-
-        if let Some(value) = Self::depth_from_arg_matches(matches) {
-            return value;
         }
 
         Ok(usize::max_value())
