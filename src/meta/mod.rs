@@ -248,3 +248,16 @@ impl Meta {
         })
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::Meta;
+
+    #[test]
+    #[cfg(unix)]
+    fn test_from_path_path() {
+        let dir = assert_fs::TempDir::new().unwrap();
+        let meta = Meta::from_path(dir.path(), false).unwrap();
+        assert_eq!(meta.path, dir.path())
+    }
+}

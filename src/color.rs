@@ -128,10 +128,10 @@ impl Colors {
     pub fn new(t: ThemeOption) -> Self {
         let theme = match t {
             ThemeOption::NoColor => None,
-            ThemeOption::Default => Some(Theme::default_dark()),
-            ThemeOption::NoLscolors => Some(Theme::default_dark()),
+            ThemeOption::Default => Some(Theme::default()),
+            ThemeOption::NoLscolors => Some(Theme::default()),
             ThemeOption::Custom(ref file) => {
-                Some(Theme::from_path(file).unwrap_or_else(Theme::default_dark))
+                Some(Theme::from_path(file).unwrap_or_else(Theme::default))
             }
         };
         let lscolors = match t {
@@ -255,8 +255,102 @@ mod tests {
     #[test]
     fn test_color_new_bad_custom_theme() {
         assert_eq!(
-            Colors::new(ThemeOption::Custom("not_existed".to_string())).theme,
+            Colors::new(ThemeOption::Custom("not-existed".to_string())).theme,
             Some(Theme::default_dark()),
+        );
+    }
+}
+
+#[cfg(test)]
+mod elem {
+    use super::Elem;
+    use crate::color::{theme, Theme};
+    use ansi_term::Colour;
+
+    #[cfg(test)]
+    fn test_theme() -> Theme {
+        Theme {
+            user: Colour::Fixed(230),  // Cornsilk1
+            group: Colour::Fixed(187), // LightYellow3
+            permissions: theme::Permissions {
+                read: Colour::Green,
+                write: Colour::Yellow,
+                exec: Colour::Red,
+                exec_sticky: Colour::Purple,
+                no_access: Colour::Fixed(245), // Grey
+            },
+            file_type: theme::FileType {
+                file: theme::File {
+                    exec_uid: Colour::Fixed(40),        // Green3
+                    uid_no_exec: Colour::Fixed(184),    // Yellow3
+                    exec_no_uid: Colour::Fixed(40),     // Green3
+                    no_exec_no_uid: Colour::Fixed(184), // Yellow3
+                },
+                dir: theme::Dir {
+                    uid: Colour::Fixed(33),    // DodgerBlue1
+                    no_uid: Colour::Fixed(33), // DodgerBlue1
+                },
+                pipe: Colour::Fixed(44), // DarkTurquoise
+                symlink: theme::Symlink {
+                    default: Colour::Fixed(44), // DarkTurquoise
+                    broken: Colour::Fixed(124), // Red3
+                },
+                block_device: Colour::Fixed(44), // DarkTurquoise
+                char_device: Colour::Fixed(172), // Orange3
+                socket: Colour::Fixed(44),       // DarkTurquoise
+                special: Colour::Fixed(44),      // DarkTurquoise
+            },
+            modified: theme::Modified {
+                hour_old: Colour::Fixed(40), // Green3
+                day_old: Colour::Fixed(42),  // SpringGreen2
+                older: Colour::Fixed(36),    // DarkCyan
+            },
+            size: theme::Size {
+                none: Colour::Fixed(245),   // Grey
+                small: Colour::Fixed(229),  // Wheat1
+                medium: Colour::Fixed(216), // LightSalmon1
+                large: Colour::Fixed(172),  // Orange3
+            },
+            inode: theme::INode {
+                valid: Colour::Fixed(13),    // Pink
+                invalid: Colour::Fixed(245), // Grey
+            },
+        }
+    }
+
+    #[test]
+    fn test_default_file() {
+        assert_eq!(
+            Elem::File {
+                exec: true,
+                uid: true
+            }
+            .get_color(&test_theme()),
+            Colour::Fixed(40),
+        );
+        assert_eq!(
+            Elem::File {
+                exec: false,
+                uid: true
+            }
+            .get_color(&test_theme()),
+            Colour::Fixed(184),
+        );
+        assert_eq!(
+            Elem::File {
+                exec: true,
+                uid: false
+            }
+            .get_color(&test_theme()),
+            Colour::Fixed(40),
+        );
+        assert_eq!(
+            Elem::File {
+                exec: false,
+                uid: false
+            }
+            .get_color(&test_theme()),
+            Colour::Fixed(184),
         );
     }
 }
