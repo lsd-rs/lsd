@@ -66,8 +66,7 @@ impl Configurable<Self> for ColorOption {
             if let Some(color) = matches.value_of("color") {
                 Self::from_str(&color)
             } else {
-                print_error!("Bad color args. This should not be reachable!");
-                None
+                panic!("Bad color args. This should not be reachable!");
             }
         } else {
             None
@@ -87,7 +86,6 @@ impl Configurable<Self> for ColorOption {
         if let Some(color) = &config.color {
             Some(color.when)
         } else {
-            // TODO: maybe return default value?
             None
         }
     }
@@ -192,7 +190,7 @@ mod test_color_option {
     fn test_from_config_classic_mode() {
         let mut c = Config::with_none();
         c.color = Some(config_file::Color {
-            when: ColorOption::Never,
+            when: ColorOption::Always,
         });
         c.classic = Some(true);
         assert_eq!(Some(ColorOption::Never), ColorOption::from_config(&c));

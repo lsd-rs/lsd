@@ -38,7 +38,8 @@ impl Configurable<Self> for Display {
 
     /// Get a potential `Display` variant from a [Config].
     ///
-    /// If the `Config::display` has value and is one of "all", "almost-all" or "directory-only",
+    /// If the `Config::display` has value and is one of
+    /// "all", "almost-all", "directory-only" or `visible-only`,
     /// this returns the corresponding `Display` variant in a [Some].
     /// Otherwise this returns [None].
     fn from_config(config: &Config) -> Option<Self> {
@@ -46,7 +47,7 @@ impl Configurable<Self> for Display {
     }
 }
 
-/// The default value for `Display` is [Display::DisplayOnlyVisible].
+/// The default value for `Display` is [Display::VisibleOnly].
 impl Default for Display {
     fn default() -> Self {
         Display::VisibleOnly
@@ -119,5 +120,12 @@ mod test {
         let mut c = Config::with_none();
         c.display = Some(Display::DirectoryOnly);
         assert_eq!(Some(Display::DirectoryOnly), Display::from_config(&c));
+    }
+
+    #[test]
+    fn test_from_config_visible_only() {
+        let mut c = Config::with_none();
+        c.display = Some(Display::VisibleOnly);
+        assert_eq!(Some(Display::VisibleOnly), Display::from_config(&c));
     }
 }

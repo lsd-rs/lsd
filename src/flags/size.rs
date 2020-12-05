@@ -4,7 +4,6 @@
 use super::Configurable;
 
 use crate::config_file::Config;
-use crate::print_error;
 
 use clap::ArgMatches;
 use serde::Deserialize;
@@ -28,11 +27,10 @@ impl SizeFlag {
             "short" => Some(Self::Short),
             "bytes" => Some(Self::Bytes),
             _ => {
-                print_error!(
+                panic!(
                     "Size can only be one of default, short or bytes, but got {}.",
                     value
                 );
-                None
             }
         }
     }

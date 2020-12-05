@@ -2,7 +2,7 @@
 ///! this.
 use crate::flags::color::ColorOption;
 use crate::flags::display::Display;
-use crate::flags::icons::IconOption;
+use crate::flags::icons::{IconOption, IconTheme};
 use crate::flags::layout::Layout;
 use crate::flags::size::SizeFlag;
 use crate::flags::sorting::{DirGrouping, SortColumn};
@@ -18,7 +18,7 @@ const CONF_DIR: &str = "lsd";
 const CONF_FILE_NAME: &str = "config";
 const YAML_LONG_EXT: &str = "yaml";
 
-/// A struct to hold an optional file path [String] and an optional [Yaml], and provides methods
+/// A struct to hold an optional configuration items, and provides methods
 /// around error handling in a config file.
 #[derive(Eq, PartialEq, Debug, Deserialize)]
 #[serde(rename_all = "kebab-case")]
@@ -50,7 +50,7 @@ pub struct Color {
 #[derive(Eq, PartialEq, Debug, Deserialize)]
 pub struct Icons {
     pub when: Option<IconOption>,
-    pub theme: Option<String>,
+    pub theme: Option<IconTheme>,
 }
 
 #[derive(Eq, PartialEq, Debug, Deserialize)]
@@ -91,9 +91,15 @@ impl Config {
     }
 
     /// This constructs a Config struct with a passed file path [String].
-    pub fn with_file(file: String) -> Option<Self> {
+    pub fn from_file(file: String) -> Option<Self> {
         match fs::read(&file) {
-            Ok(f) => Self::with_yaml(&String::from_utf8_lossy(&f)),
+            Ok(f) => match Self::from_yaml(&String::from_utf8_lossy(&f)) {
+                Ok(c) => Some(c),
+                Err(e) => {
+                    print_error!("Configuration file {} format error, {}.", &file, e);
+                    None
+                }
+            },
             Err(e) => {
                 match e.kind() {
                     std::io::ErrorKind::NotFound => {}
@@ -105,14 +111,9 @@ impl Config {
     }
 
     /// This constructs a Config struct with a passed [Yaml] str.
-    fn with_yaml(yaml: &str) -> Option<Self> {
-        match serde_yaml::from_str::<Self>(yaml) {
-            Ok(c) => Some(c),
-            Err(e) => {
-                print_error!("Configuration file format error, {}.", e);
-                None
-            }
-        }
+    /// If error happened, return the [serde_yaml::Error].
+    fn from_yaml(yaml: &str) -> Result<Self, serde_yaml::Error> {
+        serde_yaml::from_str::<Self>(yaml)
     }
 
     /// This provides the path for a configuration file, according to the XDG_BASE_DIRS specification.
@@ -149,11 +150,11 @@ impl Config {
 impl Default for Config {
     fn default() -> Self {
         if let Some(p) = Self::config_file_path() {
-            if let Some(c) = Self::with_file(p.to_string_lossy().to_string()) {
+            if let Some(c) = Self::from_file(p.to_string_lossy().to_string()) {
                 return c;
             }
         }
-        Self::with_yaml(DEFAULT_CONFIG).unwrap()
+        Self::from_yaml(DEFAULT_CONFIG).unwrap()
     }
 }
 
@@ -275,14 +276,14 @@ mod tests {
     use super::Config;
     use crate::config_file;
     use crate::flags::color::ColorOption;
-    use crate::flags::icons::IconOption;
+    use crate::flags::icons::{IconOption, IconTheme};
     use crate::flags::layout::Layout;
     use crate::flags::size::SizeFlag;
     use crate::flags::sorting::{DirGrouping, SortColumn};
 
     #[test]
     fn test_read_default() {
-        let c = Config::with_yaml(config_file::DEFAULT_CONFIG).unwrap();
+        let c = Config::from_yaml(config_file::DEFAULT_CONFIG).unwrap();
         assert_eq!(
             Config {
                 classic: Some(false),
@@ -305,7 +306,7 @@ mod tests {
                 display: None,
                 icons: Some(config_file::Icons {
                     when: Some(IconOption::Auto),
-                    theme: Some("fancy".into()),
+                    theme: Some(IconTheme::Fancy),
                 }),
                 ignore_globs: None,
                 indicators: Some(false),
@@ -330,24 +331,24 @@ mod tests {
 
     #[test]
     fn test_read_config_ok() {
-        let c = Config::with_yaml("classic: true").unwrap();
+        let c = Config::from_yaml("classic: true").unwrap();
         assert!(c.classic.unwrap())
     }
 
     #[test]
     fn test_read_config_bad_bool() {
-        let c = Config::with_yaml("classic: notbool");
-        assert!(c.is_none())
+        let c = Config::from_yaml("classic: notbool");
+        assert!(c.is_err())
     }
 
     #[test]
     fn test_read_config_file_not_found() {
-        let c = Config::with_file("not-existed".to_string());
+        let c = Config::from_file("not-existed".to_string());
         assert!(c.is_none())
     }
 
     #[test]
     fn test_read_bad_display() {
-        assert!(Config::with_yaml("display: bad").is_none())
+        assert!(Config::from_yaml("display: bad").is_err())
     }
 }

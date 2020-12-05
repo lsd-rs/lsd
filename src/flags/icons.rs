@@ -4,7 +4,6 @@
 use super::Configurable;
 
 use crate::config_file::Config;
-use crate::print_error;
 
 use clap::ArgMatches;
 use serde::Deserialize;
@@ -87,24 +86,11 @@ impl Default for IconOption {
 }
 
 /// The flag showing which icon theme to use.
-#[derive(Clone, Debug, Copy, PartialEq, Eq)]
+#[derive(Clone, Debug, Copy, PartialEq, Eq, Deserialize)]
+#[serde(rename_all = "kebab-case")]
 pub enum IconTheme {
     Unicode,
     Fancy,
-}
-
-impl IconTheme {
-    /// Get a value from a string.
-    fn from_str(value: &str) -> Option<Self> {
-        match value {
-            "fancy" => Some(Self::Fancy),
-            "unicode" => Some(Self::Unicode),
-            _ => {
-                print_error!("Bad icons.theme config, {}", &value);
-                None
-            }
-        }
-    }
 }
 
 impl Configurable<Self> for IconTheme {
@@ -131,14 +117,11 @@ impl Configurable<Self> for IconTheme {
     /// Otherwise this returns [None].
     fn from_config(config: &Config) -> Option<Self> {
         if let Some(icon) = &config.icons {
-            if let Some(theme) = &icon.theme {
-                Self::from_str(&theme)
-            } else {
-                None
+            if let Some(theme) = icon.theme {
+                return Some(theme);
             }
-        } else {
-            None
         }
+        None
     }
 }
 
@@ -296,7 +279,7 @@ mod test_icon_theme {
         let mut c = Config::with_none();
         c.icons = Some(Icons {
             when: None,
-            theme: Some("fancy".into()),
+            theme: Some(IconTheme::Fancy),
         });
         assert_eq!(Some(IconTheme::Fancy), IconTheme::from_config(&c));
     }
@@ -306,7 +289,7 @@ mod test_icon_theme {
         let mut c = Config::with_none();
         c.icons = Some(Icons {
             when: None,
-            theme: Some("unicode".into()),
+            theme: Some(IconTheme::Unicode),
         });
         assert_eq!(Some(IconTheme::Unicode), IconTheme::from_config(&c));
     }

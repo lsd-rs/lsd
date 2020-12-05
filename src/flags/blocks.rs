@@ -92,9 +92,9 @@ impl Blocks {
 
     /// Get a potential `Blocks` struct from a [Config].
     ///
-    /// of its [String]values is returned in a `Blocks` in a [Some]. Otherwise it
-    /// returns [None].
-    /// Config make sure blocks are Strings, we can unwrap here without panic
+    /// If the [Config] contains an array of blocks values,
+    /// its [String] values is returned as `Blocks` in a [Some].
+    /// Otherwise it returns [None].
     fn from_config(config: &Config) -> Option<Self> {
         if let Some(c) = &config.blocks {
             let mut blocks: Vec<Block> = vec![];
@@ -444,7 +444,7 @@ mod test_blocks {
     #[test]
     fn test_from_config_invalid_is_ignored() {
         let mut c = Config::with_none();
-        c.blocks = Some(vec!["permission".into(), "for".into(), "date".into()].into());
+        c.blocks = Some(vec!["permission".into(), "foo".into(), "date".into()].into());
         let blocks = Blocks(vec![Block::Permission, Block::Date]);
         assert_eq!(Some(blocks), Blocks::from_config(&c));
     }
