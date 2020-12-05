@@ -101,6 +101,13 @@ pub struct INode {
     pub invalid: Colour,
 }
 
+impl Default for Theme {
+    fn default() -> Self {
+        // TODO: check terminal color and return light or dark
+        Self::default_dark()
+    }
+}
+
 impl Theme {
     /// This read theme from file,
     /// use the file path if it is absolute

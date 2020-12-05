@@ -44,6 +44,11 @@ pub enum ThemeOption {
 
 impl ThemeOption {
     fn from_config(config: &Config) -> ThemeOption {
+        if let Some(classic) = config.classic {
+            if classic {
+                return ThemeOption::NoColor;
+            }
+        }
         if let Some(c) = &config.color {
             if let Some(t) = &c.theme {
                 return t.clone();
@@ -285,5 +290,74 @@ mod test_color_option {
         });
         c.classic = Some(true);
         assert_eq!(Some(ColorOption::Never), ColorOption::from_config(&c));
+    }
+}
+
+#[cfg(test)]
+mod test_theme_option {
+    use super::ThemeOption;
+    use crate::config_file::{self, Config};
+
+    #[test]
+    fn test_from_config_none_default() {
+        assert_eq!(
+            ThemeOption::Default,
+            ThemeOption::from_config(&Config::with_none())
+        );
+    }
+
+    #[test]
+    fn test_from_config_default() {
+        let mut c = Config::with_none();
+        c.color = Some(config_file::Color {
+            when: None,
+            theme: Some(ThemeOption::Default),
+        });
+
+        assert_eq!(ThemeOption::Default, ThemeOption::from_config(&c));
+    }
+
+    #[test]
+    fn test_from_config_no_color() {
+        let mut c = Config::with_none();
+        c.color = Some(config_file::Color {
+            when: None,
+            theme: Some(ThemeOption::NoColor),
+        });
+        assert_eq!(ThemeOption::NoColor, ThemeOption::from_config(&c));
+    }
+
+    #[test]
+    fn test_from_config_no_lscolor() {
+        let mut c = Config::with_none();
+        c.color = Some(config_file::Color {
+            when: None,
+            theme: Some(ThemeOption::NoLscolors),
+        });
+        assert_eq!(ThemeOption::NoLscolors, ThemeOption::from_config(&c));
+    }
+
+    #[test]
+    fn test_from_config_bad_file_flag() {
+        let mut c = Config::with_none();
+        c.color = Some(config_file::Color {
+            when: None,
+            theme: Some(ThemeOption::Custom("not-existed".to_string())),
+        });
+        assert_eq!(
+            ThemeOption::Custom("not-existed".to_string()),
+            ThemeOption::from_config(&c)
+        );
+    }
+
+    #[test]
+    fn test_from_config_classic_mode() {
+        let mut c = Config::with_none();
+        c.color = Some(config_file::Color {
+            when: None,
+            theme: Some(ThemeOption::Default),
+        });
+        c.classic = Some(true);
+        assert_eq!(ThemeOption::NoColor, ThemeOption::from_config(&c));
     }
 }

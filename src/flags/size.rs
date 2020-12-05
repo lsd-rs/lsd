@@ -83,6 +83,11 @@ mod test {
     use crate::flags::Configurable;
 
     #[test]
+    fn test_default() {
+        assert_eq!(SizeFlag::Default, SizeFlag::default());
+    }
+
+    #[test]
     fn test_from_arg_matches_none() {
         let argv = vec!["lsd"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
@@ -113,6 +118,12 @@ mod test {
         assert_eq!(Some(SizeFlag::Bytes), SizeFlag::from_arg_matches(&matches));
     }
 
+    #[test]
+    #[should_panic]
+    fn test_from_arg_matches_unknonwn() {
+        let args = vec!["lsd", "--size", "unknown"];
+        let _ = app::build().get_matches_from_safe(args).unwrap();
+    }
     #[test]
     fn test_from_arg_matches_size_multi() {
         let args = vec!["lsd", "--size", "bytes", "--size", "short"];
