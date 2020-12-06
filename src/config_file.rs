@@ -210,6 +210,12 @@ color:
   # When "classic" is set, this is set to "never".
   # Possible values: never, auto, always
   when: auto
+  # How to colorize the output.
+  # When "classic" is set, this is set to "no-color".
+  # Possible values: default, no-color, no-lscolors, <theme-file-name>
+  # when specifying <theme-file-name>, lsd will look up theme file in
+  # XDG Base Directory if relative
+  # The file path if absolute
   theme: default
 
 # == Date ==

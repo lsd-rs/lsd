@@ -116,7 +116,7 @@ impl Theme {
         let real = if let Some(path) = config_file::Config::expand_home(file) {
             path
         } else {
-            print_error!("Bad theme file path: {}.", &file);
+            print_error!("Not a valid theme file path: {}.", &file);
             return None;
         };
         let path = if Path::new(&real).is_absolute() {
@@ -125,24 +125,25 @@ impl Theme {
             config_file::Config::config_file_path().unwrap().join(real)
         };
         match fs::read(&path) {
-            Ok(f) => Self::with_yaml(&String::from_utf8_lossy(&f)),
+            Ok(f) => match Self::with_yaml(&String::from_utf8_lossy(&f)) {
+                Ok(t) => Some(t),
+                Err(e) => {
+                    print_error!("Theme file {} format error: {}.", &file, e);
+                    None
+                }
+            },
             Err(e) => {
-                print_error!("bad theme file: {}, {}\n", path.to_string_lossy(), e);
+                print_error!("Not a valid theme: {}, {}.", path.to_string_lossy(), e);
                 None
             }
         }
     }
 
     /// This constructs a Theme struct with a passed [Yaml] str.
-    fn with_yaml(yaml: &str) -> Option<Self> {
-        match serde_yaml::from_str::<Self>(yaml) {
-            Ok(c) => Some(c),
-            Err(e) => {
-                print_error!("theme file format error, {}\n\n", e);
-                None
-            }
-        }
+    fn with_yaml(yaml: &str) -> Result<Self, serde_yaml::Error> {
+        serde_yaml::from_str::<Self>(yaml)
     }
+
     pub fn default_dark() -> Self {
         Theme {
             user: Colour::Fixed(230),  // Cornsilk1
