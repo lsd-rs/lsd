@@ -213,6 +213,13 @@ color:
   # When "classic" is set, this is set to "never".
   # Possible values: never, auto, always
   when: auto
+  # How to colorize the output.
+  # When "classic" is set, this is set to "no-color".
+  # Possible values: default, no-color, no-lscolors, <theme-file-name>
+  # when specifying <theme-file-name>, lsd will look up theme file in
+  # XDG Base Directory if relative
+  # The file path if absolute
+  theme: default
 
 # == Date ==
 # This specifies the date format for the date column. The freeform format
@@ -303,6 +310,100 @@ total-size: false
 # Specifies how the symlink arrow display, chars in both ascii and utf8
 symlink-arrow: ⇒
 ```
+
+## Theme
+
+`lsd` can be configured with a theme file to set the colors.
+
+Theme can be configured in the [configuration file](#configuration)(color.theme),
+The valid theme configurations are:
+- `default`: the default color scheme shipped in `lsd`
+- `no-color`: classic mode, there will be just black and white.
+- `no-lscolors`: do not check the `LSCOLORS` env
+- theme-file-name(yaml): use the theme file to specify colors
+
+when configured with the `theme-file-name` which is a `yaml` file,
+`lsd` will look up the theme file in the following way:
+- relative name: check the XDG Base Directory
+- absolute name: use the file path and name to find theme file
+
+Check [Theme file content](#theme-file-content) for details.
+
+### Theme file content
+
+Theme file use the [ansi_term](https://docs.rs/ansi_term)
+configure the colors, check [ansi_term](https://docs.rs/ansi_term/0.12.1/ansi_term/enum.Colour.html)
+for the supported colors.
+
+Color table: https://upload.wikimedia.org/wikipedia/commons/1/15/Xterm_256color_chart.svg
+
+This is the default theme scheme shipped with `lsd`.
+
+```yaml
+user:
+  Fixed: 230
+group:
+  Fixed: 187
+permissions:
+  read: Green
+  write: Yellow
+  exec: Red
+  exec-sticky: Purple
+  no-access:
+    Fixed: 245
+file-type:
+  file:
+    exec-uid:
+      Fixed: 40
+    uid-no-exec:
+      Fixed: 184
+    exec-no-uid:
+      Fixed: 40
+    no-exec-no-uid:
+      Fixed: 184
+  dir:
+    uid:
+      Fixed: 33
+    no-uid:
+      Fixed: 33
+  pipe:
+    Fixed: 44
+  symlink:
+    default:
+      Fixed: 44
+    broken:
+      Fixed: 124
+  block-device:
+    Fixed: 44
+  char-device:
+    Fixed: 172
+  socket:
+    Fixed: 44
+  special:
+    Fixed: 44
+modified:
+  hour-old:
+    Fixed: 40
+  day-old:
+    Fixed: 42
+  older:
+    Fixed: 36
+size:
+  none:
+    Fixed: 245
+  small:
+    Fixed: 229
+  medium:
+    Fixed: 216
+  large:
+    Fixed: 172
+inode:
+  valid:
+    Fixed: 13
+  invalid:
+    Fixed: 245
+```
+
 
 ## External Configurations
 

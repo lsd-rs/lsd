@@ -6,7 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - ReleaseDate
 ### Added
-- update minimal rust version to 1.42.0 from [zwpaper](https://github.com/zwpaper) [#534](https://github.com/Peltoche/lsd/issues/534)
+- Add support for theme from [zwpaper](https://github.com/zwpaper) [#452](https://github.com/Peltoche/lsd/pull/452)
+- Update minimal rust version to 1.42.0 from [zwpaper](https://github.com/zwpaper) [#534](https://github.com/Peltoche/lsd/issues/534)
 - [`NO_COLOR`](https://no-color.org/) environment variable support from [AnInternetTroll](https://github.com/aninternettroll)
 ### Changed
 - Change size to use btyes in classic mode from [meain](https://github.com/meain)
