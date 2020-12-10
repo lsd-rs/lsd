@@ -133,7 +133,7 @@ mod test {
     use clap::ErrorKind;
 
     #[test]
-    fn test_enabled_from_arg_matches_none() {
+    fn test_enabled_from_arg_matches_empty() {
         let argv = vec!["lsd"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         assert_eq!(None, Recursion::enabled_from_arg_matches(&matches));
@@ -147,7 +147,7 @@ mod test {
     }
 
     #[test]
-    fn test_enabled_from_config_empty() {
+    fn test_enabled_from_empty_matches_and_config() {
         let argv = vec!["lsd"];
         assert_eq!(
             false,
@@ -159,7 +159,7 @@ mod test {
     }
 
     #[test]
-    fn test_enabled_from_config_true() {
+    fn test_enabled_from_matches_empty_and_config_true() {
         let argv = vec!["lsd"];
         let mut c = Config::with_none();
         c.recursion = Some(config_file::Recursion {
@@ -173,7 +173,7 @@ mod test {
     }
 
     #[test]
-    fn test_enabled_from_config_false() {
+    fn test_enabled_from_matches_empty_and_config_false() {
         let argv = vec!["lsd"];
         let mut c = Config::with_none();
         c.recursion = Some(config_file::Recursion {
@@ -190,7 +190,7 @@ mod test {
     // of the assert_eq macro, because clap::Error does not implement PartialEq.
 
     #[test]
-    fn test_depth_from_arg_matches_none() {
+    fn test_depth_from_arg_matches_empty() {
         let argv = vec!["lsd"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         assert!(match Recursion::depth_from_arg_matches(&matches) {
