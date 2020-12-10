@@ -420,7 +420,7 @@ mod test_sort_order {
     }
 
     #[test]
-    fn test_from_config_reverse() {
+    fn test_from_config_reverse_true() {
         let mut c = Config::with_none();
         c.sorting = Some(Sorting {
             column: None,
@@ -428,6 +428,17 @@ mod test_sort_order {
             dir_grouping: None,
         });
         assert_eq!(Some(SortOrder::Reverse), SortOrder::from_config(&c));
+    }
+
+    #[test]
+    fn test_from_config_reverse_false() {
+        let mut c = Config::with_none();
+        c.sorting = Some(Sorting {
+            column: None,
+            reverse: Some(false),
+            dir_grouping: None,
+        });
+        assert_eq!(Some(SortOrder::Default), SortOrder::from_config(&c));
     }
 }
 
