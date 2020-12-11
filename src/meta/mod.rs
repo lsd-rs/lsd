@@ -54,7 +54,7 @@ impl Meta {
             return Ok(None);
         }
 
-        if flags.display == Display::DirectoryItself {
+        if flags.display == Display::DirectoryItself && flags.layout != Layout::Tree {
             return Ok(None);
         }
 
@@ -118,9 +118,11 @@ impl Meta {
             };
 
             // skip files for --tree -d
-            if let Display::TreeD = flags.display {
-                if !entry.file_type()?.is_dir() {
-                    continue;
+            if flags.layout == Layout::Tree {
+                if let Display::DirectoryItself = flags.display {
+                    if !entry.file_type()?.is_dir() {
+                        continue;
+                    }
                 }
             }
 

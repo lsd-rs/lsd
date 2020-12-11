@@ -94,22 +94,21 @@ impl Core {
                 }
             };
 
-            match self.flags.display {
-                Display::DirectoryItself => {
-                    meta_list.push(meta);
-                }
-                _ => {
-                    match meta.recurse_into(depth, &self.flags) {
-                        Ok(content) => {
-                            meta.content = content;
-                            meta_list.push(meta);
-                        }
-                        Err(err) => {
-                            print_error!("lsd: {}: {}\n", path.display(), err);
-                            continue;
-                        }
-                    };
-                }
+            let recurse =
+                self.flags.layout == Layout::Tree || self.flags.display != Display::DirectoryItself;
+            if recurse {
+                match meta.recurse_into(depth, &self.flags) {
+                    Ok(content) => {
+                        meta.content = content;
+                        meta_list.push(meta);
+                    }
+                    Err(err) => {
+                        print_error!("lsd: {}: {}\n", path.display(), err);
+                        continue;
+                    }
+                };
+            } else {
+                meta_list.push(meta);
             };
         }
         if self.flags.total_size.0 {
