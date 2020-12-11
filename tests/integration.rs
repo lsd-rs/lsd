@@ -398,6 +398,20 @@ fn test_bad_utf_8_name() {
 }
 
 #[test]
+fn test_tree() {
+    let tmp = tempdir();
+    tmp.child("one").touch().unwrap();
+    tmp.child("one.d").create_dir_all().unwrap();
+    tmp.child("one.d/two").touch().unwrap();
+
+    cmd()
+        .arg(tmp.path())
+        .arg("--tree")
+        .assert()
+        .stdout(predicate::str::is_match("├── one\n└── one.d\n   └── two\n$").unwrap());
+}
+
+#[test]
 fn test_tree_d() {
     let tmp = tempdir();
     tmp.child("one").touch().unwrap();
