@@ -129,6 +129,13 @@ mod test {
     }
 
     #[test]
+    fn test_from_arg_matches_display_only_directories() {
+        let argv = vec!["lsd", "--tree", "-d"];
+        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        assert_eq!(Some(Display::TreeD), Display::from_arg_matches(&matches));
+    }
+
+    #[test]
     fn test_from_config_none() {
         assert_eq!(None, Display::from_config(&Config::with_none()));
     }

@@ -92,7 +92,8 @@ impl Meta {
         }
 
         for entry in entries {
-            let path = entry?.path();
+            let entry = entry?;
+            let path = entry.path();
 
             let name = path
                 .file_name()
@@ -117,8 +118,10 @@ impl Meta {
             };
 
             // skip files for --tree -d
-            if flags.display == Display::TreeD && !entry_meta.file_type.is_dirlike() {
-                continue;
+            if let Display::TreeD = flags.display {
+                if !entry.file_type()?.is_dir() {
+                    continue;
+                }
             }
 
             match entry_meta.recurse_into(depth - 1, &flags) {

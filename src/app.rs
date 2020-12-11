@@ -116,7 +116,7 @@ pub fn build() -> App<'static, 'static> {
                 .conflicts_with("almost-all")
                 .conflicts_with("depth")
                 .conflicts_with("recursive")
-                .help("Display directories themselves, and not their contents"),
+                .help("Display directories themselves, and not their contents (recursively when used with --tree)"),
         )
         .arg(
             Arg::with_name("size")
