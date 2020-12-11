@@ -15,7 +15,6 @@ pub enum Display {
     AlmostAll,
     DirectoryItself,
     DisplayOnlyVisible,
-    TreeD,
 }
 
 impl Display {
@@ -46,11 +45,7 @@ impl Configurable<Self> for Display {
         } else if matches.is_present("almost-all") {
             Some(Self::AlmostAll)
         } else if matches.is_present("directory-only") {
-            if matches.is_present("tree") {
-                Some(Self::TreeD)
-            } else {
-                Some(Self::DirectoryItself)
-            }
+            Some(Self::DirectoryItself)
         } else {
             None
         }
@@ -126,13 +121,6 @@ mod test {
             Some(Display::DirectoryItself),
             Display::from_arg_matches(&matches)
         );
-    }
-
-    #[test]
-    fn test_from_arg_matches_display_only_directories() {
-        let argv = vec!["lsd", "--tree", "-d"];
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
-        assert_eq!(Some(Display::TreeD), Display::from_arg_matches(&matches));
     }
 
     #[test]

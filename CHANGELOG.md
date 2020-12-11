@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add support for `--extensionsort` `-X` from [aldhsu](https://github.com/aldhsu)
 - Add support for `--versionsort` `-v` from [zwpaper](https://github.com/zwpaper)
 - Add support for config symlink arrow from [zwpaper](https://github.com/zwpaper) [#409](https://github.com/Peltoche/lsd/issues/409)
-- Implement `--tree -d`, analogous to `tree -d` from [0jdxt](https://github.com/0jdxt)
+- Implement `--tree -d`, analogous to `tree -d` from [0jdxt](https://github.com/0jdxt) and [Utah Rust](https://github.com/utah-rust)
 ### Changed
 - Use last sort flag for sort field from [meain](https://github.com/meain)
 ### Fixed
