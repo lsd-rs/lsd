@@ -257,6 +257,7 @@ fn get_output<'a>(
     for block in flags.blocks.0.iter() {
         match block {
             Block::INode => strings.push(meta.inode.render(colors)),
+            Block::INodeCount => strings.push(meta.inode_count.render(colors)),
             Block::Permission => {
                 let s: &[ColoredString] = &[
                     meta.file_type.render(colors),

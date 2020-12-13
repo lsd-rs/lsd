@@ -48,6 +48,10 @@ pub enum Elem {
     INode {
         valid: bool,
     },
+
+    INodeCount {
+        valid: bool,
+    },
 }
 
 impl Elem {
@@ -165,6 +169,10 @@ impl Colors {
                 true => Some("so"),
                 false => Some("no"),
             },
+            Elem::INodeCount { valid } => match valid {
+                true => Some("so"),
+                false => Some("no"),
+            },
             _ => None,
         };
 
@@ -243,6 +251,8 @@ impl Colors {
         // INode
         m.insert(Elem::INode { valid: true }, Colour::Fixed(13)); // Pink
         m.insert(Elem::INode { valid: false }, Colour::Fixed(245)); // Grey
+        m.insert(Elem::INodeCount { valid: true }, Colour::Fixed(134));
+        m.insert(Elem::INodeCount { valid: false }, Colour::Fixed(222));
 
         m
     }
