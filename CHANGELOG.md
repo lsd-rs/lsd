@@ -10,10 +10,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add support for using a config file [kmoschcau](https://github.com/kmoschcau)
 - Add support for `--extensionsort` `-X` from [aldhsu](https://github.com/aldhsu)
 - Add support for `--versionsort` `-v` from [zwpaper](https://github.com/zwpaper)
+- Add nix file icon from [zachcoyle](https://github.com/zachcoyle)
+- Add Termux installation instructions from [kcubeterm](https://github.com/kcubeterm)
+- Add ttc file icon from [zwpaper](https://github.com/zwpaper)
 - Add support for config symlink arrow from [zwpaper](https://github.com/zwpaper) [#409](https://github.com/Peltoche/lsd/issues/409)
+- Add julia file icon from [VentGrey](https://github.com/VentGrey)
+- Add case-insensitive matching of known filenames and extensions from [poita66](https://github.com/poita66)
+- Add Macports installation instructions from [ylluminarious](https://github.com/ylluminarious)
 - Implement `--tree -d`, analogous to `tree -d` from [0jdxt](https://github.com/0jdxt) and [Utah Rust](https://github.com/utah-rust)
+
 ### Changed
 - Use last sort flag for sort field from [meain](https://github.com/meain)
+
 ### Fixed
 - Fix group name show in gid from [zwpaper](https://github.com/zwpaper)
 - Fix panic caused by invalid UTF-8 chars in extension from [zwpaper](https://github.com/zwpaper) and [0jdxt](https://github.com/0jdxt)
@@ -25,10 +33,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add Windows(Scoop) installation instructions from [turtlebasket](https://github.com/turtlebasket)
 - Add opus filetype icon from [nabakolu](https://github.com/nabakolu)
 - Add FreeBSD insallation instructions from [andoriyu](https://github.com/andoriyu)
+
 ### Changed
 - Drop snap support from [zwpaper](https://github.com/zwpaper)
 - Improve `--ignore-glob` help message from [Pingger](https://github.com/Pingger)
 - Separate symlink icons for dirs and files from [0jdxt](https://github.com/0jdxt)
+
 ### Fixed
 - Fix listing of dir contents for symlinked dirs from [meain](https://github.com/meain)
 - Fix grid rendering showing symlink entry files and folders from [meain](https://github.com/meain)
