@@ -136,7 +136,8 @@ impl Blocks {
 
     /// Prepends a [Block] of variant [INode](Block::INode) to `self`.
     fn prepend_inode(&mut self) {
-        self.0.insert(0, Block::INode)
+        self.0.insert(0, Block::INode);
+        self.0.insert(1, Block::INodeCount)
     }
 
     /// Prepends a [Block] of variant [INode](Block::INode), if `self` does not already contain a
@@ -166,6 +167,7 @@ pub enum Block {
     Date,
     Name,
     INode,
+    INodeCount,
 }
 
 impl TryFrom<&str> for Block {
@@ -181,6 +183,7 @@ impl TryFrom<&str> for Block {
             "date" => Ok(Self::Date),
             "name" => Ok(Self::Name),
             "inode" => Ok(Self::INode),
+            "inode_count" => Ok(Self::INodeCount),
             _ => Err(format!("Not a valid block name: {}", &string)),
         }
     }
@@ -502,5 +505,10 @@ mod test_block {
     #[test]
     fn test_inode() {
         assert_eq!(Ok(Block::INode), Block::try_from("inode"));
+    }
+
+    #[test]
+    fn test_inode_count() {
+        assert_eq!(Ok(Block::INodeCount), Block::try_from("inode_count"));
     }
 }
