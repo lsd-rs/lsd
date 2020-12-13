@@ -5,7 +5,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased] - ReleaseDate
+## [0.19.0] - 2020-12-13
 ### Added
 - Add support for using a config file [kmoschcau](https://github.com/kmoschcau)
 - Add support for `--extensionsort` `-X` from [aldhsu](https://github.com/aldhsu)
@@ -291,7 +291,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Change the component alignement by using term_grid
 
 
-[Unreleased]: https://github.com/Peltoche/lsd/compare/0.18.0...HEAD
+[0.19.0]: https://github.com/Peltoche/lsd/compare/0.18.0...HEAD
 [0.18.0]: https://github.com/Peltoche/lsd/compare/0.17.0...0.18.0
 [0.17.0]: https://github.com/Peltoche/lsd/compare/0.16.0...0.17.0
 [0.16.0]: https://github.com/Peltoche/lsd/compare/0.15.1...0.16.0
