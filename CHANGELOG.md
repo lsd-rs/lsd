@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 ### Changed
 ### Fixed
+- Fix handling blocks passed without -l in cli from [meain](https://github.com/meain)
 
 ## [0.19.0] - 2020-12-13
 ### Added
