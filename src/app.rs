@@ -233,7 +233,7 @@ pub fn build() -> App<'static, 'static> {
                     "date",
                     "name",
                     "inode",
-                    "inode_count",
+                    "links",
                 ])
                 .help("Specify the blocks that will be displayed and in what order"),
         )
