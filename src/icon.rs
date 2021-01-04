@@ -345,7 +345,7 @@ impl Icons {
 
 #[cfg(test)]
 mod test {
-    use super::{Icons, Theme, ICON_SPACE};
+    use super::{Icons, Theme};
     use crate::meta::Meta;
     use std::fs::File;
     use tempfile::tempdir;
@@ -371,9 +371,9 @@ mod test {
         let meta = Meta::from_path(&file_path, false).unwrap();
 
         let icon = Icons::new(Theme::Fancy, " ".to_string());
-        let icon = icon.get(&meta.name);
+        let icon_str = icon.get(&meta.name);
 
-        assert_eq!(icon, format!("{}{}", "\u{f016}", ICON_SPACE)); // 
+        assert_eq!(icon_str, format!("{}{}", "\u{f016}", icon.icon_spacing)); // 
     }
 
     #[test]
@@ -384,9 +384,9 @@ mod test {
         let meta = Meta::from_path(&file_path, false).unwrap();
 
         let icon = Icons::new(Theme::Unicode, " ".to_string());
-        let icon = icon.get(&meta.name);
+        let icon_str = icon.get(&meta.name);
 
-        assert_eq!(icon, format!("{}{}", "\u{1f5cb}", ICON_SPACE));
+        assert_eq!(icon_str, format!("{}{}", "\u{1f5cb}", icon.icon_spacing));
     }
 
     #[test]
@@ -396,9 +396,9 @@ mod test {
         let meta = Meta::from_path(&file_path.to_path_buf(), false).unwrap();
 
         let icon = Icons::new(Theme::Fancy, " ".to_string());
-        let icon = icon.get(&meta.name);
+        let icon_str = icon.get(&meta.name);
 
-        assert_eq!(icon, format!("{}{}", "\u{f115}", ICON_SPACE)); // 
+        assert_eq!(icon_str, format!("{}{}", "\u{f115}", icon.icon_spacing)); // 
     }
 
     #[test]
@@ -408,9 +408,9 @@ mod test {
         let meta = Meta::from_path(&file_path.to_path_buf(), false).unwrap();
 
         let icon = Icons::new(Theme::Unicode, " ".to_string());
-        let icon = icon.get(&meta.name);
+        let icon_str = icon.get(&meta.name);
 
-        assert_eq!(icon, format!("{}{}", "\u{1f5c1}", ICON_SPACE));
+        assert_eq!(icon_str, format!("{}{}", "\u{1f5c1}", icon.icon_spacing));
     }
 
     #[test]
@@ -420,9 +420,9 @@ mod test {
         let meta = Meta::from_path(&file_path.to_path_buf(), false).unwrap();
 
         let icon = Icons::new(Theme::Fancy, " ".to_string());
-        let icon = icon.get(&meta.name);
+        let icon_str = icon.get(&meta.name);
 
-        assert_eq!(icon, format!("{}{}", "\u{f115}", ICON_SPACE)); // 
+        assert_eq!(icon_str, format!("{}{}", "\u{f115}", icon.icon_spacing)); // 
     }
 
     #[test]
@@ -435,9 +435,9 @@ mod test {
             let meta = Meta::from_path(&file_path, false).unwrap();
 
             let icon = Icons::new(Theme::Fancy, " ".to_string());
-            let icon = icon.get(&meta.name);
+            let icon_str = icon.get(&meta.name);
 
-            assert_eq!(icon, format!("{}{}", file_icon, ICON_SPACE));
+            assert_eq!(icon_str, format!("{}{}", file_icon, icon.icon_spacing));
         }
     }
 
@@ -451,9 +451,9 @@ mod test {
             let meta = Meta::from_path(&file_path, false).unwrap();
 
             let icon = Icons::new(Theme::Fancy, " ".to_string());
-            let icon = icon.get(&meta.name);
+            let icon_str = icon.get(&meta.name);
 
-            assert_eq!(icon, format!("{}{}", file_icon, ICON_SPACE));
+            assert_eq!(icon_str, format!("{}{}", file_icon, icon.icon_spacing));
         }
     }
 }
