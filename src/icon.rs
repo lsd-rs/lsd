@@ -17,8 +17,6 @@ pub enum Theme {
     Unicode,
 }
 
-const ICON_SPACE: &str = " ";
-
 // In order to add a new icon, write the unicode value like "\ue5fb" then
 // run the command below in vim:
 //
