@@ -7,6 +7,7 @@ pub struct Icons {
     icons_by_extension: HashMap<&'static str, &'static str>,
     default_folder_icon: &'static str,
     default_file_icon: &'static str,
+    icon_spacing: String,
 }
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
@@ -23,7 +24,7 @@ const ICON_SPACE: &str = " ";
 //
 // s#\\u[0-9a-f]*#\=eval('"'.submatch(0).'"')#
 impl Icons {
-    pub fn new(theme: Theme) -> Self {
+    pub fn new(theme: Theme, icon_spacing: String) -> Self {
         let display_icons = theme == Theme::Fancy || theme == Theme::Unicode;
         let (icons_by_name, icons_by_extension, default_file_icon, default_folder_icon) =
             if theme == Theme::Fancy {
@@ -48,6 +49,7 @@ impl Icons {
             icons_by_extension,
             default_file_icon,
             default_folder_icon,
+            icon_spacing,
         }
     }
 
@@ -92,7 +94,7 @@ impl Icons {
             self.default_file_icon
         };
 
-        format!("{}{}", icon, ICON_SPACE)
+        format!("{}{}", icon, self.icon_spacing)
     }
 
     fn get_default_icons_by_name() -> HashMap<&'static str, &'static str> {

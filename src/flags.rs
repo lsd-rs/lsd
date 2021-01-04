@@ -23,6 +23,7 @@ pub use dereference::Dereference;
 pub use display::Display;
 pub use icons::IconOption;
 pub use icons::IconTheme;
+pub use icons::IconSpacing;
 pub use icons::Icons;
 pub use ignore_globs::IgnoreGlobs;
 pub use indicators::Indicators;
