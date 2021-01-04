@@ -51,6 +51,7 @@ pub struct Color {
 pub struct Icons {
     pub when: Option<IconOption>,
     pub theme: Option<IconTheme>,
+    pub spacing: Option<String>,
 }
 
 #[derive(Eq, PartialEq, Debug, Deserialize)]
@@ -212,6 +213,9 @@ icons:
   # Which icon theme to use.
   # Possible values: fancy, unicode
   theme: fancy
+  # The string between the icons and the name.
+  # Possible values: any string
+  spacing: " "
 
 # == Ignore Globs ==
 # A list of globs to ignore when listing.
@@ -307,6 +311,7 @@ mod tests {
                 icons: Some(config_file::Icons {
                     when: Some(IconOption::Auto),
                     theme: Some(IconTheme::Fancy),
+                    spacing: None,
                 }),
                 ignore_globs: None,
                 indicators: Some(false),

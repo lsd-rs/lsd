@@ -9,12 +9,14 @@ use clap::ArgMatches;
 use serde::Deserialize;
 
 /// A collection of flags on how to use icons.
-#[derive(Clone, Debug, Copy, PartialEq, Eq, Default)]
+#[derive(Clone, Debug, PartialEq, Eq, Default)]
 pub struct Icons {
     /// When to use icons.
     pub when: IconOption,
     /// Which icon theme to use.
     pub theme: IconTheme,
+    /// How many spaces between icon and name
+    pub spacing: IconSpacing,
 }
 
 impl Icons {
@@ -25,7 +27,8 @@ impl Icons {
     pub fn configure_from(matches: &ArgMatches, config: &Config) -> Self {
         let when = IconOption::configure_from(matches, config);
         let theme = IconTheme::configure_from(matches, config);
-        Self { when, theme }
+        let spacing = IconSpacing::configure_from(matches, config);
+        Self { when, theme, spacing }
     }
 }
 
@@ -129,6 +132,48 @@ impl Configurable<Self> for IconTheme {
 impl Default for IconTheme {
     fn default() -> Self {
         Self::Fancy
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Deserialize)]
+#[serde(rename_all = "kebab-case")]
+pub struct IconSpacing(pub String);
+
+impl Configurable<Self> for IconSpacing {
+    /// Get a potential `IconTheme` variant from [ArgMatches].
+    ///
+    /// If the argument is passed, this returns the variant corresponding to its parameter in a
+    /// [Some]. Otherwise this returns [None].
+    fn from_arg_matches(matches: &ArgMatches) -> Option<Self> {
+        if matches.occurrences_of("icon-spacing") > 0 {
+            match matches.value_of("icon-spacing") {
+                Some(spacing) => Some(IconSpacing(spacing.to_string())),
+                None => panic!("This should not be reachable!"),
+            }
+        } else {
+            None
+        }
+    }
+
+    /// Get a potential `IconTheme` variant from a [Config].
+    ///
+    /// If the `Config::icons::theme` has value and is one of "fancy" or "unicode",
+    /// this returns its corresponding variant in a [Some].
+    /// Otherwise this returns [None].
+    fn from_config(config: &Config) -> Option<Self> {
+        if let Some(icon) = &config.icons {
+            if let Some(spacing) = icon.spacing.clone() {
+                return Some(IconSpacing(spacing));
+            }
+        }
+        None
+    }
+}
+
+/// The default value for `IconSpacing` is [0].
+impl Default for IconSpacing {
+    fn default() -> Self {
+        IconSpacing(" ".to_string())
     }
 }
 

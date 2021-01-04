@@ -54,6 +54,13 @@ pub fn build() -> App<'static, 'static> {
                 .help("Whether to use fancy or unicode icons"),
         )
         .arg(
+            Arg::with_name("icon-spacing")
+                .long("icon-spacing")
+                .takes_value(true)
+                .number_of_values(1)
+                .help("The string between the icon and the name"),
+        )
+        .arg(
             Arg::with_name("indicators")
                 .short("F")
                 .long("classify")
