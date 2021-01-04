@@ -50,7 +50,7 @@ impl Core {
             (_, _, IconTheme::Fancy) => icon::Theme::Fancy,
             (_, _, IconTheme::Unicode) => icon::Theme::Unicode,
         };
-        
+
         let icon_spacing = flags.icons.spacing.0.clone();
 
         if !tty_available {

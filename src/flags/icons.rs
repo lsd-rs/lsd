@@ -28,7 +28,11 @@ impl Icons {
         let when = IconOption::configure_from(matches, config);
         let theme = IconTheme::configure_from(matches, config);
         let spacing = IconSpacing::configure_from(matches, config);
-        Self { when, theme, spacing }
+        Self {
+            when,
+            theme,
+            spacing,
+        }
     }
 }
 
@@ -243,6 +247,7 @@ mod test_icon_option {
         c.icons = Some(Icons {
             when: Some(IconOption::Always),
             theme: None,
+            spacing: None,
         });
         assert_eq!(Some(IconOption::Always), IconOption::from_config(&c));
     }
@@ -253,6 +258,7 @@ mod test_icon_option {
         c.icons = Some(Icons {
             when: Some(IconOption::Auto),
             theme: None,
+            spacing: None,
         });
         assert_eq!(Some(IconOption::Auto), IconOption::from_config(&c));
     }
@@ -263,6 +269,7 @@ mod test_icon_option {
         c.icons = Some(Icons {
             when: Some(IconOption::Never),
             theme: None,
+            spacing: None,
         });
         assert_eq!(Some(IconOption::Never), IconOption::from_config(&c));
     }
@@ -274,6 +281,7 @@ mod test_icon_option {
         c.icons = Some(Icons {
             when: Some(IconOption::Always),
             theme: None,
+            spacing: None,
         });
         assert_eq!(Some(IconOption::Never), IconOption::from_config(&c));
     }
@@ -325,6 +333,7 @@ mod test_icon_theme {
         c.icons = Some(Icons {
             when: None,
             theme: Some(IconTheme::Fancy),
+            spacing: None,
         });
         assert_eq!(Some(IconTheme::Fancy), IconTheme::from_config(&c));
     }
@@ -335,6 +344,7 @@ mod test_icon_theme {
         c.icons = Some(Icons {
             when: None,
             theme: Some(IconTheme::Unicode),
+            spacing: None,
         });
         assert_eq!(Some(IconTheme::Unicode), IconTheme::from_config(&c));
     }

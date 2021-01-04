@@ -359,7 +359,7 @@ mod test {
         File::create(&file_path).expect("failed to create file");
         let meta = Meta::from_path(&file_path, false).unwrap();
 
-        let icon = Icons::new(Theme::NoIcon);
+        let icon = Icons::new(Theme::NoIcon, " ".to_string());
         let icon = icon.get(&meta.name);
 
         assert_eq!(icon, "");
@@ -372,7 +372,7 @@ mod test {
         File::create(&file_path).expect("failed to create file");
         let meta = Meta::from_path(&file_path, false).unwrap();
 
-        let icon = Icons::new(Theme::Fancy);
+        let icon = Icons::new(Theme::Fancy, " ".to_string());
         let icon = icon.get(&meta.name);
 
         assert_eq!(icon, format!("{}{}", "\u{f016}", ICON_SPACE)); // 
@@ -385,7 +385,7 @@ mod test {
         File::create(&file_path).expect("failed to create file");
         let meta = Meta::from_path(&file_path, false).unwrap();
 
-        let icon = Icons::new(Theme::Unicode);
+        let icon = Icons::new(Theme::Unicode, " ".to_string());
         let icon = icon.get(&meta.name);
 
         assert_eq!(icon, format!("{}{}", "\u{1f5cb}", ICON_SPACE));
@@ -397,7 +397,7 @@ mod test {
         let file_path = tmp_dir.path();
         let meta = Meta::from_path(&file_path.to_path_buf(), false).unwrap();
 
-        let icon = Icons::new(Theme::Fancy);
+        let icon = Icons::new(Theme::Fancy, " ".to_string());
         let icon = icon.get(&meta.name);
 
         assert_eq!(icon, format!("{}{}", "\u{f115}", ICON_SPACE)); // 
@@ -409,7 +409,7 @@ mod test {
         let file_path = tmp_dir.path();
         let meta = Meta::from_path(&file_path.to_path_buf(), false).unwrap();
 
-        let icon = Icons::new(Theme::Unicode);
+        let icon = Icons::new(Theme::Unicode, " ".to_string());
         let icon = icon.get(&meta.name);
 
         assert_eq!(icon, format!("{}{}", "\u{1f5c1}", ICON_SPACE));
@@ -421,7 +421,7 @@ mod test {
         let file_path = tmp_dir.path();
         let meta = Meta::from_path(&file_path.to_path_buf(), false).unwrap();
 
-        let icon = Icons::new(Theme::Fancy);
+        let icon = Icons::new(Theme::Fancy, " ".to_string());
         let icon = icon.get(&meta.name);
 
         assert_eq!(icon, format!("{}{}", "\u{f115}", ICON_SPACE)); // 
@@ -436,7 +436,7 @@ mod test {
             File::create(&file_path).expect("failed to create file");
             let meta = Meta::from_path(&file_path, false).unwrap();
 
-            let icon = Icons::new(Theme::Fancy);
+            let icon = Icons::new(Theme::Fancy, " ".to_string());
             let icon = icon.get(&meta.name);
 
             assert_eq!(icon, format!("{}{}", file_icon, ICON_SPACE));
@@ -452,7 +452,7 @@ mod test {
             File::create(&file_path).expect("failed to create file");
             let meta = Meta::from_path(&file_path, false).unwrap();
 
-            let icon = Icons::new(Theme::Fancy);
+            let icon = Icons::new(Theme::Fancy, " ".to_string());
             let icon = icon.get(&meta.name);
 
             assert_eq!(icon, format!("{}{}", file_icon, ICON_SPACE));
