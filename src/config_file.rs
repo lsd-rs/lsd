@@ -311,7 +311,7 @@ mod tests {
                 icons: Some(config_file::Icons {
                     when: Some(IconOption::Auto),
                     theme: Some(IconTheme::Fancy),
-                    spacing: None,
+                    spacing: Some(" ".to_string()),
                 }),
                 ignore_globs: None,
                 indicators: Some(false),

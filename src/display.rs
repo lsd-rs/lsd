@@ -372,7 +372,7 @@ mod tests {
             );
             let output = name.render(
                 &Colors::new(color::Theme::NoColor),
-                &Icons::new(icon::Theme::NoIcon),
+                &Icons::new(icon::Theme::NoIcon, " ".to_string()),
                 &DisplayOption::FileName,
             );
 
@@ -404,7 +404,7 @@ mod tests {
             let output = name
                 .render(
                     &Colors::new(color::Theme::NoColor),
-                    &Icons::new(icon::Theme::Fancy),
+                    &Icons::new(icon::Theme::Fancy, " ".to_string()),
                     &DisplayOption::FileName,
                 )
                 .to_string();
@@ -436,7 +436,7 @@ mod tests {
             let output = name
                 .render(
                     &Colors::new(color::Theme::NoLscolors),
-                    &Icons::new(icon::Theme::NoIcon),
+                    &Icons::new(icon::Theme::NoIcon, " ".to_string()),
                     &DisplayOption::FileName,
                 )
                 .to_string();
@@ -472,7 +472,7 @@ mod tests {
             let output = name
                 .render(
                     &Colors::new(color::Theme::NoColor),
-                    &Icons::new(icon::Theme::NoIcon),
+                    &Icons::new(icon::Theme::NoIcon, " ".to_string()),
                     &DisplayOption::FileName,
                 )
                 .to_string();
