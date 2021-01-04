@@ -144,7 +144,7 @@ impl Default for IconTheme {
 pub struct IconSpacing(pub String);
 
 impl Configurable<Self> for IconSpacing {
-    /// Get a potential `IconTheme` variant from [ArgMatches].
+    /// Get a potential `IconSpacing` variant from [ArgMatches].
     ///
     /// If the argument is passed, this returns the variant corresponding to its parameter in a
     /// [Some]. Otherwise this returns [None].
@@ -159,10 +159,9 @@ impl Configurable<Self> for IconSpacing {
         }
     }
 
-    /// Get a potential `IconTheme` variant from a [Config].
+    /// Get a potential `IconSpacing` variant from a [Config].
     ///
-    /// If the `Config::icons::theme` has value and is one of "fancy" or "unicode",
-    /// this returns its corresponding variant in a [Some].
+    /// This returns its corresponding variant in a [Some].
     /// Otherwise this returns [None].
     fn from_config(config: &Config) -> Option<Self> {
         if let Some(icon) = &config.icons {
@@ -174,7 +173,7 @@ impl Configurable<Self> for IconSpacing {
     }
 }
 
-/// The default value for `IconSpacing` is [0].
+/// The default value for `IconSpacing` is [" "].
 impl Default for IconSpacing {
     fn default() -> Self {
         IconSpacing(" ".to_string())
