@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - ReleaseDate
 ### Added
+- Add support for changing the spacing between icon and name from [Finn Hediger](https://github.com/orangefran) [#363](https://github.com/Peltoche/lsd/issues/363)
+
 ### Changed
 ### Fixed
 - Fix handling blocks passed without -l in cli from [meain](https://github.com/meain)
