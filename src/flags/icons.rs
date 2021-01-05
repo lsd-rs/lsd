@@ -349,3 +349,23 @@ mod test_icon_theme {
         assert_eq!(Some(IconTheme::Unicode), IconTheme::from_config(&c));
     }
 }
+
+#[cfg(test)]
+mod test_icon_spacing {
+    use super::IconSpacing;
+
+    use crate::config_file::{Config, Icons};
+    use crate::flags::Configurable;
+
+    #[test]
+    fn test_from_config() {
+        let mut c = Config::with_none();
+        c.icons = Some(Icons {
+            when: None,
+            theme: None,
+            spacing: Some(" ".to_string()),
+        });
+        let expected = Some(IconSpacing(" ".to_string()));
+        assert_eq!(expected, IconSpacing::from_config(&c));
+    }
+}
