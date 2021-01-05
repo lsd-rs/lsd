@@ -149,14 +149,6 @@ impl Configurable<Self> for IconSpacing {
     /// If the argument is passed, this returns the variant corresponding to its parameter in a
     /// [Some]. Otherwise this returns [None].
     fn from_arg_matches(_matches: &ArgMatches) -> Option<Self> {
-        // if matches.occurrences_of("icon-spacing") > 0 {
-        //     match matches.value_of("icon-spacing") {
-        //         Some(spacing) => Some(IconSpacing(spacing.to_string())),
-        //         None => panic!("This should not be reachable!"),
-        //     }
-        // } else {
-        //     None
-        // }
         None
     }
 
