@@ -103,6 +103,22 @@ environment.systemPackages = with pkgs; [
 pkg install lsd
 ```
 
+### On NetBSD
+
+_... and other platforms using `pkgsrc`_
+
+Using the package manager:
+
+``` sh
+pkgin install lsd
+```
+Building from source:
+
+``` sh
+cd /usr/pkgsrc/sysutils/lsd
+make install
+```
+
 ### On Windows
 
 Install with [Scoop](https://scoop.sh):
