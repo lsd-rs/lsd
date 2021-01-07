@@ -51,7 +51,7 @@ impl Core {
             (_, _, IconTheme::Unicode) => icon::Theme::Unicode,
         };
 
-        let icon_spacing = flags.icons.spacing.0.clone();
+        let icon_separator = flags.icons.separator.0.clone();
 
         if !tty_available {
             // The output is not a tty, this means the command is piped. (ex: lsd -l | less)
@@ -67,7 +67,7 @@ impl Core {
             flags,
             //display: Display::new(inner_flags),
             colors: Colors::new(color_theme),
-            icons: Icons::new(icon_theme, icon_spacing),
+            icons: Icons::new(icon_theme, icon_separator),
             sorters,
         }
     }

@@ -7,7 +7,7 @@ pub struct Icons {
     icons_by_extension: HashMap<&'static str, &'static str>,
     default_folder_icon: &'static str,
     default_file_icon: &'static str,
-    icon_spacing: String,
+    icon_separator: String,
 }
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
@@ -22,7 +22,7 @@ pub enum Theme {
 //
 // s#\\u[0-9a-f]*#\=eval('"'.submatch(0).'"')#
 impl Icons {
-    pub fn new(theme: Theme, icon_spacing: String) -> Self {
+    pub fn new(theme: Theme, icon_separator: String) -> Self {
         let display_icons = theme == Theme::Fancy || theme == Theme::Unicode;
         let (icons_by_name, icons_by_extension, default_file_icon, default_folder_icon) =
             if theme == Theme::Fancy {
@@ -47,7 +47,7 @@ impl Icons {
             icons_by_extension,
             default_file_icon,
             default_folder_icon,
-            icon_spacing,
+            icon_separator,
         }
     }
 
@@ -92,7 +92,7 @@ impl Icons {
             self.default_file_icon
         };
 
-        format!("{}{}", icon, self.icon_spacing)
+        format!("{}{}", icon, self.icon_separator)
     }
 
     fn get_default_icons_by_name() -> HashMap<&'static str, &'static str> {
@@ -373,7 +373,7 @@ mod test {
         let icon = Icons::new(Theme::Fancy, " ".to_string());
         let icon_str = icon.get(&meta.name);
 
-        assert_eq!(icon_str, format!("{}{}", "\u{f016}", icon.icon_spacing)); // 
+        assert_eq!(icon_str, format!("{}{}", "\u{f016}", icon.icon_separator)); // 
     }
 
     #[test]
@@ -386,7 +386,7 @@ mod test {
         let icon = Icons::new(Theme::Unicode, " ".to_string());
         let icon_str = icon.get(&meta.name);
 
-        assert_eq!(icon_str, format!("{}{}", "\u{1f5cb}", icon.icon_spacing));
+        assert_eq!(icon_str, format!("{}{}", "\u{1f5cb}", icon.icon_separator));
     }
 
     #[test]
@@ -398,7 +398,7 @@ mod test {
         let icon = Icons::new(Theme::Fancy, " ".to_string());
         let icon_str = icon.get(&meta.name);
 
-        assert_eq!(icon_str, format!("{}{}", "\u{f115}", icon.icon_spacing)); // 
+        assert_eq!(icon_str, format!("{}{}", "\u{f115}", icon.icon_separator)); // 
     }
 
     #[test]
@@ -410,7 +410,7 @@ mod test {
         let icon = Icons::new(Theme::Unicode, " ".to_string());
         let icon_str = icon.get(&meta.name);
 
-        assert_eq!(icon_str, format!("{}{}", "\u{1f5c1}", icon.icon_spacing));
+        assert_eq!(icon_str, format!("{}{}", "\u{1f5c1}", icon.icon_separator));
     }
 
     #[test]
@@ -422,7 +422,7 @@ mod test {
         let icon = Icons::new(Theme::Fancy, " ".to_string());
         let icon_str = icon.get(&meta.name);
 
-        assert_eq!(icon_str, format!("{}{}", "\u{f115}", icon.icon_spacing)); // 
+        assert_eq!(icon_str, format!("{}{}", "\u{f115}", icon.icon_separator)); // 
     }
 
     #[test]
@@ -437,7 +437,7 @@ mod test {
             let icon = Icons::new(Theme::Fancy, " ".to_string());
             let icon_str = icon.get(&meta.name);
 
-            assert_eq!(icon_str, format!("{}{}", file_icon, icon.icon_spacing));
+            assert_eq!(icon_str, format!("{}{}", file_icon, icon.icon_separator));
         }
     }
 
@@ -453,7 +453,7 @@ mod test {
             let icon = Icons::new(Theme::Fancy, " ".to_string());
             let icon_str = icon.get(&meta.name);
 
-            assert_eq!(icon_str, format!("{}{}", file_icon, icon.icon_spacing));
+            assert_eq!(icon_str, format!("{}{}", file_icon, icon.icon_separator));
         }
     }
 }
