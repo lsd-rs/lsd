@@ -22,7 +22,7 @@ pub use date::DateFlag;
 pub use dereference::Dereference;
 pub use display::Display;
 pub use icons::IconOption;
-pub use icons::IconSpacing;
+pub use icons::IconSeparator;
 pub use icons::IconTheme;
 pub use icons::Icons;
 pub use ignore_globs::IgnoreGlobs;

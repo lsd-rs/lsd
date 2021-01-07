@@ -15,8 +15,8 @@ pub struct Icons {
     pub when: IconOption,
     /// Which icon theme to use.
     pub theme: IconTheme,
-    /// How many spaces between icon and name
-    pub spacing: IconSpacing,
+    /// String between icon and name.
+    pub separator: IconSeparator,
 }
 
 impl Icons {
@@ -27,11 +27,11 @@ impl Icons {
     pub fn configure_from(matches: &ArgMatches, config: &Config) -> Self {
         let when = IconOption::configure_from(matches, config);
         let theme = IconTheme::configure_from(matches, config);
-        let spacing = IconSpacing::configure_from(matches, config);
+        let separator = IconSeparator::configure_from(matches, config);
         Self {
             when,
             theme,
-            spacing,
+            separator,
         }
     }
 }
@@ -141,10 +141,10 @@ impl Default for IconTheme {
 
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize)]
 #[serde(rename_all = "kebab-case")]
-pub struct IconSpacing(pub String);
+pub struct IconSeparator(pub String);
 
-impl Configurable<Self> for IconSpacing {
-    /// Get a potential `IconSpacing` variant from [ArgMatches].
+impl Configurable<Self> for IconSeparator {
+    /// Get a potential `IconSeparator` variant from [ArgMatches].
     ///
     /// If the argument is passed, this returns the variant corresponding to its parameter in a
     /// [Some]. Otherwise this returns [None].
@@ -152,24 +152,24 @@ impl Configurable<Self> for IconSpacing {
         None
     }
 
-    /// Get a potential `IconSpacing` variant from a [Config].
+    /// Get a potential `IconSeparator` variant from a [Config].
     ///
     /// This returns its corresponding variant in a [Some].
     /// Otherwise this returns [None].
     fn from_config(config: &Config) -> Option<Self> {
         if let Some(icon) = &config.icons {
-            if let Some(spacing) = icon.spacing.clone() {
-                return Some(IconSpacing(spacing));
+            if let Some(separator) = icon.separator.clone() {
+                return Some(IconSeparator(separator));
             }
         }
         None
     }
 }
 
-/// The default value for `IconSpacing` is [" "].
-impl Default for IconSpacing {
+/// The default value for `IconSeparator` is [" "].
+impl Default for IconSeparator {
     fn default() -> Self {
-        IconSpacing(" ".to_string())
+        IconSeparator(" ".to_string())
     }
 }
 
@@ -239,7 +239,7 @@ mod test_icon_option {
         c.icons = Some(Icons {
             when: Some(IconOption::Always),
             theme: None,
-            spacing: None,
+            separator: None,
         });
         assert_eq!(Some(IconOption::Always), IconOption::from_config(&c));
     }
@@ -250,7 +250,7 @@ mod test_icon_option {
         c.icons = Some(Icons {
             when: Some(IconOption::Auto),
             theme: None,
-            spacing: None,
+            separator: None,
         });
         assert_eq!(Some(IconOption::Auto), IconOption::from_config(&c));
     }
@@ -261,7 +261,7 @@ mod test_icon_option {
         c.icons = Some(Icons {
             when: Some(IconOption::Never),
             theme: None,
-            spacing: None,
+            separator: None,
         });
         assert_eq!(Some(IconOption::Never), IconOption::from_config(&c));
     }
@@ -273,7 +273,7 @@ mod test_icon_option {
         c.icons = Some(Icons {
             when: Some(IconOption::Always),
             theme: None,
-            spacing: None,
+            separator: None,
         });
         assert_eq!(Some(IconOption::Never), IconOption::from_config(&c));
     }
@@ -325,7 +325,7 @@ mod test_icon_theme {
         c.icons = Some(Icons {
             when: None,
             theme: Some(IconTheme::Fancy),
-            spacing: None,
+            separator: None,
         });
         assert_eq!(Some(IconTheme::Fancy), IconTheme::from_config(&c));
     }
@@ -336,15 +336,15 @@ mod test_icon_theme {
         c.icons = Some(Icons {
             when: None,
             theme: Some(IconTheme::Unicode),
-            spacing: None,
+            separator: None,
         });
         assert_eq!(Some(IconTheme::Unicode), IconTheme::from_config(&c));
     }
 }
 
 #[cfg(test)]
-mod test_icon_spacing {
-    use super::IconSpacing;
+mod test_icon_separator {
+    use super::IconSeparator;
 
     use crate::config_file::{Config, Icons};
     use crate::flags::Configurable;
@@ -355,9 +355,9 @@ mod test_icon_spacing {
         c.icons = Some(Icons {
             when: None,
             theme: None,
-            spacing: Some(" ".to_string()),
+            separator: Some(" ".to_string()),
         });
-        let expected = Some(IconSpacing(" ".to_string()));
-        assert_eq!(expected, IconSpacing::from_config(&c));
+        let expected = Some(IconSeparator(" ".to_string()));
+        assert_eq!(expected, IconSeparator::from_config(&c));
     }
 }
