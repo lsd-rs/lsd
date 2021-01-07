@@ -83,6 +83,25 @@ impl Configurable<Self> for DateFlag {
             None
         }
     }
+
+    /// Get a potential `DateFlag` variant from the environment.
+    fn from_environment() -> Option<Self> {
+        if let Ok(value) = std::env::var("TIME_STYLE") {
+            match value.as_str() {
+                // TODO: time 0.2 supports the %N specifier for nanoseconds, proper format for
+                //       full-iso should be "%F %T.%N %z"
+                "full-iso" => Some(Self::Formatted("%F %T %z".into())),
+                "long-iso" | "iso" => Some(Self::Formatted("%F %R".into())),
+                _ if value.starts_with('+') => Self::from_format_string(&value),
+                _ => {
+                    print_error!("Not a valid date value: {}.", value);
+                    None
+                }
+            }
+        } else {
+            None
+        }
+    }
 }
 
 /// The default value for `DateFlag` is [DateFlag::Date].
@@ -192,5 +211,38 @@ mod test {
         c.date = Some("relative".into());
         c.classic = Some(true);
         assert_eq!(Some(DateFlag::Date), DateFlag::from_config(&c));
+    }
+
+    #[test]
+    fn test_from_environment_none() {
+        std::env::set_var("TIME_STYLE", "");
+        assert_eq!(None, DateFlag::from_environment());
+    }
+
+    #[test]
+    fn test_from_environment_full_iso() {
+        std::env::set_var("TIME_STYLE", "full-iso");
+        assert_eq!(
+            Some(DateFlag::Formatted("%F %T %z".into())),
+            DateFlag::from_environment()
+        );
+    }
+
+    #[test]
+    fn test_from_environment_long_iso() {
+        std::env::set_var("TIME_STYLE", "long-iso");
+        assert_eq!(
+            Some(DateFlag::Formatted("%F %R".into())),
+            DateFlag::from_environment()
+        );
+    }
+
+    #[test]
+    fn test_from_environment_format() {
+        std::env::set_var("TIME_STYLE", "+%F");
+        assert_eq!(
+            Some(DateFlag::Formatted("%F".into())),
+            DateFlag::from_environment()
+        );
     }
 }
