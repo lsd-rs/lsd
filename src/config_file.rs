@@ -192,7 +192,7 @@ color:
 # accepts an strftime like string.
 # When "classic" is set, this is set to "date".
 # Possible values: date, relative, +<date_format>
-date: date
+# date: date
 
 # == Dereference ==
 # Whether to dereference symbolic links.
@@ -305,7 +305,7 @@ mod tests {
                 color: Some(config_file::Color {
                     when: ColorOption::Auto,
                 }),
-                date: Some("date".into()),
+                date: None,
                 dereference: Some(false),
                 display: None,
                 icons: Some(config_file::Icons {

@@ -99,10 +99,11 @@ pub trait Configurable<T>
 where
     T: std::default::Default,
 {
-    /// Returns a value from either [ArgMatches], a [Config] or a [Default] value. The first value
-    /// that is not [None] is used. The order of precedence for the value used is:
+    /// Returns a value from either [ArgMatches], a [Config], a [Default] or the environment value.
+    /// The first value that is not [None] is used. The order of precedence for the value used is:
     /// - [from_arg_matches](Configurable::from_arg_matches)
     /// - [from_config](Configurable::from_config)
+    /// - [from_environment](Configurable::from_environment)
     /// - [Default::default]
     ///
     /// # Note
@@ -111,6 +112,10 @@ where
     /// out warnings.
     fn configure_from(matches: &ArgMatches, config: &Config) -> T {
         let mut result: T = Default::default();
+
+        if let Some(value) = Self::from_environment() {
+            result = value;
+        }
 
         if let Some(value) = Self::from_config(config) {
             result = value;
@@ -129,4 +134,9 @@ where
     /// The method to implement the value fetching from a configuration file. This should return
     /// [None], if the [Config] does not have a [Yaml].
     fn from_config(config: &Config) -> Option<T>;
+
+    /// The method to implement the value fetching from environment variables.
+    fn from_environment() -> Option<T> {
+        None
+    }
 }
