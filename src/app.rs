@@ -296,7 +296,7 @@ pub fn validate_time_format(formatter: &str) -> Result<(), String> {
                 | Some('U') | Some('u') | Some('V') | Some('v') | Some('W') | Some('w')
                 | Some('X') | Some('x') | Some('Y') | Some('y') | Some('Z') | Some('z')
                 | Some('+') | Some('%') => (),
-                Some(c) => return Err(format!("invalid format specifier: {}", c)),
+                Some(c) => return Err(format!("invalid format specifier: %{}", c)),
                 None => return Err("missing format specifier".to_owned()),
             },
             None => break,
