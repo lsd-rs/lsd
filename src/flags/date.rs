@@ -89,8 +89,9 @@ impl Configurable<Self> for DateFlag {
         if let Ok(value) = std::env::var("TIME_STYLE") {
             match value.as_str() {
                 "full-iso" => Some(Self::Formatted("%F %T.%f %z".into())),
-                "long-iso" | "iso" => Some(Self::Formatted("%F %R".into())),
-                "local" => Some(Self::Formatted("%c".into())),
+                "long-iso" => Some(Self::Formatted("%F %R".into())),
+                "iso" => Some(Self::Formatted("%m-%d %R".into())),
+                "locale" => Some(Self::Formatted("%b %d %R".into())),
                 _ if value.starts_with('+') => Self::from_format_string(&value),
                 _ => {
                     print_error!("Not a valid date value: {}.", value);
@@ -235,6 +236,26 @@ mod test {
         std::env::set_var("TIME_STYLE", "long-iso");
         assert_eq!(
             Some(DateFlag::Formatted("%F %R".into())),
+            DateFlag::from_environment()
+        );
+    }
+
+    #[test]
+    #[serial_test::serial]
+    fn test_from_environment_iso() {
+        std::env::set_var("TIME_STYLE", "iso");
+        assert_eq!(
+            Some(DateFlag::Formatted("%m-%d %R".into())),
+            DateFlag::from_environment()
+        );
+    }
+
+    #[test]
+    #[serial_test::serial]
+    fn test_from_environment_locale() {
+        std::env::set_var("TIME_STYLE", "locale");
+        assert_eq!(
+            Some(DateFlag::Formatted("%b %d %R".into())),
             DateFlag::from_environment()
         );
     }
