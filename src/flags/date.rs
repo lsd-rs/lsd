@@ -248,4 +248,46 @@ mod test {
             DateFlag::from_environment()
         );
     }
+
+    #[test]
+    #[serial_test::serial]
+    fn test_parsing_order_arg() {
+        std::env::set_var("TIME_STYLE", "+%R");
+        let argv = vec!["lsd", "--date", "+%F"];
+        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let mut config = Config::with_none();
+        config.date = Some("+%c".into());
+        assert_eq!(
+            DateFlag::Formatted("%F".into()),
+            DateFlag::configure_from(&matches, &config)
+        );
+    }
+
+    #[test]
+    #[serial_test::serial]
+    fn test_parsing_order_env() {
+        std::env::set_var("TIME_STYLE", "+%R");
+        let argv = vec!["lsd"];
+        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let mut config = Config::with_none();
+        config.date = Some("+%c".into());
+        assert_eq!(
+            DateFlag::Formatted("%R".into()),
+            DateFlag::configure_from(&matches, &config)
+        );
+    }
+
+    #[test]
+    #[serial_test::serial]
+    fn test_parsing_order_config() {
+        std::env::set_var("TIME_STYLE", "");
+        let argv = vec!["lsd"];
+        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let mut config = Config::with_none();
+        config.date = Some("+%c".into());
+        assert_eq!(
+            DateFlag::Formatted("%c".into()),
+            DateFlag::configure_from(&matches, &config)
+        );
+    }
 }
