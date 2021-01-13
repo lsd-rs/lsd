@@ -106,7 +106,7 @@ fn test_list_inode_populated_directory() {
     #[cfg(windows)]
     let matched = "- one\n\\- two\n$";
     #[cfg(unix)]
-    let matched = "\\d+ one\n\\d+ two\n$";
+    let matched = "\\d+ +one\n\\d+ +two\n$";
 
     cmd()
         .arg("--inode")
@@ -131,7 +131,7 @@ fn test_list_block_inode_populated_directory_without_long() {
     #[cfg(windows)]
     let matched = "- one\n\\- two\n$";
     #[cfg(unix)]
-    let matched = "\\d+ one\n\\d+ two\n$";
+    let matched = "\\d+ +one\n\\d+ +two\n$";
 
     cmd()
         .arg("--blocks")
