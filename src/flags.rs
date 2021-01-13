@@ -102,8 +102,8 @@ where
     /// Returns a value from either [ArgMatches], a [Config], a [Default] or the environment value.
     /// The first value that is not [None] is used. The order of precedence for the value used is:
     /// - [from_arg_matches](Configurable::from_arg_matches)
-    /// - [from_config](Configurable::from_config)
     /// - [from_environment](Configurable::from_environment)
+    /// - [from_config](Configurable::from_config)
     /// - [Default::default]
     ///
     /// # Note
@@ -113,11 +113,11 @@ where
     fn configure_from(matches: &ArgMatches, config: &Config) -> T {
         let mut result: T = Default::default();
 
-        if let Some(value) = Self::from_environment() {
+        if let Some(value) = Self::from_config(config) {
             result = value;
         }
 
-        if let Some(value) = Self::from_config(config) {
+        if let Some(value) = Self::from_environment() {
             result = value;
         }
 
