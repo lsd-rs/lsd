@@ -213,21 +213,24 @@ mod test {
     }
 
     #[test]
+    #[serial_test::serial]
     fn test_from_environment_none() {
         std::env::set_var("TIME_STYLE", "");
         assert_eq!(None, DateFlag::from_environment());
     }
 
     #[test]
+    #[serial_test::serial]
     fn test_from_environment_full_iso() {
         std::env::set_var("TIME_STYLE", "full-iso");
         assert_eq!(
-            Some(DateFlag::Formatted("%F %T %z".into())),
+            Some(DateFlag::Formatted("%F %T.%f %z".into())),
             DateFlag::from_environment()
         );
     }
 
     #[test]
+    #[serial_test::serial]
     fn test_from_environment_long_iso() {
         std::env::set_var("TIME_STYLE", "long-iso");
         assert_eq!(
@@ -237,6 +240,7 @@ mod test {
     }
 
     #[test]
+    #[serial_test::serial]
     fn test_from_environment_format() {
         std::env::set_var("TIME_STYLE", "+%F");
         assert_eq!(
