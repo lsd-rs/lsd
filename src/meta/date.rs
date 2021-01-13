@@ -37,6 +37,20 @@ impl Date {
         match &flags.date {
             DateFlag::Date => self.0.format("%c").to_string(),
             DateFlag::Relative => format!("{}", HumanTime::from(self.0 - Local::now())),
+            DateFlag::ISO => {
+                if self.0 > Local::now() - Duration::days(365) {
+                    self.0.format("%m-%d %R").to_string()
+                } else {
+                    self.0.format("%F").to_string()
+                }
+            }
+            DateFlag::Locale => {
+                if self.0 > Local::now() - Duration::days(365) {
+                    self.0.format("%b %d %R").to_string()
+                } else {
+                    self.0.format("%b %d  %Y").to_string()
+                }
+            }
             DateFlag::Formatted(format) => self.0.format(&format).to_string(),
         }
     }
