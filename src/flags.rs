@@ -111,21 +111,19 @@ where
     /// The configuration file's Yaml is read in any case, to be able to check for errors and print
     /// out warnings.
     fn configure_from(matches: &ArgMatches, config: &Config) -> T {
-        let mut result: T = Default::default();
-
-        if let Some(value) = Self::from_config(config) {
-            result = value;
+        if let Some(value) = Self::from_arg_matches(matches) {
+            return value;
         }
 
         if let Some(value) = Self::from_environment() {
-            result = value;
+            return value;
         }
 
-        if let Some(value) = Self::from_arg_matches(matches) {
-            result = value;
+        if let Some(value) = Self::from_config(config) {
+            return value;
         }
 
-        result
+        Default::default()
     }
 
     /// The method to implement the value fetching from command line parameters.
