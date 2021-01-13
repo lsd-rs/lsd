@@ -214,7 +214,7 @@ icons:
   # Possible values: fancy, unicode
   theme: fancy
   # The string between the icons and the name.
-  # Possible values: any string
+  # Possible values: any string (eg: " |")
   separator: " "
 
 # == Ignore Globs ==
