@@ -134,9 +134,9 @@ dependencies = [
 
 [[package]]
 name = "chrono-humanize"
-version = "0.0.11"
+version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "eb2ff48a655fe8d2dae9a39e66af7fd8ff32a879e8c4e27422c25596a8b5e90d"
+checksum = "f0a4c32145b4db85fe1c4f2b125a4f9493769df424f5f84baf6b04ea8eaf33c9"
 dependencies = [
  "chrono",
 ]
@@ -343,6 +343,7 @@ dependencies = [
  "ansi_term 0.12.1",
  "assert_cmd",
  "assert_fs",
+ "chrono",
  "chrono-humanize",
  "clap",
  "dirs",
