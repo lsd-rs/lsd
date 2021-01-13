@@ -275,7 +275,7 @@ pub fn build() -> App<'static, 'static> {
 
 fn validate_date_argument(arg: String) -> Result<(), String> {
     if arg.starts_with('+') {
-        validate_time_format(&arg).map_err(|err| err.to_string())
+        validate_time_format(&arg)
     } else if &arg == "date" || &arg == "relative" {
         Result::Ok(())
     } else {
@@ -283,7 +283,7 @@ fn validate_date_argument(arg: String) -> Result<(), String> {
     }
 }
 
-pub fn validate_time_format(formatter: &str) -> Result<(), time::ParseError> {
+pub fn validate_time_format(formatter: &str) -> Result<(), String> {
     let mut chars = formatter.chars();
     loop {
         match chars.next() {
@@ -296,8 +296,8 @@ pub fn validate_time_format(formatter: &str) -> Result<(), time::ParseError> {
                 | Some('U') | Some('u') | Some('V') | Some('v') | Some('W') | Some('w')
                 | Some('X') | Some('x') | Some('Y') | Some('y') | Some('Z') | Some('z')
                 | Some('+') | Some('%') => (),
-                Some(c) => return Err(time::ParseError::InvalidFormatSpecifier(c)),
-                None => return Err(time::ParseError::MissingFormatConverter),
+                Some(c) => return Err(format!("invalid format specifier: {}", c)),
+                None => return Err("missing format specifier".to_owned()),
             },
             None => break,
             _ => continue,

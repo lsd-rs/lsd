@@ -88,10 +88,9 @@ impl Configurable<Self> for DateFlag {
     fn from_environment() -> Option<Self> {
         if let Ok(value) = std::env::var("TIME_STYLE") {
             match value.as_str() {
-                // TODO: time 0.2 supports the %N specifier for nanoseconds, proper format for
-                //       full-iso should be "%F %T.%N %z"
-                "full-iso" => Some(Self::Formatted("%F %T %z".into())),
+                "full-iso" => Some(Self::Formatted("%F %T.%f %z".into())),
                 "long-iso" | "iso" => Some(Self::Formatted("%F %R".into())),
+                "local" => Some(Self::Formatted("%c".into())),
                 _ if value.starts_with('+') => Self::from_format_string(&value),
                 _ => {
                     print_error!("Not a valid date value: {}.", value);
