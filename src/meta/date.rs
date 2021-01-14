@@ -40,7 +40,7 @@ impl Date {
             DateFlag::ISO => {
                 // 365.2425 * 24 * 60 * 60 = 31556952 seconds per year
                 // 15778476 seconds are 6 months
-                if self.0 > Local::now() - Duration::seconds(15778476) {
+                if self.0 > Local::now() - Duration::seconds(15_778_476) {
                     self.0.format("%m-%d %R").to_string()
                 } else {
                     self.0.format("%F").to_string()
