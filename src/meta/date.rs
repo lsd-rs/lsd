@@ -38,7 +38,7 @@ impl Date {
             DateFlag::Date => self.0.format("%c").to_string(),
             DateFlag::Relative => format!("{}", HumanTime::from(self.0 - Local::now())),
             DateFlag::ISO => {
-                // 356.2425 * 24 * 60 * 60 = 31556952 seconds per year
+                // 365.2425 * 24 * 60 * 60 = 31556952 seconds per year
                 // 15778476 seconds are 6 months
                 if self.0 > Local::now() - Duration::seconds(15778476) {
                     self.0.format("%m-%d %R").to_string()
