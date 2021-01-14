@@ -350,7 +350,7 @@ mod test_icon_separator {
     use crate::flags::Configurable;
 
     #[test]
-    fn test_from_config() {
+    fn test_from_config_default() {
         let mut c = Config::with_none();
         c.icons = Some(Icons {
             when: None,
@@ -360,4 +360,17 @@ mod test_icon_separator {
         let expected = Some(IconSeparator(" ".to_string()));
         assert_eq!(expected, IconSeparator::from_config(&c));
     }
+
+    #[test]
+    fn test_from_config_custom() {
+        let mut c = Config::with_none();
+        c.icons = Some(Icons {
+            when: None,
+            theme: None,
+            separator: Some(" |".to_string()),
+        });
+        let expected = Some(IconSeparator(" |".to_string()));
+        assert_eq!(expected, IconSeparator::from_config(&c));
+    }
+
 }
