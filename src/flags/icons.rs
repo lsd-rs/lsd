@@ -372,5 +372,4 @@ mod test_icon_separator {
         let expected = Some(IconSeparator(" |".to_string()));
         assert_eq!(expected, IconSeparator::from_config(&c));
     }
-
 }
