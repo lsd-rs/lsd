@@ -15,7 +15,6 @@ pub enum DateFlag {
     Date,
     Relative,
     ISO,
-    Locale,
     Formatted(String),
 }
 
@@ -93,7 +92,6 @@ impl Configurable<Self> for DateFlag {
                 "full-iso" => Some(Self::Formatted("%F %T.%f %z".into())),
                 "long-iso" => Some(Self::Formatted("%F %R".into())),
                 "iso" => Some(Self::ISO),
-                "locale" => Some(Self::Locale),
                 _ if value.starts_with('+') => Self::from_format_string(&value),
                 _ => {
                     print_error!("Not a valid date value: {}.", value);
@@ -247,13 +245,6 @@ mod test {
     fn test_from_environment_iso() {
         std::env::set_var("TIME_STYLE", "iso");
         assert_eq!(Some(DateFlag::ISO), DateFlag::from_environment());
-    }
-
-    #[test]
-    #[serial_test::serial]
-    fn test_from_environment_locale() {
-        std::env::set_var("TIME_STYLE", "locale");
-        assert_eq!(Some(DateFlag::Locale), DateFlag::from_environment());
     }
 
     #[test]
