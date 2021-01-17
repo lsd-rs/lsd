@@ -35,16 +35,14 @@ impl Blocks {
             Ok(Default::default())
         };
 
-        if matches.is_present("long") {
-            if !matches.is_present("ignore-config") {
-                if let Some(value) = Self::from_config(config) {
-                    result = Ok(value);
-                }
+        if matches.is_present("long") && !matches.is_present("ignore-config") {
+            if let Some(value) = Self::from_config(config) {
+                result = Ok(value);
             }
+        }
 
-            if let Some(value) = Self::from_arg_matches(matches) {
-                result = value;
-            }
+        if let Some(value) = Self::from_arg_matches(matches) {
+            result = value;
         }
 
         if matches.is_present("inode") {
@@ -241,7 +239,7 @@ mod test_blocks {
     #[test]
     fn test_configure_from_with_blocks_and_without_long() {
         let argv = vec!["lsd", "--blocks", "permission"];
-        let target = Ok::<_, Error>(Blocks::default());
+        let target = Ok::<_, Error>(Blocks(vec![Block::Permission]));
 
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         let result = Blocks::configure_from(&matches, &Config::with_none());
@@ -278,7 +276,7 @@ mod test_blocks {
     fn test_configure_from_prepend_inode_without_long() {
         let argv = vec!["lsd", "--blocks", "permission", "--inode"];
 
-        let mut target_blocks = Blocks::default();
+        let mut target_blocks = Blocks(vec![Block::Permission]);
         target_blocks.0.insert(0, Block::INode);
         let target = Ok::<_, Error>(target_blocks);
 
@@ -303,9 +301,7 @@ mod test_blocks {
     fn test_configure_from_ignore_prepend_inode_without_long() {
         let argv = vec!["lsd", "--blocks", "permission,inode", "--inode"];
 
-        let mut target_blocks = Blocks::default();
-        target_blocks.0.insert(0, Block::INode);
-        let target = Ok::<_, Error>(target_blocks);
+        let target = Ok::<_, Error>(Blocks(vec![Block::Permission, Block::INode]));
 
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         let result = Blocks::configure_from(&matches, &Config::with_none());

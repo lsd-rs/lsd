@@ -18,7 +18,6 @@ path = "src/main.rs"
 [build-dependencies]
 clap = "2.33.*"
 version_check = "0.9.*"
-time = "0.1.*"
 
 [dependencies]
 ansi_term = "0.12.*"
@@ -27,8 +26,8 @@ libc = "0.2.*"
 human-sort = "0.2.2"
 term_grid = "0.1.*"
 terminal_size = "0.1.*"
-time = "0.1.*"
-chrono-humanize = "0.0.*"
+chrono = "0.4.*"
+chrono-humanize = "0.1.*"
 unicode-width = "0.1.*"
 lscolors = "0.7"
 wild = "2.0.*"
@@ -53,6 +52,7 @@ assert_cmd = "1"
 assert_fs = "1"
 predicates = "1.0.1"
 tempfile = "3"
+serial_test = "0.5"
 
 [features]
 sudo = []

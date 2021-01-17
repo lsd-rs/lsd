@@ -7,6 +7,7 @@ pub struct Icons {
     icons_by_extension: HashMap<&'static str, &'static str>,
     default_folder_icon: &'static str,
     default_file_icon: &'static str,
+    icon_separator: String,
 }
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
@@ -16,14 +17,12 @@ pub enum Theme {
     Unicode,
 }
 
-const ICON_SPACE: &str = " ";
-
 // In order to add a new icon, write the unicode value like "\ue5fb" then
 // run the command below in vim:
 //
 // s#\\u[0-9a-f]*#\=eval('"'.submatch(0).'"')#
 impl Icons {
-    pub fn new(theme: Theme) -> Self {
+    pub fn new(theme: Theme, icon_separator: String) -> Self {
         let display_icons = theme == Theme::Fancy || theme == Theme::Unicode;
         let (icons_by_name, icons_by_extension, default_file_icon, default_folder_icon) =
             if theme == Theme::Fancy {
@@ -48,6 +47,7 @@ impl Icons {
             icons_by_extension,
             default_file_icon,
             default_folder_icon,
+            icon_separator,
         }
     }
 
@@ -92,7 +92,7 @@ impl Icons {
             self.default_file_icon
         };
 
-        format!("{}{}", icon, ICON_SPACE)
+        format!("{}{}", icon, self.icon_separator)
     }
 
     fn get_default_icons_by_name() -> HashMap<&'static str, &'static str> {
@@ -345,7 +345,7 @@ impl Icons {
 
 #[cfg(test)]
 mod test {
-    use super::{Icons, Theme, ICON_SPACE};
+    use super::{Icons, Theme};
     use crate::meta::Meta;
     use std::fs::File;
     use tempfile::tempdir;
@@ -357,7 +357,7 @@ mod test {
         File::create(&file_path).expect("failed to create file");
         let meta = Meta::from_path(&file_path, false).unwrap();
 
-        let icon = Icons::new(Theme::NoIcon);
+        let icon = Icons::new(Theme::NoIcon, " ".to_string());
         let icon = icon.get(&meta.name);
 
         assert_eq!(icon, "");
@@ -370,10 +370,10 @@ mod test {
         File::create(&file_path).expect("failed to create file");
         let meta = Meta::from_path(&file_path, false).unwrap();
 
-        let icon = Icons::new(Theme::Fancy);
-        let icon = icon.get(&meta.name);
+        let icon = Icons::new(Theme::Fancy, " ".to_string());
+        let icon_str = icon.get(&meta.name);
 
-        assert_eq!(icon, format!("{}{}", "\u{f016}", ICON_SPACE)); // 
+        assert_eq!(icon_str, format!("{}{}", "\u{f016}", icon.icon_separator)); // 
     }
 
     #[test]
@@ -383,10 +383,10 @@ mod test {
         File::create(&file_path).expect("failed to create file");
         let meta = Meta::from_path(&file_path, false).unwrap();
 
-        let icon = Icons::new(Theme::Unicode);
-        let icon = icon.get(&meta.name);
+        let icon = Icons::new(Theme::Unicode, " ".to_string());
+        let icon_str = icon.get(&meta.name);
 
-        assert_eq!(icon, format!("{}{}", "\u{1f5cb}", ICON_SPACE));
+        assert_eq!(icon_str, format!("{}{}", "\u{1f5cb}", icon.icon_separator));
     }
 
     #[test]
@@ -395,10 +395,10 @@ mod test {
         let file_path = tmp_dir.path();
         let meta = Meta::from_path(&file_path.to_path_buf(), false).unwrap();
 
-        let icon = Icons::new(Theme::Fancy);
-        let icon = icon.get(&meta.name);
+        let icon = Icons::new(Theme::Fancy, " ".to_string());
+        let icon_str = icon.get(&meta.name);
 
-        assert_eq!(icon, format!("{}{}", "\u{f115}", ICON_SPACE)); // 
+        assert_eq!(icon_str, format!("{}{}", "\u{f115}", icon.icon_separator)); // 
     }
 
     #[test]
@@ -407,10 +407,10 @@ mod test {
         let file_path = tmp_dir.path();
         let meta = Meta::from_path(&file_path.to_path_buf(), false).unwrap();
 
-        let icon = Icons::new(Theme::Unicode);
-        let icon = icon.get(&meta.name);
+        let icon = Icons::new(Theme::Unicode, " ".to_string());
+        let icon_str = icon.get(&meta.name);
 
-        assert_eq!(icon, format!("{}{}", "\u{1f5c1}", ICON_SPACE));
+        assert_eq!(icon_str, format!("{}{}", "\u{1f5c1}", icon.icon_separator));
     }
 
     #[test]
@@ -419,10 +419,10 @@ mod test {
         let file_path = tmp_dir.path();
         let meta = Meta::from_path(&file_path.to_path_buf(), false).unwrap();
 
-        let icon = Icons::new(Theme::Fancy);
-        let icon = icon.get(&meta.name);
+        let icon = Icons::new(Theme::Fancy, " ".to_string());
+        let icon_str = icon.get(&meta.name);
 
-        assert_eq!(icon, format!("{}{}", "\u{f115}", ICON_SPACE)); // 
+        assert_eq!(icon_str, format!("{}{}", "\u{f115}", icon.icon_separator)); // 
     }
 
     #[test]
@@ -434,10 +434,10 @@ mod test {
             File::create(&file_path).expect("failed to create file");
             let meta = Meta::from_path(&file_path, false).unwrap();
 
-            let icon = Icons::new(Theme::Fancy);
-            let icon = icon.get(&meta.name);
+            let icon = Icons::new(Theme::Fancy, " ".to_string());
+            let icon_str = icon.get(&meta.name);
 
-            assert_eq!(icon, format!("{}{}", file_icon, ICON_SPACE));
+            assert_eq!(icon_str, format!("{}{}", file_icon, icon.icon_separator));
         }
     }
 
@@ -450,10 +450,10 @@ mod test {
             File::create(&file_path).expect("failed to create file");
             let meta = Meta::from_path(&file_path, false).unwrap();
 
-            let icon = Icons::new(Theme::Fancy);
-            let icon = icon.get(&meta.name);
+            let icon = Icons::new(Theme::Fancy, " ".to_string());
+            let icon_str = icon.get(&meta.name);
 
-            assert_eq!(icon, format!("{}{}", file_icon, ICON_SPACE));
+            assert_eq!(icon_str, format!("{}{}", file_icon, icon.icon_separator));
         }
     }
 }

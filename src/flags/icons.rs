@@ -9,12 +9,14 @@ use clap::ArgMatches;
 use serde::Deserialize;
 
 /// A collection of flags on how to use icons.
-#[derive(Clone, Debug, Copy, PartialEq, Eq, Default)]
+#[derive(Clone, Debug, PartialEq, Eq, Default)]
 pub struct Icons {
     /// When to use icons.
     pub when: IconOption,
     /// Which icon theme to use.
     pub theme: IconTheme,
+    /// String between icon and name.
+    pub separator: IconSeparator,
 }
 
 impl Icons {
@@ -25,7 +27,12 @@ impl Icons {
     pub fn configure_from(matches: &ArgMatches, config: &Config) -> Self {
         let when = IconOption::configure_from(matches, config);
         let theme = IconTheme::configure_from(matches, config);
-        Self { when, theme }
+        let separator = IconSeparator::configure_from(matches, config);
+        Self {
+            when,
+            theme,
+            separator,
+        }
     }
 }
 
@@ -132,6 +139,40 @@ impl Default for IconTheme {
     }
 }
 
+#[derive(Clone, Debug, PartialEq, Eq, Deserialize)]
+#[serde(rename_all = "kebab-case")]
+pub struct IconSeparator(pub String);
+
+impl Configurable<Self> for IconSeparator {
+    /// Get a potential `IconSeparator` variant from [ArgMatches].
+    ///
+    /// If the argument is passed, this returns the variant corresponding to its parameter in a
+    /// [Some]. Otherwise this returns [None].
+    fn from_arg_matches(_matches: &ArgMatches) -> Option<Self> {
+        None
+    }
+
+    /// Get a potential `IconSeparator` variant from a [Config].
+    ///
+    /// This returns its corresponding variant in a [Some].
+    /// Otherwise this returns [None].
+    fn from_config(config: &Config) -> Option<Self> {
+        if let Some(icon) = &config.icons {
+            if let Some(separator) = icon.separator.clone() {
+                return Some(IconSeparator(separator));
+            }
+        }
+        None
+    }
+}
+
+/// The default value for `IconSeparator` is [" "].
+impl Default for IconSeparator {
+    fn default() -> Self {
+        IconSeparator(" ".to_string())
+    }
+}
+
 #[cfg(test)]
 mod test_icon_option {
     use super::IconOption;
@@ -198,6 +239,7 @@ mod test_icon_option {
         c.icons = Some(Icons {
             when: Some(IconOption::Always),
             theme: None,
+            separator: None,
         });
         assert_eq!(Some(IconOption::Always), IconOption::from_config(&c));
     }
@@ -208,6 +250,7 @@ mod test_icon_option {
         c.icons = Some(Icons {
             when: Some(IconOption::Auto),
             theme: None,
+            separator: None,
         });
         assert_eq!(Some(IconOption::Auto), IconOption::from_config(&c));
     }
@@ -218,6 +261,7 @@ mod test_icon_option {
         c.icons = Some(Icons {
             when: Some(IconOption::Never),
             theme: None,
+            separator: None,
         });
         assert_eq!(Some(IconOption::Never), IconOption::from_config(&c));
     }
@@ -229,6 +273,7 @@ mod test_icon_option {
         c.icons = Some(Icons {
             when: Some(IconOption::Always),
             theme: None,
+            separator: None,
         });
         assert_eq!(Some(IconOption::Never), IconOption::from_config(&c));
     }
@@ -280,6 +325,7 @@ mod test_icon_theme {
         c.icons = Some(Icons {
             when: None,
             theme: Some(IconTheme::Fancy),
+            separator: None,
         });
         assert_eq!(Some(IconTheme::Fancy), IconTheme::from_config(&c));
     }
@@ -290,7 +336,40 @@ mod test_icon_theme {
         c.icons = Some(Icons {
             when: None,
             theme: Some(IconTheme::Unicode),
+            separator: None,
         });
         assert_eq!(Some(IconTheme::Unicode), IconTheme::from_config(&c));
+    }
+}
+
+#[cfg(test)]
+mod test_icon_separator {
+    use super::IconSeparator;
+
+    use crate::config_file::{Config, Icons};
+    use crate::flags::Configurable;
+
+    #[test]
+    fn test_from_config_default() {
+        let mut c = Config::with_none();
+        c.icons = Some(Icons {
+            when: None,
+            theme: None,
+            separator: Some(" ".to_string()),
+        });
+        let expected = Some(IconSeparator(" ".to_string()));
+        assert_eq!(expected, IconSeparator::from_config(&c));
+    }
+
+    #[test]
+    fn test_from_config_custom() {
+        let mut c = Config::with_none();
+        c.icons = Some(Icons {
+            when: None,
+            theme: None,
+            separator: Some(" |".to_string()),
+        });
+        let expected = Some(IconSeparator(" |".to_string()));
+        assert_eq!(expected, IconSeparator::from_config(&c));
     }
 }

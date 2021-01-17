@@ -14,6 +14,7 @@ use clap::ArgMatches;
 pub enum DateFlag {
     Date,
     Relative,
+    ISO,
     Formatted(String),
 }
 
@@ -79,6 +80,24 @@ impl Configurable<Self> for DateFlag {
 
         if let Some(date) = &config.date {
             Self::from_str(&date)
+        } else {
+            None
+        }
+    }
+
+    /// Get a potential `DateFlag` variant from the environment.
+    fn from_environment() -> Option<Self> {
+        if let Ok(value) = std::env::var("TIME_STYLE") {
+            match value.as_str() {
+                "full-iso" => Some(Self::Formatted("%F %T.%f %z".into())),
+                "long-iso" => Some(Self::Formatted("%F %R".into())),
+                "iso" => Some(Self::ISO),
+                _ if value.starts_with('+') => Self::from_format_string(&value),
+                _ => {
+                    print_error!("Not a valid date value: {}.", value);
+                    None
+                }
+            }
         } else {
             None
         }
@@ -192,5 +211,91 @@ mod test {
         c.date = Some("relative".into());
         c.classic = Some(true);
         assert_eq!(Some(DateFlag::Date), DateFlag::from_config(&c));
+    }
+
+    #[test]
+    #[serial_test::serial]
+    fn test_from_environment_none() {
+        std::env::set_var("TIME_STYLE", "");
+        assert_eq!(None, DateFlag::from_environment());
+    }
+
+    #[test]
+    #[serial_test::serial]
+    fn test_from_environment_full_iso() {
+        std::env::set_var("TIME_STYLE", "full-iso");
+        assert_eq!(
+            Some(DateFlag::Formatted("%F %T.%f %z".into())),
+            DateFlag::from_environment()
+        );
+    }
+
+    #[test]
+    #[serial_test::serial]
+    fn test_from_environment_long_iso() {
+        std::env::set_var("TIME_STYLE", "long-iso");
+        assert_eq!(
+            Some(DateFlag::Formatted("%F %R".into())),
+            DateFlag::from_environment()
+        );
+    }
+
+    #[test]
+    #[serial_test::serial]
+    fn test_from_environment_iso() {
+        std::env::set_var("TIME_STYLE", "iso");
+        assert_eq!(Some(DateFlag::ISO), DateFlag::from_environment());
+    }
+
+    #[test]
+    #[serial_test::serial]
+    fn test_from_environment_format() {
+        std::env::set_var("TIME_STYLE", "+%F");
+        assert_eq!(
+            Some(DateFlag::Formatted("%F".into())),
+            DateFlag::from_environment()
+        );
+    }
+
+    #[test]
+    #[serial_test::serial]
+    fn test_parsing_order_arg() {
+        std::env::set_var("TIME_STYLE", "+%R");
+        let argv = vec!["lsd", "--date", "+%F"];
+        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let mut config = Config::with_none();
+        config.date = Some("+%c".into());
+        assert_eq!(
+            DateFlag::Formatted("%F".into()),
+            DateFlag::configure_from(&matches, &config)
+        );
+    }
+
+    #[test]
+    #[serial_test::serial]
+    fn test_parsing_order_env() {
+        std::env::set_var("TIME_STYLE", "+%R");
+        let argv = vec!["lsd"];
+        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let mut config = Config::with_none();
+        config.date = Some("+%c".into());
+        assert_eq!(
+            DateFlag::Formatted("%R".into()),
+            DateFlag::configure_from(&matches, &config)
+        );
+    }
+
+    #[test]
+    #[serial_test::serial]
+    fn test_parsing_order_config() {
+        std::env::set_var("TIME_STYLE", "");
+        let argv = vec!["lsd"];
+        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let mut config = Config::with_none();
+        config.date = Some("+%c".into());
+        assert_eq!(
+            DateFlag::Formatted("%c".into()),
+            DateFlag::configure_from(&matches, &config)
+        );
     }
 }
