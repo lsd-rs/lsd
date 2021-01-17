@@ -256,7 +256,7 @@ unsafe fn lookup_account_sid(sid: *mut c_void) -> Result<(Vec<u16>, Vec<u16>), s
             continue;
         } else {
             // Unknown account and or system domain identification
-            // Possibly foreign item coming from another machine
+            // Possibly foreign item originating from another machine
             // TODO: Calculate permissions since it has to be possible if Explorer knows.
             return Ok((
                 buf_from_os(OsStr::new("UNIDENTIFIED")),
