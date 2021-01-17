@@ -255,10 +255,12 @@ unsafe fn lookup_account_sid(sid: *mut c_void) -> Result<(Vec<u16>, Vec<u16>), s
             // name_size and domain_size are already set, just loop
             continue;
         } else {
-            // Some other failure
-            // Assumptions: None (GetLastError shouldn't ever fail)
-            return Err(io::Error::from_raw_os_error(
-                winapi::um::errhandlingapi::GetLastError() as i32,
+            // Unknown account and or system domain identification
+            // Possibly foreign item coming from another machine
+            // TODO: Calculate permissions since it has to be possible if Explorer knows.
+            return Ok((
+                buf_from_os(OsStr::new("UNIDENTIFIED")),
+                buf_from_os(OsStr::new("UNIDENTIFIED")),
             ));
         }
     }
