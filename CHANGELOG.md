@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Add support for changing the string between icon and name from [Finn Hediger](https://github.com/orangefran) [#363](https://github.com/Peltoche/lsd/issues/363)
 - Add support for `TIME_STYLE` environment variable from [999eagle](https://github.com/999eagle)
+- Add man page from [edneville](https://github.com/edneville)
 ### Changed
 ### Fixed
 - Fix handling blocks passed without -l in cli from [meain](https://github.com/meain)
