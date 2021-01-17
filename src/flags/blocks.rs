@@ -124,7 +124,7 @@ impl Blocks {
             Block::Size,
             Block::Date,
             Block::Name,
-            Block::INodeCount,
+            Block::Links,
         ])
     }
 
@@ -165,7 +165,7 @@ pub enum Block {
     Date,
     Name,
     INode,
-    INodeCount,
+    Links,
 }
 
 impl TryFrom<&str> for Block {
@@ -181,7 +181,7 @@ impl TryFrom<&str> for Block {
             "date" => Ok(Self::Date),
             "name" => Ok(Self::Name),
             "inode" => Ok(Self::INode),
-            "links" => Ok(Self::INodeCount),
+            "links" => Ok(Self::Links),
             _ => Err(format!("Not a valid block name: {}", &string)),
         }
     }
@@ -504,7 +504,7 @@ mod test_block {
     }
 
     #[test]
-    fn test_inode_count() {
-        assert_eq!(Ok(Block::INodeCount), Block::try_from("links"));
+    fn test_links() {
+        assert_eq!(Ok(Block::Links), Block::try_from("links"));
     }
 }

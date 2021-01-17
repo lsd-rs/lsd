@@ -25,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add case-insensitive matching of known filenames and extensions from [poita66](https://github.com/poita66)
 - Add Macports installation instructions from [ylluminarious](https://github.com/ylluminarious)
 - Implement `--tree -d`, analogous to `tree -d` from [0jdxt](https://github.com/0jdxt) and [Utah Rust](https://github.com/utah-rust)
+- Add support for displaying number of hard links from [thealakzam](https://github.com/thealakazam) [#407](https://github.com/Peltoche/lsd/issues/407)
 
 ### Changed
 - Use last sort flag for sort field from [meain](https://github.com/meain)
