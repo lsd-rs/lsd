@@ -22,7 +22,7 @@ pub use self::size::Size;
 pub use self::symlink::SymLink;
 pub use crate::icon::Icons;
 
-use crate::flags::{Display, Flags, Layout, Blocks, Block};
+use crate::flags::{Block, Blocks, Display, Flags, Layout};
 use crate::print_error;
 
 use std::fs::read_link;
@@ -84,8 +84,11 @@ impl Meta {
             current_meta = self.clone();
             current_meta.name.name = ".".to_owned();
 
-            let parent_meta =
-                Self::from_path(&self.path.join(Component::ParentDir), flags.dereference.0, &flags.blocks)?;
+            let parent_meta = Self::from_path(
+                &self.path.join(Component::ParentDir),
+                flags.dereference.0,
+                &flags.blocks,
+            )?;
 
             content.push(current_meta);
             content.push(parent_meta);
@@ -200,7 +203,11 @@ impl Meta {
         }
     }
 
-    pub fn from_path(path: &Path, dereference: bool, blocks: &Blocks) -> Result<Self, std::io::Error> {
+    pub fn from_path(
+        path: &Path,
+        dereference: bool,
+        blocks: &Blocks,
+    ) -> Result<Self, std::io::Error> {
         // If the file is a link then retrieve link metadata instead with target metadata (if present).
         let (metadata, symlink_meta) = if read_link(path).is_ok() && !dereference {
             (path.symlink_metadata()?, path.metadata().ok())
@@ -218,7 +225,8 @@ impl Meta {
         let permissions = Permissions::from(&metadata);
 
         #[cfg(windows)]
-        let (owner, permissions) = windows_utils::get_file_data(&path, get_owner, get_group, get_permissions)?;
+        let (owner, permissions) =
+            windows_utils::get_file_data(&path, get_owner, get_group, get_permissions)?;
 
         let file_type = FileType::new(&metadata, symlink_meta.as_ref(), &permissions);
         let name = Name::new(&path, file_type);

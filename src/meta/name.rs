@@ -166,6 +166,7 @@ mod test {
     use super::DisplayOption;
     use super::Name;
     use crate::color::{self, Colors};
+    use crate::flags::Blocks;
     use crate::icon::{self, Icons};
     use crate::meta::FileType;
     use crate::meta::Meta;
@@ -180,7 +181,6 @@ mod test {
     #[cfg(unix)]
     use std::process::Command;
     use tempfile::tempdir;
-    use crate::flags::Blocks;
 
     #[test]
     #[cfg(unix)] // Windows uses different default permissions

@@ -108,6 +108,7 @@ impl FileType {
 mod test {
     use super::FileType;
     use crate::color::{Colors, Theme};
+    use crate::flags::Blocks;
     use crate::meta::Meta;
     #[cfg(unix)]
     use crate::meta::Permissions;
@@ -121,7 +122,6 @@ mod test {
     #[cfg(unix)]
     use std::process::Command;
     use tempfile::tempdir;
-    use crate::flags::Blocks;
 
     #[test]
     #[cfg(unix)] // Windows uses different default permissions

@@ -69,7 +69,7 @@ fn by_extension(a: &Meta, b: &Meta) -> Ordering {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::flags::{Flags, Blocks};
+    use crate::flags::{Blocks, Flags};
     use std::fs::{create_dir, File};
     use std::process::Command;
     use tempfile::tempdir;

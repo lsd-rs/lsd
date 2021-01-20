@@ -346,10 +346,10 @@ impl Icons {
 #[cfg(test)]
 mod test {
     use super::{Icons, Theme};
+    use crate::flags::Blocks;
     use crate::meta::Meta;
     use std::fs::File;
     use tempfile::tempdir;
-    use crate::flags::Blocks;
 
     #[test]
     fn get_no_icon() {

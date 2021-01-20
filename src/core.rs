@@ -88,13 +88,14 @@ impl Core {
         };
 
         for path in paths {
-            let mut meta = match Meta::from_path(&path, self.flags.dereference.0, &self.flags.blocks) {
-                Ok(meta) => meta,
-                Err(err) => {
-                    print_error!("{}: {}.", path.display(), err);
-                    continue;
-                }
-            };
+            let mut meta =
+                match Meta::from_path(&path, self.flags.dereference.0, &self.flags.blocks) {
+                    Ok(meta) => meta,
+                    Err(err) => {
+                        print_error!("{}: {}.", path.display(), err);
+                        continue;
+                    }
+                };
 
             let recurse =
                 self.flags.layout == Layout::Tree || self.flags.display != Display::DirectoryOnly;

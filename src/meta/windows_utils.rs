@@ -13,7 +13,12 @@ use super::{Owner, Permissions};
 
 const BUF_SIZE: u32 = 256;
 
-pub fn get_file_data(path: &Path, get_owner: bool, get_group: bool, get_permissions: bool) -> Result<(Owner, Permissions), io::Error> {
+pub fn get_file_data(
+    path: &Path,
+    get_owner: bool,
+    get_group: bool,
+    get_permissions: bool,
+) -> Result<(Owner, Permissions), io::Error> {
     // Overall design:
     // This function allocates some data with GetNamedSecurityInfoW,
     // manipulates it only through WinAPI calls (treating the pointers as
@@ -26,7 +31,10 @@ pub fn get_file_data(path: &Path, get_owner: bool, get_group: bool, get_permissi
     // - No pointer is valid after the call to LocalFree
 
     if !get_owner && !get_group && !get_permissions {
-        return Ok((Owner::new(String::new(), String::new()), Permissions::default()));
+        return Ok((
+            Owner::new(String::new(), String::new()),
+            Permissions::default(),
+        ));
     }
 
     let windows_path = buf_from_os(path.as_os_str());
@@ -106,7 +114,8 @@ pub fn get_file_data(path: &Path, get_owner: bool, get_group: bool, get_permissi
         // Assumptions: None
         // "This function cannot fail"
         //     -- Windows Dev Center docs
-        let mut world_sid_len: u32 = unsafe { winapi::um::securitybaseapi::GetSidLengthRequired(1) };
+        let mut world_sid_len: u32 =
+            unsafe { winapi::um::securitybaseapi::GetSidLengthRequired(1) };
         let mut world_sid = vec![0u8; world_sid_len as usize];
 
         // Assumptions:
@@ -146,11 +155,14 @@ pub fn get_file_data(path: &Path, get_owner: bool, get_group: bool, get_permissi
         // Assumptions:
         // - xxxxx_trustee are still valid (including underlying SID)
         // - dacl_ptr is still valid
-        let owner_access_mask = unsafe { get_acl_access_mask(dacl_ptr as *mut _, &mut owner_trustee) }?;
+        let owner_access_mask =
+            unsafe { get_acl_access_mask(dacl_ptr as *mut _, &mut owner_trustee) }?;
 
-        let group_access_mask = unsafe { get_acl_access_mask(dacl_ptr as *mut _, &mut group_trustee) }?;
+        let group_access_mask =
+            unsafe { get_acl_access_mask(dacl_ptr as *mut _, &mut group_trustee) }?;
 
-        let world_access_mask = unsafe { get_acl_access_mask(dacl_ptr as *mut _, &mut world_trustee) }?;
+        let world_access_mask =
+            unsafe { get_acl_access_mask(dacl_ptr as *mut _, &mut world_trustee) }?;
 
         let has_bit = |field: u32, bit: u32| field & bit != 0;
 
@@ -186,7 +198,6 @@ pub fn get_file_data(path: &Path, get_owner: bool, get_group: bool, get_permissi
             winapi::um::winbase::LocalFree(sd_ptr);
         }
     }
-
 
     Ok((owner, permissions))
 }
