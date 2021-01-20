@@ -116,7 +116,7 @@ impl Blocks {
     ///
     /// It contains the [Block]s [Permission](Block::Permission), [User](Block::User),
     /// [Group](Block::Group), [Size](Block::Size), [Date](Block::Date) and [Name](Block::Name).
-    fn long() -> Self {
+    pub fn long() -> Self {
         Self(vec![
             Block::Permission,
             Block::User,

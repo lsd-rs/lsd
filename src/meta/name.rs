@@ -180,6 +180,7 @@ mod test {
     #[cfg(unix)]
     use std::process::Command;
     use tempfile::tempdir;
+    use crate::flags::Blocks;
 
     #[test]
     #[cfg(unix)] // Windows uses different default permissions
@@ -210,7 +211,7 @@ mod test {
         // Chreate the directory
         let dir_path = tmp_dir.path().join("directory");
         fs::create_dir(&dir_path).expect("failed to create the dir");
-        let meta = Meta::from_path(&dir_path, false).unwrap();
+        let meta = Meta::from_path(&dir_path, false, &Blocks::long()).unwrap();
 
         let colors = Colors::new(color::Theme::NoLscolors);
 
@@ -310,7 +311,7 @@ mod test {
         // Create the file;
         let file_path = tmp_dir.path().join("file.txt");
         File::create(&file_path).expect("failed to create file");
-        let meta = Meta::from_path(&file_path, false).unwrap();
+        let meta = Meta::from_path(&file_path, false, &Blocks::long()).unwrap();
 
         let colors = Colors::new(color::Theme::NoColor);
 

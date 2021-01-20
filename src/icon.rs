@@ -349,13 +349,14 @@ mod test {
     use crate::meta::Meta;
     use std::fs::File;
     use tempfile::tempdir;
+    use crate::flags::Blocks;
 
     #[test]
     fn get_no_icon() {
         let tmp_dir = tempdir().expect("failed to create temp dir");
         let file_path = tmp_dir.path().join("file.txt");
         File::create(&file_path).expect("failed to create file");
-        let meta = Meta::from_path(&file_path, false).unwrap();
+        let meta = Meta::from_path(&file_path, false, &Blocks::long()).unwrap();
 
         let icon = Icons::new(Theme::NoIcon, " ".to_string());
         let icon = icon.get(&meta.name);
@@ -368,7 +369,7 @@ mod test {
         let tmp_dir = tempdir().expect("failed to create temp dir");
         let file_path = tmp_dir.path().join("file");
         File::create(&file_path).expect("failed to create file");
-        let meta = Meta::from_path(&file_path, false).unwrap();
+        let meta = Meta::from_path(&file_path, false, &Blocks::long()).unwrap();
 
         let icon = Icons::new(Theme::Fancy, " ".to_string());
         let icon_str = icon.get(&meta.name);
@@ -381,7 +382,7 @@ mod test {
         let tmp_dir = tempdir().expect("failed to create temp dir");
         let file_path = tmp_dir.path().join("file");
         File::create(&file_path).expect("failed to create file");
-        let meta = Meta::from_path(&file_path, false).unwrap();
+        let meta = Meta::from_path(&file_path, false, &Blocks::long()).unwrap();
 
         let icon = Icons::new(Theme::Unicode, " ".to_string());
         let icon_str = icon.get(&meta.name);
@@ -393,7 +394,7 @@ mod test {
     fn get_directory_icon() {
         let tmp_dir = tempdir().expect("failed to create temp dir");
         let file_path = tmp_dir.path();
-        let meta = Meta::from_path(&file_path.to_path_buf(), false).unwrap();
+        let meta = Meta::from_path(&file_path.to_path_buf(), false, &Blocks::long()).unwrap();
 
         let icon = Icons::new(Theme::Fancy, " ".to_string());
         let icon_str = icon.get(&meta.name);
@@ -405,7 +406,7 @@ mod test {
     fn get_directory_icon_unicode() {
         let tmp_dir = tempdir().expect("failed to create temp dir");
         let file_path = tmp_dir.path();
-        let meta = Meta::from_path(&file_path.to_path_buf(), false).unwrap();
+        let meta = Meta::from_path(&file_path.to_path_buf(), false, &Blocks::long()).unwrap();
 
         let icon = Icons::new(Theme::Unicode, " ".to_string());
         let icon_str = icon.get(&meta.name);
@@ -417,7 +418,7 @@ mod test {
     fn get_directory_icon_with_ext() {
         let tmp_dir = tempdir().expect("failed to create temp dir");
         let file_path = tmp_dir.path();
-        let meta = Meta::from_path(&file_path.to_path_buf(), false).unwrap();
+        let meta = Meta::from_path(&file_path.to_path_buf(), false, &Blocks::long()).unwrap();
 
         let icon = Icons::new(Theme::Fancy, " ".to_string());
         let icon_str = icon.get(&meta.name);
@@ -432,7 +433,7 @@ mod test {
         for (file_name, file_icon) in &Icons::get_default_icons_by_name() {
             let file_path = tmp_dir.path().join(file_name);
             File::create(&file_path).expect("failed to create file");
-            let meta = Meta::from_path(&file_path, false).unwrap();
+            let meta = Meta::from_path(&file_path, false, &Blocks::long()).unwrap();
 
             let icon = Icons::new(Theme::Fancy, " ".to_string());
             let icon_str = icon.get(&meta.name);
@@ -448,7 +449,7 @@ mod test {
         for (ext, file_icon) in &Icons::get_default_icons_by_extension() {
             let file_path = tmp_dir.path().join(format!("file.{}", ext));
             File::create(&file_path).expect("failed to create file");
-            let meta = Meta::from_path(&file_path, false).unwrap();
+            let meta = Meta::from_path(&file_path, false, &Blocks::long()).unwrap();
 
             let icon = Icons::new(Theme::Fancy, " ".to_string());
             let icon_str = icon.get(&meta.name);

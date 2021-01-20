@@ -22,7 +22,7 @@ pub use self::size::Size;
 pub use self::symlink::SymLink;
 pub use crate::icon::Icons;
 
-use crate::flags::{Display, Flags, Layout};
+use crate::flags::{Display, Flags, Layout, Blocks, Block};
 use crate::print_error;
 
 use std::fs::read_link;
@@ -85,7 +85,7 @@ impl Meta {
             current_meta.name.name = ".".to_owned();
 
             let parent_meta =
-                Self::from_path(&self.path.join(Component::ParentDir), flags.dereference.0)?;
+                Self::from_path(&self.path.join(Component::ParentDir), flags.dereference.0, &flags.blocks)?;
 
             content.push(current_meta);
             content.push(parent_meta);
@@ -109,7 +109,7 @@ impl Meta {
                 }
             }
 
-            let mut entry_meta = match Self::from_path(&path, flags.dereference.0) {
+            let mut entry_meta = match Self::from_path(&path, flags.dereference.0, &flags.blocks) {
                 Ok(res) => res,
                 Err(err) => {
                     print_error!("{}: {}.", path.display(), err);
@@ -200,7 +200,7 @@ impl Meta {
         }
     }
 
-    pub fn from_path(path: &Path, dereference: bool) -> Result<Self, std::io::Error> {
+    pub fn from_path(path: &Path, dereference: bool, blocks: &Blocks) -> Result<Self, std::io::Error> {
         // If the file is a link then retrieve link metadata instead with target metadata (if present).
         let (metadata, symlink_meta) = if read_link(path).is_ok() && !dereference {
             (path.symlink_metadata()?, path.metadata().ok())
@@ -208,13 +208,17 @@ impl Meta {
             (path.metadata()?, None)
         };
 
+        let get_owner = blocks.0.contains(&Block::User);
+        let get_group = blocks.0.contains(&Block::Group);
+        let get_permissions = blocks.0.contains(&Block::Permission);
+
         #[cfg(unix)]
         let owner = Owner::from(&metadata);
         #[cfg(unix)]
         let permissions = Permissions::from(&metadata);
 
         #[cfg(windows)]
-        let (owner, permissions) = windows_utils::get_file_data(&path)?;
+        let (owner, permissions) = windows_utils::get_file_data(&path, get_owner, get_group, get_permissions)?;
 
         let file_type = FileType::new(&metadata, symlink_meta.as_ref(), &permissions);
         let name = Name::new(&path, file_type);

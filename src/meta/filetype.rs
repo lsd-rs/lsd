@@ -121,6 +121,7 @@ mod test {
     #[cfg(unix)]
     use std::process::Command;
     use tempfile::tempdir;
+    use crate::flags::Blocks;
 
     #[test]
     #[cfg(unix)] // Windows uses different default permissions
@@ -141,7 +142,7 @@ mod test {
     #[test]
     fn test_dir_type() {
         let tmp_dir = tempdir().expect("failed to create temp dir");
-        let meta = Meta::from_path(&tmp_dir.path().to_path_buf(), false)
+        let meta = Meta::from_path(&tmp_dir.path().to_path_buf(), false, &Blocks::long())
             .expect("failed to get tempdir path");
         let metadata = tmp_dir.path().metadata().expect("failed to get metas");
 
