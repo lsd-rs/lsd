@@ -124,7 +124,6 @@ impl Blocks {
             Block::Size,
             Block::Date,
             Block::Name,
-            Block::Links,
         ])
     }
 
