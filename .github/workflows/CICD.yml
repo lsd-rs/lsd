@@ -167,6 +167,17 @@ jobs:
         mkdir -p '${{ steps.vars.outputs.STAGING }}/${{ steps.vars.outputs.PKG_BASENAME }}'
         mkdir -p '${{ steps.vars.outputs.STAGING }}/${{ steps.vars.outputs.PKG_BASENAME }}/autocomplete'
         mkdir -p '${{ steps.vars.outputs.STAGING }}/dpkg'
+    - name: Update manpage placeholders
+      shell: bash
+      run: |
+        LSD_VERSION="$(if echo "$GITHUB_REF" | grep -q '^refs/tags'; then echo "${GITHUB_REF#refs/*/}"; else echo; fi)"
+        sed -i.bk "s|footer: lsd <version>|footer: lsd $LSD_VERSION|" doc/lsd.md
+        sed -i.bk "s|date: <date>|date: $(date '+%Y-%m-%d')|" doc/lsd.md
+        rm doc/lsd.md.bk
+    - name: Setup pandoc
+      uses: r-lib/actions/setup-pandoc@v1
+    - name: Generate Manpage
+      run: pandoc --standalone --to man doc/lsd.md -o lsd.1
     - name: Install `rust` toolchain
       uses: actions-rs/toolchain@v1
       with:
@@ -201,6 +212,8 @@ jobs:
         # README and LICENSE
         cp README.md '${{ steps.vars.outputs.STAGING }}/${{ steps.vars.outputs.PKG_BASENAME }}/'
         cp LICENSE '${{ steps.vars.outputs.STAGING }}/${{ steps.vars.outputs.PKG_BASENAME }}/'
+        # manpage
+        cp lsd.1 '${{ steps.vars.outputs.STAGING }}/${{ steps.vars.outputs.PKG_BASENAME }}/'
         # autocomplete
         cp 'target/${{ matrix.job.target }}/release/build/${{ env.PROJECT_NAME }}-'*/'out/${{ env.PROJECT_NAME }}.bash' '${{ steps.vars.outputs.STAGING }}/${{ steps.vars.outputs.PKG_BASENAME }}/autocomplete/${{ env.PROJECT_NAME }}.bash-completion'
         cp 'target/${{ matrix.job.target }}/release/build/${{ env.PROJECT_NAME }}-'*/'out/${{ env.PROJECT_NAME }}.fish' '${{ steps.vars.outputs.STAGING }}/${{ steps.vars.outputs.PKG_BASENAME }}/autocomplete/'
