@@ -13,6 +13,32 @@ use super::{Owner, Permissions};
 
 const BUF_SIZE: u32 = 256;
 
+#[cfg(feature = "no-windows-permissions")]
+pub fn get_file_data(path: &Path) -> Result<(Owner, Permissions), io::Error> {
+    let owner = Owner::new("?".to_string(), "?".to_string());
+
+    let permissions = Permissions {
+        user_read: true,
+        user_write: true,
+        user_execute: true,
+
+        group_read: true,
+        group_write: true,
+        group_execute: true,
+
+        other_read: true,
+        other_write: true,
+        other_execute: true,
+
+        sticky: false,
+        setuid: false,
+        setgid: false,
+    };
+
+    Ok((owner, permissions))
+}
+
+#[cfg(not(feature = "no-windows-permissions"))]
 pub fn get_file_data(path: &Path) -> Result<(Owner, Permissions), io::Error> {
     // Overall design:
     // This function allocates some data with GetNamedSecurityInfoW,

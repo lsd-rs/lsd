@@ -56,3 +56,4 @@ serial_test = "0.5"
 
 [features]
 sudo = []
+no-windows-permissions = []
