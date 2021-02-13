@@ -18,13 +18,13 @@ pub fn get_file_data(path: &Path) -> Result<(Owner, Permissions), io::Error> {
     let owner = Owner::new("?".to_string(), "?".to_string());
 
     let permissions = Permissions {
-        user_read: true,
-        user_write: true,
-        user_execute: true,
+        user_read: false,
+        user_write: false,
+        user_execute: false,
 
-        group_read: true,
-        group_write: true,
-        group_execute: true,
+        group_read: false,
+        group_write: false,
+        group_execute: false,
 
         other_read: true,
         other_write: true,
