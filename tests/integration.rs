@@ -415,6 +415,24 @@ fn test_tree() {
 }
 
 #[test]
+fn test_tree_all_not_show_self() {
+    let tmp = tempdir();
+    tmp.child("one").touch().unwrap();
+    tmp.child("one.d").create_dir_all().unwrap();
+    tmp.child("one.d/two").touch().unwrap();
+    tmp.child("one.d/.hidden").touch().unwrap();
+
+    cmd()
+        .arg(tmp.path())
+        .arg("--tree")
+        .arg("--all")
+        .assert()
+        .stdout(
+            predicate::str::is_match("├── one\n└── one.d\n   ├── .hidden\n   └── two\n$").unwrap(),
+        );
+}
+
+#[test]
 fn test_tree_d() {
     let tmp = tempdir();
     tmp.child("one").touch().unwrap();
