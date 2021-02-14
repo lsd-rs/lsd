@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add support for `TIME_STYLE` environment variable from [999eagle](https://github.com/999eagle)
 - Add man page from [edneville](https://github.com/edneville)
 ### Changed
+- Not showing `.` and `..` when `--tree` with `--all` from [zwpaper](https://github.com/zwpaper) [#477](https://github.com/Peltoche/lsd/issues/477)
 ### Fixed
 - Fix handling blocks passed without -l in cli from [meain](https://github.com/meain)
 
