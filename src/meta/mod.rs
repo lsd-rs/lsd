@@ -87,8 +87,9 @@ impl Meta {
             current_meta = self.clone();
             current_meta.name.name = ".".to_owned();
 
-            let parent_meta =
+            let mut parent_meta =
                 Self::from_path(&self.path.join(Component::ParentDir), flags.dereference.0)?;
+            parent_meta.name.name = "..".to_owned();
 
             content.push(current_meta);
             content.push(parent_meta);
