@@ -417,7 +417,7 @@ mod test_sort_order {
     fn test_from_config_default_config() {
         assert_eq!(
             Some(SortOrder::default()),
-            SortOrder::from_config(&Config::default())
+            SortOrder::from_config(&Config::builtin())
         );
     }
 
