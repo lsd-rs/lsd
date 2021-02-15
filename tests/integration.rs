@@ -448,6 +448,20 @@ fn test_tree_all_not_show_self() {
 }
 
 #[test]
+fn test_tree_show_edge_before_name() {
+    let tmp = tempdir();
+    tmp.child("one.d").create_dir_all().unwrap();
+    tmp.child("one.d/two").touch().unwrap();
+
+    cmd()
+        .arg(tmp.path())
+        .arg("--tree")
+        .arg("--long")
+        .assert()
+        .stdout(predicate::str::is_match("└── two\n$").unwrap());
+}
+
+#[test]
 fn test_tree_d() {
     let tmp = tempdir();
     tmp.child("one").touch().unwrap();
