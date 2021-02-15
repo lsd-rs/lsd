@@ -98,7 +98,11 @@ impl Recursion {
     /// If the parameter to the "depth" argument can not be parsed, this returns an [Error] in a
     /// [Some].
     fn depth_from_arg_matches(matches: &ArgMatches) -> Option<Result<usize, Error>> {
-        if let Some(str) = matches.value_of("depth") {
+        let depth = match matches.values_of("depth") {
+            Some(d) => d.last(),
+            None => None,
+        };
+        if let Some(str) = depth {
             match str.parse::<usize>() {
                 Ok(value) => return Some(Ok(value)),
                 Err(_) => {
@@ -208,6 +212,21 @@ mod test {
             Some(result) => {
                 match result {
                     Ok(value) => value == 42,
+                    Err(_) => false,
+                }
+            }
+        });
+    }
+
+    #[test]
+    fn test_depth_from_arg_matches_depth_multi() {
+        let argv = vec!["lsd", "--depth", "4", "--depth", "2"];
+        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        assert!(match Recursion::depth_from_arg_matches(&matches) {
+            None => false,
+            Some(result) => {
+                match result {
+                    Ok(value) => value == 2,
                     Err(_) => false,
                 }
             }

@@ -44,7 +44,7 @@ impl Configurable<Self> for SizeFlag {
     /// [None].
     fn from_arg_matches(matches: &ArgMatches) -> Option<Self> {
         if matches.occurrences_of("size") > 0 {
-            if let Some(size) = matches.value_of("size") {
+            if let Some(size) = matches.values_of("size")?.last() {
                 return Self::from_str(size);
             }
         }
@@ -105,6 +105,13 @@ mod test {
         let args = vec!["lsd", "--size", "bytes"];
         let matches = app::build().get_matches_from_safe(args).unwrap();
         assert_eq!(Some(SizeFlag::Bytes), SizeFlag::from_arg_matches(&matches));
+    }
+
+    #[test]
+    fn test_from_arg_matches_size_multi() {
+        let args = vec!["lsd", "--size", "bytes", "--size", "short"];
+        let matches = app::build().get_matches_from_safe(args).unwrap();
+        assert_eq!(Some(SizeFlag::Short), SizeFlag::from_arg_matches(&matches));
     }
 
     #[test]

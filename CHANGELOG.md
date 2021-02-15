@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Fix handling blocks passed without -l in cli from [meain](https://github.com/meain)
 - Fixed sorting of . and .. when used with folder from [meain](https://github.com/meain)
+- Fix arg parsing for flags that allow multiple values from [meain](https://github.com/meain)
 
 ## [0.19.0] - 2020-12-13
 ### Added

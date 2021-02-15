@@ -55,7 +55,7 @@ impl Configurable<Self> for IconOption {
         if matches.is_present("classic") {
             Some(Self::Never)
         } else if matches.occurrences_of("icon") > 0 {
-            match matches.value_of("icon") {
+            match matches.values_of("icon")?.last() {
                 Some("always") => Some(Self::Always),
                 Some("auto") => Some(Self::Auto),
                 Some("never") => Some(Self::Never),
@@ -107,7 +107,7 @@ impl Configurable<Self> for IconTheme {
     /// [Some]. Otherwise this returns [None].
     fn from_arg_matches(matches: &ArgMatches) -> Option<Self> {
         if matches.occurrences_of("icon-theme") > 0 {
-            match matches.value_of("icon-theme") {
+            match matches.values_of("icon-theme")?.last() {
                 Some("fancy") => Some(Self::Fancy),
                 Some("unicode") => Some(Self::Unicode),
                 _ => panic!("This should not be reachable!"),
@@ -229,6 +229,16 @@ mod test_icon_option {
     }
 
     #[test]
+    fn test_from_arg_matches_icon_when_multi() {
+        let argv = vec!["lsd", "--icon", "always", "--icon", "never"];
+        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        assert_eq!(
+            Some(IconOption::Never),
+            IconOption::from_arg_matches(&matches)
+        );
+    }
+
+    #[test]
     fn test_from_config_none() {
         assert_eq!(None, IconOption::from_config(&Config::with_none()));
     }
@@ -307,6 +317,16 @@ mod test_icon_theme {
     #[test]
     fn test_from_arg_matches_unicode() {
         let argv = vec!["lsd", "--icon-theme", "unicode"];
+        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        assert_eq!(
+            Some(IconTheme::Unicode),
+            IconTheme::from_arg_matches(&matches)
+        );
+    }
+
+    #[test]
+    fn test_from_arg_matches_icon_multi() {
+        let argv = vec!["lsd", "--icon-theme", "fancy", "--icon-theme", "unicode"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         assert_eq!(
             Some(IconTheme::Unicode),

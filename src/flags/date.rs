@@ -54,7 +54,7 @@ impl Configurable<Self> for DateFlag {
         if matches.is_present("classic") {
             Some(Self::Date)
         } else if matches.occurrences_of("date") > 0 {
-            match matches.value_of("date") {
+            match matches.values_of("date")?.last() {
                 Some("date") => Some(Self::Date),
                 Some("relative") => Some(Self::Relative),
                 Some(format) if format.starts_with('+') => {
@@ -164,6 +164,13 @@ mod test {
     #[test]
     fn test_from_arg_matches_classic_mode() {
         let argv = vec!["lsd", "--date", "date", "--classic"];
+        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        assert_eq!(Some(DateFlag::Date), DateFlag::from_arg_matches(&matches));
+    }
+
+    #[test]
+    fn test_from_arg_matches_date_multi() {
+        let argv = vec!["lsd", "--date", "relative", "--date", "date"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         assert_eq!(Some(DateFlag::Date), DateFlag::from_arg_matches(&matches));
     }
