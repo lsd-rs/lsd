@@ -10,7 +10,7 @@ use terminal_size::terminal_size;
 use unicode_width::UnicodeWidthStr;
 
 const EDGE: &str = "\u{251c}\u{2500}\u{2500}"; // "├──"
-const LINE: &str = "\u{2502}  "; // "├  "
+const LINE: &str = "\u{2502}  "; // "│  "
 const CORNER: &str = "\u{2514}\u{2500}\u{2500}"; // "└──"
 const BLANK: &str = "   ";
 
@@ -81,6 +81,7 @@ fn inner_display_grid(
             &flags,
             &display_option,
             &padding_rules,
+            "",
         );
 
         for block in blocks {
@@ -156,7 +157,18 @@ fn inner_display_tree(
         direction: Direction::LeftToRight,
     });
 
-    for meta in metas.iter() {
+    for (idx, meta) in metas.iter().enumerate() {
+        let current_prefix = if depth > 0 {
+            if idx + 1 != last_idx {
+                // is last folder elem
+                format!("{}{} ", prefix, EDGE)
+            } else {
+                format!("{}{} ", prefix, CORNER)
+            }
+        } else {
+            prefix.to_string()
+        };
+
         for block in get_output(
             &meta,
             &colors,
@@ -164,6 +176,7 @@ fn inner_display_tree(
             &flags,
             &DisplayOption::FileName,
             &padding_rules,
+            &current_prefix,
         ) {
             let block_str = block.to_string();
 
@@ -178,32 +191,20 @@ fn inner_display_tree(
     let mut lines = content.lines();
 
     for (idx, meta) in metas.iter().enumerate() {
-        let is_last_folder_elem = idx + 1 != last_idx;
-
-        if depth > 0 {
-            output += prefix;
-
-            if is_last_folder_elem {
-                output += EDGE;
-            } else {
-                output += CORNER;
-            }
-            output += " ";
-        }
-
         output += &String::from(lines.next().unwrap());
         output += "\n";
 
         if meta.content.is_some() {
-            let mut new_prefix = String::from(prefix);
-
-            if depth > 0 {
-                if is_last_folder_elem {
-                    new_prefix += LINE;
+            let new_prefix = if depth > 0 {
+                if idx + 1 != last_idx {
+                    // is last folder elem
+                    format!("{}{}", prefix, LINE)
                 } else {
-                    new_prefix += BLANK;
+                    format!("{}{}", prefix, BLANK)
                 }
-            }
+            } else {
+                prefix.to_string()
+            };
 
             output += &inner_display_tree(
                 &meta.content.as_ref().unwrap(),
@@ -252,6 +253,7 @@ fn get_output<'a>(
     flags: &'a Flags,
     display_option: &DisplayOption,
     padding_rules: &HashMap<Block, usize>,
+    tree_prefix: &'a str,
 ) -> Vec<ANSIString<'a>> {
     let mut strings: Vec<ANSIString> = Vec::new();
     for block in flags.blocks.0.iter() {
@@ -279,19 +281,20 @@ fn get_output<'a>(
                 let s: String =
                     if flags.no_symlink.0 || flags.dereference.0 || flags.layout == Layout::Grid {
                         ANSIStrings(&[
+                            ANSIString::from(tree_prefix),
                             meta.name.render(colors, icons, &display_option),
                             meta.indicator.render(&flags),
                         ])
                         .to_string()
                     } else {
                         ANSIStrings(&[
+                            ANSIString::from(tree_prefix),
                             meta.name.render(colors, icons, &display_option),
                             meta.indicator.render(&flags),
                             meta.symlink.render(colors, &flags),
                         ])
                         .to_string()
                     };
-
                 strings.push(ColoredString::from(s));
             }
         };
