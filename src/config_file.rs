@@ -276,6 +276,13 @@ symlink-arrow: ⇒
 "#;
 
 #[cfg(test)]
+impl Config {
+    pub fn builtin() -> Self {
+        Self::from_yaml(DEFAULT_CONFIG).unwrap()
+    }
+}
+
+#[cfg(test)]
 mod tests {
     use super::Config;
     use crate::config_file;
