@@ -50,7 +50,10 @@ impl Configurable<Self> for SortColumn {
     /// If either the "timesort" or "sizesort" arguments are passed, this returns the corresponding
     /// `SortColumn` variant in a [Some]. Otherwise this returns [None].
     fn from_arg_matches(matches: &ArgMatches) -> Option<Self> {
-        let sort = matches.value_of("sort");
+        let sort = match matches.values_of("sort") {
+            Some(s) => s.last(),
+            None => None,
+        };
         if matches.is_present("timesort") || sort == Some("time") {
             Some(Self::Time)
         } else if matches.is_present("sizesort") || sort == Some("size") {
@@ -169,7 +172,7 @@ impl Configurable<Self> for DirGrouping {
         }
 
         if matches.occurrences_of("group-dirs") > 0 {
-            if let Some(group_dirs) = matches.value_of("group-dirs") {
+            if let Some(group_dirs) = matches.values_of("group-dirs")?.last() {
                 return Self::from_str(group_dirs);
             }
         }
@@ -283,6 +286,16 @@ mod test_sort_column {
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         assert_eq!(
             Some(SortColumn::Version),
+            SortColumn::from_arg_matches(&matches)
+        );
+    }
+
+    #[test]
+    fn test_multi_sort() {
+        let argv = vec!["lsd", "--sort", "size", "--sort", "time"];
+        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        assert_eq!(
+            Some(SortColumn::Time),
             SortColumn::from_arg_matches(&matches)
         );
     }
@@ -501,6 +514,16 @@ mod test_dir_grouping {
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         assert_eq!(
             Some(DirGrouping::None),
+            DirGrouping::from_arg_matches(&matches)
+        );
+    }
+
+    #[test]
+    fn test_from_arg_matches_group_dirs_multi() {
+        let argv = vec!["lsd", "--group-dirs", "first", "--group-dirs", "last"];
+        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        assert_eq!(
+            Some(DirGrouping::Last),
             DirGrouping::from_arg_matches(&matches)
         );
     }

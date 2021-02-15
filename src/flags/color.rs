@@ -63,7 +63,7 @@ impl Configurable<Self> for ColorOption {
         if matches.is_present("classic") {
             Some(Self::Never)
         } else if matches.occurrences_of("color") > 0 {
-            if let Some(color) = matches.value_of("color") {
+            if let Some(color) = matches.values_of("color")?.last() {
                 Self::from_str(&color)
             } else {
                 panic!("Bad color args. This should not be reachable!");
@@ -124,7 +124,7 @@ mod test_color_option {
     }
 
     #[test]
-    fn test_from_arg_matches_autp() {
+    fn test_from_arg_matches_auto() {
         let argv = vec!["lsd", "--color", "auto"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         assert_eq!(
@@ -146,6 +146,16 @@ mod test_color_option {
     #[test]
     fn test_from_arg_matches_classic_mode() {
         let argv = vec!["lsd", "--color", "always", "--classic"];
+        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        assert_eq!(
+            Some(ColorOption::Never),
+            ColorOption::from_arg_matches(&matches)
+        );
+    }
+
+    #[test]
+    fn test_from_arg_matches_color_multiple() {
+        let argv = vec!["lsd", "--color", "always", "--color", "never"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         assert_eq!(
             Some(ColorOption::Never),
