@@ -1,4 +1,4 @@
-use crate::color::{ColoredString, Colors};
+use crate::color::{ColoredString, Colors, Elem};
 use crate::flags::{Block, Display, Flags, Layout};
 use crate::icon::Icons;
 use crate::meta::name::DisplayOption;
@@ -32,7 +32,16 @@ pub fn grid(metas: &[Meta], flags: &Flags, colors: &Colors, icons: &Icons) -> St
 }
 
 pub fn tree(metas: &[Meta], flags: &Flags, colors: &Colors, icons: &Icons) -> String {
-    inner_display_tree(metas, &flags, colors, icons, 0, "")
+    let mut grid = Grid::new(GridOptions {
+        filling: Filling::Spaces(1),
+        direction: Direction::LeftToRight,
+    });
+
+    for cell in inner_display_tree(metas, &flags, colors, icons, 0, "") {
+        grid.add(cell);
+    }
+
+    grid.fit_into_columns(flags.blocks.0.len()).to_string()
 }
 
 fn inner_display_grid(
@@ -146,16 +155,11 @@ fn inner_display_tree(
     icons: &Icons,
     depth: usize,
     prefix: &str,
-) -> String {
-    let mut output = String::new();
+) -> Vec<Cell> {
+    let mut cells = Vec::new();
     let last_idx = metas.len();
 
     let padding_rules = get_padding_rules(&metas, flags);
-
-    let mut grid = Grid::new(GridOptions {
-        filling: Filling::Spaces(1),
-        direction: Direction::LeftToRight,
-    });
 
     for (idx, meta) in metas.iter().enumerate() {
         let current_prefix = if depth > 0 {
@@ -180,19 +184,11 @@ fn inner_display_tree(
         ) {
             let block_str = block.to_string();
 
-            grid.add(Cell {
+            cells.push(Cell {
                 width: get_visible_width(&block_str),
                 contents: block_str,
             });
         }
-    }
-
-    let content = grid.fit_into_columns(flags.blocks.0.len()).to_string();
-    let mut lines = content.lines();
-
-    for (idx, meta) in metas.iter().enumerate() {
-        output += &String::from(lines.next().unwrap());
-        output += "\n";
 
         if meta.content.is_some() {
             let new_prefix = if depth > 0 {
@@ -206,18 +202,18 @@ fn inner_display_tree(
                 prefix.to_string()
             };
 
-            output += &inner_display_tree(
+            cells.extend(inner_display_tree(
                 &meta.content.as_ref().unwrap(),
                 &flags,
                 colors,
                 icons,
                 depth + 1,
                 &new_prefix,
-            );
+            ));
         }
     }
 
-    output
+    cells
 }
 
 fn should_display_folder_path(depth: usize, metas: &[Meta], flags: &Flags) -> bool {
@@ -278,23 +274,27 @@ fn get_output<'a>(
             Block::SizeValue => strings.push(meta.size.render_value(colors, flags)),
             Block::Date => strings.push(meta.date.render(colors, &flags)),
             Block::Name => {
-                let s: String =
-                    if flags.no_symlink.0 || flags.dereference.0 || flags.layout == Layout::Grid {
-                        ANSIStrings(&[
-                            ANSIString::from(tree_prefix),
-                            meta.name.render(colors, icons, &display_option),
-                            meta.indicator.render(&flags),
-                        ])
-                        .to_string()
-                    } else {
-                        ANSIStrings(&[
-                            ANSIString::from(tree_prefix),
-                            meta.name.render(colors, icons, &display_option),
-                            meta.indicator.render(&flags),
-                            meta.symlink.render(colors, &flags),
-                        ])
-                        .to_string()
-                    };
+                let s: String = if flags.no_symlink.0
+                    || flags.dereference.0
+                    || flags.layout == Layout::Grid
+                {
+                    ANSIStrings(&[
+                        colors.colorize(ANSIString::from(tree_prefix).to_string(), &Elem::TreeEdge),
+                        // ANSIString::from(tree_prefix),
+                        meta.name.render(colors, icons, &display_option),
+                        meta.indicator.render(&flags),
+                    ])
+                    .to_string()
+                } else {
+                    ANSIStrings(&[
+                        colors.colorize(ANSIString::from(tree_prefix).to_string(), &Elem::TreeEdge),
+                        meta.name.render(colors, icons, &display_option),
+                        meta.indicator.render(&flags),
+                        meta.symlink.render(colors, &flags),
+                    ])
+                    .to_string()
+                };
+                // println!("{}", s);
                 strings.push(ColoredString::from(s));
             }
         };
