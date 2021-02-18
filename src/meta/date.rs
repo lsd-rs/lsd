@@ -21,16 +21,15 @@ impl Date {
     pub fn render(&self, colors: &Colors, flags: &Flags) -> ColoredString {
         let now = Local::now();
 
-        let elem;
-        if self.0 > now - Duration::hours(1) {
-            elem = &Elem::HourOld;
+        let elem = if self.0 > now - Duration::hours(1) {
+            Elem::HourOld
         } else if self.0 > now - Duration::days(1) {
-            elem = &Elem::DayOld;
+            Elem::DayOld
         } else {
-            elem = &Elem::Older;
-        }
+            Elem::Older
+        };
 
-        colors.colorize(self.date_string(&flags), elem)
+        colors.colorize(self.date_string(&flags), &elem)
     }
 
     pub fn date_string(&self, flags: &Flags) -> String {
