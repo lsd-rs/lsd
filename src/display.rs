@@ -37,7 +37,8 @@ pub fn tree(metas: &[Meta], flags: &Flags, colors: &Colors, icons: &Icons) -> St
         direction: Direction::LeftToRight,
     });
 
-    for cell in inner_display_tree(metas, &flags, colors, icons, 0, "") {
+    let padding_rules = get_padding_rules(&metas, flags);
+    for cell in inner_display_tree(metas, &flags, colors, icons, 0, "", &padding_rules) {
         grid.add(cell);
     }
 
@@ -155,11 +156,10 @@ fn inner_display_tree(
     icons: &Icons,
     depth: usize,
     prefix: &str,
+    padding_rules: &HashMap<Block, usize>,
 ) -> Vec<Cell> {
     let mut cells = Vec::new();
     let last_idx = metas.len();
-
-    let padding_rules = get_padding_rules(&metas, flags);
 
     for (idx, meta) in metas.iter().enumerate() {
         let current_prefix = if depth > 0 {
@@ -209,6 +209,7 @@ fn inner_display_tree(
                 icons,
                 depth + 1,
                 &new_prefix,
+                padding_rules,
             ));
         }
     }
@@ -327,6 +328,15 @@ fn detect_size_lengths(metas: &[Meta], flags: &Flags) -> usize {
 
         if value_len > max_value_length {
             max_value_length = value_len;
+        }
+
+        if Layout::Tree == flags.layout {
+            if let Some(subs) = &meta.content {
+                let sub_length = detect_size_lengths(&subs, flags);
+                if sub_length > max_value_length {
+                    max_value_length = sub_length;
+                }
+            }
         }
     }
 
@@ -504,20 +514,63 @@ mod tests {
             .recurse_into(42, &flags)
             .unwrap()
             .unwrap();
-        let output = inner_display_tree(
+        let output = tree(
             &metas,
             &flags,
             &Colors::new(color::Theme::NoColor),
             &Icons::new(icon::Theme::NoIcon, " ".to_string()),
-            0,
-            "",
         );
 
         assert_eq!("one.d\n├── .hidden\n└── two\n", output);
     }
 
+    /// Different level of folder may form a different width
+    /// we must make sure it is aligned in all level
+    ///
+    /// dir has a bytes size
+    /// empty file has an empty size
+    /// `---blocks size,name` can help us for this case
     #[test]
-    fn test_display_tree_edge_before_name() {
+    fn test_tree_align_subfolder() {
+        let argv = vec!["lsd", "--tree", "--blocks", "size,name"];
+        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let flags = Flags::configure_from(&matches, &Config::with_none()).unwrap();
+
+        let dir = assert_fs::TempDir::new().unwrap();
+        dir.child("dir").create_dir_all().unwrap();
+        dir.child("dir/file").touch().unwrap();
+        let metas = Meta::from_path(Path::new(dir.path()), false)
+            .unwrap()
+            .recurse_into(42, &flags)
+            .unwrap()
+            .unwrap();
+        let output = tree(
+            &metas,
+            &flags,
+            &Colors::new(color::Theme::NoColor),
+            &Icons::new(icon::Theme::NoIcon, " ".to_string()),
+        );
+
+        println!("{}", output);
+        let length_before_b = |i| -> usize {
+            output
+                .lines()
+                .nth(i)
+                .unwrap()
+                .split(|c| c == 'K' || c == 'B')
+                .nth(0)
+                .unwrap()
+                .len()
+        };
+        assert_eq!(length_before_b(0), length_before_b(1));
+        assert_eq!(
+            output.lines().nth(0).unwrap().find("d"),
+            output.lines().nth(1).unwrap().find("└")
+        );
+    }
+
+    #[test]
+    fn test_tree_edge_before_name() {
         let argv = vec!["lsd", "--tree", "--long"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         let flags = Flags::configure_from(&matches, &Config::with_none()).unwrap();
@@ -530,13 +583,11 @@ mod tests {
             .recurse_into(42, &flags)
             .unwrap()
             .unwrap();
-        let output = inner_display_tree(
+        let output = tree(
             &metas,
             &flags,
             &Colors::new(color::Theme::NoColor),
             &Icons::new(icon::Theme::NoIcon, " ".to_string()),
-            0,
-            "",
         );
 
         assert!(output.ends_with("└── two\n"));
