@@ -38,7 +38,14 @@ pub fn tree(metas: &[Meta], flags: &Flags, colors: &Colors, icons: &Icons) -> St
     });
 
     let padding_rules = get_padding_rules(&metas, flags);
-    for cell in inner_display_tree(metas, &flags, colors, icons, 0, "", &padding_rules) {
+    let mut index = 0;
+    for (i, block) in flags.blocks.0.iter().enumerate() {
+        if let Block::Name = block {
+            index = i;
+        }
+    }
+
+    for cell in inner_display_tree(metas, &flags, colors, icons, (0, ""), &padding_rules, index) {
         grid.add(cell);
     }
 
@@ -91,7 +98,7 @@ fn inner_display_grid(
             &flags,
             &display_option,
             &padding_rules,
-            "",
+            (0, ""),
         );
 
         for block in blocks {
@@ -154,23 +161,23 @@ fn inner_display_tree(
     flags: &Flags,
     colors: &Colors,
     icons: &Icons,
-    depth: usize,
-    prefix: &str,
+    tree_depth_prefix: (usize, &str),
     padding_rules: &HashMap<Block, usize>,
+    target_index: usize,
 ) -> Vec<Cell> {
     let mut cells = Vec::new();
     let last_idx = metas.len();
 
     for (idx, meta) in metas.iter().enumerate() {
-        let current_prefix = if depth > 0 {
+        let current_prefix = if tree_depth_prefix.0 > 0 {
             if idx + 1 != last_idx {
                 // is last folder elem
-                format!("{}{} ", prefix, EDGE)
+                format!("{}{} ", tree_depth_prefix.1, EDGE)
             } else {
-                format!("{}{} ", prefix, CORNER)
+                format!("{}{} ", tree_depth_prefix.1, CORNER)
             }
         } else {
-            prefix.to_string()
+            tree_depth_prefix.1.to_string()
         };
 
         for block in get_output(
@@ -180,7 +187,7 @@ fn inner_display_tree(
             &flags,
             &DisplayOption::FileName,
             &padding_rules,
-            &current_prefix,
+            (target_index, &current_prefix),
         ) {
             let block_str = block.to_string();
 
@@ -191,15 +198,15 @@ fn inner_display_tree(
         }
 
         if meta.content.is_some() {
-            let new_prefix = if depth > 0 {
+            let new_prefix = if tree_depth_prefix.0 > 0 {
                 if idx + 1 != last_idx {
                     // is last folder elem
-                    format!("{}{}", prefix, LINE)
+                    format!("{}{}", tree_depth_prefix.1, LINE)
                 } else {
-                    format!("{}{}", prefix, BLANK)
+                    format!("{}{}", tree_depth_prefix.1, BLANK)
                 }
             } else {
-                prefix.to_string()
+                tree_depth_prefix.1.to_string()
             };
 
             cells.extend(inner_display_tree(
@@ -207,9 +214,9 @@ fn inner_display_tree(
                 &flags,
                 colors,
                 icons,
-                depth + 1,
-                &new_prefix,
+                (tree_depth_prefix.0 + 1, &new_prefix),
                 padding_rules,
+                target_index,
             ));
         }
     }
@@ -250,57 +257,54 @@ fn get_output<'a>(
     flags: &'a Flags,
     display_option: &DisplayOption,
     padding_rules: &HashMap<Block, usize>,
-    tree_prefix: &'a str,
+    tree: (usize, &'a str),
 ) -> Vec<ANSIString<'a>> {
     let mut strings: Vec<ANSIString> = Vec::new();
-    for block in flags.blocks.0.iter() {
+    for (i, block) in flags.blocks.0.iter().enumerate() {
+        let mut block_vec = if Layout::Tree == flags.layout && tree.0 == i {
+            vec![colors.colorize(ANSIString::from(tree.1).to_string(), &Elem::TreeEdge)]
+        } else {
+            Vec::new()
+        };
+
         match block {
-            Block::INode => strings.push(meta.inode.render(colors)),
-            Block::Links => strings.push(meta.links.render(colors)),
+            Block::INode => block_vec.push(meta.inode.render(colors)),
+            Block::Links => block_vec.push(meta.links.render(colors)),
             Block::Permission => {
-                let s: &[ColoredString] = &[
+                block_vec.extend(vec![
                     meta.file_type.render(colors),
                     meta.permissions.render(colors),
-                ];
-                let res = ANSIStrings(s).to_string();
-                strings.push(ColoredString::from(res));
+                ]);
             }
-            Block::User => strings.push(meta.owner.render_user(colors)),
-            Block::Group => strings.push(meta.owner.render_group(colors)),
-            Block::Size => strings.push(meta.size.render(
-                colors,
-                &flags,
-                padding_rules[&Block::SizeValue],
-            )),
-            Block::SizeValue => strings.push(meta.size.render_value(colors, flags)),
-            Block::Date => strings.push(meta.date.render(colors, &flags)),
+            Block::User => block_vec.push(meta.owner.render_user(colors)),
+            Block::Group => block_vec.push(meta.owner.render_group(colors)),
+            Block::Size => {
+                let pad = if Layout::Tree == flags.layout && 0 == tree.0 && 0 == i {
+                    None
+                } else {
+                    Some(padding_rules[&Block::SizeValue])
+                };
+                block_vec.push(meta.size.render(colors, &flags, pad))
+            }
+            Block::SizeValue => block_vec.push(meta.size.render_value(colors, flags)),
+            Block::Date => block_vec.push(meta.date.render(colors, &flags)),
             Block::Name => {
-                let s: String = if flags.no_symlink.0
-                    || flags.dereference.0
-                    || flags.layout == Layout::Grid
-                {
-                    ANSIStrings(&[
-                        colors.colorize(ANSIString::from(tree_prefix).to_string(), &Elem::TreeEdge),
-                        // ANSIString::from(tree_prefix),
+                if flags.no_symlink.0 || flags.dereference.0 || flags.layout == Layout::Grid {
+                    block_vec.extend(vec![
                         meta.name.render(colors, icons, &display_option),
                         meta.indicator.render(&flags),
                     ])
-                    .to_string()
                 } else {
-                    ANSIStrings(&[
-                        colors.colorize(ANSIString::from(tree_prefix).to_string(), &Elem::TreeEdge),
+                    block_vec.extend(vec![
                         meta.name.render(colors, icons, &display_option),
                         meta.indicator.render(&flags),
                         meta.symlink.render(colors, &flags),
                     ])
-                    .to_string()
                 };
-                // println!("{}", s);
-                strings.push(ColoredString::from(s));
             }
         };
+        strings.push(ColoredString::from(ANSIStrings(&block_vec).to_string()));
     }
-
     strings
 }
 
@@ -551,7 +555,6 @@ mod tests {
             &Icons::new(icon::Theme::NoIcon, " ".to_string()),
         );
 
-        println!("{}", output);
         let length_before_b = |i| -> usize {
             output
                 .lines()
@@ -566,6 +569,45 @@ mod tests {
         assert_eq!(
             output.lines().nth(0).unwrap().find("d"),
             output.lines().nth(1).unwrap().find("└")
+        );
+    }
+
+    #[test]
+    #[cfg(unix)]
+    fn test_tree_size_first_without_name() {
+        let argv = vec!["lsd", "--tree", "--blocks", "size,permission"];
+        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let flags = Flags::configure_from(&matches, &Config::with_none()).unwrap();
+
+        let dir = assert_fs::TempDir::new().unwrap();
+        dir.child("dir").create_dir_all().unwrap();
+        dir.child("dir/file").touch().unwrap();
+        let metas = Meta::from_path(Path::new(dir.path()), false)
+            .unwrap()
+            .recurse_into(42, &flags)
+            .unwrap()
+            .unwrap();
+        let output = tree(
+            &metas,
+            &flags,
+            &Colors::new(color::Theme::NoColor),
+            &Icons::new(icon::Theme::NoIcon, " ".to_string()),
+        );
+
+        assert_eq!(output.lines().nth(1).unwrap().chars().nth(0).unwrap(), '└');
+        assert_eq!(
+            output
+                .lines()
+                .nth(0)
+                .unwrap()
+                .chars()
+                .position(|x| x == 'd'),
+            output
+                .lines()
+                .nth(1)
+                .unwrap()
+                .chars()
+                .position(|x| x == '.'),
         );
     }
 

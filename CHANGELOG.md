@@ -21,7 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add man page from [edneville](https://github.com/edneville)
 ### Changed
 - Not showing `.` and `..` when `--tree` with `--all` from [zwpaper](https://github.com/zwpaper) [#477](https://github.com/Peltoche/lsd/issues/477)
-- Show tree edge before name block from [zwpaper](https://github.com/zwpaper) [#468](https://github.com/Peltoche/lsd/issues/468)
+- Show tree edge before name block, first column if no name block from [zwpaper](https://github.com/zwpaper) [#468](https://github.com/Peltoche/lsd/issues/468)
 ### Fixed
 - Fix handling blocks passed without -l in cli from [meain](https://github.com/meain)
 - Fix sorting of . and .. when used with folder from [meain](https://github.com/meain)
