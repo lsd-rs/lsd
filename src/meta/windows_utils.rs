@@ -13,33 +13,7 @@ use super::{Owner, Permissions};
 
 const BUF_SIZE: u32 = 256;
 
-#[cfg(feature = "no-windows-permissions")]
-pub fn get_file_data(path: &Path) -> Result<(Owner, Permissions), io::Error> {
-    let owner = Owner::new("?".to_string(), "?".to_string());
-
-    let permissions = Permissions {
-        user_read: false,
-        user_write: false,
-        user_execute: false,
-
-        group_read: false,
-        group_write: false,
-        group_execute: false,
-
-        other_read: true,
-        other_write: true,
-        other_execute: true,
-
-        sticky: false,
-        setuid: false,
-        setgid: false,
-    };
-
-    Ok((owner, permissions))
-}
-
-#[cfg(not(feature = "no-windows-permissions"))]
-pub fn get_file_data(path: &Path) -> Result<(Owner, Permissions), io::Error> {
+pub fn get_file_data(path: &Path) -> Result<(Option<Owner>, Option<Permissions>), io::Error> {
     // Overall design:
     // This function allocates some data with GetNamedSecurityInfoW,
     // manipulates it only through WinAPI calls (treating the pointers as
@@ -194,7 +168,7 @@ pub fn get_file_data(path: &Path) -> Result<(Owner, Permissions), io::Error> {
         winapi::um::winbase::LocalFree(sd_ptr);
     }
 
-    Ok((owner, permissions))
+    Ok((Some(owner), Some(permissions)))
 }
 
 /// Evaluate an ACL for a particular trustee and get its access rights

@@ -212,14 +212,15 @@ impl Meta {
         };
 
         #[cfg(unix)]
-        let owner = Owner::from(&metadata);
-        #[cfg(unix)]
-        let permissions = Permissions::from(&metadata);
+        let (owner, permissions) = (Some(Owner::from(&metadata)), Some(Permissions::from(&metadata)));
 
-        #[cfg(windows)]
+        #[cfg(all(windows, feature = "no-windows-permissions"))]
+        let (owner, permissions) = (None, None);
+
+        #[cfg(all(windows, not(feature = "no-windows-permissions")))]
         let (owner, permissions) = windows_utils::get_file_data(&path)?;
 
-        let file_type = FileType::new(&metadata, symlink_meta.as_ref(), &permissions);
+        let file_type = FileType::new(&metadata, symlink_meta.as_ref(), &permissions.unwrap_or_default());
         let name = Name::new(&path, file_type);
         let inode = INode::from(&metadata);
         let links = Links::from(&metadata);
@@ -232,8 +233,8 @@ impl Meta {
             size: Size::from(&metadata),
             date: Date::from(&metadata),
             indicator: Indicator::from(file_type),
-            owner,
-            permissions,
+            owner: owner.unwrap_or_default(),
+            permissions: permissions.unwrap_or_default(),
             name,
             file_type,
             content: None,

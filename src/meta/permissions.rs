@@ -103,6 +103,26 @@ impl Permissions {
     }
 }
 
+impl Default for Permissions
+{
+    fn default() -> Permissions {
+        Permissions {
+            user_read: false,
+            user_write: false,
+            user_execute: false,
+            group_read: false,
+            group_write: false,
+            group_execute: false,
+            other_read: false,
+            other_write: false,
+            other_execute: false,
+            sticky: false,
+            setgid: false,
+            setuid: false
+        }
+    }
+}
+
 // More readable aliases for the permission bits exposed by libc.
 #[allow(trivial_numeric_casts)]
 #[cfg(unix)]

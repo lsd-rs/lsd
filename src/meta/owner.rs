@@ -15,6 +15,13 @@ impl Owner {
     }
 }
 
+impl Default for Owner {
+    fn default() -> Owner
+    {
+        Owner { user: String::from(""), group: String::from("") }
+    }
+}
+
 #[cfg(unix)]
 impl<'a> From<&'a Metadata> for Owner {
     fn from(meta: &Metadata) -> Self {
@@ -37,10 +44,18 @@ impl<'a> From<&'a Metadata> for Owner {
 
 impl Owner {
     pub fn render_user(&self, colors: &Colors) -> ColoredString {
-        colors.colorize(self.user.clone(), &Elem::User)
+        if self.user.len() == 0 {
+            colors.colorize("?".to_owned(), &Elem::User)
+        } else {
+            colors.colorize(self.user.clone(), &Elem::User)
+        }
     }
 
     pub fn render_group(&self, colors: &Colors) -> ColoredString {
-        colors.colorize(self.group.clone(), &Elem::Group)
+        if self.group.len() == 0 {
+            colors.colorize("?".to_owned(), &Elem::Group)
+        } else {
+            colors.colorize(self.group.clone(), &Elem::Group)
+        }
     }
 }
