@@ -7,7 +7,7 @@ matrix:
     # Stable channel.
     - os: linux
       rust: stable
-      env: TARGET=x86_64-unknown-linux-gnu
+      env: TARGET=x86_64-unknown-linux-gnu FEATURES=git
     - os: linux
       rust: stable
       env: TARGET=i686-unknown-linux-gnu
@@ -19,7 +19,7 @@ matrix:
       env: TARGET=i686-unknown-linux-musl
     - os: osx
       rust: stable
-      env: TARGET=x86_64-apple-darwin
+      env: TARGET=x86_64-apple-darwin FEATURES=git
     - os: linux
       rust: stable
       env:
@@ -30,13 +30,13 @@ matrix:
     # The other platforms are disabled in order to reduce the total CI time
     - os: linux
       rust: beta
-      env: TARGET=x86_64-unknown-linux-gnu
+      env: TARGET=x86_64-unknown-linux-gnu FEATURES=git
 
     # Nightly channel.
     # The other platforms are disabled in order to reduce the total CI time
     - os: linux
       rust: nightly
-      env: TARGET=x86_64-unknown-linux-gnu
+      env: TARGET=x86_64-unknown-linux-gnu FEATURES=git
 
     # Minimum Rust supported channel.
     - os: linux

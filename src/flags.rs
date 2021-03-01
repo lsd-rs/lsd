@@ -13,6 +13,8 @@ pub mod sorting;
 pub mod symlink_arrow;
 pub mod symlinks;
 pub mod total_size;
+#[cfg(feature = "git")]
+pub mod git_icons;
 
 pub use blocks::Block;
 pub use blocks::Blocks;
@@ -112,14 +114,17 @@ where
     /// out warnings.
     fn configure_from(matches: &ArgMatches, config: &Config) -> T {
         if let Some(value) = Self::from_arg_matches(matches) {
+            // println!("from arg {}", std::any::type_name::<T>());
             return value;
         }
 
         if let Some(value) = Self::from_environment() {
+            // println!("from env {}", std::any::type_name::<T>());
             return value;
         }
 
         if let Some(value) = Self::from_config(config) {
+            // println!("from config {}", std::any::type_name::<T>());
             return value;
         }
 

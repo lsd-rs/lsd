@@ -1,6 +1,11 @@
 use crate::color::{self, Colors};
 use crate::display;
-use crate::flags::{ColorOption, Display, Flags, IconOption, IconTheme, Layout, SortOrder};
+use crate::flags::{Block, ColorOption, Display, Flags, IconOption, IconTheme, Layout, SortOrder};
+#[cfg(feature = "git")]
+use crate::git::GitCache;
+#[cfg(not(feature = "git"))]
+use crate::git_stub::GitCache;
+
 use crate::icon::{self, Icons};
 use crate::meta::Meta;
 use crate::{print_error, print_output, sort};
@@ -24,21 +29,21 @@ pub struct Core {
 
 impl Core {
     pub fn new(flags: Flags) -> Self {
-        // Check through libc if stdout is a tty. Unix specific so not on windows.
+        // Check through libc if stdout is a tty. Unix specific so not on Windows.
         // Determine color output availability (and initialize color output (for Windows 10))
         #[cfg(not(target_os = "windows"))]
-        let tty_available = unsafe { libc::isatty(io::stdout().as_raw_fd()) == 1 };
+            let tty_available = unsafe { libc::isatty(io::stdout().as_raw_fd()) == 1 };
 
         #[cfg(not(target_os = "windows"))]
-        let console_color_ok = true;
+            let console_color_ok = true;
 
         #[cfg(target_os = "windows")]
-        let tty_available = terminal_size().is_some(); // terminal_size allows us to know if the stdout is a tty or not.
+            let tty_available = terminal_size().is_some(); // terminal_size allows us to know if the stdout is a tty or not.
 
         #[cfg(target_os = "windows")]
-        let console_color_ok = ansi_term::enable_ansi_support().is_ok();
+            let console_color_ok = ansi_term::enable_ansi_support().is_ok();
 
-        let mut inner_flags = flags.clone();
+        let mut inner_flags = flags.clone(); // FIXME not used ?
 
         let color_theme = match (tty_available && console_color_ok, flags.color.when) {
             (_, ColorOption::Never) | (false, ColorOption::Auto) => color::Theme::NoColor,
@@ -96,12 +101,29 @@ impl Core {
                 }
             };
 
+            let cache = if self.flags.blocks.0.contains(&Block::GitStatus) {
+                Some(GitCache::new(&path))
+            } else {
+                None
+            };
+
             let recurse =
                 self.flags.layout == Layout::Tree || self.flags.display != Display::DirectoryOnly;
             if recurse {
-                match meta.recurse_into(depth, &self.flags) {
+                match meta.recurse_into(depth, &self.flags, cache.as_ref()) {
                     Ok(content) => {
                         meta.content = content;
+                        #[cfg(feature = "git")]
+                        if let Some(cache) = cache {
+                            let is_directory = true;
+                            meta.git_status = match std::fs::canonicalize(&meta.path) {
+                                Ok(filename) => Some(cache.get(&filename, is_directory)),
+                                Err(err) => {
+                                    log::debug!("error {}", err);
+                                    None
+                                }
+                            };
+                        };
                         meta_list.push(meta);
                     }
                     Err(err) => {
@@ -110,6 +132,17 @@ impl Core {
                     }
                 };
             } else {
+                #[cfg(feature = "git")]
+                if let Some(cache) = cache {
+                    let is_directory = true;
+                    meta.git_status = match std::fs::canonicalize(&meta.path) {
+                        Ok(filename) => Some(cache.get(&filename, is_directory)),
+                        Err(err) => {
+                            log::debug!("error {}", err);
+                            None
+                        }
+                    };
+                };
                 meta_list.push(meta);
             };
         }

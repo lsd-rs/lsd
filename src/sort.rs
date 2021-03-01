@@ -22,6 +22,7 @@ pub fn assemble_sorters(flags: &Flags) -> Vec<(SortOrder, SortFn)> {
         SortColumn::Time => by_date,
         SortColumn::Version => by_version,
         SortColumn::Extension => by_extension,
+        SortColumn::GitStatus => by_git_status,
     };
     sorters.push((flags.sorting.order, other_sort));
     sorters
@@ -64,6 +65,10 @@ fn by_version(a: &Meta, b: &Meta) -> Ordering {
 
 fn by_extension(a: &Meta, b: &Meta) -> Ordering {
     a.name.extension().cmp(&b.name.extension())
+}
+
+fn by_git_status(a: &Meta, b: &Meta) -> Ordering {
+    a.git_status.cmp(&b.git_status)
 }
 
 #[cfg(test)]

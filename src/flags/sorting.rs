@@ -42,6 +42,7 @@ pub enum SortColumn {
     Time,
     Size,
     Version,
+    GitStatus
 }
 
 impl Configurable<Self> for SortColumn {
@@ -62,6 +63,8 @@ impl Configurable<Self> for SortColumn {
             Some(Self::Extension)
         } else if matches.is_present("versionsort") || sort == Some("version") {
             Some(Self::Version)
+        } else if sort == Some("git") {
+            Some(Self::GitStatus)
         } else {
             None
         }

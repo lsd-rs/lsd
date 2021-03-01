@@ -300,6 +300,14 @@ fn get_output<'a>(
                     block_vec.push(meta.symlink.render(colors, &flags))
                 }
             }
+            Block::GitStatus => {
+                if let Some(_s) = &meta.git_status {
+                    #[cfg(not(feature = "git"))]
+                    panic!("git feature is disabled");
+                    #[cfg(feature = "git")]
+                    strings.push(_s.render(colors, icons));
+                }
+            }
         };
         strings.push(ColoredString::from(ANSIStrings(&block_vec).to_string()));
     }

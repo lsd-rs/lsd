@@ -1,5 +1,6 @@
 mod date;
 mod filetype;
+pub mod git_file_status;
 mod indicator;
 mod inode;
 mod links;
@@ -21,12 +22,17 @@ pub use self::name::Name;
 pub use self::owner::Owner;
 pub use self::permissions::Permissions;
 pub use self::size::Size;
+pub use self::git_file_status::GitFileStatus;
 pub use self::symlink::SymLink;
 pub use crate::icon::Icons;
 
 use crate::flags::{Display, Flags, Layout};
 use crate::print_error;
 
+#[cfg(feature = "git")]
+use crate::git::GitCache;
+#[cfg(not(feature = "git"))]
+use crate::git_stub::GitCache;
 use std::fs::read_link;
 use std::io::{Error, ErrorKind};
 use std::path::{Component, Path, PathBuf};
@@ -45,6 +51,7 @@ pub struct Meta {
     pub inode: INode,
     pub links: Links,
     pub content: Option<Vec<Meta>>,
+    pub git_status: Option<GitFileStatus>,
 }
 
 impl Meta {
@@ -52,6 +59,7 @@ impl Meta {
         &self,
         depth: usize,
         flags: &Flags,
+        cache: Option<&GitCache>,
     ) -> Result<Option<Vec<Meta>>, std::io::Error> {
         if depth == 0 {
             return Ok(None);
@@ -121,16 +129,19 @@ impl Meta {
                 }
             };
 
+            let is_directory =entry.file_type()?.is_dir(); 
+            
+            
             // skip files for --tree -d
             if flags.layout == Layout::Tree {
                 if let Display::DirectoryOnly = flags.display {
-                    if !entry.file_type()?.is_dir() {
+                    if !is_directory {
                         continue;
                     }
                 }
             }
 
-            match entry_meta.recurse_into(depth - 1, &flags) {
+            match entry_meta.recurse_into(depth - 1, &flags, cache) {
                 Ok(content) => entry_meta.content = content,
                 Err(err) => {
                     print_error!("{}: {}.", path.display(), err);
@@ -138,6 +149,17 @@ impl Meta {
                 }
             };
 
+            #[cfg(feature = "git")]
+            if let Some(cache) = cache {
+                entry_meta.git_status = match std::fs::canonicalize(&entry_meta.path) {
+                    Ok(filename) => Some(cache.get(&filename, is_directory)),
+                    Err(err) => {
+                        log::debug!("error {}", err);
+                        None
+                    }
+                }
+            };
+            
             content.push(entry_meta);
         }
 
@@ -238,6 +260,7 @@ impl Meta {
             name,
             file_type,
             content: None,
+            git_status: None,
         })
     }
 }

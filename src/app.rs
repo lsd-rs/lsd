@@ -1,7 +1,7 @@
 use clap::{App, Arg};
 
 pub fn build() -> App<'static, 'static> {
-    App::new("lsd")
+    let app = App::new("lsd")
         .version(crate_version!())
         .about(crate_description!())
         .arg(Arg::with_name("FILE").multiple(true).default_value("."))
@@ -192,7 +192,14 @@ pub fn build() -> App<'static, 'static> {
             Arg::with_name("sort")
                 .long("sort")
                 .multiple(true)
-                .possible_values(&["size", "time", "version", "extension"])
+                .possible_values(&[
+                    "size",
+                    "time",
+                    "version",
+                    "extension",
+                    #[cfg(feature = "git")]
+                        "git",
+                ])
                 .takes_value(true)
                 .value_name("WORD")
                 .overrides_with("timesort")
@@ -234,12 +241,14 @@ pub fn build() -> App<'static, 'static> {
                     "name",
                     "inode",
                     "links",
+                    #[cfg(feature = "git")]
+                        "git",
                 ])
                 .help("Specify the blocks that will be displayed and in what order"),
         )
         .arg(
             Arg::with_name("classic")
-            .long("classic")
+                .long("classic")
             .help("Enable classic mode (display output similar to ls)"),
         )
         .arg(
@@ -271,7 +280,17 @@ pub fn build() -> App<'static, 'static> {
                 .long("dereference")
                 .multiple(true)
                 .help("When showing file information for a symbolic link, show information for the file the link references rather than for the link itself"),
+        );
+    if cfg!(feature = "git") {
+        app.arg(
+            Arg::with_name("git")
+                .long("git")
+                .multiple(true)
+                .help("Show git status on file and directory")
         )
+    } else {
+        app
+    }
 }
 
 fn validate_date_argument(arg: String) -> Result<(), String> {

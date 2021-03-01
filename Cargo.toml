@@ -36,12 +36,18 @@ xdg = "2.1.*"
 yaml-rust = "0.4.*"
 serde = { version = "1.0", features = ["derive"] }
 serde_yaml = "0.8"
+log = { version = "0.4", features = ["release_max_level_error"] }
 
 [target.'cfg(unix)'.dependencies]
 users = "0.11.*"
 
 [target.'cfg(windows)'.dependencies]
-winapi = {version = "0.3.*", features = ["aclapi", "accctrl", "winnt", "winerror", "securitybaseapi", "winbase"]}
+winapi = { version = "0.3.*", features = ["aclapi", "accctrl", "winnt", "winerror", "securitybaseapi", "winbase"] }
+
+[dependencies.git2]
+version = "0.13"
+optional = true
+default-features = false
 
 [dependencies.clap]
 features = ["suggestions", "color", "wrap_help"]
@@ -55,4 +61,6 @@ tempfile = "3"
 serial_test = "0.5"
 
 [features]
+default = []
 sudo = []
+git = ["git2"]
