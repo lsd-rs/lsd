@@ -1,7 +1,7 @@
+use crate::meta::git_file_status::GitFileStatus;
 use log::{debug, info, warn};
 use std::fs;
 use std::path::{Path, PathBuf};
-use crate::meta::git_file_status::GitFileStatus;
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub enum GitStatus {
@@ -107,13 +107,13 @@ impl GitCache {
 mod tests {
     use super::*;
     use assert_fs::prelude::*;
-    use git2::{Repository, Oid, RepositoryInitOptions, Index, CherrypickOptions};
     use assert_fs::TempDir;
-    #[allow(unused)]
-    use std::process::Command;
+    use git2::build::CheckoutBuilder;
+    use git2::{CherrypickOptions, Index, Oid, Repository, RepositoryInitOptions};
     use std::collections::HashMap;
     use std::fs::remove_file;
-    use git2::build::CheckoutBuilder;
+    #[allow(unused)]
+    use std::process::Command;
 
     #[test]
     fn compare_git_status() {
@@ -163,7 +163,12 @@ mod tests {
             match fs::canonicalize(&root.join(path)) {
                 Ok(filename) => {
                     let is_directory = filename.is_dir();
-                    assert_eq!(&cache.get(&filename, is_directory), status, "Invalid status for file {:?}", filename);
+                    assert_eq!(
+                        &cache.get(&filename, is_directory),
+                        status,
+                        "Invalid status for file {:?}",
+                        filename
+                    );
                 }
                 Err(_) => {}
             }
@@ -171,7 +176,8 @@ mod tests {
     }
 
     #[test]
-    fn test_git_workflow() { // rename as test_git_workflow
+    fn test_git_workflow() {
+        // rename as test_git_workflow
         let (root, repo) = repo_init();
         let mut index = repo.index().unwrap();
         let mut expected_statuses = HashMap::new();
@@ -181,7 +187,13 @@ mod tests {
 
         let f0 = PathBuf::from(".gitignore");
         root.child(&f0).write_str("*.bak").unwrap();
-        expected_statuses.insert(&f0, GitFileStatus { index: GitStatus::Unmodified, workdir: GitStatus::NewInWorkdir });
+        expected_statuses.insert(
+            &f0,
+            GitFileStatus {
+                index: GitStatus::Unmodified,
+                workdir: GitStatus::NewInWorkdir,
+            },
+        );
 
         // Check now
         check_cache(root.path(), &expected_statuses);
@@ -192,13 +204,19 @@ mod tests {
         check_cache(root.path(), &expected_statuses);
 
         index.write().unwrap();
-        *expected_statuses.get_mut(&f0).unwrap() = GitFileStatus { index: GitStatus::NewInIndex, workdir: GitStatus::Unmodified };
+        *expected_statuses.get_mut(&f0).unwrap() = GitFileStatus {
+            index: GitStatus::NewInIndex,
+            workdir: GitStatus::Unmodified,
+        };
 
         // Check now
         check_cache(root.path(), &expected_statuses);
 
         commit(&repo, &mut index, "Add gitignore");
-        *expected_statuses.get_mut(&f0).unwrap() = GitFileStatus { index: GitStatus::Default, workdir: GitStatus::Default };
+        *expected_statuses.get_mut(&f0).unwrap() = GitFileStatus {
+            index: GitStatus::Default,
+            workdir: GitStatus::Default,
+        };
 
         // Check now
         check_cache(root.path(), &expected_statuses);
@@ -208,62 +226,125 @@ mod tests {
         root.child(&f1).touch().unwrap();
         let f2 = d1.join("f2.bak");
         root.child(&f2).touch().unwrap();
-        expected_statuses.insert(&d1, GitFileStatus { index: GitStatus::Unmodified, workdir: GitStatus::NewInWorkdir });
-        expected_statuses.insert(&f1, GitFileStatus { index: GitStatus::Unmodified, workdir: GitStatus::NewInWorkdir });
-        expected_statuses.insert(&f2, GitFileStatus { index: GitStatus::Unmodified, workdir: GitStatus::Ignored });
+        expected_statuses.insert(
+            &d1,
+            GitFileStatus {
+                index: GitStatus::Unmodified,
+                workdir: GitStatus::NewInWorkdir,
+            },
+        );
+        expected_statuses.insert(
+            &f1,
+            GitFileStatus {
+                index: GitStatus::Unmodified,
+                workdir: GitStatus::NewInWorkdir,
+            },
+        );
+        expected_statuses.insert(
+            &f2,
+            GitFileStatus {
+                index: GitStatus::Unmodified,
+                workdir: GitStatus::Ignored,
+            },
+        );
 
         // Check now
         check_cache(root.path(), &expected_statuses);
 
         index.add_path(f1.as_path()).unwrap();
         index.write().unwrap();
-        *expected_statuses.get_mut(&d1).unwrap() = GitFileStatus { index: GitStatus::NewInIndex, workdir: GitStatus::Ignored };
-        *expected_statuses.get_mut(&f1).unwrap() = GitFileStatus { index: GitStatus::NewInIndex, workdir: GitStatus::Unmodified };
+        *expected_statuses.get_mut(&d1).unwrap() = GitFileStatus {
+            index: GitStatus::NewInIndex,
+            workdir: GitStatus::Ignored,
+        };
+        *expected_statuses.get_mut(&f1).unwrap() = GitFileStatus {
+            index: GitStatus::NewInIndex,
+            workdir: GitStatus::Unmodified,
+        };
 
         // Check now
         check_cache(root.path(), &expected_statuses);
 
         index.add_path(f2.as_path()).unwrap();
         index.write().unwrap();
-        *expected_statuses.get_mut(&d1).unwrap() = GitFileStatus { index: GitStatus::NewInIndex, workdir: GitStatus::Unmodified };
-        *expected_statuses.get_mut(&f2).unwrap() = GitFileStatus { index: GitStatus::NewInIndex, workdir: GitStatus::Unmodified };
+        *expected_statuses.get_mut(&d1).unwrap() = GitFileStatus {
+            index: GitStatus::NewInIndex,
+            workdir: GitStatus::Unmodified,
+        };
+        *expected_statuses.get_mut(&f2).unwrap() = GitFileStatus {
+            index: GitStatus::NewInIndex,
+            workdir: GitStatus::Unmodified,
+        };
 
         // Check now
         check_cache(root.path(), &expected_statuses);
 
         let (commit1_oid, _) = commit(&repo, &mut index, "Add new files");
-        *expected_statuses.get_mut(&d1).unwrap() = GitFileStatus { index: GitStatus::Default, workdir: GitStatus::Default };
-        *expected_statuses.get_mut(&f1).unwrap() = GitFileStatus { index: GitStatus::Default, workdir: GitStatus::Default };
-        *expected_statuses.get_mut(&f2).unwrap() = GitFileStatus { index: GitStatus::Default, workdir: GitStatus::Default };
+        *expected_statuses.get_mut(&d1).unwrap() = GitFileStatus {
+            index: GitStatus::Default,
+            workdir: GitStatus::Default,
+        };
+        *expected_statuses.get_mut(&f1).unwrap() = GitFileStatus {
+            index: GitStatus::Default,
+            workdir: GitStatus::Default,
+        };
+        *expected_statuses.get_mut(&f2).unwrap() = GitFileStatus {
+            index: GitStatus::Default,
+            workdir: GitStatus::Default,
+        };
 
         // Check now
         check_cache(root.path(), &expected_statuses);
 
         remove_file(&root.child(&f2).path()).unwrap();
-        *expected_statuses.get_mut(&d1).unwrap() = GitFileStatus { index: GitStatus::Unmodified, workdir: GitStatus::Deleted };
-        *expected_statuses.get_mut(&f2).unwrap() = GitFileStatus { index: GitStatus::Unmodified, workdir: GitStatus::Deleted };
+        *expected_statuses.get_mut(&d1).unwrap() = GitFileStatus {
+            index: GitStatus::Unmodified,
+            workdir: GitStatus::Deleted,
+        };
+        *expected_statuses.get_mut(&f2).unwrap() = GitFileStatus {
+            index: GitStatus::Unmodified,
+            workdir: GitStatus::Deleted,
+        };
 
         // Check now
         check_cache(root.path(), &expected_statuses);
 
         root.child(&f1).write_str("New content").unwrap();
-        *expected_statuses.get_mut(&d1).unwrap() = GitFileStatus { index: GitStatus::Unmodified, workdir: GitStatus::Modified }; // more important to see modified vs deleted ?
-        *expected_statuses.get_mut(&f1).unwrap() = GitFileStatus { index: GitStatus::Unmodified, workdir: GitStatus::Modified };
+        *expected_statuses.get_mut(&d1).unwrap() = GitFileStatus {
+            index: GitStatus::Unmodified,
+            workdir: GitStatus::Modified,
+        }; // more important to see modified vs deleted ?
+        *expected_statuses.get_mut(&f1).unwrap() = GitFileStatus {
+            index: GitStatus::Unmodified,
+            workdir: GitStatus::Modified,
+        };
 
         // Check now
         check_cache(root.path(), &expected_statuses);
 
         index.remove_path(&f2).unwrap();
         index.write().unwrap();
-        *expected_statuses.get_mut(&d1).unwrap() = GitFileStatus { index: GitStatus::Deleted, workdir: GitStatus::Modified };
-        *expected_statuses.get_mut(&f2).unwrap() = GitFileStatus { index: GitStatus::Deleted, workdir: GitStatus::Unmodified };
+        *expected_statuses.get_mut(&d1).unwrap() = GitFileStatus {
+            index: GitStatus::Deleted,
+            workdir: GitStatus::Modified,
+        };
+        *expected_statuses.get_mut(&f2).unwrap() = GitFileStatus {
+            index: GitStatus::Deleted,
+            workdir: GitStatus::Unmodified,
+        };
 
         // Check now
         check_cache(root.path(), &expected_statuses);
 
         commit(&repo, &mut index, "Remove backup file");
-        *expected_statuses.get_mut(&d1).unwrap() = GitFileStatus { index: GitStatus::Unmodified, workdir: GitStatus::Modified };
-        *expected_statuses.get_mut(&f2).unwrap() = GitFileStatus { index: GitStatus::Default, workdir: GitStatus::Default };
+        *expected_statuses.get_mut(&d1).unwrap() = GitFileStatus {
+            index: GitStatus::Unmodified,
+            workdir: GitStatus::Modified,
+        };
+        *expected_statuses.get_mut(&f2).unwrap() = GitFileStatus {
+            index: GitStatus::Default,
+            workdir: GitStatus::Default,
+        };
 
         // Check now
         check_cache(root.path(), &expected_statuses);
@@ -271,22 +352,34 @@ mod tests {
         index.add_path(&f1).unwrap();
         index.write().unwrap();
         commit(&repo, &mut index, "Save modified file");
-        *expected_statuses.get_mut(&d1).unwrap() = GitFileStatus { index: GitStatus::Default, workdir: GitStatus::Default };
-        *expected_statuses.get_mut(&f1).unwrap() = GitFileStatus { index: GitStatus::Default, workdir: GitStatus::Default };
+        *expected_statuses.get_mut(&d1).unwrap() = GitFileStatus {
+            index: GitStatus::Default,
+            workdir: GitStatus::Default,
+        };
+        *expected_statuses.get_mut(&f1).unwrap() = GitFileStatus {
+            index: GitStatus::Default,
+            workdir: GitStatus::Default,
+        };
 
         // Check now
         check_cache(root.path(), &expected_statuses);
 
         let branch_commit = repo.find_commit(commit1_oid).unwrap();
-        let branch = repo.branch("conflict-branch", &branch_commit, true).unwrap();
-        repo.set_head(format!("refs/heads/{}", branch.name().unwrap().unwrap()).as_str()).unwrap();
+        let branch = repo
+            .branch("conflict-branch", &branch_commit, true)
+            .unwrap();
+        repo.set_head(format!("refs/heads/{}", branch.name().unwrap().unwrap()).as_str())
+            .unwrap();
         let mut checkout_opts = CheckoutBuilder::new();
         checkout_opts.force();
-        repo.checkout_head(Some(&mut checkout_opts))
-            .unwrap();
+        repo.checkout_head(Some(&mut checkout_opts)).unwrap();
 
-        root.child(&f1).write_str("New conflicting content").unwrap();
-        root.child(&f2).write_str("New conflicting content").unwrap();
+        root.child(&f1)
+            .write_str("New conflicting content")
+            .unwrap();
+        root.child(&f2)
+            .write_str("New conflicting content")
+            .unwrap();
         index.add_path(&f1).unwrap();
         index.add_path(&f2).unwrap();
         index.write().unwrap();
@@ -299,10 +392,20 @@ mod tests {
         repo.checkout_head(Some(&mut checkout_opts)).unwrap();
         let mut cherrypick_opts = CherrypickOptions::new();
         let branch_commit = repo.find_commit(commit2_oid).unwrap();
-        repo.cherrypick(&branch_commit, Some(&mut cherrypick_opts)).unwrap();
-        *expected_statuses.get_mut(&d1).unwrap() = GitFileStatus { index: GitStatus::Unmodified, workdir: GitStatus::Conflicted };
-        *expected_statuses.get_mut(&f1).unwrap() = GitFileStatus { index: GitStatus::Unmodified, workdir: GitStatus::Conflicted };
-        *expected_statuses.get_mut(&f2).unwrap() = GitFileStatus { index: GitStatus::Unmodified, workdir: GitStatus::Conflicted };
+        repo.cherrypick(&branch_commit, Some(&mut cherrypick_opts))
+            .unwrap();
+        *expected_statuses.get_mut(&d1).unwrap() = GitFileStatus {
+            index: GitStatus::Unmodified,
+            workdir: GitStatus::Conflicted,
+        };
+        *expected_statuses.get_mut(&f1).unwrap() = GitFileStatus {
+            index: GitStatus::Unmodified,
+            workdir: GitStatus::Conflicted,
+        };
+        *expected_statuses.get_mut(&f2).unwrap() = GitFileStatus {
+            index: GitStatus::Unmodified,
+            workdir: GitStatus::Conflicted,
+        };
 
         // let _success = Command::new("git")
         //     .current_dir(root.path())

@@ -44,13 +44,23 @@ impl GitFileStatus {
         }
     }
 
-    pub fn render(&self,
-                  colors: &crate::color::Colors,
-                  icons: &crate::icon::Icons) -> crate::color::ColoredString {
+    pub fn render(
+        &self,
+        colors: &crate::color::Colors,
+        icons: &crate::icon::Icons,
+    ) -> crate::color::ColoredString {
         let strings = &[
-            colors.colorize(icons.get_status(&self.index), &crate::color::Elem::GitStatus { status: self.index }),
+            colors.colorize(
+                icons.get_status(&self.index),
+                &crate::color::Elem::GitStatus { status: self.index },
+            ),
             crate::color::ColoredString::from(" "),
-            colors.colorize(icons.get_status(&self.workdir), &crate::color::Elem::GitStatus { status: self.workdir })
+            colors.colorize(
+                icons.get_status(&self.workdir),
+                &crate::color::Elem::GitStatus {
+                    status: self.workdir,
+                },
+            ),
         ];
         let res = ansi_term::ANSIStrings(strings).to_string();
         crate::color::ColoredString::from(res)

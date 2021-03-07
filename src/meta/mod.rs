@@ -15,6 +15,7 @@ mod windows_utils;
 
 pub use self::date::Date;
 pub use self::filetype::FileType;
+pub use self::git_file_status::GitFileStatus;
 pub use self::indicator::Indicator;
 pub use self::inode::INode;
 pub use self::links::Links;
@@ -22,7 +23,6 @@ pub use self::name::Name;
 pub use self::owner::Owner;
 pub use self::permissions::Permissions;
 pub use self::size::Size;
-pub use self::git_file_status::GitFileStatus;
 pub use self::symlink::SymLink;
 pub use crate::icon::Icons;
 
@@ -129,9 +129,8 @@ impl Meta {
                 }
             };
 
-            let is_directory =entry.file_type()?.is_dir(); 
-            
-            
+            let is_directory = entry.file_type()?.is_dir();
+
             // skip files for --tree -d
             if flags.layout == Layout::Tree {
                 if let Display::DirectoryOnly = flags.display {
@@ -159,7 +158,7 @@ impl Meta {
                     }
                 }
             };
-            
+
             content.push(entry_meta);
         }
 

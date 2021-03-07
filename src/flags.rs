@@ -3,6 +3,8 @@ pub mod color;
 pub mod date;
 pub mod dereference;
 pub mod display;
+#[cfg(feature = "git")]
+pub mod git_icons;
 pub mod icons;
 pub mod ignore_globs;
 pub mod indicators;
@@ -13,8 +15,6 @@ pub mod sorting;
 pub mod symlink_arrow;
 pub mod symlinks;
 pub mod total_size;
-#[cfg(feature = "git")]
-pub mod git_icons;
 
 pub use blocks::Block;
 pub use blocks::Blocks;

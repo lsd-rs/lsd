@@ -42,7 +42,7 @@ pub enum SortColumn {
     Time,
     Size,
     Version,
-    GitStatus
+    GitStatus,
 }
 
 impl Configurable<Self> for SortColumn {

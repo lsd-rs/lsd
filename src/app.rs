@@ -286,7 +286,7 @@ pub fn build() -> App<'static, 'static> {
             Arg::with_name("git")
                 .long("git")
                 .multiple(true)
-                .help("Show git status on file and directory")
+                .help("Show git status on file and directory"),
         )
     } else {
         app

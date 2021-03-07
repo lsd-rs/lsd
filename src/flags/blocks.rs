@@ -450,12 +450,7 @@ mod test_blocks {
     #[cfg(feature = "git")]
     #[test]
     fn test_from_arg_matches_no_implicit_add_git_block_if_not_long() {
-        let argv = vec![
-            "lsd",
-            "--blocks",
-            "permission,name,group,git,date",
-            "--git",
-        ];
+        let argv = vec!["lsd", "--blocks", "permission,name,group,git,date", "--git"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         let test_blocks = Blocks(vec![
             Block::Permission,
@@ -475,12 +470,7 @@ mod test_blocks {
     #[cfg(feature = "git")]
     #[test]
     fn test_from_arg_matches_no_implicit_add_git_block_if_already_here() {
-        let argv = vec![
-            "lsd",
-            "--blocks",
-            "permission,name,group,git,date",
-            "--git",
-        ];
+        let argv = vec!["lsd", "--blocks", "permission,name,group,git,date", "--git"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         let test_blocks = Blocks(vec![
             Block::Permission,

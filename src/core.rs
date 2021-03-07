@@ -32,16 +32,16 @@ impl Core {
         // Check through libc if stdout is a tty. Unix specific so not on Windows.
         // Determine color output availability (and initialize color output (for Windows 10))
         #[cfg(not(target_os = "windows"))]
-            let tty_available = unsafe { libc::isatty(io::stdout().as_raw_fd()) == 1 };
+        let tty_available = unsafe { libc::isatty(io::stdout().as_raw_fd()) == 1 };
 
         #[cfg(not(target_os = "windows"))]
-            let console_color_ok = true;
+        let console_color_ok = true;
 
         #[cfg(target_os = "windows")]
-            let tty_available = terminal_size().is_some(); // terminal_size allows us to know if the stdout is a tty or not.
+        let tty_available = terminal_size().is_some(); // terminal_size allows us to know if the stdout is a tty or not.
 
         #[cfg(target_os = "windows")]
-            let console_color_ok = ansi_term::enable_ansi_support().is_ok();
+        let console_color_ok = ansi_term::enable_ansi_support().is_ok();
 
         let mut inner_flags = flags.clone(); // FIXME not used ?
 
