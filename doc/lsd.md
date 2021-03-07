@@ -38,6 +38,9 @@ lsd is a ls command with a lot of pretty colours and some other stuff to enrich 
 `-X`, `--extensionsort`
 : Sort by file extension
 
+`--git`
+: Display git status. Directory git status is a reduction of included file statuses (recursively).
+
 `--help`
 : Prints help information
 
@@ -87,7 +90,7 @@ lsd is a ls command with a lot of pretty colours and some other stuff to enrich 
 : Natural sort of (version) numbers within text
 
 `--blocks <blocks>...`
-: Specify the blocks that will be displayed and in what order [possible values: permission, user, group, size, date, name, inode]
+: Specify the blocks that will be displayed and in what order [possible values: permission, user, group, size, date, name, inode, git]
 
 `--color <color>...`
 : When to use terminal colours [default: auto]  [possible values: always, auto, never]
@@ -114,7 +117,7 @@ lsd is a ls command with a lot of pretty colours and some other stuff to enrich 
 : How to display size [default: default]  [possible values: default, short, bytes]
 
 `--sort <WORD>...`
-: Sort by WORD instead of name [possible values: size, time, version, extension]
+: Sort by WORD instead of name [possible values: size, time, version, extension, git]
 
 # ARGS
 
