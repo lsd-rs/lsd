@@ -488,31 +488,4 @@ mod tests {
             assert_eq!(get_visible_width(&output), *l);
         }
     }
-
-    #[test]
-    fn test_display_tree_with_all() {
-        let argv = vec!["lsd", "--tree", "--all"];
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
-        let flags = Flags::configure_from(&matches, &Config::with_none()).unwrap();
-
-        let dir = assert_fs::TempDir::new().unwrap();
-        dir.child("one.d").create_dir_all().unwrap();
-        dir.child("one.d/two").touch().unwrap();
-        dir.child("one.d/.hidden").touch().unwrap();
-        let metas = Meta::from_path(Path::new(dir.path()), false)
-            .unwrap()
-            .recurse_into(42, &flags)
-            .unwrap()
-            .unwrap();
-        let output = inner_display_tree(
-            &metas,
-            &flags,
-            &Colors::new(color::Theme::NoColor),
-            &Icons::new(icon::Theme::NoIcon, " ".to_string()),
-            0,
-            "",
-        );
-
-        assert_eq!("one.d\n├── .hidden\n└── two\n", output);
-    }
 }
