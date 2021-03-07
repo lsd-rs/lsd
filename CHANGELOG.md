@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased] - ReleaseDate
+## [0.20.0] - 2021-03-07
 ### Added
 - Add support for changing the string between icon and name from [Finn Hediger](https://github.com/orangefran) [#363](https://github.com/Peltoche/lsd/issues/363)
 - Add support for `TIME_STYLE` environment variable from [999eagle](https://github.com/999eagle)
@@ -304,7 +304,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Change the component alignement by using term_grid
 
 
-[Unreleased]: https://github.com/Peltoche/lsd/compare/0.19.0...HEAD
+[0.20.0]: https://github.com/Peltoche/lsd/compare/0.19.0...HEAD
 [0.19.0]: https://github.com/Peltoche/lsd/compare/0.18.0...0.19.0
 [0.18.0]: https://github.com/Peltoche/lsd/compare/0.17.0...0.18.0
 [0.17.0]: https://github.com/Peltoche/lsd/compare/0.16.0...0.17.0
