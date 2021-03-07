@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased] - ReleaseDate
 ### Added
 ### Changed
+- Chnage size to use btyes in classic mode from [meain](https://github.com/meain)
 ### Fixed
 
 ## [0.20.1] - 2021-03-07
