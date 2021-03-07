@@ -43,7 +43,9 @@ impl Configurable<Self> for SizeFlag {
     /// `SizeFlag` variant is returned in a [Some]. If neither of them is passed, this returns
     /// [None].
     fn from_arg_matches(matches: &ArgMatches) -> Option<Self> {
-        if matches.occurrences_of("size") > 0 {
+        if matches.is_present("classic") {
+            return Some(Self::Bytes);
+        } else if matches.occurrences_of("size") > 0 {
             if let Some(size) = matches.values_of("size")?.last() {
                 return Self::from_str(size);
             }
@@ -57,7 +59,11 @@ impl Configurable<Self> for SizeFlag {
     /// this returns the corresponding `SizeFlag` variant in a [Some].
     /// Otherwise this returns [None].
     fn from_config(config: &Config) -> Option<Self> {
-        config.size
+        if let Some(true) = config.classic {
+            Some(Self::Bytes)
+        } else {
+            config.size
+        }
     }
 }
 
@@ -115,6 +121,13 @@ mod test {
     }
 
     #[test]
+    fn test_from_arg_matches_size_classic() {
+        let args = vec!["lsd", "--size", "short", "--classic"];
+        let matches = app::build().get_matches_from_safe(args).unwrap();
+        assert_eq!(Some(SizeFlag::Bytes), SizeFlag::from_arg_matches(&matches));
+    }
+
+    #[test]
     fn test_from_config_none() {
         assert_eq!(None, SizeFlag::from_config(&Config::with_none()));
     }
@@ -137,6 +150,13 @@ mod test {
     fn test_from_config_bytes() {
         let mut c = Config::with_none();
         c.size = Some(SizeFlag::Bytes);
+        assert_eq!(Some(SizeFlag::Bytes), SizeFlag::from_config(&c));
+    }
+
+    #[test]
+    fn test_from_config_classic_mode() {
+        let mut c = Config::with_none();
+        c.classic = Some(true);
         assert_eq!(Some(SizeFlag::Bytes), SizeFlag::from_config(&c));
     }
 }
