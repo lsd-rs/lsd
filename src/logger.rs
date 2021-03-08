@@ -29,7 +29,7 @@ impl log::Log for SimpleLogger {
 static LOGGER: &SimpleLogger = &SimpleLogger;
 
 pub fn init() {
-    if let Ok(_) = std::env::var("LSD_LOGGER") {
+    if std::env::var("LSD_LOGGER").is_ok() {
         log::set_logger(LOGGER)
             .map(|()| log::set_max_level(LevelFilter::Debug))
             .unwrap();
