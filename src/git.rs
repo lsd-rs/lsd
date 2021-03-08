@@ -57,9 +57,7 @@ impl GitCache {
                         statuses.push(elem);
                     }
                 }
-                Err(e) => {
-                    warn!("Git retrieve statuses error: {:?}", e)
-                }
+                Err(e) => warn!("Git retrieve statuses error: {:?}", e),
             }
             info!("GitCache path: {:?}", cachedir);
 
