@@ -113,17 +113,7 @@ impl Core {
                 match meta.recurse_into(depth, &self.flags, cache.as_ref()) {
                     Ok(content) => {
                         meta.content = content;
-                        #[cfg(feature = "git")]
-                        if let Some(cache) = cache {
-                            let is_directory = true;
-                            meta.git_status = match std::fs::canonicalize(&meta.path) {
-                                Ok(filename) => Some(cache.get(&filename, is_directory)),
-                                Err(err) => {
-                                    log::debug!("error {}", err);
-                                    None
-                                }
-                            };
-                        };
+                        meta.git_status = cache.and_then(|cache| cache.get(&meta.path, true));
                         meta_list.push(meta);
                     }
                     Err(err) => {
@@ -132,17 +122,7 @@ impl Core {
                     }
                 };
             } else {
-                #[cfg(feature = "git")]
-                if let Some(cache) = cache {
-                    let is_directory = true;
-                    meta.git_status = match std::fs::canonicalize(&meta.path) {
-                        Ok(filename) => Some(cache.get(&filename, is_directory)),
-                        Err(err) => {
-                            log::debug!("error {}", err);
-                            None
-                        }
-                    };
-                };
+                meta.git_status = cache.and_then(|cache| cache.get(&meta.path, true));
                 meta_list.push(meta);
             };
         }

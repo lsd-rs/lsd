@@ -80,7 +80,17 @@ impl GitCache {
         }
     }
 
-    pub fn get(&self, filepath: &PathBuf, is_directory: bool) -> GitFileStatus {
+    pub fn get(&self, filepath: &PathBuf, is_directory: bool) -> Option<GitFileStatus> {
+        match std::fs::canonicalize(filepath) {
+            Ok(filename) => Some(self.inner_get(&filename, is_directory)),
+            Err(err) => {
+                log::debug!("error {}", err);
+                None
+            }
+        }
+    }
+
+    fn inner_get(&self, filepath: &PathBuf, is_directory: bool) -> GitFileStatus {
         debug!("Look for [recurse={}] {:?}", is_directory, filepath);
 
         if is_directory {
@@ -160,11 +170,11 @@ mod tests {
     fn check_cache(root: &Path, statuses: &HashMap<&PathBuf, GitFileStatus>) {
         let cache = GitCache::new(root);
         for (&path, status) in statuses.iter() {
-            match fs::canonicalize(&root.join(path)) {
+            match std::fs::canonicalize(&root.join(path)) {
                 Ok(filename) => {
                     let is_directory = filename.is_dir();
                     assert_eq!(
-                        &cache.get(&filename, is_directory),
+                        &cache.inner_get(&filename, is_directory),
                         status,
                         "Invalid status for file {:?}",
                         filename
