@@ -37,6 +37,7 @@ yaml-rust = "0.4.*"
 serde = { version = "1.0", features = ["derive"] }
 serde_yaml = "0.8"
 log = { version = "0.4", features = ["release_max_level_error"] }
+strum = { version = "0.20", features = ["derive"] }
 
 [target.'cfg(unix)'.dependencies]
 users = "0.11.*"

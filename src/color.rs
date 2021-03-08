@@ -4,6 +4,7 @@ use std::collections::HashMap;
 use std::path::Path;
 
 #[allow(dead_code)]
+#[derive(strum::EnumIter)] // for tests
 #[derive(Hash, Debug, Eq, PartialEq, Clone)]
 pub enum Elem {
     /// Node type
@@ -329,5 +330,29 @@ impl Colors {
             );
         }
         m
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use strum::IntoEnumIterator;
+
+    #[test]
+    fn test_elem_map_completeness() {
+        let m = Colors::get_light_theme_colour_map();
+        for elem in Elem::iter() {
+            assert!(m.contains_key(&elem));
+        }
+    }
+    
+    #[cfg(feature = "git")]
+    #[test]
+    fn test_git_status_map_completeness() {
+        let m = Colors::get_light_theme_colour_map();
+        for status in crate::git::GitStatus::iter() {
+            let elem = Elem::GitStatus { status };
+            assert!(m.contains_key(&elem));
+        }
     }
 }

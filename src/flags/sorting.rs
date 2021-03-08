@@ -293,7 +293,19 @@ mod test_sort_column {
         );
     }
 
+    #[cfg(feature = "git")]
     #[test]
+    fn test_from_arg_matches_sort_git() {
+        let argv = vec!["lsd", "--sort", "git"];
+        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        assert_eq!(
+            Some(SortColumn::GitStatus),
+            SortColumn::from_arg_matches(&matches)
+        );
+    }
+
+
+        #[test]
     fn test_multi_sort() {
         let argv = vec!["lsd", "--sort", "size", "--sort", "time"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
@@ -383,6 +395,17 @@ mod test_sort_column {
             dir_grouping: None,
         });
         assert_eq!(Some(SortColumn::Version), SortColumn::from_config(&c));
+    }
+
+    #[test]
+    fn test_from_config_git_status() {
+        let mut c = Config::with_none();
+        c.sorting = Some(Sorting {
+            column: Some(SortColumn::GitStatus),
+            reverse: None,
+            dir_grouping: None,
+        });
+        assert_eq!(Some(SortColumn::GitStatus), SortColumn::from_config(&c));
     }
 }
 

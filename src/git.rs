@@ -3,6 +3,7 @@ use log::{debug, info, warn};
 use std::fs;
 use std::path::{Path, PathBuf};
 
+#[derive(strum::EnumIter)] // for tests
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub enum GitStatus {
     /// No status info
@@ -25,6 +26,12 @@ pub enum GitStatus {
     Modified,
     /// Entry in the index is conflicted
     Conflicted,
+}
+
+impl Default for GitStatus {
+    fn default() -> Self {
+        Self::Default
+    }
 }
 
 pub struct GitCache {
