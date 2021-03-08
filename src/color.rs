@@ -345,7 +345,7 @@ mod tests {
             assert!(m.contains_key(&elem));
         }
     }
-    
+
     #[cfg(feature = "git")]
     #[test]
     fn test_git_status_map_completeness() {

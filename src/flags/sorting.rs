@@ -304,8 +304,7 @@ mod test_sort_column {
         );
     }
 
-
-        #[test]
+    #[test]
     fn test_multi_sort() {
         let argv = vec!["lsd", "--sort", "size", "--sort", "time"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
