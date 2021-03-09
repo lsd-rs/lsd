@@ -26,7 +26,7 @@ pub use self::size::Size;
 pub use self::symlink::SymLink;
 pub use crate::icon::Icons;
 
-use crate::flags::{Display, Flags, Layout};
+use crate::flags::{Display, Flags, Layout, Block};
 use crate::print_error;
 
 #[cfg(feature = "git")]
@@ -99,6 +99,11 @@ impl Meta {
                 Self::from_path(&self.path.join(Component::ParentDir), flags.dereference.0)?;
             parent_meta.name.name = "..".to_owned();
 
+            if flags.blocks.0.contains(&Block::GitStatus) {
+                current_meta.git_status = cache.and_then(|cache| cache.get(&current_meta.path, true));
+                parent_meta.git_status = cache.and_then(|cache| cache.get(&parent_meta.path, true))
+            }
+            
             content.push(current_meta);
             content.push(parent_meta);
         }
