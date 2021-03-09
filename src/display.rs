@@ -345,14 +345,11 @@ fn get_padding_rules(metas: &[Meta], flags: &Flags) -> HashMap<Block, usize> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::app;
     use crate::color;
     use crate::color::Colors;
     use crate::icon;
     use crate::icon::Icons;
     use crate::meta::{FileType, Name};
-    use crate::Config;
-    use assert_fs::prelude::*;
     use std::path::Path;
 
     #[test]
