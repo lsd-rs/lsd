@@ -101,7 +101,7 @@ impl Meta {
 
             current_meta.git_status = cache.and_then(|cache| cache.get(&current_meta.path, true));
             parent_meta.git_status = cache.and_then(|cache| cache.get(&parent_meta.path, true));
-            
+
             content.push(current_meta);
             content.push(parent_meta);
         }
