@@ -256,7 +256,8 @@ impl Colors {
         m.insert(Elem::Links { valid: true }, Colour::Fixed(13));
         m.insert(Elem::Links { valid: false }, Colour::Fixed(245));
 
-        m.insert(Elem::TreeEdge, Colour::Fixed(44)); // DarkTurquoise
+        // TODO add this after we can use file to configure theme
+        // m.insert(Elem::TreeEdge, Colour::Fixed(44)); // DarkTurquoise
         m
     }
 }

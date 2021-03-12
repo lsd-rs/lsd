@@ -1,4 +1,4 @@
-use crate::color::{ColoredString, Colors, Elem};
+use crate::color::{ColoredString, Colors};
 use crate::flags::{Block, Display, Flags, Layout};
 use crate::icon::Icons;
 use crate::meta::name::DisplayOption;
@@ -42,6 +42,7 @@ pub fn tree(metas: &[Meta], flags: &Flags, colors: &Colors, icons: &Icons) -> St
     for (i, block) in flags.blocks.0.iter().enumerate() {
         if let Block::Name = block {
             index = i;
+            break;
         }
     }
 
@@ -163,7 +164,7 @@ fn inner_display_tree(
     icons: &Icons,
     tree_depth_prefix: (usize, &str),
     padding_rules: &HashMap<Block, usize>,
-    target_index: usize,
+    tree_index: usize,
 ) -> Vec<Cell> {
     let mut cells = Vec::new();
     let last_idx = metas.len();
@@ -187,7 +188,7 @@ fn inner_display_tree(
             &flags,
             &DisplayOption::FileName,
             &padding_rules,
-            (target_index, &current_prefix),
+            (tree_index, &current_prefix),
         ) {
             let block_str = block.to_string();
 
@@ -216,7 +217,7 @@ fn inner_display_tree(
                 icons,
                 (tree_depth_prefix.0 + 1, &new_prefix),
                 padding_rules,
-                target_index,
+                tree_index,
             ));
         }
     }
@@ -262,7 +263,9 @@ fn get_output<'a>(
     let mut strings: Vec<ANSIString> = Vec::new();
     for (i, block) in flags.blocks.0.iter().enumerate() {
         let mut block_vec = if Layout::Tree == flags.layout && tree.0 == i {
-            vec![colors.colorize(ANSIString::from(tree.1).to_string(), &Elem::TreeEdge)]
+            // TODO: add color after we have theme configuration
+            // vec![colors.colorize(ANSIString::from(tree.1).to_string(), &Elem::TreeEdge)]
+            vec![ANSIString::from(tree.1)]
         } else {
             Vec::new()
         };
@@ -289,18 +292,13 @@ fn get_output<'a>(
             Block::SizeValue => block_vec.push(meta.size.render_value(colors, flags)),
             Block::Date => block_vec.push(meta.date.render(colors, &flags)),
             Block::Name => {
-                if flags.no_symlink.0 || flags.dereference.0 || flags.layout == Layout::Grid {
-                    block_vec.extend(vec![
-                        meta.name.render(colors, icons, &display_option),
-                        meta.indicator.render(&flags),
-                    ])
-                } else {
-                    block_vec.extend(vec![
-                        meta.name.render(colors, icons, &display_option),
-                        meta.indicator.render(&flags),
-                        meta.symlink.render(colors, &flags),
-                    ])
-                };
+                block_vec.extend(vec![
+                    meta.name.render(colors, icons, &display_option),
+                    meta.indicator.render(&flags),
+                ]);
+                if !(flags.no_symlink.0 || flags.dereference.0 || flags.layout == Layout::Grid) {
+                    block_vec.push(meta.symlink.render(colors, &flags))
+                }
             }
         };
         strings.push(ColoredString::from(ANSIStrings(&block_vec).to_string()));
