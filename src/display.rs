@@ -85,7 +85,7 @@ fn inner_display_grid(
     for meta in metas {
         // Maybe skip showing the directory meta now; show its contents later.
         if skip_dirs
-            && (matches!(meta.file_type, FileType::Directory{..})
+            && (matches!(meta.file_type, FileType::Directory { .. })
                 || (matches!(meta.file_type, FileType::SymLink { is_dir: true })
                     && flags.layout != Layout::OneLine))
         {
@@ -362,9 +362,11 @@ mod tests {
     use super::*;
     use crate::color;
     use crate::color::Colors;
-    use crate::icon;
     use crate::icon::Icons;
     use crate::meta::{FileType, Name};
+    use crate::Config;
+    use crate::{app, flags, icon, sort};
+    use assert_fs::prelude::*;
     use std::path::Path;
 
     #[test]
@@ -501,6 +503,16 @@ mod tests {
         }
     }
 
+    fn sort(metas: &mut Vec<Meta>, sorters: &Vec<(flags::SortOrder, sort::SortFn)>) {
+        metas.sort_unstable_by(|a, b| sort::by_meta(sorters, a, b));
+
+        for meta in metas {
+            if let Some(ref mut content) = meta.content {
+                sort(content, sorters);
+            }
+        }
+    }
+
     #[test]
     fn test_display_tree_with_all() {
         let argv = vec!["lsd", "--tree", "--all"];
@@ -511,11 +523,12 @@ mod tests {
         dir.child("one.d").create_dir_all().unwrap();
         dir.child("one.d/two").touch().unwrap();
         dir.child("one.d/.hidden").touch().unwrap();
-        let metas = Meta::from_path(Path::new(dir.path()), false)
+        let mut metas = Meta::from_path(Path::new(dir.path()), false)
             .unwrap()
             .recurse_into(42, &flags)
             .unwrap()
             .unwrap();
+        sort(&mut metas, &sort::assemble_sorters(&flags));
         let output = tree(
             &metas,
             &flags,
