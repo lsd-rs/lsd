@@ -229,7 +229,7 @@ icons:
   # Possible values: fancy, unicode
   theme: fancy
   # Separator between icon and the name
-  # Default to 2 spaces
+  # Default to 1 space
   separator: ' '
 
 
