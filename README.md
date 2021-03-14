@@ -228,6 +228,10 @@ icons:
   # Which icon theme to use.
   # Possible values: fancy, unicode
   theme: fancy
+  # Separator between icon and the name
+  # Default to 2 spaces
+  separator: ' '
+
 
 # == Ignore Globs ==
 # A list of globs to ignore when listing.
