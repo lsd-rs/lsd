@@ -16,7 +16,6 @@ extern crate lscolors;
 #[cfg(test)]
 extern crate tempfile;
 extern crate term_grid;
-extern crate terminal_size;
 extern crate unicode_width;
 extern crate wild;
 extern crate xdg;

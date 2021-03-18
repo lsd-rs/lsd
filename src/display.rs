@@ -1,12 +1,10 @@
 use crate::color::{ColoredString, Colors};
 use crate::flags::{Block, Display, Flags, Layout};
 use crate::icon::Icons;
-use crate::meta::name::DisplayOption;
-use crate::meta::{FileType, Meta};
+use crate::meta::{DisplayOption, FileType, Meta};
 use ansi_term::{ANSIString, ANSIStrings};
 use std::collections::HashMap;
 use term_grid::{Cell, Direction, Filling, Grid, GridOptions};
-use terminal_size::terminal_size;
 use unicode_width::UnicodeWidthStr;
 
 const EDGE: &str = "\u{251c}\u{2500}\u{2500}"; // "├──"
@@ -15,11 +13,6 @@ const CORNER: &str = "\u{2514}\u{2500}\u{2500}"; // "└──"
 const BLANK: &str = "   ";
 
 pub fn grid(metas: &[Meta], flags: &Flags, colors: &Colors, icons: &Icons) -> String {
-    let term_width = match terminal_size() {
-        Some((w, _)) => Some(w.0 as usize),
-        None => None,
-    };
-
     inner_display_grid(
         &DisplayOption::None,
         metas,
@@ -27,7 +20,7 @@ pub fn grid(metas: &[Meta], flags: &Flags, colors: &Colors, icons: &Icons) -> St
         colors,
         icons,
         0,
-        term_width,
+        termize::dimensions().map(|(w, _)| w as usize),
     )
 }
 
@@ -84,12 +77,12 @@ fn inner_display_grid(
     // print the files first.
     for meta in metas {
         // Maybe skip showing the directory meta now; show its contents later.
-        if skip_dirs
-            && (matches!(meta.file_type, FileType::Directory { .. })
-                || (matches!(meta.file_type, FileType::SymLink { is_dir: true })
-                    && flags.layout != Layout::OneLine))
-        {
-            continue;
+        if skip_dirs {
+            match meta.file_type {
+                FileType::Directory { .. } => continue,
+                FileType::SymLink { is_dir: true } if flags.layout != Layout::OneLine => continue,
+                _ => {}
+            }
         }
 
         let blocks = get_output(
@@ -103,31 +96,23 @@ fn inner_display_grid(
         );
 
         for block in blocks {
-            let block_str = block.to_string();
-
             grid.add(Cell {
-                width: get_visible_width(&block_str),
-                contents: block_str,
+                width: get_visible_width(&block),
+                contents: block.to_string(),
             });
         }
     }
 
-    if flags.layout == Layout::Grid {
-        if let Some(tw) = term_width {
-            if let Some(gridded_output) = grid.fit_into_width(tw) {
-                output += &gridded_output.to_string();
-            } else {
-                //does not fit into grid, usually because (some) filename(s)
-                //are longer or almost as long as term_width
-                //print line by line instead!
-                output += &grid.fit_into_columns(1).to_string();
-            }
-        } else {
-            output += &grid.fit_into_columns(1).to_string();
+    output += if flags.layout == Layout::Grid {
+        match term_width.and_then(|tw| grid.fit_into_width(tw)) {
+            Some(gridded_output) => gridded_output,
+            None => grid.fit_into_columns(1),
         }
     } else {
-        output += &grid.fit_into_columns(flags.blocks.0.len()).to_string();
+        grid.fit_into_columns(flags.blocks.0.len())
     }
+    .to_string()
+    .as_str();
 
     let should_display_folder_path = should_display_folder_path(depth, &metas, &flags);
 
@@ -190,11 +175,9 @@ fn inner_display_tree(
             &padding_rules,
             (tree_index, &current_prefix),
         ) {
-            let block_str = block.to_string();
-
             cells.push(Cell {
-                width: get_visible_width(&block_str),
-                contents: block_str,
+                width: get_visible_width(&block),
+                contents: block.to_string(),
             });
         }
 
@@ -231,10 +214,10 @@ fn should_display_folder_path(depth: usize, metas: &[Meta], flags: &Flags) -> bo
     } else {
         let folder_number = metas
             .iter()
-            .filter(|x| {
-                matches!(x.file_type, FileType::Directory { .. })
-                    || (matches!(x.file_type, FileType::SymLink { is_dir: true })
-                        && flags.layout != Layout::OneLine)
+            .filter(|x| match x.file_type {
+                FileType::Directory { .. } => true,
+                FileType::SymLink { is_dir: true } => flags.layout != Layout::OneLine,
+                _ => false,
             })
             .count();
 
@@ -243,12 +226,7 @@ fn should_display_folder_path(depth: usize, metas: &[Meta], flags: &Flags) -> bo
 }
 
 fn display_folder_path(meta: &Meta) -> String {
-    let mut output = String::new();
-    output.push('\n');
-    output += &meta.path.to_string_lossy();
-    output += ":\n";
-
-    output
+    String::new() + "\n" + &meta.path.to_string_lossy() + ":\n"
 }
 
 fn get_output<'a>(
@@ -368,19 +346,38 @@ mod tests {
     use crate::{app, flags, icon, sort};
     use assert_fs::prelude::*;
     use std::path::Path;
+    use tempfile::tempdir;
+
+    const FILES: [&str; 8] = [
+        "Ｈｅｌｌｏ,ｗｏｒｌｄ!",
+        "ASCII1234-_",
+        "File with space",
+        "制作样本。",
+        "日本語",
+        "샘플은 무료로 드리겠습니다",
+        "👩🐩",
+        "🔬",
+    ];
+
+    macro_rules! get_files {
+        ($tmp:expr) => {
+            FILES
+                .iter()
+                .map(|&f| {
+                    let path = { &$tmp }.path().join(f);
+                    std::fs::File::create(&path).unwrap();
+                    path
+                })
+                // expected lengths
+                .zip(&[22, 11, 15, 10, 6, 26, 4, 2])
+        };
+    }
+>>>>>>> 0f3eb3e (general speed up)
 
     #[test]
     fn test_display_get_visible_width_without_icons() {
-        for (s, l) in &[
-            ("Ｈｅｌｌｏ,ｗｏｒｌｄ!", 22),
-            ("ASCII1234-_", 11),
-            ("制作样本。", 10),
-            ("日本語", 6),
-            ("샘플은 무료로 드리겠습니다", 26),
-            ("👩🐩", 4),
-            ("🔬", 2),
-        ] {
-            let path = Path::new(s);
+        let tmp = tempdir().expect("failed to create temp dir");
+        for (path, &len) in get_files!(tmp) {
             let name = Name::new(
                 &path,
                 FileType::File {
@@ -390,28 +387,20 @@ mod tests {
             );
             let output = name.render(
                 &Colors::new(color::Theme::NoColor),
-                &Icons::new(icon::Theme::NoIcon, " ".to_string()),
+                &Icons::new(icon::Theme::NoIcon),
                 &DisplayOption::FileName,
+                &path.metadata().unwrap(),
+                " ",
             );
 
-            assert_eq!(get_visible_width(&output), *l);
+            assert_eq!(get_visible_width(&output), len);
         }
     }
 
     #[test]
     fn test_display_get_visible_width_with_icons() {
-        for (s, l) in &[
-            // Add 3 characters for the icons.
-            ("Ｈｅｌｌｏ,ｗｏｒｌｄ!", 24),
-            ("ASCII1234-_", 13),
-            ("File with space", 17),
-            ("制作样本。", 12),
-            ("日本語", 8),
-            ("샘플은 무료로 드리겠습니다", 28),
-            ("👩🐩", 6),
-            ("🔬", 4),
-        ] {
-            let path = Path::new(s);
+        let tmp = tempdir().expect("failed to create temp dir");
+        for (path, &len) in get_files!(tmp) {
             let name = Name::new(
                 &path,
                 FileType::File {
@@ -422,28 +411,22 @@ mod tests {
             let output = name
                 .render(
                     &Colors::new(color::Theme::NoColor),
-                    &Icons::new(icon::Theme::Fancy, " ".to_string()),
+                    &Icons::new(icon::Theme::Fancy),
                     &DisplayOption::FileName,
+                    &path.metadata().unwrap(),
+                    " ",
                 )
                 .to_string();
 
-            assert_eq!(get_visible_width(&output), *l);
+            // Add 2 characters for the icons.
+            assert_eq!(get_visible_width(&output), len + 2);
         }
     }
 
     #[test]
     fn test_display_get_visible_width_with_colors() {
-        for (s, l) in &[
-            ("Ｈｅｌｌｏ,ｗｏｒｌｄ!", 22),
-            ("ASCII1234-_", 11),
-            ("File with space", 15),
-            ("制作样本。", 10),
-            ("日本語", 6),
-            ("샘플은 무료로 드리겠습니다", 26),
-            ("👩🐩", 4),
-            ("🔬", 2),
-        ] {
-            let path = Path::new(s);
+        let tmp = tempdir().expect("failed to create temp dir");
+        for (path, &len) in get_files!(tmp) {
             let name = Name::new(
                 &path,
                 FileType::File {
@@ -454,32 +437,24 @@ mod tests {
             let output = name
                 .render(
                     &Colors::new(color::Theme::NoLscolors),
-                    &Icons::new(icon::Theme::NoIcon, " ".to_string()),
+                    &Icons::new(icon::Theme::NoIcon),
                     &DisplayOption::FileName,
+                    &path.metadata().unwrap(),
+                    " ",
                 )
                 .to_string();
 
             // check if the color is present.
             assert_eq!(true, output.starts_with("\u{1b}[38;5;"));
             assert_eq!(true, output.ends_with("[0m"));
-
-            assert_eq!(get_visible_width(&output), *l);
+            assert_eq!(get_visible_width(&output), len);
         }
     }
 
     #[test]
     fn test_display_get_visible_width_without_colors() {
-        for (s, l) in &[
-            ("Ｈｅｌｌｏ,ｗｏｒｌｄ!", 22),
-            ("ASCII1234-_", 11),
-            ("File with space", 15),
-            ("制作样本。", 10),
-            ("日本語", 6),
-            ("샘플은 무료로 드리겠습니다", 26),
-            ("👩🐩", 4),
-            ("🔬", 2),
-        ] {
-            let path = Path::new(s);
+        let tmp = tempdir().expect("failed to create temp dir");
+        for (path, &len) in get_files!(tmp) {
             let name = Name::new(
                 &path,
                 FileType::File {
@@ -490,8 +465,10 @@ mod tests {
             let output = name
                 .render(
                     &Colors::new(color::Theme::NoColor),
-                    &Icons::new(icon::Theme::NoIcon, " ".to_string()),
+                    &Icons::new(icon::Theme::NoIcon),
                     &DisplayOption::FileName,
+                    &path.metadata().unwrap(),
+                    " ",
                 )
                 .to_string();
 
@@ -499,7 +476,7 @@ mod tests {
             assert_eq!(false, output.starts_with("\u{1b}[38;5;"));
             assert_eq!(false, output.ends_with("[0m"));
 
-            assert_eq!(get_visible_width(&output), *l);
+            assert_eq!(get_visible_width(&output), len);
         }
     }
 

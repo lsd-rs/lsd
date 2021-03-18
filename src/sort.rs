@@ -59,7 +59,7 @@ fn by_date(a: &Meta, b: &Meta) -> Ordering {
 }
 
 fn by_version(a: &Meta, b: &Meta) -> Ordering {
-    compare(&a.name.name, &b.name.name)
+    compare(&a.name.get_name(), &b.name.get_name())
 }
 
 fn by_extension(a: &Meta, b: &Meta) -> Ordering {

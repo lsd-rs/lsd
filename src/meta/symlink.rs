@@ -1,55 +1,32 @@
 use crate::color::{ColoredString, Colors, Elem};
 use crate::flags::Flags;
-use ansi_term::{ANSIString, ANSIStrings};
-use std::fs::read_link;
+use ansi_term::ANSIStrings;
 use std::path::Path;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct SymLink {
     target: Option<String>,
     valid: bool,
 }
 
-impl<'a> From<&'a Path> for SymLink {
-    fn from(path: &'a Path) -> Self {
-        if let Ok(target) = read_link(path) {
-            if target.is_absolute() || path.parent() == None {
-                return Self {
-                    valid: target.exists(),
-                    target: Some(
-                        target
-                            .to_str()
-                            .expect("failed to convert symlink to str")
-                            .to_string(),
-                    ),
-                };
-            }
-
-            return Self {
-                target: Some(
-                    target
-                        .to_str()
-                        .expect("failed to convert symlink to str")
-                        .to_string(),
-                ),
-                valid: path.parent().unwrap().join(target).exists(),
-            };
-        }
-
-        Self {
-            target: None,
-            valid: false,
-        }
+impl<P: AsRef<Path>> From<&P> for SymLink {
+    fn from(path: &P) -> Self {
+        path.as_ref()
+            .read_link()
+            .map(|target| Self {
+                target: Some(target.to_string_lossy().into()),
+                valid: match (path.as_ref().parent(), target.is_absolute()) {
+                    (Some(p), false) => p.join(target).exists(),
+                    _ => target.exists(),
+                },
+            })
+            .unwrap_or_default()
     }
 }
 
 impl SymLink {
     pub fn symlink_string(&self) -> Option<String> {
-        if let Some(ref target) = self.target {
-            Some(target.to_string())
-        } else {
-            None
-        }
+        self.target.as_ref().map(Into::into)
     }
 
     pub fn render(&self, colors: &Colors, flag: &Flags) -> ColoredString {
@@ -60,15 +37,14 @@ impl SymLink {
                 &Elem::BrokenSymLink
             };
 
-            let strings: &[ColoredString] = &[
-                ColoredString::from(format!(" {} ", flag.symlink_arrow)), // ⇒ \u{21d2}
+            ANSIStrings(&[
+                format!(" {} ", flag.symlink_arrow).into(), // ⇒ \u{21d2}
                 colors.colorize(target_string, elem),
-            ];
-
-            let res = ANSIStrings(strings).to_string();
-            ColoredString::from(res)
+            ])
+            .to_string()
+            .into()
         } else {
-            ANSIString::from("")
+            "".into()
         }
     }
 }

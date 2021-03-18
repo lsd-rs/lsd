@@ -1,8 +1,9 @@
 use crate::color::{ColoredString, Colors, Elem};
 use crate::icon::Icons;
 use crate::meta::filetype::FileType;
+
+use std::borrow::Cow;
 use std::cmp::{Ordering, PartialOrd};
-use std::ffi::OsStr;
 use std::path::{Component, Path, PathBuf};
 
 #[derive(Debug)]
@@ -14,86 +15,78 @@ pub enum DisplayOption<'a> {
 
 #[derive(Clone, Debug, Eq)]
 pub struct Name {
-    pub name: String,
+    // name is an option since we want to use the Cow<str> from path until we actually need a newly allocated String. See set_name and get_name for more
+    name: Option<String>,
     path: PathBuf,
-    extension: Option<String>,
     file_type: FileType,
 }
 
 impl Name {
     pub fn new(path: &Path, file_type: FileType) -> Self {
-        let name = match path.file_name() {
-            Some(name) => name.to_string_lossy().to_string(),
-            None => path.to_string_lossy().to_string(),
-        };
-
-        let extension = path
-            .extension()
-            .map(|ext| ext.to_string_lossy().to_string());
-
         Self {
-            name,
-            path: PathBuf::from(path),
-            extension,
+            name: None,
+            path: path.into(),
             file_type,
         }
     }
 
-    pub fn file_name(&self) -> &str {
-        self.path
-            .file_name()
-            .and_then(OsStr::to_str)
-            .unwrap_or(&self.name)
+    pub fn extension(&self) -> Option<Cow<'_, str>> {
+        self.path.extension().map(|e| e.to_string_lossy())
     }
 
-    fn relative_path<T: AsRef<Path> + Clone>(&self, base_path: T) -> PathBuf {
-        let base_path = base_path.as_ref();
+    pub fn set_name(&mut self, new_name: &str) {
+        self.name = Some(new_name.to_owned());
+    }
 
+    pub fn get_name(&self) -> Cow<'_, str> {
+        match &self.name {
+            Some(name) => Cow::from(name),
+            None => match self.path.file_name() {
+                Some(name) => name.to_string_lossy(),
+                None => self.path.to_string_lossy(),
+            },
+        }
+    }
+
+    pub fn get_path(&self) -> &PathBuf {
+        &self.path
+    }
+
+    pub fn file_type(&self) -> FileType {
+        self.file_type
+    }
+
+    fn relative_path(&self, base_path: &Path) -> PathBuf {
         if self.path == base_path {
-            return PathBuf::from(AsRef::<Path>::as_ref(&Component::CurDir));
+            PathBuf::from(AsRef::<Path>::as_ref(&Component::CurDir))
+        } else if let Some(prefix) = self.path.ancestors().find(|a| base_path.starts_with(a)) {
+            std::iter::repeat(Component::ParentDir)
+                .take(
+                    base_path
+                        .strip_prefix(&prefix)
+                        .unwrap()
+                        .components()
+                        .count(),
+                )
+                .chain(self.path.strip_prefix(&prefix).unwrap().components())
+                .collect()
+        } else {
+            PathBuf::new()
         }
-
-        let shared_components: PathBuf = self
-            .path
-            .components()
-            .zip(base_path.components())
-            .take_while(|(target_component, base_component)| target_component == base_component)
-            .map(|tuple| tuple.0)
-            .collect();
-
-        base_path
-            .strip_prefix(&shared_components)
-            .unwrap()
-            .components()
-            .map(|_| Component::ParentDir)
-            .chain(
-                self.path
-                    .strip_prefix(&shared_components)
-                    .unwrap()
-                    .components(),
-            )
-            .collect()
     }
 
-    pub fn escape(&self, string: &str) -> String {
-        if string
-            .chars()
-            .all(|c| c >= 0x20 as char && c != 0x7f as char)
-        {
-            string.to_string()
-        } else {
-            let mut chars = String::new();
-            for c in string.chars() {
-                // The `escape_default` method on `char` is *almost* what we want here, but
-                // it still escapes non-ASCII UTF-8 characters, which are still printable.
-                if c >= 0x20 as char && c != 0x7f as char {
-                    chars.push(c);
-                } else {
-                    chars += &c.escape_default().collect::<String>();
-                }
+    fn escape(&self, string: &str) -> String {
+        let mut chars = String::with_capacity(string.len());
+        for c in string.chars() {
+            // The `escape_default` method on `char` is *almost* what we want here, but
+            // it still escapes non-ASCII UTF-8 characters, which are still printable.
+            if c >= 0x20 as char && c != 0x7f as char {
+                chars.push(c);
+            } else {
+                chars += &c.escape_default().collect::<String>();
             }
-            chars
         }
+        chars
     }
 
     pub fn render(
@@ -101,21 +94,18 @@ impl Name {
         colors: &Colors,
         icons: &Icons,
         display_option: &DisplayOption,
+        meta: &std::fs::Metadata,
+        separator: &str,
     ) -> ColoredString {
-        let content = match display_option {
-            DisplayOption::FileName => {
-                format!("{}{}", icons.get(self), self.escape(self.file_name()))
-            }
-            DisplayOption::Relative { base_path } => format!(
-                "{}{}",
-                icons.get(self),
-                self.escape(&self.relative_path(base_path).to_string_lossy())
-            ),
-            DisplayOption::None => format!(
-                "{}{}",
-                icons.get(self),
-                self.escape(&self.path.to_string_lossy())
-            ),
+        let name: String = if let DisplayOption::Relative { base_path } = display_option {
+            self.escape(&self.relative_path(base_path).to_string_lossy())
+        } else {
+            self.escape(&self.get_name())
+        };
+
+        let content = match icons.get(self) {
+            Some(icon) => format!("{}{}{}", icon, separator, name),
+            None => name,
         };
 
         let elem = match self.file_type {
@@ -129,35 +119,27 @@ impl Name {
             },
         };
 
-        colors.colorize_using_path(content, &self.path, &elem)
-    }
-
-    pub fn extension(&self) -> Option<&str> {
-        self.extension.as_deref()
-    }
-
-    pub fn file_type(&self) -> FileType {
-        self.file_type
+        colors.colorize_using_path(content, &self.path, &elem, meta)
     }
 }
 
 impl Ord for Name {
     fn cmp(&self, other: &Self) -> Ordering {
-        self.name.to_lowercase().cmp(&other.name.to_lowercase())
+        self.get_name()
+            .to_ascii_lowercase()
+            .cmp(&other.get_name().to_ascii_lowercase())
     }
 }
 
 impl PartialOrd for Name {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        self.name
-            .to_lowercase()
-            .partial_cmp(&other.name.to_lowercase())
+        Some(self.cmp(other))
     }
 }
 
 impl PartialEq for Name {
     fn eq(&self, other: &Self) -> bool {
-        self.name.eq_ignore_ascii_case(&other.name.to_lowercase())
+        self.get_name().eq_ignore_ascii_case(&other.get_name())
     }
 }
 
@@ -185,7 +167,7 @@ mod test {
     #[cfg(unix)] // Windows uses different default permissions
     fn test_print_file_name() {
         let tmp_dir = tempdir().expect("failed to create temp dir");
-        let icons = Icons::new(icon::Theme::Fancy, " ".to_string());
+        let icons = Icons::new(icon::Theme::Fancy);
 
         // Create the file;
         let file_path = tmp_dir.path().join("file.txt");
@@ -198,14 +180,14 @@ mod test {
 
         assert_eq!(
             Colour::Fixed(184).paint(" file.txt"),
-            name.render(&colors, &icons, &DisplayOption::FileName)
+            name.render(&colors, &icons, &DisplayOption::FileName, &meta, " ")
         );
     }
 
     #[test]
     fn test_print_dir_name() {
         let tmp_dir = tempdir().expect("failed to create temp dir");
-        let icons = Icons::new(icon::Theme::Fancy, " ".to_string());
+        let icons = Icons::new(icon::Theme::Fancy);
 
         // Chreate the directory
         let dir_path = tmp_dir.path().join("directory");
@@ -216,7 +198,13 @@ mod test {
 
         assert_eq!(
             Colour::Fixed(33).paint(" directory"),
-            meta.name.render(&colors, &icons, &DisplayOption::FileName)
+            meta.name.render(
+                &colors,
+                &icons,
+                &DisplayOption::FileName,
+                &dir_path.metadata().unwrap(),
+                " "
+            )
         );
     }
 
@@ -224,7 +212,7 @@ mod test {
     #[cfg(unix)] // Symlinks are hard on Windows
     fn test_print_symlink_name_file() {
         let tmp_dir = tempdir().expect("failed to create temp dir");
-        let icons = Icons::new(icon::Theme::Fancy, " ".to_string());
+        let icons = Icons::new(icon::Theme::Fancy);
 
         // Create the file;
         let file_path = tmp_dir.path().join("file.tmp");
@@ -244,7 +232,7 @@ mod test {
 
         assert_eq!(
             Colour::Fixed(44).paint(" target.tmp"),
-            name.render(&colors, &icons, &DisplayOption::FileName)
+            name.render(&colors, &icons, &DisplayOption::FileName, &meta, " ")
         );
     }
 
@@ -252,7 +240,7 @@ mod test {
     #[cfg(unix)] // Symlinks are hard on Windows
     fn test_print_symlink_name_dir() {
         let tmp_dir = tempdir().expect("failed to create temp dir");
-        let icons = Icons::new(icon::Theme::Fancy, " ".to_string());
+        let icons = Icons::new(icon::Theme::Fancy);
 
         // Create the directory;
         let dir_path = tmp_dir.path().join("tmp.d");
@@ -272,7 +260,7 @@ mod test {
 
         assert_eq!(
             Colour::Fixed(44).paint(" target.d"),
-            name.render(&colors, &icons, &DisplayOption::FileName)
+            name.render(&colors, &icons, &DisplayOption::FileName, &meta, " ")
         );
     }
 
@@ -280,7 +268,7 @@ mod test {
     #[cfg(unix)]
     fn test_print_other_type_name() {
         let tmp_dir = tempdir().expect("failed to create temp dir");
-        let icons = Icons::new(icon::Theme::Fancy, " ".to_string());
+        let icons = Icons::new(icon::Theme::Fancy);
 
         // Create the pipe;
         let pipe_path = tmp_dir.path().join("pipe.tmp");
@@ -298,14 +286,14 @@ mod test {
 
         assert_eq!(
             Colour::Fixed(184).paint(" pipe.tmp"),
-            name.render(&colors, &icons, &DisplayOption::FileName)
+            name.render(&colors, &icons, &DisplayOption::FileName, &meta, " ")
         );
     }
 
     #[test]
     fn test_print_without_icon_or_color() {
         let tmp_dir = tempdir().expect("failed to create temp dir");
-        let icons = Icons::new(icon::Theme::NoIcon, " ".to_string());
+        let icons = Icons::new(icon::Theme::NoIcon);
 
         // Create the file;
         let file_path = tmp_dir.path().join("file.txt");
@@ -317,7 +305,13 @@ mod test {
         assert_eq!(
             "file.txt",
             meta.name
-                .render(&colors, &icons, &DisplayOption::FileName)
+                .render(
+                    &colors,
+                    &icons,
+                    &DisplayOption::FileName,
+                    &file_path.metadata().unwrap(),
+                    " "
+                )
                 .to_string()
                 .as_str()
         );
@@ -335,7 +329,10 @@ mod test {
             },
         );
 
-        assert_eq!(Some("txt"), name.extension());
+        assert_eq!(
+            Some("txt".to_string()),
+            name.extension().map(|c| c.to_string())
+        );
     }
 
     #[test]
@@ -496,7 +493,7 @@ mod test {
         );
         let base_path = PathBuf::from("/home/parent1");
 
-        assert_eq!(PathBuf::from("child"), name.relative_path(base_path),)
+        assert_eq!(PathBuf::from("child"), name.relative_path(&base_path),)
     }
 
     #[test]
@@ -512,7 +509,7 @@ mod test {
 
         assert_eq!(
             PathBuf::from("../../grand-parent1/parent1/child"),
-            name.relative_path(base_path),
+            name.relative_path(&base_path),
         )
     }
 
@@ -520,7 +517,7 @@ mod test {
     #[cfg(unix)]
     fn test_special_chars_in_filename() {
         let tmp_dir = tempdir().expect("failed to create temp dir");
-        let icons = Icons::new(icon::Theme::Fancy, " ".to_string());
+        let icons = Icons::new(icon::Theme::Fancy);
 
         // Create the file;
         let file_path = tmp_dir.path().join("file\ttab.txt");
@@ -533,7 +530,7 @@ mod test {
 
         assert_eq!(
             Colour::Fixed(184).paint(" file\\ttab.txt"),
-            name.render(&colors, &icons, &DisplayOption::FileName)
+            name.render(&colors, &icons, &DisplayOption::FileName, &meta, " ")
         );
 
         let file_path = tmp_dir.path().join("file\nnewline.txt");
@@ -546,7 +543,7 @@ mod test {
 
         assert_eq!(
             Colour::Fixed(184).paint(" file\\nnewline.txt"),
-            name.render(&colors, &icons, &DisplayOption::FileName)
+            name.render(&colors, &icons, &DisplayOption::FileName, &meta, " ")
         );
     }
 }

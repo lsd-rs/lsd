@@ -17,7 +17,7 @@ pub use self::filetype::FileType;
 pub use self::indicator::Indicator;
 pub use self::inode::INode;
 pub use self::links::Links;
-pub use self::name::Name;
+pub use self::name::{DisplayOption, Name};
 pub use self::owner::Owner;
 pub use self::permissions::Permissions;
 pub use self::size::Size;
@@ -27,12 +27,12 @@ pub use crate::icon::Icons;
 use crate::flags::{Display, Flags, Layout};
 use crate::print_error;
 
-use std::fs::read_link;
-use std::io::{Error, ErrorKind};
+use std::fs::{read_link, Metadata};
 use std::path::{Component, Path, PathBuf};
 
 #[derive(Clone, Debug)]
 pub struct Meta {
+    pub metadata: Metadata,
     pub name: Name,
     pub path: PathBuf,
     pub permissions: Permissions,
@@ -82,14 +82,12 @@ impl Meta {
         let mut content: Vec<Meta> = Vec::new();
 
         if Display::All == flags.display && flags.layout != Layout::Tree {
-            let mut current_meta;
-
-            current_meta = self.clone();
-            current_meta.name.name = ".".to_owned();
+            let mut current_meta = self.clone();
+            current_meta.name.set_name(".");
 
             let mut parent_meta =
                 Self::from_path(&self.path.join(Component::ParentDir), flags.dereference.0)?;
-            parent_meta.name.name = "..".to_owned();
+            parent_meta.name.set_name("..");
 
             content.push(current_meta);
             content.push(parent_meta);
@@ -97,11 +95,7 @@ impl Meta {
 
         for entry in entries {
             let entry = entry?;
-            let path = entry.path();
-
-            let name = path
-                .file_name()
-                .ok_or_else(|| Error::new(ErrorKind::InvalidInput, "invalid file name"))?;
+            let name = entry.file_name();
 
             if flags.ignore_globs.0.is_match(&name) {
                 continue;
@@ -113,14 +107,6 @@ impl Meta {
                 }
             }
 
-            let mut entry_meta = match Self::from_path(&path, flags.dereference.0) {
-                Ok(res) => res,
-                Err(err) => {
-                    print_error!("{}: {}.", path.display(), err);
-                    continue;
-                }
-            };
-
             // skip files for --tree -d
             if flags.layout == Layout::Tree {
                 if let Display::DirectoryOnly = flags.display {
@@ -130,10 +116,18 @@ impl Meta {
                 }
             }
 
+            let mut entry_meta = match Self::from_path(&entry.path(), flags.dereference.0) {
+                Ok(res) => res,
+                Err(err) => {
+                    print_error!("{}: {}.", entry.path().display(), err);
+                    continue;
+                }
+            };
+
             match entry_meta.recurse_into(depth - 1, &flags) {
                 Ok(content) => entry_meta.content = content,
                 Err(err) => {
-                    print_error!("{}: {}.", path.display(), err);
+                    print_error!("{}: {}.", entry.path().display(), err);
                     continue;
                 }
             };
@@ -155,18 +149,23 @@ impl Meta {
                 self.size = Size::new(size_accumulated);
             } else {
                 // possibility that 'depth' limited the recursion in 'recurse_into'
-                self.size = Size::new(Meta::calculate_total_file_size(&self.path));
+                self.size = Size::new(Meta::calculate_total_file_size(&self.path, Some(self)));
             }
         }
     }
 
-    fn calculate_total_file_size(path: &PathBuf) -> u64 {
-        let metadata = if read_link(&path).is_ok() {
-            // If the file is a link, retrieve the metadata without following
-            // the link.
-            path.symlink_metadata()
-        } else {
-            path.metadata()
+    fn calculate_total_file_size(path: &PathBuf, meta: Option<&Meta>) -> u64 {
+        let metadata = match meta {
+            Some(m) => Ok(m.metadata.clone()),
+            None => {
+                if read_link(&path).is_ok() {
+                    // If the file is a link, retrieve the metadata without following
+                    // the link.
+                    path.symlink_metadata()
+                } else {
+                    path.metadata()
+                }
+            }
         };
         let metadata = match metadata {
             Ok(meta) => meta,
@@ -196,7 +195,7 @@ impl Meta {
                         continue;
                     }
                 };
-                size += Meta::calculate_total_file_size(&path);
+                size += Meta::calculate_total_file_size(&path, None);
             }
             size
         } else {
@@ -206,10 +205,9 @@ impl Meta {
 
     pub fn from_path(path: &Path, dereference: bool) -> Result<Self, std::io::Error> {
         // If the file is a link then retrieve link metadata instead with target metadata (if present).
-        let (metadata, symlink_meta) = if read_link(path).is_ok() && !dereference {
-            (path.symlink_metadata()?, path.metadata().ok())
-        } else {
-            (path.metadata()?, None)
+        let (metadata, symlink_meta, is_link) = match path.symlink_metadata() {
+            Ok(metadata) if !dereference => (metadata, path.metadata().ok(), true),
+            _ => (path.metadata()?, None, false),
         };
 
         #[cfg(unix)]
@@ -226,10 +224,15 @@ impl Meta {
         let links = Links::from(&metadata);
 
         Ok(Self {
+            metadata: metadata.clone(),
             inode,
             links,
             path: path.to_path_buf(),
-            symlink: SymLink::from(path),
+            symlink: if is_link {
+                SymLink::from(&path)
+            } else {
+                SymLink::default()
+            },
             size: Size::from(&metadata),
             date: Date::from(&metadata),
             indicator: Indicator::from(file_type),
@@ -239,5 +242,9 @@ impl Meta {
             file_type,
             content: None,
         })
+    }
+
+    pub fn get_symlink(&self) -> &SymLink {
+        &self.symlink
     }
 }

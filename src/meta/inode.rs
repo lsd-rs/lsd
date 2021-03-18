@@ -3,31 +3,32 @@ use std::fs::Metadata;
 
 #[derive(Debug, PartialEq, Eq, Copy, Clone)]
 pub struct INode {
-    index: Option<u64>,
+    #[cfg(unix)]
+    index: u64,
 }
 
 impl<'a> From<&'a Metadata> for INode {
     #[cfg(unix)]
     fn from(meta: &Metadata) -> Self {
         use std::os::unix::fs::MetadataExt;
-
-        let index = meta.ino();
-
-        Self { index: Some(index) }
+        Self { index: meta.ino() }
     }
 
     #[cfg(windows)]
     fn from(_: &Metadata) -> Self {
-        Self { index: None }
+        Self {}
     }
 }
 
 impl INode {
+    #[cfg(unix)]
     pub fn render(&self, colors: &Colors) -> ColoredString {
-        match self.index {
-            Some(i) => colors.colorize(i.to_string(), &Elem::INode { valid: true }),
-            None => colors.colorize(String::from("-"), &Elem::INode { valid: false }),
-        }
+        colors.colorize(self.index.to_string(), &Elem::INode { valid: true })
+    }
+
+    #[cfg(windows)]
+    pub fn render(&self, colors: &Colors) -> ColoredString {
+        colors.colorize(String::from("-"), &Elem::INode { valid: false })
     }
 }
 
@@ -53,10 +54,6 @@ mod tests {
         assert!(success, "failed to exec touch");
 
         let inode = INode::from(&file_path.metadata().unwrap());
-
-        #[cfg(unix)]
-        assert!(inode.index.is_some());
-        #[cfg(windows)]
-        assert!(inode.index.is_none());
+        assert!(inode.index > 0);
     }
 }

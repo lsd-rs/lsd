@@ -2,51 +2,45 @@ use crate::color::{ColoredString, Colors, Elem};
 use crate::flags::{DateFlag, Flags};
 use chrono::{DateTime, Duration, Local};
 use chrono_humanize::HumanTime;
-use std::fs::Metadata;
+use std::{fs::Metadata, time::SystemTime};
 
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
-pub struct Date(DateTime<Local>);
+pub struct Date(SystemTime);
 
 impl<'a> From<&'a Metadata> for Date {
     fn from(meta: &'a Metadata) -> Self {
-        let modified_time = meta.modified().expect("failed to retrieve modified date");
-
-        let time = modified_time.into();
-
-        Date(time)
+        Date(meta.modified().expect("failed to retrieve modified date"))
     }
 }
 
 impl Date {
     pub fn render(&self, colors: &Colors, flags: &Flags) -> ColoredString {
-        let now = Local::now();
+        let time: DateTime<Local> = self.0.into();
+        let ago = Local::now() - time;
 
-        let elem = if self.0 > now - Duration::hours(1) {
+        let elem = if ago < Duration::hours(1) {
             Elem::HourOld
-        } else if self.0 > now - Duration::days(1) {
+        } else if ago < Duration::days(1) {
             Elem::DayOld
         } else {
             Elem::Older
         };
 
-        colors.colorize(self.date_string(&flags), &elem)
-    }
-
-    pub fn date_string(&self, flags: &Flags) -> String {
-        match &flags.date {
-            DateFlag::Date => self.0.format("%c").to_string(),
-            DateFlag::Relative => format!("{}", HumanTime::from(self.0 - Local::now())),
+        let date_string = match &flags.date {
+            DateFlag::Date => time.format("%c").to_string(),
+            DateFlag::Relative => format!("{}", HumanTime::from(-ago)),
             DateFlag::ISO => {
-                // 365.2425 * 24 * 60 * 60 = 31556952 seconds per year
-                // 15778476 seconds are 6 months
-                if self.0 > Local::now() - Duration::seconds(15_778_476) {
-                    self.0.format("%m-%d %R").to_string()
+                // 15778476 seconds is 6 months
+                if ago < Duration::seconds(15_778_476) {
+                    time.format("%m-%d %R").to_string()
                 } else {
-                    self.0.format("%F").to_string()
+                    time.format("%F").to_string()
                 }
             }
-            DateFlag::Formatted(format) => self.0.format(&format).to_string(),
-        }
+            DateFlag::Formatted(format) => time.format(&format).to_string(),
+        };
+
+        colors.colorize(date_string, &elem)
     }
 }
 
