@@ -426,7 +426,7 @@ fn test_tree() {
         .arg(tmp.path())
         .arg("--tree")
         .assert()
-        .stdout(predicate::str::is_match("├── one\n└── one.d\n   └── two\n$").unwrap());
+        .stdout(predicate::str::is_match("├── one\n└── one.d\n    └── two\n$").unwrap());
 }
 
 #[test]
@@ -443,7 +443,8 @@ fn test_tree_all_not_show_self() {
         .arg("--all")
         .assert()
         .stdout(
-            predicate::str::is_match("├── one\n└── one.d\n   ├── .hidden\n   └── two\n$").unwrap(),
+            predicate::str::is_match("├── one\n└── one.d\n    ├── .hidden\n    └── two\n$")
+                .unwrap(),
         );
 }
 
@@ -476,7 +477,7 @@ fn test_tree_d() {
         .arg("--tree")
         .arg("-d")
         .assert()
-        .stdout(predicate::str::is_match("├── one.d\n│  └── one.d\n└── two.d\n$").unwrap());
+        .stdout(predicate::str::is_match("├── one.d\n│   └── one.d\n└── two.d\n$").unwrap());
 }
 
 fn cmd() -> Command {
