@@ -202,9 +202,9 @@ fn inner_display_tree(
             let new_prefix = if tree_depth_prefix.0 > 0 {
                 if idx + 1 != last_idx {
                     // is last folder elem
-                    format!("{}{}", tree_depth_prefix.1, LINE)
+                    format!("{}{} ", tree_depth_prefix.1, LINE)
                 } else {
-                    format!("{}{}", tree_depth_prefix.1, BLANK)
+                    format!("{}{} ", tree_depth_prefix.1, BLANK)
                 }
             } else {
                 tree_depth_prefix.1.to_string()
