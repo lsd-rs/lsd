@@ -271,7 +271,13 @@ fn get_output<'a>(
             Block::Date => block_vec.push(meta.date.render(colors, &flags)),
             Block::Name => {
                 block_vec.extend(vec![
-                    meta.name.render(colors, icons, &display_option),
+                    meta.name.render(
+                        colors,
+                        icons,
+                        &display_option,
+                        &meta.metadata,
+                        &flags.icons.separator.0,
+                    ),
                     meta.indicator.render(&flags),
                 ]);
                 if !(flags.no_symlink.0 || flags.dereference.0 || flags.layout == Layout::Grid) {
@@ -285,37 +291,22 @@ fn get_output<'a>(
 }
 
 fn get_visible_width(input: &str) -> usize {
-    let mut nb_invisible_char = 0;
-
     // If the input has color, do not compute the length contributed by the color to the actual length
-    for (idx, _) in input.match_indices("\u{1b}[") {
-        let (_, s) = input.split_at(idx);
-
-        let m_pos = s.find('m');
-        if let Some(len) = m_pos {
-            nb_invisible_char += len
-        }
-    }
-
-    UnicodeWidthStr::width(input) - nb_invisible_char
+    UnicodeWidthStr::width(input)
+        - input
+            .match_indices("\u{1b}[")
+            .map(|(i, _)| input.split_at(i).1.find('m').unwrap_or_default())
+            .sum::<usize>()
 }
 
 fn detect_size_lengths(metas: &[Meta], flags: &Flags) -> usize {
     let mut max_value_length: usize = 0;
 
     for meta in metas {
-        let value_len = meta.size.value_string(flags).len();
-
-        if value_len > max_value_length {
-            max_value_length = value_len;
-        }
-
+        max_value_length = max_value_length.max(meta.size.value_string(flags).len());
         if Layout::Tree == flags.layout {
             if let Some(subs) = &meta.content {
-                let sub_length = detect_size_lengths(&subs, flags);
-                if sub_length > max_value_length {
-                    max_value_length = sub_length;
-                }
+                max_value_length = max_value_length.max(detect_size_lengths(&subs, flags));
             }
         }
     }
@@ -328,7 +319,6 @@ fn get_padding_rules(metas: &[Meta], flags: &Flags) -> HashMap<Block, usize> {
 
     if flags.blocks.0.contains(&Block::Size) {
         let size_val = detect_size_lengths(&metas, &flags);
-
         padding_rules.insert(Block::SizeValue, size_val);
     }
 
@@ -372,7 +362,6 @@ mod tests {
                 .zip(&[22, 11, 15, 10, 6, 26, 4, 2])
         };
     }
->>>>>>> 0f3eb3e (general speed up)
 
     #[test]
     fn test_display_get_visible_width_without_icons() {
@@ -510,7 +499,7 @@ mod tests {
             &metas,
             &flags,
             &Colors::new(color::Theme::NoColor),
-            &Icons::new(icon::Theme::NoIcon, " ".to_string()),
+            &Icons::new(icon::Theme::NoIcon),
         );
 
         assert_eq!("one.d\n├── .hidden\n└── two\n", output);
@@ -540,7 +529,7 @@ mod tests {
             &metas,
             &flags,
             &Colors::new(color::Theme::NoColor),
-            &Icons::new(icon::Theme::NoIcon, " ".to_string()),
+            &Icons::new(icon::Theme::NoIcon),
         );
 
         let length_before_b = |i| -> usize {
@@ -579,7 +568,7 @@ mod tests {
             &metas,
             &flags,
             &Colors::new(color::Theme::NoColor),
-            &Icons::new(icon::Theme::NoIcon, " ".to_string()),
+            &Icons::new(icon::Theme::NoIcon),
         );
 
         assert_eq!(output.lines().nth(1).unwrap().chars().nth(0).unwrap(), '└');
@@ -617,7 +606,7 @@ mod tests {
             &metas,
             &flags,
             &Colors::new(color::Theme::NoColor),
-            &Icons::new(icon::Theme::NoIcon, " ".to_string()),
+            &Icons::new(icon::Theme::NoIcon),
         );
 
         assert!(output.ends_with("└── two\n"));

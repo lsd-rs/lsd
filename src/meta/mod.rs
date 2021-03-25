@@ -83,11 +83,11 @@ impl Meta {
 
         if Display::All == flags.display && flags.layout != Layout::Tree {
             let mut current_meta = self.clone();
-            current_meta.name.set_name(".");
+            current_meta.name.set_current_dir();
 
             let mut parent_meta =
                 Self::from_path(&self.path.join(Component::ParentDir), flags.dereference.0)?;
-            parent_meta.name.set_name("..");
+            parent_meta.name.set_parent_dir();
 
             content.push(current_meta);
             content.push(parent_meta);
@@ -242,9 +242,5 @@ impl Meta {
             file_type,
             content: None,
         })
-    }
-
-    pub fn get_symlink(&self) -> &SymLink {
-        &self.symlink
     }
 }

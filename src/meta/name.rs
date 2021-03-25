@@ -13,10 +13,15 @@ pub enum DisplayOption<'a> {
     None,
 }
 
+static CUR_DIR: &str = ".";
+static PAR_DIR: &str = "..";
+
 #[derive(Clone, Debug, Eq)]
 pub struct Name {
-    // name is an option since we want to use the Cow<str> from path until we actually need a newly allocated String. See set_name and get_name for more
-    name: Option<String>,
+    // `name` is an option since we want to use the Cow from `path`.
+    // The only time we set the `name` to be different is for . and ..
+    // see set_current_dir, set_parent_dir and get_name.
+    name: Option<Cow<'static, str>>,
     path: PathBuf,
     file_type: FileType,
 }
@@ -34,13 +39,17 @@ impl Name {
         self.path.extension().map(|e| e.to_string_lossy())
     }
 
-    pub fn set_name(&mut self, new_name: &str) {
-        self.name = Some(new_name.to_owned());
+    pub fn set_current_dir(&mut self) {
+        self.name = Some(Cow::from(CUR_DIR));
+    }
+
+    pub fn set_parent_dir(&mut self) {
+        self.name = Some(Cow::from(PAR_DIR));
     }
 
     pub fn get_name(&self) -> Cow<'_, str> {
         match &self.name {
-            Some(name) => Cow::from(name),
+            Some(name) => name.clone(),
             None => match self.path.file_name() {
                 Some(name) => name.to_string_lossy(),
                 None => self.path.to_string_lossy(),

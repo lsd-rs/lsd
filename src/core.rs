@@ -9,21 +9,19 @@ use std::path::PathBuf;
 pub struct Core {
     flags: Flags,
     icons: Icons,
-    //display: Display,
     colors: Colors,
     sorters: Vec<(SortOrder, sort::SortFn)>,
 }
 
 impl Core {
     pub fn new(flags: Flags) -> Self {
-        // termsize allows us to know if the stdout is a tty or not.
+        // termize allows us to know if the stdout is a tty or not.
         let tty_available = termize::dimensions().is_some();
 
-        #[cfg(not(target_os = "windows"))]
-        let console_color_ok = true;
-
-        #[cfg(target_os = "windows")]
+        #[cfg(windows)]
         let console_color_ok = ansi_term::enable_ansi_support().is_ok();
+        #[cfg(unix)]
+        let console_color_ok = true;
 
         let mut inner_flags = flags.clone();
 

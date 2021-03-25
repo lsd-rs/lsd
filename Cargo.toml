@@ -33,10 +33,10 @@ wild = "2.0.*"
 globset = "0.4.*"
 xdg = "2.1.*"
 yaml-rust = "0.4.*"
-termize = "0.1"
-fxhash = "0.2.*"
 serde = { version = "1.0", features = ["derive"] }
 serde_yaml = "0.8"
+fxhash = "0.2.*"
+termize = "0.1.1"
 
 [target.'cfg(unix)'.dependencies]
 users = "0.11.*"
