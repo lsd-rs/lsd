@@ -1,9 +1,14 @@
-use crate::color::{ColoredString, Colors};
 use crate::flags::{Block, Display, Flags, Layout};
+use crate::hashmap;
 use crate::icon::Icons;
 use crate::meta::{DisplayOption, FileType, Meta};
+use crate::{
+    color::{ColoredString, Colors},
+    meta::SymLink,
+};
 use ansi_term::{ANSIString, ANSIStrings};
-use std::collections::HashMap;
+use fxhash::FxHashMap;
+use std::sync::atomic::{AtomicU32, Ordering};
 use term_grid::{Cell, Direction, Filling, Grid, GridOptions};
 use unicode_width::UnicodeWidthStr;
 
@@ -24,6 +29,7 @@ pub fn grid(metas: &[Meta], flags: &Flags, colors: &Colors, icons: &Icons) -> St
     )
 }
 
+static COUNT: (AtomicU32, AtomicU32) = (AtomicU32::new(0), AtomicU32::new(0));
 pub fn tree(metas: &[Meta], flags: &Flags, colors: &Colors, icons: &Icons) -> String {
     let mut grid = Grid::new(GridOptions {
         filling: Filling::Spaces(1),
@@ -43,7 +49,12 @@ pub fn tree(metas: &[Meta], flags: &Flags, colors: &Colors, icons: &Icons) -> St
         grid.add(cell);
     }
 
-    grid.fit_into_columns(flags.blocks.0.len()).to_string()
+    format!(
+        "{}\n{} directories, {} files\n",
+        grid.fit_into_columns(flags.blocks.0.len()),
+        COUNT.0.load(Ordering::SeqCst),
+        COUNT.1.load(Ordering::SeqCst)
+    )
 }
 
 fn inner_display_grid(
@@ -148,7 +159,7 @@ fn inner_display_tree(
     colors: &Colors,
     icons: &Icons,
     tree_depth_prefix: (usize, &str),
-    padding_rules: &HashMap<Block, usize>,
+    padding_rules: &FxHashMap<Block, usize>,
     tree_index: usize,
 ) -> Vec<Cell> {
     let mut cells = Vec::new();
@@ -165,6 +176,12 @@ fn inner_display_tree(
         } else {
             tree_depth_prefix.1.to_string()
         };
+
+        if meta.file_type.is_dirlike() {
+            COUNT.0.fetch_add(1, Ordering::SeqCst);
+        } else {
+            COUNT.1.fetch_add(1, Ordering::SeqCst);
+        }
 
         for block in get_output(
             &meta,
@@ -235,7 +252,7 @@ fn get_output<'a>(
     icons: &'a Icons,
     flags: &'a Flags,
     display_option: &DisplayOption,
-    padding_rules: &HashMap<Block, usize>,
+    padding_rules: &FxHashMap<Block, usize>,
     tree: (usize, &'a str),
 ) -> Vec<ANSIString<'a>> {
     let mut strings: Vec<ANSIString> = Vec::new();
@@ -314,15 +331,12 @@ fn detect_size_lengths(metas: &[Meta], flags: &Flags) -> usize {
     max_value_length
 }
 
-fn get_padding_rules(metas: &[Meta], flags: &Flags) -> HashMap<Block, usize> {
-    let mut padding_rules: HashMap<Block, usize> = HashMap::new();
-
+fn get_padding_rules(metas: &[Meta], flags: &Flags) -> FxHashMap<Block, usize> {
     if flags.blocks.0.contains(&Block::Size) {
-        let size_val = detect_size_lengths(&metas, &flags);
-        padding_rules.insert(Block::SizeValue, size_val);
+        hashmap! { Block::SizeValue => detect_size_lengths(&metas, &flags) }
+    } else {
+        hashmap! {}
     }
-
-    padding_rules
 }
 
 #[cfg(test)]

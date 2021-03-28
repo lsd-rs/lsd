@@ -3,6 +3,7 @@ use std::io::BufRead;
 use std::io::BufReader;
 use std::io::Read;
 
+use crate::hashmap;
 use crate::meta::{FileType, Name};
 use fxhash::FxHashMap;
 
@@ -19,19 +20,6 @@ pub enum Theme {
     NoIcon,
     Fancy,
     Unicode,
-}
-
-macro_rules! hashmap { // adapted from `maplit` to use FxHashMap
-    (@single $($x:tt)*) => (());
-    (@count $($rest:expr),*) => (<[()]>::len(&[$(hashmap!(@single $rest)),*]));
-    ($($key:expr => $value:expr,)+) => { hashmap!($($key => $value),+) };
-    ($($key:expr => $value:expr),*) => {{
-        let mut _map = FxHashMap::default();
-        let _cap = hashmap!(@count $($key),*);
-        _map.reserve(_cap);
-        $(_map.insert($key, $value);)*
-        _map
-    }};
 }
 
 impl Icons {

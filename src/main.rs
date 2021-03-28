@@ -88,6 +88,21 @@ macro_rules! print_output {
     };
 }
 
+// adapted from `maplit` to use FxHashMap
+#[macro_export]
+macro_rules! hashmap {
+    (@single $($x:tt)*) => (());
+    (@count $($rest:expr),*) => (<[()]>::len(&[$(hashmap!(@single $rest)),*]));
+    ($($key:expr => $value:expr,)+) => { hashmap!($($key => $value),+) };
+    ($($key:expr => $value:expr),*) => {{
+        let mut _map = FxHashMap::default();
+        let _cap = hashmap!(@count $($key),*);
+        _map.reserve(_cap);
+        $(_map.insert($key, $value);)*
+        _map
+    }};
+}
+
 fn main() {
     let matches = app::build().get_matches_from(wild::args_os());
 
