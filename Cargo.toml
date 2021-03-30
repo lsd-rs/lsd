@@ -37,6 +37,7 @@ serde = { version = "1.0.*", features = ["derive"] }
 serde_yaml = "0.8.*"
 fxhash = "0.2.*"
 termize = "0.1.*"
+simple-counter = "0.1.0"
 
 [target.'cfg(unix)'.dependencies]
 users = "0.11.*"

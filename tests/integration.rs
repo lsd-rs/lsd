@@ -17,7 +17,6 @@ fn test_runs_okay() {
 #[test]
 fn test_list_empty_directory() {
     cmd()
-        .arg("--ignore-config")
         .arg(tempdir().path())
         .assert()
         .stdout(predicate::eq(""));
@@ -28,14 +27,12 @@ fn test_list_almost_all_empty_directory() {
     let matched = "";
     cmd()
         .arg("--almost-all")
-        .arg("--ignore-config")
         .arg(tempdir().path())
         .assert()
         .stdout(predicate::eq(matched));
 
     cmd()
         .arg("-A")
-        .arg("--ignore-config")
         .arg(tempdir().path())
         .assert()
         .stdout(predicate::eq(matched));
@@ -46,14 +43,12 @@ fn test_list_all_empty_directory() {
     let matched = "\\.\n\\.\\.\n$";
     cmd()
         .arg("--all")
-        .arg("--ignore-config")
         .arg(tempdir().path())
         .assert()
         .stdout(predicate::str::is_match(matched).unwrap());
 
     cmd()
         .arg("-a")
-        .arg("--ignore-config")
         .arg(tempdir().path())
         .assert()
         .stdout(predicate::str::is_match(matched).unwrap());
@@ -65,7 +60,6 @@ fn test_list_populated_directory() {
     dir.child("one").touch().unwrap();
     dir.child("two").touch().unwrap();
     cmd()
-        .arg("--ignore-config")
         .arg(dir.path())
         .assert()
         .stdout(predicate::str::is_match("one\ntwo\n$").unwrap());
@@ -78,7 +72,6 @@ fn test_list_almost_all_populated_directory() {
     dir.child("two").touch().unwrap();
     cmd()
         .arg("--almost-all")
-        .arg("--ignore-config")
         .arg(dir.path())
         .assert()
         .stdout(predicate::str::is_match("one\ntwo\n$").unwrap());
@@ -91,7 +84,6 @@ fn test_list_all_populated_directory() {
     dir.child("two").touch().unwrap();
     cmd()
         .arg("--all")
-        .arg("--ignore-config")
         .arg(dir.path())
         .assert()
         .stdout(predicate::str::is_match("\\.\n\\.\\.\none\ntwo\n$").unwrap());
@@ -106,7 +98,6 @@ fn test_almost_sort_with_folder() {
     cmd()
         .current_dir(tmp.path())
         .arg("-a")
-        .arg("--ignore-config")
         .arg("z")
         .assert()
         .stdout(predicate::str::is_match("\\.\n\\.\\.\na\n$").unwrap());
@@ -125,13 +116,11 @@ fn test_list_inode_populated_directory() {
 
     cmd()
         .arg("--inode")
-        .arg("--ignore-config")
         .arg(dir.path())
         .assert()
         .stdout(predicate::str::is_match(matched).unwrap());
     cmd()
         .arg("-i")
-        .arg("--ignore-config")
         .arg(dir.path())
         .assert()
         .stdout(predicate::str::is_match(matched).unwrap());
@@ -151,7 +140,6 @@ fn test_list_block_inode_populated_directory_without_long() {
     cmd()
         .arg("--blocks")
         .arg("inode,name")
-        .arg("--ignore-config")
         .arg(dir.path())
         .assert()
         .stdout(predicate::str::is_match(matched).unwrap());
@@ -172,7 +160,6 @@ fn test_list_block_inode_populated_directory_with_long() {
         .arg("--long")
         .arg("--blocks")
         .arg("inode,name")
-        .arg("--ignore-config")
         .arg(dir.path())
         .assert()
         .stdout(predicate::str::is_match(matched).unwrap());
@@ -181,13 +168,7 @@ fn test_list_block_inode_populated_directory_with_long() {
 #[test]
 fn test_list_inode_with_long_ok() {
     let dir = tempdir();
-    cmd()
-        .arg("-i")
-        .arg("-l")
-        .arg("--ignore-config")
-        .arg(dir.path())
-        .assert()
-        .success();
+    cmd().arg("-i").arg("-l").arg(dir.path()).assert().success();
 }
 
 #[cfg(unix)]
@@ -200,13 +181,11 @@ fn test_list_broken_link_ok() {
 
     cmd()
         .arg(&broken_link)
-        .arg("--ignore-config")
         .assert()
         .stderr(predicate::str::contains(matched).not());
 
     cmd()
         .arg("-l")
-        .arg("--ignore-config")
         .arg(broken_link)
         .assert()
         .stderr(predicate::str::contains(matched).not());
@@ -222,13 +201,11 @@ fn test_nosymlink_on_non_long() {
 
     cmd()
         .arg("-l")
-        .arg("--ignore-config")
         .arg(&link)
         .assert()
         .stdout(predicate::str::contains(link_icon));
 
     cmd()
-        .arg("--ignore-config")
         .arg(&link)
         .assert()
         .stdout(predicate::str::contains(link_icon).not());
@@ -247,7 +224,6 @@ fn test_dereference_link_right_type_and_no_link() {
     cmd()
         .arg("-l")
         .arg("--dereference")
-        .arg("--ignore-config")
         .arg(&link)
         .assert()
         .stdout(predicate::str::starts_with(file_type))
@@ -256,7 +232,6 @@ fn test_dereference_link_right_type_and_no_link() {
     cmd()
         .arg("-l")
         .arg("-L")
-        .arg("--ignore-config")
         .arg(link)
         .assert()
         .stdout(predicate::str::starts_with(file_type))
@@ -272,7 +247,6 @@ fn test_show_folder_content_of_symlink() {
     fs::symlink("target", &link).unwrap();
 
     cmd()
-        .arg("--ignore-config")
         .arg(link)
         .assert()
         .stdout(predicate::str::starts_with("link").not())
@@ -289,7 +263,6 @@ fn test_no_show_folder_content_of_symlink_for_long() {
 
     cmd()
         .arg("-l")
-        .arg("--ignore-config")
         .arg(link)
         .assert()
         .stdout(predicate::str::starts_with("lrw"))
@@ -297,7 +270,6 @@ fn test_no_show_folder_content_of_symlink_for_long() {
 
     cmd()
         .arg("-l")
-        .arg("--ignore-config")
         .arg(dir.path().join("link/"))
         .assert()
         .stdout(predicate::str::starts_with(".rw"))
@@ -314,7 +286,6 @@ fn test_show_folder_of_symlink_for_long_multi() {
 
     cmd()
         .arg("-l")
-        .arg("--ignore-config")
         .arg(dir.path().join("link/"))
         .arg(dir.path().join("link"))
         .assert()
@@ -335,14 +306,9 @@ fn test_version_sort() {
     dir.child("11").touch().unwrap();
     dir.child("2").touch().unwrap();
     dir.child("22").touch().unwrap();
-    cmd()
-        .arg("-v")
-        .arg("--ignore-config")
-        .arg(dir.path())
-        .assert()
-        .stdout(
-            predicate::str::is_match("0.2\n0.3.7\n0.11\n0.11.5\n1\n2\n11\n11a\n22\n$").unwrap(),
-        );
+    cmd().arg("-v").arg(dir.path()).assert().stdout(
+        predicate::str::is_match("0.2\n0.3.7\n0.11\n0.11.5\n1\n2\n11\n11a\n22\n$").unwrap(),
+    );
 }
 
 #[test]
@@ -353,7 +319,6 @@ fn test_version_sort_overwrite_by_timesort() {
     cmd()
         .arg("-v")
         .arg("-t")
-        .arg("--ignore-config")
         .arg(dir.path())
         .assert()
         .stdout(predicate::str::is_match("11\n2\n$").unwrap());
@@ -371,7 +336,6 @@ fn test_version_sort_overwrite_by_sizesort() {
     cmd()
         .arg("-v")
         .arg("-S")
-        .arg("--ignore-config")
         .arg(dir.path())
         .assert()
         .stdout(predicate::str::is_match("11\n2\n$").unwrap());
@@ -422,11 +386,10 @@ fn test_tree() {
     tmp.child("one.d").create_dir_all().unwrap();
     tmp.child("one.d/two").touch().unwrap();
 
-    cmd()
-        .arg(tmp.path())
-        .arg("--tree")
-        .assert()
-        .stdout(predicate::str::is_match("├── one\n└── one.d\n    └── two\n$").unwrap());
+    cmd().arg(tmp.path()).arg("--tree").assert().stdout(
+        predicate::str::is_match("├── one\n└── one.d\n    └── two\n\n1 directories, 2 files\n$")
+            .unwrap(),
+    );
 }
 
 #[test]
@@ -443,8 +406,10 @@ fn test_tree_all_not_show_self() {
         .arg("--all")
         .assert()
         .stdout(
-            predicate::str::is_match("├── one\n└── one.d\n    ├── .hidden\n    └── two\n$")
-                .unwrap(),
+            predicate::str::is_match(
+                "├── one\n└── one.d\n    ├── .hidden\n    └── two\n\n1 directories, 3 files\n$",
+            )
+            .unwrap(),
         );
 }
 
@@ -459,7 +424,7 @@ fn test_tree_show_edge_before_name() {
         .arg("--tree")
         .arg("--long")
         .assert()
-        .stdout(predicate::str::is_match("└── two\n$").unwrap());
+        .stdout(predicate::str::is_match("└── two\n\n1 directories, 1 files\n$").unwrap());
 }
 
 #[test]
@@ -477,11 +442,18 @@ fn test_tree_d() {
         .arg("--tree")
         .arg("-d")
         .assert()
-        .stdout(predicate::str::is_match("├── one.d\n│   └── one.d\n└── two.d\n$").unwrap());
+        .stdout(
+            predicate::str::is_match(
+                "├── one.d\n│   └── one.d\n└── two.d\n\n3 directories, 0 files\n$",
+            )
+            .unwrap(),
+        );
 }
 
 fn cmd() -> Command {
-    Command::cargo_bin(env!("CARGO_PKG_NAME")).unwrap()
+    let mut command = Command::cargo_bin(env!("CARGO_PKG_NAME")).unwrap();
+    command.arg("--ignore-config");
+    command
 }
 
 fn tempdir() -> assert_fs::TempDir {
@@ -498,7 +470,6 @@ fn test_lower_case_name_icon_match() {
     cmd()
         .arg("--icon")
         .arg("always")
-        .arg("--ignore-config")
         .arg(test_file)
         .assert()
         .stdout(predicate::str::contains("\u{f1f8}"));
@@ -514,7 +485,6 @@ fn test_upper_case_name_icon_match() {
     cmd()
         .arg("--icon")
         .arg("always")
-        .arg("--ignore-config")
         .arg(test_file)
         .assert()
         .stdout(predicate::str::contains("\u{f1f8}"));
@@ -530,7 +500,6 @@ fn test_lower_case_ext_icon_match() {
     cmd()
         .arg("--icon")
         .arg("always")
-        .arg("--ignore-config")
         .arg(test_file)
         .assert()
         .stdout(predicate::str::contains("\u{f410}"));
@@ -546,7 +515,6 @@ fn test_upper_case_ext_icon_match() {
     cmd()
         .arg("--icon")
         .arg("always")
-        .arg("--ignore-config")
         .arg(test_file)
         .assert()
         .stdout(predicate::str::contains("\u{f410}"));

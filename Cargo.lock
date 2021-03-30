@@ -406,6 +406,7 @@ dependencies = [
  "serde",
  "serde_yaml",
  "serial_test",
+ "simple-counter",
  "tempfile",
  "term_grid",
  "termize",
@@ -714,6 +715,12 @@ dependencies = [
  "quote",
  "syn",
 ]
+
+[[package]]
+name = "simple-counter"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4bb57743b52ea059937169c0061d70298fe2df1d2c988b44caae79dd979d9b49"
 
 [[package]]
 name = "smallvec"
