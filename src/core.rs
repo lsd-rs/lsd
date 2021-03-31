@@ -55,18 +55,17 @@ impl Core {
         }
     }
 
-    pub fn run(self, paths: Vec<PathBuf>) {
-        self.display(&self.fetch(paths))
-    }
-
-    fn fetch(&self, paths: Vec<PathBuf>) -> Vec<Meta> {
+    pub fn run(self, paths: &[PathBuf]) {
         let mut meta_list = Vec::with_capacity(paths.len());
+
+        // if -R or --tree, get depth
         let depth = match self.flags.layout {
             Layout::Tree { .. } => self.flags.recursion.depth,
             _ if self.flags.recursion.enabled => self.flags.recursion.depth,
             _ => 1,
         };
 
+        // fetch metas
         for path in paths {
             let mut meta = match Meta::from_path(&path, self.flags.dereference.0) {
                 Ok(meta) => meta,
@@ -80,11 +79,11 @@ impl Core {
                 self.flags.layout == Layout::Tree || self.flags.display != Display::DirectoryOnly;
             if recurse {
                 match meta.recurse_into(depth, &self.flags) {
-                    Ok(mut content) => {
-                        if let Some(ref mut inner) = content {
-                            self.sort(inner);
-                        }
+                    Ok(content) => {
                         meta.content = content;
+                        if let Some(ref mut inner) = meta.content {
+                            inner.sort_unstable_by(|a, b| sort::by_meta(&self.sorters, a, b));
+                        }
                         meta_list.push(meta);
                     }
                     Err(err) => {
@@ -101,24 +100,10 @@ impl Core {
             meta_list.iter_mut().for_each(Meta::calculate_total_size)
         }
 
-        meta_list
-    }
-
-    fn sort(&self, metas: &mut Vec<Meta>) {
-        metas.sort_unstable_by(|a, b| sort::by_meta(&self.sorters, a, b));
-
-        for meta in metas {
-            if let Some(ref mut content) = meta.content {
-                self.sort(content);
-            }
-        }
-    }
-
-    fn display(&self, metas: &[Meta]) {
         let output = if self.flags.layout == Layout::Tree {
-            display::tree(&metas, &self.flags, &self.colors, &self.icons)
+            display::tree(&meta_list, &self.flags, &self.colors, &self.icons)
         } else {
-            display::grid(&metas, &self.flags, &self.colors, &self.icons)
+            display::grid(&meta_list, &self.flags, &self.colors, &self.icons)
         };
 
         print_output!("{}", output);

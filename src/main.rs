@@ -103,14 +103,14 @@ macro_rules! hashmap {
     }};
 }
 
-fn main() {
+fn main() -> clap::Result<()> {
     let matches = app::build().get_matches_from(wild::args_os());
 
     // input translate glob FILE without single quote into real names
     // for example:
     // * to all files matched
     // '*' remain as '*'
-    let inputs = matches
+    let inputs: Vec<PathBuf> = matches
         .values_of("FILE")
         .expect("failed to retrieve cli value")
         .map(PathBuf::from)
@@ -122,6 +122,9 @@ fn main() {
         Config::default()
     };
 
-    let core = Core::new(Flags::configure_from(&matches, &config).unwrap_or_else(|err| err.exit()));
-    core.run(inputs);
+    let flags = Flags::configure_from(&matches, &config)?;
+    let core = Core::new(flags);
+    core.run(&inputs);
+
+    Ok(())
 }
