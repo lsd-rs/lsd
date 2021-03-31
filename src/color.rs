@@ -190,8 +190,8 @@ impl Colors {
     fn get_light_theme_colour_map() -> FxHashMap<Elem, Colour> {
         hashmap! {
             // User / Group
-            Elem::User=> Colour::Fixed(230), // Cornsilk1
-            Elem::Group=> Colour::Fixed(187), // LightYellow3
+            Elem::User => Colour::Fixed(230), // Cornsilk1
+            Elem::Group => Colour::Fixed(187), // LightYellow3
 
             // Permissions
             Elem::Read => Colour::Green,
@@ -241,8 +241,8 @@ impl Colors {
             // INode
             Elem::INode { valid: true } => Colour::Fixed(13), // Pink
             Elem::INode { valid: false } => Colour::Fixed(245), // Grey
-            Elem::Links { valid: true }=> Colour::Fixed(13),
-            Elem::Links { valid: false }=> Colour::Fixed(245),
+            Elem::Links { valid: true } => Colour::Fixed(13),
+            Elem::Links { valid: false } => Colour::Fixed(245),
 
             // TODO add this after we can use file to configure theme
             // Elem::TreeEdge => Colour::Fixed(44), // DarkTurquoise
