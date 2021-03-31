@@ -101,9 +101,9 @@ impl Core {
         }
 
         let output = if self.flags.layout == Layout::Tree {
-            display::tree(&meta_list, &self.flags, &self.colors, &self.icons)
+            display::tree(&mut meta_list, &self.flags, &self.colors, &self.icons)
         } else {
-            display::grid(&meta_list, &self.flags, &self.colors, &self.icons)
+            display::grid(&mut meta_list, &self.flags, &self.colors, &self.icons)
         };
 
         print_output!("{}", output);

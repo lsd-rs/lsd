@@ -14,7 +14,7 @@ const LINE: &str = "\u{2502}  "; // "│  "
 const CORNER: &str = "\u{2514}\u{2500}\u{2500}"; // "└──"
 const BLANK: &str = "   ";
 
-pub fn grid(metas: &[Meta], flags: &Flags, colors: &Colors, icons: &Icons) -> String {
+pub fn grid(metas: &mut [Meta], flags: &Flags, colors: &Colors, icons: &Icons) -> String {
     inner_display_grid(
         &DisplayOption::None,
         metas,
@@ -59,7 +59,7 @@ pub fn tree(metas: &[Meta], flags: &Flags, colors: &Colors, icons: &Icons) -> St
 
 fn inner_display_grid(
     display_option: &DisplayOption,
-    metas: &[Meta],
+    metas: &mut [Meta],
     flags: &Flags,
     colors: &Colors,
     icons: &Icons,
@@ -86,7 +86,7 @@ fn inner_display_grid(
     let skip_dirs = (depth == 0) && (flags.display != Display::DirectoryOnly);
 
     // print the files first.
-    for meta in metas {
+    for meta in metas.iter_mut() {
         // Maybe skip showing the directory meta now; show its contents later.
         if skip_dirs {
             match meta.file_type {
@@ -94,6 +94,12 @@ fn inner_display_grid(
                 FileType::SymLink { is_dir: true } if flags.layout != Layout::OneLine => continue,
                 _ => {}
             }
+        }
+
+        if let Some(ref mut inner) = meta.content {
+            inner.sort_unstable_by(|a, b| {
+                crate::sort::by_meta(&crate::sort::assemble_sorters(&flags), a, b)
+            });
         }
 
         let blocks = get_output(
@@ -140,7 +146,7 @@ fn inner_display_grid(
 
             output += &inner_display_grid(
                 &display_option,
-                meta.content.as_ref().unwrap(),
+                meta.content.as_mut().unwrap(),
                 &flags,
                 colors,
                 icons,
