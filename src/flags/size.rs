@@ -21,11 +21,11 @@ pub enum SizeFlag {
 }
 
 impl SizeFlag {
-    fn from_str(value: &str) -> Option<Self> {
+    fn from_str(value: &str) -> Self {
         match value {
-            "default" => Some(Self::Default),
-            "short" => Some(Self::Short),
-            "bytes" => Some(Self::Bytes),
+            "default" => Self::Default,
+            "short" => Self::Short,
+            "bytes" => Self::Bytes,
             _ => {
                 panic!(
                     "Size can only be one of default, short or bytes, but got {}.",
@@ -47,7 +47,7 @@ impl Configurable<Self> for SizeFlag {
             return Some(Self::Bytes);
         } else if matches.occurrences_of("size") > 0 {
             if let Some(size) = matches.values_of("size")?.last() {
-                return Self::from_str(size);
+                return Some(Self::from_str(size));
             }
         }
         None
