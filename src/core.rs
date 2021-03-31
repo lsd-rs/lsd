@@ -56,10 +56,7 @@ impl Core {
     }
 
     pub fn run(self, paths: Vec<PathBuf>) {
-        let mut meta_list = self.fetch(paths);
-
-        self.sort(&mut meta_list);
-        self.display(&meta_list)
+        self.display(&self.fetch(paths))
     }
 
     fn fetch(&self, paths: Vec<PathBuf>) -> Vec<Meta> {
@@ -83,7 +80,10 @@ impl Core {
                 self.flags.layout == Layout::Tree || self.flags.display != Display::DirectoryOnly;
             if recurse {
                 match meta.recurse_into(depth, &self.flags) {
-                    Ok(content) => {
+                    Ok(mut content) => {
+                        if let Some(ref mut inner) = content {
+                            self.sort(inner);
+                        }
                         meta.content = content;
                         meta_list.push(meta);
                     }
@@ -96,10 +96,9 @@ impl Core {
                 meta_list.push(meta);
             };
         }
+
         if self.flags.total_size.0 {
-            for meta in &mut meta_list.iter_mut() {
-                meta.calculate_total_size();
-            }
+            meta_list.iter_mut().for_each(Meta::calculate_total_size)
         }
 
         meta_list

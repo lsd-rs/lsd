@@ -121,8 +121,7 @@ fn main() {
     } else {
         Config::default()
     };
-    let flags = Flags::configure_from(&matches, &config).unwrap_or_else(|err| err.exit());
-    let core = Core::new(flags);
 
+    let core = Core::new(Flags::configure_from(&matches, &config).unwrap_or_else(|err| err.exit()));
     core.run(inputs);
 }

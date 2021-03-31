@@ -167,23 +167,21 @@ fn inner_display_tree(
 
     for (idx, meta) in metas.iter().enumerate() {
         let current_prefix = if tree_depth_prefix.0 > 0 {
-            if idx + 1 != last_idx {
-                // is last folder elem
-                format!("{}{} ", tree_depth_prefix.1, EDGE)
-            } else {
-                format!("{}{} ", tree_depth_prefix.1, CORNER)
-            }
+            format!(
+                "{}{} ",
+                tree_depth_prefix.1,
+                if idx + 1 == last_idx { CORNER } else { EDGE }
+            )
         } else {
             tree_depth_prefix.1.to_string()
         };
 
-        if meta.file_type.is_dirlike() {
-            // dont count current directory
-            if tree_depth_prefix.0 > 0 {
-                DIR_COUNT::next();
-            }
-        } else {
+        // assume if not directory, is a file
+        // dont count current directory
+        if !meta.file_type.is_dirlike() {
             FILE_COUNT::next();
+        } else if tree_depth_prefix.0 > 0 {
+            DIR_COUNT::next();
         }
 
         for block in get_output(
@@ -203,12 +201,11 @@ fn inner_display_tree(
 
         if meta.content.is_some() {
             let new_prefix = if tree_depth_prefix.0 > 0 {
-                if idx + 1 != last_idx {
-                    // is last folder elem
-                    format!("{}{} ", tree_depth_prefix.1, LINE)
-                } else {
-                    format!("{}{} ", tree_depth_prefix.1, BLANK)
-                }
+                format!(
+                    "{}{} ",
+                    tree_depth_prefix.1,
+                    if idx + 1 == last_idx { BLANK } else { LINE }
+                )
             } else {
                 tree_depth_prefix.1.to_string()
             };
