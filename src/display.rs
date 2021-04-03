@@ -376,6 +376,7 @@ mod tests {
     use crate::{app, flags, icon, sort};
     use assert_fs::prelude::*;
     use std::path::Path;
+    use tempfile::tempdir;
 
     #[test]
     fn test_display_get_visible_width_without_icons() {
@@ -652,5 +653,103 @@ mod tests {
         );
 
         assert!(output.ends_with("└── two\n"));
+    }
+
+    #[test]
+    fn test_folder_path() {
+        let tmp_dir = tempdir().expect("failed to create temp dir");
+
+        let file_path = tmp_dir.path().join("file");
+        std::fs::File::create(&file_path).expect("failed to create the file");
+        let file = Meta::from_path(&file_path, false).unwrap();
+
+        let dir_path = tmp_dir.path().join("dir");
+        std::fs::create_dir(&dir_path).expect("failed to create the dir");
+        let dir = Meta::from_path(&dir_path, false).unwrap();
+
+        assert_eq!(
+            display_folder_path(&dir),
+            format!(
+                "\n{}{}dir:\n",
+                tmp_dir.path().to_string_lossy(),
+                std::path::MAIN_SEPARATOR
+            )
+        );
+
+        assert_eq!(
+            should_display_folder_path(0, &[file.clone()], &Flags::default()),
+            true // doesn't matter since there is no folder
+        );
+        assert_eq!(
+            should_display_folder_path(0, &[dir.clone()], &Flags::default()),
+            false
+        );
+        assert_eq!(
+            should_display_folder_path(0, &[file.clone(), dir.clone()], &Flags::default()),
+            true
+        );
+        assert_eq!(
+            should_display_folder_path(0, &[dir.clone(), dir.clone()], &Flags::default()),
+            true
+        );
+        assert_eq!(
+            should_display_folder_path(0, &[file.clone(), file.clone()], &Flags::default()),
+            true // doesn't matter since there is no folder
+        );
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn test_folder_path_with_links() {
+        let tmp_dir = tempdir().expect("failed to create temp dir");
+
+        let file_path = tmp_dir.path().join("file");
+        std::fs::File::create(&file_path).expect("failed to create the file");
+        let file = Meta::from_path(&file_path, false).unwrap();
+
+        let dir_path = tmp_dir.path().join("dir");
+        std::fs::create_dir(&dir_path).expect("failed to create the dir");
+        let dir = Meta::from_path(&dir_path, false).unwrap();
+
+        let link_path = tmp_dir.path().join("link");
+        std::os::unix::fs::symlink("dir", &link_path).unwrap();
+        let link = Meta::from_path(&link_path, false).unwrap();
+
+        let grid_flags = Flags {
+            layout: Layout::Grid,
+            ..Flags::default()
+        };
+
+        let oneline_flags = Flags {
+            layout: Layout::OneLine,
+            ..Flags::default()
+        };
+
+        assert_eq!(
+            should_display_folder_path(0, &[link.clone()], &grid_flags),
+            false
+        );
+        assert_eq!(
+            should_display_folder_path(0, &[link.clone()], &oneline_flags),
+            true // doesn't matter since this link will be expanded as a directory
+        );
+
+        assert_eq!(
+            should_display_folder_path(0, &[file.clone(), link.clone()], &grid_flags),
+            true
+        );
+        assert_eq!(
+            should_display_folder_path(0, &[file.clone(), link.clone()], &oneline_flags),
+            true // doesn't matter since this link will be expanded as a directory
+        );
+
+        assert_eq!(
+            should_display_folder_path(0, &[dir.clone(), link.clone()], &grid_flags),
+            true
+        );
+        assert_eq!(
+            should_display_folder_path(0, &[dir.clone(), link.clone()], &oneline_flags),
+            true
+        );
     }
 }
