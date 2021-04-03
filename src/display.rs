@@ -315,7 +315,7 @@ fn get_output<'a>(
                             all(windows, target_arch = "x86", target_env = "gnu")
                         ))
                     ))]
-                    strings.push(_s.render(colors, icons));
+                    block_vec.push(_s.render(colors, icons));
                 }
             }
         };
@@ -544,7 +544,7 @@ mod tests {
         dir.child("one.d/.hidden").touch().unwrap();
         let mut metas = Meta::from_path(Path::new(dir.path()), false)
             .unwrap()
-            .recurse_into(42, &flags)
+            .recurse_into(42, &flags, None)
             .unwrap()
             .unwrap();
         sort(&mut metas, &sort::assemble_sorters(&flags));
@@ -575,7 +575,7 @@ mod tests {
         dir.child("dir/file").touch().unwrap();
         let metas = Meta::from_path(Path::new(dir.path()), false)
             .unwrap()
-            .recurse_into(42, &flags)
+            .recurse_into(42, &flags, None)
             .unwrap()
             .unwrap();
         let output = tree(
@@ -614,7 +614,7 @@ mod tests {
         dir.child("dir/file").touch().unwrap();
         let metas = Meta::from_path(Path::new(dir.path()), false)
             .unwrap()
-            .recurse_into(42, &flags)
+            .recurse_into(42, &flags, None)
             .unwrap()
             .unwrap();
         let output = tree(
@@ -652,7 +652,7 @@ mod tests {
         dir.child("one.d/two").touch().unwrap();
         let metas = Meta::from_path(Path::new(dir.path()), false)
             .unwrap()
-            .recurse_into(42, &flags)
+            .recurse_into(42, &flags, None)
             .unwrap()
             .unwrap();
         let output = tree(

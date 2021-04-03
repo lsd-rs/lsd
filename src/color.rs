@@ -270,7 +270,7 @@ impl Colors {
 
         // TODO add this after we can use file to configure theme
         // m.insert(Elem::TreeEdge, Colour::Fixed(44)); // DarkTurquoise
-        
+
         // GitStatus
         #[cfg(all(
             feature = "git",
