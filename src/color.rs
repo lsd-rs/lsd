@@ -54,8 +54,7 @@ pub enum Elem {
         valid: bool,
     },
 
-    TreeEdge,
-
+    // TreeEdge, // TODO enable it as we enable a theme for it
     #[cfg(all(
         feature = "git",
         not(any(
