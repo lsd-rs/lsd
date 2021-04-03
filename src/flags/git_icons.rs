@@ -80,21 +80,39 @@ mod test {
         }
     }
 
-    #[cfg(all(feature="git", not(any(all(target_os = "linux", target_arch = "arm"), all(windows, target_arch = "x86", target_env = "gnu")))))]
+    #[cfg(all(
+        feature = "git",
+        not(any(
+            all(target_os = "linux", target_arch = "arm"),
+            all(windows, target_arch = "x86", target_env = "gnu")
+        ))
+    ))]
     #[test]
     fn test_non_duplicated_noicon() {
         let icons = GitIcons::new(Theme::NoIcon);
         test_non_duplicated(&icons);
     }
 
-    #[cfg(all(feature="git", not(any(all(target_os = "linux", target_arch = "arm"), all(windows, target_arch = "x86", target_env = "gnu")))))]
+    #[cfg(all(
+        feature = "git",
+        not(any(
+            all(target_os = "linux", target_arch = "arm"),
+            all(windows, target_arch = "x86", target_env = "gnu")
+        ))
+    ))]
     #[test]
     fn test_non_duplicated_unicode() {
         let icons = GitIcons::new(Theme::Unicode);
         test_non_duplicated(&icons);
     }
 
-    #[cfg(all(feature="git", not(any(all(target_os = "linux", target_arch = "arm"), all(windows, target_arch = "x86", target_env = "gnu")))))]
+    #[cfg(all(
+        feature = "git",
+        not(any(
+            all(target_os = "linux", target_arch = "arm"),
+            all(windows, target_arch = "x86", target_env = "gnu")
+        ))
+    ))]
     #[test]
     fn test_non_duplicated_fancy() {
         let icons = GitIcons::new(Theme::Fancy);

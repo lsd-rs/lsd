@@ -293,7 +293,13 @@ mod test_sort_column {
         );
     }
 
-    #[cfg(all(feature="git", not(any(all(target_os = "linux", target_arch = "arm"), all(windows, target_arch = "x86", target_env = "gnu")))))]
+    #[cfg(all(
+        feature = "git",
+        not(any(
+            all(target_os = "linux", target_arch = "arm"),
+            all(windows, target_arch = "x86", target_env = "gnu")
+        ))
+    ))]
     #[test]
     fn test_from_arg_matches_sort_git() {
         let argv = vec!["lsd", "--sort", "git"];

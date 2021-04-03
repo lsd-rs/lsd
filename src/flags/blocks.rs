@@ -421,7 +421,13 @@ mod test_blocks {
         });
     }
 
-    #[cfg(all(feature="git", not(any(all(target_os = "linux", target_arch = "arm"), all(windows, target_arch = "x86", target_env = "gnu")))))]
+    #[cfg(all(
+        feature = "git",
+        not(any(
+            all(target_os = "linux", target_arch = "arm"),
+            all(windows, target_arch = "x86", target_env = "gnu")
+        ))
+    ))]
     #[test]
     fn test_from_arg_matches_implicit_add_git_block() {
         let argv = vec![
@@ -447,7 +453,13 @@ mod test_blocks {
         );
     }
 
-    #[cfg(all(feature="git", not(any(all(target_os = "linux", target_arch = "arm"), all(windows, target_arch = "x86", target_env = "gnu")))))]
+    #[cfg(all(
+        feature = "git",
+        not(any(
+            all(target_os = "linux", target_arch = "arm"),
+            all(windows, target_arch = "x86", target_env = "gnu")
+        ))
+    ))]
     #[test]
     fn test_from_arg_matches_no_implicit_add_git_block_if_not_long() {
         let argv = vec!["lsd", "--blocks", "permission,name,group,git,date", "--git"];
@@ -467,7 +479,13 @@ mod test_blocks {
         );
     }
 
-    #[cfg(all(feature="git", not(any(all(target_os = "linux", target_arch = "arm"), all(windows, target_arch = "x86", target_env = "gnu")))))]
+    #[cfg(all(
+        feature = "git",
+        not(any(
+            all(target_os = "linux", target_arch = "arm"),
+            all(windows, target_arch = "x86", target_env = "gnu")
+        ))
+    ))]
     #[test]
     fn test_from_arg_matches_no_implicit_add_git_block_if_already_here() {
         let argv = vec!["lsd", "--blocks", "permission,name,group,git,date", "--git"];

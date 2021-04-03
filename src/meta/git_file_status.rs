@@ -1,6 +1,16 @@
-#[cfg(all(feature="git", not(any(all(target_os = "linux", target_arch = "arm"), all(windows, target_arch = "x86", target_env = "gnu")))))]
+#[cfg(all(
+    feature = "git",
+    not(any(
+        all(target_os = "linux", target_arch = "arm"),
+        all(windows, target_arch = "x86", target_env = "gnu")
+    ))
+))]
 use crate::git::GitStatus;
-#[cfg(any(not(feature="git"), all(target_os = "linux", target_arch = "arm"), all(windows, target_arch = "x86", target_env = "gnu")))]
+#[cfg(any(
+    not(feature = "git"),
+    all(target_os = "linux", target_arch = "arm"),
+    all(windows, target_arch = "x86", target_env = "gnu")
+))]
 use crate::git_stub::GitStatus;
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash, PartialOrd, Ord)]
@@ -18,7 +28,13 @@ impl Default for GitFileStatus {
     }
 }
 
-#[cfg(all(feature="git", not(any(all(target_os = "linux", target_arch = "arm"), all(windows, target_arch = "x86", target_env = "gnu")))))]
+#[cfg(all(
+    feature = "git",
+    not(any(
+        all(target_os = "linux", target_arch = "arm"),
+        all(windows, target_arch = "x86", target_env = "gnu")
+    ))
+))]
 impl GitFileStatus {
     pub fn new(status: git2::Status) -> Self {
         Self {
