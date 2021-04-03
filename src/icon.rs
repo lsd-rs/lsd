@@ -8,7 +8,7 @@ pub struct Icons {
     default_folder_icon: &'static str,
     default_file_icon: &'static str,
     icon_separator: String,
-    #[cfg(feature = "git")]
+    #[cfg(not(any(all(target_os = "linux", target_arch = "arm"), all(windows, target_arch = "x86", target_env = "gnu"))))]
     git_icons: crate::flags::git_icons::GitIcons,
 }
 
@@ -50,7 +50,7 @@ impl Icons {
             default_file_icon,
             default_folder_icon,
             icon_separator,
-            #[cfg(feature = "git")]
+            #[cfg(not(any(all(target_os = "linux", target_arch = "arm"), all(windows, target_arch = "x86", target_env = "gnu"))))]
             git_icons: crate::flags::git_icons::GitIcons::new(theme),
         }
     }
@@ -346,7 +346,7 @@ impl Icons {
         m
     }
 
-    #[cfg(feature = "git")]
+    #[cfg(not(any(all(target_os = "linux", target_arch = "arm"), all(windows, target_arch = "x86", target_env = "gnu"))))]
     pub fn get_status(&self, status: &crate::git::GitStatus) -> String {
         self.git_icons.get(status)
     }

@@ -34,9 +34,9 @@ mod config_file;
 mod core;
 mod display;
 mod flags;
-#[cfg(feature = "git")]
+#[cfg(not(any(all(target_os = "linux", target_arch = "arm"), all(windows, target_arch = "x86", target_env = "gnu"))))]
 mod git;
-#[cfg(not(feature = "git"))]
+#[cfg(any(all(target_os = "linux", target_arch = "arm"), all(windows, target_arch = "x86", target_env = "gnu")))]
 mod git_stub;
 mod icon;
 mod logger;

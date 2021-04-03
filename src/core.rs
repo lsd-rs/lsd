@@ -1,9 +1,9 @@
 use crate::color::{self, Colors};
 use crate::display;
 use crate::flags::{Block, ColorOption, Display, Flags, IconOption, IconTheme, Layout, SortOrder};
-#[cfg(feature = "git")]
+#[cfg(not(any(all(target_os = "linux", target_arch = "arm"), all(windows, target_arch = "x86", target_env = "gnu"))))]
 use crate::git::GitCache;
-#[cfg(not(feature = "git"))]
+#[cfg(any(all(target_os = "linux", target_arch = "arm"), all(windows, target_arch = "x86", target_env = "gnu")))]
 use crate::git_stub::GitCache;
 
 use crate::icon::{self, Icons};

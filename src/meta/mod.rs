@@ -29,9 +29,9 @@ pub use crate::icon::Icons;
 use crate::flags::{Display, Flags, Layout};
 use crate::print_error;
 
-#[cfg(feature = "git")]
+#[cfg(not(any(all(target_os = "linux", target_arch = "arm"), all(windows, target_arch = "x86", target_env = "gnu"))))]
 use crate::git::GitCache;
-#[cfg(not(feature = "git"))]
+#[cfg(any(all(target_os = "linux", target_arch = "arm"), all(windows, target_arch = "x86", target_env = "gnu")))]
 use crate::git_stub::GitCache;
 use std::fs::read_link;
 use std::io::{Error, ErrorKind};

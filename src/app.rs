@@ -197,7 +197,7 @@ pub fn build() -> App<'static, 'static> {
                     "time",
                     "version",
                     "extension",
-                    #[cfg(feature = "git")]
+                    #[cfg(not(any(all(target_os = "linux", target_arch = "arm"),all(windows, target_arch = "x86", target_env = "gnu"))))]
                         "git",
                 ])
                 .takes_value(true)
@@ -241,7 +241,7 @@ pub fn build() -> App<'static, 'static> {
                     "name",
                     "inode",
                     "links",
-                    #[cfg(feature = "git")]
+                    #[cfg(not(any(all(target_os = "linux", target_arch = "arm"), all(windows, target_arch = "x86", target_env = "gnu"))))]
                         "git",
                 ])
                 .help("Specify the blocks that will be displayed and in what order"),

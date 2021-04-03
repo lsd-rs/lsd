@@ -3,7 +3,8 @@ pub mod color;
 pub mod date;
 pub mod dereference;
 pub mod display;
-#[cfg(feature = "git")]
+
+#[cfg(not(any(all(target_os = "linux", target_arch = "arm"), all(windows, target_arch = "x86", target_env = "gnu"))))]
 pub mod git_icons;
 pub mod icons;
 pub mod ignore_globs;
