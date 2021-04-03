@@ -56,7 +56,7 @@ pub enum Elem {
 
     TreeEdge,
 
-    #[cfg(not(any(all(target_os = "linux", target_arch = "arm"), all(windows, target_arch = "x86", target_env = "gnu"))))]
+    #[cfg(all(feature="git", not(any(all(target_os = "linux", target_arch = "arm"), all(windows, target_arch = "x86", target_env = "gnu")))))]
     GitStatus {
         status: crate::git::GitStatus,
     },
@@ -266,7 +266,7 @@ impl Colors {
         // m.insert(Elem::TreeEdge, Colour::Fixed(44)); // DarkTurquoise
         
         // GitStatus
-        #[cfg(not(any(all(target_os = "linux", target_arch = "arm"), all(windows, target_arch = "x86", target_env = "gnu"))))]        {
+        #[cfg(all(feature="git", not(any(all(target_os = "linux", target_arch = "arm"), all(windows, target_arch = "x86", target_env = "gnu")))))]        {
             m.insert(
                 Elem::GitStatus {
                     status: crate::git::GitStatus::Default,
@@ -345,7 +345,7 @@ mod tests {
         }
     }
 
-    #[cfg(not(any(all(target_os = "linux", target_arch = "arm"), all(windows, target_arch = "x86", target_env = "gnu"))))]
+    #[cfg(all(feature="git", not(any(all(target_os = "linux", target_arch = "arm"), all(windows, target_arch = "x86", target_env = "gnu")))))]
     #[test]
     fn test_git_status_map_completeness() {
         let m = Colors::get_light_theme_colour_map();

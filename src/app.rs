@@ -241,7 +241,7 @@ pub fn build() -> App<'static, 'static> {
                     "name",
                     "inode",
                     "links",
-                    #[cfg(not(any(all(target_os = "linux", target_arch = "arm"), all(windows, target_arch = "x86", target_env = "gnu"))))]
+                    #[cfg(all(feature="git", not(any(all(target_os = "linux", target_arch = "arm"), all(windows, target_arch = "x86", target_env = "gnu")))))]
                         "git",
                 ])
                 .help("Specify the blocks that will be displayed and in what order"),

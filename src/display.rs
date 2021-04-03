@@ -302,9 +302,9 @@ fn get_output<'a>(
             }
             Block::GitStatus => {
                 if let Some(_s) = &meta.git_status {
-                    #[cfg(any(all(target_os = "linux", target_arch = "arm"), all(windows, target_arch = "x86", target_env = "gnu")))]
+                    #[cfg(any(not(feature="git"), all(target_os = "linux", target_arch = "arm"), all(windows, target_arch = "x86", target_env = "gnu")))]
                     panic!("git feature is disabled");
-                    #[cfg(not(any(all(target_os = "linux", target_arch = "arm"), all(windows, target_arch = "x86", target_env = "gnu"))))]
+                    #[cfg(all(feature = "git", not(any(all(target_os = "linux", target_arch = "arm"), all(windows, target_arch = "x86", target_env = "gnu")))))]
                     strings.push(_s.render(colors, icons));
                 }
             }
