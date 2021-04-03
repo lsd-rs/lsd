@@ -1,5 +1,4 @@
 use crate::meta::git_file_status::GitFileStatus;
-use log::{debug, info, warn};
 use std::fs;
 use std::path::{Path, PathBuf};
 
@@ -42,19 +41,19 @@ pub struct GitCache {
 impl GitCache {
     pub fn new(path: &Path) -> GitCache {
         let cachedir = fs::canonicalize(&path).unwrap();
-        info!("Trying to retrieve Git statuses for {:?}", cachedir);
+        // log::info!("Trying to retrieve Git statuses for {:?}", cachedir);
 
         let repo = match git2::Repository::discover(&path) {
             Ok(r) => r,
-            Err(e) => {
-                warn!("Git discovery error: {:?}", e);
+            Err(_e) => {
+                // log::warn!("Git discovery error: {:?}", _e);
                 return Self::empty();
             }
         };
 
         if let Some(workdir) = repo.workdir().and_then(|x| std::fs::canonicalize(x).ok()) {
             let mut statuses = Vec::new();
-            info!("Retrieving Git statuses for workdir {:?}", workdir);
+            // log::info!("Retrieving Git statuses for workdir {:?}", workdir);
             match repo.statuses(None) {
                 Ok(status_list) => {
                     for status_entry in status_list.iter() {
@@ -64,20 +63,22 @@ impl GitCache {
                             str_path.split('/').collect::<Vec<_>>().iter().collect();
                         let path = workdir.join(path);
                         let elem = (path, status_entry.status());
-                        debug!("{:?}", elem);
+                        // log::debug!("{:?}", elem);
                         statuses.push(elem);
                     }
                 }
-                Err(e) => warn!("Git retrieve statuses error: {:?}", e),
+                Err(_e) => {
+                    // log::warn!("Git retrieve statuses error: {:?}", _e);
+                }
             }
-            info!("GitCache path: {:?}", cachedir);
+            // log::info!("GitCache path: {:?}", cachedir);
 
             GitCache {
                 statuses,
                 _cached_dir: Some(cachedir),
             }
         } else {
-            debug!("No workdir");
+            // log::debug!("No workdir");
             Self::empty()
         }
     }
@@ -92,21 +93,21 @@ impl GitCache {
     pub fn get(&self, filepath: &PathBuf, is_directory: bool) -> Option<GitFileStatus> {
         match std::fs::canonicalize(filepath) {
             Ok(filename) => Some(self.inner_get(&filename, is_directory)),
-            Err(err) => {
-                log::debug!("error {}", err);
+            Err(_err) => {
+                // log::debug!("error {}", _err);
                 None
             }
         }
     }
 
     fn inner_get(&self, filepath: &PathBuf, is_directory: bool) -> GitFileStatus {
-        debug!("Look for [recurse={}] {:?}", is_directory, filepath);
+        // log::debug!("Look for [recurse={}] {:?}", is_directory, filepath);
 
         if is_directory {
             self.statuses
                 .iter()
                 .filter(|&x| x.0.starts_with(filepath))
-                .inspect(|&x| debug!("\t{:?}", x.0))
+                // .inspect(|&x| log::debug!("\t{:?}", x.0))
                 .map(|x| GitFileStatus::new(x.1))
                 .fold(GitFileStatus::default(), |acc, x| GitFileStatus {
                     index: std::cmp::max(acc.index, x.index),
@@ -223,12 +224,12 @@ mod tests {
             .success();
 
         // Check now
-        // check_cache(root.path(), &expected_statuses, "new .gitignore");
+        check_cache(root.path(), &expected_statuses, "new .gitignore");
 
         index.add_path(f0.as_path()).unwrap();
 
         // Check now
-        // check_cache(root.path(), &expected_statuses, "unstaged .gitignore");
+        check_cache(root.path(), &expected_statuses, "unstaged .gitignore");
 
         index.write().unwrap();
         *expected_statuses.get_mut(&f0).unwrap() = GitFileStatus {
@@ -237,7 +238,7 @@ mod tests {
         };
 
         // Check now
-        // check_cache(root.path(), &expected_statuses, "staged .gitignore");
+        check_cache(root.path(), &expected_statuses, "staged .gitignore");
 
         commit(&repo, &mut index, "Add gitignore");
         *expected_statuses.get_mut(&f0).unwrap() = GitFileStatus {
