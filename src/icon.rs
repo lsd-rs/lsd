@@ -15,6 +15,7 @@ pub enum Theme {
     NoIcon,
     Fancy,
     Unicode,
+    Devicons,
 }
 
 // In order to add a new icon, write the unicode value like "\ue5fb" then
@@ -23,7 +24,7 @@ pub enum Theme {
 // s#\\u[0-9a-f]*#\=eval('"'.submatch(0).'"')#
 impl Icons {
     pub fn new(theme: Theme, icon_separator: String) -> Self {
-        let display_icons = theme == Theme::Fancy || theme == Theme::Unicode;
+        let display_icons = theme == Theme::Fancy || theme == Theme::Unicode || theme == Theme::Devicons;
         let (icons_by_name, icons_by_extension, default_file_icon, default_folder_icon) =
             if theme == Theme::Fancy {
                 (
@@ -32,7 +33,18 @@ impl Icons {
                     "\u{f016}", // 
                     "\u{f115}", // 
                 )
+
+            }
+            else if theme == Theme::Devicons {
+                (
+                    Self::get_default_icons_by_name(),
+                    Self::get_default_icons_by_extension(),
+                    "\u{e612}", // 
+                    "\u{f07b}", // 
+                )
+
             } else {
+
                 (
                     HashMap::new(),
                     HashMap::new(),

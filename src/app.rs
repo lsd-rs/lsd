@@ -48,10 +48,11 @@ pub fn build() -> App<'static, 'static> {
                 .long("icon-theme")
                 .possible_value("fancy")
                 .possible_value("unicode")
+                .possible_value("devicons")
                 .default_value("fancy")
                 .multiple(true)
                 .number_of_values(1)
-                .help("Whether to use fancy or unicode icons"),
+                .help("Whether to use fancy, unicode or devicons icons"),
         )
         .arg(
             Arg::with_name("indicators")

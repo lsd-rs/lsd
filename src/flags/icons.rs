@@ -98,6 +98,7 @@ impl Default for IconOption {
 pub enum IconTheme {
     Unicode,
     Fancy,
+    Devicons,
 }
 
 impl Configurable<Self> for IconTheme {
@@ -110,6 +111,7 @@ impl Configurable<Self> for IconTheme {
             match matches.values_of("icon-theme")?.last() {
                 Some("fancy") => Some(Self::Fancy),
                 Some("unicode") => Some(Self::Unicode),
+                Some("devicons") => Some(Self::Devicons),
                 _ => panic!("This should not be reachable!"),
             }
         } else {
@@ -323,10 +325,19 @@ mod test_icon_theme {
             IconTheme::from_arg_matches(&matches)
         );
     }
+    #[test]
+    fn test_from_arg_matches_devicons() {
+        let argv = vec!["lsd", "--icon-theme", "devicons"];
+        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        assert_eq!(
+            Some(IconTheme::Unicode),
+            IconTheme::from_arg_matches(&matches)
+        );
+    }
 
     #[test]
     fn test_from_arg_matches_icon_multi() {
-        let argv = vec!["lsd", "--icon-theme", "fancy", "--icon-theme", "unicode"];
+        let argv = vec!["lsd", "--icon-theme", "fancy", "--icon-theme", "unicode", "--icon-theme", "devicons"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         assert_eq!(
             Some(IconTheme::Unicode),
@@ -359,6 +370,17 @@ mod test_icon_theme {
             separator: None,
         });
         assert_eq!(Some(IconTheme::Unicode), IconTheme::from_config(&c));
+    }
+
+    #[test]
+    fn test_from_config_devicons() {
+        let mut c = Config::with_none();
+        c.icons = Some(Icons {
+            when: None,
+            theme: Some(IconTheme::Devicons),
+            separator: None,
+        });
+        assert_eq!(Some(IconTheme::Devicons), IconTheme::from_config(&c));
     }
 }
 

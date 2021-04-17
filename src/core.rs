@@ -49,6 +49,7 @@ impl Core {
             (_, IconOption::Never, _) | (false, IconOption::Auto, _) => icon::Theme::NoIcon,
             (_, _, IconTheme::Fancy) => icon::Theme::Fancy,
             (_, _, IconTheme::Unicode) => icon::Theme::Unicode,
+            (_, _, IconTheme::Devicons) => icon::Theme::Devicons,
         };
 
         let icon_separator = flags.icons.separator.0.clone();
