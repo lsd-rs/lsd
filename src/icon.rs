@@ -39,8 +39,8 @@ impl Icons {
                 (
                     Self::get_default_icons_by_name(),
                     Self::get_default_icons_by_extension(),
-                    "\u{e612}", // 
-                    "\u{f07b}", // 
+                    "\u{e612}", // 
+                    "\u{f07b}", // 
                 )
 
             } else {
