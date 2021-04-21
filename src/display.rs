@@ -5,7 +5,7 @@ use crate::icon::Icons;
 use crate::meta::{DisplayOption, FileType, Meta};
 use ansi_term::{ANSIString, ANSIStrings};
 use fxhash::FxHashMap;
-use simple_counter::generate_counter;
+use std::fmt;
 use term_grid::{Cell, Direction, Filling, Grid, GridOptions};
 use unicode_width::UnicodeWidthStr;
 
@@ -26,8 +26,28 @@ pub fn grid(metas: &mut [Meta], flags: &Flags, colors: &Colors, icons: &Icons) -
     )
 }
 
-generate_counter!(DIR_COUNT, u32);
-generate_counter!(FILE_COUNT, u32);
+struct Count {
+    files: u32,
+    dirs: u32,
+}
+
+impl Count {
+    fn count(&mut self, is_dirlike: bool, depth: usize) {
+        // assume if not directory, it's a file
+        if !is_dirlike {
+            self.files += 1;
+        } else if depth > 0 {
+            //  dont count current directory
+            self.dirs += 1;
+        }
+    }
+}
+
+impl fmt::Display for Count {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{} directories, {} files", self.dirs, self.files)
+    }
+}
 
 pub fn tree(metas: &[Meta], flags: &Flags, colors: &Colors, icons: &Icons) -> String {
     let mut grid = Grid::new(GridOptions {
@@ -37,23 +57,32 @@ pub fn tree(metas: &[Meta], flags: &Flags, colors: &Colors, icons: &Icons) -> St
 
     let padding_rules = get_padding_rules(&metas, flags);
 
-    let index = match flags.blocks.0.iter().position(|&b| b == Block::Name) {
-        Some(i) => i,
-        None => 0,
-    };
+    let index = flags
+        .blocks
+        .0
+        .iter()
+        .position(|&b| b == Block::Name)
+        .unwrap_or(0);
 
-    DIR_COUNT::reset();
-    FILE_COUNT::reset();
+    let mut counter = Count { files: 0, dirs: 0 };
 
-    for cell in inner_display_tree(metas, &flags, colors, icons, (0, ""), &padding_rules, index) {
+    for cell in inner_display_tree(
+        metas,
+        &flags,
+        colors,
+        icons,
+        (0, ""),
+        &padding_rules,
+        index,
+        &mut counter,
+    ) {
         grid.add(cell);
     }
 
     format!(
-        "{}\n{} directories, {} files\n",
+        "{}\n{}\n",
         grid.fit_into_columns(flags.blocks.0.len()),
-        DIR_COUNT::next(),
-        FILE_COUNT::next()
+        counter
     )
 }
 
@@ -167,11 +196,14 @@ fn inner_display_tree(
     tree_depth_prefix: (usize, &str),
     padding_rules: &FxHashMap<Block, usize>,
     tree_index: usize,
+    counter: &mut Count,
 ) -> Vec<Cell> {
     let mut cells = Vec::new();
     let last_idx = metas.len();
 
     for (idx, meta) in metas.iter().enumerate() {
+        counter.count(meta.file_type.is_dirlike(), tree_depth_prefix.0);
+
         let current_prefix = if tree_depth_prefix.0 > 0 {
             format!(
                 "{}{} ",
@@ -181,14 +213,6 @@ fn inner_display_tree(
         } else {
             tree_depth_prefix.1.to_string()
         };
-
-        // assume if not directory, is a file
-        // dont count current directory
-        if !meta.file_type.is_dirlike() {
-            FILE_COUNT::next();
-        } else if tree_depth_prefix.0 > 0 {
-            DIR_COUNT::next();
-        }
 
         for block in get_output(
             &meta,
@@ -224,6 +248,7 @@ fn inner_display_tree(
                 (tree_depth_prefix.0 + 1, &new_prefix),
                 padding_rules,
                 tree_index,
+                counter,
             ));
         }
     }
