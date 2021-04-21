@@ -278,13 +278,13 @@ fn display_folder_path(meta: &Meta) -> String {
 }
 
 fn get_output<'a>(
-    meta: &'a Meta,
-    colors: &'a Colors,
-    icons: &'a Icons,
-    flags: &'a Flags,
+    meta: &Meta,
+    colors: &Colors,
+    icons: &Icons,
+    flags: &Flags,
     display_option: &DisplayOption,
     padding_rules: &FxHashMap<Block, usize>,
-    tree: (usize, &'a str),
+    tree: (usize, &str),
 ) -> Vec<ANSIString<'a>> {
     let mut strings: Vec<ANSIString> = Vec::new();
     for (i, block) in flags.blocks.0.iter().enumerate() {

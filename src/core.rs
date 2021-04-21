@@ -4,6 +4,7 @@ use crate::flags::{ColorOption, Display, Flags, IconOption, IconTheme, Layout, S
 use crate::icon::{self, Icons};
 use crate::meta::Meta;
 use crate::{print_error, print_output, sort};
+#[cfg(unix)]
 use std::os::unix::io::AsRawFd;
 use std::path::PathBuf;
 
