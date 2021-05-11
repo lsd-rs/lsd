@@ -117,6 +117,12 @@ impl Config {
         serde_yaml::from_str::<Self>(yaml)
     }
 
+    #[cfg(not(windows))]
+    fn _custom_config_path(_file: String) -> Option<PathBuf> {
+        // somehow get file path from args here...
+        todo!()
+    }
+
     /// This provides the path for a configuration file, according to the XDG_BASE_DIRS specification.
     /// return None if error like PermissionDenied
     #[cfg(not(windows))]
