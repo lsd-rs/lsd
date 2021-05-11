@@ -73,6 +73,12 @@ pub fn build() -> App<'static, 'static> {
                 .help("Ignore the configuration file"),
         )
         .arg(
+            Arg::with_name("config-file")
+                .short("f")
+                .long("config-file")
+                .help("Provide a custom lsd configuration file")
+        )
+        .arg(
             Arg::with_name("oneline")
                 .short("1")
                 .long("oneline")
