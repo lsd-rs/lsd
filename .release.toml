@@ -1,6 +1,9 @@
 sign-commit = true
+sign-tag = true
 no-dev-version = true
 pre-release-commit-message = "Release {{version}}"
+tag-prefix = ""
+tag-name = "{{version}}"
 pre-release-replacements = [
   {file="CHANGELOG.md", search="Unreleased", replace="{{version}}"},
   {file="CHANGELOG.md", search="ReleaseDate", replace="{{date}}"},

@@ -62,6 +62,8 @@ jobs:
       matrix:
         job:
           - { os: ubuntu-latest  , target: arm-unknown-linux-gnueabihf , use-cross: use-cross }
+          - { os: ubuntu-latest  , target: aarch64-unknown-linux-gnu   , use-cross: use-cross }
+          - { os: ubuntu-latest  , target: aarch64-unknown-linux-musl  , use-cross: use-cross }
           - { os: ubuntu-latest  , target: i686-unknown-linux-gnu      , use-cross: use-cross }
           - { os: ubuntu-latest  , target: i686-unknown-linux-musl     , use-cross: use-cross }
           - { os: ubuntu-latest  , target: x86_64-unknown-linux-gnu    , use-cross: use-cross }
@@ -77,7 +79,8 @@ jobs:
       shell: bash
       run: |
         case ${{ matrix.job.target }} in
-          arm-unknown-linux-gnueabihf) sudo apt-get -y update ; sudo apt-get -y install gcc-arm-linux-gnueabihf ;;
+          arm-*-linux-*hf) sudo apt-get -y update ; sudo apt-get -y install binutils-arm-linux-gnueabihf ;;
+          aarch64-*-linux-*) sudo apt-get -y update ; sudo apt-get -y install binutils-aarch64-linux-gnu ;;
         esac
     - name: Initialize workflow variables
       id: vars
@@ -127,7 +130,7 @@ jobs:
         echo set-output name=DEPLOY::${DEPLOY:-<empty>/false}
         echo ::set-output name=DEPLOY::${DEPLOY}
         # DPKG architecture?
-        unset DPKG_ARCH ; case ${{ matrix.job.target }} in i686-*-linux-*) DPKG_ARCH=i686 ;; x86_64-*-linux-*) DPKG_ARCH=amd64 ;; esac;
+        unset DPKG_ARCH ; case ${{ matrix.job.target }} in aarch64-*-linux-*) DPKG_ARCH=arm64 ;; i686-*-linux-*) DPKG_ARCH=i686 ;; x86_64-*-linux-*) DPKG_ARCH=amd64 ;; esac;
         echo set-output name=DPKG_ARCH::${DPKG_ARCH}
         echo ::set-output name=DPKG_ARCH::${DPKG_ARCH}
         # DPKG version?
@@ -153,11 +156,11 @@ jobs:
         echo set-output name=CARGO_USE_CROSS::${CARGO_USE_CROSS:-<empty>/false}
         echo ::set-output name=CARGO_USE_CROSS::${CARGO_USE_CROSS}
         # * test only binary for arm-type targets
-        unset CARGO_TEST_OPTIONS ; case ${{ matrix.job.target }} in arm-*) CARGO_TEST_OPTIONS="--bin ${PROJECT_NAME}" ;; esac;
+        unset CARGO_TEST_OPTIONS ; case ${{ matrix.job.target }} in arm-* | aarch64-*-linux-*) CARGO_TEST_OPTIONS="--bin ${PROJECT_NAME}" ;; esac;
         echo set-output name=CARGO_TEST_OPTIONS::${CARGO_TEST_OPTIONS}
         echo ::set-output name=CARGO_TEST_OPTIONS::${CARGO_TEST_OPTIONS}
         # * strip executable?
-        STRIP="strip" ; case ${{ matrix.job.target }} in arm-unknown-linux-gnueabihf) STRIP="arm-linux-gnueabihf-strip" ;; *-pc-windows-msvc) STRIP="" ;; esac;
+        STRIP="strip" ; case ${{ matrix.job.target }} in arm-*-linux-*hf) STRIP="arm-linux-gnueabihf-strip" ;; aarch64-*-linux-*) STRIP="aarch64-linux-gnu-strip" ;; *-pc-windows-msvc) STRIP="" ;; esac;
         echo set-output name=STRIP::${STRIP}
         echo ::set-output name=STRIP::${STRIP}
     - name: Create all needed build/work directories
@@ -167,6 +170,17 @@ jobs:
         mkdir -p '${{ steps.vars.outputs.STAGING }}/${{ steps.vars.outputs.PKG_BASENAME }}'
         mkdir -p '${{ steps.vars.outputs.STAGING }}/${{ steps.vars.outputs.PKG_BASENAME }}/autocomplete'
         mkdir -p '${{ steps.vars.outputs.STAGING }}/dpkg'
+    - name: Update manpage placeholders
+      shell: bash
+      run: |
+        LSD_VERSION="$(if echo "$GITHUB_REF" | grep -q '^refs/tags'; then echo "${GITHUB_REF#refs/*/}"; else echo; fi)"
+        sed -i.bk "s|footer: lsd <version>|footer: lsd $LSD_VERSION|" doc/lsd.md
+        sed -i.bk "s|date: <date>|date: $(date '+%Y-%m-%d')|" doc/lsd.md
+        rm doc/lsd.md.bk
+    - name: Setup pandoc
+      uses: r-lib/actions/setup-pandoc@v1
+    - name: Generate Manpage
+      run: pandoc --standalone --to man doc/lsd.md -o lsd.1
     - name: Install `rust` toolchain
       uses: actions-rs/toolchain@v1
       with:
@@ -201,6 +215,8 @@ jobs:
         # README and LICENSE
         cp README.md '${{ steps.vars.outputs.STAGING }}/${{ steps.vars.outputs.PKG_BASENAME }}/'
         cp LICENSE '${{ steps.vars.outputs.STAGING }}/${{ steps.vars.outputs.PKG_BASENAME }}/'
+        # manpage
+        cp lsd.1 '${{ steps.vars.outputs.STAGING }}/${{ steps.vars.outputs.PKG_BASENAME }}/'
         # autocomplete
         cp 'target/${{ matrix.job.target }}/release/build/${{ env.PROJECT_NAME }}-'*/'out/${{ env.PROJECT_NAME }}.bash' '${{ steps.vars.outputs.STAGING }}/${{ steps.vars.outputs.PKG_BASENAME }}/autocomplete/${{ env.PROJECT_NAME }}.bash-completion'
         cp 'target/${{ matrix.job.target }}/release/build/${{ env.PROJECT_NAME }}-'*/'out/${{ env.PROJECT_NAME }}.fish' '${{ steps.vars.outputs.STAGING }}/${{ steps.vars.outputs.PKG_BASENAME }}/autocomplete/'

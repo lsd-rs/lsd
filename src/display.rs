@@ -1,18 +1,20 @@
 use crate::color::{ColoredString, Colors};
 use crate::flags::{Block, Display, Flags, Layout};
+use crate::hashmap;
 use crate::icon::Icons;
 use crate::meta::{DisplayOption, FileType, Meta};
 use ansi_term::{ANSIString, ANSIStrings};
-use std::collections::HashMap;
+use fxhash::FxHashMap;
+use std::fmt;
 use term_grid::{Cell, Direction, Filling, Grid, GridOptions};
 use unicode_width::UnicodeWidthStr;
 
 const EDGE: &str = "\u{251c}\u{2500}\u{2500}"; // "├──"
-const LINE: &str = "\u{2502}  "; // "├  "
+const LINE: &str = "\u{2502}  "; // "│  "
 const CORNER: &str = "\u{2514}\u{2500}\u{2500}"; // "└──"
 const BLANK: &str = "   ";
 
-pub fn grid(metas: &[Meta], flags: &Flags, colors: &Colors, icons: &Icons) -> String {
+pub fn grid(metas: &mut [Meta], flags: &Flags, colors: &Colors, icons: &Icons) -> String {
     inner_display_grid(
         &DisplayOption::None,
         metas,
@@ -20,17 +22,73 @@ pub fn grid(metas: &[Meta], flags: &Flags, colors: &Colors, icons: &Icons) -> St
         colors,
         icons,
         0,
-        termize::dimensions().map(|size| size.0 as usize),
+        termize::dimensions().map(|(w, _)| w as usize),
     )
 }
 
+struct Count {
+    files: u32,
+    dirs: u32,
+}
+
+impl Count {
+    fn count(&mut self, is_dirlike: bool, depth: usize) {
+        // assume if not directory, it's a file
+        if !is_dirlike {
+            self.files += 1;
+        } else if depth > 0 {
+            //  dont count current directory
+            self.dirs += 1;
+        }
+    }
+}
+
+impl fmt::Display for Count {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{} directories, {} files", self.dirs, self.files)
+    }
+}
+
 pub fn tree(metas: &[Meta], flags: &Flags, colors: &Colors, icons: &Icons) -> String {
-    inner_display_tree(metas, &flags, colors, icons, 0, "")
+    let mut grid = Grid::new(GridOptions {
+        filling: Filling::Spaces(1),
+        direction: Direction::LeftToRight,
+    });
+
+    let padding_rules = get_padding_rules(&metas, flags);
+
+    let index = flags
+        .blocks
+        .0
+        .iter()
+        .position(|&b| b == Block::Name)
+        .unwrap_or(0);
+
+    let mut counter = Count { files: 0, dirs: 0 };
+
+    for cell in inner_display_tree(
+        metas,
+        &flags,
+        colors,
+        icons,
+        (0, ""),
+        &padding_rules,
+        index,
+        &mut counter,
+    ) {
+        grid.add(cell);
+    }
+
+    format!(
+        "{}\n{}\n",
+        grid.fit_into_columns(flags.blocks.0.len()),
+        counter
+    )
 }
 
 fn inner_display_grid(
     display_option: &DisplayOption,
-    metas: &[Meta],
+    metas: &mut [Meta],
     flags: &Flags,
     colors: &Colors,
     icons: &Icons,
@@ -54,17 +112,23 @@ fn inner_display_grid(
     // The first iteration (depth == 0) corresponds to the inputs given by the
     // user. We defer displaying directories given by the user unless we've been
     // asked to display the directory itself (rather than its contents).
-    let skip_dirs = (depth == 0) && (flags.display != Display::DirectoryItself);
+    let skip_dirs = (depth == 0) && (flags.display != Display::DirectoryOnly);
 
     // print the files first.
-    for meta in metas {
+    for meta in metas.iter_mut() {
         // Maybe skip showing the directory meta now; show its contents later.
-        if skip_dirs
-            && (matches!(meta.file_type, FileType::Directory{..})
-                || (matches!(meta.file_type, FileType::SymLink { is_dir: true })
-                    && flags.layout != Layout::OneLine))
-        {
-            continue;
+        if skip_dirs {
+            match meta.file_type {
+                FileType::Directory { .. } => continue,
+                FileType::SymLink { is_dir: true } if flags.layout != Layout::OneLine => continue,
+                _ => {}
+            }
+        }
+
+        if let Some(ref mut inner) = meta.content {
+            inner.sort_unstable_by(|a, b| {
+                crate::sort::by_meta(&crate::sort::assemble_sorters(&flags), a, b)
+            });
         }
 
         let blocks = get_output(
@@ -74,34 +138,27 @@ fn inner_display_grid(
             &flags,
             &display_option,
             &padding_rules,
+            (0, ""),
         );
 
         for block in blocks {
-            let block_str = block.to_string();
-
             grid.add(Cell {
-                width: get_visible_width(&block_str),
-                contents: block_str,
+                width: get_visible_width(&block),
+                contents: block.to_string(),
             });
         }
     }
 
-    if flags.layout == Layout::Grid {
-        if let Some(tw) = term_width {
-            if let Some(gridded_output) = grid.fit_into_width(tw) {
-                output += &gridded_output.to_string();
-            } else {
-                //does not fit into grid, usually because (some) filename(s)
-                //are longer or almost as long as term_width
-                //print line by line instead!
-                output += &grid.fit_into_columns(1).to_string();
-            }
-        } else {
-            output += &grid.fit_into_columns(1).to_string();
+    output += if flags.layout == Layout::Grid {
+        match term_width.and_then(|tw| grid.fit_into_width(tw)) {
+            Some(gridded_output) => gridded_output,
+            None => grid.fit_into_columns(1),
         }
     } else {
-        output += &grid.fit_into_columns(flags.blocks.0.len()).to_string();
+        grid.fit_into_columns(flags.blocks.0.len())
     }
+    .to_string()
+    .as_str();
 
     let should_display_folder_path = should_display_folder_path(depth, &metas, &flags);
 
@@ -118,7 +175,7 @@ fn inner_display_grid(
 
             output += &inner_display_grid(
                 &display_option,
-                meta.content.as_ref().unwrap(),
+                meta.content.as_mut().unwrap(),
                 &flags,
                 colors,
                 icons,
@@ -136,20 +193,27 @@ fn inner_display_tree(
     flags: &Flags,
     colors: &Colors,
     icons: &Icons,
-    depth: usize,
-    prefix: &str,
-) -> String {
-    let mut output = String::new();
+    tree_depth_prefix: (usize, &str),
+    padding_rules: &FxHashMap<Block, usize>,
+    tree_index: usize,
+    counter: &mut Count,
+) -> Vec<Cell> {
+    let mut cells = Vec::new();
     let last_idx = metas.len();
 
-    let padding_rules = get_padding_rules(&metas, flags);
+    for (idx, meta) in metas.iter().enumerate() {
+        counter.count(meta.file_type.is_dirlike(), tree_depth_prefix.0);
 
-    let mut grid = Grid::new(GridOptions {
-        filling: Filling::Spaces(1),
-        direction: Direction::LeftToRight,
-    });
+        let current_prefix = if tree_depth_prefix.0 > 0 {
+            format!(
+                "{}{} ",
+                tree_depth_prefix.1,
+                if idx + 1 == last_idx { CORNER } else { EDGE }
+            )
+        } else {
+            tree_depth_prefix.1.to_string()
+        };
 
-    for meta in metas.iter() {
         for block in get_output(
             &meta,
             &colors,
@@ -157,59 +221,39 @@ fn inner_display_tree(
             &flags,
             &DisplayOption::FileName,
             &padding_rules,
+            (tree_index, &current_prefix),
         ) {
-            let block_str = block.to_string();
-
-            grid.add(Cell {
-                width: get_visible_width(&block_str),
-                contents: block_str,
+            cells.push(Cell {
+                width: get_visible_width(&block),
+                contents: block.to_string(),
             });
         }
-    }
-
-    let content = grid.fit_into_columns(flags.blocks.0.len()).to_string();
-    let mut lines = content.lines();
-
-    for (idx, meta) in metas.iter().enumerate() {
-        let is_last_folder_elem = idx + 1 != last_idx;
-
-        if depth > 0 {
-            output += prefix;
-
-            if is_last_folder_elem {
-                output += EDGE;
-            } else {
-                output += CORNER;
-            }
-            output += " ";
-        }
-
-        output += &String::from(lines.next().unwrap());
-        output += "\n";
 
         if meta.content.is_some() {
-            let mut new_prefix = String::from(prefix);
+            let new_prefix = if tree_depth_prefix.0 > 0 {
+                format!(
+                    "{}{} ",
+                    tree_depth_prefix.1,
+                    if idx + 1 == last_idx { BLANK } else { LINE }
+                )
+            } else {
+                tree_depth_prefix.1.to_string()
+            };
 
-            if depth > 0 {
-                if is_last_folder_elem {
-                    new_prefix += LINE;
-                } else {
-                    new_prefix += BLANK;
-                }
-            }
-
-            output += &inner_display_tree(
+            cells.extend(inner_display_tree(
                 &meta.content.as_ref().unwrap(),
                 &flags,
                 colors,
                 icons,
-                depth + 1,
-                &new_prefix,
-            );
+                (tree_depth_prefix.0 + 1, &new_prefix),
+                padding_rules,
+                tree_index,
+                counter,
+            ));
         }
     }
 
-    output
+    cells
 }
 
 fn should_display_folder_path(depth: usize, metas: &[Meta], flags: &Flags) -> bool {
@@ -218,10 +262,10 @@ fn should_display_folder_path(depth: usize, metas: &[Meta], flags: &Flags) -> bo
     } else {
         let folder_number = metas
             .iter()
-            .filter(|x| {
-                matches!(x.file_type, FileType::Directory { .. })
-                    || (matches!(x.file_type, FileType::SymLink { is_dir: true })
-                        && flags.layout != Layout::OneLine)
+            .filter(|x| match x.file_type {
+                FileType::Directory { .. } => true,
+                FileType::SymLink { is_dir: true } => flags.layout != Layout::OneLine,
+                _ => false,
             })
             .count();
 
@@ -230,108 +274,100 @@ fn should_display_folder_path(depth: usize, metas: &[Meta], flags: &Flags) -> bo
 }
 
 fn display_folder_path(meta: &Meta) -> String {
-    let mut output = String::new();
-    output.push('\n');
-    output += &meta.path.to_string_lossy();
-    output += ":\n";
-
-    output
+    String::new() + "\n" + &meta.path.to_string_lossy() + ":\n"
 }
 
 fn get_output<'a>(
-    meta: &'a Meta,
-    colors: &'a Colors,
-    icons: &'a Icons,
-    flags: &'a Flags,
+    meta: &Meta,
+    colors: &Colors,
+    icons: &Icons,
+    flags: &Flags,
     display_option: &DisplayOption,
-    padding_rules: &HashMap<Block, usize>,
+    padding_rules: &FxHashMap<Block, usize>,
+    tree: (usize, &str),
 ) -> Vec<ANSIString<'a>> {
     let mut strings: Vec<ANSIString> = Vec::new();
-    for block in flags.blocks.0.iter() {
+    for (i, block) in flags.blocks.0.iter().enumerate() {
+        let mut block_vec = if Layout::Tree == flags.layout && tree.0 == i {
+            // TODO: add color after we have theme configuration
+            // vec![colors.colorize(ANSIString::from(tree.1).to_string(), &Elem::TreeEdge)]
+            vec![ANSIString::from(tree.1)]
+        } else {
+            Vec::new()
+        };
+
         match block {
-            Block::INode => strings.push(meta.inode.render(colors)),
+            Block::INode => block_vec.push(meta.inode.render(colors)),
+            Block::Links => block_vec.push(meta.links.render(colors)),
             Block::Permission => {
-                let s: &[ColoredString] = &[
+                block_vec.extend(vec![
                     meta.file_type.render(colors),
                     meta.permissions.render(colors),
-                ];
-                let res = ANSIStrings(s).to_string();
-                strings.push(ColoredString::from(res));
+                ]);
             }
-            Block::User => strings.push(meta.owner.render_user(colors)),
-            Block::Group => strings.push(meta.owner.render_group(colors)),
-            Block::Size => strings.push(meta.size.render(
-                colors,
-                &flags,
-                padding_rules[&Block::SizeValue],
-            )),
-            Block::SizeValue => strings.push(meta.size.render_value(colors, flags)),
-            Block::Date => strings.push(meta.date.render(colors, &flags)),
+            Block::User => block_vec.push(meta.owner.render_user(colors)),
+            Block::Group => block_vec.push(meta.owner.render_group(colors)),
+            Block::Size => {
+                let pad = if Layout::Tree == flags.layout && 0 == tree.0 && 0 == i {
+                    None
+                } else {
+                    Some(padding_rules[&Block::SizeValue])
+                };
+                block_vec.push(meta.size.render(colors, &flags, pad))
+            }
+            Block::SizeValue => block_vec.push(meta.size.render_value(colors, flags)),
+            Block::Date => block_vec.push(meta.date.render(colors, &flags)),
             Block::Name => {
-                let s: String =
-                    if flags.no_symlink.0 || flags.dereference.0 || flags.layout == Layout::Grid {
-                        ANSIStrings(&[
-                            meta.name.render(colors, icons, &display_option),
-                            meta.indicator.render(&flags),
-                        ])
-                        .to_string()
-                    } else {
-                        ANSIStrings(&[
-                            meta.name.render(colors, icons, &display_option),
-                            meta.indicator.render(&flags),
-                            meta.symlink.render(colors, &flags),
-                        ])
-                        .to_string()
-                    };
-
-                strings.push(ColoredString::from(s));
+                block_vec.extend(vec![
+                    meta.name.render(
+                        colors,
+                        icons,
+                        &display_option,
+                        &meta.metadata,
+                        &flags.icons.separator.0,
+                    ),
+                    meta.indicator.render(&flags),
+                ]);
+                if !(flags.no_symlink.0 || flags.dereference.0 || flags.layout == Layout::Grid) {
+                    block_vec.push(meta.symlink.render(colors, &flags))
+                }
             }
         };
+        strings.push(ColoredString::from(ANSIStrings(&block_vec).to_string()));
     }
-
     strings
 }
 
 fn get_visible_width(input: &str) -> usize {
-    let mut nb_invisible_char = 0;
-
     // If the input has color, do not compute the length contributed by the color to the actual length
-    for (idx, _) in input.match_indices("\u{1b}[") {
-        let (_, s) = input.split_at(idx);
-
-        let m_pos = s.find('m');
-        if let Some(len) = m_pos {
-            nb_invisible_char += len
-        }
-    }
-
-    UnicodeWidthStr::width(input) - nb_invisible_char
+    UnicodeWidthStr::width(input)
+        - input
+            .match_indices("\u{1b}[")
+            .map(|(i, _)| input.split_at(i).1.find('m').unwrap_or_default())
+            .sum::<usize>()
 }
 
 fn detect_size_lengths(metas: &[Meta], flags: &Flags) -> usize {
     let mut max_value_length: usize = 0;
 
     for meta in metas {
-        let value_len = meta.size.value_string(flags).len();
-
-        if value_len > max_value_length {
-            max_value_length = value_len;
+        max_value_length = max_value_length.max(meta.size.value_string(flags).len());
+        if Layout::Tree == flags.layout {
+            if let Some(subs) = &meta.content {
+                max_value_length = max_value_length.max(detect_size_lengths(&subs, flags));
+            }
         }
     }
 
     max_value_length
 }
 
-fn get_padding_rules(metas: &[Meta], flags: &Flags) -> HashMap<Block, usize> {
-    let mut padding_rules: HashMap<Block, usize> = HashMap::new();
-
+fn get_padding_rules(metas: &[Meta], flags: &Flags) -> FxHashMap<Block, usize> {
     if flags.blocks.0.contains(&Block::Size) {
-        let size_val = detect_size_lengths(&metas, &flags);
-
-        padding_rules.insert(Block::SizeValue, size_val);
+        hashmap! { Block::SizeValue => detect_size_lengths(&metas, &flags) }
+    } else {
+        hashmap! {}
     }
-
-    padding_rules
 }
 
 #[cfg(test)]
@@ -339,23 +375,43 @@ mod tests {
     use super::*;
     use crate::color;
     use crate::color::Colors;
-    use crate::icon;
     use crate::icon::Icons;
     use crate::meta::{FileType, Name};
+    use crate::Config;
+    use crate::{app, flags, icon, sort};
+    use assert_fs::prelude::*;
     use std::path::Path;
+    use tempfile::tempdir;
+
+    const FILES: [&str; 8] = [
+        "Ｈｅｌｌｏ,ｗｏｒｌｄ!",
+        "ASCII1234-_",
+        "File with space",
+        "制作样本。",
+        "日本語",
+        "샘플은 무료로 드리겠습니다",
+        "👩🐩",
+        "🔬",
+    ];
+
+    macro_rules! get_files {
+        ($tmp:expr) => {
+            FILES
+                .iter()
+                .map(|&f| {
+                    let path = { &$tmp }.path().join(f);
+                    std::fs::File::create(&path).unwrap();
+                    path
+                })
+                // expected lengths
+                .zip(&[22, 11, 15, 10, 6, 26, 4, 2])
+        };
+    }
 
     #[test]
     fn test_display_get_visible_width_without_icons() {
-        for (s, l) in &[
-            ("Ｈｅｌｌｏ,ｗｏｒｌｄ!", 22),
-            ("ASCII1234-_", 11),
-            ("制作样本。", 10),
-            ("日本語", 6),
-            ("샘플은 무료로 드리겠습니다", 26),
-            ("👩🐩", 4),
-            ("🔬", 2),
-        ] {
-            let path = Path::new(s);
+        let tmp = tempdir().expect("failed to create temp dir");
+        for (path, &len) in get_files!(tmp) {
             let name = Name::new(
                 &path,
                 FileType::File {
@@ -367,26 +423,18 @@ mod tests {
                 &Colors::new(color::Theme::NoColor),
                 &Icons::new(icon::Theme::NoIcon),
                 &DisplayOption::FileName,
+                &path.metadata().unwrap(),
+                " ",
             );
 
-            assert_eq!(get_visible_width(&output), *l);
+            assert_eq!(get_visible_width(&output), len);
         }
     }
 
     #[test]
     fn test_display_get_visible_width_with_icons() {
-        for (s, l) in &[
-            // Add 3 characters for the icons.
-            ("Ｈｅｌｌｏ,ｗｏｒｌｄ!", 24),
-            ("ASCII1234-_", 13),
-            ("File with space", 17),
-            ("制作样本。", 12),
-            ("日本語", 8),
-            ("샘플은 무료로 드리겠습니다", 28),
-            ("👩🐩", 6),
-            ("🔬", 4),
-        ] {
-            let path = Path::new(s);
+        let tmp = tempdir().expect("failed to create temp dir");
+        for (path, &len) in get_files!(tmp) {
             let name = Name::new(
                 &path,
                 FileType::File {
@@ -399,26 +447,20 @@ mod tests {
                     &Colors::new(color::Theme::NoColor),
                     &Icons::new(icon::Theme::Fancy),
                     &DisplayOption::FileName,
+                    &path.metadata().unwrap(),
+                    " ",
                 )
                 .to_string();
 
-            assert_eq!(get_visible_width(&output), *l);
+            // Add 2 characters for the icons.
+            assert_eq!(get_visible_width(&output), len + 2);
         }
     }
 
     #[test]
     fn test_display_get_visible_width_with_colors() {
-        for (s, l) in &[
-            ("Ｈｅｌｌｏ,ｗｏｒｌｄ!", 22),
-            ("ASCII1234-_", 11),
-            ("File with space", 15),
-            ("制作样本。", 10),
-            ("日本語", 6),
-            ("샘플은 무료로 드리겠습니다", 26),
-            ("👩🐩", 4),
-            ("🔬", 2),
-        ] {
-            let path = Path::new(s);
+        let tmp = tempdir().expect("failed to create temp dir");
+        for (path, &len) in get_files!(tmp) {
             let name = Name::new(
                 &path,
                 FileType::File {
@@ -431,30 +473,22 @@ mod tests {
                     &Colors::new(color::Theme::NoLscolors),
                     &Icons::new(icon::Theme::NoIcon),
                     &DisplayOption::FileName,
+                    &path.metadata().unwrap(),
+                    " ",
                 )
                 .to_string();
 
             // check if the color is present.
             assert_eq!(true, output.starts_with("\u{1b}[38;5;"));
             assert_eq!(true, output.ends_with("[0m"));
-
-            assert_eq!(get_visible_width(&output), *l);
+            assert_eq!(get_visible_width(&output), len);
         }
     }
 
     #[test]
     fn test_display_get_visible_width_without_colors() {
-        for (s, l) in &[
-            ("Ｈｅｌｌｏ,ｗｏｒｌｄ!", 22),
-            ("ASCII1234-_", 11),
-            ("File with space", 15),
-            ("制作样本。", 10),
-            ("日本語", 6),
-            ("샘플은 무료로 드리겠습니다", 26),
-            ("👩🐩", 4),
-            ("🔬", 2),
-        ] {
-            let path = Path::new(s);
+        let tmp = tempdir().expect("failed to create temp dir");
+        for (path, &len) in get_files!(tmp) {
             let name = Name::new(
                 &path,
                 FileType::File {
@@ -467,6 +501,8 @@ mod tests {
                     &Colors::new(color::Theme::NoColor),
                     &Icons::new(icon::Theme::NoIcon),
                     &DisplayOption::FileName,
+                    &path.metadata().unwrap(),
+                    " ",
                 )
                 .to_string();
 
@@ -474,7 +510,156 @@ mod tests {
             assert_eq!(false, output.starts_with("\u{1b}[38;5;"));
             assert_eq!(false, output.ends_with("[0m"));
 
-            assert_eq!(get_visible_width(&output), *l);
+            assert_eq!(get_visible_width(&output), len);
         }
+    }
+
+    fn sort(metas: &mut Vec<Meta>, sorters: &Vec<(flags::SortOrder, sort::SortFn)>) {
+        metas.sort_unstable_by(|a, b| sort::by_meta(sorters, a, b));
+
+        for meta in metas {
+            if let Some(ref mut content) = meta.content {
+                sort(content, sorters);
+            }
+        }
+    }
+
+    #[test]
+    fn test_display_tree_with_all() {
+        let argv = vec!["lsd", "--tree", "--all"];
+        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let flags = Flags::configure_from(&matches, &Config::with_none()).unwrap();
+
+        let dir = assert_fs::TempDir::new().unwrap();
+        dir.child("one.d").create_dir_all().unwrap();
+        dir.child("one.d/two").touch().unwrap();
+        dir.child("one.d/.hidden").touch().unwrap();
+        let mut metas = Meta::from_path(Path::new(dir.path()), false)
+            .unwrap()
+            .recurse_into(42, &flags)
+            .unwrap()
+            .unwrap();
+        sort(&mut metas, &sort::assemble_sorters(&flags));
+        let output = tree(
+            &metas,
+            &flags,
+            &Colors::new(color::Theme::NoColor),
+            &Icons::new(icon::Theme::NoIcon),
+        );
+
+        assert_eq!(
+            "one.d\n├── .hidden\n└── two\n\n0 directories, 2 files\n",
+            output
+        );
+    }
+
+    /// Different level of folder may form a different width
+    /// we must make sure it is aligned in all level
+    ///
+    /// dir has a bytes size
+    /// empty file has an empty size
+    /// `---blocks size,name` can help us for this case
+    #[test]
+    fn test_tree_align_subfolder() {
+        let argv = vec!["lsd", "--tree", "--blocks", "size,name"];
+        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let flags = Flags::configure_from(&matches, &Config::with_none()).unwrap();
+
+        let dir = assert_fs::TempDir::new().unwrap();
+        dir.child("dir").create_dir_all().unwrap();
+        dir.child("dir/file").touch().unwrap();
+        let metas = Meta::from_path(Path::new(dir.path()), false)
+            .unwrap()
+            .recurse_into(42, &flags)
+            .unwrap()
+            .unwrap();
+        let output = tree(
+            &metas,
+            &flags,
+            &Colors::new(color::Theme::NoColor),
+            &Icons::new(icon::Theme::NoIcon),
+        );
+
+        let length_before_b = |i| -> usize {
+            output
+                .lines()
+                .nth(i)
+                .unwrap()
+                .split(|c| c == 'K' || c == 'B')
+                .nth(0)
+                .unwrap()
+                .len()
+        };
+        assert_eq!(length_before_b(0), length_before_b(1));
+        assert_eq!(
+            output.lines().nth(0).unwrap().find("d"),
+            output.lines().nth(1).unwrap().find("└")
+        );
+    }
+
+    #[test]
+    #[cfg(unix)]
+    fn test_tree_size_first_without_name() {
+        let argv = vec!["lsd", "--tree", "--blocks", "size,permission"];
+        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let flags = Flags::configure_from(&matches, &Config::with_none()).unwrap();
+
+        let dir = assert_fs::TempDir::new().unwrap();
+        dir.child("dir").create_dir_all().unwrap();
+        dir.child("dir/file").touch().unwrap();
+        let metas = Meta::from_path(Path::new(dir.path()), false)
+            .unwrap()
+            .recurse_into(42, &flags)
+            .unwrap()
+            .unwrap();
+        let output = tree(
+            &metas,
+            &flags,
+            &Colors::new(color::Theme::NoColor),
+            &Icons::new(icon::Theme::NoIcon),
+        );
+
+        assert_eq!(output.lines().nth(1).unwrap().chars().nth(0).unwrap(), '└');
+        assert_eq!(
+            output
+                .lines()
+                .nth(0)
+                .unwrap()
+                .chars()
+                .position(|x| x == 'd'),
+            output
+                .lines()
+                .nth(1)
+                .unwrap()
+                .chars()
+                .position(|x| x == '.'),
+        );
+    }
+
+    #[test]
+    fn test_tree_edge_before_name() {
+        let argv = vec!["lsd", "--tree", "--long"];
+        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let flags = Flags::configure_from(&matches, &Config::with_none()).unwrap();
+
+        let dir = assert_fs::TempDir::new().unwrap();
+        dir.child("one.d").create_dir_all().unwrap();
+        dir.child("one.d/two").touch().unwrap();
+        let metas = Meta::from_path(Path::new(dir.path()), false)
+            .unwrap()
+            .recurse_into(42, &flags)
+            .unwrap()
+            .unwrap();
+        let output = tree(
+            &metas,
+            &flags,
+            &Colors::new(color::Theme::NoColor),
+            &Icons::new(icon::Theme::NoIcon),
+        );
+
+        let mut lines = output.lines();
+        assert_eq!(lines.next_back(), Some("0 directories, 1 files"));
+        lines.next_back();
+        assert!(lines.next_back().unwrap().ends_with("└── two"));
     }
 }

@@ -55,7 +55,7 @@ _... and other Debian-based Linux distributions_
 Download the latest .deb package from the [release page](https://github.com/Peltoche/lsd/releases) and install it via:
 
 ```sh
-sudo dpkg -i lsd_0.18.0_amd64.deb # adapt version number and architecture
+sudo dpkg -i lsd_0.20.1_amd64.deb # adapt version number and architecture
 ```
 
 ### On Gentoo
@@ -103,6 +103,22 @@ environment.systemPackages = with pkgs; [
 pkg install lsd
 ```
 
+### On NetBSD
+
+_... and other platforms using `pkgsrc`_
+
+Using the package manager:
+
+``` sh
+pkgin install lsd
+```
+Building from source:
+
+``` sh
+cd /usr/pkgsrc/sysutils/lsd
+make install
+```
+
 ### On Windows
 
 Install with [Scoop](https://scoop.sh):
@@ -134,8 +150,7 @@ The [release page](https://github.com/Peltoche/lsd/releases) includes precompile
 ## Configuration
 
 `lsd` can be configured with a configuration file to set the default options.
-Right now this only supports setting options that can be passed via the command
-line options as well.
+Check [Config file content](#config-file-content) for details.
 
 ### Config file location
 
@@ -145,19 +160,20 @@ On non-Windows systems `lsd` follows the
 [XDG Base Directory Specification](https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html)
 convention for the location of the configuration file. The configuration dir
 `lsd` uses is itself named `lsd`. In that directory it looks first for a file
-called `config.yaml` and if it can't find one, a file named `config.yml`.
+called `config.yaml`.
 For most people it should be enough to put their config file at
 `~/.config/lsd/config.yaml`.
 
 #### Windows
 
-On Windows systems `lsd` only looks for the two files in one location:
+On Windows systems `lsd` only looks for the `config.yaml` files in one location:
 `%APPDATA%\lsd\`
 
 ### Config file content
 
 This is an example config file with the default values and some additional
 remarks.
+
 ```yaml
 # == Classic ==
 # This is a shorthand to override some of the options to be backwards compatible
@@ -212,6 +228,10 @@ icons:
   # Which icon theme to use.
   # Possible values: fancy, unicode
   theme: fancy
+  # Separator between icon and the name
+  # Default to 1 space
+  separator: ' '
+
 
 # == Ignore Globs ==
 # A list of globs to ignore when listing.

@@ -13,9 +13,15 @@ pub enum DisplayOption<'a> {
     None,
 }
 
+static CUR_DIR: &str = ".";
+static PAR_DIR: &str = "..";
+
 #[derive(Clone, Debug, Eq)]
 pub struct Name {
-    name: Option<String>,
+    // `name` is an option since we want to use the Cow from `path`.
+    // The only time we set the `name` to be different is for . and ..
+    // see set_current_dir, set_parent_dir and get_name.
+    name: Option<Cow<'static, str>>,
     path: PathBuf,
     file_type: FileType,
 }
@@ -33,18 +39,26 @@ impl Name {
         self.path.extension().map(|e| e.to_string_lossy())
     }
 
-    pub fn set_name(&mut self, new_name: String) {
-        self.name = Some(new_name);
+    pub fn set_current_dir(&mut self) {
+        self.name = Some(Cow::from(CUR_DIR));
+    }
+
+    pub fn set_parent_dir(&mut self) {
+        self.name = Some(Cow::from(PAR_DIR));
     }
 
     pub fn get_name(&self) -> Cow<'_, str> {
         match &self.name {
-            Some(name) => Cow::from(name),
+            Some(name) => name.clone(),
             None => match self.path.file_name() {
                 Some(name) => name.to_string_lossy(),
                 None => self.path.to_string_lossy(),
             },
         }
+    }
+
+    pub fn get_path(&self) -> &PathBuf {
+        &self.path
     }
 
     pub fn file_type(&self) -> FileType {
@@ -89,13 +103,19 @@ impl Name {
         colors: &Colors,
         icons: &Icons,
         display_option: &DisplayOption,
+        meta: &std::fs::Metadata,
+        separator: &str,
     ) -> ColoredString {
         let name: String = if let DisplayOption::Relative { base_path } = display_option {
             self.escape(&self.relative_path(base_path).to_string_lossy())
         } else {
             self.escape(&self.get_name())
         };
-        let content = format!("{}{}", icons.get(self), name);
+
+        let content = match icons.get(self) {
+            Some(icon) => format!("{}{}{}", icon, separator, name),
+            None => name,
+        };
 
         let elem = match self.file_type {
             FileType::CharDevice => Elem::CharDevice,
@@ -108,7 +128,7 @@ impl Name {
             },
         };
 
-        colors.colorize_using_path(content, &self.path, &elem)
+        colors.colorize_using_path(content, &self.path, &elem, meta)
     }
 }
 
@@ -169,7 +189,7 @@ mod test {
 
         assert_eq!(
             Colour::Fixed(184).paint(" file.txt"),
-            name.render(&colors, &icons, &DisplayOption::FileName)
+            name.render(&colors, &icons, &DisplayOption::FileName, &meta, " ")
         );
     }
 
@@ -187,7 +207,13 @@ mod test {
 
         assert_eq!(
             Colour::Fixed(33).paint(" directory"),
-            meta.name.render(&colors, &icons, &DisplayOption::FileName)
+            meta.name.render(
+                &colors,
+                &icons,
+                &DisplayOption::FileName,
+                &dir_path.metadata().unwrap(),
+                " "
+            )
         );
     }
 
@@ -215,7 +241,7 @@ mod test {
 
         assert_eq!(
             Colour::Fixed(44).paint(" target.tmp"),
-            name.render(&colors, &icons, &DisplayOption::FileName)
+            name.render(&colors, &icons, &DisplayOption::FileName, &meta, " ")
         );
     }
 
@@ -243,7 +269,7 @@ mod test {
 
         assert_eq!(
             Colour::Fixed(44).paint(" target.d"),
-            name.render(&colors, &icons, &DisplayOption::FileName)
+            name.render(&colors, &icons, &DisplayOption::FileName, &meta, " ")
         );
     }
 
@@ -269,7 +295,7 @@ mod test {
 
         assert_eq!(
             Colour::Fixed(184).paint(" pipe.tmp"),
-            name.render(&colors, &icons, &DisplayOption::FileName)
+            name.render(&colors, &icons, &DisplayOption::FileName, &meta, " ")
         );
     }
 
@@ -288,7 +314,13 @@ mod test {
         assert_eq!(
             "file.txt",
             meta.name
-                .render(&colors, &icons, &DisplayOption::FileName)
+                .render(
+                    &colors,
+                    &icons,
+                    &DisplayOption::FileName,
+                    &file_path.metadata().unwrap(),
+                    " "
+                )
                 .to_string()
                 .as_str()
         );
@@ -507,7 +539,7 @@ mod test {
 
         assert_eq!(
             Colour::Fixed(184).paint(" file\\ttab.txt"),
-            name.render(&colors, &icons, &DisplayOption::FileName)
+            name.render(&colors, &icons, &DisplayOption::FileName, &meta, " ")
         );
 
         let file_path = tmp_dir.path().join("file\nnewline.txt");
@@ -520,7 +552,7 @@ mod test {
 
         assert_eq!(
             Colour::Fixed(184).paint(" file\\nnewline.txt"),
-            name.render(&colors, &icons, &DisplayOption::FileName)
+            name.render(&colors, &icons, &DisplayOption::FileName, &meta, " ")
         );
     }
 }

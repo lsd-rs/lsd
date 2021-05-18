@@ -1,4 +1,4 @@
-//! This module defines the [IconOption]. To set it up from [ArgMatches], a [Yaml] and its
+//! This module defines the [IconOption]. To set it up from [ArgMatches], a [Config] and its
 //! [Default] value, use its [configure_from](Configurable::configure_from) method.
 
 use super::Configurable;
@@ -6,15 +6,17 @@ use super::Configurable;
 use crate::config_file::Config;
 
 use clap::ArgMatches;
-use yaml_rust::Yaml;
+use serde::Deserialize;
 
 /// A collection of flags on how to use icons.
-#[derive(Clone, Debug, Copy, PartialEq, Eq, Default)]
+#[derive(Clone, Debug, PartialEq, Eq, Default)]
 pub struct Icons {
     /// When to use icons.
     pub when: IconOption,
     /// Which icon theme to use.
     pub theme: IconTheme,
+    /// String between icon and name.
+    pub separator: IconSeparator,
 }
 
 impl Icons {
@@ -25,32 +27,22 @@ impl Icons {
     pub fn configure_from(matches: &ArgMatches, config: &Config) -> Self {
         let when = IconOption::configure_from(matches, config);
         let theme = IconTheme::configure_from(matches, config);
-        Self { when, theme }
+        let separator = IconSeparator::configure_from(matches, config);
+        Self {
+            when,
+            theme,
+            separator,
+        }
     }
 }
 
 /// The flag showing when to use icons in the output.
-#[derive(Clone, Debug, Copy, PartialEq, Eq)]
+#[derive(Clone, Debug, Copy, PartialEq, Eq, Deserialize)]
+#[serde(rename_all = "kebab-case")]
 pub enum IconOption {
     Always,
     Auto,
     Never,
-}
-
-impl IconOption {
-    /// Get a value from a [Yaml] string. The [Config] is used to log warnings about wrong values
-    /// in a Yaml.
-    fn from_yaml_string(value: &str, config: &Config) -> Option<Self> {
-        match value {
-            "always" => Some(Self::Always),
-            "auto" => Some(Self::Auto),
-            "never" => Some(Self::Never),
-            _ => {
-                config.print_invalid_value_warning("icons->when", &value);
-                None
-            }
-        }
-    }
 }
 
 impl Configurable<Self> for IconOption {
@@ -63,7 +55,7 @@ impl Configurable<Self> for IconOption {
         if matches.is_present("classic") {
             Some(Self::Never)
         } else if matches.occurrences_of("icon") > 0 {
-            match matches.value_of("icon") {
+            match matches.values_of("icon")?.last() {
                 Some("always") => Some(Self::Always),
                 Some("auto") => Some(Self::Auto),
                 Some("never") => Some(Self::Never),
@@ -76,25 +68,17 @@ impl Configurable<Self> for IconOption {
 
     /// Get a potential `IconOption` variant from a [Config].
     ///
-    /// If the Configs' [Yaml] contains a [Boolean](Yaml::Boolean) value pointed to by "classic"
-    /// and its value is `true`, then this returns the [IconOption::Never] variant in a [Some].
-    /// Otherwise if the Yaml contains a [String](Yaml::String) value pointed to by "icons" ->
-    /// "when" and it is one of "always", "auto" or "never", this returns its corresponding variant
-    /// in a [Some]. Otherwise this returns [None].
+    /// If the `Configs::classic` has value and is "true" then this returns Some(IconOption::Never).
+    /// Otherwise if the `Config::icon::when` has value and is one of "always", "auto" or "never",
+    /// this returns its corresponding variant in a [Some].
+    /// Otherwise this returns [None].
     fn from_config(config: &Config) -> Option<Self> {
-        if let Some(yaml) = &config.yaml {
-            if let Yaml::Boolean(true) = &yaml["classic"] {
-                Some(Self::Never)
-            } else {
-                match &yaml["icons"]["when"] {
-                    Yaml::BadValue => None,
-                    Yaml::String(value) => Self::from_yaml_string(&value, &config),
-                    _ => {
-                        config.print_wrong_type_warning("icons->when", "string");
-                        None
-                    }
-                }
-            }
+        if let Some(true) = &config.classic {
+            return Some(Self::Never);
+        }
+
+        if let Some(icon) = &config.icons {
+            icon.when
         } else {
             None
         }
@@ -109,25 +93,11 @@ impl Default for IconOption {
 }
 
 /// The flag showing which icon theme to use.
-#[derive(Clone, Debug, Copy, PartialEq, Eq)]
+#[derive(Clone, Debug, Copy, PartialEq, Eq, Deserialize)]
+#[serde(rename_all = "kebab-case")]
 pub enum IconTheme {
     Unicode,
     Fancy,
-}
-
-impl IconTheme {
-    /// Get a value from a [Yaml] string. The [Config] is used to log warnings about wrong values
-    /// in a Yaml.
-    fn from_yaml_string(value: &str, config: &Config) -> Option<Self> {
-        match value {
-            "fancy" => Some(Self::Fancy),
-            "unicode" => Some(Self::Unicode),
-            _ => {
-                config.print_invalid_value_warning("icons->theme", &value);
-                None
-            }
-        }
-    }
 }
 
 impl Configurable<Self> for IconTheme {
@@ -137,7 +107,7 @@ impl Configurable<Self> for IconTheme {
     /// [Some]. Otherwise this returns [None].
     fn from_arg_matches(matches: &ArgMatches) -> Option<Self> {
         if matches.occurrences_of("icon-theme") > 0 {
-            match matches.value_of("icon-theme") {
+            match matches.values_of("icon-theme")?.last() {
                 Some("fancy") => Some(Self::Fancy),
                 Some("unicode") => Some(Self::Unicode),
                 _ => panic!("This should not be reachable!"),
@@ -149,22 +119,16 @@ impl Configurable<Self> for IconTheme {
 
     /// Get a potential `IconTheme` variant from a [Config].
     ///
-    /// If the Config's [Yaml] contains a [String](Yaml::String) value pointed to by "icons" ->
-    /// "theme" and it is one of "fancy" or "unicode", this returns its corresponding variant in a
-    /// [Some]. Otherwise this returns [None].
+    /// If the `Config::icons::theme` has value and is one of "fancy" or "unicode",
+    /// this returns its corresponding variant in a [Some].
+    /// Otherwise this returns [None].
     fn from_config(config: &Config) -> Option<Self> {
-        if let Some(yaml) = &config.yaml {
-            match &yaml["icons"]["theme"] {
-                Yaml::BadValue => None,
-                Yaml::String(value) => Self::from_yaml_string(&value, &config),
-                _ => {
-                    config.print_wrong_type_warning("icons->theme", "string");
-                    None
-                }
+        if let Some(icon) = &config.icons {
+            if let Some(theme) = icon.theme {
+                return Some(theme);
             }
-        } else {
-            None
         }
+        None
     }
 }
 
@@ -175,15 +139,47 @@ impl Default for IconTheme {
     }
 }
 
+#[derive(Clone, Debug, PartialEq, Eq, Deserialize)]
+#[serde(rename_all = "kebab-case")]
+pub struct IconSeparator(pub String);
+
+impl Configurable<Self> for IconSeparator {
+    /// Get a potential `IconSeparator` variant from [ArgMatches].
+    ///
+    /// If the argument is passed, this returns the variant corresponding to its parameter in a
+    /// [Some]. Otherwise this returns [None].
+    fn from_arg_matches(_matches: &ArgMatches) -> Option<Self> {
+        None
+    }
+
+    /// Get a potential `IconSeparator` variant from a [Config].
+    ///
+    /// This returns its corresponding variant in a [Some].
+    /// Otherwise this returns [None].
+    fn from_config(config: &Config) -> Option<Self> {
+        if let Some(icon) = &config.icons {
+            if let Some(separator) = icon.separator.clone() {
+                return Some(IconSeparator(separator));
+            }
+        }
+        None
+    }
+}
+
+/// The default value for `IconSeparator` is [" "].
+impl Default for IconSeparator {
+    fn default() -> Self {
+        IconSeparator(" ".to_string())
+    }
+}
+
 #[cfg(test)]
 mod test_icon_option {
     use super::IconOption;
 
     use crate::app;
-    use crate::config_file::Config;
+    use crate::config_file::{Config, Icons};
     use crate::flags::Configurable;
-
-    use yaml_rust::YamlLoader;
 
     #[test]
     fn test_from_arg_matches_none() {
@@ -233,55 +229,63 @@ mod test_icon_option {
     }
 
     #[test]
+    fn test_from_arg_matches_icon_when_multi() {
+        let argv = vec!["lsd", "--icon", "always", "--icon", "never"];
+        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        assert_eq!(
+            Some(IconOption::Never),
+            IconOption::from_arg_matches(&matches)
+        );
+    }
+
+    #[test]
     fn test_from_config_none() {
         assert_eq!(None, IconOption::from_config(&Config::with_none()));
     }
 
     #[test]
-    fn test_from_config_empty() {
-        let yaml_string = "---";
-        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
-        assert_eq!(None, IconOption::from_config(&Config::with_yaml(yaml)));
-    }
-
-    #[test]
     fn test_from_config_always() {
-        let yaml_string = "icons:\n  when: always";
-        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
-        assert_eq!(
-            Some(IconOption::Always),
-            IconOption::from_config(&Config::with_yaml(yaml))
-        );
+        let mut c = Config::with_none();
+        c.icons = Some(Icons {
+            when: Some(IconOption::Always),
+            theme: None,
+            separator: None,
+        });
+        assert_eq!(Some(IconOption::Always), IconOption::from_config(&c));
     }
 
     #[test]
     fn test_from_config_auto() {
-        let yaml_string = "icons:\n  when: auto";
-        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
-        assert_eq!(
-            Some(IconOption::Auto),
-            IconOption::from_config(&Config::with_yaml(yaml))
-        );
+        let mut c = Config::with_none();
+        c.icons = Some(Icons {
+            when: Some(IconOption::Auto),
+            theme: None,
+            separator: None,
+        });
+        assert_eq!(Some(IconOption::Auto), IconOption::from_config(&c));
     }
 
     #[test]
     fn test_from_config_never() {
-        let yaml_string = "icons:\n  when: never";
-        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
-        assert_eq!(
-            Some(IconOption::Never),
-            IconOption::from_config(&Config::with_yaml(yaml))
-        );
+        let mut c = Config::with_none();
+        c.icons = Some(Icons {
+            when: Some(IconOption::Never),
+            theme: None,
+            separator: None,
+        });
+        assert_eq!(Some(IconOption::Never), IconOption::from_config(&c));
     }
 
     #[test]
     fn test_from_config_classic_mode() {
-        let yaml_string = "classic: true\nicons:\n  when: always";
-        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
-        assert_eq!(
-            Some(IconOption::Never),
-            IconOption::from_config(&Config::with_yaml(yaml))
-        );
+        let mut c = Config::with_none();
+        c.classic = Some(true);
+        c.icons = Some(Icons {
+            when: Some(IconOption::Always),
+            theme: None,
+            separator: None,
+        });
+        assert_eq!(Some(IconOption::Never), IconOption::from_config(&c));
     }
 }
 
@@ -290,10 +294,8 @@ mod test_icon_theme {
     use super::IconTheme;
 
     use crate::app;
-    use crate::config_file::Config;
+    use crate::config_file::{Config, Icons};
     use crate::flags::Configurable;
-
-    use yaml_rust::YamlLoader;
 
     #[test]
     fn test_from_arg_matches_none() {
@@ -323,34 +325,71 @@ mod test_icon_theme {
     }
 
     #[test]
+    fn test_from_arg_matches_icon_multi() {
+        let argv = vec!["lsd", "--icon-theme", "fancy", "--icon-theme", "unicode"];
+        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        assert_eq!(
+            Some(IconTheme::Unicode),
+            IconTheme::from_arg_matches(&matches)
+        );
+    }
+
+    #[test]
     fn test_from_config_none() {
         assert_eq!(None, IconTheme::from_config(&Config::with_none()));
     }
 
     #[test]
-    fn test_from_config_empty() {
-        let yaml_string = "---";
-        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
-        assert_eq!(None, IconTheme::from_config(&Config::with_yaml(yaml)));
-    }
-
-    #[test]
     fn test_from_config_fancy() {
-        let yaml_string = "icons:\n  theme: fancy";
-        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
-        assert_eq!(
-            Some(IconTheme::Fancy),
-            IconTheme::from_config(&Config::with_yaml(yaml))
-        );
+        let mut c = Config::with_none();
+        c.icons = Some(Icons {
+            when: None,
+            theme: Some(IconTheme::Fancy),
+            separator: None,
+        });
+        assert_eq!(Some(IconTheme::Fancy), IconTheme::from_config(&c));
     }
 
     #[test]
     fn test_from_config_unicode() {
-        let yaml_string = "icons:\n  theme: unicode";
-        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
-        assert_eq!(
-            Some(IconTheme::Unicode),
-            IconTheme::from_config(&Config::with_yaml(yaml))
-        );
+        let mut c = Config::with_none();
+        c.icons = Some(Icons {
+            when: None,
+            theme: Some(IconTheme::Unicode),
+            separator: None,
+        });
+        assert_eq!(Some(IconTheme::Unicode), IconTheme::from_config(&c));
+    }
+}
+
+#[cfg(test)]
+mod test_icon_separator {
+    use super::IconSeparator;
+
+    use crate::config_file::{Config, Icons};
+    use crate::flags::Configurable;
+
+    #[test]
+    fn test_from_config_default() {
+        let mut c = Config::with_none();
+        c.icons = Some(Icons {
+            when: None,
+            theme: None,
+            separator: Some(" ".to_string()),
+        });
+        let expected = Some(IconSeparator(" ".to_string()));
+        assert_eq!(expected, IconSeparator::from_config(&c));
+    }
+
+    #[test]
+    fn test_from_config_custom() {
+        let mut c = Config::with_none();
+        c.icons = Some(Icons {
+            when: None,
+            theme: None,
+            separator: Some(" |".to_string()),
+        });
+        let expected = Some(IconSeparator(" |".to_string()));
+        assert_eq!(expected, IconSeparator::from_config(&c));
     }
 }

@@ -1,11 +1,10 @@
-//! This module defines the [IgnoreGlobs]. To set it up from [ArgMatches], a [Yaml] and its
+//! This module defines the [IgnoreGlobs]. To set it up from [ArgMatches], a [Config] and its
 //! [Default] value, use the [configure_from](IgnoreGlobs::configure_from) method.
 
 use crate::config_file::Config;
 
 use clap::{ArgMatches, Error, ErrorKind};
 use globset::{Glob, GlobSet, GlobSetBuilder};
-use yaml_rust::Yaml;
 
 /// The struct holding a [GlobSet] and methods to build it.
 #[derive(Clone, Debug)]
@@ -18,18 +17,13 @@ impl IgnoreGlobs {
     /// - [from_config](IgnoreGlobs::from_config)
     /// - [Default::default]
     ///
-    /// # Note
-    ///
-    /// The configuration file's Yaml is read in any case, to be able to check for errors and print
-    /// out warnings.
-    ///
     /// # Errors
     ///
     /// If either of the [Glob::new] or [GlobSetBuilder.build] methods return an [Err].
     pub fn configure_from(matches: &ArgMatches, config: &Config) -> Result<Self, Error> {
         let mut result: Result<Self, Error> = Ok(Default::default());
 
-        if config.has_yaml() {
+        if !matches.is_present("ignore-config") {
             if let Some(value) = Self::from_config(config) {
                 match value {
                     Ok(glob_set) => result = Ok(Self(glob_set)),
@@ -76,34 +70,23 @@ impl IgnoreGlobs {
 
     /// Get a potential [GlobSet] from a [Config].
     ///
-    /// If the Config's [Yaml] contains an [Array](Yaml::Array) value pointed to by "ignore-globs",
-    /// each of its [String](Yaml::String) values is used to build the [GlobSet]. If the building
+    /// If the `Config::ignore-globs` contains an Array of Strings,
+    /// each of its values is used to build the [GlobSet]. If the building
     /// succeeds, the [GlobSet] is returned in the [Result] in a [Some]. If any error is
-    /// encountered while building, an [Error] is returned in the Result instead. If the Yaml does
+    /// encountered while building, an [Error] is returned in the Result instead. If the Config does
     /// not contain such a key, this returns [None].
     fn from_config(config: &Config) -> Option<Result<GlobSet, Error>> {
-        if let Some(yaml) = &config.yaml {
-            match &yaml["ignore-globs"] {
-                Yaml::BadValue => None,
-                Yaml::Array(values) => {
-                    let mut glob_set_builder = GlobSetBuilder::new();
-                    for yaml_str in values.iter() {
-                        if let Yaml::String(value) = yaml_str {
-                            match Self::create_glob(value) {
-                                Ok(glob) => {
-                                    glob_set_builder.add(glob);
-                                }
-                                Err(err) => return Some(Err(err)),
-                            }
-                        }
+        if let Some(globs) = &config.ignore_globs {
+            let mut glob_set_builder = GlobSetBuilder::new();
+            for glob in globs.iter() {
+                match Self::create_glob(glob) {
+                    Ok(glob) => {
+                        glob_set_builder.add(glob);
                     }
-                    Some(Self::create_glob_set(&glob_set_builder))
-                }
-                _ => {
-                    config.print_wrong_type_warning("ignore-globs", "string");
-                    None
+                    Err(err) => return Some(Err(err)),
                 }
             }
+            Some(Self::create_glob_set(&glob_set_builder))
         } else {
             None
         }
@@ -150,13 +133,47 @@ mod test {
     use crate::app;
     use crate::config_file::Config;
 
-    use yaml_rust::YamlLoader;
-
     // The following tests are implemented using match expressions instead of the assert_eq macro,
     // because clap::Error does not implement PartialEq.
     //
     // Further no tests for actually returned GlobSets are implemented, because GlobSet does not
     // even implement PartialEq and thus can not be easily compared.
+
+    #[test]
+    fn test_configuration_from_none() {
+        let argv = vec!["lsd"];
+        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        assert!(
+            match IgnoreGlobs::configure_from(&matches, &Config::with_none()) {
+                Ok(_) => true,
+                _ => false,
+            }
+        );
+    }
+
+    #[test]
+    fn test_configuration_from_args() {
+        let argv = vec!["lsd", "--ignore-glob", ".git"];
+        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        assert!(
+            match IgnoreGlobs::configure_from(&matches, &Config::with_none()) {
+                Ok(_) => true,
+                _ => false,
+            }
+        );
+    }
+
+    #[test]
+    fn test_configuration_from_config() {
+        let argv = vec!["lsd"];
+        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let mut c = Config::with_none();
+        c.ignore_globs = Some(vec![".git".into()].into());
+        assert!(match IgnoreGlobs::configure_from(&matches, &c) {
+            Ok(_) => true,
+            _ => false,
+        });
+    }
 
     #[test]
     fn test_from_arg_matches_none() {
@@ -171,16 +188,6 @@ mod test {
     #[test]
     fn test_from_config_none() {
         assert!(match IgnoreGlobs::from_config(&Config::with_none()) {
-            None => true,
-            _ => false,
-        });
-    }
-
-    #[test]
-    fn test_from_config_empty() {
-        let yaml_string = "---";
-        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
-        assert!(match IgnoreGlobs::from_config(&Config::with_yaml(yaml)) {
             None => true,
             _ => false,
         });
