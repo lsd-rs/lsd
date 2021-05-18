@@ -47,20 +47,17 @@ use std::path::PathBuf;
 #[macro_export]
 macro_rules! print_error {
     ($($arg:tt)*) => {
+        use std::io::Write;
+
+        let stderr = std::io::stderr();
+
         {
-            use std::io::Write;
-
-            let stderr = std::io::stderr();
-
-            {
-                let mut handle = stderr.lock();
-                // We can write on stderr, so we simply ignore the error and don't print
-                // and stop with success.
-                let res = handle.write_all(std::format!("lsd: {}\n\n",
-                                                        std::format!($($arg)*)).as_bytes());
-                if res.is_err() {
-                    std::process::exit(0);
-                }
+            let mut handle = stderr.lock();
+            // We can write on stderr, so we simply ignore the error and don't print
+            // and stop with success.
+            let res = handle.write_all(std::format!($($arg)*).as_bytes());
+            if res.is_err() {
+                std::process::exit(0);
             }
         }
     };
@@ -88,29 +85,14 @@ macro_rules! print_output {
     };
 }
 
-// adapted from `maplit` to use FxHashMap
-#[macro_export]
-macro_rules! hashmap {
-    (@single $($x:tt)*) => (());
-    (@count $($rest:expr),*) => (<[()]>::len(&[$(hashmap!(@single $rest)),*]));
-    ($($key:expr => $value:expr,)+) => { hashmap!($($key => $value),+) };
-    ($($key:expr => $value:expr),*) => {{
-        let mut _map = FxHashMap::default();
-        let _cap = hashmap!(@count $($key),*);
-        _map.reserve(_cap);
-        $(_map.insert($key, $value);)*
-        _map
-    }};
-}
-
-fn main() -> clap::Result<()> {
+fn main() {
     let matches = app::build().get_matches_from(wild::args_os());
 
     // input translate glob FILE without single quote into real names
     // for example:
     // * to all files matched
     // '*' remain as '*'
-    let inputs: Vec<PathBuf> = matches
+    let inputs = matches
         .values_of("FILE")
         .expect("failed to retrieve cli value")
         .map(PathBuf::from)
@@ -119,12 +101,10 @@ fn main() -> clap::Result<()> {
     let config = if matches.is_present("ignore-config") {
         Config::with_none()
     } else {
-        Config::default()
+        Config::read_config()
     };
-
-    let flags = Flags::configure_from(&matches, &config)?;
+    let flags = Flags::configure_from(&matches, &config).unwrap_or_else(|err| err.exit());
     let core = Core::new(flags);
-    core.run(&inputs);
 
-    Ok(())
+    core.run(inputs);
 }

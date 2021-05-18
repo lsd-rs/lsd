@@ -1,12 +1,12 @@
-//! This module defines the [Blocks] struct. To set it up from [ArgMatches], a [Config] and its
+//! This module defines the [Blocks] struct. To set it up from [ArgMatches], a [Yaml] and its
 //! [Default] value, use its [configure_from](Blocks::configure_from) method.
-
-use crate::config_file::Config;
-use crate::print_error;
 
 use std::convert::TryFrom;
 
+use crate::config_file::Config;
+
 use clap::{ArgMatches, Error, ErrorKind};
+use yaml_rust::Yaml;
 
 /// A struct to hold a [Vec] of [Block]s and to provide methods to create it.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -24,6 +24,11 @@ impl Blocks {
     /// `Blocks` does not contain a [Block] of variant [INode](Block::INode) yet, one is prepended
     /// to the returned value.
     ///
+    /// # Note
+    ///
+    /// The configuration file's Yaml is read in any case, to be able to check for errors and print
+    /// out warnings.
+    ///
     /// # Errors
     ///
     /// This errors if any of the [ArgMatches] parameter arguments causes [Block]'s implementation
@@ -35,14 +40,16 @@ impl Blocks {
             Ok(Default::default())
         };
 
-        if matches.is_present("long") && !matches.is_present("ignore-config") {
-            if let Some(value) = Self::from_config(config) {
-                result = Ok(value);
+        if matches.is_present("long") {
+            if config.has_yaml() {
+                if let Some(value) = Self::from_config(config) {
+                    result = Ok(value);
+                }
             }
-        }
 
-        if let Some(value) = Self::from_arg_matches(matches) {
-            result = value;
+            if let Some(value) = Self::from_arg_matches(matches) {
+                result = value;
+            }
         }
 
         if matches.is_present("inode") {
@@ -90,25 +97,41 @@ impl Blocks {
 
     /// Get a potential `Blocks` struct from a [Config].
     ///
-    /// If the [Config] contains an array of blocks values,
-    /// its [String] values is returned as `Blocks` in a [Some].
-    /// Otherwise it returns [None].
+    /// If the Config's [Yaml] contains an [Array](Yaml::Array) value pointed to by "blocks", each
+    /// of its [String](Yaml::String) values is returned in a `Blocks` in a [Some]. Otherwise it
+    /// returns [None].
     fn from_config(config: &Config) -> Option<Self> {
-        if let Some(c) = &config.blocks {
-            let mut blocks: Vec<Block> = vec![];
-            for b in c.iter() {
-                match Block::try_from(b.as_str()) {
-                    Ok(block) => blocks.push(block),
-                    Err(err) => print_error!("{}.", err),
+        if let Some(yaml) = &config.yaml {
+            match &yaml["blocks"] {
+                Yaml::BadValue => None,
+                Yaml::Array(values) => Self::from_yaml_array(values, config),
+                _ => {
+                    config.print_wrong_type_warning("blocks", "array");
+                    None
                 }
-            }
-            if blocks.is_empty() {
-                None
-            } else {
-                Some(Self(blocks))
             }
         } else {
             None
+        }
+    }
+
+    /// Get a [Blocks] from a [Yaml] array. The [Config] is used to log warnings about wrong values
+    /// in a Yaml.
+    fn from_yaml_array(values: &[Yaml], config: &Config) -> Option<Self> {
+        let mut blocks: Vec<Block> = vec![];
+        for array_el in values.iter() {
+            match array_el {
+                Yaml::String(value) => match Block::try_from(value.as_str()) {
+                    Ok(block) => blocks.push(block),
+                    Err(err) => config.print_warning(&err),
+                },
+                _ => config.print_warning("The blocks config values have to be strings."),
+            }
+        }
+        if blocks.is_empty() {
+            None
+        } else {
+            Some(Self(blocks))
         }
     }
 
@@ -134,7 +157,7 @@ impl Blocks {
 
     /// Prepends a [Block] of variant [INode](Block::INode) to `self`.
     fn prepend_inode(&mut self) {
-        self.0.insert(0, Block::INode);
+        self.0.insert(0, Block::INode)
     }
 
     /// Prepends a [Block] of variant [INode](Block::INode), if `self` does not already contain a
@@ -164,7 +187,6 @@ pub enum Block {
     Date,
     Name,
     INode,
-    Links,
 }
 
 impl TryFrom<&str> for Block {
@@ -180,7 +202,6 @@ impl TryFrom<&str> for Block {
             "date" => Ok(Self::Date),
             "name" => Ok(Self::Name),
             "inode" => Ok(Self::INode),
-            "links" => Ok(Self::Links),
             _ => Err(format!("Not a valid block name: {}", &string)),
         }
     }
@@ -195,6 +216,7 @@ mod test_blocks {
     use crate::config_file::Config;
 
     use clap::Error;
+    use yaml_rust::YamlLoader;
 
     // The following tests are implemented using match expressions instead of the assert_eq macro,
     // because clap::Error does not implement PartialEq.
@@ -238,7 +260,7 @@ mod test_blocks {
     #[test]
     fn test_configure_from_with_blocks_and_without_long() {
         let argv = vec!["lsd", "--blocks", "permission"];
-        let target = Ok::<_, Error>(Blocks(vec![Block::Permission]));
+        let target = Ok::<_, Error>(Blocks::default());
 
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         let result = Blocks::configure_from(&matches, &Config::with_none());
@@ -275,7 +297,7 @@ mod test_blocks {
     fn test_configure_from_prepend_inode_without_long() {
         let argv = vec!["lsd", "--blocks", "permission", "--inode"];
 
-        let mut target_blocks = Blocks(vec![Block::Permission]);
+        let mut target_blocks = Blocks::default();
         target_blocks.0.insert(0, Block::INode);
         let target = Ok::<_, Error>(target_blocks);
 
@@ -300,7 +322,9 @@ mod test_blocks {
     fn test_configure_from_ignore_prepend_inode_without_long() {
         let argv = vec!["lsd", "--blocks", "permission,inode", "--inode"];
 
-        let target = Ok::<_, Error>(Blocks(vec![Block::Permission, Block::INode]));
+        let mut target_blocks = Blocks::default();
+        target_blocks.0.insert(0, Block::INode);
+        let target = Ok::<_, Error>(target_blocks);
 
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         let result = Blocks::configure_from(&matches, &Config::with_none());
@@ -397,17 +421,32 @@ mod test_blocks {
     }
 
     #[test]
-    fn test_from_config_one() {
-        let mut c = Config::with_none();
-        c.blocks = Some(vec!["permission".into()].into());
+    fn test_from_config_empty() {
+        let yaml_string = "---";
+        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
+        assert_eq!(None, Blocks::from_config(&Config::with_yaml(yaml)));
+    }
 
+    #[test]
+    fn test_from_config_one() {
+        let yaml_string = "blocks:\n  - permission";
+        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
         let blocks = Blocks(vec![Block::Permission]);
-        assert_eq!(Some(blocks), Blocks::from_config(&c));
+        assert_eq!(Some(blocks), Blocks::from_config(&Config::with_yaml(yaml)));
     }
 
     #[test]
     fn test_from_config_reversed_default() {
-        let target = Blocks(vec![
+        let yaml_string = "blocks:
+  - name
+  - date
+  - size
+  - group
+  - user
+  - permission
+";
+        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
+        let blocks = Blocks(vec![
             Block::Name,
             Block::Date,
             Block::Size,
@@ -415,36 +454,31 @@ mod test_blocks {
             Block::User,
             Block::Permission,
         ]);
-        let mut c = Config::with_none();
-        c.blocks = Some(
-            vec![
-                "name".into(),
-                "date".into(),
-                "size".into(),
-                "group".into(),
-                "user".into(),
-                "permission".into(),
-            ]
-            .into(),
-        );
-
-        assert_eq!(Some(target), Blocks::from_config(&c));
+        assert_eq!(Some(blocks), Blocks::from_config(&Config::with_yaml(yaml)));
     }
 
     #[test]
     fn test_from_config_every_second_one() {
-        let mut c = Config::with_none();
-        c.blocks = Some(vec!["permission".into(), "group".into(), "date".into()].into());
+        let yaml_string = "blocks:
+  - permission
+  - group
+  - date
+";
+        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
         let blocks = Blocks(vec![Block::Permission, Block::Group, Block::Date]);
-        assert_eq!(Some(blocks), Blocks::from_config(&c));
+        assert_eq!(Some(blocks), Blocks::from_config(&Config::with_yaml(yaml)));
     }
 
     #[test]
     fn test_from_config_invalid_is_ignored() {
-        let mut c = Config::with_none();
-        c.blocks = Some(vec!["permission".into(), "foo".into(), "date".into()].into());
+        let yaml_string = "blocks:
+  - permission
+  - foo
+  - date
+";
+        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
         let blocks = Blocks(vec![Block::Permission, Block::Date]);
-        assert_eq!(Some(blocks), Blocks::from_config(&c));
+        assert_eq!(Some(blocks), Blocks::from_config(&Config::with_yaml(yaml)));
     }
 }
 
@@ -500,10 +534,5 @@ mod test_block {
     #[test]
     fn test_inode() {
         assert_eq!(Ok(Block::INode), Block::try_from("inode"));
-    }
-
-    #[test]
-    fn test_links() {
-        assert_eq!(Ok(Block::Links), Block::try_from("links"));
     }
 }

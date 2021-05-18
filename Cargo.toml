@@ -8,7 +8,7 @@ license = "Apache-2.0"
 name = "lsd"
 readme = "./README.md"
 repository = "https://github.com/Peltoche/lsd"
-version = "0.20.1"
+version = "0.18.0"
 edition = "2018"
 
 [[bin]]
@@ -16,45 +16,41 @@ name = "lsd"
 path = "src/main.rs"
 
 [build-dependencies]
-clap = "2.33.*"
-version_check = "0.9.*"
+clap = "2.33"
+version_check = "0.9"
+chrono = "0.4"
 
 [dependencies]
-ansi_term = "0.12.*"
-dirs = "3.0.*"
-libc = "0.2.*"
-human-sort = "0.2.2"
-term_grid = "0.1.*"
-chrono = "0.4.*"
-chrono-humanize = "0.1.*"
-unicode-width = "0.1.*"
-lscolors = "0.7.*"
-wild = "2.0.*"
-globset = "0.4.*"
-xdg = "2.1.*"
-yaml-rust = "0.4.*"
-serde = { version = "1.0.*", features = ["derive"] }
-serde_yaml = "0.8.*"
-fxhash = "0.2.*"
-termize = "0.1.*"
-simple-counter = "0.1.0"
+ansi_term = "0.12"
+dirs = "3.0"
+libc = "0.2"
+human-sort = "0.2"
+term_grid = "0.1"
+chrono-humanize = "0.0"
+unicode-width = "0.1"
+lscolors = "0.7"
+wild = "2.0"
+globset = "0.4"
+xdg = "2.1"
+yaml-rust = "0.4"
+termize = "0.1"
+chrono = "0.4"
 
 [target.'cfg(unix)'.dependencies]
-users = "0.11.*"
+users = "0.11"
 
 [target.'cfg(windows)'.dependencies]
-winapi = {version = "0.3.*", features = ["aclapi", "accctrl", "winnt", "winerror", "securitybaseapi", "winbase"]}
+winapi = {version = "0.3", features = ["aclapi", "accctrl", "winnt", "winerror", "securitybaseapi", "winbase"]}
 
 [dependencies.clap]
 features = ["suggestions", "color", "wrap_help"]
-version = "2.33.*"
+version = "2.33"
 
 [dev-dependencies]
 assert_cmd = "1"
 assert_fs = "1"
 predicates = "1.0.1"
 tempfile = "3"
-serial_test = "0.5"
 
 [features]
 sudo = []

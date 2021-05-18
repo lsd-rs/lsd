@@ -81,10 +81,7 @@ impl FileType {
     }
 
     pub fn is_dirlike(self) -> bool {
-        matches!(
-            self,
-            FileType::Directory { .. } | FileType::SymLink { is_dir: true }
-        )
+        matches!(self, FileType::Directory { .. } | FileType::SymLink { is_dir: true })
     }
 }
 

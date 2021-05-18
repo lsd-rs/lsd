@@ -1,8 +1,6 @@
-use crate::hashmap;
 use ansi_term::{ANSIString, Colour, Style};
-use fxhash::FxHashMap;
 use lscolors::{Indicator, LsColors};
-use std::fs::Metadata;
+use std::collections::HashMap;
 use std::path::Path;
 
 #[allow(dead_code)]
@@ -50,12 +48,6 @@ pub enum Elem {
     INode {
         valid: bool,
     },
-
-    Links {
-        valid: bool,
-    },
-
-    TreeEdge,
 }
 
 impl Elem {
@@ -75,7 +67,7 @@ pub enum Theme {
 }
 
 pub struct Colors {
-    colors: Option<FxHashMap<Elem, Colour>>,
+    colors: Option<HashMap<Elem, Colour>>,
     lscolors: Option<LsColors>,
 }
 
@@ -104,19 +96,19 @@ impl Colors {
         input: String,
         path: &Path,
         elem: &Elem,
-        meta: &Metadata,
     ) -> ColoredString<'a> {
-        match self.style_from_path(path, meta) {
-            Some(style) => style.paint(input),
+        let style_from_path = self.style_from_path(path);
+        match style_from_path {
+            Some(style_from_path) => style_from_path.paint(input),
             None => self.colorize(input, elem),
         }
     }
 
-    fn style_from_path(&self, path: &Path, meta: &Metadata) -> Option<Style> {
+    fn style_from_path(&self, path: &Path) -> Option<Style> {
         match &self.lscolors {
             Some(lscolors) => lscolors
-                .style_for_path_with_metadata(path, Some(meta))
-                .map(|s| s.to_ansi_term_style()),
+                .style_for_path(path)
+                .map(lscolors::Style::to_ansi_term_style),
             None => None,
         }
     }
@@ -124,10 +116,12 @@ impl Colors {
     fn style(&self, elem: &Elem) -> Style {
         match &self.lscolors {
             Some(lscolors) => match self.get_indicator_from_elem(elem) {
-                Some(style) => lscolors
-                    .style_for_indicator(style)
-                    .map(|s| s.to_ansi_term_style())
-                    .unwrap_or_default(),
+                Some(style) => {
+                    let style = lscolors.style_for_indicator(style);
+                    style
+                        .map(lscolors::Style::to_ansi_term_style)
+                        .unwrap_or_default()
+                }
                 None => self.style_default(elem),
             },
             None => self.style_default(elem),
@@ -171,10 +165,6 @@ impl Colors {
                 true => Some("so"),
                 false => Some("no"),
             },
-            Elem::Links { valid } => match valid {
-                true => Some("so"),
-                false => Some("no"),
-            },
             _ => None,
         };
 
@@ -187,65 +177,73 @@ impl Colors {
     // You can find the table for each color, code, and display at:
     //
     //https://jonasjacek.github.io/colors/
-    fn get_light_theme_colour_map() -> FxHashMap<Elem, Colour> {
-        hashmap! {
-            // User / Group
-            Elem::User => Colour::Fixed(230), // Cornsilk1
-            Elem::Group => Colour::Fixed(187), // LightYellow3
+    fn get_light_theme_colour_map() -> HashMap<Elem, Colour> {
+        let mut m = HashMap::new();
+        // User / Group
+        m.insert(Elem::User, Colour::Fixed(230)); // Cornsilk1
+        m.insert(Elem::Group, Colour::Fixed(187)); // LightYellow3
 
-            // Permissions
-            Elem::Read => Colour::Green,
-            Elem::Write => Colour::Yellow,
-            Elem::Exec => Colour::Red,
-            Elem::ExecSticky => Colour::Purple,
-            Elem::NoAccess => Colour::Fixed(245), // Grey
+        // Permissions
+        m.insert(Elem::Read, Colour::Green);
+        m.insert(Elem::Write, Colour::Yellow);
+        m.insert(Elem::Exec, Colour::Red);
+        m.insert(Elem::ExecSticky, Colour::Purple);
+        m.insert(Elem::NoAccess, Colour::Fixed(245)); // Grey
 
-            // File Types
+        // File Types
+        m.insert(
             Elem::File {
                 exec: false,
                 uid: false,
-            } => Colour::Fixed(184), // Yellow3
+            },
+            Colour::Fixed(184),
+        ); // Yellow3
+        m.insert(
             Elem::File {
                 exec: false,
                 uid: true,
-            } => Colour::Fixed(184), // Yellow3
+            },
+            Colour::Fixed(184),
+        ); // Yellow3
+        m.insert(
             Elem::File {
                 exec: true,
                 uid: false,
-            } => Colour::Fixed(40), // Green3
+            },
+            Colour::Fixed(40),
+        ); // Green3
+        m.insert(
             Elem::File {
                 exec: true,
                 uid: true,
-            } => Colour::Fixed(40), // Green3
-            Elem::Dir { uid: true } => Colour::Fixed(33), // DodgerBlue1
-            Elem::Dir { uid: false } => Colour::Fixed(33), // DodgerBlue1
-            Elem::Pipe => Colour::Fixed(44), // DarkTurquoise
-            Elem::SymLink => Colour::Fixed(44), // DarkTurquoise
-            Elem::BrokenSymLink => Colour::Fixed(124), // Red3
-            Elem::BlockDevice => Colour::Fixed(44), // DarkTurquoise
-            Elem::CharDevice => Colour::Fixed(172), // Orange3
-            Elem::Socket => Colour::Fixed(44), // DarkTurquoise
-            Elem::Special => Colour::Fixed(44), // DarkTurquoise
+            },
+            Colour::Fixed(40),
+        ); // Green3
+        m.insert(Elem::Dir { uid: true }, Colour::Fixed(33)); // DodgerBlue1
+        m.insert(Elem::Dir { uid: false }, Colour::Fixed(33)); // DodgerBlue1
+        m.insert(Elem::Pipe, Colour::Fixed(44)); // DarkTurquoise
+        m.insert(Elem::SymLink, Colour::Fixed(44)); // DarkTurquoise
+        m.insert(Elem::BrokenSymLink, Colour::Fixed(124)); // Red3
+        m.insert(Elem::BlockDevice, Colour::Fixed(44)); // DarkTurquoise
+        m.insert(Elem::CharDevice, Colour::Fixed(172)); // Orange3
+        m.insert(Elem::Socket, Colour::Fixed(44)); // DarkTurquoise
+        m.insert(Elem::Special, Colour::Fixed(44)); // DarkTurquoise
 
-            // Last Time Modified
-            Elem::HourOld => Colour::Fixed(40), // Green3
-            Elem::DayOld => Colour::Fixed(42), // SpringGreen2
-            Elem::Older => Colour::Fixed(36), // DarkCyan
+        // Last Time Modified
+        m.insert(Elem::HourOld, Colour::Fixed(40)); // Green3
+        m.insert(Elem::DayOld, Colour::Fixed(42)); // SpringGreen2
+        m.insert(Elem::Older, Colour::Fixed(36)); // DarkCyan
 
-            // Last Time Modified
-            Elem::NonFile => Colour::Fixed(245), // Grey
-            Elem::FileSmall => Colour::Fixed(229), // Wheat1
-            Elem::FileMedium => Colour::Fixed(216), // LightSalmon1
-            Elem::FileLarge => Colour::Fixed(172), // Orange3
+        // Last Time Modified
+        m.insert(Elem::NonFile, Colour::Fixed(245)); // Grey
+        m.insert(Elem::FileSmall, Colour::Fixed(229)); // Wheat1
+        m.insert(Elem::FileMedium, Colour::Fixed(216)); // LightSalmon1
+        m.insert(Elem::FileLarge, Colour::Fixed(172)); // Orange3
 
-            // INode
-            Elem::INode { valid: true } => Colour::Fixed(13), // Pink
-            Elem::INode { valid: false } => Colour::Fixed(245), // Grey
-            Elem::Links { valid: true } => Colour::Fixed(13),
-            Elem::Links { valid: false } => Colour::Fixed(245),
+        // INode
+        m.insert(Elem::INode { valid: true }, Colour::Fixed(13)); // Pink
+        m.insert(Elem::INode { valid: false }, Colour::Fixed(245)); // Grey
 
-            // TODO add this after we can use file to configure theme
-            // Elem::TreeEdge => Colour::Fixed(44), // DarkTurquoise
-        }
+        m
     }
 }

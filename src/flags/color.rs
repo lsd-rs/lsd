@@ -1,13 +1,12 @@
-//! This module defines the [Color]. To set it up from [ArgMatches], a [Config] and its [Default]
+//! This module defines the [Color]. To set it up from [ArgMatches], a [Yaml] and its [Default]
 //! value, use its [configure_from](Configurable::configure_from) method.
 
 use super::Configurable;
 
 use crate::config_file::Config;
-use crate::print_error;
 
 use clap::ArgMatches;
-use serde::Deserialize;
+use yaml_rust::Yaml;
 
 /// A collection of flags on how to use colors.
 #[derive(Clone, Debug, Copy, PartialEq, Eq, Default)]
@@ -27,8 +26,7 @@ impl Color {
 }
 
 /// The flag showing when to use colors in the output.
-#[derive(Clone, Debug, Copy, PartialEq, Eq, Deserialize)]
-#[serde(rename_all = "kebab-case")]
+#[derive(Clone, Debug, Copy, PartialEq, Eq)]
 pub enum ColorOption {
     Always,
     Auto,
@@ -36,17 +34,15 @@ pub enum ColorOption {
 }
 
 impl ColorOption {
-    /// Get a Color value from a [String].
-    fn from_str(value: &str) -> Option<Self> {
+    /// Get a Color value from a [Yaml] string. The [Config] is used to log warnings about wrong
+    /// values in a Yaml.
+    fn from_yaml_string(value: &str, config: &Config) -> Option<Self> {
         match value {
             "always" => Some(Self::Always),
             "auto" => Some(Self::Auto),
             "never" => Some(Self::Never),
             _ => {
-                print_error!(
-                    "Config color.when could only be one of auto, always and never, got {}.",
-                    &value
-                );
+                config.print_invalid_value_warning("color->when", &value);
                 None
             }
         }
@@ -63,10 +59,11 @@ impl Configurable<Self> for ColorOption {
         if matches.is_present("classic") {
             Some(Self::Never)
         } else if matches.occurrences_of("color") > 0 {
-            if let Some(color) = matches.values_of("color")?.last() {
-                Self::from_str(&color)
-            } else {
-                panic!("Bad color args. This should not be reachable!");
+            match matches.value_of("color") {
+                Some("always") => Some(Self::Always),
+                Some("auto") => Some(Self::Auto),
+                Some("never") => Some(Self::Never),
+                _ => panic!("This should not be reachable!"),
             }
         } else {
             None
@@ -75,16 +72,25 @@ impl Configurable<Self> for ColorOption {
 
     /// Get a potential `ColorOption` variant from a [Config].
     ///
-    /// If the `Config::classic` is `true` then this returns the Some(ColorOption::Never),
-    /// Otherwise if the `Config::color::when` has value and is one of "always", "auto" or "never"
-    /// this returns its corresponding variant in a [Some]. Otherwise this returns [None].
+    /// If the Config's [Yaml] contains a [Boolean](Yaml::Boolean) value pointed to by "classic"
+    /// and its value is `true`, then this returns the [ColorOption::Never] variant in a [Some].
+    /// Otherwise if the Yaml contains a [String](Yaml::String) value pointed to by "color" ->
+    /// "when" and it is one of "always", "auto" or "never", this returns its corresponding variant
+    /// in a [Some]. Otherwise this returns [None].
     fn from_config(config: &Config) -> Option<Self> {
-        if let Some(true) = config.classic {
-            return Some(Self::Never);
-        }
-
-        if let Some(color) = &config.color {
-            Some(color.when)
+        if let Some(yaml) = &config.yaml {
+            if let Yaml::Boolean(true) = &yaml["classic"] {
+                Some(Self::Never)
+            } else {
+                match &yaml["color"]["when"] {
+                    Yaml::BadValue => None,
+                    Yaml::String(value) => Self::from_yaml_string(&value, &config),
+                    _ => {
+                        config.print_wrong_type_warning("color->when", "string");
+                        None
+                    }
+                }
+            }
         } else {
             None
         }
@@ -103,8 +109,10 @@ mod test_color_option {
     use super::ColorOption;
 
     use crate::app;
-    use crate::config_file::{self, Config};
+    use crate::config_file::Config;
     use crate::flags::Configurable;
+
+    use yaml_rust::YamlLoader;
 
     #[test]
     fn test_from_arg_matches_none() {
@@ -124,7 +132,7 @@ mod test_color_option {
     }
 
     #[test]
-    fn test_from_arg_matches_auto() {
+    fn test_from_arg_matches_autp() {
         let argv = vec!["lsd", "--color", "auto"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         assert_eq!(
@@ -154,55 +162,54 @@ mod test_color_option {
     }
 
     #[test]
-    fn test_from_arg_matches_color_multiple() {
-        let argv = vec!["lsd", "--color", "always", "--color", "never"];
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
-        assert_eq!(
-            Some(ColorOption::Never),
-            ColorOption::from_arg_matches(&matches)
-        );
-    }
-
-    #[test]
     fn test_from_config_none() {
         assert_eq!(None, ColorOption::from_config(&Config::with_none()));
     }
 
     #[test]
-    fn test_from_config_always() {
-        let mut c = Config::with_none();
-        c.color = Some(config_file::Color {
-            when: ColorOption::Always,
-        });
+    fn test_from_config_empty() {
+        let yaml_string = "---";
+        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
+        assert_eq!(None, ColorOption::from_config(&Config::with_yaml(yaml)));
+    }
 
-        assert_eq!(Some(ColorOption::Always), ColorOption::from_config(&c));
+    #[test]
+    fn test_from_config_always() {
+        let yaml_string = "color:\n  when: always";
+        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
+        assert_eq!(
+            Some(ColorOption::Always),
+            ColorOption::from_config(&Config::with_yaml(yaml))
+        );
     }
 
     #[test]
     fn test_from_config_auto() {
-        let mut c = Config::with_none();
-        c.color = Some(config_file::Color {
-            when: ColorOption::Auto,
-        });
-        assert_eq!(Some(ColorOption::Auto), ColorOption::from_config(&c));
+        let yaml_string = "color:\n  when: auto";
+        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
+        assert_eq!(
+            Some(ColorOption::Auto),
+            ColorOption::from_config(&Config::with_yaml(yaml))
+        );
     }
 
     #[test]
     fn test_from_config_never() {
-        let mut c = Config::with_none();
-        c.color = Some(config_file::Color {
-            when: ColorOption::Never,
-        });
-        assert_eq!(Some(ColorOption::Never), ColorOption::from_config(&c));
+        let yaml_string = "color:\n  when: never";
+        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
+        assert_eq!(
+            Some(ColorOption::Never),
+            ColorOption::from_config(&Config::with_yaml(yaml))
+        );
     }
 
     #[test]
     fn test_from_config_classic_mode() {
-        let mut c = Config::with_none();
-        c.color = Some(config_file::Color {
-            when: ColorOption::Always,
-        });
-        c.classic = Some(true);
-        assert_eq!(Some(ColorOption::Never), ColorOption::from_config(&c));
+        let yaml_string = "classic: true\ncolor:\n  when: always";
+        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
+        assert_eq!(
+            Some(ColorOption::Never),
+            ColorOption::from_config(&Config::with_yaml(yaml))
+        );
     }
 }

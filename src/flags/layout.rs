@@ -1,20 +1,18 @@
-//! This module defines the [Layout] flag. To set it up from [ArgMatches], a [Config] and its
+//! This module defines the [Layout] flag. To set it up from [ArgMatches], a [Yaml] and its
 //! [Default] value, use its [configure_from](Configurable::configure_from) method.
-
-use crate::config_file::Config;
 
 use super::Configurable;
 
+use crate::config_file::Config;
+
 use clap::ArgMatches;
-use serde::Deserialize;
+use yaml_rust::Yaml;
 
 /// The flag showing which output layout to print.
-#[derive(Clone, Debug, Copy, PartialEq, Eq, Deserialize)]
-#[serde(rename_all = "kebab-case")]
+#[derive(Clone, Debug, Copy, PartialEq, Eq)]
 pub enum Layout {
     Grid,
     Tree,
-    #[serde(rename = "oneline")]
     OneLine,
 }
 
@@ -42,11 +40,30 @@ impl Configurable<Layout> for Layout {
 
     /// Get a potential Layout variant from a [Config].
     ///
-    /// If the `Config::layout` has value and is one of "tree", "oneline" or "grid",
-    /// this returns the corresponding `Layout` variant in a [Some].
-    /// Otherwise this returns [None].
+    /// If the Config's [Yaml] contains a [String](Yaml::String) value pointed to by "layout" and
+    /// it is either "tree", "oneline" or "grid", this returns the corresponding `Layout` variant
+    /// in a [Some]. Otherwise this returns [None].
     fn from_config(config: &Config) -> Option<Self> {
-        config.layout
+        if let Some(yaml) = &config.yaml {
+            match &yaml["layout"] {
+                Yaml::BadValue => None,
+                Yaml::String(value) => match value.as_ref() {
+                    "tree" => Some(Self::Tree),
+                    "oneline" => Some(Self::OneLine),
+                    "grid" => Some(Self::Grid),
+                    _ => {
+                        config.print_invalid_value_warning("layout", &value);
+                        None
+                    }
+                },
+                _ => {
+                    config.print_wrong_type_warning("layout", "string");
+                    None
+                }
+            }
+        } else {
+            None
+        }
     }
 }
 
@@ -64,6 +81,8 @@ mod test {
     use crate::app;
     use crate::config_file::Config;
     use crate::flags::Configurable;
+
+    use yaml_rust::YamlLoader;
 
     #[test]
     fn test_from_arg_matches_none() {
@@ -106,23 +125,39 @@ mod test {
     }
 
     #[test]
+    fn test_from_config_empty() {
+        let yaml_string = "---";
+        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
+        assert_eq!(None, Layout::from_config(&Config::with_yaml(yaml)));
+    }
+
+    #[test]
     fn test_from_config_tree() {
-        let mut c = Config::with_none();
-        c.layout = Some(Layout::Tree);
-        assert_eq!(Some(Layout::Tree), Layout::from_config(&c));
+        let yaml_string = "layout: tree";
+        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
+        assert_eq!(
+            Some(Layout::Tree),
+            Layout::from_config(&Config::with_yaml(yaml))
+        );
     }
 
     #[test]
     fn test_from_config_oneline() {
-        let mut c = Config::with_none();
-        c.layout = Some(Layout::OneLine);
-        assert_eq!(Some(Layout::OneLine), Layout::from_config(&c));
+        let yaml_string = "layout: oneline";
+        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
+        assert_eq!(
+            Some(Layout::OneLine),
+            Layout::from_config(&Config::with_yaml(yaml))
+        );
     }
 
     #[test]
     fn test_from_config_grid() {
-        let mut c = Config::with_none();
-        c.layout = Some(Layout::Grid);
-        assert_eq!(Some(Layout::Grid), Layout::from_config(&c));
+        let yaml_string = "layout: grid";
+        let yaml = YamlLoader::load_from_str(yaml_string).unwrap()[0].clone();
+        assert_eq!(
+            Some(Layout::Grid),
+            Layout::from_config(&Config::with_yaml(yaml))
+        );
     }
 }

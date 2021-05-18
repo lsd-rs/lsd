@@ -116,7 +116,8 @@ pub fn build() -> App<'static, 'static> {
                 .conflicts_with("almost-all")
                 .conflicts_with("depth")
                 .conflicts_with("recursive")
-                .help("Display directories themselves, and not their contents (recursively when used with --tree)"),
+                .conflicts_with("tree")
+                .help("Display directories themselves, and not their contents"),
         )
         .arg(
             Arg::with_name("size")
@@ -233,14 +234,13 @@ pub fn build() -> App<'static, 'static> {
                     "date",
                     "name",
                     "inode",
-                    "links",
                 ])
                 .help("Specify the blocks that will be displayed and in what order"),
         )
         .arg(
             Arg::with_name("classic")
             .long("classic")
-            .help("Enable classic mode (display output similar to ls)"),
+            .help("Enable classic mode (no colors or icons)"),
         )
         .arg(
             Arg::with_name("no-symlink")
@@ -276,7 +276,7 @@ pub fn build() -> App<'static, 'static> {
 
 fn validate_date_argument(arg: String) -> Result<(), String> {
     if arg.starts_with('+') {
-        validate_time_format(&arg)
+        validate_time_format(&arg).map_err(|err| err.to_string())
     } else if &arg == "date" || &arg == "relative" {
         Result::Ok(())
     } else {
@@ -284,7 +284,24 @@ fn validate_date_argument(arg: String) -> Result<(), String> {
     }
 }
 
-pub fn validate_time_format(formatter: &str) -> Result<(), String> {
+#[derive(Debug)]
+pub enum FormatError {
+    InvalidSpecifier(char),
+    MissingConverter,
+}
+
+impl std::fmt::Display for FormatError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::InvalidSpecifier(c) => write!(f, "invalid format specifier: %{}", c),
+            Self::MissingConverter => write!(f, "missing format converter"),
+        }
+    }
+}
+
+impl std::error::Error for FormatError {}
+
+pub fn validate_time_format(formatter: &str) -> Result<(), FormatError> {
     let mut chars = formatter.chars();
     loop {
         match chars.next() {
@@ -297,8 +314,8 @@ pub fn validate_time_format(formatter: &str) -> Result<(), String> {
                 | Some('U') | Some('u') | Some('V') | Some('v') | Some('W') | Some('w')
                 | Some('X') | Some('x') | Some('Y') | Some('y') | Some('Z') | Some('z')
                 | Some('+') | Some('%') => (),
-                Some(c) => return Err(format!("invalid format specifier: %{}", c)),
-                None => return Err("missing format specifier".to_owned()),
+                Some(c) => return Err(FormatError::InvalidSpecifier(c)),
+                None => return Err(FormatError::MissingConverter),
             },
             None => break,
             _ => continue,

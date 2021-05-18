@@ -2,7 +2,6 @@ use crate::color::{ColoredString, Colors, Elem};
 use crate::flags::{Flags, SizeFlag};
 use ansi_term::ANSIStrings;
 use std::fs::Metadata;
-use std::iter::repeat;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Unit {
@@ -53,22 +52,14 @@ impl Size {
         }
     }
 
-    pub fn render(
-        &self,
-        colors: &Colors,
-        flags: &Flags,
-        val_alignment: Option<usize>,
-    ) -> ColoredString {
+    pub fn render(&self, colors: &Colors, flags: &Flags, val_alignment: usize) -> ColoredString {
         let val_content = self.render_value(colors, flags);
         let unit_content = self.render_unit(colors, flags);
 
-        let left_pad = if let Some(align) = val_alignment {
-            repeat(" ")
-                .take(align - val_content.len())
-                .collect::<String>()
-        } else {
-            "".to_string()
-        };
+        let mut left_pad = String::with_capacity(val_alignment - val_content.len());
+        for _ in 0..left_pad.capacity() {
+            left_pad.push(' ');
+        }
 
         let mut strings: Vec<ColoredString> = vec![ColoredString::from(left_pad), val_content];
         if flags.size != SizeFlag::Short {
@@ -327,7 +318,7 @@ mod test {
         flags.size = SizeFlag::Short;
         let colors = Colors::new(Theme::NoColor);
 
-        assert_eq!(size.render(&colors, &flags, Some(2)).to_string(), "42K");
-        assert_eq!(size.render(&colors, &flags, Some(3)).to_string(), " 42K");
+        assert_eq!(size.render(&colors, &flags, 2).to_string(), "42K");
+        assert_eq!(size.render(&colors, &flags, 3).to_string(), " 42K");
     }
 }
