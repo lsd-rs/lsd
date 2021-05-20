@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Change size to use btyes in classic mode from [meain](https://github.com/meain)
 - Show tree edge before name block or first column if no name block from [zwpaper](https://github.com/zwpaper) [#468](https://github.com/Peltoche/lsd/issues/468)
+- Added icons for Perl modules (.pm) and test scripts (.t)
 ### Fixed
 
 ## [0.20.1] - 2021-03-07
