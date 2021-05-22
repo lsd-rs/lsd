@@ -105,8 +105,12 @@ fn main() {
     let config = if matches.is_present("ignore-config") {
         Config::with_none()
     } else if matches.is_present("config-file") {
-        // Here we should call new method to load from custom path
-        Config::default()
+        let path = matches
+            .value_of("config-file")
+            .expect("Invalid config file path")
+            .into();
+
+        Config::from_file(path).expect("Provided file path is invalid")
     } else {
         Config::default()
     };
