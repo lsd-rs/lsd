@@ -47,6 +47,9 @@ lsd is a ls command with a lot of pretty colours and some other stuff to enrich 
 `--ignore-config`
 : Ignore the configuration file
 
+`--config-file <path>`
+: Provide the config file from a custom location
+
 `-F`, `--classify`
 : Append indicator (one of \*/=>@|) at the end of the file names
 
