@@ -169,6 +169,11 @@ For most people it should be enough to put their config file at
 On Windows systems `lsd` only looks for the `config.yaml` files in one location:
 `%APPDATA%\lsd\`
 
+#### Custom
+
+You can also provide a configuration file from a non standard location:
+`lsd --config-file [PATH]`
+
 ### Config file content
 
 This is an example config file with the default values and some additional
