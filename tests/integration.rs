@@ -551,3 +551,20 @@ fn test_upper_case_ext_icon_match() {
         .assert()
         .stdout(predicate::str::contains("\u{f410}"));
 }
+
+#[cfg(unix)]
+#[test]
+fn test_custom_config_file_parsing() {
+    let dir = tempdir();
+    dir.child("config.yaml").write_str("layout: tree").unwrap();
+    dir.child("folder").create_dir_all().unwrap();
+    dir.child("folder/file").touch().unwrap();
+    let custom_config = dir.path().join("config.yaml");
+
+    cmd()
+        .arg("--config-file")
+        .arg(custom_config)
+        .arg(dir.child("folder").path())
+        .assert()
+        .stdout(predicate::str::is_match("folder\n└── file").unwrap());
+}
