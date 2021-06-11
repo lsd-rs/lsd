@@ -211,7 +211,7 @@ color:
 # This specifies the date format for the date column. The freeform format
 # accepts an strftime like string.
 # When "classic" is set, this is set to "date".
-# Possible values: date, relative, +<date_format>
+# Possible values: date, relative, '+<strftime_date_format>'
 date: date
 
 # == Dereference ==
