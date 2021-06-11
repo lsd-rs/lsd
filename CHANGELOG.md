@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Show tree edge before name block or first column if no name block from [zwpaper](https://github.com/zwpaper) [#468](https://github.com/Peltoche/lsd/issues/468)
 - Added icons for Perl modules (.pm) and test scripts (.t)
 - Add `--config-file` flag to read configuration file from a custom location
+- Clarify custom date format for `date` field in configuration file in the README.
 ### Fixed
 
 ## [0.20.1] - 2021-03-07
