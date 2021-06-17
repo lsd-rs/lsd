@@ -13,8 +13,8 @@
 - [Installation](#installation)
 - [Configuration](#configuration)
 - [External Configurations](#external-configurations)
-  * [Required](#required)
-  * [Optional](#optional)
+  - [Required](#required)
+  - [Optional](#optional)
 - [F.A.Q.](#faq)
 - [Contributors](#contributors)
 - [Credits](#credits)
@@ -63,8 +63,8 @@ sudo dpkg -i lsd_0.20.1_amd64.deb # adapt version number and architecture
 ```sh
 sudo emerge sys-apps/lsd
 ```
-(Ebuild maintained by Georgy Yakovlev)
 
+(Ebuild maintained by Georgy Yakovlev)
 
 ### On macOS
 
@@ -112,6 +112,7 @@ Using the package manager:
 ``` sh
 pkgin install lsd
 ```
+
 Building from source:
 
 ``` sh
@@ -122,14 +123,19 @@ make install
 ### On Windows
 
 Install with [Scoop](https://scoop.sh):
+
 ```powershell
 scoop install lsd
 ```
+
 ### On Android (via Termux)
+
 ```sh
 pkg install lsd
 ```
+
 [Setup Nerd Fonts in Termux](https://github.com/Peltoche/lsd/issues/423)
+
 ### From Sources
 
 With Rust's package manager cargo, you can install lsd via:
@@ -139,6 +145,7 @@ cargo install lsd
 ```
 
 If you want to install the latest master branch commit:
+
 ```sh
 cargo install --git https://github.com/Peltoche/lsd.git --branch master
 ```
@@ -211,7 +218,8 @@ color:
 # This specifies the date format for the date column. The freeform format
 # accepts an strftime like string.
 # When "classic" is set, this is set to "date".
-# Possible values: date, relative, '+<strftime_date_format>'
+# Possible values: date, relative, '+<date_format>' e.g. date: '+%d %b %y %X' will give you 
+# a date like this: 17 Jun 21 20:14:55
 date: date
 
 # == Dereference ==
@@ -303,12 +311,12 @@ symlink-arrow: ⇒
 Enable nerd fonts for your terminal, URxvt for example:
 
 .Xresources
+
 ```
 URxvt*font:    xft:Hack Nerd Font:style=Regular:size=11
 ```
 
 ### Optional
-
 
 In order to use lsd when entering the `ls` command, you need to add this to your shell
 configuration file  (~/.bashrc, ~/.zshrc, etc.):
@@ -326,7 +334,7 @@ Some further examples of useful aliases:
   alias lt='ls --tree'
   ```
 
-## F.A.Q.
+## F.A.Q
 
 ### Default Colors
 
