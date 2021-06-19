@@ -218,8 +218,8 @@ color:
 # This specifies the date format for the date column. The freeform format
 # accepts an strftime like string.
 # When "classic" is set, this is set to "date".
-# Possible values: date, relative, '+<date_format>' e.g. date: '+%d %b %y %X' will give you 
-# a date like this: 17 Jun 21 20:14:55
+# Possible values: date, relative, '+<date_format>' 
+# `date_format` will be a `strftime` formatted value. e.g. `date: '+%d %b %y %X'` will give you a date like this: 17 Jun 21 20:14:55
 date: date
 
 # == Dereference ==
