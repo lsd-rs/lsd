@@ -1,7 +1,6 @@
-use crate::color::ColoredString;
+use crate::color::{ColoredString, Colors};
 use crate::flags::Flags;
 use crate::meta::FileType;
-use ansi_term::ANSIString;
 
 #[derive(Clone, Debug)]
 pub struct Indicator(&'static str);
@@ -24,9 +23,9 @@ impl From<FileType> for Indicator {
 impl Indicator {
     pub fn render(&self, flags: &Flags) -> ColoredString {
         if flags.display_indicators.0 {
-            ANSIString::from(self.0)
+            ColoredString::new(Colors::default_style(), self.0.to_string())
         } else {
-            ANSIString::from("")
+            ColoredString::new(Colors::default_style(), "".into())
         }
     }
 }

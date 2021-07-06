@@ -1,6 +1,5 @@
 use crate::color::{ColoredString, Colors, Elem};
 use crate::flags::{Flags, SizeFlag};
-use ansi_term::ANSIStrings;
 use std::fs::Metadata;
 use std::iter::repeat;
 
@@ -62,22 +61,30 @@ impl Size {
         let val_content = self.render_value(colors, flags);
         let unit_content = self.render_unit(colors, flags);
 
+        // TODD(zwpaper): make sure the val_content.content().len() works as expected
         let left_pad = if let Some(align) = val_alignment {
             repeat(" ")
-                .take(align - val_content.len())
+                .take(align - val_content.content().len())
                 .collect::<String>()
         } else {
             "".to_string()
         };
 
-        let mut strings: Vec<ColoredString> = vec![ColoredString::from(left_pad), val_content];
+        let mut strings: Vec<ColoredString> = vec![
+            ColoredString::new(Colors::default_style(), left_pad),
+            val_content,
+        ];
         if flags.size != SizeFlag::Short {
-            strings.push(ColoredString::from(" "));
+            strings.push(ColoredString::new(Colors::default_style(), " ".into()));
         }
         strings.push(unit_content);
 
-        let res = ANSIStrings(&strings).to_string();
-        ColoredString::from(res)
+        let res = strings
+            .into_iter()
+            .map(|s| s.to_string())
+            .collect::<Vec<String>>()
+            .join("");
+        ColoredString::new(Colors::default_style(), res)
     }
 
     fn paint(&self, colors: &Colors, flags: &Flags, content: String) -> ColoredString {

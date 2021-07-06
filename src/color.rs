@@ -1,10 +1,11 @@
 mod theme;
 
+use crossterm::style::{Attribute, ContentStyle, StyledContent, Stylize};
 use theme::Theme;
 
 pub use crate::flags::color::ThemeOption;
 
-use ansi_term::{ANSIString, Colour, Style};
+use crossterm::style::Color;
 use lscolors::{Indicator, LsColors};
 use std::path::Path;
 
@@ -65,7 +66,7 @@ impl Elem {
     pub fn has_suid(&self) -> bool {
         matches!(self, Elem::Dir { uid: true } | Elem::File { uid: true, .. })
     }
-    pub fn get_color(&self, theme: &theme::Theme) -> Colour {
+    pub fn get_color(&self, theme: &theme::Theme) -> Color {
         match self {
             Elem::File {
                 exec: true,
@@ -113,11 +114,15 @@ impl Elem {
 
             Elem::INode { valid: false } => theme.inode.valid,
             Elem::INode { valid: true } => theme.inode.invalid,
+
+            Elem::TreeEdge => theme.inode.invalid,
+            Elem::Links { valid: false } => theme.inode.invalid,
+            Elem::Links { valid: true } => theme.inode.invalid,
         }
     }
 }
 
-pub type ColoredString<'a> = ANSIString<'a>;
+pub type ColoredString = StyledContent<String>;
 
 pub struct Colors {
     theme: Option<Theme>,
@@ -142,40 +147,35 @@ impl Colors {
         Self { theme, lscolors }
     }
 
-    pub fn colorize<'a>(&self, input: String, elem: &Elem) -> ColoredString<'a> {
-        self.style(elem).paint(input)
+    pub fn colorize(&self, input: String, elem: &Elem) -> ColoredString {
+        self.style(elem).apply(input)
     }
 
-    pub fn colorize_using_path<'a>(
-        &self,
-        input: String,
-        path: &Path,
-        elem: &Elem,
-    ) -> ColoredString<'a> {
+    pub fn colorize_using_path(&self, input: String, path: &Path, elem: &Elem) -> ColoredString {
         let style_from_path = self.style_from_path(path);
         match style_from_path {
-            Some(style_from_path) => style_from_path.paint(input),
+            Some(style_from_path) => style_from_path.apply(input),
             None => self.colorize(input, elem),
         }
     }
 
-    fn style_from_path(&self, path: &Path) -> Option<Style> {
+    pub fn default_style() -> ContentStyle {
+        ContentStyle::default()
+    }
+
+    fn style_from_path(&self, path: &Path) -> Option<ContentStyle> {
         match &self.lscolors {
-            Some(lscolors) => lscolors
-                .style_for_path(path)
-                .map(lscolors::Style::to_ansi_term_style),
+            Some(lscolors) => lscolors.style_for_path(path).map(to_content_style),
             None => None,
         }
     }
 
-    fn style(&self, elem: &Elem) -> Style {
+    fn style(&self, elem: &Elem) -> ContentStyle {
         match &self.lscolors {
             Some(lscolors) => match self.get_indicator_from_elem(elem) {
                 Some(style) => {
                     let style = lscolors.style_for_indicator(style);
-                    style
-                        .map(lscolors::Style::to_ansi_term_style)
-                        .unwrap_or_default()
+                    style.map(to_content_style).unwrap_or_default()
                 }
                 None => self.style_default(elem),
             },
@@ -183,16 +183,16 @@ impl Colors {
         }
     }
 
-    fn style_default(&self, elem: &Elem) -> Style {
+    fn style_default(&self, elem: &Elem) -> ContentStyle {
         if let Some(t) = &self.theme {
-            let style_fg = Style::default().fg(elem.get_color(&t));
+            let style_fg = ContentStyle::default().with(elem.get_color(&t));
             if elem.has_suid() {
-                style_fg.on(Colour::Fixed(124)) // Red3
+                style_fg.on(Color::AnsiValue(124)) // Red3
             } else {
                 style_fg
             }
         } else {
-            Style::default()
+            ContentStyle::default()
         }
     }
 
@@ -234,6 +234,59 @@ impl Colors {
     }
 }
 
+fn to_content_style(ls: &lscolors::Style) -> ContentStyle {
+    let to_crossterm_color = |c: &lscolors::Color| match c {
+        lscolors::style::Color::RGB(r, g, b) => Color::Rgb {
+            r: *r,
+            g: *g,
+            b: *b,
+        },
+        lscolors::style::Color::Fixed(n) => Color::AnsiValue(*n),
+        lscolors::style::Color::Black => Color::Black,
+        lscolors::style::Color::Red => Color::Red,
+        lscolors::style::Color::Green => Color::Green,
+        lscolors::style::Color::Yellow => Color::Yellow,
+        lscolors::style::Color::Blue => Color::Blue,
+        lscolors::style::Color::Magenta => Color::Magenta,
+        lscolors::style::Color::Cyan => Color::Cyan,
+        lscolors::style::Color::White => Color::White,
+    };
+    let mut style = ContentStyle::default();
+
+    style.foreground_color = ls.foreground.as_ref().map(to_crossterm_color);
+    style.background_color = ls.background.as_ref().map(to_crossterm_color);
+
+    if ls.font_style.bold {
+        style.attributes.set(Attribute::Bold);
+    }
+    if ls.font_style.dimmed {
+        style.attributes.set(Attribute::Dim);
+    }
+    if ls.font_style.italic {
+        style.attributes.set(Attribute::Italic);
+    }
+    if ls.font_style.underline {
+        style.attributes.set(Attribute::Underlined);
+    }
+    if ls.font_style.rapid_blink {
+        style.attributes.set(Attribute::RapidBlink);
+    }
+    if ls.font_style.slow_blink {
+        style.attributes.set(Attribute::SlowBlink);
+    }
+    if ls.font_style.reverse {
+        style.attributes.set(Attribute::Reverse);
+    }
+    if ls.font_style.hidden {
+        style.attributes.set(Attribute::Hidden);
+    }
+    if ls.font_style.strikethrough {
+        style.attributes.set(Attribute::CrossedOut);
+    }
+
+    style
+}
+
 #[cfg(test)]
 mod tests {
     use super::Colors;
@@ -265,55 +318,55 @@ mod tests {
 mod elem {
     use super::Elem;
     use crate::color::{theme, Theme};
-    use ansi_term::Colour;
+    use crossterm::style::Color;
 
     #[cfg(test)]
     fn test_theme() -> Theme {
         Theme {
-            user: Colour::Fixed(230),  // Cornsilk1
-            group: Colour::Fixed(187), // LightYellow3
+            user: Color::AnsiValue(230),  // Cornsilk1
+            group: Color::AnsiValue(187), // LightYellow3
             permissions: theme::Permissions {
                 read: Colour::Green,
                 write: Colour::Yellow,
                 exec: Colour::Red,
                 exec_sticky: Colour::Purple,
-                no_access: Colour::Fixed(245), // Grey
+                no_access: Color::AnsiValue(245), // Grey
             },
             file_type: theme::FileType {
                 file: theme::File {
-                    exec_uid: Colour::Fixed(40),        // Green3
-                    uid_no_exec: Colour::Fixed(184),    // Yellow3
-                    exec_no_uid: Colour::Fixed(40),     // Green3
-                    no_exec_no_uid: Colour::Fixed(184), // Yellow3
+                    exec_uid: Color::AnsiValue(40),        // Green3
+                    uid_no_exec: Color::AnsiValue(184),    // Yellow3
+                    exec_no_uid: Color::AnsiValue(40),     // Green3
+                    no_exec_no_uid: Color::AnsiValue(184), // Yellow3
                 },
                 dir: theme::Dir {
-                    uid: Colour::Fixed(33),    // DodgerBlue1
-                    no_uid: Colour::Fixed(33), // DodgerBlue1
+                    uid: Color::AnsiValue(33),    // DodgerBlue1
+                    no_uid: Color::AnsiValue(33), // DodgerBlue1
                 },
-                pipe: Colour::Fixed(44), // DarkTurquoise
+                pipe: Color::AnsiValue(44), // DarkTurquoise
                 symlink: theme::Symlink {
-                    default: Colour::Fixed(44), // DarkTurquoise
-                    broken: Colour::Fixed(124), // Red3
+                    default: Color::AnsiValue(44), // DarkTurquoise
+                    broken: Color::AnsiValue(124), // Red3
                 },
-                block_device: Colour::Fixed(44), // DarkTurquoise
-                char_device: Colour::Fixed(172), // Orange3
-                socket: Colour::Fixed(44),       // DarkTurquoise
-                special: Colour::Fixed(44),      // DarkTurquoise
+                block_device: Color::AnsiValue(44), // DarkTurquoise
+                char_device: Color::AnsiValue(172), // Orange3
+                socket: Color::AnsiValue(44),       // DarkTurquoise
+                special: Color::AnsiValue(44),      // DarkTurquoise
             },
             modified: theme::Modified {
-                hour_old: Colour::Fixed(40), // Green3
-                day_old: Colour::Fixed(42),  // SpringGreen2
-                older: Colour::Fixed(36),    // DarkCyan
+                hour_old: Color::AnsiValue(40), // Green3
+                day_old: Color::AnsiValue(42),  // SpringGreen2
+                older: Color::AnsiValue(36),    // DarkCyan
             },
             size: theme::Size {
-                none: Colour::Fixed(245),   // Grey
-                small: Colour::Fixed(229),  // Wheat1
-                medium: Colour::Fixed(216), // LightSalmon1
-                large: Colour::Fixed(172),  // Orange3
+                none: Color::AnsiValue(245),   // Grey
+                small: Color::AnsiValue(229),  // Wheat1
+                medium: Color::AnsiValue(216), // LightSalmon1
+                large: Color::AnsiValue(172),  // Orange3
             },
             inode: theme::INode {
-                valid: Colour::Fixed(13),    // Pink
-                invalid: Colour::Fixed(245), // Grey
+                valid: Color::AnsiValue(13),    // Pink
+                invalid: Color::AnsiValue(245), // Grey
             },
         }
     }

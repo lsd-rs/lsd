@@ -1,5 +1,4 @@
 use crate::color::{ColoredString, Colors, Elem};
-use ansi_term::ANSIStrings;
 use std::fs::Metadata;
 
 #[derive(Debug, PartialEq, Eq, Copy, Clone)]
@@ -94,8 +93,12 @@ impl Permissions {
             },
         ];
 
-        let res = ANSIStrings(strings).to_string();
-        ColoredString::from(res)
+        let res = strings
+            .into_iter()
+            .map(|s| s.to_string())
+            .collect::<Vec<String>>()
+            .join("");
+        ColoredString::new(Colors::default_style(), res)
     }
 
     pub fn is_executable(&self) -> bool {
