@@ -1,9 +1,8 @@
-use crate::color::{ColoredString, Colors};
+use crate::color::{Colors, Elem};
 use crate::flags::{Block, Display, Flags, Layout};
 use crate::icon::Icons;
 use crate::meta::name::DisplayOption;
 use crate::meta::{FileType, Meta};
-use ansi_term::{ANSIString, ANSIStrings};
 use std::collections::HashMap;
 use term_grid::{Cell, Direction, Filling, Grid, GridOptions};
 use terminal_size::terminal_size;
@@ -256,13 +255,11 @@ fn get_output<'a>(
     display_option: &DisplayOption,
     padding_rules: &HashMap<Block, usize>,
     tree: (usize, &'a str),
-) -> Vec<ANSIString<'a>> {
-    let mut strings: Vec<ANSIString> = Vec::new();
+) -> Vec<String> {
+    let mut strings: Vec<String> = Vec::new();
     for (i, block) in flags.blocks.0.iter().enumerate() {
         let mut block_vec = if Layout::Tree == flags.layout && tree.0 == i {
-            // TODO: add color after we have theme configuration
-            // vec![colors.colorize(ANSIString::from(tree.1).to_string(), &Elem::TreeEdge)]
-            vec![ANSIString::from(tree.1)]
+            vec![colors.colorize(tree.1.to_string(), &Elem::TreeEdge)]
         } else {
             Vec::new()
         };
@@ -298,7 +295,13 @@ fn get_output<'a>(
                 }
             }
         };
-        strings.push(ColoredString::from(ANSIStrings(&block_vec).to_string()));
+        strings.push(
+            block_vec
+                .into_iter()
+                .map(|s| s.to_string())
+                .collect::<Vec<String>>()
+                .join(" "),
+        );
     }
     strings
 }

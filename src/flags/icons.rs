@@ -101,17 +101,14 @@ pub enum IconTheme {
 }
 
 impl IconTheme {
-    /// Get a value from a string.
-    fn from_str(value: &str) -> Option<Self> {
-        match value {
-            "fancy" => Some(Self::Fancy),
-            "unicode" => Some(Self::Unicode),
-            _ => {
-                print_error!("Bad icons.theme config, {}", &value);
-                None
-            }
-        }
-    }
+    // /// Get a value from a string.
+    // fn from_str(value: &str) -> Option<Self> {
+    //     match value {
+    //         "fancy" => Some(Self::Fancy),
+    //         "unicode" => Some(Self::Unicode),
+    //         _ => panic!("Bad icons.theme config, {}", &value),
+    //     }
+    // }
 }
 
 impl Configurable<Self> for IconTheme {

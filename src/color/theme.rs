@@ -3,7 +3,7 @@
 use crate::config_file;
 use crate::print_error;
 
-use ansi_term::Colour;
+use crossterm::style::Color;
 use serde::Deserialize;
 use std::fs;
 use std::path::Path;
@@ -14,8 +14,8 @@ use std::path::Path;
 #[serde(rename_all = "kebab-case")]
 #[serde(deny_unknown_fields)]
 pub struct Theme {
-    pub user: Colour,
-    pub group: Colour,
+    pub user: Color,
+    pub group: Color,
     pub permissions: Permissions,
     pub file_type: FileType,
     pub modified: Modified,
@@ -27,11 +27,11 @@ pub struct Theme {
 #[serde(rename_all = "kebab-case")]
 #[serde(deny_unknown_fields)]
 pub struct Permissions {
-    pub read: Colour,
-    pub write: Colour,
-    pub exec: Colour,
-    pub exec_sticky: Colour,
-    pub no_access: Colour,
+    pub read: Color,
+    pub write: Color,
+    pub exec: Color,
+    pub exec_sticky: Color,
+    pub no_access: Color,
 }
 
 #[derive(Debug, Deserialize, PartialEq)]
@@ -40,65 +40,65 @@ pub struct Permissions {
 pub struct FileType {
     pub file: File,
     pub dir: Dir,
-    pub pipe: Colour,
+    pub pipe: Color,
     pub symlink: Symlink,
-    pub block_device: Colour,
-    pub char_device: Colour,
-    pub socket: Colour,
-    pub special: Colour,
+    pub block_device: Color,
+    pub char_device: Color,
+    pub socket: Color,
+    pub special: Color,
 }
 
 #[derive(Debug, Deserialize, PartialEq)]
 #[serde(rename_all = "kebab-case")]
 #[serde(deny_unknown_fields)]
 pub struct File {
-    pub exec_uid: Colour,
-    pub uid_no_exec: Colour,
-    pub exec_no_uid: Colour,
-    pub no_exec_no_uid: Colour,
+    pub exec_uid: Color,
+    pub uid_no_exec: Color,
+    pub exec_no_uid: Color,
+    pub no_exec_no_uid: Color,
 }
 
 #[derive(Debug, Deserialize, PartialEq)]
 #[serde(rename_all = "kebab-case")]
 #[serde(deny_unknown_fields)]
 pub struct Dir {
-    pub uid: Colour,
-    pub no_uid: Colour,
+    pub uid: Color,
+    pub no_uid: Color,
 }
 
 #[derive(Debug, Deserialize, PartialEq)]
 #[serde(rename_all = "kebab-case")]
 #[serde(deny_unknown_fields)]
 pub struct Symlink {
-    pub default: Colour,
-    pub broken: Colour,
+    pub default: Color,
+    pub broken: Color,
 }
 
 #[derive(Debug, Deserialize, PartialEq)]
 #[serde(rename_all = "kebab-case")]
 #[serde(deny_unknown_fields)]
 pub struct Modified {
-    pub hour_old: Colour,
-    pub day_old: Colour,
-    pub older: Colour,
+    pub hour_old: Color,
+    pub day_old: Color,
+    pub older: Color,
 }
 
 #[derive(Debug, Deserialize, PartialEq)]
 #[serde(rename_all = "kebab-case")]
 #[serde(deny_unknown_fields)]
 pub struct Size {
-    pub none: Colour,
-    pub small: Colour,
-    pub medium: Colour,
-    pub large: Colour,
+    pub none: Color,
+    pub small: Color,
+    pub medium: Color,
+    pub large: Color,
 }
 
 #[derive(Debug, Deserialize, PartialEq)]
 #[serde(rename_all = "kebab-case")]
 #[serde(deny_unknown_fields)]
 pub struct INode {
-    pub valid: Colour,
-    pub invalid: Colour,
+    pub valid: Color,
+    pub invalid: Color,
 }
 
 impl Default for Theme {
@@ -146,50 +146,50 @@ impl Theme {
 
     pub fn default_dark() -> Self {
         Theme {
-            user: Colour::Fixed(230),  // Cornsilk1
-            group: Colour::Fixed(187), // LightYellow3
+            user: Color::AnsiValue(230),  // Cornsilk1
+            group: Color::AnsiValue(187), // LightYellow3
             permissions: Permissions {
-                read: Colour::Green,
-                write: Colour::Yellow,
-                exec: Colour::Red,
-                exec_sticky: Colour::Purple,
-                no_access: Colour::Fixed(245), // Grey
+                read: Color::Green,
+                write: Color::Yellow,
+                exec: Color::Red,
+                exec_sticky: Color::AnsiValue(5),
+                no_access: Color::AnsiValue(245), // Grey
             },
             file_type: FileType {
                 file: File {
-                    exec_uid: Colour::Fixed(40),        // Green3
-                    uid_no_exec: Colour::Fixed(184),    // Yellow3
-                    exec_no_uid: Colour::Fixed(40),     // Green3
-                    no_exec_no_uid: Colour::Fixed(184), // Yellow3
+                    exec_uid: Color::AnsiValue(40),        // Green3
+                    uid_no_exec: Color::AnsiValue(184),    // Yellow3
+                    exec_no_uid: Color::AnsiValue(40),     // Green3
+                    no_exec_no_uid: Color::AnsiValue(184), // Yellow3
                 },
                 dir: Dir {
-                    uid: Colour::Fixed(33),    // DodgerBlue1
-                    no_uid: Colour::Fixed(33), // DodgerBlue1
+                    uid: Color::AnsiValue(33),    // DodgerBlue1
+                    no_uid: Color::AnsiValue(33), // DodgerBlue1
                 },
-                pipe: Colour::Fixed(44), // DarkTurquoise
+                pipe: Color::AnsiValue(44), // DarkTurquoise
                 symlink: Symlink {
-                    default: Colour::Fixed(44), // DarkTurquoise
-                    broken: Colour::Fixed(124), // Red3
+                    default: Color::AnsiValue(44), // DarkTurquoise
+                    broken: Color::AnsiValue(124), // Red3
                 },
-                block_device: Colour::Fixed(44), // DarkTurquoise
-                char_device: Colour::Fixed(172), // Orange3
-                socket: Colour::Fixed(44),       // DarkTurquoise
-                special: Colour::Fixed(44),      // DarkTurquoise
+                block_device: Color::AnsiValue(44), // DarkTurquoise
+                char_device: Color::AnsiValue(172), // Orange3
+                socket: Color::AnsiValue(44),       // DarkTurquoise
+                special: Color::AnsiValue(44),      // DarkTurquoise
             },
             modified: Modified {
-                hour_old: Colour::Fixed(40), // Green3
-                day_old: Colour::Fixed(42),  // SpringGreen2
-                older: Colour::Fixed(36),    // DarkCyan
+                hour_old: Color::AnsiValue(40), // Green3
+                day_old: Color::AnsiValue(42),  // SpringGreen2
+                older: Color::AnsiValue(36),    // DarkCyan
             },
             size: Size {
-                none: Colour::Fixed(245),   // Grey
-                small: Colour::Fixed(229),  // Wheat1
-                medium: Colour::Fixed(216), // LightSalmon1
-                large: Colour::Fixed(172),  // Orange3
+                none: Color::AnsiValue(245),   // Grey
+                small: Color::AnsiValue(229),  // Wheat1
+                medium: Color::AnsiValue(216), // LightSalmon1
+                large: Color::AnsiValue(172),  // Orange3
             },
             inode: INode {
-                valid: Colour::Fixed(13),    // Pink
-                invalid: Colour::Fixed(245), // Grey
+                valid: Color::AnsiValue(13),    // Pink
+                invalid: Color::AnsiValue(245), // Grey
             },
         }
     }
@@ -197,68 +197,43 @@ impl Theme {
     #[cfg(test)]
     pub fn default_yaml() -> &'static str {
         r#"---
-user:
-  Fixed: 230
-group:
-  Fixed: 187
+user: 230
+group: 187
 permissions:
   read: Green
   write: Yellow
   exec: Red
   exec-sticky: Purple
-  no-access:
-    Fixed: 245
+  no-access: 245
 file-type:
   file:
-    exec-uid:
-      Fixed: 40
-    uid-no-exec:
-      Fixed: 184
-    exec-no-uid:
-      Fixed: 40
-    no-exec-no-uid:
-      Fixed: 184
+    exec-uid: 40
+    uid-no-exec: 184
+    exec-no-uid: 40
+    no-exec-no-uid: 184
   dir:
-    uid:
-      Fixed: 33
-    no-uid:
-      Fixed: 33
-  pipe:
-    Fixed: 44
+    uid: 33
+    no-uid: 33
+  pipe: 44
   symlink:
-    default:
-      Fixed: 44
-    broken:
-      Fixed: 124
-  block-device:
-    Fixed: 44
-  char-device:
-    Fixed: 172
-  socket:
-    Fixed: 44
-  special:
-    Fixed: 44
+    default: 44
+    broken: 124
+  block-device: 44
+  char-device: 172
+  socket: 44
+  special: 44
 modified:
-  hour-old:
-    Fixed: 40
-  day-old:
-    Fixed: 42
-  older:
-    Fixed: 36
+  hour-old: 40
+  day-old: 42
+  older: 36
 size:
-  none:
-    Fixed: 245
-  small:
-    Fixed: 229
-  medium:
-    Fixed: 216
-  large:
-    Fixed: 172
+  none: 245
+  small: 229
+  medium: 216
+  large: 172
 inode:
-  valid:
-    Fixed: 13
-  invalid:
-    Fixed: 245
+  valid: 13
+  invalid: 245
 "#
     }
 }
