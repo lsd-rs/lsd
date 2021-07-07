@@ -331,8 +331,8 @@ Check [Theme file content](#theme-file-content) for details.
 
 ### Theme file content
 
-Theme file use the [ansi_term](https://docs.rs/ansi_term)
-configure the colors, check [ansi_term](https://docs.rs/ansi_term/0.12.1/ansi_term/enum.Colour.html)
+Theme file use the [crossterm](https://crates.io/crates/crossterm)
+configure the colors, check [crossterm](https://docs.rs/crossterm/0.20.0/crossterm/style/enum.Color.html)
 for the supported colors.
 
 Color table: https://upload.wikimedia.org/wikipedia/commons/1/15/Xterm_256color_chart.svg
@@ -340,68 +340,47 @@ Color table: https://upload.wikimedia.org/wikipedia/commons/1/15/Xterm_256color_
 This is the default theme scheme shipped with `lsd`.
 
 ```yaml
-user:
-  Fixed: 230
-group:
-  Fixed: 187
+user: 230
+group: 187
 permissions:
   read: Green
   write: Yellow
   exec: Red
-  exec-sticky: Purple
-  no-access:
-    Fixed: 245
+  exec-sticky: 5
+  no-access: 245
 file-type:
   file:
-    exec-uid:
-      Fixed: 40
-    uid-no-exec:
-      Fixed: 184
-    exec-no-uid:
-      Fixed: 40
-    no-exec-no-uid:
-      Fixed: 184
+    exec-uid: 40
+    uid-no-exec: 184
+    exec-no-uid: 40
+    no-exec-no-uid: 184
   dir:
-    uid:
-      Fixed: 33
-    no-uid:
-      Fixed: 33
-  pipe:
-    Fixed: 44
+    uid: 33
+    no-uid: 33
+  pipe: 44
   symlink:
-    default:
-      Fixed: 44
-    broken:
-      Fixed: 124
-  block-device:
-    Fixed: 44
-  char-device:
-    Fixed: 172
-  socket:
-    Fixed: 44
-  special:
-    Fixed: 44
+    default: 44
+    broken: 124
+  block-device: 44
+  char-device: 172
+  socket: 44
+  special: 44
 modified:
-  hour-old:
-    Fixed: 40
-  day-old:
-    Fixed: 42
-  older:
-    Fixed: 36
+  hour-old: 40
+  day-old: 42
+  older: 36
 size:
-  none:
-    Fixed: 245
-  small:
-    Fixed: 229
-  medium:
-    Fixed: 216
-  large:
-    Fixed: 172
+  none: 245
+  small: 229
+  medium: 216
+  large: 172
 inode:
-  valid:
-    Fixed: 13
-  invalid:
-    Fixed: 245
+  valid: 13
+  invalid: 245
+links:
+  valid: 13
+  invalid: 245
+tree-edge: 245
 ```
 
 
