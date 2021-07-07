@@ -66,6 +66,7 @@ impl Elem {
     pub fn has_suid(&self) -> bool {
         matches!(self, Elem::Dir { uid: true } | Elem::File { uid: true, .. })
     }
+
     pub fn get_color(&self, theme: &theme::Theme) -> Color {
         match self {
             Elem::File {
@@ -115,9 +116,9 @@ impl Elem {
             Elem::INode { valid: false } => theme.inode.valid,
             Elem::INode { valid: true } => theme.inode.invalid,
 
-            Elem::TreeEdge => theme.inode.invalid,
-            Elem::Links { valid: false } => theme.inode.invalid,
-            Elem::Links { valid: true } => theme.inode.invalid,
+            Elem::TreeEdge => theme.tree_edge,
+            Elem::Links { valid: false } => theme.links.invalid,
+            Elem::Links { valid: true } => theme.links.valid,
         }
     }
 }
@@ -326,10 +327,10 @@ mod elem {
             user: Color::AnsiValue(230),  // Cornsilk1
             group: Color::AnsiValue(187), // LightYellow3
             permissions: theme::Permissions {
-                read: Colour::Green,
-                write: Colour::Yellow,
-                exec: Colour::Red,
-                exec_sticky: Colour::Purple,
+                read: Color::Green,
+                write: Color::Yellow,
+                exec: Color::Red,
+                exec_sticky: Color::Magenta,
                 no_access: Color::AnsiValue(245), // Grey
             },
             file_type: theme::FileType {
@@ -368,6 +369,11 @@ mod elem {
                 valid: Color::AnsiValue(13),    // Pink
                 invalid: Color::AnsiValue(245), // Grey
             },
+            links: theme::Links {
+                valid: Color::AnsiValue(13),    // Pink
+                invalid: Color::AnsiValue(245), // Grey
+            },
+            tree_edge: Color::AnsiValue(245), // Grey
         }
     }
 
@@ -379,7 +385,7 @@ mod elem {
                 uid: true
             }
             .get_color(&test_theme()),
-            Colour::Fixed(40),
+            Color::AnsiValue(40),
         );
         assert_eq!(
             Elem::File {
@@ -387,7 +393,7 @@ mod elem {
                 uid: true
             }
             .get_color(&test_theme()),
-            Colour::Fixed(184),
+            Color::AnsiValue(184),
         );
         assert_eq!(
             Elem::File {
@@ -395,7 +401,7 @@ mod elem {
                 uid: false
             }
             .get_color(&test_theme()),
-            Colour::Fixed(40),
+            Color::AnsiValue(40),
         );
         assert_eq!(
             Elem::File {
@@ -403,7 +409,7 @@ mod elem {
                 uid: false
             }
             .get_color(&test_theme()),
-            Colour::Fixed(184),
+            Color::AnsiValue(184),
         );
     }
 }

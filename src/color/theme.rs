@@ -21,6 +21,8 @@ pub struct Theme {
     pub modified: Modified,
     pub size: Size,
     pub inode: INode,
+    pub tree_edge: Color,
+    pub links: Links,
 }
 
 #[derive(Debug, Deserialize, PartialEq)]
@@ -101,9 +103,17 @@ pub struct INode {
     pub invalid: Color,
 }
 
+#[derive(Debug, Deserialize, PartialEq)]
+#[serde(rename_all = "kebab-case")]
+#[serde(deny_unknown_fields)]
+pub struct Links {
+    pub valid: Color,
+    pub invalid: Color,
+}
+
 impl Default for Theme {
     fn default() -> Self {
-        // TODO: check terminal color and return light or dark
+        // TODO(zwpaper): check terminal color and return light or dark
         Self::default_dark()
     }
 }
@@ -191,6 +201,11 @@ impl Theme {
                 valid: Color::AnsiValue(13),    // Pink
                 invalid: Color::AnsiValue(245), // Grey
             },
+            links: Links {
+                valid: Color::AnsiValue(13),    // Pink
+                invalid: Color::AnsiValue(245), // Grey
+            },
+            tree_edge: Color::AnsiValue(245), // Grey
         }
     }
 
@@ -203,7 +218,7 @@ permissions:
   read: Green
   write: Yellow
   exec: Red
-  exec-sticky: Purple
+  exec-sticky: 5
   no-access: 245
 file-type:
   file:
@@ -234,6 +249,10 @@ size:
 inode:
   valid: 13
   invalid: 245
+links:
+  valid: 13
+  invalid: 245
+tree-edge: 245
 "#
     }
 }

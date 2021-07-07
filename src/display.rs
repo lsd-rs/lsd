@@ -300,7 +300,7 @@ fn get_output<'a>(
                 .into_iter()
                 .map(|s| s.to_string())
                 .collect::<Vec<String>>()
-                .join(" "),
+                .join(""),
         );
     }
     strings
@@ -388,11 +388,13 @@ mod tests {
                     uid: false,
                 },
             );
-            let output = name.render(
-                &Colors::new(color::ThemeOption::NoColor),
-                &Icons::new(icon::Theme::NoIcon, " ".to_string()),
-                &DisplayOption::FileName,
-            );
+            let output = name
+                .render(
+                    &Colors::new(color::ThemeOption::NoColor),
+                    &Icons::new(icon::Theme::NoIcon, " ".to_string()),
+                    &DisplayOption::FileName,
+                )
+                .to_string();
 
             assert_eq!(get_visible_width(&output), *l);
         }
@@ -460,10 +462,10 @@ mod tests {
                 .to_string();
 
             // check if the color is present.
-            assert_eq!(true, output.starts_with("\u{1b}[38;5;"));
-            assert_eq!(true, output.ends_with("[0m"));
+            assert_eq!(true, output.starts_with("\u{1b}[38;5;"), "start with color");
+            assert_eq!(true, output.ends_with("[39m"), "reset foreground color");
 
-            assert_eq!(get_visible_width(&output), *l);
+            assert_eq!(get_visible_width(&output), *l, "visible match");
         }
     }
 
@@ -532,7 +534,7 @@ mod tests {
         let output = tree(
             &metas,
             &flags,
-            &Colors::new(color::Theme::NoColor),
+            &Colors::new(color::ThemeOption::NoColor),
             &Icons::new(icon::Theme::NoIcon, " ".to_string()),
         );
 
@@ -562,7 +564,7 @@ mod tests {
         let output = tree(
             &metas,
             &flags,
-            &Colors::new(color::Theme::NoColor),
+            &Colors::new(color::ThemeOption::NoColor),
             &Icons::new(icon::Theme::NoIcon, " ".to_string()),
         );
 
@@ -601,7 +603,7 @@ mod tests {
         let output = tree(
             &metas,
             &flags,
-            &Colors::new(color::Theme::NoColor),
+            &Colors::new(color::ThemeOption::NoColor),
             &Icons::new(icon::Theme::NoIcon, " ".to_string()),
         );
 
@@ -639,7 +641,7 @@ mod tests {
         let output = tree(
             &metas,
             &flags,
-            &Colors::new(color::Theme::NoColor),
+            &Colors::new(color::ThemeOption::NoColor),
             &Icons::new(icon::Theme::NoIcon, " ".to_string()),
         );
 

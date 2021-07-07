@@ -171,7 +171,7 @@ mod test {
     use crate::meta::Meta;
     #[cfg(unix)]
     use crate::meta::Permissions;
-    use ansi_term::Colour;
+    use crossterm::style::{Color, Stylize};
     use std::cmp::Ordering;
     use std::fs::{self, File};
     #[cfg(unix)]
@@ -197,7 +197,7 @@ mod test {
         let name = Name::new(&file_path, file_type);
 
         assert_eq!(
-            Colour::Fixed(184).paint(" file.txt"),
+            " file.txt".to_string().with(Color::AnsiValue(184)),
             name.render(&colors, &icons, &DisplayOption::FileName)
         );
     }
@@ -215,7 +215,7 @@ mod test {
         let colors = Colors::new(color::ThemeOption::NoLscolors);
 
         assert_eq!(
-            Colour::Fixed(33).paint(" directory"),
+            " directory".to_string().with(Color::AnsiValue(33)),
             meta.name.render(&colors, &icons, &DisplayOption::FileName)
         );
     }
@@ -243,7 +243,7 @@ mod test {
         let name = Name::new(&symlink_path, file_type);
 
         assert_eq!(
-            Colour::Fixed(44).paint(" target.tmp"),
+            " target.tmp".to_string().with(Color::AnsiValue(44)),
             name.render(&colors, &icons, &DisplayOption::FileName)
         );
     }
@@ -271,7 +271,7 @@ mod test {
         let name = Name::new(&symlink_path, file_type);
 
         assert_eq!(
-            Colour::Fixed(44).paint(" target.d"),
+            " target.d".to_string().with(Color::AnsiValue(44)),
             name.render(&colors, &icons, &DisplayOption::FileName)
         );
     }
@@ -297,7 +297,7 @@ mod test {
         let name = Name::new(&pipe_path, file_type);
 
         assert_eq!(
-            Colour::Fixed(184).paint(" pipe.tmp"),
+            " pipe.tmp".to_string().with(Color::AnsiValue(184)),
             name.render(&colors, &icons, &DisplayOption::FileName)
         );
     }
@@ -532,7 +532,7 @@ mod test {
         let name = Name::new(&file_path, file_type);
 
         assert_eq!(
-            Colour::Fixed(184).paint(" file\\ttab.txt"),
+            " file\\ttab.txt".to_string().with(Color::AnsiValue(184)),
             name.render(&colors, &icons, &DisplayOption::FileName)
         );
 
@@ -545,7 +545,9 @@ mod test {
         let name = Name::new(&file_path, file_type);
 
         assert_eq!(
-            Colour::Fixed(184).paint(" file\\nnewline.txt"),
+            " file\\nnewline.txt"
+                .to_string()
+                .with(Color::AnsiValue(184)),
             name.render(&colors, &icons, &DisplayOption::FileName)
         );
     }
