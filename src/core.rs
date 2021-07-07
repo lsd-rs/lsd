@@ -38,7 +38,7 @@ impl Core {
         let tty_available = terminal_size().is_some(); // terminal_size allows us to know if the stdout is a tty or not.
 
         #[cfg(target_os = "windows")]
-        let console_color_ok = ansi_term::enable_ansi_support().is_ok();
+        let console_color_ok = crossterm::ansi_support::supports_ansi();
 
         let mut inner_flags = flags.clone();
 

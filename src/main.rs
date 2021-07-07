@@ -7,7 +7,6 @@
 
 #[macro_use]
 extern crate clap;
-extern crate ansi_term;
 extern crate chrono;
 extern crate chrono_humanize;
 extern crate dirs;
