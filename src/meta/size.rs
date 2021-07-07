@@ -61,7 +61,6 @@ impl Size {
         let val_content = self.render_value(colors, flags);
         let unit_content = self.render_unit(colors, flags);
 
-        // TODD(zwpaper): make sure the val_content.content().len() works as expected
         let left_pad = if let Some(align) = val_alignment {
             repeat(" ")
                 .take(align - val_content.content().len())

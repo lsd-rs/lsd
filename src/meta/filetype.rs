@@ -114,7 +114,7 @@ mod test {
     use crate::meta::Meta;
     #[cfg(unix)]
     use crate::meta::Permissions;
-    use ansi_term::Colour;
+    use crossterm::style::{Color, Stylize};
     #[cfg(unix)]
     use std::fs::File;
     #[cfg(unix)]
@@ -138,7 +138,10 @@ mod test {
         let colors = Colors::new(ThemeOption::NoLscolors);
         let file_type = FileType::new(&meta, None, &Permissions::from(&meta));
 
-        assert_eq!(Colour::Fixed(184).paint("."), file_type.render(&colors));
+        assert_eq!(
+            ".".to_string().with(Color::AnsiValue(184)),
+            file_type.render(&colors)
+        );
     }
 
     #[test]
@@ -151,7 +154,10 @@ mod test {
         let colors = Colors::new(ThemeOption::NoLscolors);
         let file_type = FileType::new(&metadata, None, &meta.permissions);
 
-        assert_eq!(Colour::Fixed(33).paint("d"), file_type.render(&colors));
+        assert_eq!(
+            "d".to_string().with(Color::AnsiValue(33)),
+            file_type.render(&colors)
+        );
     }
 
     #[test]
@@ -173,7 +179,10 @@ mod test {
         let colors = Colors::new(ThemeOption::NoLscolors);
         let file_type = FileType::new(&meta, Some(&meta), &Permissions::from(&meta));
 
-        assert_eq!(Colour::Fixed(44).paint("l"), file_type.render(&colors));
+        assert_eq!(
+            "l".to_string().with(Color::AnsiValue(44)),
+            file_type.render(&colors)
+        );
     }
 
     #[test]
@@ -195,7 +204,10 @@ mod test {
         let colors = Colors::new(ThemeOption::NoLscolors);
         let file_type = FileType::new(&meta, Some(&meta), &Permissions::from(&meta));
 
-        assert_eq!(Colour::Fixed(44).paint("l"), file_type.render(&colors));
+        assert_eq!(
+            "l".to_string().with(Color::AnsiValue(44)),
+            file_type.render(&colors)
+        );
     }
 
     #[test]
@@ -216,7 +228,10 @@ mod test {
         let colors = Colors::new(ThemeOption::NoLscolors);
         let file_type = FileType::new(&meta, None, &Permissions::from(&meta));
 
-        assert_eq!(Colour::Fixed(44).paint("|"), file_type.render(&colors));
+        assert_eq!(
+            "|".to_string().with(Color::AnsiValue(44)),
+            file_type.render(&colors)
+        );
     }
 
     #[test]
@@ -241,7 +256,10 @@ mod test {
         let colors = Colors::new(ThemeOption::NoLscolors);
         let file_type = FileType::new(&meta, None, &Permissions::from(&meta));
 
-        assert_eq!(Colour::Fixed(44).paint("c"), file_type.render(&colors));
+        assert_eq!(
+            "c".to_string().with(Color::AnsiValue(44)),
+            file_type.render(&colors)
+        );
     }
 
     #[test]
@@ -257,6 +275,9 @@ mod test {
         let colors = Colors::new(ThemeOption::NoLscolors);
         let file_type = FileType::new(&meta, None, &Permissions::from(&meta));
 
-        assert_eq!(Colour::Fixed(44).paint("s"), file_type.render(&colors));
+        assert_eq!(
+            "s".to_string().with(Color::AnsiValue(44)),
+            file_type.render(&colors)
+        );
     }
 }
