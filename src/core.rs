@@ -72,14 +72,16 @@ impl Core {
         }
     }
 
-    pub fn run(self, paths: Vec<PathBuf>) {
-        let mut meta_list = self.fetch(paths);
+    pub fn run(self, paths: Vec<PathBuf>) -> i32 {
+        let (mut meta_list, exit_status) = self.fetch(paths);
 
         self.sort(&mut meta_list);
-        self.display(&meta_list)
+        self.display(&meta_list);
+
+        exit_status
     }
 
-    fn fetch(&self, paths: Vec<PathBuf>) -> Vec<Meta> {
+    fn fetch(&self, paths: Vec<PathBuf>) -> (Vec<Meta>, i32) {
         let mut meta_list = Vec::with_capacity(paths.len());
         let depth = match self.flags.layout {
             Layout::Tree { .. } => self.flags.recursion.depth,
@@ -87,11 +89,15 @@ impl Core {
             _ => 1,
         };
 
+        let mut path_not_found: bool = false;
+        let mut recourse_path_not_found: bool = false;
+
         for path in paths {
             let mut meta = match Meta::from_path(&path, self.flags.dereference.0) {
                 Ok(meta) => meta,
                 Err(err) => {
                     print_error!("{}: {}.", path.display(), err);
+                    path_not_found = true;
                     continue;
                 }
             };
@@ -106,6 +112,7 @@ impl Core {
                     }
                     Err(err) => {
                         print_error!("lsd: {}: {}\n", path.display(), err);
+                        recourse_path_not_found = true;
                         continue;
                     }
                 };
@@ -117,9 +124,15 @@ impl Core {
             for meta in &mut meta_list.iter_mut() {
                 meta.calculate_total_size();
             }
-        }
+        };
 
-        meta_list
+        let exit_status = match (path_not_found, recourse_path_not_found) {
+            (true, _) => 2,
+            (_, true) => 1,
+            _ => 0,
+        };
+
+        (meta_list, exit_status)
     }
 
     fn sort(&self, metas: &mut Vec<Meta>) {

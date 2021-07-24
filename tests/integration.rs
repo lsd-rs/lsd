@@ -4,6 +4,7 @@ extern crate predicates;
 use assert_cmd::prelude::*;
 use assert_fs::prelude::*;
 use predicates::prelude::*;
+use std::os::unix::fs::PermissionsExt;
 use std::process::Command;
 
 #[cfg(unix)]
@@ -568,3 +569,21 @@ fn test_custom_config_file_parsing() {
         .assert()
         .stdout(predicate::str::is_match("folder\n└── file").unwrap());
 }
+
+#[test]
+fn test_cannot_access_file_exit_status() {
+    let dir = tempdir();
+    let does_not_exist = dir.path().join("does_not_exist");
+
+    let status = cmd()
+        .arg("-l")
+        .arg("--ignore-config")
+        .arg(does_not_exist)
+        .status()
+        .unwrap()
+        .code()
+        .unwrap();
+
+    assert_eq!(status, 2)
+}
+

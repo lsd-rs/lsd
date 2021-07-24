@@ -117,5 +117,7 @@ fn main() {
     let flags = Flags::configure_from(&matches, &config).unwrap_or_else(|err| err.exit());
     let core = Core::new(flags);
 
-    core.run(inputs);
+    let exit_status = core.run(inputs);
+
+    std::process::exit(exit_status)
 }
