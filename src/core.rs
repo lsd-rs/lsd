@@ -3,7 +3,8 @@ use crate::display;
 use crate::flags::{ColorOption, Display, Flags, IconOption, IconTheme, Layout, SortOrder};
 use crate::icon::{self, Icons};
 use crate::meta::Meta;
-use crate::{print_error, print_output, sort};
+
+use crate::{print_output, sort, ExitCode, ExitStatus, PathError};
 use std::path::PathBuf;
 
 #[cfg(not(target_os = "windows"))]
@@ -20,6 +21,7 @@ pub struct Core {
     //display: Display,
     colors: Colors,
     sorters: Vec<(SortOrder, sort::SortFn)>,
+    exit_status: ExitStatus,
 }
 
 impl Core {
@@ -68,20 +70,31 @@ impl Core {
             //display: Display::new(inner_flags),
             colors: Colors::new(color_theme),
             icons: Icons::new(icon_theme, icon_separator),
+            exit_status: ExitStatus::new(),
             sorters,
         }
     }
 
-    pub fn run(self, paths: Vec<PathBuf>) -> i32 {
-        let (mut meta_list, exit_status) = self.fetch(paths);
+    pub fn run(&mut self, paths: Vec<PathBuf>) {
+        let mut meta_list = self.fetch(paths);
 
         self.sort(&mut meta_list);
         self.display(&meta_list);
-
-        exit_status
     }
 
-    fn fetch(&self, paths: Vec<PathBuf>) -> (Vec<Meta>, i32) {
+    pub fn exit(&self) {
+        let errors = &self.exit_status.errors;
+        if !errors.is_empty() {
+            for error in errors {
+                println!("{}", error);
+            }
+        }
+
+        let exit_code = self.exit_status.code as i32;
+        std::process::exit(exit_code);
+    }
+
+    fn fetch(&mut self, paths: Vec<PathBuf>) -> Vec<Meta> {
         let mut meta_list = Vec::with_capacity(paths.len());
         let depth = match self.flags.layout {
             Layout::Tree { .. } => self.flags.recursion.depth,
@@ -89,15 +102,13 @@ impl Core {
             _ => 1,
         };
 
-        let mut path_not_found: bool = false;
-        let mut recourse_path_not_found: bool = false;
-
         for path in paths {
             let mut meta = match Meta::from_path(&path, self.flags.dereference.0) {
                 Ok(meta) => meta,
                 Err(err) => {
-                    print_error!("{}: {}.", path.display(), err);
-                    path_not_found = true;
+                    let path_error = PathError::new(path, err);
+                    self.exit_status
+                        .push_error(ExitCode::MajorIssue, path_error);
                     continue;
                 }
             };
@@ -111,8 +122,9 @@ impl Core {
                         meta_list.push(meta);
                     }
                     Err(err) => {
-                        print_error!("lsd: {}: {}\n", path.display(), err);
-                        recourse_path_not_found = true;
+                        let path_error = PathError::new(path, err);
+                        self.exit_status
+                            .push_error(ExitCode::MinorIssue, path_error);
                         continue;
                     }
                 };
@@ -126,13 +138,7 @@ impl Core {
             }
         };
 
-        let exit_status = match (path_not_found, recourse_path_not_found) {
-            (true, _) => 2,
-            (_, true) => 1,
-            _ => 0,
-        };
-
-        (meta_list, exit_status)
+        meta_list
     }
 
     fn sort(&self, metas: &mut Vec<Meta>) {

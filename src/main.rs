@@ -41,7 +41,54 @@ mod sort;
 use crate::config_file::Config;
 use crate::core::Core;
 use crate::flags::Flags;
+use std::fmt;
+use std::io::Error;
 use std::path::PathBuf;
+
+struct PathError {
+    path: PathBuf,
+    error: Error,
+}
+
+impl PathError {
+    fn new(path: PathBuf, error: Error) -> Self {
+        Self { path, error }
+    }
+}
+
+impl fmt::Display for PathError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}: {}", self.path.display(), self.error)
+    }
+}
+
+#[derive(PartialEq, PartialOrd, Copy, Clone)]
+enum ExitCode {
+    OK,
+    MinorIssue,
+    MajorIssue,
+}
+pub struct ExitStatus {
+    code: ExitCode,
+    errors: Vec<PathError>,
+}
+
+impl ExitStatus {
+    fn new() -> Self {
+        Self {
+            code: ExitCode::OK,
+            errors: vec![],
+        }
+    }
+
+    fn push_error(&mut self, code: ExitCode, error: PathError) {
+        if self.code < code {
+            self.code = code;
+        }
+
+        self.errors.push(error);
+    }
+}
 
 /// Macro used to avoid panicking when the lsd method is used with a pipe and
 /// stderr close before our program.
@@ -115,9 +162,9 @@ fn main() {
         Config::default()
     };
     let flags = Flags::configure_from(&matches, &config).unwrap_or_else(|err| err.exit());
-    let core = Core::new(flags);
+    let mut core = Core::new(flags);
 
-    let exit_status = core.run(inputs);
+    core.run(inputs);
 
-    std::process::exit(exit_status)
+    core.exit();
 }
