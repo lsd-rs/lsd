@@ -1,10 +1,10 @@
 use crate::color::{self, Colors};
-use crate::display;
 use crate::flags::{ColorOption, Display, Flags, IconOption, IconTheme, Layout, SortOrder};
 use crate::icon::{self, Icons};
 use crate::meta::Meta;
+use crate::{display, print_error};
 
-use crate::{print_output, sort, ExitCode, ExitStatus, PathError};
+use crate::{print_output, sort, ExitCode};
 use std::path::PathBuf;
 
 #[cfg(not(target_os = "windows"))]
@@ -21,7 +21,7 @@ pub struct Core {
     //display: Display,
     colors: Colors,
     sorters: Vec<(SortOrder, sort::SortFn)>,
-    exit_status: ExitStatus,
+    exit_code: ExitCode,
 }
 
 impl Core {
@@ -70,7 +70,7 @@ impl Core {
             //display: Display::new(inner_flags),
             colors: Colors::new(color_theme),
             icons: Icons::new(icon_theme, icon_separator),
-            exit_status: ExitStatus::new(),
+            exit_code: ExitCode::OK,
             sorters,
         }
     }
@@ -83,15 +83,7 @@ impl Core {
     }
 
     pub fn exit(&self) {
-        let errors = &self.exit_status.errors;
-        if !errors.is_empty() {
-            for error in errors {
-                println!("{}", error);
-            }
-        }
-
-        let exit_code = self.exit_status.code as i32;
-        std::process::exit(exit_code);
+        std::process::exit(self.exit_code as i32);
     }
 
     fn fetch(&mut self, paths: Vec<PathBuf>) -> Vec<Meta> {
@@ -106,9 +98,8 @@ impl Core {
             let mut meta = match Meta::from_path(&path, self.flags.dereference.0) {
                 Ok(meta) => meta,
                 Err(err) => {
-                    let path_error = PathError::new(path, err);
-                    self.exit_status
-                        .push_error(ExitCode::MajorIssue, path_error);
+                    print_error!("{}: {}.", path.display(), err);
+                    self.exit_code.set_if_greater(ExitCode::MajorIssue);
                     continue;
                 }
             };
@@ -122,9 +113,8 @@ impl Core {
                         meta_list.push(meta);
                     }
                     Err(err) => {
-                        let path_error = PathError::new(path, err);
-                        self.exit_status
-                            .push_error(ExitCode::MinorIssue, path_error);
+                        print_error!("{}: {}\n", path.display(), err);
+                        self.exit_code.set_if_greater(ExitCode::MinorIssue);
                         continue;
                     }
                 };

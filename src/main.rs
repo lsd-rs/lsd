@@ -41,26 +41,7 @@ mod sort;
 use crate::config_file::Config;
 use crate::core::Core;
 use crate::flags::Flags;
-use std::fmt;
-use std::io::Error;
 use std::path::PathBuf;
-
-struct PathError {
-    path: PathBuf,
-    error: Error,
-}
-
-impl PathError {
-    fn new(path: PathBuf, error: Error) -> Self {
-        Self { path, error }
-    }
-}
-
-impl fmt::Display for PathError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}: {}", self.path.display(), self.error)
-    }
-}
 
 #[derive(PartialEq, PartialOrd, Copy, Clone)]
 enum ExitCode {
@@ -68,28 +49,13 @@ enum ExitCode {
     MinorIssue,
     MajorIssue,
 }
-pub struct ExitStatus {
-    code: ExitCode,
-    errors: Vec<PathError>,
-}
-
-impl ExitStatus {
-    fn new() -> Self {
-        Self {
-            code: ExitCode::OK,
-            errors: vec![],
+impl ExitCode {
+    fn set_if_greater(&mut self, mut code: ExitCode) {
+        if self < &mut code {
+            *self = code.clone()
         }
     }
-
-    fn push_error(&mut self, code: ExitCode, error: PathError) {
-        if self.code < code {
-            self.code = code;
-        }
-
-        self.errors.push(error);
-    }
 }
-
 /// Macro used to avoid panicking when the lsd method is used with a pipe and
 /// stderr close before our program.
 #[macro_export]
