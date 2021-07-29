@@ -523,11 +523,11 @@ mod tests {
         dir.child("one.d").create_dir_all().unwrap();
         dir.child("one.d/two").touch().unwrap();
         dir.child("one.d/.hidden").touch().unwrap();
-        let mut metas = Meta::from_path(Path::new(dir.path()), false)
+        let (metas_, _) = Meta::from_path(Path::new(dir.path()), false)
             .unwrap()
             .recurse_into(42, &flags)
-            .unwrap()
             .unwrap();
+        let mut metas = metas_.unwrap();
         sort(&mut metas, &sort::assemble_sorters(&flags));
         let output = tree(
             &metas,
@@ -554,11 +554,11 @@ mod tests {
         let dir = assert_fs::TempDir::new().unwrap();
         dir.child("dir").create_dir_all().unwrap();
         dir.child("dir/file").touch().unwrap();
-        let metas = Meta::from_path(Path::new(dir.path()), false)
+        let (metas_, _) = Meta::from_path(Path::new(dir.path()), false)
             .unwrap()
             .recurse_into(42, &flags)
-            .unwrap()
             .unwrap();
+        let metas = metas_.unwrap();
         let output = tree(
             &metas,
             &flags,
@@ -593,11 +593,12 @@ mod tests {
         let dir = assert_fs::TempDir::new().unwrap();
         dir.child("dir").create_dir_all().unwrap();
         dir.child("dir/file").touch().unwrap();
-        let metas = Meta::from_path(Path::new(dir.path()), false)
+        let (metas_, _) = Meta::from_path(Path::new(dir.path()), false)
             .unwrap()
             .recurse_into(42, &flags)
-            .unwrap()
             .unwrap();
+
+        let metas = metas_.unwrap();
         let output = tree(
             &metas,
             &flags,
@@ -631,11 +632,12 @@ mod tests {
         let dir = assert_fs::TempDir::new().unwrap();
         dir.child("one.d").create_dir_all().unwrap();
         dir.child("one.d/two").touch().unwrap();
-        let metas = Meta::from_path(Path::new(dir.path()), false)
+        let (metas_, _) = Meta::from_path(Path::new(dir.path()), false)
             .unwrap()
             .recurse_into(42, &flags)
-            .unwrap()
             .unwrap();
+
+        let metas = metas_.unwrap();
         let output = tree(
             &metas,
             &flags,

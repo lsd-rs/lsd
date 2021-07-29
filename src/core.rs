@@ -108,9 +108,10 @@ impl Core {
                 self.flags.layout == Layout::Tree || self.flags.display != Display::DirectoryOnly;
             if recurse {
                 match meta.recurse_into(depth, &self.flags) {
-                    Ok(content) => {
+                    Ok((content, exit_code)) => {
                         meta.content = content;
                         meta_list.push(meta);
+                        self.exit_code.set_if_greater(exit_code);
                     }
                     Err(err) => {
                         print_error!("{}: {}\n", path.display(), err);

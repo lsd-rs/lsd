@@ -44,13 +44,13 @@ use crate::flags::Flags;
 use std::path::PathBuf;
 
 #[derive(PartialEq, PartialOrd, Copy, Clone)]
-enum ExitCode {
+pub enum ExitCode {
     OK,
     MinorIssue,
     MajorIssue,
 }
 impl ExitCode {
-    fn set_if_greater(&mut self, mut code: ExitCode) {
+    pub fn set_if_greater(&mut self, mut code: ExitCode) {
         if self < &mut code {
             *self = code.clone()
         }
