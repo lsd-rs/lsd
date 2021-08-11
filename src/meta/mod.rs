@@ -27,7 +27,6 @@ pub use crate::icon::Icons;
 use crate::flags::{Display, Flags, Layout};
 use crate::print_error;
 
-use std::fs::read_link;
 use std::io::{Error, ErrorKind};
 use std::path::{Component, Path, PathBuf};
 
@@ -161,13 +160,7 @@ impl Meta {
     }
 
     fn calculate_total_file_size(path: &PathBuf) -> u64 {
-        let metadata = if read_link(&path).is_ok() {
-            // If the file is a link, retrieve the metadata without following
-            // the link.
-            path.symlink_metadata()
-        } else {
-            path.metadata()
-        };
+        let metadata = path.symlink_metadata();
         let metadata = match metadata {
             Ok(meta) => meta,
             Err(err) => {
@@ -205,12 +198,26 @@ impl Meta {
     }
 
     pub fn from_path(path: &Path, dereference: bool) -> Result<Self, std::io::Error> {
-        // If the file is a link then retrieve link metadata instead with target metadata (if present).
-        let (metadata, symlink_meta) = if read_link(path).is_ok() && !dereference {
-            (path.symlink_metadata()?, path.metadata().ok())
-        } else {
-            (path.metadata()?, None)
-        };
+        let mut metadata = path.symlink_metadata()?;
+        let mut symlink_meta = None;
+        if metadata.file_type().is_symlink() {
+            match path.metadata() {
+                Ok(m) => {
+                    if dereference {
+                        metadata = m;
+                    } else {
+                        symlink_meta = Some(m);
+                    }
+                }
+                Err(e) => {
+                    // This case, it is definitely a symlink or
+                    // path.symlink_metadata would have errored out
+                    if dereference {
+                        return Err(e);
+                    }
+                }
+            }
+        }
 
         #[cfg(unix)]
         let owner = Owner::from(&metadata);

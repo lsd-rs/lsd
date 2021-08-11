@@ -265,6 +265,30 @@ fn test_dereference_link_right_type_and_no_link() {
 
 #[cfg(unix)]
 #[test]
+fn test_dereference_link_broken_link() {
+    let dir = tempdir();
+    let link = dir.path().join("link");
+    fs::symlink("target", &link).unwrap();
+
+    cmd()
+        .arg("-l")
+        .arg("--dereference")
+        .arg("--ignore-config")
+        .arg(&link)
+        .assert()
+        .stderr(predicate::str::contains("No such file or directory"));
+
+    cmd()
+        .arg("-l")
+        .arg("-L")
+        .arg("--ignore-config")
+        .arg(link)
+        .assert()
+        .stderr(predicate::str::contains("No such file or directory"));
+}
+
+#[cfg(unix)]
+#[test]
 fn test_show_folder_content_of_symlink() {
     let dir = tempdir();
     dir.child("target").child("inside").touch().unwrap();
