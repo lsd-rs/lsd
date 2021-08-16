@@ -249,6 +249,7 @@ impl Icons {
         m.insert("m4a", "\u{f001}"); // ""
         m.insert("markdown", "\u{f48a}"); // ""
         m.insert("md", "\u{f48a}"); // ""
+        m.insert("mjs", "\u{e74e}"); // ""
         m.insert("mkd", "\u{f48a}"); // ""
         m.insert("mkv", "\u{f03d}"); // ""
         m.insert("mobi", "\u{e28b}"); // ""
