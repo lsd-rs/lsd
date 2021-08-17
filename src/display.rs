@@ -15,15 +15,12 @@ const CORNER: &str = "\u{2514}\u{2500}\u{2500}"; // "└──"
 const BLANK: &str = "   ";
 
 pub fn grid(metas: &[Meta], flags: &Flags, colors: &Colors, icons: &Icons) -> String {
-    let term_width = match terminal_size() {
-        Some((w, _)) => Some(w.0 as usize),
-        None => None,
-    };
+    let term_width = terminal_size().map(|(w, _)| w.0 as usize);
 
     inner_display_grid(
         &DisplayOption::None,
         metas,
-        &flags,
+        flags,
         colors,
         icons,
         0,
@@ -37,7 +34,7 @@ pub fn tree(metas: &[Meta], flags: &Flags, colors: &Colors, icons: &Icons) -> St
         direction: Direction::LeftToRight,
     });
 
-    let padding_rules = get_padding_rules(&metas, flags);
+    let padding_rules = get_padding_rules(metas, flags);
     let mut index = 0;
     for (i, block) in flags.blocks.0.iter().enumerate() {
         if let Block::Name = block {
@@ -46,7 +43,7 @@ pub fn tree(metas: &[Meta], flags: &Flags, colors: &Colors, icons: &Icons) -> St
         }
     }
 
-    for cell in inner_display_tree(metas, &flags, colors, icons, (0, ""), &padding_rules, index) {
+    for cell in inner_display_tree(metas, flags, colors, icons, (0, ""), &padding_rules, index) {
         grid.add(cell);
     }
 
@@ -64,7 +61,7 @@ fn inner_display_grid(
 ) -> String {
     let mut output = String::new();
 
-    let padding_rules = get_padding_rules(&metas, flags);
+    let padding_rules = get_padding_rules(metas, flags);
     let mut grid = match flags.layout {
         Layout::OneLine => Grid::new(GridOptions {
             filling: Filling::Spaces(1),
@@ -93,11 +90,11 @@ fn inner_display_grid(
         }
 
         let blocks = get_output(
-            &meta,
-            &colors,
-            &icons,
-            &flags,
-            &display_option,
+            meta,
+            colors,
+            icons,
+            flags,
+            display_option,
             &padding_rules,
             (0, ""),
         );
@@ -129,13 +126,13 @@ fn inner_display_grid(
         output += &grid.fit_into_columns(flags.blocks.0.len()).to_string();
     }
 
-    let should_display_folder_path = should_display_folder_path(depth, &metas, &flags);
+    let should_display_folder_path = should_display_folder_path(depth, metas, flags);
 
     // print the folder content
     for meta in metas {
         if meta.content.is_some() {
             if should_display_folder_path {
-                output += &display_folder_path(&meta);
+                output += &display_folder_path(meta);
             }
 
             let display_option = DisplayOption::Relative {
@@ -145,7 +142,7 @@ fn inner_display_grid(
             output += &inner_display_grid(
                 &display_option,
                 meta.content.as_ref().unwrap(),
-                &flags,
+                flags,
                 colors,
                 icons,
                 depth + 1,
@@ -182,12 +179,12 @@ fn inner_display_tree(
         };
 
         for block in get_output(
-            &meta,
-            &colors,
-            &icons,
-            &flags,
+            meta,
+            colors,
+            icons,
+            flags,
             &DisplayOption::FileName,
-            &padding_rules,
+            padding_rules,
             (tree_index, &current_prefix),
         ) {
             let block_str = block.to_string();
@@ -211,8 +208,8 @@ fn inner_display_tree(
             };
 
             cells.extend(inner_display_tree(
-                &meta.content.as_ref().unwrap(),
-                &flags,
+                meta.content.as_ref().unwrap(),
+                flags,
                 colors,
                 icons,
                 (tree_depth_prefix.0 + 1, &new_prefix),
@@ -287,17 +284,17 @@ fn get_output<'a>(
                 } else {
                     Some(padding_rules[&Block::SizeValue])
                 };
-                block_vec.push(meta.size.render(colors, &flags, pad))
+                block_vec.push(meta.size.render(colors, flags, pad))
             }
             Block::SizeValue => block_vec.push(meta.size.render_value(colors, flags)),
-            Block::Date => block_vec.push(meta.date.render(colors, &flags)),
+            Block::Date => block_vec.push(meta.date.render(colors, flags)),
             Block::Name => {
                 block_vec.extend(vec![
-                    meta.name.render(colors, icons, &display_option),
-                    meta.indicator.render(&flags),
+                    meta.name.render(colors, icons, display_option),
+                    meta.indicator.render(flags),
                 ]);
                 if !(flags.no_symlink.0 || flags.dereference.0 || flags.layout == Layout::Grid) {
-                    block_vec.push(meta.symlink.render(colors, &flags))
+                    block_vec.push(meta.symlink.render(colors, flags))
                 }
             }
         };
@@ -334,7 +331,7 @@ fn detect_size_lengths(metas: &[Meta], flags: &Flags) -> usize {
 
         if Layout::Tree == flags.layout {
             if let Some(subs) = &meta.content {
-                let sub_length = detect_size_lengths(&subs, flags);
+                let sub_length = detect_size_lengths(subs, flags);
                 if sub_length > max_value_length {
                     max_value_length = sub_length;
                 }
@@ -349,7 +346,7 @@ fn get_padding_rules(metas: &[Meta], flags: &Flags) -> HashMap<Block, usize> {
     let mut padding_rules: HashMap<Block, usize> = HashMap::new();
 
     if flags.blocks.0.contains(&Block::Size) {
-        let size_val = detect_size_lengths(&metas, &flags);
+        let size_val = detect_size_lengths(metas, flags);
 
         padding_rules.insert(Block::SizeValue, size_val);
     }

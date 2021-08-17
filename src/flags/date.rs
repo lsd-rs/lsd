@@ -21,7 +21,7 @@ pub enum DateFlag {
 impl DateFlag {
     /// Get a value from a date format string
     fn from_format_string(value: &str) -> Option<Self> {
-        match app::validate_time_format(&value) {
+        match app::validate_time_format(value) {
             Ok(()) => Some(Self::Formatted(value[1..].to_string())),
             _ => {
                 print_error!("Not a valid date format: {}.", value);
@@ -35,7 +35,7 @@ impl DateFlag {
         match value {
             "date" => Some(Self::Date),
             "relative" => Some(Self::Relative),
-            _ if value.starts_with('+') => Self::from_format_string(&value),
+            _ if value.starts_with('+') => Self::from_format_string(value),
             _ => {
                 print_error!("Not a valid date value: {}.", value);
                 None
@@ -79,7 +79,7 @@ impl Configurable<Self> for DateFlag {
         }
 
         if let Some(date) = &config.date {
-            Self::from_str(&date)
+            Self::from_str(date)
         } else {
             None
         }

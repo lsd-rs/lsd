@@ -29,7 +29,7 @@ impl Date {
             Elem::Older
         };
 
-        colors.colorize(self.date_string(&flags), &elem)
+        colors.colorize(self.date_string(flags), &elem)
     }
 
     pub fn date_string(&self, flags: &Flags) -> String {
@@ -45,7 +45,7 @@ impl Date {
                     self.0.format("%F").to_string()
                 }
             }
-            DateFlag::Formatted(format) => self.0.format(&format).to_string(),
+            DateFlag::Formatted(format) => self.0.format(format).to_string(),
         }
     }
 }

@@ -134,9 +134,9 @@ impl Core {
 
     fn display(&self, metas: &[Meta]) {
         let output = if self.flags.layout == Layout::Tree {
-            display::tree(&metas, &self.flags, &self.colors, &self.icons)
+            display::tree(metas, &self.flags, &self.colors, &self.icons)
         } else {
-            display::grid(&metas, &self.flags, &self.colors, &self.icons)
+            display::grid(metas, &self.flags, &self.colors, &self.icons)
         };
 
         print_output!("{}", output);

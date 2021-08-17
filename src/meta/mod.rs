@@ -129,7 +129,7 @@ impl Meta {
                 }
             }
 
-            match entry_meta.recurse_into(depth - 1, &flags) {
+            match entry_meta.recurse_into(depth - 1, flags) {
                 Ok(content) => entry_meta.content = content,
                 Err(err) => {
                     print_error!("{}: {}.", path.display(), err);
@@ -228,7 +228,7 @@ impl Meta {
         let (owner, permissions) = windows_utils::get_file_data(&path)?;
 
         let file_type = FileType::new(&metadata, symlink_meta.as_ref(), &permissions);
-        let name = Name::new(&path, file_type);
+        let name = Name::new(path, file_type);
         let inode = INode::from(&metadata);
         let links = Links::from(&metadata);
 
