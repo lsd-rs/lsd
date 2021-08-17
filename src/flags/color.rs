@@ -64,7 +64,7 @@ impl Configurable<Self> for ColorOption {
             Some(Self::Never)
         } else if matches.occurrences_of("color") > 0 {
             if let Some(color) = matches.values_of("color")?.last() {
-                Self::from_str(&color)
+                Self::from_str(color)
             } else {
                 panic!("Bad color args. This should not be reachable!");
             }
