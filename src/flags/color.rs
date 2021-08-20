@@ -6,6 +6,7 @@ use super::Configurable;
 use crate::config_file::Config;
 use crate::print_error;
 
+use std::env;
 use clap::ArgMatches;
 use serde::Deserialize;
 
@@ -85,6 +86,14 @@ impl Configurable<Self> for ColorOption {
 
         if let Some(color) = &config.color {
             Some(color.when)
+        } else {
+            None
+        }
+    }
+
+    fn from_environment() -> Option<Self> {
+        if env::var("NO_COLOR").is_ok() {
+            return Some(Self::Never)
         } else {
             None
         }
