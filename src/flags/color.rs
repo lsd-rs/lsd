@@ -93,7 +93,7 @@ impl Configurable<Self> for ColorOption {
 
     fn from_environment() -> Option<Self> {
         if env::var("NO_COLOR").is_ok() {
-            return Some(Self::Never);
+            Some(Self::Never)
         } else {
             None
         }
