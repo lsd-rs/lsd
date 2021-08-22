@@ -30,11 +30,8 @@ impl Configurable<Self> for Indicators {
     /// this returns its value as the value of the `Indicators`, in a [Some].
     /// Otherwise this returns [None].
     fn from_config(config: &Config) -> Option<Self> {
-        if let Some(ind) = &config.indicators {
-            Some(Self(*ind))
-        } else {
-            None
-        }
+        config.indicators.as_ref()
+            .map(|ind| Self(*ind))
     }
 }
 

@@ -21,11 +21,8 @@ impl Configurable<Self> for SymlinkArrow {
     /// returns its value as the value of the `SymlinkArrow`, in a [Some].
     /// Otherwise this returns [None].
     fn from_config(config: &Config) -> Option<Self> {
-        if let Some(arrow) = &config.symlink_arrow {
-            Some(SymlinkArrow(arrow.to_string()))
-        } else {
-            None
-        }
+        config.symlink_arrow.as_ref()
+            .map(|arrow| SymlinkArrow(arrow.to_string()))
     }
 }
 

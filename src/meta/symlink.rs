@@ -45,11 +45,8 @@ impl<'a> From<&'a Path> for SymLink {
 
 impl SymLink {
     pub fn symlink_string(&self) -> Option<String> {
-        if let Some(ref target) = self.target {
-            Some(target.to_string())
-        } else {
-            None
-        }
+        self.target.as_ref()
+            .map(|target| target.to_string())
     }
 
     pub fn render(&self, colors: &Colors, flag: &Flags) -> ColoredString {
