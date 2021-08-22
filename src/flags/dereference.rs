@@ -29,11 +29,8 @@ impl Configurable<Self> for Dereference {
     /// If the `Config::dereference` has value, this returns its value
     /// as the value of the `Dereference`, in a [Some], Otherwise this returns [None].
     fn from_config(config: &Config) -> Option<Self> {
-        if let Some(deref) = &config.dereference {
-            Some(Self(*deref))
-        } else {
-            None
-        }
+        config.dereference.as_ref()
+            .map(|deref| Self(*deref))
     }
 }
 

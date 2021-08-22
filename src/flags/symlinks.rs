@@ -30,11 +30,7 @@ impl Configurable<Self> for NoSymlink {
     /// this returns it as the value of the `NoSymlink`, in a [Some].
     /// Otherwise this returns [None].
     fn from_config(config: &Config) -> Option<Self> {
-        if let Some(no_link) = config.no_symlink {
-            Some(Self(no_link))
-        } else {
-            None
-        }
+        config.no_symlink.map(Self)
     }
 }
 

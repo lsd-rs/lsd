@@ -30,11 +30,7 @@ impl Configurable<Self> for TotalSize {
     /// this returns it as the value of the `TotalSize`, in a [Some].
     /// Otherwise this returns [None].
     fn from_config(config: &Config) -> Option<Self> {
-        if let Some(total) = config.total_size {
-            Some(Self(total))
-        } else {
-            None
-        }
+        config.total_size.map(Self)
     }
 }
 
