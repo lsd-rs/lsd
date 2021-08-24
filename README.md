@@ -225,7 +225,7 @@ color:
 # This specifies the date format for the date column. The freeform format
 # accepts an strftime like string.
 # When "classic" is set, this is set to "date".
-# Possible values: date, relative, '+<date_format>' 
+# Possible values: date, relative, '+<date_format>'
 # `date_format` will be a `strftime` formatted value. e.g. `date: '+%d %b %y %X'` will give you a date like this: 17 Jun 21 20:14:55
 date: date
 
@@ -318,8 +318,6 @@ symlink-arrow: ⇒
 Theme can be configured in the [configuration file](#configuration)(color.theme),
 The valid theme configurations are:
 - `default`: the default color scheme shipped in `lsd`
-- `no-color`: classic mode, there will be just black and white.
-- `no-lscolors`: do not check the `LSCOLORS` env
 - theme-file-name(yaml): use the theme file to specify colors
 
 when configured with the `theme-file-name` which is a `yaml` file,
@@ -336,6 +334,8 @@ configure the colors, check [crossterm](https://docs.rs/crossterm/0.20.0/crosste
 for the supported colors.
 
 Color table: https://upload.wikimedia.org/wikipedia/commons/1/15/Xterm_256color_chart.svg
+
+Please notice that color value would ignore case, both lowercase and UPPERCASE is supported.
 
 This is the default theme scheme shipped with `lsd`.
 
