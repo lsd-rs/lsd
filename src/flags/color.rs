@@ -8,6 +8,7 @@ use crate::print_error;
 
 use clap::ArgMatches;
 use serde::Deserialize;
+use std::env;
 
 /// A collection of flags on how to use colors.
 #[derive(Clone, Debug, Copy, PartialEq, Eq, Default)]
@@ -85,6 +86,14 @@ impl Configurable<Self> for ColorOption {
 
         config.color.as_ref().map(|color| color.when)
     }
+
+    fn from_environment() -> Option<Self> {
+        if env::var("NO_COLOR").is_ok() {
+            Some(Self::Never)
+        } else {
+            None
+        }
+    }
 }
 
 /// The default value for `ColorOption` is [ColorOption::Auto].
@@ -101,6 +110,8 @@ mod test_color_option {
     use crate::app;
     use crate::config_file::{self, Config};
     use crate::flags::Configurable;
+
+    use std::env::set_var;
 
     #[test]
     fn test_from_arg_matches_none() {
@@ -137,6 +148,12 @@ mod test_color_option {
             Some(ColorOption::Never),
             ColorOption::from_arg_matches(&matches)
         );
+    }
+
+    #[test]
+    fn test_from_env_no_color() {
+        set_var("NO_COLOR", "true");
+        assert_eq!(Some(ColorOption::Never), ColorOption::from_environment());
     }
 
     #[test]
