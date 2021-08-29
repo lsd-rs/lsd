@@ -74,7 +74,7 @@ pub fn get_file_data(path: &Path) -> Result<(Owner, Permissions), io::Error> {
             let owner_name = os_from_buf(&n);
             let owner_domain = os_from_buf(&d);
 
-            let mut owner = owner_domain.to_string_lossy().into_owned();
+            owner = owner_domain.to_string_lossy().into_owned();
             owner.push('\\');
             owner.push_str(&owner_name.to_string_lossy());
         }
@@ -89,7 +89,7 @@ pub fn get_file_data(path: &Path) -> Result<(Owner, Permissions), io::Error> {
             let group_name = os_from_buf(&n);
             let group_domain = os_from_buf(&d);
 
-            let mut group = group_domain.to_string_lossy().into_owned();
+            group = group_domain.to_string_lossy().into_owned();
             group.push('\\');
             group.push_str(&group_name.to_string_lossy());
         }
