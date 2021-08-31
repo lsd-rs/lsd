@@ -135,6 +135,7 @@ impl Theme {
             config_file::Config::config_file_path()?
                 .join("themes")
                 .join(real)
+                .with_extension("yaml")
         };
         match fs::read(&path) {
             Ok(f) => match Self::with_yaml(&String::from_utf8_lossy(&f)) {
