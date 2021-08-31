@@ -14,7 +14,6 @@ use serde::Deserialize;
 pub enum Layout {
     Grid,
     Tree,
-    #[serde(rename = "oneline")]
     OneLine,
 }
 

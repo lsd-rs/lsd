@@ -153,7 +153,11 @@ impl Configurable<Self> for ColorOption {
             return Some(Self::Never);
         }
 
-        config.color.as_ref().map(|color| color.when)
+        if let Some(c) = &config.color {
+            c.when
+        } else {
+            None
+        }
     }
 
     fn from_environment() -> Option<Self> {
