@@ -132,7 +132,9 @@ impl Theme {
         let path = if Path::new(&real).is_absolute() {
             real
         } else {
-            config_file::Config::config_file_path().unwrap().join(real)
+            config_file::Config::config_file_path()?
+                .join("themes")
+                .join(real)
         };
         match fs::read(&path) {
             Ok(f) => match Self::with_yaml(&String::from_utf8_lossy(&f)) {

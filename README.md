@@ -215,9 +215,9 @@ color:
   when: auto
   # How to colorize the output.
   # When "classic" is set, this is set to "no-color".
-  # Possible values: default, no-color, no-lscolors, <theme-file-name>
-  # when specifying <theme-file-name>, lsd will look up theme file in
-  # XDG Base Directory if relative
+  # Possible values: default, <theme-file-name>
+  # when specifying <theme-file-name>, lsd will look up theme file
+  # XDG Base Directory if relative, e.g. ~/.config/lsd/themes/<theme-file-name>,
   # The file path if absolute
   theme: default
 
@@ -322,7 +322,7 @@ The valid theme configurations are:
 
 when configured with the `theme-file-name` which is a `yaml` file,
 `lsd` will look up the theme file in the following way:
-- relative name: check the XDG Base Directory
+- relative name: check the themes under XDG Base Directory, e.g. ~/.config/lsd/themes/<theme-file-name>
 - absolute name: use the file path and name to find theme file
 
 Check [Theme file content](#theme-file-content) for details.
