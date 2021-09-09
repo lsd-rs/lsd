@@ -100,8 +100,6 @@ pub enum IconTheme {
     Fancy,
 }
 
-impl IconTheme {}
-
 impl Configurable<Self> for IconTheme {
     /// Get a potential `IconTheme` variant from [ArgMatches].
     ///
