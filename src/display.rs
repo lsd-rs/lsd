@@ -462,7 +462,12 @@ mod tests {
                 .to_string();
 
             // check if the color is present.
-            assert_eq!(true, output.starts_with("\u{1b}[38;5;"), "start with color");
+            assert_eq!(
+                true,
+                output.starts_with("\u{1b}[38;5;"),
+                "{:?} should start with color",
+                output,
+            );
             assert_eq!(true, output.ends_with("[39m"), "reset foreground color");
 
             assert_eq!(get_visible_width(&output), *l, "visible match");

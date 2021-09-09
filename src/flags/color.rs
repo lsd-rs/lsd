@@ -38,6 +38,7 @@ impl Color {
 pub enum ThemeOption {
     NoColor,
     Default,
+    #[allow(dead_code)]
     NoLscolors,
     Custom(String),
 }
@@ -76,7 +77,7 @@ impl<'de> de::Deserialize<'de> for ThemeOption {
             type Value = ThemeOption;
 
             fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                formatter.write_str("`no-color`, `default`, `no-lscolors` or <theme-file-path>")
+                formatter.write_str("`default` or <theme-file-path>")
             }
 
             fn visit_str<E>(self, value: &str) -> Result<ThemeOption, E>
@@ -84,9 +85,7 @@ impl<'de> de::Deserialize<'de> for ThemeOption {
                 E: de::Error,
             {
                 match value {
-                    "no-color" => Ok(ThemeOption::NoColor),
                     "default" => Ok(ThemeOption::Default),
-                    "no-lscolors" => Ok(ThemeOption::NoLscolors),
                     str => Ok(ThemeOption::Custom(str.to_string())),
                 }
             }
