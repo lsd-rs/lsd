@@ -327,6 +327,12 @@ when configured with the `theme-file-name` which is a `yaml` file,
 
 Check [Theme file content](#theme-file-content) for details.
 
+### Filename coloring
+
+`lsd` use both [LS_COLORS](https://github.com/trapd00r/LS_COLORS) and this theme feature to
+colorize the filename, `lsd` will use the color and format option defined in `LS_COLORS`,
+and then the theme configurations if no `LS_COLOR` are found.
+
 ### Theme file content
 
 Theme file use the [crossterm](https://crates.io/crates/crossterm)
