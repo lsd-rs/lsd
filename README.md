@@ -327,12 +327,6 @@ when configured with the `theme-file-name` which is a `yaml` file,
 
 Check [Theme file content](#theme-file-content) for details.
 
-### Filename coloring
-
-`lsd` use both [LS_COLORS](https://github.com/trapd00r/LS_COLORS) and this theme feature to
-colorize the filename, `lsd` will use the color and format option defined in `LS_COLORS`,
-and then the theme configurations if no `LS_COLOR` are found.
-
 ### Theme file content
 
 Theme file use the [crossterm](https://crates.io/crates/crossterm)
@@ -348,30 +342,13 @@ This is the default theme scheme shipped with `lsd`.
 ```yaml
 user: 230
 group: 187
-permissions:
+permission:
   read: Green
   write: Yellow
   exec: Red
   exec-sticky: 5
   no-access: 245
-file-type:
-  file:
-    exec-uid: 40
-    uid-no-exec: 184
-    exec-no-uid: 40
-    no-exec-no-uid: 184
-  dir:
-    uid: 33
-    no-uid: 33
-  pipe: 44
-  symlink:
-    default: 44
-    broken: 124
-  block-device: 44
-  char-device: 172
-  socket: 44
-  special: 44
-modified:
+date:
   hour-old: 40
   day-old: 42
   older: 36
@@ -427,7 +404,7 @@ Some further examples of useful aliases:
 In the future the possibility to customize the colors might be implemented.
 For now, the default colors are:
 
-| User/Group | Permissions | File Types | Last time Modified | File Size |
+| User/Group | Permission | File Types | Date | File Size |
 |:---|:---|:---|:---|:---|
 |![#ffffd7](https://via.placeholder.com/15/ffffd7/000000?text=+) User|![#00d700](https://via.placeholder.com/15/00d700/000000?text=+) Read |![#0087ff](https://via.placeholder.com/15/0087ff/000000?text=+) Directory|![#00d700](https://via.placeholder.com/15/00d700/000000?text=+) within the last hour|![#ffffaf](https://via.placeholder.com/15/ffffaf/000000?text=+) Small File|
 |![#d7d7af](https://via.placeholder.com/15/d7d7af/000000?text=+) Group|![#d7ff87](https://via.placeholder.com/15/d7ff87/000000?text=+) Write|![#00d700](https://via.placeholder.com/15/00d700/000000?text=+) Executable File|![#00d787](https://via.placeholder.com/15/00d787/000000?text=+) within the last day|![#ffaf87](https://via.placeholder.com/15/ffaf87/000000?text=+) Medium File|
