@@ -28,7 +28,7 @@ pub enum Elem {
     Socket,
     Special,
 
-    /// Permissions
+    /// Permission
     Read,
     Write,
     Exec,
@@ -95,15 +95,15 @@ impl Elem {
             Elem::Socket => theme.file_type.socket,
             Elem::Special => theme.file_type.special,
 
-            Elem::Read => theme.permissions.read,
-            Elem::Write => theme.permissions.write,
-            Elem::Exec => theme.permissions.exec,
-            Elem::ExecSticky => theme.permissions.exec_sticky,
-            Elem::NoAccess => theme.permissions.no_access,
+            Elem::Read => theme.permission.read,
+            Elem::Write => theme.permission.write,
+            Elem::Exec => theme.permission.exec,
+            Elem::ExecSticky => theme.permission.exec_sticky,
+            Elem::NoAccess => theme.permission.no_access,
 
-            Elem::DayOld => theme.modified.day_old,
-            Elem::HourOld => theme.modified.hour_old,
-            Elem::Older => theme.modified.older,
+            Elem::DayOld => theme.date.day_old,
+            Elem::HourOld => theme.date.hour_old,
+            Elem::Older => theme.date.older,
 
             Elem::User => theme.user,
             Elem::Group => theme.group,
@@ -325,7 +325,7 @@ mod elem {
         Theme {
             user: Color::AnsiValue(230),  // Cornsilk1
             group: Color::AnsiValue(187), // LightYellow3
-            permissions: theme::Permissions {
+            permission: theme::Permission {
                 read: Color::Green,
                 write: Color::Yellow,
                 exec: Color::Red,
@@ -353,7 +353,7 @@ mod elem {
                 socket: Color::AnsiValue(44),       // DarkTurquoise
                 special: Color::AnsiValue(44),      // DarkTurquoise
             },
-            modified: theme::Modified {
+            date: theme::Date {
                 hour_old: Color::AnsiValue(40), // Green3
                 day_old: Color::AnsiValue(42),  // SpringGreen2
                 older: Color::AnsiValue(36),    // DarkCyan

@@ -16,19 +16,21 @@ use std::path::Path;
 pub struct Theme {
     pub user: Color,
     pub group: Color,
-    pub permissions: Permissions,
-    pub file_type: FileType,
-    pub modified: Modified,
+    pub permission: Permission,
+    pub date: Date,
     pub size: Size,
     pub inode: INode,
     pub tree_edge: Color,
     pub links: Links,
+
+    #[serde(skip)]
+    pub file_type: FileType,
 }
 
 #[derive(Debug, Deserialize, PartialEq)]
 #[serde(rename_all = "kebab-case")]
 #[serde(deny_unknown_fields)]
-pub struct Permissions {
+pub struct Permission {
     pub read: Color,
     pub write: Color,
     pub exec: Color,
@@ -79,7 +81,7 @@ pub struct Symlink {
 #[derive(Debug, Deserialize, PartialEq)]
 #[serde(rename_all = "kebab-case")]
 #[serde(deny_unknown_fields)]
-pub struct Modified {
+pub struct Date {
     pub hour_old: Color,
     pub day_old: Color,
     pub older: Color,
@@ -109,6 +111,12 @@ pub struct INode {
 pub struct Links {
     pub valid: Color,
     pub invalid: Color,
+}
+
+impl Default for FileType {
+    fn default() -> Self {
+        Theme::default_dark().file_type
+    }
 }
 
 impl Default for Theme {
@@ -161,7 +169,7 @@ impl Theme {
         Theme {
             user: Color::AnsiValue(230),  // Cornsilk1
             group: Color::AnsiValue(187), // LightYellow3
-            permissions: Permissions {
+            permission: Permission {
                 read: Color::Green,
                 write: Color::Yellow,
                 exec: Color::Red,
@@ -189,7 +197,7 @@ impl Theme {
                 socket: Color::AnsiValue(44),       // DarkTurquoise
                 special: Color::AnsiValue(44),      // DarkTurquoise
             },
-            modified: Modified {
+            date: Date {
                 hour_old: Color::AnsiValue(40), // Green3
                 day_old: Color::AnsiValue(42),  // SpringGreen2
                 older: Color::AnsiValue(36),    // DarkCyan
@@ -217,30 +225,13 @@ impl Theme {
         r#"---
 user: 230
 group: 187
-permissions:
+permission:
   read: Green
   write: Yellow
   exec: Red
   exec-sticky: 5
   no-access: 245
-file-type:
-  file:
-    exec-uid: 40
-    uid-no-exec: 184
-    exec-no-uid: 40
-    no-exec-no-uid: 184
-  dir:
-    uid: 33
-    no-uid: 33
-  pipe: 44
-  symlink:
-    default: 44
-    broken: 124
-  block-device: 44
-  char-device: 172
-  socket: 44
-  special: 44
-modified:
+date:
   hour-old: 40
   day-old: 42
   older: 36
