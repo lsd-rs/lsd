@@ -143,9 +143,8 @@ impl Theme {
             config_file::Config::config_file_path()?
                 .join("themes")
                 .join(real)
-                .with_extension("yaml")
         };
-        match fs::read(&path) {
+        match fs::read(&path.with_extension("yaml")) {
             Ok(f) => match Self::with_yaml(&String::from_utf8_lossy(&f)) {
                 Ok(t) => Some(t),
                 Err(e) => {
@@ -153,9 +152,21 @@ impl Theme {
                     None
                 }
             },
-            Err(e) => {
-                print_error!("Not a valid theme: {}, {}.", path.to_string_lossy(), e);
-                None
+            Err(_) => {
+                // try `yml` if `yaml` extension file not found
+                match fs::read(&path.with_extension("yml")) {
+                    Ok(f) => match Self::with_yaml(&String::from_utf8_lossy(&f)) {
+                        Ok(t) => Some(t),
+                        Err(e) => {
+                            print_error!("Theme file {} format error: {}.", &file, e);
+                            None
+                        }
+                    },
+                    Err(e) => {
+                        print_error!("Not a valid theme: {}, {}.", path.to_string_lossy(), e);
+                        None
+                    }
+                }
             }
         }
     }
