@@ -170,9 +170,9 @@ impl Theme {
             user: Color::AnsiValue(230),  // Cornsilk1
             group: Color::AnsiValue(187), // LightYellow3
             permission: Permission {
-                read: Color::Green,
-                write: Color::Yellow,
-                exec: Color::Red,
+                read: Color::DarkGreen,
+                write: Color::DarkYellow,
+                exec: Color::DarkRed,
                 exec_sticky: Color::AnsiValue(5),
                 no_access: Color::AnsiValue(245), // Grey
             },
@@ -226,9 +226,9 @@ impl Theme {
 user: 230
 group: 187
 permission:
-  read: Green
-  write: Yellow
-  exec: Red
+  read: dark_green
+  write: dark_yellow
+  exec: dark_red
   exec-sticky: 5
   no-access: 245
 date:
