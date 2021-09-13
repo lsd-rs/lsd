@@ -343,9 +343,9 @@ This is the default theme scheme shipped with `lsd`.
 user: 230
 group: 187
 permission:
-  read: Green
-  write: Yellow
-  exec: Red
+  read: dark_green
+  write: dark_yellow
+  exec: dark_red
   exec-sticky: 5
   no-access: 245
 date:

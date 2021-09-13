@@ -243,12 +243,12 @@ fn to_content_style(ls: &lscolors::Style) -> ContentStyle {
         },
         lscolors::style::Color::Fixed(n) => Color::AnsiValue(*n),
         lscolors::style::Color::Black => Color::Black,
-        lscolors::style::Color::Red => Color::Red,
-        lscolors::style::Color::Green => Color::Green,
-        lscolors::style::Color::Yellow => Color::Yellow,
-        lscolors::style::Color::Blue => Color::Blue,
-        lscolors::style::Color::Magenta => Color::Magenta,
-        lscolors::style::Color::Cyan => Color::Cyan,
+        lscolors::style::Color::Red => Color::DarkRed,
+        lscolors::style::Color::Green => Color::DarkGreen,
+        lscolors::style::Color::Yellow => Color::DarkYellow,
+        lscolors::style::Color::Blue => Color::DarkBlue,
+        lscolors::style::Color::Magenta => Color::DarkMagenta,
+        lscolors::style::Color::Cyan => Color::DarkCyan,
         lscolors::style::Color::White => Color::White,
     };
     let mut style = ContentStyle::default();
