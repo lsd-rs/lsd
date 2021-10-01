@@ -19,6 +19,7 @@ pub enum Elem {
     },
     SymLink,
     BrokenSymLink,
+    MissingSymLinkTarget,
     Dir {
         uid: bool,
     },
@@ -87,6 +88,7 @@ impl Elem {
             } => theme.file_type.file.no_exec_no_uid,
             Elem::SymLink => theme.file_type.symlink.default,
             Elem::BrokenSymLink => theme.file_type.symlink.broken,
+            Elem::MissingSymLinkTarget => theme.file_type.symlink.missing_target,
             Elem::Dir { uid: true } => theme.file_type.dir.uid,
             Elem::Dir { uid: false } => theme.file_type.dir.no_uid,
             Elem::Pipe => theme.file_type.pipe,
@@ -216,6 +218,7 @@ impl Colors {
             Elem::BlockDevice => Some("bd"),
             Elem::CharDevice => Some("cd"),
             Elem::BrokenSymLink => Some("or"),
+            Elem::MissingSymLinkTarget => Some("mi"),
             Elem::INode { valid } => match valid {
                 true => Some("so"),
                 false => Some("no"),
@@ -345,8 +348,9 @@ mod elem {
                 },
                 pipe: Color::AnsiValue(44), // DarkTurquoise
                 symlink: theme::Symlink {
-                    default: Color::AnsiValue(44), // DarkTurquoise
-                    broken: Color::AnsiValue(124), // Red3
+                    default: Color::AnsiValue(44),         // DarkTurquoise
+                    broken: Color::AnsiValue(124),         // Red3
+                    missing_target: Color::AnsiValue(124), // Red3
                 },
                 block_device: Color::AnsiValue(44), // DarkTurquoise
                 char_device: Color::AnsiValue(172), // Orange3

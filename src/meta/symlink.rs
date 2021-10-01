@@ -52,7 +52,7 @@ impl SymLink {
             let elem = if self.valid {
                 &Elem::SymLink
             } else {
-                &Elem::BrokenSymLink
+                &Elem::MissingSymLinkTarget
             };
 
             let strings: &[ColoredString] = &[
