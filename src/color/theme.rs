@@ -76,6 +76,7 @@ pub struct Dir {
 pub struct Symlink {
     pub default: Color,
     pub broken: Color,
+    pub missing_target: Color,
 }
 
 #[derive(Debug, Deserialize, PartialEq)]
@@ -200,8 +201,9 @@ impl Theme {
                 },
                 pipe: Color::AnsiValue(44), // DarkTurquoise
                 symlink: Symlink {
-                    default: Color::AnsiValue(44), // DarkTurquoise
-                    broken: Color::AnsiValue(124), // Red3
+                    default: Color::AnsiValue(44),         // DarkTurquoise
+                    broken: Color::AnsiValue(124),         // Red3
+                    missing_target: Color::AnsiValue(124), // Red3
                 },
                 block_device: Color::AnsiValue(44), // DarkTurquoise
                 char_device: Color::AnsiValue(172), // Orange3
