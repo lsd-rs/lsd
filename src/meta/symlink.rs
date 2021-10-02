@@ -115,4 +115,22 @@ mod tests {
             .to_string()
         );
     }
+
+    #[test]
+    fn test_symlink_render_default_invalid_target_withcolor() {
+        let link = SymLink {
+            target: Some("/target".to_string()),
+            valid: false,
+        };
+        let argv = vec!["lsd"];
+        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        assert_eq!(
+            format!("{}", " ⇒ \u{1b}[38;5;124m/target\u{1b}[39m"),
+            link.render(
+                &Colors::new(ThemeOption::NoLscolors),
+                &Flags::configure_from(&matches, &Config::with_none()).unwrap()
+            )
+            .to_string()
+        );
+    }
 }
