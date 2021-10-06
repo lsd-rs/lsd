@@ -61,41 +61,37 @@ pub fn get_file_data(path: &Path) -> Result<(Owner, Permissions), io::Error> {
         return Err(std::io::Error::from_raw_os_error(error_code as i32));
     }
 
-    // Format into domain\name format
-
     // Assumptions:
     // - owner_sid_ptr is valid
     // - group_sid_ptr is valid
     // (both OK because GetNamedSecurityInfoW returned success)
 
-    let mut owner = String::new();
-    match unsafe { lookup_account_sid(owner_sid_ptr) } {
+    let owner = match unsafe { lookup_account_sid(owner_sid_ptr) } {
         Ok((n, d)) => {
             let owner_name = os_from_buf(&n);
             let owner_domain = os_from_buf(&d);
 
-            owner = owner_domain.to_string_lossy().into_owned();
-            owner.push('\\');
-            owner.push_str(&owner_name.to_string_lossy());
+            format!(
+                "{}\\{}",
+                owner_domain.to_string_lossy(),
+                &owner_name.to_string_lossy()
+            )
         }
-        Err(_) => {
-            owner.push('-');
-        }
+        Err(_) => String::from('-'),
     };
 
-    let mut group = String::new();
-    match unsafe { lookup_account_sid(group_sid_ptr) } {
+    let group = match unsafe { lookup_account_sid(group_sid_ptr) } {
         Ok((n, d)) => {
             let group_name = os_from_buf(&n);
             let group_domain = os_from_buf(&d);
 
-            group = group_domain.to_string_lossy().into_owned();
-            group.push('\\');
-            group.push_str(&group_name.to_string_lossy());
+            format!(
+                "{}\\{}",
+                group_domain.to_string_lossy(),
+                &group_name.to_string_lossy()
+            )
         }
-        Err(_) => {
-            group.push('-');
-        }
+        Err(_) => String::from('-'),
     };
 
     // This structure will be returned
