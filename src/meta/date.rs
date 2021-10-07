@@ -3,49 +3,66 @@ use crate::flags::{DateFlag, Flags};
 use chrono::{DateTime, Duration, Local};
 use chrono_humanize::HumanTime;
 use std::fs::Metadata;
+use std::panic;
 
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
-pub struct Date(DateTime<Local>);
+pub enum Date {
+    Date(DateTime<Local>),
+    Bad(String),
+}
 
 impl<'a> From<&'a Metadata> for Date {
     fn from(meta: &'a Metadata) -> Self {
         let modified_time = meta.modified().expect("failed to retrieve modified date");
 
-        let time = modified_time.into();
+        // FIXME: This should really involve a result, but there's upstream issues in chrono. See https://github.com/chronotope/chrono/issues/110
+        let res = panic::catch_unwind(|| {
+            return modified_time.into();
+        });
 
-        Date(time)
+        if let Ok(time) = res {
+            Date::Date(time)
+        } else {
+            Date::Bad(format!("Bad {:?}", res))
+        }
     }
 }
 
 impl Date {
     pub fn render(&self, colors: &Colors, flags: &Flags) -> ColoredString {
         let now = Local::now();
-
-        let elem = if self.0 > now - Duration::hours(1) {
-            Elem::HourOld
-        } else if self.0 > now - Duration::days(1) {
-            Elem::DayOld
+        let elem = if let Date::Date(val) = self {
+            if *val > now - Duration::hours(1) {
+                Elem::HourOld
+            } else if *val > now - Duration::days(1) {
+                Elem::DayOld
+            } else {
+                Elem::Older
+            }
         } else {
             Elem::Older
         };
-
         colors.colorize(self.date_string(flags), &elem)
     }
 
     pub fn date_string(&self, flags: &Flags) -> String {
-        match &flags.date {
-            DateFlag::Date => self.0.format("%c").to_string(),
-            DateFlag::Relative => format!("{}", HumanTime::from(self.0 - Local::now())),
-            DateFlag::ISO => {
-                // 365.2425 * 24 * 60 * 60 = 31556952 seconds per year
-                // 15778476 seconds are 6 months
-                if self.0 > Local::now() - Duration::seconds(15_778_476) {
-                    self.0.format("%m-%d %R").to_string()
-                } else {
-                    self.0.format("%F").to_string()
+        if let Date::Date(val) = self {
+            return match &flags.date {
+                DateFlag::Date => val.format("%c").to_string(),
+                DateFlag::Relative => format!("{}", HumanTime::from(*val - Local::now())),
+                DateFlag::ISO => {
+                    // 365.2425 * 24 * 60 * 60 = 31556952 seconds per year
+                    // 15778476 seconds are 6 months
+                    if *val > Local::now() - Duration::seconds(15_778_476) {
+                        val.format("%m-%d %R").to_string()
+                    } else {
+                        val.format("%F").to_string()
+                    }
                 }
-            }
-            DateFlag::Formatted(format) => self.0.format(format).to_string(),
+                DateFlag::Formatted(format) => val.format(format).to_string(),
+            };
+        } else {
+            return String::from("invalid time");
         }
     }
 }
