@@ -77,7 +77,7 @@ pub fn get_file_data(path: &Path) -> Result<(Owner, Permissions), io::Error> {
                 &owner_name.to_string_lossy()
             )
         }
-        Err(_) => String::from('-'),
+        Err(_) => String::from("-"),
     };
 
     let group = match unsafe { lookup_account_sid(group_sid_ptr) } {
@@ -91,7 +91,7 @@ pub fn get_file_data(path: &Path) -> Result<(Owner, Permissions), io::Error> {
                 &group_name.to_string_lossy()
             )
         }
-        Err(_) => String::from('-'),
+        Err(_) => String::from("-"),
     };
 
     // This structure will be returned
