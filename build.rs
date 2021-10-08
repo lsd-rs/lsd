@@ -18,11 +18,11 @@ use std::process::exit;
 include!("src/app.rs");
 
 fn main() {
-    match version_check::is_min_version("1.43.0") {
+    match version_check::is_min_version("1.43.1") {
         Some(true) => {}
         // rustc version too small or can't figure it out
         _ => {
-            writeln!(&mut io::stderr(), "'lsd' requires rustc >= 1.43.0").unwrap();
+            writeln!(&mut io::stderr(), "'lsd' requires rustc >= 1.43.1").unwrap();
             exit(1);
         }
     }
