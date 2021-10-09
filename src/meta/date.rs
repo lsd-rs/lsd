@@ -9,7 +9,7 @@ use std::time::SystemTime;
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub enum Date {
     Date(DateTime<Local>),
-    Bad(String),
+    Invalid,
 }
 
 // Note that this is split from the From for Metadata so we can test this one (as we can't mock Metadata)
@@ -21,7 +21,7 @@ impl<'a> From<SystemTime> for Date {
         if let Ok(time) = res {
             Date::Date(time)
         } else {
-            Date::Bad(format!("Bad {:?}", res))
+            Date::Invalid
         }
     }
 }
@@ -68,7 +68,7 @@ impl Date {
                 DateFlag::Formatted(format) => val.format(format).to_string(),
             }
         } else {
-            String::from("invalid time")
+            String::from("-")
         }
     }
 }
@@ -322,7 +322,7 @@ mod test {
         flags.date = DateFlag::Date;
 
         assert_eq!(
-            "invalid time".to_string().with(Color::AnsiValue(36)),
+            "-".to_string().with(Color::AnsiValue(36)),
             date.render(&colors, &flags)
         );
     }
