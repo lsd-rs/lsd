@@ -4,6 +4,7 @@ use chrono::{DateTime, Duration, Local};
 use chrono_humanize::HumanTime;
 use std::fs::Metadata;
 use std::panic;
+use std::time::SystemTime;
 
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub enum Date {
@@ -11,13 +12,12 @@ pub enum Date {
     Bad(String),
 }
 
-impl<'a> From<&'a Metadata> for Date {
-    fn from(meta: &'a Metadata) -> Self {
-        let modified_time = meta.modified().expect("failed to retrieve modified date");
-
+// Note that this is split from the From for Metadata so we can test this one (as we can't mock Metadata)
+impl<'a> From<SystemTime> for Date {
+    fn from(systime: SystemTime) -> Self {
         // FIXME: This should really involve a result, but there's upstream issues in chrono. See https://github.com/chronotope/chrono/issues/110
         let res = panic::catch_unwind(|| {
-            return modified_time.into();
+            return systime.into();
         });
 
         if let Ok(time) = res {
@@ -25,6 +25,13 @@ impl<'a> From<&'a Metadata> for Date {
         } else {
             Date::Bad(format!("Bad {:?}", res))
         }
+    }
+}
+
+impl<'a> From<&'a Metadata> for Date {
+    fn from(meta: &'a Metadata) -> Self {
+        let modified_time = meta.modified().expect("failed to retrieve modified date");
+        return modified_time.into();
     }
 }
 
@@ -77,6 +84,7 @@ mod test {
     use std::io;
     use std::path::Path;
     use std::process::{Command, ExitStatus};
+    use std::time;
     use std::{env, fs};
 
     #[cfg(unix)]
@@ -299,5 +307,24 @@ mod test {
         );
 
         fs::remove_file(file_path).unwrap();
+    }
+
+    #[test]
+    fn test_bad_date() {
+        // 4437052 is the bad year taken from https://github.com/Peltoche/lsd/issues/529 that we know is both
+        // a) high enough to break chrono
+        // b) not high enough to break SystemTime (as Duration::MAX would)
+        let end_time =
+            time::SystemTime::UNIX_EPOCH + time::Duration::new(4437052 * 365 * 24 * 60 * 60, 0);
+        let colors = Colors::new(ThemeOption::Default);
+        let date = Date::from(end_time);
+
+        let mut flags = Flags::default();
+        flags.date = DateFlag::Date;
+
+        assert_eq!(
+            "invalid time".to_string().with(Color::AnsiValue(36)),
+            date.render(&colors, &flags)
+        );
     }
 }
