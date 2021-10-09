@@ -16,9 +16,7 @@ pub enum Date {
 impl<'a> From<SystemTime> for Date {
     fn from(systime: SystemTime) -> Self {
         // FIXME: This should really involve a result, but there's upstream issues in chrono. See https://github.com/chronotope/chrono/issues/110
-        let res = panic::catch_unwind(|| {
-            return systime.into();
-        });
+        let res = panic::catch_unwind(|| systime.into());
 
         if let Ok(time) = res {
             Date::Date(time)
@@ -30,8 +28,9 @@ impl<'a> From<SystemTime> for Date {
 
 impl<'a> From<&'a Metadata> for Date {
     fn from(meta: &'a Metadata) -> Self {
-        let modified_time = meta.modified().expect("failed to retrieve modified date");
-        return modified_time.into();
+        meta.modified()
+            .expect("failed to retrieve modified date")
+            .into()
     }
 }
 
@@ -54,7 +53,7 @@ impl Date {
 
     pub fn date_string(&self, flags: &Flags) -> String {
         if let Date::Date(val) = self {
-            return match &flags.date {
+            match &flags.date {
                 DateFlag::Date => val.format("%c").to_string(),
                 DateFlag::Relative => format!("{}", HumanTime::from(*val - Local::now())),
                 DateFlag::ISO => {
@@ -67,9 +66,9 @@ impl Date {
                     }
                 }
                 DateFlag::Formatted(format) => val.format(format).to_string(),
-            };
+            }
         } else {
-            return String::from("invalid time");
+            String::from("invalid time")
         }
     }
 }
