@@ -309,12 +309,13 @@ mod test {
     }
 
     #[test]
+    #[cfg(all(not(windows), target_arch = "x86_64"))]
     fn test_bad_date() {
         // 4437052 is the bad year taken from https://github.com/Peltoche/lsd/issues/529 that we know is both
         // a) high enough to break chrono
         // b) not high enough to break SystemTime (as Duration::MAX would)
         let end_time =
-            time::SystemTime::UNIX_EPOCH + time::Duration::new(343702 * 365 * 24 * 60 * 60, 0);
+            time::SystemTime::UNIX_EPOCH + time::Duration::new(4437052 * 365 * 24 * 60 * 60, 0);
         let colors = Colors::new(ThemeOption::Default);
         let date = Date::from(end_time);
 
