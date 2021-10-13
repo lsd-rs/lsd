@@ -308,17 +308,17 @@ pub fn validate_time_format(formatter: &str) -> Result<(), String> {
                     Some('f') => (),
                     Some(c) => return Err(format!("invalid format specifier: %{}{}", n, c)),
                     None => return Err("missing format specifier".to_owned()),
-                }
+                },
                 Some('.') => match chars.next() {
                     Some('f') => (),
                     Some(n @ '3') | Some(n @ '6') | Some(n @ '9') => match chars.next() {
                         Some('f') => (),
                         Some(c) => return Err(format!("invalid format specifier: %.{}{}", n, c)),
                         None => return Err("missing format specifier".to_owned()),
-                    }
+                    },
                     Some(c) => return Err(format!("invalid format specifier: %.{}", c)),
                     None => return Err("missing format specifier".to_owned()),
-                }
+                },
                 Some(c) => return Err(format!("invalid format specifier: %{}", c)),
                 None => return Err("missing format specifier".to_owned()),
             },

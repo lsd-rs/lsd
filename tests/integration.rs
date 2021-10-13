@@ -592,3 +592,19 @@ fn test_custom_config_file_parsing() {
         .assert()
         .stdout(predicate::str::is_match("folder\n└── file").unwrap());
 }
+
+#[test]
+fn test_date_custom_format_supports_nanos_with_length() {
+    let dir = tempdir();
+    dir.child("one").touch().unwrap();
+    dir.child("two").touch().unwrap();
+
+    cmd()
+        .arg("-l")
+        .arg("--date")
+        .arg("+testDateFormat%.3f")
+        .arg("--ignore-config")
+        .arg(dir.path())
+        .assert()
+        .stdout(predicate::str::is_match("testDateFormat\\.[0-9]{3}").unwrap().count(2));
+}
