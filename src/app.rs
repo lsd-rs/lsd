@@ -246,8 +246,8 @@ pub fn build() -> App<'static, 'static> {
         )
         .arg(
             Arg::with_name("classic")
-            .long("classic")
-            .help("Enable classic mode (display output similar to ls)"),
+                .long("classic")
+                .help("Enable classic mode (display output similar to ls)"),
         )
         .arg(
             Arg::with_name("no-symlink")
@@ -296,6 +296,29 @@ pub fn validate_time_format(formatter: &str) -> Result<(), String> {
     loop {
         match chars.next() {
             Some('%') => match chars.next() {
+                Some('.') => match chars.next() {
+                    Some('f') => (),
+                    Some(n @ '3') | Some(n @ '6') | Some(n @ '9') => match chars.next() {
+                        Some('f') => (),
+                        Some(c) => return Err(format!("invalid format specifier: %.{}{}", n, c)),
+                        None => return Err("missing format specifier".to_owned()),
+                    },
+                    Some(c) => return Err(format!("invalid format specifier: %.{}", c)),
+                    None => return Err("missing format specifier".to_owned()),
+                },
+                Some(n @ ':') | Some(n @ '#') => match chars.next() {
+                    Some('z') => (),
+                    Some(c) => return Err(format!("invalid format specifier: %{}{}", n, c)),
+                    None => return Err("missing format specifier".to_owned()),
+                },
+                Some(n @ '-') | Some(n @ '_') | Some(n @ '0') => match chars.next() {
+                    Some('C') | Some('d') | Some('e') | Some('f') | Some('G') | Some('g')
+                    | Some('H') | Some('I') | Some('j') | Some('k') | Some('l') | Some('M')
+                    | Some('m') | Some('S') | Some('s') | Some('U') | Some('u') | Some('V')
+                    | Some('W') | Some('w') | Some('Y') | Some('y') => (),
+                    Some(c) => return Err(format!("invalid format specifier: %{}{}", n, c)),
+                    None => return Err("missing format specifier".to_owned()),
+                }
                 Some('A') | Some('a') | Some('B') | Some('b') | Some('C') | Some('c')
                 | Some('D') | Some('d') | Some('e') | Some('F') | Some('f') | Some('G')
                 | Some('g') | Some('H') | Some('h') | Some('I') | Some('j') | Some('k')
@@ -307,16 +330,6 @@ pub fn validate_time_format(formatter: &str) -> Result<(), String> {
                 Some(n @ '3') | Some(n @ '6') | Some(n @ '9') => match chars.next() {
                     Some('f') => (),
                     Some(c) => return Err(format!("invalid format specifier: %{}{}", n, c)),
-                    None => return Err("missing format specifier".to_owned()),
-                },
-                Some('.') => match chars.next() {
-                    Some('f') => (),
-                    Some(n @ '3') | Some(n @ '6') | Some(n @ '9') => match chars.next() {
-                        Some('f') => (),
-                        Some(c) => return Err(format!("invalid format specifier: %.{}{}", n, c)),
-                        None => return Err("missing format specifier".to_owned()),
-                    },
-                    Some(c) => return Err(format!("invalid format specifier: %.{}", c)),
                     None => return Err("missing format specifier".to_owned()),
                 },
                 Some(c) => return Err(format!("invalid format specifier: %{}", c)),
