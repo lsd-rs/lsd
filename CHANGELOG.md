@@ -17,7 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add `--config-file` flag to read configuration file from a custom location
 - Clarify custom date format for `date` field in configuration file in the README.
 ### Fixed
-- Specific length date formatting for nanos `.3/6/9f` fixed [#532](https://github.com/Peltoche/lsd/issues/532)   
+- Support all `strftime` like formatting [#532](https://github.com/Peltoche/lsd/issues/532)   
 
 ## [0.20.1] - 2021-03-07
 ### Fixed
