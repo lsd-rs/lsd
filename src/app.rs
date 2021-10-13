@@ -318,7 +318,7 @@ pub fn validate_time_format(formatter: &str) -> Result<(), String> {
                     | Some('W') | Some('w') | Some('Y') | Some('y') => (),
                     Some(c) => return Err(format!("invalid format specifier: %{}{}", n, c)),
                     None => return Err("missing format specifier".to_owned()),
-                }
+                },
                 Some('A') | Some('a') | Some('B') | Some('b') | Some('C') | Some('c')
                 | Some('D') | Some('d') | Some('e') | Some('F') | Some('f') | Some('G')
                 | Some('g') | Some('H') | Some('h') | Some('I') | Some('j') | Some('k')
