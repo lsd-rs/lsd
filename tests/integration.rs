@@ -608,3 +608,19 @@ fn test_date_custom_format_supports_nanos_with_length() {
         .assert()
         .stdout(predicate::str::is_match("testDateFormat\\.[0-9]{3}").unwrap().count(2));
 }
+
+#[test]
+fn test_date_custom_format_supports_padding() {
+    let dir = tempdir();
+    dir.child("one").touch().unwrap();
+    dir.child("two").touch().unwrap();
+
+    cmd()
+        .arg("-l")
+        .arg("--date")
+        .arg("+testDateFormat%_d")
+        .arg("--ignore-config")
+        .arg(dir.path())
+        .assert()
+        .stdout(predicate::str::is_match("testDateFormat[\\s0-9]{2}").unwrap().count(2));
+}
