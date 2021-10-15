@@ -1,5 +1,6 @@
 use crate::color::{ColoredString, Colors, Elem};
 use crate::flags::{Flags, SizeFlag};
+use num_format::{Locale, ToFormattedString};
 use std::fs::Metadata;
 use std::iter::repeat;
 
@@ -38,8 +39,19 @@ impl Size {
         format!("{0:.1$}", number, if number < 10.0 { 1 } else { 0 })
     }
 
+    fn format_bytes(&self, flags: &Flags) -> String {
+        if flags.size == SizeFlag::BytesWithSeparator {
+            self.bytes.to_formatted_string(&Locale::en)
+        } else {
+            self.bytes.to_string()
+        }
+    }
+
     pub fn get_unit(&self, flags: &Flags) -> Unit {
-        if self.bytes < 1024 || flags.size == SizeFlag::Bytes {
+        if self.bytes < 1024
+            || flags.size == SizeFlag::Bytes
+            || flags.size == SizeFlag::BytesWithSeparator
+        {
             Unit::Byte
         } else if self.bytes < 1024 * 1024 {
             Unit::Kilo
@@ -111,7 +123,7 @@ impl Size {
 
         match unit {
             Unit::None => "".to_string(),
-            Unit::Byte => self.bytes.to_string(),
+            Unit::Byte => self.format_bytes(flags),
             Unit::Kilo => self.format_size(((self.bytes as f64) / 1024.0 * 10.0).round() / 10.0),
             Unit::Mega => {
                 self.format_size(((self.bytes as f64) / (1024.0 * 1024.0) * 10.0).round() / 10.0)
@@ -151,7 +163,7 @@ impl Size {
                 Unit::Giga => String::from("G"),
                 Unit::Tera => String::from("T"),
             },
-            SizeFlag::Bytes => String::from(""),
+            SizeFlag::Bytes | SizeFlag::BytesWithSeparator => String::from(""),
         }
     }
 }
@@ -335,5 +347,19 @@ mod test {
 
         assert_eq!(size.render(&colors, &flags, Some(2)).to_string(), "42K");
         assert_eq!(size.render(&colors, &flags, Some(3)).to_string(), " 42K");
+    }
+
+    #[test]
+    fn render_bytes_with_separator() {
+        let size = Size::new(42 * 1024 * 1024); // == 42 megabytes
+        let mut flags = Flags::default();
+
+        flags.size = SizeFlag::Bytes;
+        assert_eq!(size.value_string(&flags).as_str(), "44040192");
+        assert_eq!(size.unit_string(&flags).as_str(), "");
+
+        flags.size = SizeFlag::BytesWithSeparator;
+        assert_eq!(size.value_string(&flags).as_str(), "44,040,192");
+        assert_eq!(size.unit_string(&flags).as_str(), "");
     }
 }

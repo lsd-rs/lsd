@@ -37,6 +37,7 @@ xdg = "2.1.*"
 yaml-rust = "0.4.*"
 serde = { version = "1.0", features = ["derive"] }
 serde_yaml = "0.8"
+num-format = "0.4.0"
 
 [target.'cfg(unix)'.dependencies]
 users = "0.11.*"
