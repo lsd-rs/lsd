@@ -6,137 +6,32 @@
 [![codecov](https://codecov.io/gh/Peltoche/lsd/branch/master/graph/badge.svg)](https://codecov.io/gh/Peltoche/lsd)
 [![versions](https://img.shields.io/repology/repositories/lsd)](https://repology.org/project/lsd/versions)
 
-# Table of Contents
-
-- [Description](#description)
-- [Screenshot](#screenshot)
-- [Installation](#installation)
-- [Configuration](#configuration)
-- [External Configurations](#external-configurations)
-  - [Required](#required)
-  - [Optional](#optional)
-- [F.A.Q.](#faq)
-- [Contributors](#contributors)
-- [Credits](#credits)
-
-## Description
-
-This project is heavily inspired by the super [colorls](https://github.com/athityakumar/colorls)
-project but with some little differences.  For example it is written in rust and not in ruby which makes it much faster.
-
-## Screenshot
-
 ![image](https://raw.githubusercontent.com/Peltoche/lsd/assets/screen_lsd.png)
+
+This project is a rewrite of GNU `ls` with lot of added features like colors, icons, tree-view, more formatting options etc.
+The project is heavily inspired by the super [colorls](https://github.com/athityakumar/colorls) project.
+
 
 ## Installation
 
-### Prerequisites
+#### Prerequisites
 
 Install the patched fonts of powerline nerd-font and/or font-awesome. Have a look at the [Nerd Font README](https://github.com/ryanoasis/nerd-fonts/blob/master/readme.md) for more installation instructions. Don't forget to setup your terminal in order to use the correct font.
 
-See [this issue comment](https://github.com/Peltoche/lsd/issues/199#issuecomment-494218334) for detailed instructions on how to configure iTerm2 font settings correctly.
+| OS/Distro                       | Command                                                                                                           |
+| ------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| Archlinux                       | `pacman -S lsd`                                                                                                   |
+| Fedora                          | `dnf install lsd`                                                                                                 |
+| Gentoo                          | `sudo emerge sys-apps/lsd`                                                                                        |
+| macOS                           | `brew install lsd` or `sudo port install lsd`                                                                     |
+| NixOS                           | `nix-env -iA nixos.lsd`                                                                                           |
+| FreeBSD                         | `pkg install lsd`                                                                                                 |
+| NetBSD or any `pkgsrc` platform | `pkgin install lsd` or `cd /usr/pkgsrc/sysutils/lsd && make install`                                              |
+| Windows                         | `scoop install lsd`                                                                                               |
+| Android (via Termux)            | `pkg install lsd`                                                                                                 |
+| Ubuntu/Debian based distro     | `sudo dpkg -i lsd_0.20.1_amd64.deb` get `.deb` file from [release page](https://github.com/Peltoche/lsd/releases) |
 
-### On Archlinux
-
-```sh
-pacman -S lsd
-```
-
-### On Fedora
-
-```sh
-dnf install lsd
-```
-
-### On Ubuntu
-
-_... and other Debian-based Linux distributions_
-
-Download the latest .deb package from the [release page](https://github.com/Peltoche/lsd/releases) and install it via:
-
-```sh
-sudo dpkg -i lsd_0.20.1_amd64.deb # adapt version number and architecture
-```
-
-### On Gentoo
-
-```sh
-sudo emerge sys-apps/lsd
-```
-
-(Ebuild maintained by Georgy Yakovlev)
-
-### On macOS
-
-via [Homebrew](https://brew.sh/):
-
-```sh
-brew install lsd
-```
-
-or [MacPorts](https://www.macports.org/):
-
-```sh
-sudo port install lsd
-```
-
-### On NixOS/From nix
-
-```sh
-nix-env -iA nixos.lsd
-```
-
-Or add `lsd` to your `configuration.nix` like so:
-
-```nix
-# ...
-environment.systemPackages = with pkgs; [
-  # other packages ...
-  lsd
-];
-# ...
-```
-
-### On FreeBSD
-
-```sh
-pkg install lsd
-```
-
-### On NetBSD
-
-_... and other platforms using `pkgsrc`_
-
-Using the package manager:
-
-``` sh
-pkgin install lsd
-```
-
-Building from source:
-
-``` sh
-cd /usr/pkgsrc/sysutils/lsd
-make install
-```
-
-### On Windows
-
-Install with [Scoop](https://scoop.sh):
-
-```powershell
-scoop install lsd
-```
-
-### On Android (via Termux)
-
-```sh
-pkg install lsd
-```
-
-[Setup Nerd Fonts in Termux](https://github.com/Peltoche/lsd/issues/423)
-
-### From Sources
+### From source
 
 With Rust's package manager cargo, you can install lsd via:
 
@@ -152,7 +47,7 @@ cargo install --git https://github.com/Peltoche/lsd.git --branch master
 
 ### From Binaries
 
-The [release page](https://github.com/Peltoche/lsd/releases) includes precompiled binaries for Linux and macOS.
+The [release page](https://github.com/Peltoche/lsd/releases) includes precompiled binaries for Linux, macOS and Windows for every release. You can also get the latest binary of `master` branch from the [Github action build artifacts](https://github.com/Peltoche/lsd/actions?query=branch%3Amaster+is%3Asuccess+event%3Apush) (choose the top action and scroll down to the artifacts section).
 
 ## Configuration
 
@@ -250,8 +145,7 @@ icons:
   theme: fancy
   # Separator between icon and the name
   # Default to 1 space
-  separator: ' '
-
+  separator: " "
 
 # == Ignore Globs ==
 # A list of globs to ignore when listing.
@@ -317,11 +211,13 @@ symlink-arrow: ⇒
 
 Theme can be configured in the [configuration file](#configuration)(color.theme),
 The valid theme configurations are:
+
 - `default`: the default color scheme shipped in `lsd`
 - theme-file-name(yaml): use the theme file to specify colors(without the `yaml` extension)
 
 when configured with the `theme-file-name` which is a `yaml` file,
 `lsd` will look up the theme file in the following way:
+
 - relative name: check the themes under XDG Base Directory, e.g. ~/.config/lsd/themes/<theme-file-name>.yaml
 - absolute name: use the file path and name to find theme file
 
@@ -366,7 +262,6 @@ links:
 tree-edge: 245
 ```
 
-
 ## External Configurations
 
 ### Required
@@ -382,36 +277,59 @@ URxvt*font:    xft:Hack Nerd Font:style=Regular:size=11
 ### Optional
 
 In order to use lsd when entering the `ls` command, you need to add this to your shell
-configuration file  (~/.bashrc, ~/.zshrc, etc.):
+configuration file (~/.bashrc, ~/.zshrc, etc.):
 
-  ```sh
-  alias ls='lsd'
-  ```
+```sh
+alias ls='lsd'
+```
 
 Some further examples of useful aliases:
 
-  ```sh
-  alias l='ls -l'
-  alias la='ls -a'
-  alias lla='ls -la'
-  alias lt='ls --tree'
-  ```
+```sh
+alias l='ls -l'
+alias la='ls -a'
+alias lla='ls -la'
+alias lt='ls --tree'
+```
 
 ## F.A.Q
 
-### Default Colors
+### Icons not showing up
 
-In the future the possibility to customize the colors might be implemented.
-For now, the default colors are:
+For `lsd` to be able to display icons, the font has to include special font glyphs. This might not be the case for most fonts that you download. Thankfully, you can patch most fonts using [NerdFont](https://www.nerdfonts.com/) and add these icons. Or you can just download an already patched version of your favourite font from [NerdFont font download page](https://www.nerdfonts.com/font-downloads).
+Here is a guide on how to setup fonts on [macOS](https://github.com/Peltoche/lsd/issues/199#issuecomment-494218334) and [Android](https://github.com/Peltoche/lsd/issues/423).
 
-| User/Group | Permission | File Types | Date | File Size |
-|:---|:---|:---|:---|:---|
-|![#ffffd7](https://via.placeholder.com/15/ffffd7/000000?text=+) User|![#00d700](https://via.placeholder.com/15/00d700/000000?text=+) Read |![#0087ff](https://via.placeholder.com/15/0087ff/000000?text=+) Directory|![#00d700](https://via.placeholder.com/15/00d700/000000?text=+) within the last hour|![#ffffaf](https://via.placeholder.com/15/ffffaf/000000?text=+) Small File|
-|![#d7d7af](https://via.placeholder.com/15/d7d7af/000000?text=+) Group|![#d7ff87](https://via.placeholder.com/15/d7ff87/000000?text=+) Write|![#00d700](https://via.placeholder.com/15/00d700/000000?text=+) Executable File|![#00d787](https://via.placeholder.com/15/00d787/000000?text=+) within the last day|![#ffaf87](https://via.placeholder.com/15/ffaf87/000000?text=+) Medium File|
-||![#af0000](https://via.placeholder.com/15/af0000/000000?text=+) Execute|![#d7d700](https://via.placeholder.com/15/d7d700/000000?text=+) Non-Executable File|![#00af87](https://via.placeholder.com/15/00af87/000000?text=+) older|![#d78700](https://via.placeholder.com/15/d78700/000000?text=+) Large File|
-||![#ff00ff](https://via.placeholder.com/15/ff00ff/000000?text=+) Execute with Stickybit|![#af0000](https://via.placeholder.com/15/af0000/000000?text=+) Broken Symlink||![#ffffff](https://via.placeholder.com/15/ffffff/000000?text=+) Non File|
-||![#d75f87](https://via.placeholder.com/15/d75f87/000000?text=+) No Access|![#00d7d7](https://via.placeholder.com/15/00d7d7/000000?text=+) Pipe/Symlink/Blockdevice/Socket/Special|||
-|||![#d78700](https://via.placeholder.com/15/d78700/000000?text=+) CharDevice|||
+To check if the font you are using is setup correctly, try running the following snippet in a shell and see if that [prints a folder icon](https://github.com/Peltoche/lsd/issues/510#issuecomment-860000306). If it prints a box, or question mark or something else, then you might have some issues in how you setup the font or how your terminal emulator renders the font.
+
+```sh
+echo $'\uf115'
+```
+
+### Colors
+
+You can customize filetype colors using `LS_COLORS` and other colors using the theme.
+
+The default colors are:
+
+| User/Group                                                            | Permission                                                                             | File Type (changes based on your terminal colorscheme)                                                  | Date                                                                                 | File Size                                                                   |
+| :-------------------------------------------------------------------- | :------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------ | :----------------------------------------------------------------------------------- | :-------------------------------------------------------------------------- |
+| ![#ffffd7](https://via.placeholder.com/15/ffffd7/000000?text=+) User  | ![#00d700](https://via.placeholder.com/15/00d700/000000?text=+) Read                   | ![#0087ff](https://via.placeholder.com/15/0087ff/000000?text=+) Directory                               | ![#00d700](https://via.placeholder.com/15/00d700/000000?text=+) within the last hour | ![#ffffaf](https://via.placeholder.com/15/ffffaf/000000?text=+) Small File  |
+| ![#d7d7af](https://via.placeholder.com/15/d7d7af/000000?text=+) Group | ![#d7ff87](https://via.placeholder.com/15/d7ff87/000000?text=+) Write                  | ![#00d700](https://via.placeholder.com/15/00d700/000000?text=+) Executable File                         | ![#00d787](https://via.placeholder.com/15/00d787/000000?text=+) within the last day  | ![#ffaf87](https://via.placeholder.com/15/ffaf87/000000?text=+) Medium File |
+|                                                                       | ![#af0000](https://via.placeholder.com/15/af0000/000000?text=+) Execute                | ![#ffffff](https://via.placeholder.com/15/ffffff/000000?text=+) Non-Executable File                     | ![#00af87](https://via.placeholder.com/15/00af87/000000?text=+) older                | ![#d78700](https://via.placeholder.com/15/d78700/000000?text=+) Large File  |
+|                                                                       | ![#ff00ff](https://via.placeholder.com/15/ff00ff/000000?text=+) Execute with Stickybit | ![#af0000](https://via.placeholder.com/15/af0000/000000?text=+) Broken Symlink                          |                                                                                      | ![#ffffff](https://via.placeholder.com/15/ffffff/000000?text=+) Non File    |
+|                                                                       | ![#d75f87](https://via.placeholder.com/15/d75f87/000000?text=+) No Access              | ![#00d7d7](https://via.placeholder.com/15/00d7d7/000000?text=+) Pipe/Symlink/Blockdevice/Socket/Special |                                                                                      |                                                                             |
+|                                                                       |                                                                                        | ![#d78700](https://via.placeholder.com/15/d78700/000000?text=+) CharDevice                              |                                                                                      |                                                                             |
+
+_Checkout [trapd00r/LS_COLORS](https://github.com/trapd00r/LS_COLORS) and [sharkdp/vivid](https://github.com/sharkdp/vivid) for help in themeing using `LS_COLORS`._
+
+### First char of folder/file getting trimmed
+
+This is a known issue in a few terminal emulator. Try using a different terminal emulator like. [Alacritty](https://github.com/alacritty/alacritty) and [Kitty](https://github.com/kovidgoyal/kitty) are really good alternatives. You might also want to check if your font is responsible for causing this.
+To verify this, try running lsd with icons disabled and if it still does not have the first character, then this is an lsd bug:
+
+```sh
+lsd --icon never --ignore-config
+```
 
 ### UTF-8 Chars
 
