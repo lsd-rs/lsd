@@ -1,8 +1,8 @@
 use crate::color::{ColoredString, Colors, Elem};
 use crate::flags::{Flags, SizeFlag};
+use num_format::ToFormattedString;
 use std::fs::Metadata;
 use std::iter::repeat;
-use num_format::{ToFormattedString};
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Unit {
@@ -58,7 +58,7 @@ impl Size {
 
     #[cfg(not(unix))]
     fn os_formatted_bytes(&self) -> String {
-        self.bytes.to_formatted_string(&Locale::en)
+        self.bytes.to_formatted_string(&num_format::Locale::en)
     }
 
     pub fn get_unit(&self, flags: &Flags) -> Unit {
@@ -184,10 +184,10 @@ impl Size {
 
 #[cfg(test)]
 mod test {
-    use std::env;
     use super::Size;
     use crate::color::{Colors, ThemeOption};
     use crate::flags::{Flags, SizeFlag};
+    use std::env;
 
     #[test]
     fn render_byte() {
@@ -367,7 +367,8 @@ mod test {
     #[cfg(unix)]
     #[test]
     fn render_bytes_with_separator() {
-        env::set_var("LC_ALL", "en");
+        env::set_var("LC_ALL", "en-US");
+        env::set_var("LC_NUMERIC", ",");
         let size = Size::new(42 * 1024 * 1024); // == 42 megabytes
         let mut flags = Flags::default();
 
