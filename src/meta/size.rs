@@ -1,8 +1,8 @@
 use crate::color::{ColoredString, Colors, Elem};
 use crate::flags::{Flags, SizeFlag};
-use num_format::{Locale, ToFormattedString};
 use std::fs::Metadata;
 use std::iter::repeat;
+use num_format::{ToFormattedString};
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Unit {
@@ -41,10 +41,24 @@ impl Size {
 
     fn format_bytes(&self, flags: &Flags) -> String {
         if flags.size == SizeFlag::BytesWithSeparator {
-            self.bytes.to_formatted_string(&Locale::en)
+            self.os_formatted_bytes()
         } else {
             self.bytes.to_string()
         }
+    }
+
+    #[cfg(unix)]
+    fn os_formatted_bytes(&self) -> String {
+        if let Ok(system_locale) = num_format::SystemLocale::default() {
+            self.bytes.to_formatted_string(&system_locale)
+        } else {
+            self.bytes.to_formatted_string(&num_format::Locale::en)
+        }
+    }
+
+    #[cfg(not(unix))]
+    fn os_formatted_bytes(&self) -> String {
+        self.bytes.to_formatted_string(&Locale::en)
     }
 
     pub fn get_unit(&self, flags: &Flags) -> Unit {
@@ -170,6 +184,7 @@ impl Size {
 
 #[cfg(test)]
 mod test {
+    use std::env;
     use super::Size;
     use crate::color::{Colors, ThemeOption};
     use crate::flags::{Flags, SizeFlag};
@@ -349,6 +364,23 @@ mod test {
         assert_eq!(size.render(&colors, &flags, Some(3)).to_string(), " 42K");
     }
 
+    #[cfg(unix)]
+    #[test]
+    fn render_bytes_with_separator() {
+        env::set_var("LC_ALL", "en");
+        let size = Size::new(42 * 1024 * 1024); // == 42 megabytes
+        let mut flags = Flags::default();
+
+        flags.size = SizeFlag::Bytes;
+        assert_eq!(size.value_string(&flags).as_str(), "44040192");
+        assert_eq!(size.unit_string(&flags).as_str(), "");
+
+        flags.size = SizeFlag::BytesWithSeparator;
+        assert_eq!(size.value_string(&flags).as_str(), "44,040,192");
+        assert_eq!(size.unit_string(&flags).as_str(), "");
+    }
+
+    #[cfg(not(unix))]
     #[test]
     fn render_bytes_with_separator() {
         let size = Size::new(42 * 1024 * 1024); // == 42 megabytes
