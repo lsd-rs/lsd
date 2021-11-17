@@ -98,6 +98,7 @@ pub fn build() -> App<'static, 'static> {
             Arg::with_name("human_readable")
                 .short("h")
                 .long("human-readable")
+                .multiple(true)
                 .help("For ls compatibility purposes ONLY, currently set by default"),
         )
         .arg(
