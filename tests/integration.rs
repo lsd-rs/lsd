@@ -632,3 +632,20 @@ fn test_date_custom_format_supports_padding() {
                 .count(2),
         );
 }
+
+#[test]
+fn test_all_directory() {
+    let dir = tempdir();
+    dir.child("one").touch().unwrap();
+    dir.child("two").touch().unwrap();
+
+    cmd()
+        .arg("-a")
+        .arg("-d")
+        .arg(dir.path())
+        .assert()
+        .stdout(
+            predicate::str::is_match(".\n..\none\ntwo\n")
+            .unwrap(),
+        );
+}
