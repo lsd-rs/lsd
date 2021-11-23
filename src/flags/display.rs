@@ -26,7 +26,12 @@ impl Configurable<Self> for Display {
     /// [None].
     fn from_arg_matches(matches: &ArgMatches) -> Option<Self> {
         if matches.is_present("all") {
-            Some(Self::All)
+            if matches.is_present("directory-only") {
+                Some(Self::DirectoryOnly)
+            }
+            else {
+                Some(Self::All)
+            }
         } else if matches.is_present("almost-all") {
             Some(Self::AlmostAll)
         } else if matches.is_present("directory-only") {
