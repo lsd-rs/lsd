@@ -645,7 +645,7 @@ fn test_all_directory() {
         .arg(dir.path())
         .assert()
         .stdout(
-            predicate::str::is_match(".\n..\none\ntwo\n")
+            predicate::str::is_match(".")
             .unwrap(),
         );
 }
