@@ -644,8 +644,5 @@ fn test_all_directory() {
         .arg("-d")
         .arg(dir.path())
         .assert()
-        .stdout(
-            predicate::str::is_match(".")
-            .unwrap(),
-        );
+        .stdout(predicate::str::is_match(".").unwrap());
 }
