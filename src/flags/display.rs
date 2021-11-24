@@ -28,8 +28,7 @@ impl Configurable<Self> for Display {
         if matches.is_present("all") {
             if matches.is_present("directory-only") {
                 Some(Self::DirectoryOnly)
-            }
-            else {
+            } else {
                 Some(Self::All)
             }
         } else if matches.is_present("almost-all") {
