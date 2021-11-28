@@ -63,6 +63,16 @@ pub enum Elem {
     TreeEdge,
 }
 
+macro_rules! color_or_default {
+    ($elem:expr, $color:tt, $default:expr) => {
+        if let Some(color) = $elem {
+            color.$color.unwrap_or($default)
+        } else {
+            $default
+        }
+    };
+}
+
 impl Elem {
     pub fn has_suid(&self) -> bool {
         matches!(self, Elem::Dir { uid: true } | Elem::File { uid: true, .. })
@@ -73,54 +83,60 @@ impl Elem {
             Elem::File {
                 exec: true,
                 uid: true,
-            } => theme.file_type.file.exec_uid,
+            } => color_or_default!(&theme.file_type.file, exec_uid, theme.default),
             Elem::File {
                 exec: false,
                 uid: true,
-            } => theme.file_type.file.uid_no_exec,
+            } => color_or_default!(&theme.file_type.file, uid_no_exec, theme.default),
             Elem::File {
                 exec: true,
                 uid: false,
-            } => theme.file_type.file.exec_no_uid,
+            } => color_or_default!(&theme.file_type.file, exec_no_uid, theme.default),
             Elem::File {
                 exec: false,
                 uid: false,
-            } => theme.file_type.file.no_exec_no_uid,
-            Elem::SymLink => theme.file_type.symlink.default,
-            Elem::BrokenSymLink => theme.file_type.symlink.broken,
-            Elem::MissingSymLinkTarget => theme.file_type.symlink.missing_target,
-            Elem::Dir { uid: true } => theme.file_type.dir.uid,
-            Elem::Dir { uid: false } => theme.file_type.dir.no_uid,
-            Elem::Pipe => theme.file_type.pipe,
-            Elem::BlockDevice => theme.file_type.block_device,
-            Elem::CharDevice => theme.file_type.char_device,
-            Elem::Socket => theme.file_type.socket,
-            Elem::Special => theme.file_type.special,
+            } => color_or_default!(&theme.file_type.file, no_exec_no_uid, theme.default),
+            Elem::SymLink => color_or_default!(&theme.file_type.symlink, default, theme.default),
+            Elem::BrokenSymLink => {
+                color_or_default!(&theme.file_type.symlink, broken, theme.default)
+            }
+            Elem::MissingSymLinkTarget => {
+                color_or_default!(&theme.file_type.symlink, missing_target, theme.default)
+            }
+            Elem::Dir { uid: true } => color_or_default!(&theme.file_type.dir, uid, theme.default),
+            Elem::Dir { uid: false } => {
+                color_or_default!(&theme.file_type.dir, no_uid, theme.default)
+            }
+            Elem::Pipe => theme.file_type.pipe.unwrap_or(theme.default),
+            Elem::BlockDevice => theme.file_type.block_device.unwrap_or(theme.default),
+            Elem::CharDevice => theme.file_type.char_device.unwrap_or(theme.default),
+            Elem::Socket => theme.file_type.socket.unwrap_or(theme.default),
+            Elem::Special => theme.file_type.special.unwrap_or(theme.default),
 
-            Elem::Read => theme.permission.read,
-            Elem::Write => theme.permission.write,
-            Elem::Exec => theme.permission.exec,
-            Elem::ExecSticky => theme.permission.exec_sticky,
-            Elem::NoAccess => theme.permission.no_access,
+            Elem::Read => color_or_default!(&theme.permission, read, theme.default),
+            Elem::Write => color_or_default!(&theme.permission, write, theme.default),
+            Elem::Exec => color_or_default!(&theme.permission, exec, theme.default),
+            Elem::ExecSticky => color_or_default!(&theme.permission, exec_sticky, theme.default),
+            Elem::NoAccess => color_or_default!(&theme.permission, no_access, theme.default),
 
-            Elem::DayOld => theme.date.day_old,
-            Elem::HourOld => theme.date.hour_old,
-            Elem::Older => theme.date.older,
+            Elem::DayOld => color_or_default!(&theme.date, day_old, theme.default),
+            Elem::HourOld => color_or_default!(&theme.date, hour_old, theme.default),
+            Elem::Older => color_or_default!(&theme.date, older, theme.default),
 
-            Elem::User => theme.user,
-            Elem::Group => theme.group,
+            Elem::User => theme.user.unwrap_or(theme.default),
+            Elem::Group => theme.group.unwrap_or(theme.default),
 
-            Elem::NonFile => theme.size.none,
-            Elem::FileLarge => theme.size.large,
-            Elem::FileMedium => theme.size.medium,
-            Elem::FileSmall => theme.size.small,
+            Elem::NonFile => color_or_default!(&theme.size, none, theme.default),
+            Elem::FileLarge => color_or_default!(&theme.size, large, theme.default),
+            Elem::FileMedium => color_or_default!(&theme.size, medium, theme.default),
+            Elem::FileSmall => color_or_default!(&theme.size, small, theme.default),
 
-            Elem::INode { valid: false } => theme.inode.valid,
-            Elem::INode { valid: true } => theme.inode.invalid,
+            Elem::INode { valid: false } => color_or_default!(&theme.inode, valid, theme.default),
+            Elem::INode { valid: true } => color_or_default!(&theme.inode, invalid, theme.default),
 
-            Elem::TreeEdge => theme.tree_edge,
-            Elem::Links { valid: false } => theme.links.invalid,
-            Elem::Links { valid: true } => theme.links.valid,
+            Elem::TreeEdge => theme.tree_edge.unwrap_or(theme.default),
+            Elem::Links { valid: false } => color_or_default!(&theme.links, invalid, theme.default),
+            Elem::Links { valid: true } => color_or_default!(&theme.links, valid, theme.default),
         }
     }
 }
@@ -326,62 +342,87 @@ mod elem {
     #[cfg(test)]
     fn test_theme() -> Theme {
         Theme {
-            user: Color::AnsiValue(230),  // Cornsilk1
-            group: Color::AnsiValue(187), // LightYellow3
-            permission: theme::Permission {
-                read: Color::Green,
-                write: Color::Yellow,
-                exec: Color::Red,
-                exec_sticky: Color::Magenta,
-                no_access: Color::AnsiValue(245), // Grey
-            },
+            default: Color::AnsiValue(245),
+            user: Some(Color::AnsiValue(230)),  // Cornsilk1
+            group: Some(Color::AnsiValue(187)), // LightYellow3
+            permission: Some(theme::Permission {
+                read: Some(Color::Green),
+                write: Some(Color::Yellow),
+                exec: Some(Color::Red),
+                exec_sticky: Some(Color::Magenta),
+                no_access: Some(Color::AnsiValue(245)), // Grey
+            }),
             file_type: theme::FileType {
-                file: theme::File {
-                    exec_uid: Color::AnsiValue(40),        // Green3
-                    uid_no_exec: Color::AnsiValue(184),    // Yellow3
-                    exec_no_uid: Color::AnsiValue(40),     // Green3
-                    no_exec_no_uid: Color::AnsiValue(184), // Yellow3
-                },
-                dir: theme::Dir {
-                    uid: Color::AnsiValue(33),    // DodgerBlue1
-                    no_uid: Color::AnsiValue(33), // DodgerBlue1
-                },
-                pipe: Color::AnsiValue(44), // DarkTurquoise
-                symlink: theme::Symlink {
-                    default: Color::AnsiValue(44),         // DarkTurquoise
-                    broken: Color::AnsiValue(124),         // Red3
-                    missing_target: Color::AnsiValue(124), // Red3
-                },
-                block_device: Color::AnsiValue(44), // DarkTurquoise
-                char_device: Color::AnsiValue(172), // Orange3
-                socket: Color::AnsiValue(44),       // DarkTurquoise
-                special: Color::AnsiValue(44),      // DarkTurquoise
+                file: Some(theme::File {
+                    exec_uid: Some(Color::AnsiValue(40)),        // Green3
+                    uid_no_exec: Some(Color::AnsiValue(184)),    // Yellow3
+                    exec_no_uid: Some(Color::AnsiValue(40)),     // Green3
+                    no_exec_no_uid: Some(Color::AnsiValue(184)), // Yellow3
+                }),
+                dir: Some(theme::Dir {
+                    uid: Some(Color::AnsiValue(33)),    // DodgerBlue1
+                    no_uid: Some(Color::AnsiValue(33)), // DodgerBlue1
+                }),
+                pipe: Some(Color::AnsiValue(44)), // DarkTurquoise
+                symlink: Some(theme::Symlink {
+                    default: Some(Color::AnsiValue(44)),         // DarkTurquoise
+                    broken: Some(Color::AnsiValue(124)),         // Red3
+                    missing_target: Some(Color::AnsiValue(124)), // Red3
+                }),
+                block_device: Some(Color::AnsiValue(44)), // DarkTurquoise
+                char_device: Some(Color::AnsiValue(172)), // Orange3
+                socket: Some(Color::AnsiValue(44)),       // DarkTurquoise
+                special: Some(Color::AnsiValue(44)),      // DarkTurquoise
             },
-            date: theme::Date {
-                hour_old: Color::AnsiValue(40), // Green3
-                day_old: Color::AnsiValue(42),  // SpringGreen2
-                older: Color::AnsiValue(36),    // DarkCyan
+            date: Some(theme::Date {
+                hour_old: Some(Color::AnsiValue(40)), // Green3
+                day_old: Some(Color::AnsiValue(42)),  // SpringGreen2
+                older: Some(Color::AnsiValue(36)),    // DarkCyan
+            }),
+            size: Some(theme::Size {
+                none: Some(Color::AnsiValue(245)),   // Grey
+                small: Some(Color::AnsiValue(229)),  // Wheat1
+                medium: Some(Color::AnsiValue(216)), // LightSalmon1
+                large: Some(Color::AnsiValue(172)),  // Orange3
+            }),
+            inode: Some(theme::INode {
+                valid: Some(Color::AnsiValue(13)),    // Pink
+                invalid: Some(Color::AnsiValue(245)), // Grey
+            }),
+            links: Some(theme::Links {
+                valid: Some(Color::AnsiValue(13)),    // Pink
+                invalid: Some(Color::AnsiValue(245)), // Grey
+            }),
+            tree_edge: Some(Color::AnsiValue(245)), // Grey
+        }
+    }
+
+    fn none_theme() -> Theme {
+        Theme {
+            default: Color::Green,
+            file_type: theme::FileType {
+                file: None,
+                dir: None,
+                pipe: None,
+                symlink: None,
+                block_device: None,
+                char_device: None,
+                socket: None,
+                special: None,
             },
-            size: theme::Size {
-                none: Color::AnsiValue(245),   // Grey
-                small: Color::AnsiValue(229),  // Wheat1
-                medium: Color::AnsiValue(216), // LightSalmon1
-                large: Color::AnsiValue(172),  // Orange3
-            },
-            inode: theme::INode {
-                valid: Color::AnsiValue(13),    // Pink
-                invalid: Color::AnsiValue(245), // Grey
-            },
-            links: theme::Links {
-                valid: Color::AnsiValue(13),    // Pink
-                invalid: Color::AnsiValue(245), // Grey
-            },
-            tree_edge: Color::AnsiValue(245), // Grey
+            group: None,
+            user: None,
+            permission: None,
+            date: None,
+            size: None,
+            inode: None,
+            links: None,
+            tree_edge: None,
         }
     }
 
     #[test]
-    fn test_default_file() {
+    fn test_default_theme_color() {
         assert_eq!(
             Elem::File {
                 exec: true,
@@ -413,6 +454,32 @@ mod elem {
             }
             .get_color(&test_theme()),
             Color::AnsiValue(184),
+        );
+    }
+
+    #[test]
+    fn test_default_theme_default() {
+        assert_eq!(
+            Elem::User.get_color(&none_theme()),
+            none_theme().default,
+        );
+        assert_eq!(
+            Elem::Group.get_color(&none_theme()),
+            none_theme().default,
+        );
+        assert_eq!(
+            Elem::INode {
+                valid: false
+            }
+            .get_color(&none_theme()),
+            none_theme().default,
+        );
+        assert_eq!(
+            Elem::Links {
+                valid: true
+            }
+            .get_color(&none_theme()),
+            none_theme().default,
         );
     }
 }

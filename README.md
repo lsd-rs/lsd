@@ -238,6 +238,7 @@ Please notice that color value would ignore case, both lowercase and UPPERCASE i
 This is the default theme scheme shipped with `lsd`.
 
 ```yaml
+default: 245
 user: 230
 group: 187
 permission:
@@ -263,6 +264,9 @@ links:
   invalid: 245
 tree-edge: 245
 ```
+
+The `default` item is required while the others are optional,
+it will use the `default` value as color for the items missed.
 
 ## External Configurations
 
@@ -306,11 +310,11 @@ To check if the font you are using is setup correctly, try running the following
 ```sh
 echo $'\uf115'
 ```
-  
+
 ### Icons missing or not rendering correctly using PuTTY/KiTTY on Windows
-  
+
 First of all, make sure a patched font is installed and PuTTY/KiTTY is configurated to use it, please check [Prerequisites](#prerequisites).
-  
+
 There are problems for PuTTY/KiTTY to show 2 char wide icons, make sure using a 1 char wide font like [Hack Regular Nerd Font Complete Mono Windows Compatible](https://github.com/ryanoasis/nerd-fonts/blob/master/patched-fonts/Hack/Regular/complete/Hack%20Regular%20Nerd%20Font%20Complete%20Mono%20Windows%20Compatible.ttf), check [this issue](https://github.com/Peltoche/lsd/issues/331) for detail.
 
 ### Colors
