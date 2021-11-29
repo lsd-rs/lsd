@@ -220,7 +220,6 @@ pub fn build() -> App<'static, 'static> {
                 .possible_value("none")
                 .possible_value("first")
                 .possible_value("last")
-                .default_value("none")
                 .multiple(true)
                 .number_of_values(1)
                 .help("Sort the directories then the files"),
