@@ -331,7 +331,7 @@ The default colors are:
 _Checkout [trapd00r/LS_COLORS](https://github.com/trapd00r/LS_COLORS) and [sharkdp/vivid](https://github.com/sharkdp/vivid) for help in themeing using `LS_COLORS`._
 
 ### First char of folder/file getting trimmed
-For Konsole: ㅤEdit the config file (or create it if it doesn't exist) and paste the following into it (contains invisible unicode characters):
+Workaround for Konsole: ㅤEdit the config file(or [create it](#config-file-location) if it doesn't already exist) and paste the following into it (contains invisible unicode characters):
   ```yml
 icons:
     separator: " ㅤ"
