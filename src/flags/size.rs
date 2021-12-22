@@ -18,6 +18,8 @@ pub enum SizeFlag {
     Short,
     /// The variant to show file size in bytes.
     Bytes,
+    /// The variant to show file size in bytes with thousand separated by delimiter.
+    BytesWithSeparator,
 }
 
 impl SizeFlag {
@@ -26,9 +28,10 @@ impl SizeFlag {
             "default" => Some(Self::Default),
             "short" => Some(Self::Short),
             "bytes" => Some(Self::Bytes),
+            "bytes-with-separator" => Some(Self::BytesWithSeparator),
             _ => {
                 panic!(
-                    "Size can only be one of default, short or bytes, but got {}.",
+                    "Size can only be one of default, short, bytes or bytes-with-separator, but got {}.",
                     value
                 );
             }
@@ -169,5 +172,15 @@ mod test {
         let mut c = Config::with_none();
         c.classic = Some(true);
         assert_eq!(Some(SizeFlag::Bytes), SizeFlag::from_config(&c));
+    }
+
+    #[test]
+    fn test_from_arg_matches_size_bytes_with_separators() {
+        let args = vec!["lsd", "--size", "bytes-with-separator"];
+        let matches = app::build().get_matches_from_safe(args).unwrap();
+        assert_eq!(
+            Some(SizeFlag::BytesWithSeparator),
+            SizeFlag::from_arg_matches(&matches)
+        );
     }
 }
