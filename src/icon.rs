@@ -227,6 +227,7 @@ impl Icons {
         m.insert("iml", "\u{e7b5}"); // ""
         m.insert("ini", "\u{e615}"); // ""
         m.insert("ipynb", "\u{e606}"); // ""
+        m.insert("iso", "\u{faed}"); // "﫭"
         m.insert("jar", "\u{e204}"); // ""
         m.insert("java", "\u{e204}"); // ""
         m.insert("jpeg", "\u{f1c5}"); // ""
@@ -344,7 +345,6 @@ impl Icons {
         m.insert("zsh", "\u{f489}"); // ""
         m.insert("zsh-theme", "\u{f489}"); // ""
         m.insert("zshrc", "\u{f489}"); // ""
-        m.insert("iso", "\u{faed}"); // "﫭"
 
         m
     }
