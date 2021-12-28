@@ -145,6 +145,7 @@ impl Icons {
 
         m.insert("7z", "\u{f410}"); // ""
         m.insert("apk", "\u{e70e}"); // ""
+        m.insert("ass", "\u{f6f6}"); // ""
         m.insert("avi", "\u{f03d}"); // ""
         m.insert("avro", "\u{e60b}"); // ""
         m.insert("awk", "\u{f489}"); // ""
