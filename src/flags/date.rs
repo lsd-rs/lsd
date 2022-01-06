@@ -11,6 +11,7 @@ use clap::ArgMatches;
 
 /// The flag showing which kind of time stamps to display.
 #[derive(Clone, Debug, PartialEq, Eq)]
+#[allow(clippy::upper_case_acronyms)]
 pub enum DateFlag {
     Date,
     Relative,
