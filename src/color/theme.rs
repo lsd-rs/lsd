@@ -13,16 +13,16 @@ use std::path::Path;
 #[derive(Debug, Deserialize, PartialEq)]
 #[serde(rename_all = "kebab-case")]
 #[serde(deny_unknown_fields)]
+#[serde(default)]
 pub struct Theme {
-    pub default: Color,
-    pub user: Option<Color>,
-    pub group: Option<Color>,
-    pub permission: Option<Permission>,
-    pub date: Option<Date>,
-    pub size: Option<Size>,
-    pub inode: Option<INode>,
-    pub tree_edge: Option<Color>,
-    pub links: Option<Links>,
+    pub user: Color,
+    pub group: Color,
+    pub permission: Permission,
+    pub date: Date,
+    pub size: Size,
+    pub inode: INode,
+    pub tree_edge: Color,
+    pub links: Links,
 
     #[serde(skip)]
     pub file_type: FileType,
@@ -31,93 +31,184 @@ pub struct Theme {
 #[derive(Debug, Deserialize, PartialEq)]
 #[serde(rename_all = "kebab-case")]
 #[serde(deny_unknown_fields)]
+#[serde(default)]
 pub struct Permission {
-    pub read: Option<Color>,
-    pub write: Option<Color>,
-    pub exec: Option<Color>,
-    pub exec_sticky: Option<Color>,
-    pub no_access: Option<Color>,
+    pub read: Color,
+    pub write: Color,
+    pub exec: Color,
+    pub exec_sticky: Color,
+    pub no_access: Color,
 }
 
 #[derive(Debug, Deserialize, PartialEq)]
 #[serde(rename_all = "kebab-case")]
 #[serde(deny_unknown_fields)]
+#[serde(default)]
 pub struct FileType {
-    pub file: Option<File>,
-    pub dir: Option<Dir>,
-    pub pipe: Option<Color>,
-    pub symlink: Option<Symlink>,
-    pub block_device: Option<Color>,
-    pub char_device: Option<Color>,
-    pub socket: Option<Color>,
-    pub special: Option<Color>,
+    pub file: File,
+    pub dir: Dir,
+    pub pipe: Color,
+    pub symlink: Symlink,
+    pub block_device: Color,
+    pub char_device: Color,
+    pub socket: Color,
+    pub special: Color,
 }
 
 #[derive(Debug, Deserialize, PartialEq)]
 #[serde(rename_all = "kebab-case")]
 #[serde(deny_unknown_fields)]
+#[serde(default)]
 pub struct File {
-    pub exec_uid: Option<Color>,
-    pub uid_no_exec: Option<Color>,
-    pub exec_no_uid: Option<Color>,
-    pub no_exec_no_uid: Option<Color>,
+    pub exec_uid: Color,
+    pub uid_no_exec: Color,
+    pub exec_no_uid: Color,
+    pub no_exec_no_uid: Color,
 }
 
 #[derive(Debug, Deserialize, PartialEq)]
 #[serde(rename_all = "kebab-case")]
 #[serde(deny_unknown_fields)]
+#[serde(default)]
 pub struct Dir {
-    pub uid: Option<Color>,
-    pub no_uid: Option<Color>,
+    pub uid: Color,
+    pub no_uid: Color,
 }
 
 #[derive(Debug, Deserialize, PartialEq)]
 #[serde(rename_all = "kebab-case")]
 #[serde(deny_unknown_fields)]
+#[serde(default)]
 pub struct Symlink {
-    pub default: Option<Color>,
-    pub broken: Option<Color>,
-    pub missing_target: Option<Color>,
+    pub default: Color,
+    pub broken: Color,
+    pub missing_target: Color,
 }
 
 #[derive(Debug, Deserialize, PartialEq)]
 #[serde(rename_all = "kebab-case")]
 #[serde(deny_unknown_fields)]
+#[serde(default)]
 pub struct Date {
-    pub hour_old: Option<Color>,
-    pub day_old: Option<Color>,
-    pub older: Option<Color>,
+    pub hour_old: Color,
+    pub day_old: Color,
+    pub older: Color,
 }
 
 #[derive(Debug, Deserialize, PartialEq)]
 #[serde(rename_all = "kebab-case")]
 #[serde(deny_unknown_fields)]
+#[serde(default)]
 pub struct Size {
-    pub none: Option<Color>,
-    pub small: Option<Color>,
-    pub medium: Option<Color>,
-    pub large: Option<Color>,
+    pub none: Color,
+    pub small: Color,
+    pub medium: Color,
+    pub large: Color,
 }
 
 #[derive(Debug, Deserialize, PartialEq)]
 #[serde(rename_all = "kebab-case")]
 #[serde(deny_unknown_fields)]
+#[serde(default)]
 pub struct INode {
-    pub valid: Option<Color>,
-    pub invalid: Option<Color>,
+    pub valid: Color,
+    pub invalid: Color,
 }
 
 #[derive(Debug, Deserialize, PartialEq)]
 #[serde(rename_all = "kebab-case")]
 #[serde(deny_unknown_fields)]
+#[serde(default)]
 pub struct Links {
-    pub valid: Option<Color>,
-    pub invalid: Option<Color>,
+    pub valid: Color,
+    pub invalid: Color,
 }
 
+impl Default for Permission {
+    fn default() -> Self {
+        Permission {
+            read: Color::DarkGreen,
+            write: Color::DarkYellow,
+            exec: Color::DarkRed,
+            exec_sticky: Color::AnsiValue(5),
+            no_access: Color::AnsiValue(245), // Grey
+        }
+    }
+}
 impl Default for FileType {
     fn default() -> Self {
-        Theme::default_dark().file_type
+        FileType {
+            file: File::default(),
+            dir: Dir::default(),
+            symlink: Symlink::default(),
+            pipe: Color::AnsiValue(44),         // DarkTurquoise
+            block_device: Color::AnsiValue(44), // DarkTurquoise
+            char_device: Color::AnsiValue(172), // Orange3
+            socket: Color::AnsiValue(44),       // DarkTurquoise
+            special: Color::AnsiValue(44),      // DarkTurquoise
+        }
+    }
+}
+impl Default for File {
+    fn default() -> Self {
+        File {
+            exec_uid: Color::AnsiValue(40),        // Green3
+            uid_no_exec: Color::AnsiValue(184),    // Yellow3
+            exec_no_uid: Color::AnsiValue(40),     // Green3
+            no_exec_no_uid: Color::AnsiValue(184), // Yellow3
+        }
+    }
+}
+impl Default for Dir {
+    fn default() -> Self {
+        Dir {
+            uid: Color::AnsiValue(33),    // DodgerBlue1
+            no_uid: Color::AnsiValue(33), // DodgerBlue1
+        }
+    }
+}
+impl Default for Symlink {
+    fn default() -> Self {
+        Symlink {
+            default: Color::AnsiValue(44),         // DarkTurquoise
+            broken: Color::AnsiValue(124),         // Red3
+            missing_target: Color::AnsiValue(124), // Red3
+        }
+    }
+}
+impl Default for Date {
+    fn default() -> Self {
+        Date {
+            hour_old: Color::AnsiValue(40), // Green3
+            day_old: Color::AnsiValue(42),  // SpringGreen2
+            older: Color::AnsiValue(36),    // DarkCyan
+        }
+    }
+}
+impl Default for Size {
+    fn default() -> Self {
+        Size {
+            none: Color::AnsiValue(245),   // Grey
+            small: Color::AnsiValue(229),  // Wheat1
+            medium: Color::AnsiValue(216), // LightSalmon1
+            large: Color::AnsiValue(172),  // Orange3
+        }
+    }
+}
+impl Default for INode {
+    fn default() -> Self {
+        INode {
+            valid: Color::AnsiValue(13),    // Pink
+            invalid: Color::AnsiValue(245), // Grey
+        }
+    }
+}
+impl Default for Links {
+    fn default() -> Self {
+        Links {
+            valid: Color::AnsiValue(13),    // Pink
+            invalid: Color::AnsiValue(245), // Grey
+        }
     }
 }
 
@@ -180,65 +271,21 @@ impl Theme {
 
     pub fn default_dark() -> Self {
         Theme {
-            default: Color::AnsiValue(245),
-            user: Some(Color::AnsiValue(230)),  // Cornsilk1
-            group: Some(Color::AnsiValue(187)), // LightYellow3
-            permission: Some(Permission {
-                read: Some(Color::DarkGreen),
-                write: Some(Color::DarkYellow),
-                exec: Some(Color::DarkRed),
-                exec_sticky: Some(Color::AnsiValue(5)),
-                no_access: Some(Color::AnsiValue(245)), // Grey
-            }),
-            file_type: FileType {
-                file: Some(File {
-                    exec_uid: Some(Color::AnsiValue(40)),        // Green3
-                    uid_no_exec: Some(Color::AnsiValue(184)),    // Yellow3
-                    exec_no_uid: Some(Color::AnsiValue(40)),     // Green3
-                    no_exec_no_uid: Some(Color::AnsiValue(184)), // Yellow3
-                }),
-                dir: Some(Dir {
-                    uid: Some(Color::AnsiValue(33)),    // DodgerBlue1
-                    no_uid: Some(Color::AnsiValue(33)), // DodgerBlue1
-                }),
-                pipe: Some(Color::AnsiValue(44)), // DarkTurquoise
-                symlink: Some(Symlink {
-                    default: Some(Color::AnsiValue(44)),         // DarkTurquoise
-                    broken: Some(Color::AnsiValue(124)),         // Red3
-                    missing_target: Some(Color::AnsiValue(124)), // Red3
-                }),
-                block_device: Some(Color::AnsiValue(44)), // DarkTurquoise
-                char_device: Some(Color::AnsiValue(172)), // Orange3
-                socket: Some(Color::AnsiValue(44)),       // DarkTurquoise
-                special: Some(Color::AnsiValue(44)),      // DarkTurquoise
-            },
-            date: Some(Date {
-                hour_old: Some(Color::AnsiValue(40)), // Green3
-                day_old: Some(Color::AnsiValue(42)),  // SpringGreen2
-                older: Some(Color::AnsiValue(36)),    // DarkCyan
-            }),
-            size: Some(Size {
-                none: Some(Color::AnsiValue(245)),   // Grey
-                small: Some(Color::AnsiValue(229)),  // Wheat1
-                medium: Some(Color::AnsiValue(216)), // LightSalmon1
-                large: Some(Color::AnsiValue(172)),  // Orange3
-            }),
-            inode: Some(INode {
-                valid: Some(Color::AnsiValue(13)),    // Pink
-                invalid: Some(Color::AnsiValue(245)), // Grey
-            }),
-            links: Some(Links {
-                valid: Some(Color::AnsiValue(13)),    // Pink
-                invalid: Some(Color::AnsiValue(245)), // Grey
-            }),
-            tree_edge: Some(Color::AnsiValue(245)), // Grey
+            user: Color::AnsiValue(230),  // Cornsilk1
+            group: Color::AnsiValue(187), // LightYellow3
+            permission: Permission::default(),
+            file_type: FileType::default(),
+            date: Date::default(),
+            size: Size::default(),
+            inode: INode::default(),
+            links: Links::default(),
+            tree_edge: Color::AnsiValue(245), // Grey
         }
     }
 
     #[cfg(test)]
     pub fn default_yaml() -> &'static str {
         r#"---
-default: 245
 user: 230
 group: 187
 permission:

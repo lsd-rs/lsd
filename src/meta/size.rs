@@ -1,7 +1,6 @@
 use crate::color::{ColoredString, Colors, Elem};
 use crate::flags::{Flags, SizeFlag};
 use std::fs::Metadata;
-use std::iter::repeat;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Unit {
@@ -62,9 +61,7 @@ impl Size {
         let unit_content = self.render_unit(colors, flags);
 
         let left_pad = if let Some(align) = val_alignment {
-            repeat(" ")
-                .take(align - val_content.content().len())
-                .collect::<String>()
+            " ".repeat(align - val_content.content().len())
         } else {
             "".to_string()
         };

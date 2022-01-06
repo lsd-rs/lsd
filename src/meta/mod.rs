@@ -159,7 +159,7 @@ impl Meta {
         }
     }
 
-    fn calculate_total_file_size(path: &PathBuf) -> u64 {
+    fn calculate_total_file_size(path: &Path) -> u64 {
         let metadata = path.symlink_metadata();
         let metadata = match metadata {
             Ok(meta) => meta,
