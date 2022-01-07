@@ -228,17 +228,16 @@ Check [Theme file content](#theme-file-content) for details.
 ### Theme file content
 
 Theme file use the [crossterm](https://crates.io/crates/crossterm)
-configure the colors, check [crossterm](https://docs.rs/crossterm/0.20.0/crossterm/style/enum.Color.html)
-for the supported colors.
+to configure the colors, check [crossterm](https://docs.rs/crossterm/0.20.0/crossterm/style/enum.Color.html)
+for supported colors.
 
 Color table: https://upload.wikimedia.org/wikipedia/commons/1/15/Xterm_256color_chart.svg
 
-Please notice that color value would ignore case, both lowercase and UPPERCASE is supported.
+Please notice that color values would ignore the case, both lowercase and UPPERCASE is supported.
 
 This is the default theme scheme shipped with `lsd`.
 
 ```yaml
-default: 245
 user: 230
 group: 187
 permission:
@@ -265,8 +264,11 @@ links:
 tree-edge: 245
 ```
 
-The `default` item is required while the others are optional,
-it will use the `default` value as color for the items missed.
+When creating a theme for `lsd`, you can specify any part of the default theme,
+and then change its colors, the items missed would fallback to use the default colors.
+
+Please also notice that an empty theme is **NOT** supported due to
+[a bug in serde lib](https://github.com/dtolnay/serde-yaml/issues/86).
 
 ## External Configurations
 

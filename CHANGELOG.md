@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Added support for the MISSING / mi= dircolors variable for broken symlink targets.
 - Add support for theme from [zwpaper](https://github.com/zwpaper) [#452](https://github.com/Peltoche/lsd/pull/452)
+- Update theme to support partial themes [zwpaper](https://github.com/zwpaper) [#591](https://github.com/Peltoche/lsd/pull/591)
 - Update minimal rust version to 1.42.0 from [zwpaper](https://github.com/zwpaper) [#534](https://github.com/Peltoche/lsd/issues/534)
 - [`NO_COLOR`](https://no-color.org/) environment variable support from [AnInternetTroll](https://github.com/aninternettroll)
 ### Changed
@@ -17,7 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add `--config-file` flag to read configuration file from a custom location
 - Clarify custom date format for `date` field in configuration file in the README.
 ### Fixed
-- Support all `strftime` like formatting [#532](https://github.com/Peltoche/lsd/issues/532)   
+- Support all `strftime` like formatting [#532](https://github.com/Peltoche/lsd/issues/532)
 
 ## [0.20.1] - 2021-03-07
 ### Fixed
