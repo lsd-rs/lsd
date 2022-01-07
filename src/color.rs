@@ -324,81 +324,57 @@ mod elem {
     #[cfg(test)]
     fn test_theme() -> Theme {
         Theme {
-            user: Some(Color::AnsiValue(230)),  // Cornsilk1
-            group: Some(Color::AnsiValue(187)), // LightYellow3
-            permission: Some(theme::Permission {
-                read: Some(Color::Green),
-                write: Some(Color::Yellow),
-                exec: Some(Color::Red),
-                exec_sticky: Some(Color::Magenta),
-                no_access: Some(Color::AnsiValue(245)), // Grey
-            }),
-            file_type: theme::FileType {
-                file: Some(theme::File {
-                    exec_uid: Some(Color::AnsiValue(40)),        // Green3
-                    uid_no_exec: Some(Color::AnsiValue(184)),    // Yellow3
-                    exec_no_uid: Some(Color::AnsiValue(40)),     // Green3
-                    no_exec_no_uid: Some(Color::AnsiValue(184)), // Yellow3
-                }),
-                dir: Some(theme::Dir {
-                    uid: Some(Color::AnsiValue(33)),    // DodgerBlue1
-                    no_uid: Some(Color::AnsiValue(33)), // DodgerBlue1
-                }),
-                pipe: Some(Color::AnsiValue(44)), // DarkTurquoise
-                symlink: Some(theme::Symlink {
-                    default: Some(Color::AnsiValue(44)),         // DarkTurquoise
-                    broken: Some(Color::AnsiValue(124)),         // Red3
-                    missing_target: Some(Color::AnsiValue(124)), // Red3
-                }),
-                block_device: Some(Color::AnsiValue(44)), // DarkTurquoise
-                char_device: Some(Color::AnsiValue(172)), // Orange3
-                socket: Some(Color::AnsiValue(44)),       // DarkTurquoise
-                special: Some(Color::AnsiValue(44)),      // DarkTurquoise
+            user: Color::AnsiValue(230),  // Cornsilk1
+            group: Color::AnsiValue(187), // LightYellow3
+            permission: theme::Permission {
+                read: Color::Green,
+                write: Color::Yellow,
+                exec: Color::Red,
+                exec_sticky: Color::Magenta,
+                no_access: Color::AnsiValue(245), // Grey
             },
-            date: Some(theme::Date {
-                hour_old: Some(Color::AnsiValue(40)), // Green3
-                day_old: Some(Color::AnsiValue(42)),  // SpringGreen2
-                older: Some(Color::AnsiValue(36)),    // DarkCyan
-            }),
-            size: Some(theme::Size {
-                none: Some(Color::AnsiValue(245)),   // Grey
-                small: Some(Color::AnsiValue(229)),  // Wheat1
-                medium: Some(Color::AnsiValue(216)), // LightSalmon1
-                large: Some(Color::AnsiValue(172)),  // Orange3
-            }),
-            inode: Some(theme::INode {
-                valid: Some(Color::AnsiValue(13)),    // Pink
-                invalid: Some(Color::AnsiValue(245)), // Grey
-            }),
-            links: Some(theme::Links {
-                valid: Some(Color::AnsiValue(13)),    // Pink
-                invalid: Some(Color::AnsiValue(245)), // Grey
-            }),
-            tree_edge: Some(Color::AnsiValue(245)), // Grey
-        }
-    }
-
-    fn none_theme() -> Theme {
-        Theme {
-            default: Color::Green,
             file_type: theme::FileType {
-                file: None,
-                dir: None,
-                pipe: None,
-                symlink: None,
-                block_device: None,
-                char_device: None,
-                socket: None,
-                special: None,
+                file: theme::File {
+                    exec_uid: Color::AnsiValue(40),        // Green3
+                    uid_no_exec: Color::AnsiValue(184),    // Yellow3
+                    exec_no_uid: Color::AnsiValue(40),     // Green3
+                    no_exec_no_uid: Color::AnsiValue(184), // Yellow3
+                },
+                dir: theme::Dir {
+                    uid: Color::AnsiValue(33),    // DodgerBlue1
+                    no_uid: Color::AnsiValue(33), // DodgerBlue1
+                },
+                pipe: Color::AnsiValue(44), // DarkTurquoise
+                symlink: theme::Symlink {
+                    default: Color::AnsiValue(44),         // DarkTurquoise
+                    broken: Color::AnsiValue(124),         // Red3
+                    missing_target: Color::AnsiValue(124), // Red3
+                },
+                block_device: Color::AnsiValue(44), // DarkTurquoise
+                char_device: Color::AnsiValue(172), // Orange3
+                socket: Color::AnsiValue(44),       // DarkTurquoise
+                special: Color::AnsiValue(44),      // DarkTurquoise
             },
-            group: None,
-            user: None,
-            permission: None,
-            date: None,
-            size: None,
-            inode: None,
-            links: None,
-            tree_edge: None,
+            date: theme::Date {
+                hour_old: Color::AnsiValue(40), // Green3
+                day_old: Color::AnsiValue(42),  // SpringGreen2
+                older: Color::AnsiValue(36),    // DarkCyan
+            },
+            size: theme::Size {
+                none: Color::AnsiValue(245),   // Grey
+                small: Color::AnsiValue(229),  // Wheat1
+                medium: Color::AnsiValue(216), // LightSalmon1
+                large: Color::AnsiValue(172),  // Orange3
+            },
+            inode: theme::INode {
+                valid: Color::AnsiValue(13),    // Pink
+                invalid: Color::AnsiValue(245), // Grey
+            },
+            links: theme::Links {
+                valid: Color::AnsiValue(13),    // Pink
+                invalid: Color::AnsiValue(245), // Grey
+            },
+            tree_edge: Color::AnsiValue(245), // Grey
         }
     }
 
@@ -435,20 +411,6 @@ mod elem {
             }
             .get_color(&test_theme()),
             Color::AnsiValue(184),
-        );
-    }
-
-    #[test]
-    fn test_default_theme_default() {
-        assert_eq!(Elem::User.get_color(&none_theme()), none_theme().default,);
-        assert_eq!(Elem::Group.get_color(&none_theme()), none_theme().default,);
-        assert_eq!(
-            Elem::INode { valid: false }.get_color(&none_theme()),
-            none_theme().default,
-        );
-        assert_eq!(
-            Elem::Links { valid: true }.get_color(&none_theme()),
-            none_theme().default,
         );
     }
 }

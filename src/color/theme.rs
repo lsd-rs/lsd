@@ -340,4 +340,41 @@ mod tests {
             Theme::from_path(theme.to_str().unwrap()).unwrap()
         );
     }
+
+    #[test]
+    fn test_empty_theme_return_default() {
+        // Must contain one field at least
+        // ref https://github.com/dtolnay/serde-yaml/issues/86
+        let empty_theme = Theme::with_yaml("user: 230".into()).unwrap();
+        let default_theme = Theme::default_dark();
+        assert_eq!(empty_theme, default_theme);
+    }
+
+    #[test]
+    fn test_first_level_theme_return_default_but_changed() {
+        // Must contain one field at least
+        // ref https://github.com/dtolnay/serde-yaml/issues/86
+        let empty_theme = Theme::with_yaml("user: 130".into()).unwrap();
+        let mut theme = Theme::default_dark();
+        use crossterm::style::Color;
+        theme.user = Color::AnsiValue(130);
+        assert_eq!(empty_theme, theme);
+    }
+
+    #[test]
+    fn test_second_level_theme_return_default_but_changed() {
+        // Must contain one field at least
+        // ref https://github.com/dtolnay/serde-yaml/issues/86
+        let empty_theme = Theme::with_yaml(
+            r#"---
+permission:
+  read: 130"#
+                .into(),
+        )
+        .unwrap();
+        let mut theme = Theme::default_dark();
+        use crossterm::style::Color;
+        theme.permission.read = Color::AnsiValue(130);
+        assert_eq!(empty_theme, theme);
+    }
 }
