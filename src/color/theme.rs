@@ -345,7 +345,7 @@ mod tests {
     fn test_empty_theme_return_default() {
         // Must contain one field at least
         // ref https://github.com/dtolnay/serde-yaml/issues/86
-        let empty_theme = Theme::with_yaml("user: 230".into()).unwrap();
+        let empty_theme = Theme::with_yaml("user: 230".into()).unwrap(); // 230 is the default value
         let default_theme = Theme::default_dark();
         assert_eq!(empty_theme, default_theme);
     }
