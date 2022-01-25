@@ -225,6 +225,11 @@ pub fn build() -> App<'static, 'static> {
                 .help("Sort the directories then the files"),
         )
         .arg(
+            Arg::with_name("group-directories-first")
+                .long("group-directories-first")
+                .help("Groups the directories at the top before the files. Same as --group-dirs=first")
+        )
+        .arg(
             Arg::with_name("blocks")
                 .long("blocks")
                 .multiple(true)

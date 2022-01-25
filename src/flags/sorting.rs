@@ -171,6 +171,10 @@ impl Configurable<Self> for DirGrouping {
             return Some(Self::None);
         }
 
+        if matches.is_present("group-directories-first") {
+            return Some(Self::First);
+        }
+
         if matches.occurrences_of("group-dirs") > 0 {
             if let Some(group_dirs) = matches.values_of("group-dirs")?.last() {
                 return Self::from_str(group_dirs);
@@ -524,6 +528,16 @@ mod test_dir_grouping {
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         assert_eq!(
             Some(DirGrouping::Last),
+            DirGrouping::from_arg_matches(&matches)
+        );
+    }
+
+    #[test]
+    fn test_from_arg_matches_group_directories_first() {
+        let argv = vec!["lsd", "--group-directories-first"];
+        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        assert_eq!(
+            Some(DirGrouping::First),
             DirGrouping::from_arg_matches(&matches)
         );
     }
