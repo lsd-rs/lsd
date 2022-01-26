@@ -105,7 +105,7 @@ lsd is a ls command with a lot of pretty colours and some other stuff to enrich 
 : Sort the directories then the files [default: none]  [possible values: none, first, last]
 
 `--group-directories-first`
-: Groups the directories at the top before the files. Same as `--group-dirs=first`. Same as `--group-dirs=first`
+: Groups the directories at the top before the files. Same as `--group-dirs=first`
 
 `--icon <icon>...`
 : When to print the icons [default: auto]  [possible values: always, auto, never]
