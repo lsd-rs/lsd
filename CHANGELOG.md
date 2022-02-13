@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased] - ReleaseDate
 ### Added
 - Add `--group-directories-first` as an alias for `--group-dirs=first` to improve compatibility with `coreutils/ls`
+### Fixed
+- Support non-bold bright colors [#248](https://github.com/Peltoche/lsd/issues/248) from [meain](https://github.com/meain)
 
 ## [0.21.0] - 2022-01-16
 ### Added

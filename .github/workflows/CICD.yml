@@ -6,7 +6,7 @@ env:
   PROJECT_NAME: lsd
   PROJECT_DESC: "An ls command with a lot of pretty colors."
   PROJECT_AUTH: "Peltoche <peltoche@halium.fr>"
-  RUST_MIN_SRV: "1.43.1"
+  RUST_MIN_SRV: "1.56.0"
 
 on: [push, pull_request]
 
