@@ -14,7 +14,7 @@ use clap::ArgMatches;
 pub enum DateFlag {
     Date,
     Relative,
-    ISO,
+    Iso,
     Formatted(String),
 }
 
@@ -91,7 +91,7 @@ impl Configurable<Self> for DateFlag {
             match value.as_str() {
                 "full-iso" => Some(Self::Formatted("%F %T.%f %z".into())),
                 "long-iso" => Some(Self::Formatted("%F %R".into())),
-                "iso" => Some(Self::ISO),
+                "iso" => Some(Self::Iso),
                 _ if value.starts_with('+') => Self::from_format_string(&value),
                 _ => {
                     print_error!("Not a valid date value: {}.", value);
@@ -251,7 +251,7 @@ mod test {
     #[serial_test::serial]
     fn test_from_environment_iso() {
         std::env::set_var("TIME_STYLE", "iso");
-        assert_eq!(Some(DateFlag::ISO), DateFlag::from_environment());
+        assert_eq!(Some(DateFlag::Iso), DateFlag::from_environment());
     }
 
     #[test]
