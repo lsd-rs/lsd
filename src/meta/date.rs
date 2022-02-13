@@ -56,7 +56,7 @@ impl Date {
             match &flags.date {
                 DateFlag::Date => val.format("%c").to_string(),
                 DateFlag::Relative => format!("{}", HumanTime::from(*val - Local::now())),
-                DateFlag::ISO => {
+                DateFlag::Iso => {
                     // 365.2425 * 24 * 60 * 60 = 31556952 seconds per year
                     // 15778476 seconds are 6 months
                     if *val > Local::now() - Duration::seconds(15_778_476) {
@@ -267,7 +267,7 @@ mod test {
         let date = Date::from(&file_path.metadata().unwrap());
 
         let mut flags = Flags::default();
-        flags.date = DateFlag::ISO;
+        flags.date = DateFlag::Iso;
 
         assert_eq!(
             creation_date
@@ -295,7 +295,7 @@ mod test {
         let date = Date::from(&file_path.metadata().unwrap());
 
         let mut flags = Flags::default();
-        flags.date = DateFlag::ISO;
+        flags.date = DateFlag::Iso;
 
         assert_eq!(
             creation_date
