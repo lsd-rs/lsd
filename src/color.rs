@@ -249,7 +249,15 @@ fn to_content_style(ls: &lscolors::Style) -> ContentStyle {
         lscolors::style::Color::Blue => Color::DarkBlue,
         lscolors::style::Color::Magenta => Color::DarkMagenta,
         lscolors::style::Color::Cyan => Color::DarkCyan,
-        lscolors::style::Color::White => Color::White,
+        lscolors::style::Color::White => Color::Grey,
+        lscolors::style::Color::BrightBlack => Color::DarkGrey,
+        lscolors::style::Color::BrightRed => Color::Red,
+        lscolors::style::Color::BrightGreen => Color::Green,
+        lscolors::style::Color::BrightYellow => Color::Yellow,
+        lscolors::style::Color::BrightBlue => Color::Blue,
+        lscolors::style::Color::BrightMagenta => Color::Magenta,
+        lscolors::style::Color::BrightCyan => Color::Cyan,
+        lscolors::style::Color::BrightWhite => Color::White,
     };
     let mut style = ContentStyle {
         foreground_color: ls.foreground.as_ref().map(to_crossterm_color),
