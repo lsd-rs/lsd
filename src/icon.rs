@@ -104,7 +104,7 @@ impl Icons {
         m.insert(".atom", "\u{e764}"); // ""
         m.insert(".bashprofile", "\u{e615}"); // ""
         m.insert(".bashrc", "\u{f489}"); // ""
-        m.insert(".clang-format", "\u{e5fc}"); // ""
+        m.insert(".clang-format", "\u{e615}"); // ""
         m.insert(".git", "\u{f1d3}"); // ""
         m.insert(".gitattributes", "\u{f1d3}"); // ""
         m.insert(".gitconfig", "\u{f1d3}"); // ""
