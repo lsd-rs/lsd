@@ -8,7 +8,7 @@ license = "Apache-2.0"
 name = "lsd"
 readme = "./README.md"
 repository = "https://github.com/Peltoche/lsd"
-version = "0.21.2"
+version = "0.21.0"
 edition = "2018"
 
 [[bin]]
