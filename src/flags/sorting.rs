@@ -267,6 +267,16 @@ mod test_sort_column {
     }
 
     #[test]
+    fn test_from_arg_matches_unsorted() {
+        let argv = vec!["lsd", "--unsorted"];
+        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        assert_eq!(
+            Some(SortColumn::None),
+            SortColumn::from_arg_matches(&matches)
+        );
+    }
+
+    #[test]
     fn test_from_arg_matches_sort() {
         let argv = vec!["lsd", "--sort", "time"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
@@ -293,6 +303,13 @@ mod test_sort_column {
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         assert_eq!(
             Some(SortColumn::Version),
+            SortColumn::from_arg_matches(&matches)
+        );
+
+        let argv = vec!["lsd", "--sort", "none"];
+        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        assert_eq!(
+            Some(SortColumn::None),
             SortColumn::from_arg_matches(&matches)
         );
     }
