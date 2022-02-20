@@ -122,6 +122,9 @@ lsd is a ls command with a lot of pretty colours and some other stuff to enrich 
 `--sort <WORD>...`
 : Sort by WORD instead of name [possible values: size, time, version, extension]
 
+`-U`, `--unsorted`
+: Do not sort
+
 # ARGS
 
 `<FILE>...`
