@@ -37,6 +37,7 @@ impl Sorting {
 #[derive(Clone, Debug, Copy, PartialEq, Eq, Deserialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum SortColumn {
+    None,
     Extension,
     Name,
     Time,
@@ -62,6 +63,8 @@ impl Configurable<Self> for SortColumn {
             Some(Self::Extension)
         } else if matches.is_present("versionsort") || sort == Some("version") {
             Some(Self::Version)
+        } else if matches.is_present("unsorted") || sort == Some("none") {
+            Some(Self::None)
         } else {
             None
         }

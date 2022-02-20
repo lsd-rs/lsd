@@ -16,14 +16,15 @@ pub fn assemble_sorters(flags: &Flags) -> Vec<(SortOrder, SortFn)> {
         }
         DirGrouping::None => {}
     };
-    let other_sort = match flags.sorting.column {
-        SortColumn::Name => by_name,
-        SortColumn::Size => by_size,
-        SortColumn::Time => by_date,
-        SortColumn::Version => by_version,
-        SortColumn::Extension => by_extension,
-    };
-    sorters.push((flags.sorting.order, other_sort));
+
+    match flags.sorting.column {
+        SortColumn::Name => sorters.push((flags.sorting.order, by_name)),
+        SortColumn::Size => sorters.push((flags.sorting.order, by_size)),
+        SortColumn::Time => sorters.push((flags.sorting.order, by_date)),
+        SortColumn::Version => sorters.push((flags.sorting.order, by_version)),
+        SortColumn::Extension => sorters.push((flags.sorting.order, by_extension)),
+        SortColumn::None => {}
+    }
     sorters
 }
 
