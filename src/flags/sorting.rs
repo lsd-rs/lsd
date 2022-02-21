@@ -63,7 +63,7 @@ impl Configurable<Self> for SortColumn {
             Some(Self::Extension)
         } else if matches.is_present("versionsort") || sort == Some("version") {
             Some(Self::Version)
-        } else if matches.is_present("unsorted") || sort == Some("none") {
+        } else if matches.is_present("no-sort") || sort == Some("none") {
             Some(Self::None)
         } else {
             None
@@ -267,8 +267,8 @@ mod test_sort_column {
     }
 
     #[test]
-    fn test_from_arg_matches_unsorted() {
-        let argv = vec!["lsd", "--unsorted"];
+    fn test_from_arg_matches_no_sort() {
+        let argv = vec!["lsd", "--no-sort"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         assert_eq!(
             Some(SortColumn::None),

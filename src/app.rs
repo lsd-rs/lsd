@@ -158,7 +158,7 @@ pub fn build() -> App<'static, 'static> {
                 .overrides_with("extensionsort")
                 .overrides_with("versionsort")
                 .overrides_with("sort")
-                .overrides_with("unsorted")
+                .overrides_with("no-sort")
                 .multiple(true)
                 .help("Sort by time modified"),
         )
@@ -170,7 +170,7 @@ pub fn build() -> App<'static, 'static> {
                 .overrides_with("extensionsort")
                 .overrides_with("versionsort")
                 .overrides_with("sort")
-                .overrides_with("unsorted")
+                .overrides_with("no-sort")
                 .multiple(true)
                 .help("Sort by size"),
         )
@@ -182,7 +182,7 @@ pub fn build() -> App<'static, 'static> {
                 .overrides_with("timesort")
                 .overrides_with("versionsort")
                 .overrides_with("sort")
-                .overrides_with("unsorted")
+                .overrides_with("no-sort")
                 .multiple(true)
                 .help("Sort by file extension"),
         )
@@ -195,7 +195,7 @@ pub fn build() -> App<'static, 'static> {
                 .overrides_with("sizesort")
                 .overrides_with("extensionsort")
                 .overrides_with("sort")
-                .overrides_with("unsorted")
+                .overrides_with("no-sort")
                 .help("Natural sort of (version) numbers within text"),
         )
         .arg(
@@ -209,20 +209,20 @@ pub fn build() -> App<'static, 'static> {
                 .overrides_with("sizesort")
                 .overrides_with("extensionsort")
                 .overrides_with("versionsort")
-                .overrides_with("unsorted")
+                .overrides_with("no-sort")
                 .help("sort by WORD instead of name")
         )
         .arg(
-            Arg::with_name("unsorted")
+            Arg::with_name("no-sort")
             .short("U")
-            .long("unsorted")
+            .long("no-sort")
             .multiple(true)
             .overrides_with("timesort")
             .overrides_with("sizesort")
             .overrides_with("extensionsort")
             .overrides_with("sort")
             .overrides_with("versionsort")
-            .help("Do not sort")
+            .help("Do not sort. List entries in directory order")
         )
         .arg(
             Arg::with_name("reverse")
