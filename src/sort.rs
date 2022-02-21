@@ -298,7 +298,7 @@ mod tests {
     }
 
     #[test]
-    fn test_sort_assemble_sorters_unsorted() {
+    fn test_sort_assemble_sorters_no_sort() {
         let tmp_dir = tempdir().expect("failed to create temp dir");
 
         // Create the file with rs extension;
