@@ -116,6 +116,9 @@ lsd is a ls command with a lot of pretty colours and some other stuff to enrich 
 `-I, --ignore-glob <pattern>...`
 : Do not display files/directories with names matching the glob pattern(s). More than one can be specified by repeating the argument [default: ]
 
+  * [ ] `--permission <permission>...`
+: How to display permissions [default: rwx]  [possible values: rwx, octal]
+
 `--size <size>...`
 : How to display size [default: default]  [possible values: default, short, bytes]
 

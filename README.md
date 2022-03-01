@@ -179,6 +179,11 @@ recursion:
 # Possible values: default, short, bytes
 size: default
 
+# == Permission ==
+# Specify the format of the permission column
+# Possible value: rwx, octal
+permission: rwx
+
 # == Sorting ==
 sorting:
   # Specify what to sort by.
@@ -246,6 +251,7 @@ permission:
   exec: dark_red
   exec-sticky: 5
   no-access: 245
+  octal: 6
 date:
   hour-old: 40
   day-old: 42

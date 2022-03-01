@@ -35,6 +35,7 @@ pub enum Elem {
     Exec,
     ExecSticky,
     NoAccess,
+    Octal,
 
     /// Last Time Modified
     DayOld,
@@ -102,6 +103,7 @@ impl Elem {
             Elem::Exec => theme.permission.exec,
             Elem::ExecSticky => theme.permission.exec_sticky,
             Elem::NoAccess => theme.permission.no_access,
+            Elem::Octal => theme.permission.octal,
 
             Elem::DayOld => theme.date.day_old,
             Elem::HourOld => theme.date.hour_old,
@@ -340,6 +342,7 @@ mod elem {
                 exec: Color::Red,
                 exec_sticky: Color::Magenta,
                 no_access: Color::AnsiValue(245), // Grey
+                octal: Color::AnsiValue(6),
             },
             file_type: theme::FileType {
                 file: theme::File {

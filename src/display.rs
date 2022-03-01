@@ -270,7 +270,7 @@ fn get_output<'a>(
             Block::Permission => {
                 block_vec.extend(vec![
                     meta.file_type.render(colors),
-                    meta.permissions.render(colors),
+                    meta.permissions.render(colors, flags),
                 ]);
             }
             Block::User => block_vec.push(meta.owner.render_user(colors)),
