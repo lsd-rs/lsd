@@ -7,6 +7,7 @@ pub mod icons;
 pub mod ignore_globs;
 pub mod indicators;
 pub mod layout;
+pub mod permission;
 pub mod recursion;
 pub mod size;
 pub mod sorting;
@@ -28,6 +29,7 @@ pub use icons::Icons;
 pub use ignore_globs::IgnoreGlobs;
 pub use indicators::Indicators;
 pub use layout::Layout;
+pub use permission::PermissionFlag;
 pub use recursion::Recursion;
 pub use size::SizeFlag;
 pub use sorting::DirGrouping;
@@ -60,6 +62,7 @@ pub struct Flags {
     pub no_symlink: NoSymlink,
     pub recursion: Recursion,
     pub size: SizeFlag,
+    pub permission: PermissionFlag,
     pub sorting: Sorting,
     pub total_size: TotalSize,
     pub symlink_arrow: SymlinkArrow,
@@ -81,6 +84,7 @@ impl Flags {
             display: Display::configure_from(matches, config),
             layout: Layout::configure_from(matches, config),
             size: SizeFlag::configure_from(matches, config),
+            permission: PermissionFlag::configure_from(matches, config),
             display_indicators: Indicators::configure_from(matches, config),
             icons: Icons::configure_from(matches, config),
             ignore_globs: IgnoreGlobs::configure_from(matches, config)?,

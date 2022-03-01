@@ -125,6 +125,16 @@ pub fn build() -> App<'static, 'static> {
                 .help("Display directories themselves, and not their contents (recursively when used with --tree)"),
         )
         .arg(
+            Arg::with_name("permission")
+                .long("permission")
+                .default_value("rwx")
+                .possible_value("rwx")
+                .possible_value("octal")
+                .multiple(true)
+                .number_of_values(1)
+                .help("How to display permissions"),
+        )
+        .arg(
             Arg::with_name("size")
                 .long("size")
                 .possible_value("default")
