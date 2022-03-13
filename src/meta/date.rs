@@ -83,7 +83,6 @@ mod test {
     use std::io;
     use std::path::Path;
     use std::process::{Command, ExitStatus};
-    use std::time;
     use std::{env, fs};
 
     #[cfg(unix)]
@@ -314,8 +313,8 @@ mod test {
         // 4437052 is the bad year taken from https://github.com/Peltoche/lsd/issues/529 that we know is both
         // a) high enough to break chrono
         // b) not high enough to break SystemTime (as Duration::MAX would)
-        let end_time =
-            time::SystemTime::UNIX_EPOCH + time::Duration::new(4437052 * 365 * 24 * 60 * 60, 0);
+        let end_time = std::time::SystemTime::UNIX_EPOCH
+            + std::time::Duration::new(4437052 * 365 * 24 * 60 * 60, 0);
         let colors = Colors::new(ThemeOption::Default);
         let date = Date::from(end_time);
 
