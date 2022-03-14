@@ -302,6 +302,7 @@ impl Icons {
         m.insert("rubydoc", "\u{e73b}"); // ""
         m.insert("sass", "\u{e603}"); // ""
         m.insert("scala", "\u{e737}"); // ""
+        m.insert("scpt", "\u{f302}"); // ""
         m.insert("scss", "\u{e749}"); // ""
         m.insert("sh", "\u{f489}"); // ""
         m.insert("shell", "\u{f489}"); // ""
