@@ -145,6 +145,7 @@ impl Icons {
         // Note: extensions must be lower-case
 
         m.insert("7z", "\u{f410}"); // ""
+        m.insert("ai", "\u{e7b4}"); // ""
         m.insert("apk", "\u{e70e}"); // ""
         m.insert("avi", "\u{f03d}"); // ""
         m.insert("avro", "\u{e60b}"); // ""
