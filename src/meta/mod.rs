@@ -129,13 +129,17 @@ impl Meta {
                 }
             }
 
-            match entry_meta.recurse_into(depth - 1, flags) {
-                Ok(content) => entry_meta.content = content,
-                Err(err) => {
-                    print_error!("{}: {}.", path.display(), err);
-                    continue;
-                }
-            };
+            let dereference =
+                !matches!(entry_meta.file_type, FileType::SymLink { .. }) || flags.dereference.0;
+            if dereference {
+                match entry_meta.recurse_into(depth - 1, flags) {
+                    Ok(content) => entry_meta.content = content,
+                    Err(err) => {
+                        print_error!("{}: {}.", path.display(), err);
+                        continue;
+                    }
+                };
+            }
 
             content.push(entry_meta);
         }
