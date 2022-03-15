@@ -39,6 +39,8 @@ pub struct Permission {
     pub exec_sticky: Color,
     pub no_access: Color,
     pub octal: Color,
+    pub acl: Color,
+    pub security_label: Color,
 }
 
 #[derive(Debug, Deserialize, PartialEq)]
@@ -134,6 +136,8 @@ impl Default for Permission {
             exec_sticky: Color::AnsiValue(5),
             no_access: Color::AnsiValue(245), // Grey
             octal: Color::AnsiValue(6),
+            acl: Color::DarkCyan,
+            security_label: Color::White,
         }
     }
 }

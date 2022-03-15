@@ -40,6 +40,7 @@ serde_yaml = "0.8"
 
 [target.'cfg(unix)'.dependencies]
 users = "0.11.*"
+xattr = "0.2.*"
 
 [target.'cfg(windows)'.dependencies]
 winapi = {version = "0.3.*", features = ["aclapi", "accctrl", "winnt", "winerror", "securitybaseapi", "winbase"]}

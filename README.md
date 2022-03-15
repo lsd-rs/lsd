@@ -252,6 +252,8 @@ permission:
   exec-sticky: 5
   no-access: 245
   octal: 6
+  acl: dark_cyan
+  security-label: white
 date:
   hour-old: 40
   day-old: 42
@@ -348,7 +350,7 @@ Workaround for Konsole: ㅤEdit the config file (or [create it](#config-file-loc
 icons:
     separator: " ㅤ"
 ```
-  
+
 
 This is a known issue in a few terminal emulator. Try using a different terminal emulator like. [Alacritty](https://github.com/alacritty/alacritty) and [Kitty](https://github.com/kovidgoyal/kitty) are really good alternatives. You might also want to check if your font is responsible for causing this.
 To verify this, try running lsd with icons disabled and if it still does not have the first character, then this is an lsd bug:

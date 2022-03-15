@@ -1,3 +1,4 @@
+mod access_control;
 mod date;
 mod filetype;
 mod indicator;
@@ -12,6 +13,7 @@ mod symlink;
 #[cfg(windows)]
 mod windows_utils;
 
+pub use self::access_control::AccessControl;
 pub use self::date::Date;
 pub use self::filetype::FileType;
 pub use self::indicator::Indicator;
@@ -44,6 +46,7 @@ pub struct Meta {
     pub inode: INode,
     pub links: Links,
     pub content: Option<Vec<Meta>>,
+    pub access_control: AccessControl,
 }
 
 impl Meta {
@@ -231,6 +234,7 @@ impl Meta {
         #[cfg(windows)]
         let (owner, permissions) = windows_utils::get_file_data(path)?;
 
+        let access_control = AccessControl::for_path(path);
         let file_type = FileType::new(&metadata, symlink_meta.as_ref(), &permissions);
         let name = Name::new(path, file_type);
         let inode = INode::from(&metadata);
@@ -249,6 +253,7 @@ impl Meta {
             name,
             file_type,
             content: None,
+            access_control: access_control,
         })
     }
 }
