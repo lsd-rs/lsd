@@ -253,7 +253,7 @@ impl Meta {
             name,
             file_type,
             content: None,
-            access_control: access_control,
+            access_control,
         })
     }
 }

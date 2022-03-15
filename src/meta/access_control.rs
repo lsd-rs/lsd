@@ -49,6 +49,20 @@ impl AccessControl {
             colors.colorize(String::from(""), &Elem::Acl)
         }
     }
+
+    pub fn render_label(&self, colors: &Colors) -> ColoredString {
+        let mut label = self.selinux_label.clone();
+        if !self.smack_label.is_empty() {
+            if !label.is_empty() {
+                label += "+";
+            }
+            label += &self.smack_label;
+        }
+        if label.is_empty() {
+            label += "?";
+        }
+        colors.colorize(label, &Elem::SecurityLabel)
+    }
 }
 
 #[cfg(unix)]
@@ -103,6 +117,36 @@ mod test {
         assert_eq!(
             String::from("+").with(Color::DarkCyan),
             access_control.render_method(&Colors::new(ThemeOption::Default))
+        );
+    }
+
+    #[test]
+    fn test_selinux_label() {
+        let access_control = AccessControl::from_data(false, &[b'a'], &[]);
+
+        assert_eq!(
+            String::from("a").with(Color::White),
+            access_control.render_label(&Colors::new(ThemeOption::Default))
+        );
+    }
+
+    #[test]
+    fn test_selinux_and_smack_label() {
+        let access_control = AccessControl::from_data(false, &[b'a'], &[b'b']);
+
+        assert_eq!(
+            String::from("a+b").with(Color::White),
+            access_control.render_label(&Colors::new(ThemeOption::Default))
+        );
+    }
+
+    #[test]
+    fn test_no_label() {
+        let access_control = AccessControl::from_data(false, &[], &[]);
+
+        assert_eq!(
+            String::from("?").with(Color::White),
+            access_control.render_label(&Colors::new(ThemeOption::Default))
         );
     }
 }

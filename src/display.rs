@@ -276,6 +276,7 @@ fn get_output<'a>(
             }
             Block::User => block_vec.push(meta.owner.render_user(colors)),
             Block::Group => block_vec.push(meta.owner.render_group(colors)),
+            Block::Label => block_vec.push(meta.access_control.render_label(colors)),
             Block::Size => {
                 let pad = if Layout::Tree == flags.layout && 0 == tree.0 && 0 == i {
                     None
