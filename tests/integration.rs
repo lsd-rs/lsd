@@ -504,6 +504,42 @@ fn test_tree_d() {
         .stdout(predicate::str::is_match("├── one.d\n│   └── one.d\n└── two.d\n$").unwrap());
 }
 
+#[cfg(unix)]
+#[test]
+fn test_tree_no_dereference() {
+    let tmp = tempdir();
+    tmp.child("one.d").create_dir_all().unwrap();
+    tmp.child("one.d/samplefile").touch().unwrap();
+    let link = tmp.path().join("link");
+    fs::symlink("one.d", &link).unwrap();
+
+    cmd().arg(tmp.path()).arg("--tree").assert().stdout(
+        predicate::str::is_match("├── link ⇒ one.d\n└── one.d\n    └── samplefile\n$").unwrap(),
+    );
+}
+
+#[cfg(unix)]
+#[test]
+fn test_tree_dereference() {
+    let tmp = tempdir();
+    tmp.child("one.d").create_dir_all().unwrap();
+    tmp.child("one.d/samplefile").touch().unwrap();
+    let link = tmp.path().join("link");
+    fs::symlink("one.d", &link).unwrap();
+
+    cmd()
+        .arg(tmp.path())
+        .arg("--tree")
+        .arg("-L")
+        .assert()
+        .stdout(
+            predicate::str::is_match(
+                "├── link\n│   └── samplefile\n└── one.d\n    └── samplefile\n$",
+            )
+            .unwrap(),
+        );
+}
+
 fn cmd() -> Command {
     Command::cargo_bin(env!("CARGO_PKG_NAME")).unwrap()
 }
