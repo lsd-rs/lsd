@@ -36,6 +36,8 @@ pub enum Elem {
     ExecSticky,
     NoAccess,
     Octal,
+    Acl,
+    SecurityLabel,
 
     /// Last Time Modified
     DayOld,
@@ -104,6 +106,8 @@ impl Elem {
             Elem::ExecSticky => theme.permission.exec_sticky,
             Elem::NoAccess => theme.permission.no_access,
             Elem::Octal => theme.permission.octal,
+            Elem::Acl => theme.permission.acl,
+            Elem::SecurityLabel => theme.permission.security_label,
 
             Elem::DayOld => theme.date.day_old,
             Elem::HourOld => theme.date.hour_old,
@@ -343,6 +347,8 @@ mod elem {
                 exec_sticky: Color::Magenta,
                 no_access: Color::AnsiValue(245), // Grey
                 octal: Color::AnsiValue(6),
+                acl: Color::DarkCyan,
+                security_label: Color::White,
             },
             file_type: theme::FileType {
                 file: theme::File {
