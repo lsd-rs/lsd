@@ -266,6 +266,7 @@ pub fn build() -> App<'static, 'static> {
                     "permission",
                     "user",
                     "group",
+                    "label",
                     "size",
                     "date",
                     "name",
@@ -308,6 +309,14 @@ pub fn build() -> App<'static, 'static> {
                 .long("dereference")
                 .multiple(true)
                 .help("When showing file information for a symbolic link, show information for the file the link references rather than for the link itself"),
+        )
+        .arg(
+            Arg::with_name("label")
+                .short("Z")
+                .long("label")
+                .required(false)
+                .takes_value(false)
+                .help("Print security label (context) of each file"),
         )
 }
 
