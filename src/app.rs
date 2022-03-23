@@ -103,6 +103,7 @@ pub fn build() -> App<'static, 'static> {
         )
         .arg(
             Arg::with_name("tree")
+                .short("T")
                 .long("tree")
                 .multiple(true)
                 .conflicts_with("recursive")
