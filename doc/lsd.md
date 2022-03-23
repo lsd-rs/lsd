@@ -80,7 +80,7 @@ lsd is a ls command with a lot of pretty colours and some other stuff to enrich 
 `--total-size`
 : Display the total size of directories
 
-`--tree`
+`-T` `--tree`
 : Recurse into directories and present the result as a tree
 
 `-V`, `--version`
