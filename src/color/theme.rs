@@ -40,7 +40,7 @@ pub struct Permission {
     pub no_access: Color,
     pub octal: Color,
     pub acl: Color,
-    pub security_label: Color,
+    pub security_context: Color,
 }
 
 #[derive(Debug, Deserialize, PartialEq)]
@@ -137,7 +137,7 @@ impl Default for Permission {
             no_access: Color::AnsiValue(245), // Grey
             octal: Color::AnsiValue(6),
             acl: Color::DarkCyan,
-            security_label: Color::White,
+            security_context: Color::Cyan,
         }
     }
 }

@@ -37,7 +37,7 @@ pub enum Elem {
     NoAccess,
     Octal,
     Acl,
-    SecurityLabel,
+    SecurityContext,
 
     /// Last Time Modified
     DayOld,
@@ -107,7 +107,7 @@ impl Elem {
             Elem::NoAccess => theme.permission.no_access,
             Elem::Octal => theme.permission.octal,
             Elem::Acl => theme.permission.acl,
-            Elem::SecurityLabel => theme.permission.security_label,
+            Elem::SecurityContext => theme.permission.security_context,
 
             Elem::DayOld => theme.date.day_old,
             Elem::HourOld => theme.date.hour_old,
@@ -348,7 +348,7 @@ mod elem {
                 no_access: Color::AnsiValue(245), // Grey
                 octal: Color::AnsiValue(6),
                 acl: Color::DarkCyan,
-                security_label: Color::White,
+                security_context: Color::Cyan,
             },
             file_type: theme::FileType {
                 file: theme::File {

@@ -266,7 +266,7 @@ pub fn build() -> App<'static, 'static> {
                     "permission",
                     "user",
                     "group",
-                    "label",
+                    "context",
                     "size",
                     "date",
                     "name",
@@ -311,12 +311,12 @@ pub fn build() -> App<'static, 'static> {
                 .help("When showing file information for a symbolic link, show information for the file the link references rather than for the link itself"),
         )
         .arg(
-            Arg::with_name("label")
+            Arg::with_name("context")
                 .short("Z")
-                .long("label")
+                .long("context")
                 .required(false)
                 .takes_value(false)
-                .help("Print security label (context) of each file"),
+                .help("Print security context (label) of each file"),
         )
 }
 

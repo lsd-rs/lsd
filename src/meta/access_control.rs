@@ -4,8 +4,8 @@ use std::path::Path;
 #[derive(Clone, Debug)]
 pub struct AccessControl {
     has_acl: bool,
-    selinux_label: String,
-    smack_label: String,
+    selinux_context: String,
+    smack_context: String,
 }
 
 impl AccessControl {
@@ -20,48 +20,48 @@ impl AccessControl {
             .unwrap_or_default()
             .unwrap_or_default()
             .is_empty();
-        let selinux_label = xattr::get(path, Method::Selinux.name())
+        let selinux_context = xattr::get(path, Method::Selinux.name())
             .unwrap_or_default()
             .unwrap_or_default();
-        let smack_label = xattr::get(path, Method::Smack.name())
+        let smack_context = xattr::get(path, Method::Smack.name())
             .unwrap_or_default()
             .unwrap_or_default();
 
-        Self::from_data(has_acl, &selinux_label, &smack_label)
+        Self::from_data(has_acl, &selinux_context, &smack_context)
     }
 
-    fn from_data(has_acl: bool, selinux_label: &[u8], smack_label: &[u8]) -> Self {
-        let selinux_label = String::from_utf8_lossy(selinux_label).to_string();
-        let smack_label = String::from_utf8_lossy(smack_label).to_string();
+    fn from_data(has_acl: bool, selinux_context: &[u8], smack_context: &[u8]) -> Self {
+        let selinux_context = String::from_utf8_lossy(selinux_context).to_string();
+        let smack_context = String::from_utf8_lossy(smack_context).to_string();
         Self {
             has_acl,
-            selinux_label,
-            smack_label,
+            selinux_context,
+            smack_context,
         }
     }
 
     pub fn render_method(&self, colors: &Colors) -> ColoredString {
         if self.has_acl {
             colors.colorize(String::from("+"), &Elem::Acl)
-        } else if !self.selinux_label.is_empty() || !self.smack_label.is_empty() {
-            colors.colorize(String::from("."), &Elem::SecurityLabel)
+        } else if !self.selinux_context.is_empty() || !self.smack_context.is_empty() {
+            colors.colorize(String::from("."), &Elem::SecurityContext)
         } else {
             colors.colorize(String::from(""), &Elem::Acl)
         }
     }
 
-    pub fn render_label(&self, colors: &Colors) -> ColoredString {
-        let mut label = self.selinux_label.clone();
-        if !self.smack_label.is_empty() {
-            if !label.is_empty() {
-                label += "+";
+    pub fn render_context(&self, colors: &Colors) -> ColoredString {
+        let mut context = self.selinux_context.clone();
+        if !self.smack_context.is_empty() {
+            if !context.is_empty() {
+                context += "+";
             }
-            label += &self.smack_label;
+            context += &self.smack_context;
         }
-        if label.is_empty() {
-            label += "?";
+        if context.is_empty() {
+            context += "?";
         }
-        colors.colorize(label, &Elem::SecurityLabel)
+        colors.colorize(context, &Elem::SecurityContext)
     }
 }
 
@@ -105,7 +105,7 @@ mod test {
         let access_control = AccessControl::from_data(false, &[], &[b'a']);
 
         assert_eq!(
-            String::from(".").with(Color::White),
+            String::from(".").with(Color::Cyan),
             access_control.render_method(&Colors::new(ThemeOption::Default))
         );
     }
@@ -121,32 +121,32 @@ mod test {
     }
 
     #[test]
-    fn test_selinux_label() {
+    fn test_selinux_context() {
         let access_control = AccessControl::from_data(false, &[b'a'], &[]);
 
         assert_eq!(
-            String::from("a").with(Color::White),
-            access_control.render_label(&Colors::new(ThemeOption::Default))
+            String::from("a").with(Color::Cyan),
+            access_control.render_context(&Colors::new(ThemeOption::Default))
         );
     }
 
     #[test]
-    fn test_selinux_and_smack_label() {
+    fn test_selinux_and_smack_context() {
         let access_control = AccessControl::from_data(false, &[b'a'], &[b'b']);
 
         assert_eq!(
-            String::from("a+b").with(Color::White),
-            access_control.render_label(&Colors::new(ThemeOption::Default))
+            String::from("a+b").with(Color::Cyan),
+            access_control.render_context(&Colors::new(ThemeOption::Default))
         );
     }
 
     #[test]
-    fn test_no_label() {
+    fn test_no_context() {
         let access_control = AccessControl::from_data(false, &[], &[]);
 
         assert_eq!(
-            String::from("?").with(Color::White),
-            access_control.render_label(&Colors::new(ThemeOption::Default))
+            String::from("?").with(Color::Cyan),
+            access_control.render_context(&Colors::new(ThemeOption::Default))
         );
     }
 }

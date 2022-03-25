@@ -68,7 +68,7 @@ fn inner_display_grid(
         }),
         _ => Grid::new(GridOptions {
             filling: Filling::Spaces(2),
-            direction: Direction::TopToBottom,
+            direction: Direction::LeftToRight,
         }),
     };
 
@@ -276,7 +276,7 @@ fn get_output<'a>(
             }
             Block::User => block_vec.push(meta.owner.render_user(colors)),
             Block::Group => block_vec.push(meta.owner.render_group(colors)),
-            Block::Label => block_vec.push(meta.access_control.render_label(colors)),
+            Block::Context => block_vec.push(meta.access_control.render_context(colors)),
             Block::Size => {
                 let pad = if Layout::Tree == flags.layout && 0 == tree.0 && 0 == i {
                     None
