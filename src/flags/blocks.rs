@@ -45,9 +45,9 @@ impl Blocks {
             result = value;
         }
 
-        if matches.is_present("label") {
+        if matches.is_present("context") {
             if let Ok(blocks) = result.as_mut() {
-                blocks.optional_insert_label();
+                blocks.optional_insert_context();
             }
         }
 
@@ -151,11 +151,11 @@ impl Blocks {
         }
     }
 
-    /// Tnserts a [Block] of variant [INode](Block::Label), if `self` does not already contain a
+    /// Tnserts a [Block] of variant [INode](Block::Context), if `self` does not already contain a
     /// [Block] of that variant. The positioning will be best-effort approximation of coreutils
-    /// ls position for a security label
-    fn optional_insert_label(&mut self) {
-        if self.0.contains(&Block::Label) {
+    /// ls position for a security context
+    fn optional_insert_context(&mut self) {
+        if self.0.contains(&Block::Context) {
             return;
         }
         let mut pos = self.0.iter().position(|elem| *elem == Block::Group);
@@ -163,8 +163,8 @@ impl Blocks {
             pos = self.0.iter().position(|elem| *elem == Block::User);
         }
         match pos {
-            Some(pos) => self.0.insert(pos + 1, Block::Label),
-            None => self.0.insert(0, Block::Label),
+            Some(pos) => self.0.insert(pos + 1, Block::Context),
+            None => self.0.insert(0, Block::Context),
         }
     }
 }
@@ -182,7 +182,7 @@ pub enum Block {
     Permission,
     User,
     Group,
-    Label,
+    Context,
     Size,
     SizeValue,
     Date,
@@ -199,7 +199,7 @@ impl TryFrom<&str> for Block {
             "permission" => Ok(Self::Permission),
             "user" => Ok(Self::User),
             "group" => Ok(Self::Group),
-            "label" => Ok(Self::Label),
+            "context" => Ok(Self::Context),
             "size" => Ok(Self::Size),
             "size_value" => Ok(Self::SizeValue),
             "date" => Ok(Self::Date),
@@ -473,37 +473,37 @@ mod test_blocks {
     }
 
     #[test]
-    fn test_label_not_present_on_cli() {
+    fn test_context_not_present_on_cli() {
         let argv = vec!["lsd", "--long"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         let parsed_blocks = Blocks::configure_from(&matches, &Config::with_none()).unwrap();
         let it = parsed_blocks.0.iter();
-        assert_eq!(it.filter(|&x| *x == Block::Label).count(), 0);
+        assert_eq!(it.filter(|&x| *x == Block::Context).count(), 0);
     }
 
     #[test]
-    fn test_label_present_if_label_on() {
-        let argv = vec!["lsd", "--label"];
+    fn test_context_present_if_context_on() {
+        let argv = vec!["lsd", "--context"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         let parsed_blocks = Blocks::configure_from(&matches, &Config::with_none()).unwrap();
         let it = parsed_blocks.0.iter();
-        assert_eq!(it.filter(|&x| *x == Block::Label).count(), 1);
+        assert_eq!(it.filter(|&x| *x == Block::Context).count(), 1);
     }
 
     #[test]
-    fn test_only_one_label_no_other_blocks_affected() {
+    fn test_only_one_context_no_other_blocks_affected() {
         let argv = vec![
             "lsd",
-            "--label",
+            "--context",
             "--blocks",
-            "name,date,size,label,group,user,permission",
+            "name,date,size,context,group,user,permission",
         ];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         let test_blocks = Blocks(vec![
             Block::Name,
             Block::Date,
             Block::Size,
-            Block::Label,
+            Block::Context,
             Block::Group,
             Block::User,
             Block::Permission,
@@ -573,7 +573,7 @@ mod test_block {
     }
 
     #[test]
-    fn test_label() {
-        assert_eq!(Ok(Block::Label), Block::try_from("label"));
+    fn test_context() {
+        assert_eq!(Ok(Block::Context), Block::try_from("context"));
     }
 }
