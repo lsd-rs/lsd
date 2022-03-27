@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add `--group-directories-first` as an alias for `--group-dirs=first` to improve compatibility with `coreutils/ls`
 - Add `--permission` flag to choose permission formatting (rwx, octal) from [meain](https://github.com/meain)
 - Display MAC contexts and MAC and ACL indicators from [mmatous](https://github.com/mmatous)
+- Add `--hyperlink` flag for adding hyperlinks to files from [KSXGitHub](https://github.com/KSXGitHub) and [meain](https://github.com/meain)
 ### Fixed
 - Support non-bold bright colors [#248](https://github.com/Peltoche/lsd/issues/248) from [meain](https://github.com/meain)
 - Don't automatically dereference symlinks in tree/recursive [#637](https://github.com/Peltoche/lsd/issues/637) from [meain](https://github.com/meain)
