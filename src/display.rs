@@ -68,7 +68,7 @@ fn inner_display_grid(
         }),
         _ => Grid::new(GridOptions {
             filling: Filling::Spaces(2),
-            direction: Direction::LeftToRight,
+            direction: Direction::TopToBottom,
         }),
     };
 

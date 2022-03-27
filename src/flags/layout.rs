@@ -30,6 +30,7 @@ impl Configurable<Layout> for Layout {
         } else if matches.is_present("long")
             || matches.is_present("oneline")
             || matches.is_present("inode")
+            || matches.is_present("context")
             || matches!(matches.values_of("blocks"), Some(values) if values.len() > 1)
         // TODO: handle this differently
         {
