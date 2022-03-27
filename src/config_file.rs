@@ -312,6 +312,11 @@ no-symlink: false
 # Possible values: false, true
 total-size: false
 
+# == Hyperlink ==
+# Whether to display the total size of directories.
+# Possible values: always, auto, never
+hyperlink: never
+
 # == Symlink arrow ==
 # Specifies how the symlink arrow display, chars in both ascii and utf8
 symlink-arrow: ⇒

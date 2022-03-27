@@ -3,6 +3,7 @@ pub mod color;
 pub mod date;
 pub mod dereference;
 pub mod display;
+pub mod hyperlink;
 pub mod icons;
 pub mod ignore_globs;
 pub mod indicators;
@@ -14,7 +15,6 @@ pub mod sorting;
 pub mod symlink_arrow;
 pub mod symlinks;
 pub mod total_size;
-pub mod hyperlink;
 
 pub use blocks::Block;
 pub use blocks::Blocks;

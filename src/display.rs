@@ -1,5 +1,5 @@
 use crate::color::{Colors, Elem};
-use crate::flags::{Block, Display, Flags, Layout};
+use crate::flags::{Block, Display, Flags, HyperlinkOption, Layout};
 use crate::icon::Icons;
 use crate::meta::name::DisplayOption;
 use crate::meta::{FileType, Meta};
@@ -102,7 +102,10 @@ fn inner_display_grid(
             let block_str = block.to_string();
 
             grid.add(Cell {
-                width: get_visible_width(&block_str),
+                width: get_visible_width(
+                    &block_str,
+                    matches!(flags.hyperlink, HyperlinkOption::Always),
+                ),
                 contents: block_str,
             });
         }
@@ -189,7 +192,10 @@ fn inner_display_tree(
             let block_str = block.to_string();
 
             cells.push(Cell {
-                width: get_visible_width(&block_str),
+                width: get_visible_width(
+                    &block_str,
+                    matches!(flags.hyperlink, HyperlinkOption::Always),
+                ),
                 contents: block_str,
             });
         }
@@ -309,7 +315,7 @@ fn get_output<'a>(
     strings
 }
 
-fn get_visible_width(input: &str) -> usize {
+fn get_visible_width(input: &str, hyperlink: bool) -> usize {
     let mut nb_invisible_char = 0;
 
     // If the input has color, do not compute the length contributed by the color to the actual length
@@ -319,6 +325,17 @@ fn get_visible_width(input: &str) -> usize {
         let m_pos = s.find('m');
         if let Some(len) = m_pos {
             nb_invisible_char += len
+        }
+    }
+
+    if hyperlink {
+        for (idx, _) in input.match_indices("\x1B]8;;") {
+            let (_, s) = input.split_at(idx);
+
+            let m_pos = s.find("\x1B\x5C");
+            if let Some(len) = m_pos {
+                nb_invisible_char += len
+            }
         }
     }
 
@@ -365,6 +382,7 @@ mod tests {
     use super::*;
     use crate::color;
     use crate::color::Colors;
+    use crate::flags::HyperlinkOption;
     use crate::icon::Icons;
     use crate::meta::{FileType, Name};
     use crate::Config;
@@ -396,11 +414,11 @@ mod tests {
                     &Colors::new(color::ThemeOption::NoColor),
                     &Icons::new(icon::Theme::NoIcon, " ".to_string()),
                     &DisplayOption::FileName,
-                    false,
+                    HyperlinkOption::Never,
                 )
                 .to_string();
 
-            assert_eq!(get_visible_width(&output), *l);
+            assert_eq!(get_visible_width(&output, false), *l);
         }
     }
 
@@ -430,11 +448,11 @@ mod tests {
                     &Colors::new(color::ThemeOption::NoColor),
                     &Icons::new(icon::Theme::Fancy, " ".to_string()),
                     &DisplayOption::FileName,
-                    false,
+                    HyperlinkOption::Never,
                 )
                 .to_string();
 
-            assert_eq!(get_visible_width(&output), *l);
+            assert_eq!(get_visible_width(&output, false), *l);
         }
     }
 
@@ -463,7 +481,7 @@ mod tests {
                     &Colors::new(color::ThemeOption::NoLscolors),
                     &Icons::new(icon::Theme::NoIcon, " ".to_string()),
                     &DisplayOption::FileName,
-                    false,
+                    HyperlinkOption::Never,
                 )
                 .to_string();
 
@@ -476,7 +494,7 @@ mod tests {
             );
             assert_eq!(true, output.ends_with("[39m"), "reset foreground color");
 
-            assert_eq!(get_visible_width(&output), *l, "visible match");
+            assert_eq!(get_visible_width(&output, false), *l, "visible match");
         }
     }
 
@@ -505,7 +523,7 @@ mod tests {
                     &Colors::new(color::ThemeOption::NoColor),
                     &Icons::new(icon::Theme::NoIcon, " ".to_string()),
                     &DisplayOption::FileName,
-                    false,
+                    HyperlinkOption::Never,
                 )
                 .to_string();
 
@@ -513,7 +531,25 @@ mod tests {
             assert_eq!(false, output.starts_with("\u{1b}[38;5;"));
             assert_eq!(false, output.ends_with("[0m"));
 
-            assert_eq!(get_visible_width(&output), *l);
+            assert_eq!(get_visible_width(&output, false), *l);
+        }
+    }
+
+    #[test]
+    fn test_display_get_visible_width_hypelink_simple() {
+        for (s, l) in &[
+            ("Ｈｅｌｌｏ,ｗｏｒｌｄ!", 22),
+            ("ASCII1234-_", 11),
+            ("File with space", 15),
+            ("制作样本。", 10),
+            ("日本語", 6),
+            ("샘플은 무료로 드리겠습니다", 26),
+            ("👩🐩", 4),
+            ("🔬", 2),
+        ] {
+            // rending name require actual file, so we are mocking that
+            let output = format!("\x1B]8;;{}\x1B\x5C{}\x1B]8;;\x1B\x5C", "url://fake-url", s);
+            assert_eq!(get_visible_width(&output, true), *l);
         }
     }
 
