@@ -44,7 +44,7 @@ impl AccessControl {
         if self.has_acl {
             colors.colorize(String::from("+"), &Elem::Acl)
         } else if !self.selinux_context.is_empty() || !self.smack_context.is_empty() {
-            colors.colorize(String::from("."), &Elem::SecurityContext)
+            colors.colorize(String::from("."), &Elem::Context)
         } else {
             colors.colorize(String::from(""), &Elem::Acl)
         }
@@ -61,7 +61,7 @@ impl AccessControl {
         if context.is_empty() {
             context += "?";
         }
-        colors.colorize(context, &Elem::SecurityContext)
+        colors.colorize(context, &Elem::Context)
     }
 }
 
