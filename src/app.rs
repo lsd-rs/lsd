@@ -324,7 +324,7 @@ pub fn build() -> App<'static, 'static> {
                 .possible_value("always")
                 .possible_value("auto")
                 .possible_value("never")
-                .default_value("auto")
+                .default_value("never")
                 .multiple(true)
                 .number_of_values(1)
                 .help("Attach hyperlink to filenames"),

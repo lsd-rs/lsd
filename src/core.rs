@@ -1,7 +1,8 @@
 use crate::color::Colors;
 use crate::display;
 use crate::flags::{
-    ColorOption, Display, Flags, IconOption, IconTheme, Layout, SortOrder, ThemeOption,
+    ColorOption, Display, Flags, HyperlinkOption, IconOption, IconTheme, Layout, SortOrder,
+    ThemeOption,
 };
 use crate::icon::{self, Icons};
 use crate::meta::Meta;
@@ -19,13 +20,12 @@ use terminal_size::terminal_size;
 pub struct Core {
     flags: Flags,
     icons: Icons,
-    //display: Display,
     colors: Colors,
     sorters: Vec<(SortOrder, sort::SortFn)>,
 }
 
 impl Core {
-    pub fn new(flags: Flags) -> Self {
+    pub fn new(mut flags: Flags) -> Self {
         // Check through libc if stdout is a tty. Unix specific so not on windows.
         // Determine color output availability (and initialize color output (for Windows 10))
         #[cfg(not(target_os = "windows"))]
@@ -53,6 +53,16 @@ impl Core {
             (_, _, IconTheme::Unicode) => icon::Theme::Unicode,
         };
 
+        // TODO: Rework this so that flags passed downstream does not
+        // have Auto option for any (icon, color, hyperlink).
+        if matches!(flags.hyperlink, HyperlinkOption::Auto) {
+            flags.hyperlink = if tty_available {
+                HyperlinkOption::Always
+            } else {
+                HyperlinkOption::Never
+            }
+        }
+
         let icon_separator = flags.icons.separator.0.clone();
 
         if !tty_available {
@@ -67,7 +77,6 @@ impl Core {
 
         Self {
             flags,
-            //display: Display::new(inner_flags),
             colors: Colors::new(color_theme),
             icons: Icons::new(icon_theme, icon_separator),
             sorters,

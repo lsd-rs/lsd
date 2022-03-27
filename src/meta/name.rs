@@ -2,6 +2,7 @@ use crate::color::{ColoredString, Colors, Elem};
 use crate::flags::HyperlinkOption;
 use crate::icon::Icons;
 use crate::meta::filetype::FileType;
+use crate::print_error;
 use crate::url::Url;
 use std::cmp::{Ordering, PartialOrd};
 use std::ffi::OsStr;
@@ -98,6 +99,34 @@ impl Name {
         }
     }
 
+    fn hyperlink(&self, name: String, hyperlink: HyperlinkOption) -> String {
+        match hyperlink {
+            HyperlinkOption::Always => {
+                // HyperlinkOption::Auto gets converted to None or Always in core.rs based on tty_available
+                match std::fs::canonicalize(&self.path) {
+                    Ok(rp) => {
+                        match Url::from_file_path(&rp) {
+                            Ok(url) => {
+                                // Crossterm does not support hyperlinks as of now
+                                // https://gist.github.com/egmontkob/eb114294efbcd5adb1944c9f3cb5feda
+                                format!("\x1B]8;;{}\x1B\x5C{}\x1B]8;;\x1B\x5C", url, name)
+                            }
+                            Err(_) => {
+                                print_error!("{}: unable to form url.", name);
+                                name
+                            }
+                        }
+                    }
+                    Err(err) => {
+                        print_error!("{}: {}.", name, err);
+                        name
+                    }
+                }
+            }
+            _ => name,
+        }
+    }
+
     pub fn render(
         &self,
         colors: &Colors,
@@ -105,31 +134,26 @@ impl Name {
         display_option: &DisplayOption,
         hyperlink: HyperlinkOption,
     ) -> ColoredString {
-        let name = &match hyperlink {
-            HyperlinkOption::Always => {
-                let url = Url::from_file_path(&self.path).expect("absolute path");
-
-                // Crossterm does not support hyperlinks as of now
-                // https://gist.github.com/egmontkob/eb114294efbcd5adb1944c9f3cb5feda
-                format!("\x1B;;{}\x1B\x5C{}\x1B;;\x1B\x5C", url, self.file_name())
-            }
-
-            _ => self.file_name().to_string(),
-        };
-
         let content = match display_option {
             DisplayOption::FileName => {
-                format!("{}{}", icons.get(self), self.escape(name))
+                format!(
+                    "{}{}",
+                    icons.get(self),
+                    self.hyperlink(self.escape(self.file_name()), hyperlink)
+                )
             }
             DisplayOption::Relative { base_path } => format!(
                 "{}{}",
                 icons.get(self),
-                self.escape(&self.relative_path(base_path).to_string_lossy())
+                self.hyperlink(
+                    self.escape(&self.relative_path(base_path).to_string_lossy()),
+                    hyperlink
+                )
             ),
             DisplayOption::None => format!(
                 "{}{}",
                 icons.get(self),
-                self.escape(&self.path.to_string_lossy())
+                self.hyperlink(self.escape(&self.path.to_string_lossy()), hyperlink)
             ),
         };
 
@@ -187,9 +211,8 @@ mod test {
     use crate::meta::Meta;
     #[cfg(unix)]
     use crate::meta::Permissions;
-    use crossterm::style::{Color, Stylize};
-    #[cfg(unix)]
     use crate::url::Url;
+    use crossterm::style::{Color, Stylize};
     use std::cmp::Ordering;
     use std::fs::{self, File};
     #[cfg(unix)]
@@ -245,7 +268,7 @@ mod test {
                 &DisplayOption::FileName,
                 HyperlinkOption::Never
             )
-       );
+        );
     }
 
     #[test]
@@ -372,30 +395,35 @@ mod test {
     }
 
     #[test]
-    #[cfg(unix)]
     fn test_print_hyperlink() {
         let tmp_dir = tempdir().expect("failed to create temp dir");
-        let icons = Icons::new(icon::Theme::Fancy);
+        let icons = Icons::new(icon::Theme::NoIcon, " ".to_string());
 
         // Create the file;
         let file_path = tmp_dir.path().join("file.txt");
         File::create(&file_path).expect("failed to create file");
-        let meta = file_path.metadata().expect("failed to get metas");
+        let meta = Meta::from_path(&file_path, false).unwrap();
 
-        let colors = Colors::new(color::Theme::NoLscolors);
-        let file_type = FileType::new(&meta, &Permissions::from(&meta));
-        let name = Name::new(&file_path, file_type);
+        let colors = Colors::new(color::ThemeOption::NoColor);
 
         let real_path = std::fs::canonicalize(&file_path).expect("canonicalize");
         let expected_url = Url::from_file_path(&real_path).expect("absolute path");
         let expected_text = format!(
-            " \x1B]8;;{}\x1B\x5C{}\x1B]8;;\x1B\x5C",
+            "\x1B]8;;{}\x1B\x5C{}\x1B]8;;\x1B\x5C",
             expected_url, "file.txt"
         );
 
         assert_eq!(
-            Colour::Fixed(184).paint(expected_text),
-            name.render(&colors, &icons, true)
+            expected_text,
+            meta.name
+                .render(
+                    &colors,
+                    &icons,
+                    &DisplayOption::FileName,
+                    HyperlinkOption::Always
+                )
+                .to_string()
+                .as_str()
         );
     }
 

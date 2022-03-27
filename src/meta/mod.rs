@@ -84,9 +84,7 @@ impl Meta {
         let mut content: Vec<Meta> = Vec::new();
 
         if Display::All == flags.display && flags.layout != Layout::Tree {
-            let mut current_meta;
-
-            current_meta = self.clone();
+            let mut current_meta = self.clone();
             current_meta.name.name = ".".to_owned();
 
             let mut parent_meta =
