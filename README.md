@@ -253,7 +253,7 @@ permission:
   no-access: 245
   octal: 6
   acl: dark_cyan
-  security-context: cyan
+  context: cyan
 date:
   hour-old: 40
   day-old: 42
