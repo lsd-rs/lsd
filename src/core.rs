@@ -124,7 +124,8 @@ impl Core {
                 meta_list.push(meta);
             };
         }
-        if self.flags.total_size.0 {
+        // Only calculate the total size of a directory if it will be displayed
+        if self.flags.total_size.0 && self.flags.blocks.displays_size() {
             for meta in &mut meta_list.iter_mut() {
                 meta.calculate_total_size();
             }
