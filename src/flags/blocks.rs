@@ -151,6 +151,10 @@ impl Blocks {
         }
     }
 
+    pub fn displays_size(&self) -> bool {
+        self.0.contains(&Block::Size)
+    }
+
     /// Tnserts a [Block] of variant [INode](Block::Context), if `self` does not already contain a
     /// [Block] of that variant. The positioning will be best-effort approximation of coreutils
     /// ls position for a security context
