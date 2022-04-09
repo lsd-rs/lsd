@@ -98,6 +98,7 @@ pub fn build() -> App<'static, 'static> {
             Arg::with_name("human_readable")
                 .short("h")
                 .long("human-readable")
+                .multiple(true)
                 .help("For ls compatibility purposes ONLY, currently set by default"),
         )
         .arg(
@@ -119,11 +120,19 @@ pub fn build() -> App<'static, 'static> {
             Arg::with_name("directory-only")
                 .short("d")
                 .long("directory-only")
-                .conflicts_with("all")
-                .conflicts_with("almost-all")
                 .conflicts_with("depth")
                 .conflicts_with("recursive")
                 .help("Display directories themselves, and not their contents (recursively when used with --tree)"),
+        )
+        .arg(
+            Arg::with_name("permission")
+                .long("permission")
+                .default_value("rwx")
+                .possible_value("rwx")
+                .possible_value("octal")
+                .multiple(true)
+                .number_of_values(1)
+                .help("How to display permissions"),
         )
         .arg(
             Arg::with_name("size")
@@ -159,6 +168,7 @@ pub fn build() -> App<'static, 'static> {
                 .overrides_with("extensionsort")
                 .overrides_with("versionsort")
                 .overrides_with("sort")
+                .overrides_with("no-sort")
                 .multiple(true)
                 .help("Sort by time modified"),
         )
@@ -170,6 +180,7 @@ pub fn build() -> App<'static, 'static> {
                 .overrides_with("extensionsort")
                 .overrides_with("versionsort")
                 .overrides_with("sort")
+                .overrides_with("no-sort")
                 .multiple(true)
                 .help("Sort by size"),
         )
@@ -181,6 +192,7 @@ pub fn build() -> App<'static, 'static> {
                 .overrides_with("timesort")
                 .overrides_with("versionsort")
                 .overrides_with("sort")
+                .overrides_with("no-sort")
                 .multiple(true)
                 .help("Sort by file extension"),
         )
@@ -193,20 +205,34 @@ pub fn build() -> App<'static, 'static> {
                 .overrides_with("sizesort")
                 .overrides_with("extensionsort")
                 .overrides_with("sort")
+                .overrides_with("no-sort")
                 .help("Natural sort of (version) numbers within text"),
         )
         .arg(
             Arg::with_name("sort")
                 .long("sort")
                 .multiple(true)
-                .possible_values(&["size", "time", "version", "extension"])
+                .possible_values(&["size", "time", "version", "extension", "none"])
                 .takes_value(true)
                 .value_name("WORD")
                 .overrides_with("timesort")
                 .overrides_with("sizesort")
                 .overrides_with("extensionsort")
                 .overrides_with("versionsort")
+                .overrides_with("no-sort")
                 .help("sort by WORD instead of name")
+        )
+        .arg(
+            Arg::with_name("no-sort")
+            .short("U")
+            .long("no-sort")
+            .multiple(true)
+            .overrides_with("timesort")
+            .overrides_with("sizesort")
+            .overrides_with("extensionsort")
+            .overrides_with("sort")
+            .overrides_with("versionsort")
+            .help("Do not sort. List entries in directory order")
         )
         .arg(
             Arg::with_name("reverse")
@@ -221,10 +247,14 @@ pub fn build() -> App<'static, 'static> {
                 .possible_value("none")
                 .possible_value("first")
                 .possible_value("last")
-                .default_value("none")
                 .multiple(true)
                 .number_of_values(1)
                 .help("Sort the directories then the files"),
+        )
+        .arg(
+            Arg::with_name("group-directories-first")
+                .long("group-directories-first")
+                .help("Groups the directories at the top before the files. Same as --group-dirs=first")
         )
         .arg(
             Arg::with_name("blocks")
@@ -236,6 +266,7 @@ pub fn build() -> App<'static, 'static> {
                     "permission",
                     "user",
                     "group",
+                    "context",
                     "size",
                     "date",
                     "name",
@@ -278,6 +309,14 @@ pub fn build() -> App<'static, 'static> {
                 .long("dereference")
                 .multiple(true)
                 .help("When showing file information for a symbolic link, show information for the file the link references rather than for the link itself"),
+        )
+        .arg(
+            Arg::with_name("context")
+                .short("Z")
+                .long("context")
+                .required(false)
+                .takes_value(false)
+                .help("Print security context (label) of each file"),
         )
 }
 

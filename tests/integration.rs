@@ -421,6 +421,7 @@ fn test_bad_utf_8_extension() {
 
     cmd()
         .arg(tmp.path())
+        .arg("--ignore-config")
         .assert()
         .stdout(predicate::str::is_match("bad.extension\u{fffd}\u{fffd}\n$").unwrap());
 }
@@ -435,6 +436,7 @@ fn test_bad_utf_8_name() {
 
     cmd()
         .arg(tmp.path())
+        .arg("--ignore-config")
         .assert()
         .stdout(predicate::str::is_match("bad-name\u{fffd}\u{fffd}.ext\n$").unwrap());
 }
@@ -449,6 +451,7 @@ fn test_tree() {
     cmd()
         .arg(tmp.path())
         .arg("--tree")
+        .arg("--ignore-config")
         .assert()
         .stdout(predicate::str::is_match("├── one\n└── one.d\n    └── two\n$").unwrap());
 }
@@ -465,6 +468,7 @@ fn test_tree_all_not_show_self() {
         .arg(tmp.path())
         .arg("--tree")
         .arg("--all")
+        .arg("--ignore-config")
         .assert()
         .stdout(
             predicate::str::is_match("├── one\n└── one.d\n    ├── .hidden\n    └── two\n$")
@@ -482,6 +486,7 @@ fn test_tree_show_edge_before_name() {
         .arg(tmp.path())
         .arg("--tree")
         .arg("--long")
+        .arg("--ignore-config")
         .assert()
         .stdout(predicate::str::is_match("└── two\n$").unwrap());
 }
@@ -500,8 +505,51 @@ fn test_tree_d() {
         .arg(tmp.path())
         .arg("--tree")
         .arg("-d")
+        .arg("--ignore-config")
         .assert()
         .stdout(predicate::str::is_match("├── one.d\n│   └── one.d\n└── two.d\n$").unwrap());
+}
+
+#[cfg(unix)]
+#[test]
+fn test_tree_no_dereference() {
+    let tmp = tempdir();
+    tmp.child("one.d").create_dir_all().unwrap();
+    tmp.child("one.d/samplefile").touch().unwrap();
+    let link = tmp.path().join("link");
+    fs::symlink("one.d", &link).unwrap();
+
+    cmd()
+        .arg("--tree")
+        .arg("--ignore-config")
+        .arg(tmp.path())
+        .assert()
+        .stdout(
+            predicate::str::is_match("├── link ⇒ one.d\n└── one.d\n    └── samplefile\n$").unwrap(),
+        );
+}
+
+#[cfg(unix)]
+#[test]
+fn test_tree_dereference() {
+    let tmp = tempdir();
+    tmp.child("one.d").create_dir_all().unwrap();
+    tmp.child("one.d/samplefile").touch().unwrap();
+    let link = tmp.path().join("link");
+    fs::symlink("one.d", &link).unwrap();
+
+    cmd()
+        .arg("--ignore-config")
+        .arg(tmp.path())
+        .arg("--tree")
+        .arg("-L")
+        .assert()
+        .stdout(
+            predicate::str::is_match(
+                "├── link\n│   └── samplefile\n└── one.d\n    └── samplefile\n$",
+            )
+            .unwrap(),
+        );
 }
 
 fn cmd() -> Command {
@@ -631,4 +679,19 @@ fn test_date_custom_format_supports_padding() {
                 .unwrap()
                 .count(2),
         );
+}
+
+#[test]
+fn test_all_directory() {
+    let dir = tempdir();
+    dir.child("one").touch().unwrap();
+    dir.child("two").touch().unwrap();
+
+    cmd()
+        .arg("-a")
+        .arg("-d")
+        .arg("--ignore-config")
+        .arg(dir.path())
+        .assert()
+        .stdout(predicate::str::is_match(".").unwrap());
 }

@@ -29,7 +29,7 @@ Install the patched fonts of powerline nerd-font and/or font-awesome. Have a loo
 | NetBSD or any `pkgsrc` platform | `pkgin install lsd` or `cd /usr/pkgsrc/sysutils/lsd && make install`                                              |
 | Windows                         | `scoop install lsd`                                                                                               |
 | Android (via Termux)            | `pkg install lsd`                                                                                                 |
-| Ubuntu/Debian based distro      | `sudo dpkg -i lsd_0.20.1_amd64.deb` get `.deb` file from [release page](https://github.com/Peltoche/lsd/releases) |
+| Ubuntu/Debian based distro      | `sudo dpkg -i lsd_0.21.0_amd64.deb` get `.deb` file from [release page](https://github.com/Peltoche/lsd/releases) |
 | Solus                           | `eopkg it lsd`                                                                                                    |
 
 
@@ -179,6 +179,11 @@ recursion:
 # Possible values: default, short, bytes
 size: default
 
+# == Permission ==
+# Specify the format of the permission column
+# Possible value: rwx, octal
+permission: rwx
+
 # == Sorting ==
 sorting:
   # Specify what to sort by.
@@ -228,12 +233,12 @@ Check [Theme file content](#theme-file-content) for details.
 ### Theme file content
 
 Theme file use the [crossterm](https://crates.io/crates/crossterm)
-configure the colors, check [crossterm](https://docs.rs/crossterm/0.20.0/crossterm/style/enum.Color.html)
-for the supported colors.
+to configure the colors, check [crossterm](https://docs.rs/crossterm/0.20.0/crossterm/style/enum.Color.html)
+for supported colors.
 
 Color table: https://upload.wikimedia.org/wikipedia/commons/1/15/Xterm_256color_chart.svg
 
-Please notice that color value would ignore case, both lowercase and UPPERCASE is supported.
+Please notice that color values would ignore the case, both lowercase and UPPERCASE is supported.
 
 This is the default theme scheme shipped with `lsd`.
 
@@ -246,6 +251,9 @@ permission:
   exec: dark_red
   exec-sticky: 5
   no-access: 245
+  octal: 6
+  acl: dark_cyan
+  context: cyan
 date:
   hour-old: 40
   day-old: 42
@@ -263,6 +271,12 @@ links:
   invalid: 245
 tree-edge: 245
 ```
+
+When creating a theme for `lsd`, you can specify any part of the default theme,
+and then change its colors, the items missed would fallback to use the default colors.
+
+Please also notice that an empty theme is **NOT** supported due to
+[a bug in serde lib](https://github.com/dtolnay/serde-yaml/issues/86).
 
 ## External Configurations
 
@@ -307,6 +321,12 @@ To check if the font you are using is setup correctly, try running the following
 echo $'\uf115'
 ```
 
+### Icons missing or not rendering correctly using PuTTY/KiTTY on Windows
+
+First of all, make sure a patched font is installed and PuTTY/KiTTY is configurated to use it, please check [Prerequisites](#prerequisites).
+
+There are problems for PuTTY/KiTTY to show 2 char wide icons, make sure using a 1 char wide font like [Hack Regular Nerd Font Complete Mono Windows Compatible](https://github.com/ryanoasis/nerd-fonts/blob/master/patched-fonts/Hack/Regular/complete/Hack%20Regular%20Nerd%20Font%20Complete%20Mono%20Windows%20Compatible.ttf), check [this issue](https://github.com/Peltoche/lsd/issues/331) for detail.
+
 ### Colors
 
 You can customize filetype colors using `LS_COLORS` and other colors using the theme.
@@ -325,6 +345,12 @@ The default colors are:
 _Checkout [trapd00r/LS_COLORS](https://github.com/trapd00r/LS_COLORS) and [sharkdp/vivid](https://github.com/sharkdp/vivid) for help in themeing using `LS_COLORS`._
 
 ### First char of folder/file getting trimmed
+Workaround for Konsole: ㅤEdit the config file (or [create it](#config-file-location) if it doesn't already exist) and paste the following into it (contains invisible unicode characters):
+  ```yml
+icons:
+    separator: " ㅤ"
+```
+
 
 This is a known issue in a few terminal emulator. Try using a different terminal emulator like. [Alacritty](https://github.com/alacritty/alacritty) and [Kitty](https://github.com/kovidgoyal/kitty) are really good alternatives. You might also want to check if your font is responsible for causing this.
 To verify this, try running lsd with icons disabled and if it still does not have the first character, then this is an lsd bug:

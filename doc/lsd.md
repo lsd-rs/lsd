@@ -104,6 +104,9 @@ lsd is a ls command with a lot of pretty colours and some other stuff to enrich 
 `--group-dirs <group-dirs>...`
 : Sort the directories then the files [default: none]  [possible values: none, first, last]
 
+`--group-directories-first`
+: Groups the directories at the top before the files. Same as `--group-dirs=first`
+
 `--icon <icon>...`
 : When to print the icons [default: auto]  [possible values: always, auto, never]
 
@@ -113,11 +116,20 @@ lsd is a ls command with a lot of pretty colours and some other stuff to enrich 
 `-I, --ignore-glob <pattern>...`
 : Do not display files/directories with names matching the glob pattern(s). More than one can be specified by repeating the argument [default: ]
 
+  * [ ] `--permission <permission>...`
+: How to display permissions [default: rwx]  [possible values: rwx, octal]
+
 `--size <size>...`
 : How to display size [default: default]  [possible values: default, short, bytes]
 
 `--sort <WORD>...`
 : Sort by WORD instead of name [possible values: size, time, version, extension]
+
+`-U`, `--no-sort`
+: Do not sort. List entries in directory order
+
+`-Z` `--context`
+: Display SELinux or SMACK security context
 
 # ARGS
 

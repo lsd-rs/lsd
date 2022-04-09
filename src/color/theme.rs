@@ -13,6 +13,7 @@ use std::path::Path;
 #[derive(Debug, Deserialize, PartialEq)]
 #[serde(rename_all = "kebab-case")]
 #[serde(deny_unknown_fields)]
+#[serde(default)]
 pub struct Theme {
     pub user: Color,
     pub group: Color,
@@ -30,17 +31,22 @@ pub struct Theme {
 #[derive(Debug, Deserialize, PartialEq)]
 #[serde(rename_all = "kebab-case")]
 #[serde(deny_unknown_fields)]
+#[serde(default)]
 pub struct Permission {
     pub read: Color,
     pub write: Color,
     pub exec: Color,
     pub exec_sticky: Color,
     pub no_access: Color,
+    pub octal: Color,
+    pub acl: Color,
+    pub context: Color,
 }
 
 #[derive(Debug, Deserialize, PartialEq)]
 #[serde(rename_all = "kebab-case")]
 #[serde(deny_unknown_fields)]
+#[serde(default)]
 pub struct FileType {
     pub file: File,
     pub dir: Dir,
@@ -55,6 +61,7 @@ pub struct FileType {
 #[derive(Debug, Deserialize, PartialEq)]
 #[serde(rename_all = "kebab-case")]
 #[serde(deny_unknown_fields)]
+#[serde(default)]
 pub struct File {
     pub exec_uid: Color,
     pub uid_no_exec: Color,
@@ -65,6 +72,7 @@ pub struct File {
 #[derive(Debug, Deserialize, PartialEq)]
 #[serde(rename_all = "kebab-case")]
 #[serde(deny_unknown_fields)]
+#[serde(default)]
 pub struct Dir {
     pub uid: Color,
     pub no_uid: Color,
@@ -73,6 +81,7 @@ pub struct Dir {
 #[derive(Debug, Deserialize, PartialEq)]
 #[serde(rename_all = "kebab-case")]
 #[serde(deny_unknown_fields)]
+#[serde(default)]
 pub struct Symlink {
     pub default: Color,
     pub broken: Color,
@@ -82,6 +91,7 @@ pub struct Symlink {
 #[derive(Debug, Deserialize, PartialEq)]
 #[serde(rename_all = "kebab-case")]
 #[serde(deny_unknown_fields)]
+#[serde(default)]
 pub struct Date {
     pub hour_old: Color,
     pub day_old: Color,
@@ -91,6 +101,7 @@ pub struct Date {
 #[derive(Debug, Deserialize, PartialEq)]
 #[serde(rename_all = "kebab-case")]
 #[serde(deny_unknown_fields)]
+#[serde(default)]
 pub struct Size {
     pub none: Color,
     pub small: Color,
@@ -101,6 +112,7 @@ pub struct Size {
 #[derive(Debug, Deserialize, PartialEq)]
 #[serde(rename_all = "kebab-case")]
 #[serde(deny_unknown_fields)]
+#[serde(default)]
 pub struct INode {
     pub valid: Color,
     pub invalid: Color,
@@ -109,14 +121,100 @@ pub struct INode {
 #[derive(Debug, Deserialize, PartialEq)]
 #[serde(rename_all = "kebab-case")]
 #[serde(deny_unknown_fields)]
+#[serde(default)]
 pub struct Links {
     pub valid: Color,
     pub invalid: Color,
 }
 
+impl Default for Permission {
+    fn default() -> Self {
+        Permission {
+            read: Color::DarkGreen,
+            write: Color::DarkYellow,
+            exec: Color::DarkRed,
+            exec_sticky: Color::AnsiValue(5),
+            no_access: Color::AnsiValue(245), // Grey
+            octal: Color::AnsiValue(6),
+            acl: Color::DarkCyan,
+            context: Color::Cyan,
+        }
+    }
+}
 impl Default for FileType {
     fn default() -> Self {
-        Theme::default_dark().file_type
+        FileType {
+            file: File::default(),
+            dir: Dir::default(),
+            symlink: Symlink::default(),
+            pipe: Color::AnsiValue(44),         // DarkTurquoise
+            block_device: Color::AnsiValue(44), // DarkTurquoise
+            char_device: Color::AnsiValue(172), // Orange3
+            socket: Color::AnsiValue(44),       // DarkTurquoise
+            special: Color::AnsiValue(44),      // DarkTurquoise
+        }
+    }
+}
+impl Default for File {
+    fn default() -> Self {
+        File {
+            exec_uid: Color::AnsiValue(40),        // Green3
+            uid_no_exec: Color::AnsiValue(184),    // Yellow3
+            exec_no_uid: Color::AnsiValue(40),     // Green3
+            no_exec_no_uid: Color::AnsiValue(184), // Yellow3
+        }
+    }
+}
+impl Default for Dir {
+    fn default() -> Self {
+        Dir {
+            uid: Color::AnsiValue(33),    // DodgerBlue1
+            no_uid: Color::AnsiValue(33), // DodgerBlue1
+        }
+    }
+}
+impl Default for Symlink {
+    fn default() -> Self {
+        Symlink {
+            default: Color::AnsiValue(44),         // DarkTurquoise
+            broken: Color::AnsiValue(124),         // Red3
+            missing_target: Color::AnsiValue(124), // Red3
+        }
+    }
+}
+impl Default for Date {
+    fn default() -> Self {
+        Date {
+            hour_old: Color::AnsiValue(40), // Green3
+            day_old: Color::AnsiValue(42),  // SpringGreen2
+            older: Color::AnsiValue(36),    // DarkCyan
+        }
+    }
+}
+impl Default for Size {
+    fn default() -> Self {
+        Size {
+            none: Color::AnsiValue(245),   // Grey
+            small: Color::AnsiValue(229),  // Wheat1
+            medium: Color::AnsiValue(216), // LightSalmon1
+            large: Color::AnsiValue(172),  // Orange3
+        }
+    }
+}
+impl Default for INode {
+    fn default() -> Self {
+        INode {
+            valid: Color::AnsiValue(13),    // Pink
+            invalid: Color::AnsiValue(245), // Grey
+        }
+    }
+}
+impl Default for Links {
+    fn default() -> Self {
+        Links {
+            valid: Color::AnsiValue(13),    // Pink
+            invalid: Color::AnsiValue(245), // Grey
+        }
     }
 }
 
@@ -181,54 +279,12 @@ impl Theme {
         Theme {
             user: Color::AnsiValue(230),  // Cornsilk1
             group: Color::AnsiValue(187), // LightYellow3
-            permission: Permission {
-                read: Color::DarkGreen,
-                write: Color::DarkYellow,
-                exec: Color::DarkRed,
-                exec_sticky: Color::AnsiValue(5),
-                no_access: Color::AnsiValue(245), // Grey
-            },
-            file_type: FileType {
-                file: File {
-                    exec_uid: Color::AnsiValue(40),        // Green3
-                    uid_no_exec: Color::AnsiValue(184),    // Yellow3
-                    exec_no_uid: Color::AnsiValue(40),     // Green3
-                    no_exec_no_uid: Color::AnsiValue(184), // Yellow3
-                },
-                dir: Dir {
-                    uid: Color::AnsiValue(33),    // DodgerBlue1
-                    no_uid: Color::AnsiValue(33), // DodgerBlue1
-                },
-                pipe: Color::AnsiValue(44), // DarkTurquoise
-                symlink: Symlink {
-                    default: Color::AnsiValue(44),         // DarkTurquoise
-                    broken: Color::AnsiValue(124),         // Red3
-                    missing_target: Color::AnsiValue(124), // Red3
-                },
-                block_device: Color::AnsiValue(44), // DarkTurquoise
-                char_device: Color::AnsiValue(172), // Orange3
-                socket: Color::AnsiValue(44),       // DarkTurquoise
-                special: Color::AnsiValue(44),      // DarkTurquoise
-            },
-            date: Date {
-                hour_old: Color::AnsiValue(40), // Green3
-                day_old: Color::AnsiValue(42),  // SpringGreen2
-                older: Color::AnsiValue(36),    // DarkCyan
-            },
-            size: Size {
-                none: Color::AnsiValue(245),   // Grey
-                small: Color::AnsiValue(229),  // Wheat1
-                medium: Color::AnsiValue(216), // LightSalmon1
-                large: Color::AnsiValue(172),  // Orange3
-            },
-            inode: INode {
-                valid: Color::AnsiValue(13),    // Pink
-                invalid: Color::AnsiValue(245), // Grey
-            },
-            links: Links {
-                valid: Color::AnsiValue(13),    // Pink
-                invalid: Color::AnsiValue(245), // Grey
-            },
+            permission: Permission::default(),
+            file_type: FileType::default(),
+            date: Date::default(),
+            size: Size::default(),
+            inode: INode::default(),
+            links: Links::default(),
             tree_edge: Color::AnsiValue(245), // Grey
         }
     }
@@ -289,5 +345,42 @@ mod tests {
             Theme::default_dark(),
             Theme::from_path(theme.to_str().unwrap()).unwrap()
         );
+    }
+
+    #[test]
+    fn test_empty_theme_return_default() {
+        // Must contain one field at least
+        // ref https://github.com/dtolnay/serde-yaml/issues/86
+        let empty_theme = Theme::with_yaml("user: 230".into()).unwrap(); // 230 is the default value
+        let default_theme = Theme::default_dark();
+        assert_eq!(empty_theme, default_theme);
+    }
+
+    #[test]
+    fn test_first_level_theme_return_default_but_changed() {
+        // Must contain one field at least
+        // ref https://github.com/dtolnay/serde-yaml/issues/86
+        let empty_theme = Theme::with_yaml("user: 130".into()).unwrap();
+        let mut theme = Theme::default_dark();
+        use crossterm::style::Color;
+        theme.user = Color::AnsiValue(130);
+        assert_eq!(empty_theme, theme);
+    }
+
+    #[test]
+    fn test_second_level_theme_return_default_but_changed() {
+        // Must contain one field at least
+        // ref https://github.com/dtolnay/serde-yaml/issues/86
+        let empty_theme = Theme::with_yaml(
+            r#"---
+permission:
+  read: 130"#
+                .into(),
+        )
+        .unwrap();
+        let mut theme = Theme::default_dark();
+        use crossterm::style::Color;
+        theme.permission.read = Color::AnsiValue(130);
+        assert_eq!(empty_theme, theme);
     }
 }

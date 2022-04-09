@@ -6,8 +6,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - ReleaseDate
 ### Added
+- Add support for `--no-sort` `-U` from [MichaelAug](https://github.com/MichaelAug)
+- Add `--group-directories-first` as an alias for `--group-dirs=first` to improve compatibility with `coreutils/ls`
+- Add `--permission` flag to choose permission formatting (rwx, octal) from [meain](https://github.com/meain)
+- Display MAC contexts and MAC and ACL indicators from [mmatous](https://github.com/mmatous)
+### Fixed
+- Support non-bold bright colors [#248](https://github.com/Peltoche/lsd/issues/248) from [meain](https://github.com/meain)
+- Don't automatically dereference symlinks in tree/recursive [#637](https://github.com/Peltoche/lsd/issues/637) from [meain](https://github.com/meain)
+
+## [0.21.0] - 2022-01-16
+### Added
 - Added support for the MISSING / mi= dircolors variable for broken symlink targets.
 - Add support for theme from [zwpaper](https://github.com/zwpaper) [#452](https://github.com/Peltoche/lsd/pull/452)
+- Update theme to support partial themes [zwpaper](https://github.com/zwpaper) [#591](https://github.com/Peltoche/lsd/pull/591)
 - Update minimal rust version to 1.42.0 from [zwpaper](https://github.com/zwpaper) [#534](https://github.com/Peltoche/lsd/issues/534)
 - [`NO_COLOR`](https://no-color.org/) environment variable support from [AnInternetTroll](https://github.com/aninternettroll)
 ### Changed
@@ -17,7 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add `--config-file` flag to read configuration file from a custom location
 - Clarify custom date format for `date` field in configuration file in the README.
 ### Fixed
-- Support all `strftime` like formatting [#532](https://github.com/Peltoche/lsd/issues/532)   
+- Support all `strftime` like formatting [#532](https://github.com/Peltoche/lsd/issues/532)
 
 ## [0.20.1] - 2021-03-07
 ### Fixed
@@ -323,7 +334,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Change the component alignement by using term_grid
 
 
-[Unreleased]: https://github.com/Peltoche/lsd/compare/0.20.1...HEAD
+[Unreleased]: https://github.com/Peltoche/lsd/compare/0.21....HEAD
+[0.21.0]: https://github.com/Peltoche/lsd/compare/0.20.1...0.21.0
 [0.20.1]: https://github.com/Peltoche/lsd/compare/0.20.0...0.20.1
 [0.20.0]: https://github.com/Peltoche/lsd/compare/0.19.0...0.20.0
 [0.19.0]: https://github.com/Peltoche/lsd/compare/0.18.0...0.19.0

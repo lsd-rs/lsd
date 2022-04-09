@@ -35,6 +35,9 @@ pub enum Elem {
     Exec,
     ExecSticky,
     NoAccess,
+    Octal,
+    Acl,
+    Context,
 
     /// Last Time Modified
     DayOld,
@@ -102,6 +105,9 @@ impl Elem {
             Elem::Exec => theme.permission.exec,
             Elem::ExecSticky => theme.permission.exec_sticky,
             Elem::NoAccess => theme.permission.no_access,
+            Elem::Octal => theme.permission.octal,
+            Elem::Acl => theme.permission.acl,
+            Elem::Context => theme.permission.context,
 
             Elem::DayOld => theme.date.day_old,
             Elem::HourOld => theme.date.hour_old,
@@ -109,15 +115,12 @@ impl Elem {
 
             Elem::User => theme.user,
             Elem::Group => theme.group,
-
             Elem::NonFile => theme.size.none,
             Elem::FileLarge => theme.size.large,
             Elem::FileMedium => theme.size.medium,
             Elem::FileSmall => theme.size.small,
-
             Elem::INode { valid: false } => theme.inode.valid,
             Elem::INode { valid: true } => theme.inode.invalid,
-
             Elem::TreeEdge => theme.tree_edge,
             Elem::Links { valid: false } => theme.links.invalid,
             Elem::Links { valid: true } => theme.links.valid,
@@ -187,7 +190,7 @@ impl Colors {
 
     fn style_default(&self, elem: &Elem) -> ContentStyle {
         if let Some(t) = &self.theme {
-            let style_fg = ContentStyle::default().with(elem.get_color(&t));
+            let style_fg = ContentStyle::default().with(elem.get_color(t));
             if elem.has_suid() {
                 style_fg.on(Color::AnsiValue(124)) // Red3
             } else {
@@ -252,12 +255,21 @@ fn to_content_style(ls: &lscolors::Style) -> ContentStyle {
         lscolors::style::Color::Blue => Color::DarkBlue,
         lscolors::style::Color::Magenta => Color::DarkMagenta,
         lscolors::style::Color::Cyan => Color::DarkCyan,
-        lscolors::style::Color::White => Color::White,
+        lscolors::style::Color::White => Color::Grey,
+        lscolors::style::Color::BrightBlack => Color::DarkGrey,
+        lscolors::style::Color::BrightRed => Color::Red,
+        lscolors::style::Color::BrightGreen => Color::Green,
+        lscolors::style::Color::BrightYellow => Color::Yellow,
+        lscolors::style::Color::BrightBlue => Color::Blue,
+        lscolors::style::Color::BrightMagenta => Color::Magenta,
+        lscolors::style::Color::BrightCyan => Color::Cyan,
+        lscolors::style::Color::BrightWhite => Color::White,
     };
-    let mut style = ContentStyle::default();
-
-    style.foreground_color = ls.foreground.as_ref().map(to_crossterm_color);
-    style.background_color = ls.background.as_ref().map(to_crossterm_color);
+    let mut style = ContentStyle {
+        foreground_color: ls.foreground.as_ref().map(to_crossterm_color),
+        background_color: ls.background.as_ref().map(to_crossterm_color),
+        ..ContentStyle::default()
+    };
 
     if ls.font_style.bold {
         style.attributes.set(Attribute::Bold);
@@ -334,6 +346,9 @@ mod elem {
                 exec: Color::Red,
                 exec_sticky: Color::Magenta,
                 no_access: Color::AnsiValue(245), // Grey
+                octal: Color::AnsiValue(6),
+                acl: Color::DarkCyan,
+                context: Color::Cyan,
             },
             file_type: theme::FileType {
                 file: theme::File {
@@ -381,7 +396,7 @@ mod elem {
     }
 
     #[test]
-    fn test_default_file() {
+    fn test_default_theme_color() {
         assert_eq!(
             Elem::File {
                 exec: true,

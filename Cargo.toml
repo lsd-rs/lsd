@@ -8,8 +8,8 @@ license = "Apache-2.0"
 name = "lsd"
 readme = "./README.md"
 repository = "https://github.com/Peltoche/lsd"
-version = "0.20.1"
-edition = "2018"
+version = "0.21.0"
+edition = "2021"
 
 [[bin]]
 name = "lsd"
@@ -30,7 +30,7 @@ terminal_size = "0.1.*"
 chrono = "0.4.*"
 chrono-humanize = "0.1.*"
 unicode-width = "0.1.*"
-lscolors = "0.7"
+lscolors = "0.9.0"
 wild = "2.0.*"
 globset = "0.4.*"
 xdg = "2.1.*"
@@ -40,6 +40,7 @@ serde_yaml = "0.8"
 
 [target.'cfg(unix)'.dependencies]
 users = "0.11.*"
+xattr = "0.2.*"
 
 [target.'cfg(windows)'.dependencies]
 winapi = {version = "0.3.*", features = ["aclapi", "accctrl", "winnt", "winerror", "securitybaseapi", "winbase"]}

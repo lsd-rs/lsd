@@ -270,11 +270,13 @@ fn get_output<'a>(
             Block::Permission => {
                 block_vec.extend(vec![
                     meta.file_type.render(colors),
-                    meta.permissions.render(colors),
+                    meta.permissions.render(colors, flags),
+                    meta.access_control.render_method(colors),
                 ]);
             }
             Block::User => block_vec.push(meta.owner.render_user(colors)),
             Block::Group => block_vec.push(meta.owner.render_group(colors)),
+            Block::Context => block_vec.push(meta.access_control.render_context(colors)),
             Block::Size => {
                 let pad = if Layout::Tree == flags.layout && 0 == tree.0 && 0 == i {
                     None

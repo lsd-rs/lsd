@@ -1,6 +1,7 @@
 use crate::flags::display::Display;
 use crate::flags::icons::{IconOption, IconTheme};
 use crate::flags::layout::Layout;
+use crate::flags::permission::PermissionFlag;
 use crate::flags::size::SizeFlag;
 use crate::flags::sorting::{DirGrouping, SortColumn};
 use crate::flags::{ColorOption, ThemeOption};
@@ -36,6 +37,7 @@ pub struct Config {
     pub layout: Option<Layout>,
     pub recursion: Option<Recursion>,
     pub size: Option<SizeFlag>,
+    pub permission: Option<PermissionFlag>,
     pub sorting: Option<Sorting>,
     pub no_symlink: Option<bool>,
     pub total_size: Option<bool>,
@@ -85,6 +87,7 @@ impl Config {
             layout: None,
             recursion: None,
             size: None,
+            permission: None,
             sorting: None,
             no_symlink: None,
             total_size: None,
@@ -194,7 +197,7 @@ classic: false
 # == Blocks ==
 # This specifies the columns and their order when using the long and the tree
 # layout.
-# Possible values: permission, user, group, size, size_value, date, name, inode
+# Possible values: permission, user, group, context, size, size_value, date, name, inode
 blocks:
   - permission
   - user
@@ -278,6 +281,11 @@ recursion:
 # Possible values: default, short, bytes
 size: default
 
+# == Permission ==
+# Specify the format of the permission column.
+# Possible value: rwx, octal
+permission: rwx
+
 # == Sorting ==
 sorting:
   # Specify what to sort by.
@@ -320,6 +328,7 @@ mod tests {
     use crate::flags::color::{ColorOption, ThemeOption};
     use crate::flags::icons::{IconOption, IconTheme};
     use crate::flags::layout::Layout;
+    use crate::flags::permission::PermissionFlag;
     use crate::flags::size::SizeFlag;
     use crate::flags::sorting::{DirGrouping, SortColumn};
 
@@ -360,6 +369,7 @@ mod tests {
                     depth: None,
                 }),
                 size: Some(SizeFlag::Default),
+                permission: Some(PermissionFlag::Rwx),
                 sorting: Some(config_file::Sorting {
                     column: Some(SortColumn::Name),
                     reverse: Some(false),

@@ -1,3 +1,4 @@
+mod access_control;
 mod date;
 mod filetype;
 mod indicator;
@@ -12,6 +13,7 @@ mod symlink;
 #[cfg(windows)]
 mod windows_utils;
 
+pub use self::access_control::AccessControl;
 pub use self::date::Date;
 pub use self::filetype::FileType;
 pub use self::indicator::Indicator;
@@ -44,6 +46,7 @@ pub struct Meta {
     pub inode: INode,
     pub links: Links,
     pub content: Option<Vec<Meta>>,
+    pub access_control: AccessControl,
 }
 
 impl Meta {
@@ -129,13 +132,17 @@ impl Meta {
                 }
             }
 
-            match entry_meta.recurse_into(depth - 1, flags) {
-                Ok(content) => entry_meta.content = content,
-                Err(err) => {
-                    print_error!("{}: {}.", path.display(), err);
-                    continue;
-                }
-            };
+            let dereference =
+                !matches!(entry_meta.file_type, FileType::SymLink { .. }) || flags.dereference.0;
+            if dereference {
+                match entry_meta.recurse_into(depth - 1, flags) {
+                    Ok(content) => entry_meta.content = content,
+                    Err(err) => {
+                        print_error!("{}: {}.", path.display(), err);
+                        continue;
+                    }
+                };
+            }
 
             content.push(entry_meta);
         }
@@ -159,7 +166,7 @@ impl Meta {
         }
     }
 
-    fn calculate_total_file_size(path: &PathBuf) -> u64 {
+    fn calculate_total_file_size(path: &Path) -> u64 {
         let metadata = path.symlink_metadata();
         let metadata = match metadata {
             Ok(meta) => meta,
@@ -225,8 +232,9 @@ impl Meta {
         let permissions = Permissions::from(&metadata);
 
         #[cfg(windows)]
-        let (owner, permissions) = windows_utils::get_file_data(&path)?;
+        let (owner, permissions) = windows_utils::get_file_data(path)?;
 
+        let access_control = AccessControl::for_path(path);
         let file_type = FileType::new(&metadata, symlink_meta.as_ref(), &permissions);
         let name = Name::new(path, file_type);
         let inode = INode::from(&metadata);
@@ -245,6 +253,7 @@ impl Meta {
             name,
             file_type,
             content: None,
+            access_control,
         })
     }
 }

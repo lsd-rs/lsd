@@ -45,6 +45,12 @@ impl Blocks {
             result = value;
         }
 
+        if matches.is_present("context") {
+            if let Ok(blocks) = result.as_mut() {
+                blocks.optional_insert_context();
+            }
+        }
+
         if matches.is_present("inode") {
             if let Ok(blocks) = result.as_mut() {
                 blocks.optional_prepend_inode();
@@ -144,6 +150,23 @@ impl Blocks {
             self.prepend_inode()
         }
     }
+
+    /// Tnserts a [Block] of variant [INode](Block::Context), if `self` does not already contain a
+    /// [Block] of that variant. The positioning will be best-effort approximation of coreutils
+    /// ls position for a security context
+    fn optional_insert_context(&mut self) {
+        if self.0.contains(&Block::Context) {
+            return;
+        }
+        let mut pos = self.0.iter().position(|elem| *elem == Block::Group);
+        if pos.is_none() {
+            pos = self.0.iter().position(|elem| *elem == Block::User);
+        }
+        match pos {
+            Some(pos) => self.0.insert(pos + 1, Block::Context),
+            None => self.0.insert(0, Block::Context),
+        }
+    }
 }
 
 /// The default value for `Blocks` contains a [Vec] of [Name](Block::Name).
@@ -159,6 +182,7 @@ pub enum Block {
     Permission,
     User,
     Group,
+    Context,
     Size,
     SizeValue,
     Date,
@@ -175,6 +199,7 @@ impl TryFrom<&str> for Block {
             "permission" => Ok(Self::Permission),
             "user" => Ok(Self::User),
             "group" => Ok(Self::Group),
+            "context" => Ok(Self::Context),
             "size" => Ok(Self::Size),
             "size_value" => Ok(Self::SizeValue),
             "date" => Ok(Self::Date),
@@ -446,6 +471,46 @@ mod test_blocks {
         let blocks = Blocks(vec![Block::Permission, Block::Date]);
         assert_eq!(Some(blocks), Blocks::from_config(&c));
     }
+
+    #[test]
+    fn test_context_not_present_on_cli() {
+        let argv = vec!["lsd", "--long"];
+        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let parsed_blocks = Blocks::configure_from(&matches, &Config::with_none()).unwrap();
+        let it = parsed_blocks.0.iter();
+        assert_eq!(it.filter(|&x| *x == Block::Context).count(), 0);
+    }
+
+    #[test]
+    fn test_context_present_if_context_on() {
+        let argv = vec!["lsd", "--context"];
+        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let parsed_blocks = Blocks::configure_from(&matches, &Config::with_none()).unwrap();
+        let it = parsed_blocks.0.iter();
+        assert_eq!(it.filter(|&x| *x == Block::Context).count(), 1);
+    }
+
+    #[test]
+    fn test_only_one_context_no_other_blocks_affected() {
+        let argv = vec![
+            "lsd",
+            "--context",
+            "--blocks",
+            "name,date,size,context,group,user,permission",
+        ];
+        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let test_blocks = Blocks(vec![
+            Block::Name,
+            Block::Date,
+            Block::Size,
+            Block::Context,
+            Block::Group,
+            Block::User,
+            Block::Permission,
+        ]);
+        let parsed_blocks = Blocks::from_arg_matches(&matches).unwrap().unwrap();
+        assert_eq!(test_blocks, parsed_blocks);
+    }
 }
 
 #[cfg(test)]
@@ -505,5 +570,10 @@ mod test_block {
     #[test]
     fn test_links() {
         assert_eq!(Ok(Block::Links), Block::try_from("links"));
+    }
+
+    #[test]
+    fn test_context() {
+        assert_eq!(Ok(Block::Context), Block::try_from("context"));
     }
 }

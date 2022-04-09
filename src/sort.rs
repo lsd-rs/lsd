@@ -16,14 +16,15 @@ pub fn assemble_sorters(flags: &Flags) -> Vec<(SortOrder, SortFn)> {
         }
         DirGrouping::None => {}
     };
-    let other_sort = match flags.sorting.column {
-        SortColumn::Name => by_name,
-        SortColumn::Size => by_size,
-        SortColumn::Time => by_date,
-        SortColumn::Version => by_version,
-        SortColumn::Extension => by_extension,
-    };
-    sorters.push((flags.sorting.order, other_sort));
+
+    match flags.sorting.column {
+        SortColumn::Name => sorters.push((flags.sorting.order, by_name)),
+        SortColumn::Size => sorters.push((flags.sorting.order, by_size)),
+        SortColumn::Time => sorters.push((flags.sorting.order, by_date)),
+        SortColumn::Version => sorters.push((flags.sorting.order, by_version)),
+        SortColumn::Extension => sorters.push((flags.sorting.order, by_extension)),
+        SortColumn::None => {}
+    }
     sorters
 }
 
@@ -294,5 +295,47 @@ mod tests {
 
         let sorter = assemble_sorters(&flags);
         assert_eq!(by_meta(&sorter, &meta_b, &meta_c), Ordering::Less);
+    }
+
+    #[test]
+    fn test_sort_assemble_sorters_no_sort() {
+        let tmp_dir = tempdir().expect("failed to create temp dir");
+
+        let path_a = tmp_dir.path().join("aaa.aa");
+        File::create(&path_a).expect("failed to create file");
+        let meta_a = Meta::from_path(&path_a, false).expect("failed to get meta");
+
+        let path_b = tmp_dir.path().join("aaa");
+        create_dir(&path_b).expect("failed to create dir");
+        let meta_b = Meta::from_path(&path_b, false).expect("failed to get meta");
+
+        let path_c = tmp_dir.path().join("zzz.zz");
+        File::create(&path_c).expect("failed to create file");
+        let meta_c = Meta::from_path(&path_c, false).expect("failed to get meta");
+
+        let path_d = tmp_dir.path().join("zzz");
+        create_dir(&path_d).expect("failed to create dir");
+        let meta_d = Meta::from_path(&path_d, false).expect("failed to get meta");
+
+        let mut flags = Flags::default();
+        flags.sorting.column = SortColumn::None;
+
+        let sorter = assemble_sorters(&flags);
+        assert_eq!(by_meta(&sorter, &meta_a, &meta_b), Ordering::Equal);
+
+        let sorter = assemble_sorters(&flags);
+        assert_eq!(by_meta(&sorter, &meta_a, &meta_c), Ordering::Equal);
+
+        let sorter = assemble_sorters(&flags);
+        assert_eq!(by_meta(&sorter, &meta_a, &meta_d), Ordering::Equal);
+
+        let sorter = assemble_sorters(&flags);
+        assert_eq!(by_meta(&sorter, &meta_b, &meta_c), Ordering::Equal);
+
+        let sorter = assemble_sorters(&flags);
+        assert_eq!(by_meta(&sorter, &meta_b, &meta_d), Ordering::Equal);
+
+        let sorter = assemble_sorters(&flags);
+        assert_eq!(by_meta(&sorter, &meta_c, &meta_d), Ordering::Equal);
     }
 }
