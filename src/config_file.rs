@@ -44,6 +44,7 @@ pub struct Config {
     pub total_size: Option<bool>,
     pub symlink_arrow: Option<String>,
     pub hyperlink: Option<HyperlinkOption>,
+    pub header: Option<bool>,
 }
 
 #[derive(Eq, PartialEq, Debug, Deserialize)]
@@ -95,6 +96,7 @@ impl Config {
             total_size: None,
             symlink_arrow: None,
             hyperlink: None,
+            header: None
         }
     }
 
@@ -388,6 +390,7 @@ mod tests {
                 total_size: Some(false),
                 symlink_arrow: Some("⇒".into()),
                 hyperlink: Some(HyperlinkOption::Never),
+                header: None
             },
             c
         );

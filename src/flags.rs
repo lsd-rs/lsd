@@ -15,6 +15,7 @@ pub mod sorting;
 pub mod symlink_arrow;
 pub mod symlinks;
 pub mod total_size;
+pub mod header;
 
 pub use blocks::Block;
 pub use blocks::Blocks;
@@ -41,6 +42,7 @@ pub use sorting::Sorting;
 pub use symlink_arrow::SymlinkArrow;
 pub use symlinks::NoSymlink;
 pub use total_size::TotalSize;
+pub use header::Header;
 
 use crate::config_file::Config;
 
@@ -69,6 +71,7 @@ pub struct Flags {
     pub total_size: TotalSize,
     pub symlink_arrow: SymlinkArrow,
     pub hyperlink: HyperlinkOption,
+    pub header: Header,
 }
 
 impl Flags {
@@ -97,6 +100,7 @@ impl Flags {
             total_size: TotalSize::configure_from(matches, config),
             symlink_arrow: SymlinkArrow::configure_from(matches, config),
             hyperlink: HyperlinkOption::configure_from(matches, config),
+            header: Header::configure_from(matches, config),
         })
     }
 }

@@ -329,6 +329,11 @@ pub fn build() -> App<'static, 'static> {
                 .number_of_values(1)
                 .help("Attach hyperlink to filenames"),
         )
+        .arg(
+            Arg::with_name("header")
+                .long("header")
+                .help("Display block headers"),
+        )
 }
 
 fn validate_date_argument(arg: String) -> Result<(), String> {
