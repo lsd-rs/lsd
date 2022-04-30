@@ -3,6 +3,7 @@ pub mod color;
 pub mod date;
 pub mod dereference;
 pub mod display;
+pub mod header;
 pub mod hyperlink;
 pub mod icons;
 pub mod ignore_globs;
@@ -15,7 +16,6 @@ pub mod sorting;
 pub mod symlink_arrow;
 pub mod symlinks;
 pub mod total_size;
-pub mod header;
 
 pub use blocks::Block;
 pub use blocks::Blocks;
@@ -24,6 +24,7 @@ pub use color::{ColorOption, ThemeOption};
 pub use date::DateFlag;
 pub use dereference::Dereference;
 pub use display::Display;
+pub use header::Header;
 pub use hyperlink::HyperlinkOption;
 pub use icons::IconOption;
 pub use icons::IconSeparator;
@@ -42,7 +43,6 @@ pub use sorting::Sorting;
 pub use symlink_arrow::SymlinkArrow;
 pub use symlinks::NoSymlink;
 pub use total_size::TotalSize;
-pub use header::Header;
 
 use crate::config_file::Config;
 

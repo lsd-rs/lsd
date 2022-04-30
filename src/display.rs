@@ -72,6 +72,23 @@ fn inner_display_grid(
         }),
     };
 
+    // Print block headers
+    if flags.header.0 && flags.layout == Layout::OneLine && !metas.is_empty() {
+        if let DisplayOption::Relative { .. } = display_option {
+            for block in &flags.blocks.0 {
+                let header = block.get_header();
+
+                grid.add(Cell {
+                    width: get_visible_width(
+                        &header,
+                        matches!(flags.hyperlink, HyperlinkOption::Always),
+                    ),
+                    contents: header,
+                });
+            }
+        }
+    }
+
     // The first iteration (depth == 0) corresponds to the inputs given by the
     // user. We defer displaying directories given by the user unless we've been
     // asked to display the directory itself (rather than its contents).
