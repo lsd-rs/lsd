@@ -96,7 +96,7 @@ impl Config {
             total_size: None,
             symlink_arrow: None,
             hyperlink: None,
-            header: None
+            header: None,
         }
     }
 
