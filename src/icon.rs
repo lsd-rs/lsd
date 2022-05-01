@@ -182,6 +182,7 @@ impl Icons {
         m.insert("db", "\u{f1c0}"); // ""
         m.insert("diff", "\u{f440}"); // ""
         m.insert("doc", "\u{f1c2}"); // ""
+        m.insert("dockerfile", "\u{f308}"); // ""
         m.insert("docx", "\u{f1c2}"); // ""
         m.insert("ds_store", "\u{f179}"); // ""
         m.insert("dump", "\u{f1c0}"); // ""
