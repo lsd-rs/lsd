@@ -12,6 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Display MAC contexts and MAC and ACL indicators from [mmatous](https://github.com/mmatous)
 - Add `--hyperlink` flag for adding hyperlinks to files from [KSXGitHub](https://github.com/KSXGitHub) and [meain](https://github.com/meain)
 - Add icons for HEIC, PEM and TOML from [Nix](https://github.com/nix6839)
+### Changed
+- Show Docker icon for files with Dockerfile extension [#652](https://github.com/Peltoche/lsd/pull/652) from [TeamTamoad](https://github.com/TeamTamoad)
 ### Fixed
 - Support non-bold bright colors [#248](https://github.com/Peltoche/lsd/issues/248) from [meain](https://github.com/meain)
 - Don't automatically dereference symlinks in tree/recursive [#637](https://github.com/Peltoche/lsd/issues/637) from [meain](https://github.com/meain)
