@@ -122,6 +122,7 @@ impl Icons {
         m.insert(".xinitrc", "\u{e615}"); // ""
         m.insert(".xresources", "\u{e615}"); // ""
         m.insert(".zshrc", "\u{f489}"); // ""
+        m.insert("a.out", "\u{f489}"); // ""
         m.insert("authorized_keys", "\u{e60a}"); // ""
         m.insert("bin", "\u{e5fc}"); // ""
         m.insert("bspwmrc", "\u{e615}"); // ""
