@@ -87,6 +87,9 @@ impl Icons {
         }) {
             // Use the known extensions.
             icon
+        } else if let FileType::File { exec: true, .. } = file_type {
+            // If file has no extension and is executable
+            "\u{f489}" // ""
         } else {
             // Use the default icons.
             self.default_file_icon
