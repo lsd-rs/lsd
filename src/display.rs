@@ -12,6 +12,7 @@ const EDGE: &str = "\u{251c}\u{2500}\u{2500}"; // "├──"
 const LINE: &str = "\u{2502}  "; // "│  "
 const CORNER: &str = "\u{2514}\u{2500}\u{2500}"; // "└──"
 const BLANK: &str = "   ";
+const UNDERLINE: &str = "-";
 
 pub fn grid(metas: &[Meta], flags: &Flags, colors: &Colors, icons: &Icons) -> String {
     let term_width = terminal_size().map(|(w, _)| w.0 as usize);
@@ -59,6 +60,7 @@ fn inner_display_grid(
     term_width: Option<usize>,
 ) -> String {
     let mut output = String::new();
+    let mut cells = Vec::new();
 
     let padding_rules = get_padding_rules(metas, flags);
     let mut grid = match flags.layout {
@@ -71,23 +73,6 @@ fn inner_display_grid(
             direction: Direction::TopToBottom,
         }),
     };
-
-    // Print block headers
-    if flags.header.0 && flags.layout == Layout::OneLine && !metas.is_empty() {
-        if let DisplayOption::Relative { .. } = display_option {
-            for block in &flags.blocks.0 {
-                let header = block.get_header();
-
-                grid.add(Cell {
-                    width: get_visible_width(
-                        &header,
-                        matches!(flags.hyperlink, HyperlinkOption::Always),
-                    ),
-                    contents: header,
-                });
-            }
-        }
-    }
 
     // The first iteration (depth == 0) corresponds to the inputs given by the
     // user. We defer displaying directories given by the user unless we've been
@@ -118,7 +103,7 @@ fn inner_display_grid(
         for block in blocks {
             let block_str = block.to_string();
 
-            grid.add(Cell {
+            cells.push(Cell {
                 width: get_visible_width(
                     &block_str,
                     matches!(flags.hyperlink, HyperlinkOption::Always),
@@ -126,6 +111,17 @@ fn inner_display_grid(
                 contents: block_str,
             });
         }
+    }
+
+    // Print block headers
+    if flags.header.0 && flags.layout == Layout::OneLine && !cells.is_empty() {
+        if let DisplayOption::Relative { .. } = display_option {
+            add_header(flags, &cells, &mut grid);
+        }
+    }
+
+    for cell in cells {
+        grid.add(cell);
     }
 
     if flags.layout == Layout::Grid {
@@ -171,6 +167,46 @@ fn inner_display_grid(
     }
 
     output
+}
+
+fn add_header(flags: &Flags, cells: &[Cell], grid: &mut Grid) {
+    let num_columns: usize = flags.blocks.0.len();
+
+    let mut widths = flags
+        .blocks
+        .0
+        .iter()
+        .map(|b| {
+            get_visible_width(
+                &b.get_header(),
+                matches!(flags.hyperlink, HyperlinkOption::Always),
+            )
+        })
+        .collect::<Vec<usize>>();
+
+    // find max widths of each column
+    for (index, cell) in cells.iter().enumerate() {
+        let index = index % num_columns;
+        widths[index] = std::cmp::max(widths[index], cell.width);
+    }
+
+    for (idx, block) in flags.blocks.0.iter().enumerate() {
+        // center header
+        let header = format!("{: ^1$}", block.get_header(), widths[idx]);
+
+        grid.add(Cell {
+            width: widths[idx],
+            contents: header,
+        });
+    }
+
+    for width in widths {
+        let underline = UNDERLINE.repeat(width);
+        grid.add(Cell {
+            width,
+            contents: underline,
+        });
+    }
 }
 
 fn inner_display_tree(
