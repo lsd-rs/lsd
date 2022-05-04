@@ -480,7 +480,7 @@ mod test {
         let icon = Icons::new(Theme::Fancy, " ".to_string());
         let icon_str = icon.get(&meta.name);
 
-        assert_eq!(icon_str, format!("{}{}", "\u{f115}", icon.icon_separator)); // 
+        assert_eq!(icon_str, format!("{}{}", "\u{e5ff}", icon.icon_separator)); // 
     }
 
     #[test]
@@ -504,7 +504,7 @@ mod test {
         let icon = Icons::new(Theme::Fancy, " ".to_string());
         let icon_str = icon.get(&meta.name);
 
-        assert_eq!(icon_str, format!("{}{}", "\u{f115}", icon.icon_separator)); // 
+        assert_eq!(icon_str, format!("{}{}", "\u{e5ff}", icon.icon_separator)); // 
     }
 
     #[test]
