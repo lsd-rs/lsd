@@ -200,13 +200,13 @@ impl Block {
         match self {
             Block::INode => String::from("INode"),
             Block::Links => String::from("Links"),
-            Block::Permission => String::from("Permission"),
+            Block::Permission => String::from("Permissions"),
             Block::User => String::from("User"),
             Block::Group => String::from("Group"),
             Block::Context => String::from("Context"),
             Block::Size => String::from("Size"),
             Block::SizeValue => String::from("SizeValue"),
-            Block::Date => String::from("Date"),
+            Block::Date => String::from("Date Modified"),
             Block::Name => String::from("Name"),
         }
     }
