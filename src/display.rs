@@ -12,7 +12,6 @@ const EDGE: &str = "\u{251c}\u{2500}\u{2500}"; // "├──"
 const LINE: &str = "\u{2502}  "; // "│  "
 const CORNER: &str = "\u{2514}\u{2500}\u{2500}"; // "└──"
 const BLANK: &str = "   ";
-const UNDERLINE: &str = "-";
 
 pub fn grid(metas: &[Meta], flags: &Flags, colors: &Colors, icons: &Icons) -> String {
     let term_width = terminal_size().map(|(w, _)| w.0 as usize);
@@ -115,9 +114,7 @@ fn inner_display_grid(
 
     // Print block headers
     if flags.header.0 && flags.layout == Layout::OneLine && !cells.is_empty() {
-        if let DisplayOption::Relative { .. } = display_option {
             add_header(flags, &cells, &mut grid);
-        }
     }
 
     for cell in cells {
@@ -191,20 +188,16 @@ fn add_header(flags: &Flags, cells: &[Cell], grid: &mut Grid) {
     }
 
     for (idx, block) in flags.blocks.0.iter().enumerate() {
-        // center header
-        let header = format!("{: ^1$}", block.get_header(), widths[idx]);
+        // center and underline header
+        let underlined_header = crossterm::style::Stylize::attribute(
+            format!("{: ^1$}", block.get_header(), widths[idx]),
+            crossterm::style::Attribute::Underlined,
+        )
+        .to_string();
 
         grid.add(Cell {
             width: widths[idx],
-            contents: header,
-        });
-    }
-
-    for width in widths {
-        let underline = UNDERLINE.repeat(width);
-        grid.add(Cell {
-            width,
-            contents: underline,
+            contents: underlined_header,
         });
     }
 }
