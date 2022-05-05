@@ -269,7 +269,7 @@ mod test {
         let colors = Colors::new(color::ThemeOption::NoLscolors);
 
         assert_eq!(
-            " directory".to_string().with(Color::AnsiValue(33)),
+            " directory".to_string().with(Color::AnsiValue(33)),
             meta.name.render(
                 &colors,
                 &icons,

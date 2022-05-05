@@ -30,7 +30,7 @@ impl Icons {
                     Self::get_default_icons_by_name(),
                     Self::get_default_icons_by_extension(),
                     "\u{f016}", // 
-                    "\u{e5ff}", // 
+                    "\u{f115}", // 
                 )
             } else {
                 (
@@ -105,11 +105,13 @@ impl Icons {
 
         m.insert(".trash", "\u{f1f8}"); // ""
         m.insert(".atom", "\u{e764}"); // ""
-        m.insert(".bashprofile", "\u{e615}"); // ""
+        m.insert(".bash_profile", "\u{f489}"); // ""
+        m.insert(".bash_logout", "\u{f489}"); // ""
         m.insert(".bashrc", "\u{f489}"); // ""
         m.insert(".clang-format", "\u{e615}"); // ""
         m.insert(".config", "\u{e5fc}"); // ""
-        m.insert(".git", "\u{f1d3}"); // ""
+        m.insert(".emacs.d", "\u{e779}"); // ""
+        m.insert(".git", "\u{e5fb}"); // ""
         m.insert(".gitattributes", "\u{f1d3}"); // ""
         m.insert(".gitconfig", "\u{f1d3}"); // ""
         m.insert(".github", "\u{f408}"); // ""
@@ -118,7 +120,10 @@ impl Icons {
         m.insert(".gitmodules", "\u{f1d3}"); // ""
         m.insert(".rvm", "\u{e21e}"); // ""
         m.insert(".vimrc", "\u{e62b}"); // ""
+        m.insert(".viminfo", "\u{e62b}"); // ""
         m.insert(".vscode", "\u{e70c}"); // ""
+        m.insert(".xauthority", "\u{e615}"); // ""
+        m.insert(".xdefaults", "\u{e615}"); // ""
         m.insert(".xinitrc", "\u{e615}"); // ""
         m.insert(".xresources", "\u{e615}"); // ""
         m.insert(".zshrc", "\u{f489}"); // ""
@@ -128,14 +133,16 @@ impl Icons {
         m.insert("bspwmrc", "\u{e615}"); // ""
         m.insert("cargo.toml", "\u{e7a8}"); // ""
         m.insert("cargo.lock", "\u{e7a8}"); // ""
-        m.insert("changelog", "\u{e609}"); // ""
+        m.insert("changelog", "\u{f48a}"); // ""
         m.insert("composer.json", "\u{e608}"); // ""
         m.insert("config", "\u{e5fc}"); // ""
         m.insert("config.mk", "\u{e615}"); // ""
+        m.insert("config.ac", "\u{e615}"); // ""
+        m.insert("desktop", "\u{f108}"); // ""
         m.insert("docker-compose.yml", "\u{f308}"); // ""
         m.insert("dockerfile", "\u{f308}"); // ""
+        m.insert("downloads", "\u{f498}"); // ""
         m.insert("ds_store", "\u{f179}"); // ""
-        m.insert(".emacs.d", "\u{e615}"); // ""
         m.insert("favicon.ico", "\u{f005}"); // ""
         m.insert("gitignore_global", "\u{f1d3}"); // ""
         m.insert("gradle", "\u{e70e}"); // ""
@@ -154,6 +161,7 @@ impl Icons {
         m.insert("license.txt", "\u{e60a}"); // ""
         m.insert("localized", "\u{f179}"); // ""
         m.insert("makefile", "\u{e615}"); // ""
+        m.insert("makefile.ac", "\u{e615}"); // ""
         m.insert("muttrc", "\u{e615}"); // ""
         m.insert("node_modules", "\u{e718}"); // ""
         m.insert("npmignore", "\u{e71e}"); // ""
@@ -163,6 +171,7 @@ impl Icons {
         m.insert("robots.txt", "\u{fba7}"); // "ﮧ"
         m.insert("root", "\u{f023}"); // ""
         m.insert("sxhkdrc", "\u{e615}"); // ""
+        m.insert("tmp", "\u{f1f8}"); // ""
         m.insert("vagrantfile", "\u{e615}"); // ""
         m.insert("webpack.config.js", "\u{fc29}"); // "ﰩ"
         m.insert("xmonad.hs", "\u{e615}"); // ""
@@ -182,6 +191,7 @@ impl Icons {
         m.insert("ape", "\u{f001}"); // ""
         m.insert("apk", "\u{e70e}"); // ""
         m.insert("asm", "\u{e614}"); // ""
+        m.insert("asp", "\u{f121}"); // ""
         m.insert("avi", "\u{f008}"); // ""
         m.insert("avro", "\u{e60b}"); // ""
         m.insert("awk", "\u{f489}"); // ""
@@ -205,6 +215,7 @@ impl Icons {
         m.insert("cls", "\u{e600}"); // ""
         m.insert("coffee", "\u{f0f4}"); // ""
         m.insert("conf", "\u{e615}"); // ""
+        m.insert("config", "\u{e5fc}"); // ""
         m.insert("cp", "\u{e61d}"); // ""
         m.insert("cpp", "\u{e61d}"); // ""
         m.insert("cs", "\u{f81a}"); // ""
@@ -230,8 +241,8 @@ impl Icons {
         m.insert("ebook", "\u{e28b}"); // ""
         m.insert("editorconfig", "\u{e615}"); // ""
         m.insert("ejs", "\u{e618}"); // ""
-        m.insert("el", "\u{f671}"); // ""
-        m.insert("elc", "\u{f671}"); // ""
+        m.insert("el", "\u{e779}"); // ""
+        m.insert("elc", "\u{e779}"); // ""
         m.insert("elf", "\u{f489}"); // ""
         m.insert("elm", "\u{e62c}"); // ""
         m.insert("env", "\u{f462}"); // ""
@@ -256,7 +267,7 @@ impl Icons {
         m.insert("gform", "\u{f298}"); // ""
         m.insert("gif", "\u{f1c5}"); // ""
         m.insert("git", "\u{f1d3}"); // ""
-        m.insert("go", "\u{e627}"); // ""
+        m.insert("go", "\u{e724}"); // ""
         m.insert("gradle", "\u{e70e}"); // ""
         m.insert("gsheet", "\u{f1c3}"); // ""
         m.insert("gslides", "\u{f1c4}"); // ""
@@ -285,6 +296,7 @@ impl Icons {
         m.insert("jpg", "\u{f1c5}"); // ""
         m.insert("js", "\u{e74e}"); // ""
         m.insert("json", "\u{e60b}"); // ""
+        m.insert("jsp", "\u{e738}"); // ""
         m.insert("jsx", "\u{e7ba}"); // ""
         m.insert("jl", "\u{e624}"); // ""
         m.insert("key", "\u{e60a}"); // ""
@@ -304,10 +316,10 @@ impl Icons {
         m.insert("m4a", "\u{f001}"); // ""
         m.insert("m4v", "\u{f008}"); // ""
         m.insert("magnet", "\u{f076}"); // ""
-        m.insert("markdown", "\u{e609}"); // ""
-        m.insert("md", "\u{e609}"); // ""
+        m.insert("markdown", "\u{f48a}"); // ""
+        m.insert("md", "\u{f48a}"); // ""
         m.insert("mjs", "\u{e74e}"); // ""
-        m.insert("mkd", "\u{e609}"); // ""
+        m.insert("mkd", "\u{f48a}"); // ""
         m.insert("mkv", "\u{f008}"); // ""
         m.insert("mobi", "\u{e28b}"); // ""
         m.insert("mov", "\u{f008}"); // ""
@@ -328,6 +340,7 @@ impl Icons {
         m.insert("php", "\u{e608}"); // ""
         m.insert("pkg", "\u{f187}"); // ""
         m.insert("pl", "\u{e769}"); // ""
+        m.insert("plist", "\u{f121}"); // ""
         m.insert("pls", "\u{f910}"); // "蘿"
         m.insert("pm", "\u{e769}"); // ""
         m.insert("png", "\u{f1c5}"); // ""
@@ -348,11 +361,11 @@ impl Icons {
         m.insert("rb", "\u{e21e}"); // ""
         m.insert("rdata", "\u{fcd2}"); // "ﳒ"
         m.insert("rdb", "\u{e76d}"); // ""
-        m.insert("rdoc", "\u{e609}"); // ""
+        m.insert("rdoc", "\u{f48a}"); // ""
         m.insert("rds", "\u{fcd2}"); // "ﳒ"
-        m.insert("readme", "\u{e609}"); // ""
+        m.insert("readme", "\u{f48a}"); // ""
         m.insert("rlib", "\u{e7a8}"); // ""
-        m.insert("rmd", "\u{e609}"); // ""
+        m.insert("rmd", "\u{f48a}"); // ""
         m.insert("rpm", "\u{f187}"); // ""
         m.insert("rproj", "\u{fac5}"); // "鉶"
         m.insert("rs", "\u{e7a8}"); // ""
@@ -409,6 +422,7 @@ impl Icons {
         m.insert("woff2", "\u{f031}"); // ""
         m.insert("xbps", "\u{f187}"); // ""
         m.insert("xcf", "\u{f1c5}"); // ""
+        m.insert("xhtml", "\u{f121}"); // ""
         m.insert("xls", "\u{f1c3}"); // ""
         m.insert("xlsx", "\u{f1c3}"); // ""
         m.insert("xml", "\u{f121}"); // ""
@@ -480,7 +494,7 @@ mod test {
         let icon = Icons::new(Theme::Fancy, " ".to_string());
         let icon_str = icon.get(&meta.name);
 
-        assert_eq!(icon_str, format!("{}{}", "\u{e5ff}", icon.icon_separator)); // 
+        assert_eq!(icon_str, format!("{}{}", "\u{f115}", icon.icon_separator)); // 
     }
 
     #[test]
@@ -504,7 +518,7 @@ mod test {
         let icon = Icons::new(Theme::Fancy, " ".to_string());
         let icon_str = icon.get(&meta.name);
 
-        assert_eq!(icon_str, format!("{}{}", "\u{e5ff}", icon.icon_separator)); // 
+        assert_eq!(icon_str, format!("{}{}", "\u{f115}", icon.icon_separator)); // 
     }
 
     #[test]
