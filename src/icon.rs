@@ -59,6 +59,7 @@ impl Icons {
         // Check file types
         let file_type: FileType = name.file_type();
 
+
         let icon = if let FileType::Directory { .. } = file_type {
             self.default_folder_icon
         } else if let FileType::SymLink { is_dir: true } = file_type {
@@ -89,11 +90,16 @@ impl Icons {
             icon
         } else if let FileType::File { exec: true, .. } = file_type {
             // If file has no extension and is executable
-            "\u{f489}" // ""
+            if cfg!(not(target_os = "windows")) {
+                "\u{f489}" // ""
+            } else {
+                self.default_file_icon
+            }
         } else {
             // Use the default icons.
             self.default_file_icon
         };
+
 
         format!("{}{}", icon, self.icon_separator)
     }
