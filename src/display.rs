@@ -114,7 +114,7 @@ fn inner_display_grid(
 
     // Print block headers
     if flags.header.0 && flags.layout == Layout::OneLine && !cells.is_empty() {
-            add_header(flags, &cells, &mut grid);
+        add_header(flags, &cells, &mut grid);
     }
 
     for cell in cells {
@@ -740,5 +740,73 @@ mod tests {
         );
 
         assert!(output.ends_with("└── two\n"));
+    }
+
+    #[test]
+    fn test_grid_all_block_headers() {
+        let argv = vec![
+            "lsd",
+            "--header",
+            "--blocks",
+            "permission,user,group,size,date,name,inode,links",
+        ];
+        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let flags = Flags::configure_from(&matches, &Config::with_none()).unwrap();
+
+        let dir = assert_fs::TempDir::new().unwrap();
+        dir.child("testdir").create_dir_all().unwrap();
+        dir.child("test").touch().unwrap();
+        let metas = Meta::from_path(Path::new(dir.path()), false)
+            .unwrap()
+            .recurse_into(1, &flags)
+            .unwrap()
+            .unwrap();
+        let output = grid(
+            &metas,
+            &flags,
+            &Colors::new(color::ThemeOption::NoColor),
+            &Icons::new(icon::Theme::NoIcon, " ".to_string()),
+        );
+
+        dir.close().unwrap();
+
+        assert!(output.contains("Permissions"));
+        assert!(output.contains("User"));
+        assert!(output.contains("Group"));
+        assert!(output.contains("Size"));
+        assert!(output.contains("Date Modified"));
+        assert!(output.contains("Name"));
+        assert!(output.contains("INode"));
+        assert!(output.contains("Links"));
+    }
+
+    #[test]
+    fn test_grid_no_header_with_empty_meta() {
+        let argv = vec!["lsd", "--header", "-l"];
+        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let flags = Flags::configure_from(&matches, &Config::with_none()).unwrap();
+
+        let dir = assert_fs::TempDir::new().unwrap();
+        dir.child("testdir").create_dir_all().unwrap();
+        let metas = Meta::from_path(Path::new(dir.path()), false)
+            .unwrap()
+            .recurse_into(1, &flags)
+            .unwrap()
+            .unwrap();
+        let output = grid(
+            &metas,
+            &flags,
+            &Colors::new(color::ThemeOption::NoColor),
+            &Icons::new(icon::Theme::NoIcon, " ".to_string()),
+        );
+
+        dir.close().unwrap();
+
+        assert!(!output.contains("Permissions"));
+        assert!(!output.contains("User"));
+        assert!(!output.contains("Group"));
+        assert!(!output.contains("Size"));
+        assert!(!output.contains("Date Modified"));
+        assert!(!output.contains("Name"));
     }
 }

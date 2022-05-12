@@ -597,4 +597,18 @@ mod test_block {
     fn test_context() {
         assert_eq!(Ok(Block::Context), Block::try_from("context"));
     }
+
+    #[test]
+    fn test_block_headers() {
+        assert_eq!(Block::INode.get_header(), String::from("INode"));
+        assert_eq!(Block::Links.get_header(), String::from("Links"));
+        assert_eq!(Block::Permission.get_header(), String::from("Permissions"));
+        assert_eq!(Block::User.get_header(), String::from("User"));
+        assert_eq!(Block::Group.get_header(), String::from("Group"));
+        assert_eq!(Block::Context.get_header(), String::from("Context"));
+        assert_eq!(Block::Size.get_header(), String::from("Size"));
+        assert_eq!(Block::SizeValue.get_header(), String::from("SizeValue"));
+        assert_eq!(Block::Date.get_header(), String::from("Date Modified"));
+        assert_eq!(Block::Name.get_header(), String::from("Name"));
+    }
 }

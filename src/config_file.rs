@@ -349,17 +349,14 @@ mod tests {
         assert_eq!(
             Config {
                 classic: Some(false),
-                blocks: Some(
-                    vec![
-                        "permission".into(),
-                        "user".into(),
-                        "group".into(),
-                        "size".into(),
-                        "date".into(),
-                        "name".into(),
-                    ]
-                    .into()
-                ),
+                blocks: Some(vec![
+                    "permission".into(),
+                    "user".into(),
+                    "group".into(),
+                    "size".into(),
+                    "date".into(),
+                    "name".into(),
+                ]),
                 color: Some(config_file::Color {
                     when: Some(ColorOption::Auto),
                     theme: Some(ThemeOption::Default)
