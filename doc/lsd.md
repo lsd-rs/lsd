@@ -134,6 +134,9 @@ lsd is a ls command with a lot of pretty colours and some other stuff to enrich 
 `-Z` `--context`
 : Display SELinux or SMACK security context
 
+`--header`
+: Display block headers
+
 # ARGS
 
 `<FILE>...`

@@ -215,6 +215,11 @@ hyperlink: never
 # == Symlink arrow ==
 # Specifies how the symlink arrow display, chars in both ascii and utf8
 symlink-arrow: ⇒
+
+# == Header ==
+# Whether to display block headers.
+# Possible values: false, true
+header: false
 ```
 
 ## Theme

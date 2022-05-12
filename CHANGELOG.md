@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - ReleaseDate
 ### Added
+- Add support for `--header` from [MichaelAug](https://github.com/MichaelAug)
 - Add support for `--no-sort` `-U` from [MichaelAug](https://github.com/MichaelAug)
 - Add `--group-directories-first` as an alias for `--group-dirs=first` to improve compatibility with `coreutils/ls`
 - Add `--permission` flag to choose permission formatting (rwx, octal) from [meain](https://github.com/meain)
