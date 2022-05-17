@@ -40,6 +40,11 @@ impl Core {
         #[cfg(target_os = "windows")]
         let console_color_ok = crossterm::ansi_support::supports_ansi();
 
+        #[cfg(target_os = "windows")]
+        if console_color_ok {
+            let _ = ansi_term::enable_ansi_support();
+        }
+
         let mut inner_flags = flags.clone();
 
         let color_theme = match (tty_available && console_color_ok, flags.color.when) {

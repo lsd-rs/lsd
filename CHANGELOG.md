@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Support non-bold bright colors [#248](https://github.com/Peltoche/lsd/issues/248) from [meain](https://github.com/meain)
 - Don't automatically dereference symlinks in tree/recursive [#637](https://github.com/Peltoche/lsd/issues/637) from [meain](https://github.com/meain)
+- Restore colors on Windows when running under MSYS2 [#657](https://github.com/Peltoche/lsd/issues/657) from [martinlindhe](https://github.com/martinlindhe)
 
 ## [0.21.0] - 2022-01-16
 ### Added
