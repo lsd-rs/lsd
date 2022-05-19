@@ -118,8 +118,16 @@ impl Name {
                         }
                     }
                     Err(err) => {
-                        print_error!("{}: {}.", name, err);
-                        name
+                        match err.kind() {
+                            std::io::ErrorKind::NotFound => {
+                                // If this happens, it just means the file is a broken symlink. This is not an error, and the user is already warned that the symlink is broken by the colors.
+                                name
+                            }
+                            _ => {
+                                print_error!("{}: {}", name, err);
+                                name
+                            }
+                        }
                     }
                 }
             }
