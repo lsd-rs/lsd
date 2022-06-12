@@ -58,46 +58,39 @@ impl Icons {
 
         // Check file types
         let file_type: FileType = name.file_type();
-
-        let icon = if let FileType::SymLink { is_dir: true } = file_type {
-            "\u{f482}" // ""
-        } else if let FileType::SymLink { is_dir: false } = file_type {
-            "\u{f481}" // ""
-        } else if let FileType::Socket = file_type {
-            "\u{f6a7}" // ""
-        } else if let FileType::Pipe = file_type {
-            "\u{f731}" // ""
-        } else if let FileType::CharDevice = file_type {
-            "\u{e601}" // ""
-        } else if let FileType::BlockDevice = file_type {
-            "\u{fc29}" // "ﰩ"
-        } else if let FileType::Special = file_type {
-            "\u{f2dc}" // ""
-        } else if let Some(icon) = self
-            .icons_by_name
-            .get(name.file_name().to_lowercase().as_str())
-        {
-            // Use the known names.
-            icon
-        } else if let Some(icon) = name.extension().and_then(|extension| {
-            self.icons_by_extension
-                .get(extension.to_lowercase().as_str())
-        }) {
-            // Use the known extensions.
-            icon
-        } else if let FileType::Directory { .. } = file_type {
-            self.default_folder_icon
-        } else if let FileType::File { exec: true, .. } = file_type {
-            // If file has no extension and is executable
-            if cfg!(windows) {
-                // Windows marks everything as executable
-                self.default_file_icon // 
-            } else {
-                "\u{f489}" // ""
+        let icon = match file_type {
+            FileType::SymLink { is_dir: true } => "\u{f482}", // ""
+            FileType::SymLink { is_dir: false } => "\u{f481}", // ""
+            FileType::Socket => "\u{f6a7}",                   // ""
+            FileType::Pipe => "\u{f731}",                     // ""
+            FileType::CharDevice => "\u{e601}",               // ""
+            FileType::BlockDevice => "\u{fc29}",              // "ﰩ"
+            FileType::Special => "\u{f2dc}",                  // ""
+            _ => {
+                // Use the known names
+                if let Some(icon) = self
+                    .icons_by_name
+                    .get(name.file_name().to_lowercase().as_str())
+                {
+                    icon
+                }
+                // Use the known extensions
+                else if let Some(icon) = name.extension().and_then(|extension| {
+                    self.icons_by_extension
+                        .get(extension.to_lowercase().as_str())
+                }) {
+                    icon
+                } else {
+                    match file_type {
+                        FileType::Directory { .. } => self.default_folder_icon,
+                        // If a file has no extension and is executable, show an icon.
+                        // Except for Windows, it marks everything as an executable.
+                        #[cfg(not(windows))]
+                        FileType::File { exec: true, .. } => "\u{f489}", // ""
+                        _ => self.default_file_icon,
+                    }
+                }
             }
-        } else {
-            // Use the default icons.
-            self.default_file_icon
         };
 
         format!("{}{}", icon, self.icon_separator)
