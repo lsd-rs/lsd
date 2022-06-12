@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased] - ReleaseDate
+## [0.22.0] - 2022-06-12
 ### Added
 - Add support for `--header` from [MichaelAug](https://github.com/MichaelAug)
 - Add support for `--no-sort` `-U` from [MichaelAug](https://github.com/MichaelAug)
@@ -340,7 +340,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Change the component alignement by using term_grid
 
 
-[Unreleased]: https://github.com/Peltoche/lsd/compare/0.21....HEAD
+[0.22.0]: https://github.com/Peltoche/lsd/compare/0.21....HEAD
 [0.21.0]: https://github.com/Peltoche/lsd/compare/0.20.1...0.21.0
 [0.20.1]: https://github.com/Peltoche/lsd/compare/0.20.0...0.20.1
 [0.20.0]: https://github.com/Peltoche/lsd/compare/0.19.0...0.20.0

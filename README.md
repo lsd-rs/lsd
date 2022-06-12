@@ -29,7 +29,7 @@ Install the patched fonts of powerline nerd-font and/or font-awesome. Have a loo
 | NetBSD or any `pkgsrc` platform | `pkgin install lsd` or `cd /usr/pkgsrc/sysutils/lsd && make install`                                              |
 | Windows                         | `scoop install lsd`                                                                                               |
 | Android (via Termux)            | `pkg install lsd`                                                                                                 |
-| Ubuntu/Debian based distro      | `sudo dpkg -i lsd_0.21.0_amd64.deb` get `.deb` file from [release page](https://github.com/Peltoche/lsd/releases) |
+| Ubuntu/Debian based distro      | `sudo dpkg -i lsd_0.22.0_amd64.deb` get `.deb` file from [release page](https://github.com/Peltoche/lsd/releases) |
 | Solus                           | `eopkg it lsd`                                                                                                    |
 
 
