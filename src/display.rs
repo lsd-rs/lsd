@@ -100,14 +100,12 @@ fn inner_display_grid(
         );
 
         for block in blocks {
-            let block_str = block.to_string();
-
             cells.push(Cell {
                 width: get_visible_width(
-                    &block_str,
+                    &block,
                     matches!(flags.hyperlink, HyperlinkOption::Always),
                 ),
-                contents: block_str,
+                contents: block,
             });
         }
     }
@@ -235,14 +233,12 @@ fn inner_display_tree(
             padding_rules,
             (tree_index, &current_prefix),
         ) {
-            let block_str = block.to_string();
-
             cells.push(Cell {
                 width: get_visible_width(
-                    &block_str,
+                    &block,
                     matches!(flags.hyperlink, HyperlinkOption::Always),
                 ),
-                contents: block_str,
+                contents: block,
             });
         }
 
