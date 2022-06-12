@@ -30,7 +30,7 @@ impl Icons {
                     Self::get_default_icons_by_name(),
                     Self::get_default_icons_by_extension(),
                     "\u{f016}", // 
-                    "\u{e5ff}", // 
+                    "\u{f115}", // 
                 )
             } else {
                 (
@@ -89,7 +89,12 @@ impl Icons {
             self.default_folder_icon
         } else if let FileType::File { exec: true, .. } = file_type {
             // If file has no extension and is executable
-            "\u{f489}" // ""
+            if cfg!(windows) {
+                // Windows marks everything as executable
+                self.default_file_icon // 
+            } else {
+                "\u{f489}" // ""
+            }
         } else {
             // Use the default icons.
             self.default_file_icon
@@ -194,7 +199,7 @@ impl Icons {
         m.insert("makefile.ac", "\u{e615}"); // ""
         m.insert("music", "\u{f025}"); // ""
         m.insert("muttrc", "\u{e615}"); // ""
-        m.insert("node_modules", "\u{e5fa}"); // "" 
+        m.insert("node_modules", "\u{e5fa}"); // ""
         m.insert("npmignore", "\u{e71e}"); // ""
         m.insert("package.json", "\u{e718}"); // ""
         m.insert("packages.el", "\u{e779}"); // ""
@@ -542,7 +547,7 @@ mod test {
         let icon = Icons::new(Theme::Fancy, " ".to_string());
         let icon_str = icon.get(&meta.name);
 
-        assert_eq!(icon_str, format!("{}{}", "\u{e5ff}", icon.icon_separator)); // 
+        assert_eq!(icon_str, format!("{}{}", "\u{f115}", icon.icon_separator)); // 
     }
 
     #[test]
@@ -566,7 +571,7 @@ mod test {
         let icon = Icons::new(Theme::Fancy, " ".to_string());
         let icon_str = icon.get(&meta.name);
 
-        assert_eq!(icon_str, format!("{}{}", "\u{e5ff}", icon.icon_separator)); // 
+        assert_eq!(icon_str, format!("{}{}", "\u{f115}", icon.icon_separator)); // 
     }
 
     #[test]
