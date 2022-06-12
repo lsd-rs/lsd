@@ -1,6 +1,6 @@
 sign-commit = true
 sign-tag = true
-no-dev-version = true
+dev-version = false
 pre-release-commit-message = "Release {{version}}"
 tag-prefix = ""
 tag-name = "{{version}}"
