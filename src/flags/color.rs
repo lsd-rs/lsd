@@ -187,14 +187,14 @@ mod test_color_option {
 
     #[test]
     fn test_from_arg_matches_none() {
-        let argv = vec!["lsd"];
+        let argv = ["lsd"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         assert_eq!(None, ColorOption::from_arg_matches(&matches));
     }
 
     #[test]
     fn test_from_arg_matches_always() {
-        let argv = vec!["lsd", "--color", "always"];
+        let argv = ["lsd", "--color", "always"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         assert_eq!(
             Some(ColorOption::Always),
@@ -204,7 +204,7 @@ mod test_color_option {
 
     #[test]
     fn test_from_arg_matches_auto() {
-        let argv = vec!["lsd", "--color", "auto"];
+        let argv = ["lsd", "--color", "auto"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         assert_eq!(
             Some(ColorOption::Auto),
@@ -214,7 +214,7 @@ mod test_color_option {
 
     #[test]
     fn test_from_arg_matches_never() {
-        let argv = vec!["lsd", "--color", "never"];
+        let argv = ["lsd", "--color", "never"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         assert_eq!(
             Some(ColorOption::Never),
@@ -230,7 +230,7 @@ mod test_color_option {
 
     #[test]
     fn test_from_arg_matches_classic_mode() {
-        let argv = vec!["lsd", "--color", "always", "--classic"];
+        let argv = ["lsd", "--color", "always", "--classic"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         assert_eq!(
             Some(ColorOption::Never),
@@ -240,7 +240,7 @@ mod test_color_option {
 
     #[test]
     fn test_from_arg_matches_color_multiple() {
-        let argv = vec!["lsd", "--color", "always", "--color", "never"];
+        let argv = ["lsd", "--color", "always", "--color", "never"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         assert_eq!(
             Some(ColorOption::Never),

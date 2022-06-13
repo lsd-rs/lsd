@@ -183,14 +183,14 @@ mod test_icon_option {
 
     #[test]
     fn test_from_arg_matches_none() {
-        let argv = vec!["lsd"];
+        let argv = ["lsd"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         assert_eq!(None, IconOption::from_arg_matches(&matches));
     }
 
     #[test]
     fn test_from_arg_matches_always() {
-        let argv = vec!["lsd", "--icon", "always"];
+        let argv = ["lsd", "--icon", "always"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         assert_eq!(
             Some(IconOption::Always),
@@ -200,7 +200,7 @@ mod test_icon_option {
 
     #[test]
     fn test_from_arg_matches_autp() {
-        let argv = vec!["lsd", "--icon", "auto"];
+        let argv = ["lsd", "--icon", "auto"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         assert_eq!(
             Some(IconOption::Auto),
@@ -210,7 +210,7 @@ mod test_icon_option {
 
     #[test]
     fn test_from_arg_matches_never() {
-        let argv = vec!["lsd", "--icon", "never"];
+        let argv = ["lsd", "--icon", "never"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         assert_eq!(
             Some(IconOption::Never),
@@ -220,7 +220,7 @@ mod test_icon_option {
 
     #[test]
     fn test_from_arg_matches_classic_mode() {
-        let argv = vec!["lsd", "--icon", "always", "--classic"];
+        let argv = ["lsd", "--icon", "always", "--classic"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         assert_eq!(
             Some(IconOption::Never),
@@ -230,7 +230,7 @@ mod test_icon_option {
 
     #[test]
     fn test_from_arg_matches_icon_when_multi() {
-        let argv = vec!["lsd", "--icon", "always", "--icon", "never"];
+        let argv = ["lsd", "--icon", "always", "--icon", "never"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         assert_eq!(
             Some(IconOption::Never),
@@ -299,14 +299,14 @@ mod test_icon_theme {
 
     #[test]
     fn test_from_arg_matches_none() {
-        let argv = vec!["lsd"];
+        let argv = ["lsd"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         assert_eq!(None, IconTheme::from_arg_matches(&matches));
     }
 
     #[test]
     fn test_from_arg_matches_fancy() {
-        let argv = vec!["lsd", "--icon-theme", "fancy"];
+        let argv = ["lsd", "--icon-theme", "fancy"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         assert_eq!(
             Some(IconTheme::Fancy),
@@ -316,7 +316,7 @@ mod test_icon_theme {
 
     #[test]
     fn test_from_arg_matches_unicode() {
-        let argv = vec!["lsd", "--icon-theme", "unicode"];
+        let argv = ["lsd", "--icon-theme", "unicode"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         assert_eq!(
             Some(IconTheme::Unicode),
@@ -326,7 +326,7 @@ mod test_icon_theme {
 
     #[test]
     fn test_from_arg_matches_icon_multi() {
-        let argv = vec!["lsd", "--icon-theme", "fancy", "--icon-theme", "unicode"];
+        let argv = ["lsd", "--icon-theme", "fancy", "--icon-theme", "unicode"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         assert_eq!(
             Some(IconTheme::Unicode),

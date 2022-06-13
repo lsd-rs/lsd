@@ -316,7 +316,7 @@ fn get_output<'a>(
             Block::INode => block_vec.push(meta.inode.render(colors)),
             Block::Links => block_vec.push(meta.links.render(colors)),
             Block::Permission => {
-                block_vec.extend(vec![
+                block_vec.extend([
                     meta.file_type.render(colors),
                     meta.permissions.render(colors, flags),
                     meta.access_control.render_method(colors),
@@ -336,7 +336,7 @@ fn get_output<'a>(
             Block::SizeValue => block_vec.push(meta.size.render_value(colors, flags)),
             Block::Date => block_vec.push(meta.date.render(colors, flags)),
             Block::Name => {
-                block_vec.extend(vec![
+                block_vec.extend([
                     meta.name
                         .render(colors, icons, display_option, flags.hyperlink),
                     meta.indicator.render(flags),
@@ -607,7 +607,7 @@ mod tests {
 
     #[test]
     fn test_display_tree_with_all() {
-        let argv = vec!["lsd", "--tree", "--all"];
+        let argv = ["lsd", "--tree", "--all"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         let flags = Flags::configure_from(&matches, &Config::with_none()).unwrap();
 
@@ -639,7 +639,7 @@ mod tests {
     /// `---blocks size,name` can help us for this case
     #[test]
     fn test_tree_align_subfolder() {
-        let argv = vec!["lsd", "--tree", "--blocks", "size,name"];
+        let argv = ["lsd", "--tree", "--blocks", "size,name"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         let flags = Flags::configure_from(&matches, &Config::with_none()).unwrap();
 
@@ -678,7 +678,7 @@ mod tests {
     #[test]
     #[cfg(unix)]
     fn test_tree_size_first_without_name() {
-        let argv = vec!["lsd", "--tree", "--blocks", "size,permission"];
+        let argv = ["lsd", "--tree", "--blocks", "size,permission"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         let flags = Flags::configure_from(&matches, &Config::with_none()).unwrap();
 
@@ -716,7 +716,7 @@ mod tests {
 
     #[test]
     fn test_tree_edge_before_name() {
-        let argv = vec!["lsd", "--tree", "--long"];
+        let argv = ["lsd", "--tree", "--long"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         let flags = Flags::configure_from(&matches, &Config::with_none()).unwrap();
 
@@ -740,7 +740,7 @@ mod tests {
 
     #[test]
     fn test_grid_all_block_headers() {
-        let argv = vec![
+        let argv = [
             "lsd",
             "--header",
             "--blocks",
@@ -778,7 +778,7 @@ mod tests {
 
     #[test]
     fn test_grid_no_header_with_empty_meta() {
-        let argv = vec!["lsd", "--header", "-l"];
+        let argv = ["lsd", "--header", "-l"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         let flags = Flags::configure_from(&matches, &Config::with_none()).unwrap();
 

@@ -44,14 +44,14 @@ mod test {
 
     #[test]
     fn test_from_arg_matches_none() {
-        let argv = vec!["lsd"];
+        let argv = ["lsd"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         assert_eq!(None, TotalSize::from_arg_matches(&matches));
     }
 
     #[test]
     fn test_from_arg_matches_true() {
-        let argv = vec!["lsd", "--total-size"];
+        let argv = ["lsd", "--total-size"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         assert_eq!(Some(TotalSize(true)), TotalSize::from_arg_matches(&matches));
     }

@@ -44,14 +44,14 @@ mod test {
 
     #[test]
     fn test_from_arg_matches_none() {
-        let argv = vec!["lsd"];
+        let argv = ["lsd"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         assert_eq!(None, NoSymlink::from_arg_matches(&matches));
     }
 
     #[test]
     fn test_from_arg_matches_true() {
-        let argv = vec!["lsd", "--no-symlink"];
+        let argv = ["lsd", "--no-symlink"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         assert_eq!(Some(NoSymlink(true)), NoSymlink::from_arg_matches(&matches));
     }

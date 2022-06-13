@@ -88,14 +88,14 @@ mod test {
 
     #[test]
     fn test_from_arg_matches_none() {
-        let argv = vec!["lsd"];
+        let argv = ["lsd"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         assert_eq!(None, PermissionFlag::from_arg_matches(&matches));
     }
 
     #[test]
     fn test_from_arg_matches_default() {
-        let argv = vec!["lsd", "--permission", "rwx"];
+        let argv = ["lsd", "--permission", "rwx"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         assert_eq!(
             Some(PermissionFlag::Rwx),

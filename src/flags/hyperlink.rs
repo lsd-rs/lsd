@@ -70,14 +70,14 @@ mod test_hyperlink_option {
 
     #[test]
     fn test_from_arg_matches_none() {
-        let argv = vec!["lsd"];
+        let argv = ["lsd"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         assert_eq!(None, HyperlinkOption::from_arg_matches(&matches));
     }
 
     #[test]
     fn test_from_arg_matches_always() {
-        let argv = vec!["lsd", "--hyperlink", "always"];
+        let argv = ["lsd", "--hyperlink", "always"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         assert_eq!(
             Some(HyperlinkOption::Always),
@@ -87,7 +87,7 @@ mod test_hyperlink_option {
 
     #[test]
     fn test_from_arg_matches_autp() {
-        let argv = vec!["lsd", "--hyperlink", "auto"];
+        let argv = ["lsd", "--hyperlink", "auto"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         assert_eq!(
             Some(HyperlinkOption::Auto),
@@ -97,7 +97,7 @@ mod test_hyperlink_option {
 
     #[test]
     fn test_from_arg_matches_never() {
-        let argv = vec!["lsd", "--hyperlink", "never"];
+        let argv = ["lsd", "--hyperlink", "never"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         assert_eq!(
             Some(HyperlinkOption::Never),
@@ -107,7 +107,7 @@ mod test_hyperlink_option {
 
     #[test]
     fn test_from_arg_matches_classic_mode() {
-        let argv = vec!["lsd", "--hyperlink", "always", "--classic"];
+        let argv = ["lsd", "--hyperlink", "always", "--classic"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         assert_eq!(
             Some(HyperlinkOption::Never),
@@ -117,7 +117,7 @@ mod test_hyperlink_option {
 
     #[test]
     fn test_from_arg_matches_hyperlink_when_multi() {
-        let argv = vec!["lsd", "--hyperlink", "always", "--hyperlink", "never"];
+        let argv = ["lsd", "--hyperlink", "always", "--hyperlink", "never"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         assert_eq!(
             Some(HyperlinkOption::Never),

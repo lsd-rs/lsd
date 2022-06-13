@@ -64,21 +64,21 @@ mod test {
 
     #[test]
     fn test_from_arg_matches_none() {
-        let argv = vec!["lsd"];
+        let argv = ["lsd"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         assert_eq!(None, Display::from_arg_matches(&matches));
     }
 
     #[test]
     fn test_from_arg_matches_all() {
-        let argv = vec!["lsd", "--all"];
+        let argv = ["lsd", "--all"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         assert_eq!(Some(Display::All), Display::from_arg_matches(&matches));
     }
 
     #[test]
     fn test_from_arg_matches_almost_all() {
-        let argv = vec!["lsd", "--almost-all"];
+        let argv = ["lsd", "--almost-all"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         assert_eq!(
             Some(Display::AlmostAll),
@@ -88,7 +88,7 @@ mod test {
 
     #[test]
     fn test_from_arg_matches_directory_only() {
-        let argv = vec!["lsd", "--directory-only"];
+        let argv = ["lsd", "--directory-only"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         assert_eq!(
             Some(Display::DirectoryOnly),

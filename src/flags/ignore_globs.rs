@@ -141,7 +141,7 @@ mod test {
 
     #[test]
     fn test_configuration_from_none() {
-        let argv = vec!["lsd"];
+        let argv = ["lsd"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         assert!(
             match IgnoreGlobs::configure_from(&matches, &Config::with_none()) {
@@ -153,7 +153,7 @@ mod test {
 
     #[test]
     fn test_configuration_from_args() {
-        let argv = vec!["lsd", "--ignore-glob", ".git"];
+        let argv = ["lsd", "--ignore-glob", ".git"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         assert!(
             match IgnoreGlobs::configure_from(&matches, &Config::with_none()) {
@@ -165,7 +165,7 @@ mod test {
 
     #[test]
     fn test_configuration_from_config() {
-        let argv = vec!["lsd"];
+        let argv = ["lsd"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         let mut c = Config::with_none();
         c.ignore_globs = Some(vec![".git".into()].into());
@@ -177,7 +177,7 @@ mod test {
 
     #[test]
     fn test_from_arg_matches_none() {
-        let argv = vec!["lsd"];
+        let argv = ["lsd"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         assert!(match IgnoreGlobs::from_arg_matches(&matches) {
             None => true,

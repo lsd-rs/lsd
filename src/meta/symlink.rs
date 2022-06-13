@@ -86,7 +86,7 @@ mod tests {
             target: Some("/target".to_string()),
             valid: true,
         };
-        let argv = vec!["lsd"];
+        let argv = ["lsd"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         assert_eq!(
             format!("{}", " ⇒ /target"),
@@ -104,7 +104,7 @@ mod tests {
             target: Some("/target".to_string()),
             valid: false,
         };
-        let argv = vec!["lsd"];
+        let argv = ["lsd"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         assert_eq!(
             format!("{}", " ⇒ /target"),
@@ -122,7 +122,7 @@ mod tests {
             target: Some("/target".to_string()),
             valid: false,
         };
-        let argv = vec!["lsd"];
+        let argv = ["lsd"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         assert_eq!(
             format!("{}", " ⇒ \u{1b}[38;5;124m/target\u{1b}[39m"),
