@@ -138,21 +138,21 @@ mod test {
 
     #[test]
     fn test_enabled_from_arg_matches_empty() {
-        let argv = vec!["lsd"];
+        let argv = ["lsd"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         assert_eq!(None, Recursion::enabled_from_arg_matches(&matches));
     }
 
     #[test]
     fn test_enabled_from_arg_matches_true() {
-        let argv = vec!["lsd", "--recursive"];
+        let argv = ["lsd", "--recursive"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         assert_eq!(Some(true), Recursion::enabled_from_arg_matches(&matches));
     }
 
     #[test]
     fn test_enabled_from_empty_matches_and_config() {
-        let argv = vec!["lsd"];
+        let argv = ["lsd"];
         assert_eq!(
             false,
             Recursion::enabled_from(
@@ -164,7 +164,7 @@ mod test {
 
     #[test]
     fn test_enabled_from_matches_empty_and_config_true() {
-        let argv = vec!["lsd"];
+        let argv = ["lsd"];
         let mut c = Config::with_none();
         c.recursion = Some(config_file::Recursion {
             enabled: Some(true),
@@ -178,7 +178,7 @@ mod test {
 
     #[test]
     fn test_enabled_from_matches_empty_and_config_false() {
-        let argv = vec!["lsd"];
+        let argv = ["lsd"];
         let mut c = Config::with_none();
         c.recursion = Some(config_file::Recursion {
             enabled: Some(false),
@@ -195,7 +195,7 @@ mod test {
 
     #[test]
     fn test_depth_from_arg_matches_empty() {
-        let argv = vec!["lsd"];
+        let argv = ["lsd"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         assert!(match Recursion::depth_from_arg_matches(&matches) {
             None => true,
@@ -205,7 +205,7 @@ mod test {
 
     #[test]
     fn test_depth_from_arg_matches_integer() {
-        let argv = vec!["lsd", "--depth", "42"];
+        let argv = ["lsd", "--depth", "42"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         assert!(match Recursion::depth_from_arg_matches(&matches) {
             None => false,
@@ -220,7 +220,7 @@ mod test {
 
     #[test]
     fn test_depth_from_arg_matches_depth_multi() {
-        let argv = vec!["lsd", "--depth", "4", "--depth", "2"];
+        let argv = ["lsd", "--depth", "4", "--depth", "2"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         assert!(match Recursion::depth_from_arg_matches(&matches) {
             None => false,
@@ -235,7 +235,7 @@ mod test {
 
     #[test]
     fn test_depth_from_arg_matches_neg_int() {
-        let argv = vec!["lsd", "--depth", "\\-42"];
+        let argv = ["lsd", "--depth", "\\-42"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         assert!(match Recursion::depth_from_arg_matches(&matches) {
             None => false,
@@ -250,7 +250,7 @@ mod test {
 
     #[test]
     fn test_depth_from_arg_matches_non_int() {
-        let argv = vec!["lsd", "--depth", "foo"];
+        let argv = ["lsd", "--depth", "foo"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         assert!(match Recursion::depth_from_arg_matches(&matches) {
             None => false,
@@ -265,7 +265,7 @@ mod test {
 
     #[test]
     fn test_depth_from_config_none_max() {
-        let argv = vec!["lsd"];
+        let argv = ["lsd"];
         assert_eq!(
             usize::max_value(),
             Recursion::depth_from(
@@ -278,7 +278,7 @@ mod test {
 
     #[test]
     fn test_depth_from_config_pos_integer() {
-        let argv = vec!["lsd"];
+        let argv = ["lsd"];
         let mut c = Config::with_none();
         c.recursion = Some(config_file::Recursion {
             enabled: None,

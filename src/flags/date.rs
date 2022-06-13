@@ -121,21 +121,21 @@ mod test {
 
     #[test]
     fn test_from_arg_matches_none() {
-        let argv = vec!["lsd"];
+        let argv = ["lsd"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         assert_eq!(None, DateFlag::from_arg_matches(&matches));
     }
 
     #[test]
     fn test_from_arg_matches_date() {
-        let argv = vec!["lsd", "--date", "date"];
+        let argv = ["lsd", "--date", "date"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         assert_eq!(Some(DateFlag::Date), DateFlag::from_arg_matches(&matches));
     }
 
     #[test]
     fn test_from_arg_matches_relative() {
-        let argv = vec!["lsd", "--date", "relative"];
+        let argv = ["lsd", "--date", "relative"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         assert_eq!(
             Some(DateFlag::Relative),
@@ -145,7 +145,7 @@ mod test {
 
     #[test]
     fn test_from_arg_matches_format() {
-        let argv = vec!["lsd", "--date", "+%F"];
+        let argv = ["lsd", "--date", "+%F"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         assert_eq!(
             Some(DateFlag::Formatted("%F".to_string())),
@@ -156,21 +156,21 @@ mod test {
     #[test]
     #[should_panic(expected = "invalid format specifier: %J")]
     fn test_from_arg_matches_format_invalid() {
-        let argv = vec!["lsd", "--date", "+%J"];
+        let argv = ["lsd", "--date", "+%J"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         DateFlag::from_arg_matches(&matches);
     }
 
     #[test]
     fn test_from_arg_matches_classic_mode() {
-        let argv = vec!["lsd", "--date", "date", "--classic"];
+        let argv = ["lsd", "--date", "date", "--classic"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         assert_eq!(Some(DateFlag::Date), DateFlag::from_arg_matches(&matches));
     }
 
     #[test]
     fn test_from_arg_matches_date_multi() {
-        let argv = vec!["lsd", "--date", "relative", "--date", "date"];
+        let argv = ["lsd", "--date", "relative", "--date", "date"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         assert_eq!(Some(DateFlag::Date), DateFlag::from_arg_matches(&matches));
     }
@@ -268,7 +268,7 @@ mod test {
     #[serial_test::serial]
     fn test_parsing_order_arg() {
         std::env::set_var("TIME_STYLE", "+%R");
-        let argv = vec!["lsd", "--date", "+%F"];
+        let argv = ["lsd", "--date", "+%F"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         let mut config = Config::with_none();
         config.date = Some("+%c".into());
@@ -282,7 +282,7 @@ mod test {
     #[serial_test::serial]
     fn test_parsing_order_env() {
         std::env::set_var("TIME_STYLE", "+%R");
-        let argv = vec!["lsd"];
+        let argv = ["lsd"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         let mut config = Config::with_none();
         config.date = Some("+%c".into());
@@ -296,7 +296,7 @@ mod test {
     #[serial_test::serial]
     fn test_parsing_order_config() {
         std::env::set_var("TIME_STYLE", "");
-        let argv = vec!["lsd"];
+        let argv = ["lsd"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         let mut config = Config::with_none();
         config.date = Some("+%c".into());
