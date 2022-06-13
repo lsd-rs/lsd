@@ -173,7 +173,7 @@ fn add_header(flags: &Flags, cells: &[Cell], grid: &mut Grid) {
         .iter()
         .map(|b| {
             get_visible_width(
-                &b.get_header(),
+                b.get_header(),
                 matches!(flags.hyperlink, HyperlinkOption::Always),
             )
         })

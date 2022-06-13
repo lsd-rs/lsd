@@ -196,18 +196,18 @@ pub enum Block {
 }
 
 impl Block {
-    pub fn get_header(&self) -> String {
+    pub fn get_header(&self) -> &'static str {
         match self {
-            Block::INode => String::from("INode"),
-            Block::Links => String::from("Links"),
-            Block::Permission => String::from("Permissions"),
-            Block::User => String::from("User"),
-            Block::Group => String::from("Group"),
-            Block::Context => String::from("Context"),
-            Block::Size => String::from("Size"),
-            Block::SizeValue => String::from("SizeValue"),
-            Block::Date => String::from("Date Modified"),
-            Block::Name => String::from("Name"),
+            Block::INode => "INode",
+            Block::Links => "Links",
+            Block::Permission => "Permissions",
+            Block::User => "User",
+            Block::Group => "Group",
+            Block::Context => "Context",
+            Block::Size => "Size",
+            Block::SizeValue => "SizeValue",
+            Block::Date => "Date Modified",
+            Block::Name => "Name",
         }
     }
 }
@@ -600,15 +600,15 @@ mod test_block {
 
     #[test]
     fn test_block_headers() {
-        assert_eq!(Block::INode.get_header(), String::from("INode"));
-        assert_eq!(Block::Links.get_header(), String::from("Links"));
-        assert_eq!(Block::Permission.get_header(), String::from("Permissions"));
-        assert_eq!(Block::User.get_header(), String::from("User"));
-        assert_eq!(Block::Group.get_header(), String::from("Group"));
-        assert_eq!(Block::Context.get_header(), String::from("Context"));
-        assert_eq!(Block::Size.get_header(), String::from("Size"));
-        assert_eq!(Block::SizeValue.get_header(), String::from("SizeValue"));
-        assert_eq!(Block::Date.get_header(), String::from("Date Modified"));
-        assert_eq!(Block::Name.get_header(), String::from("Name"));
+        assert_eq!(Block::INode.get_header(), "INode");
+        assert_eq!(Block::Links.get_header(), "Links");
+        assert_eq!(Block::Permission.get_header(), "Permissions");
+        assert_eq!(Block::User.get_header(), "User");
+        assert_eq!(Block::Group.get_header(), "Group");
+        assert_eq!(Block::Context.get_header(), "Context");
+        assert_eq!(Block::Size.get_header(), "Size");
+        assert_eq!(Block::SizeValue.get_header(), "SizeValue");
+        assert_eq!(Block::Date.get_header(), "Date Modified");
+        assert_eq!(Block::Name.get_header(), "Name");
     }
 }
