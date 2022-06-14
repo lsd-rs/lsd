@@ -68,8 +68,8 @@ impl Permissions {
             }
         };
 
-        let strings = match flags.permission {
-            PermissionFlag::Rwx => vec![
+        let res = match flags.permission {
+            PermissionFlag::Rwx => [
                 // User permissions
                 bit(self.user_read, "r", &Elem::Read),
                 bit(self.user_write, "w", &Elem::Write),
@@ -97,30 +97,30 @@ impl Permissions {
                     (false, true) => colors.colorize(String::from("T"), &Elem::ExecSticky),
                     (true, true) => colors.colorize(String::from("t"), &Elem::ExecSticky),
                 },
-            ],
+            ]
+            .into_iter()
+            // From the experiment, the maximum string size is 153 bytes
+            .fold(String::with_capacity(160), |mut acc, x| {
+                acc.push_str(&x.to_string());
+                acc
+            }),
             PermissionFlag::Octal => {
-                let octal_sticky = Self::bits_to_octal(self.setuid, self.setgid, self.sticky);
-                let octal_user =
-                    Self::bits_to_octal(self.user_read, self.user_write, self.user_execute);
-                let octal_group =
-                    Self::bits_to_octal(self.group_read, self.group_write, self.group_execute);
-                let octal_other =
-                    Self::bits_to_octal(self.other_read, self.other_write, self.other_execute);
-                vec![colors.colorize(
-                    format!(
-                        "{}{}{}{}",
-                        octal_sticky, octal_user, octal_group, octal_other
-                    ),
-                    &Elem::Octal,
-                )]
+                let octals = [
+                    Self::bits_to_octal(self.setuid, self.setgid, self.sticky),
+                    Self::bits_to_octal(self.user_read, self.user_write, self.user_execute),
+                    Self::bits_to_octal(self.group_read, self.group_write, self.group_execute),
+                    Self::bits_to_octal(self.other_read, self.other_write, self.other_execute),
+                ]
+                .into_iter()
+                .fold(String::with_capacity(4), |mut acc, x| {
+                    acc.push(char::from_digit(x as u32, 8).unwrap());
+                    acc
+                });
+
+                colors.colorize(octals, &Elem::Octal).to_string()
             }
         };
 
-        let res = strings
-            .iter()
-            .map(|s| s.to_string())
-            .collect::<Vec<String>>()
-            .join("");
         ColoredString::new(Colors::default_style(), res)
     }
 
