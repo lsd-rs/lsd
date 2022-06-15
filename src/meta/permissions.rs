@@ -115,7 +115,7 @@ impl Permissions {
                 .fold(String::with_capacity(4), |mut acc, x| {
                     acc.push(
                         char::from_digit(x as u32, 8)
-                            .expect("Octal value of permission should not greater than 7."),
+                            .expect("octal value of permission should not be greater than 7"),
                     );
                     acc
                 });
