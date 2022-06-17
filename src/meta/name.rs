@@ -4,6 +4,7 @@ use crate::icon::Icons;
 use crate::meta::filetype::FileType;
 use crate::print_error;
 use crate::url::Url;
+use std::borrow::Cow;
 use std::cmp::{Ordering, PartialOrd};
 use std::ffi::OsStr;
 use std::path::{Component, Path, PathBuf};
@@ -78,28 +79,28 @@ impl Name {
             .collect()
     }
 
-    pub fn escape(&self, string: &str) -> String {
+    pub fn escape<'a>(&self, string: &'a str) -> Cow<'a, str> {
         if string
             .chars()
             .all(|c| c >= 0x20 as char && c != 0x7f as char)
         {
-            string.to_string()
+            string.into()
         } else {
-            let mut chars = String::new();
+            let mut chars = String::with_capacity(string.len());
             for c in string.chars() {
                 // The `escape_default` method on `char` is *almost* what we want here, but
                 // it still escapes non-ASCII UTF-8 characters, which are still printable.
                 if c >= 0x20 as char && c != 0x7f as char {
                     chars.push(c);
                 } else {
-                    chars += &c.escape_default().collect::<String>();
+                    chars.extend(c.escape_default());
                 }
             }
-            chars
+            chars.into()
         }
     }
 
-    fn hyperlink(&self, name: String, hyperlink: HyperlinkOption) -> String {
+    fn hyperlink<'a>(&self, name: Cow<'a, str>, hyperlink: HyperlinkOption) -> Cow<'a, str> {
         match hyperlink {
             HyperlinkOption::Always => {
                 // HyperlinkOption::Auto gets converted to None or Always in core.rs based on tty_available
@@ -109,7 +110,7 @@ impl Name {
                             Ok(url) => {
                                 // Crossterm does not support hyperlinks as of now
                                 // https://gist.github.com/egmontkob/eb114294efbcd5adb1944c9f3cb5feda
-                                format!("\x1B]8;;{}\x1B\x5C{}\x1B]8;;\x1B\x5C", url, name)
+                                format!("\x1B]8;;{}\x1B\x5C{}\x1B]8;;\x1B\x5C", url, name).into()
                             }
                             Err(_) => {
                                 print_error!("{}: unable to form url.", name);
@@ -143,13 +144,12 @@ impl Name {
         hyperlink: HyperlinkOption,
     ) -> ColoredString {
         let content = match display_option {
-            DisplayOption::FileName => {
-                format!(
-                    "{}{}",
-                    icons.get(self),
-                    self.hyperlink(self.escape(self.file_name()), hyperlink)
-                )
-            }
+            DisplayOption::FileName => format!(
+                "{}{}",
+                icons.get(self),
+                self.hyperlink(self.escape(self.file_name()), hyperlink)
+            ),
+
             DisplayOption::Relative { base_path } => format!(
                 "{}{}",
                 icons.get(self),
