@@ -29,7 +29,7 @@ pub use crate::icon::Icons;
 use crate::flags::{Display, Flags, Layout};
 use crate::print_error;
 
-use std::io::{Error, ErrorKind};
+use std::io::{self, Error, ErrorKind};
 use std::path::{Component, Path, PathBuf};
 
 #[derive(Clone, Debug)]
@@ -50,11 +50,7 @@ pub struct Meta {
 }
 
 impl Meta {
-    pub fn recurse_into(
-        &self,
-        depth: usize,
-        flags: &Flags,
-    ) -> Result<Option<Vec<Meta>>, std::io::Error> {
+    pub fn recurse_into(&self, depth: usize, flags: &Flags) -> io::Result<Option<Vec<Meta>>> {
         if depth == 0 {
             return Ok(None);
         }
@@ -103,14 +99,12 @@ impl Meta {
                 .file_name()
                 .ok_or_else(|| Error::new(ErrorKind::InvalidInput, "invalid file name"))?;
 
-            if flags.ignore_globs.0.is_match(&name) {
+            if flags.ignore_globs.0.is_match(name) {
                 continue;
             }
 
-            if let Display::VisibleOnly = flags.display {
-                if name.to_string_lossy().starts_with('.') {
-                    continue;
-                }
+            if flags.display == Display::VisibleOnly && name.to_string_lossy().starts_with('.') {
+                continue;
             }
 
             let mut entry_meta = match Self::from_path(&path, flags.dereference.0) {
@@ -122,17 +116,15 @@ impl Meta {
             };
 
             // skip files for --tree -d
-            if flags.layout == Layout::Tree {
-                if let Display::DirectoryOnly = flags.display {
-                    if !entry.file_type()?.is_dir() {
-                        continue;
-                    }
-                }
+            if flags.layout == Layout::Tree
+                && flags.display == Display::DirectoryOnly
+                && !entry.file_type()?.is_dir()
+            {
+                continue;
             }
 
-            let dereference =
-                !matches!(entry_meta.file_type, FileType::SymLink { .. }) || flags.dereference.0;
-            if dereference {
+            // check dereferencing
+            if flags.dereference.0 || !matches!(entry_meta.file_type, FileType::SymLink { .. }) {
                 match entry_meta.recurse_into(depth - 1, flags) {
                     Ok(content) => entry_meta.content = content,
                     Err(err) => {
@@ -202,7 +194,7 @@ impl Meta {
         }
     }
 
-    pub fn from_path(path: &Path, dereference: bool) -> Result<Self, std::io::Error> {
+    pub fn from_path(path: &Path, dereference: bool) -> io::Result<Self> {
         let mut metadata = path.symlink_metadata()?;
         let mut symlink_meta = None;
         if metadata.file_type().is_symlink() {
