@@ -26,7 +26,7 @@ impl Links {
     pub fn render(&self, colors: &Colors) -> ColoredString {
         match self.nlink {
             Some(i) => colors.colorize(i.to_string(), &Elem::Links { valid: true }),
-            None => colors.colorize(String::from("-"), &Elem::Links { valid: false }),
+            None => colors.colorize('-', &Elem::Links { valid: false }),
         }
     }
 }

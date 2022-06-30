@@ -152,8 +152,8 @@ impl Colors {
         Self { theme, lscolors }
     }
 
-    pub fn colorize(&self, input: String, elem: &Elem) -> ColoredString {
-        self.style(elem).apply(input)
+    pub fn colorize<S: Into<String>>(&self, input: S, elem: &Elem) -> ColoredString {
+        self.style(elem).apply(input.into())
     }
 
     pub fn colorize_using_path(&self, input: String, path: &Path, elem: &Elem) -> ColoredString {

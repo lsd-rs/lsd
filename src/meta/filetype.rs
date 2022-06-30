@@ -91,18 +91,14 @@ impl FileType {
 impl FileType {
     pub fn render(self, colors: &Colors) -> ColoredString {
         match self {
-            FileType::File { exec, .. } => {
-                colors.colorize(String::from("."), &Elem::File { exec, uid: false })
-            }
-            FileType::Directory { .. } => {
-                colors.colorize(String::from("d"), &Elem::Dir { uid: false })
-            }
-            FileType::Pipe => colors.colorize(String::from("|"), &Elem::Pipe),
-            FileType::SymLink { .. } => colors.colorize(String::from("l"), &Elem::SymLink),
-            FileType::BlockDevice => colors.colorize(String::from("b"), &Elem::BlockDevice),
-            FileType::CharDevice => colors.colorize(String::from("c"), &Elem::CharDevice),
-            FileType::Socket => colors.colorize(String::from("s"), &Elem::Socket),
-            FileType::Special => colors.colorize(String::from("?"), &Elem::Special),
+            FileType::File { exec, .. } => colors.colorize('.', &Elem::File { exec, uid: false }),
+            FileType::Directory { .. } => colors.colorize('d', &Elem::Dir { uid: false }),
+            FileType::Pipe => colors.colorize('|', &Elem::Pipe),
+            FileType::SymLink { .. } => colors.colorize('l', &Elem::SymLink),
+            FileType::BlockDevice => colors.colorize('b', &Elem::BlockDevice),
+            FileType::CharDevice => colors.colorize('c', &Elem::CharDevice),
+            FileType::Socket => colors.colorize('s', &Elem::Socket),
+            FileType::Special => colors.colorize('?', &Elem::Special),
         }
     }
 }
