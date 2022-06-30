@@ -307,7 +307,7 @@ fn get_output<'a>(
     let mut strings: Vec<String> = Vec::new();
     for (i, block) in flags.blocks.0.iter().enumerate() {
         let mut block_vec = if Layout::Tree == flags.layout && tree.0 == i {
-            vec![colors.colorize(tree.1.to_string(), &Elem::TreeEdge)]
+            vec![colors.colorize(tree.1, &Elem::TreeEdge)]
         } else {
             Vec::new()
         };

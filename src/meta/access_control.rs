@@ -42,11 +42,11 @@ impl AccessControl {
 
     pub fn render_method(&self, colors: &Colors) -> ColoredString {
         if self.has_acl {
-            colors.colorize(String::from("+"), &Elem::Acl)
+            colors.colorize('+', &Elem::Acl)
         } else if !self.selinux_context.is_empty() || !self.smack_context.is_empty() {
-            colors.colorize(String::from("."), &Elem::Context)
+            colors.colorize('.', &Elem::Context)
         } else {
-            colors.colorize(String::from(""), &Elem::Acl)
+            colors.colorize("", &Elem::Acl)
         }
     }
 

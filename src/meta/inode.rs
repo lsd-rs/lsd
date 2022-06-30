@@ -26,7 +26,7 @@ impl INode {
     pub fn render(&self, colors: &Colors) -> ColoredString {
         match self.index {
             Some(i) => colors.colorize(i.to_string(), &Elem::INode { valid: true }),
-            None => colors.colorize(String::from("-"), &Elem::INode { valid: false }),
+            None => colors.colorize('-', &Elem::INode { valid: false }),
         }
     }
 }
