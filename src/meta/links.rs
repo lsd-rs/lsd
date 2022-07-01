@@ -6,7 +6,7 @@ pub struct Links {
     nlink: Option<u64>,
 }
 
-impl<'a> From<&'a Metadata> for Links {
+impl From<&Metadata> for Links {
     #[cfg(unix)]
     fn from(meta: &Metadata) -> Self {
         use std::os::unix::fs::MetadataExt;

@@ -13,7 +13,7 @@ pub enum Date {
 }
 
 // Note that this is split from the From for Metadata so we can test this one (as we can't mock Metadata)
-impl<'a> From<SystemTime> for Date {
+impl From<SystemTime> for Date {
     fn from(systime: SystemTime) -> Self {
         // FIXME: This should really involve a result, but there's upstream issues in chrono. See https://github.com/chronotope/chrono/issues/110
         let res = panic::catch_unwind(|| systime.into());
@@ -26,8 +26,8 @@ impl<'a> From<SystemTime> for Date {
     }
 }
 
-impl<'a> From<&'a Metadata> for Date {
-    fn from(meta: &'a Metadata) -> Self {
+impl From<&Metadata> for Date {
+    fn from(meta: &Metadata) -> Self {
         meta.modified()
             .expect("failed to retrieve modified date")
             .into()

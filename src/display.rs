@@ -279,14 +279,14 @@ fn display_folder_path(meta: &Meta) -> String {
     format!("\n{}:\n", meta.path.to_string_lossy())
 }
 
-fn get_output<'a>(
-    meta: &'a Meta,
-    colors: &'a Colors,
-    icons: &'a Icons,
-    flags: &'a Flags,
+fn get_output(
+    meta: &Meta,
+    colors: &Colors,
+    icons: &Icons,
+    flags: &Flags,
     display_option: &DisplayOption,
     padding_rules: &HashMap<Block, usize>,
-    tree: (usize, &'a str),
+    tree: (usize, &str),
 ) -> Vec<String> {
     let mut strings: Vec<String> = Vec::new();
     for (i, block) in flags.blocks.0.iter().enumerate() {
