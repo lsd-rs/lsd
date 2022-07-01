@@ -17,7 +17,7 @@ pub struct Size {
     bytes: u64,
 }
 
-impl<'a> From<&'a Metadata> for Size {
+impl From<&Metadata> for Size {
     fn from(meta: &Metadata) -> Self {
         let len = meta.len();
         Self { bytes: len }

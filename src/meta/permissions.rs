@@ -21,7 +21,7 @@ pub struct Permissions {
     pub setuid: bool,
 }
 
-impl<'a> From<&'a Metadata> for Permissions {
+impl From<&Metadata> for Permissions {
     #[cfg(unix)]
     fn from(meta: &Metadata) -> Self {
         use std::os::unix::fs::PermissionsExt;

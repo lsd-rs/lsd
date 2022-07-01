@@ -6,7 +6,7 @@ pub struct INode {
     index: Option<u64>,
 }
 
-impl<'a> From<&'a Metadata> for INode {
+impl From<&Metadata> for INode {
     #[cfg(unix)]
     fn from(meta: &Metadata) -> Self {
         use std::os::unix::fs::MetadataExt;

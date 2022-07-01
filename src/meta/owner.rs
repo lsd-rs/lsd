@@ -16,7 +16,7 @@ impl Owner {
 }
 
 #[cfg(unix)]
-impl<'a> From<&'a Metadata> for Owner {
+impl From<&Metadata> for Owner {
     fn from(meta: &Metadata) -> Self {
         use std::os::unix::fs::MetadataExt;
         use users::{get_group_by_gid, get_user_by_uid};

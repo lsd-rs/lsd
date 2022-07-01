@@ -9,8 +9,8 @@ pub struct SymLink {
     valid: bool,
 }
 
-impl<'a> From<&'a Path> for SymLink {
-    fn from(path: &'a Path) -> Self {
+impl From<&Path> for SymLink {
+    fn from(path: &Path) -> Self {
         if let Ok(target) = read_link(path) {
             if target.is_absolute() || path.parent() == None {
                 return Self {
