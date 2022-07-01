@@ -36,7 +36,7 @@ pub fn tree(metas: &[Meta], flags: &Flags, colors: &Colors, icons: &Icons) -> St
     let padding_rules = get_padding_rules(metas, flags);
     let mut index = 0;
     for (i, block) in flags.blocks.0.iter().enumerate() {
-        if let Block::Name = block {
+        if block == &Block::Name {
             index = i;
             break;
         }
@@ -101,10 +101,7 @@ fn inner_display_grid(
 
         for block in blocks {
             cells.push(Cell {
-                width: get_visible_width(
-                    &block,
-                    matches!(flags.hyperlink, HyperlinkOption::Always),
-                ),
+                width: get_visible_width(&block, flags.hyperlink == HyperlinkOption::Always),
                 contents: block,
             });
         }
@@ -140,7 +137,7 @@ fn inner_display_grid(
 
     // print the folder content
     for meta in metas {
-        if meta.content.is_some() {
+        if let Some(content) = &meta.content {
             if should_display_folder_path {
                 output += &display_folder_path(meta);
             }
@@ -151,7 +148,7 @@ fn inner_display_grid(
 
             output += &inner_display_grid(
                 &display_option,
-                meta.content.as_ref().unwrap(),
+                content,
                 flags,
                 colors,
                 icons,
@@ -171,12 +168,7 @@ fn add_header(flags: &Flags, cells: &[Cell], grid: &mut Grid) {
         .blocks
         .0
         .iter()
-        .map(|b| {
-            get_visible_width(
-                b.get_header(),
-                matches!(flags.hyperlink, HyperlinkOption::Always),
-            )
-        })
+        .map(|b| get_visible_width(b.get_header(), flags.hyperlink == HyperlinkOption::Always))
         .collect::<Vec<usize>>();
 
     // find max widths of each column
@@ -234,15 +226,12 @@ fn inner_display_tree(
             (tree_index, &current_prefix),
         ) {
             cells.push(Cell {
-                width: get_visible_width(
-                    &block,
-                    matches!(flags.hyperlink, HyperlinkOption::Always),
-                ),
+                width: get_visible_width(&block, flags.hyperlink == HyperlinkOption::Always),
                 contents: block,
             });
         }
 
-        if meta.content.is_some() {
+        if let Some(content) = &meta.content {
             let new_prefix = if tree_depth_prefix.0 > 0 {
                 if idx + 1 != last_idx {
                     // is last folder elem
@@ -255,7 +244,7 @@ fn inner_display_tree(
             };
 
             cells.extend(inner_display_tree(
-                meta.content.as_ref().unwrap(),
+                content,
                 flags,
                 colors,
                 icons,
@@ -287,12 +276,7 @@ fn should_display_folder_path(depth: usize, metas: &[Meta], flags: &Flags) -> bo
 }
 
 fn display_folder_path(meta: &Meta) -> String {
-    let mut output = String::new();
-    output.push('\n');
-    output += &meta.path.to_string_lossy();
-    output += ":\n";
-
-    output
+    format!("\n{}:\n", meta.path.to_string_lossy())
 }
 
 fn get_output<'a>(
