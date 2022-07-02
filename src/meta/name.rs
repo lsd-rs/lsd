@@ -398,7 +398,6 @@ mod test {
                     HyperlinkOption::Never
                 )
                 .to_string()
-                .as_str()
         );
     }
 
@@ -431,7 +430,6 @@ mod test {
                     HyperlinkOption::Always
                 )
                 .to_string()
-                .as_str()
         );
     }
 
