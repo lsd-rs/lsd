@@ -155,13 +155,13 @@ mod test {
         let size = Size::new(42); // == 42 bytes
         let mut flags = Flags::default();
 
-        assert_eq!(size.value_string(&flags).as_str(), "42");
+        assert_eq!(size.value_string(&flags), "42");
 
-        assert_eq!(size.unit_string(&flags).as_str(), "B");
+        assert_eq!(size.unit_string(&flags), "B");
         flags.size = SizeFlag::Short;
-        assert_eq!(size.unit_string(&flags).as_str(), "B");
+        assert_eq!(size.unit_string(&flags), "B");
         flags.size = SizeFlag::Bytes;
-        assert_eq!(size.unit_string(&flags).as_str(), "");
+        assert_eq!(size.unit_string(&flags), "");
     }
 
     #[test]
@@ -169,10 +169,10 @@ mod test {
         let size = Size::new(4 * KB); // 4 kilobytes
         let mut flags = Flags::default();
 
-        assert_eq!(size.value_string(&flags).as_str(), "4.0");
-        assert_eq!(size.unit_string(&flags).as_str(), "KB");
+        assert_eq!(size.value_string(&flags), "4.0");
+        assert_eq!(size.unit_string(&flags), "KB");
         flags.size = SizeFlag::Short;
-        assert_eq!(size.unit_string(&flags).as_str(), "K");
+        assert_eq!(size.unit_string(&flags), "K");
     }
 
     #[test]
@@ -180,10 +180,10 @@ mod test {
         let size = Size::new(42 * KB); // 42 kilobytes
         let mut flags = Flags::default();
 
-        assert_eq!(size.value_string(&flags).as_str(), "42");
-        assert_eq!(size.unit_string(&flags).as_str(), "KB");
+        assert_eq!(size.value_string(&flags), "42");
+        assert_eq!(size.unit_string(&flags), "KB");
         flags.size = SizeFlag::Short;
-        assert_eq!(size.unit_string(&flags).as_str(), "K");
+        assert_eq!(size.unit_string(&flags), "K");
     }
 
     #[test]
@@ -191,10 +191,10 @@ mod test {
         let size = Size::new(420 * KB + 420); // 420.4 kilobytes
         let mut flags = Flags::default();
 
-        assert_eq!(size.value_string(&flags).as_str(), "420");
-        assert_eq!(size.unit_string(&flags).as_str(), "KB");
+        assert_eq!(size.value_string(&flags), "420");
+        assert_eq!(size.unit_string(&flags), "KB");
         flags.size = SizeFlag::Short;
-        assert_eq!(size.unit_string(&flags).as_str(), "K");
+        assert_eq!(size.unit_string(&flags), "K");
     }
 
     #[test]
@@ -202,10 +202,10 @@ mod test {
         let size = Size::new(4 * MB); // 4 megabytes
         let mut flags = Flags::default();
 
-        assert_eq!(size.value_string(&flags).as_str(), "4.0");
-        assert_eq!(size.unit_string(&flags).as_str(), "MB");
+        assert_eq!(size.value_string(&flags), "4.0");
+        assert_eq!(size.unit_string(&flags), "MB");
         flags.size = SizeFlag::Short;
-        assert_eq!(size.unit_string(&flags).as_str(), "M");
+        assert_eq!(size.unit_string(&flags), "M");
     }
 
     #[test]
@@ -213,10 +213,10 @@ mod test {
         let size = Size::new(42 * MB); // 42 megabytes
         let mut flags = Flags::default();
 
-        assert_eq!(size.value_string(&flags).as_str(), "42");
-        assert_eq!(size.unit_string(&flags).as_str(), "MB");
+        assert_eq!(size.value_string(&flags), "42");
+        assert_eq!(size.unit_string(&flags), "MB");
         flags.size = SizeFlag::Short;
-        assert_eq!(size.unit_string(&flags).as_str(), "M");
+        assert_eq!(size.unit_string(&flags), "M");
     }
 
     #[test]
@@ -224,10 +224,10 @@ mod test {
         let size = Size::new(420 * MB + 420 * KB); // 420.4 megabytes
         let mut flags = Flags::default();
 
-        assert_eq!(size.value_string(&flags).as_str(), "420");
-        assert_eq!(size.unit_string(&flags).as_str(), "MB");
+        assert_eq!(size.value_string(&flags), "420");
+        assert_eq!(size.unit_string(&flags), "MB");
         flags.size = SizeFlag::Short;
-        assert_eq!(size.unit_string(&flags).as_str(), "M");
+        assert_eq!(size.unit_string(&flags), "M");
     }
 
     #[test]
@@ -235,10 +235,10 @@ mod test {
         let size = Size::new(4 * GB); // 4 gigabytes
         let mut flags = Flags::default();
 
-        assert_eq!(size.value_string(&flags).as_str(), "4.0");
-        assert_eq!(size.unit_string(&flags).as_str(), "GB");
+        assert_eq!(size.value_string(&flags), "4.0");
+        assert_eq!(size.unit_string(&flags), "GB");
         flags.size = SizeFlag::Short;
-        assert_eq!(size.unit_string(&flags).as_str(), "G");
+        assert_eq!(size.unit_string(&flags), "G");
     }
 
     #[test]
@@ -246,10 +246,10 @@ mod test {
         let size = Size::new(42 * GB); // 42 gigabytes
         let mut flags = Flags::default();
 
-        assert_eq!(size.value_string(&flags).as_str(), "42");
-        assert_eq!(size.unit_string(&flags).as_str(), "GB");
+        assert_eq!(size.value_string(&flags), "42");
+        assert_eq!(size.unit_string(&flags), "GB");
         flags.size = SizeFlag::Short;
-        assert_eq!(size.unit_string(&flags).as_str(), "G");
+        assert_eq!(size.unit_string(&flags), "G");
     }
 
     #[test]
@@ -257,10 +257,10 @@ mod test {
         let size = Size::new(420 * GB + 420 * MB); // 420.4 gigabytes
         let mut flags = Flags::default();
 
-        assert_eq!(size.value_string(&flags).as_str(), "420");
-        assert_eq!(size.unit_string(&flags).as_str(), "GB");
+        assert_eq!(size.value_string(&flags), "420");
+        assert_eq!(size.unit_string(&flags), "GB");
         flags.size = SizeFlag::Short;
-        assert_eq!(size.unit_string(&flags).as_str(), "G");
+        assert_eq!(size.unit_string(&flags), "G");
     }
 
     #[test]
@@ -268,10 +268,10 @@ mod test {
         let size = Size::new(4 * TB); // 4 terabytes
         let mut flags = Flags::default();
 
-        assert_eq!(size.value_string(&flags).as_str(), "4.0");
-        assert_eq!(size.unit_string(&flags).as_str(), "TB");
+        assert_eq!(size.value_string(&flags), "4.0");
+        assert_eq!(size.unit_string(&flags), "TB");
         flags.size = SizeFlag::Short;
-        assert_eq!(size.unit_string(&flags).as_str(), "T");
+        assert_eq!(size.unit_string(&flags), "T");
     }
 
     #[test]
@@ -279,10 +279,10 @@ mod test {
         let size = Size::new(42 * TB); // 42 terabytes
         let mut flags = Flags::default();
 
-        assert_eq!(size.value_string(&flags).as_str(), "42");
-        assert_eq!(size.unit_string(&flags).as_str(), "TB");
+        assert_eq!(size.value_string(&flags), "42");
+        assert_eq!(size.unit_string(&flags), "TB");
         flags.size = SizeFlag::Short;
-        assert_eq!(size.unit_string(&flags).as_str(), "T");
+        assert_eq!(size.unit_string(&flags), "T");
     }
 
     #[test]
@@ -290,10 +290,10 @@ mod test {
         let size = Size::new(420 * TB + 420 * GB); // 420.4 terabytes
         let mut flags = Flags::default();
 
-        assert_eq!(size.value_string(&flags).as_str(), "420");
-        assert_eq!(size.unit_string(&flags).as_str(), "TB");
+        assert_eq!(size.value_string(&flags), "420");
+        assert_eq!(size.unit_string(&flags), "TB");
         flags.size = SizeFlag::Short;
-        assert_eq!(size.unit_string(&flags).as_str(), "T");
+        assert_eq!(size.unit_string(&flags), "T");
     }
 
     #[test]
@@ -301,8 +301,8 @@ mod test {
         let size = Size::new(42 * KB + 103); // 42.1 kilobytes
         let flags = Flags::default();
 
-        assert_eq!(size.value_string(&flags).as_str(), "42");
-        assert_eq!(size.unit_string(&flags).as_str(), "KB");
+        assert_eq!(size.value_string(&flags), "42");
+        assert_eq!(size.unit_string(&flags), "KB");
     }
 
     #[test]
@@ -310,8 +310,8 @@ mod test {
         let size = Size::new(42 * KB + 1); // 42.001 kilobytes == 42 kilobytes
         let flags = Flags::default();
 
-        assert_eq!(size.value_string(&flags).as_str(), "42");
-        assert_eq!(size.unit_string(&flags).as_str(), "KB");
+        assert_eq!(size.value_string(&flags), "42");
+        assert_eq!(size.unit_string(&flags), "KB");
     }
 
     #[test]

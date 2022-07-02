@@ -43,7 +43,7 @@ mod test {
 
         let file_type = Indicator::from(FileType::Directory { uid: false });
 
-        assert_eq!("/", file_type.render(&flags).to_string().as_str());
+        assert_eq!("/", file_type.render(&flags).to_string());
     }
 
     #[test]
@@ -56,7 +56,7 @@ mod test {
             exec: true,
         });
 
-        assert_eq!("*", file_type.render(&flags).to_string().as_str());
+        assert_eq!("*", file_type.render(&flags).to_string());
     }
 
     #[test]
@@ -66,7 +66,7 @@ mod test {
 
         let file_type = Indicator::from(FileType::Socket);
 
-        assert_eq!("=", file_type.render(&flags).to_string().as_str());
+        assert_eq!("=", file_type.render(&flags).to_string());
     }
 
     #[test]
@@ -75,10 +75,10 @@ mod test {
         flags.display_indicators = Indicators(true);
 
         let file_type = Indicator::from(FileType::SymLink { is_dir: false });
-        assert_eq!("@", file_type.render(&flags).to_string().as_str());
+        assert_eq!("@", file_type.render(&flags).to_string());
 
         let file_type = Indicator::from(FileType::SymLink { is_dir: true });
-        assert_eq!("@", file_type.render(&flags).to_string().as_str());
+        assert_eq!("@", file_type.render(&flags).to_string());
     }
 
     #[test]
@@ -92,6 +92,6 @@ mod test {
             uid: false,
         });
 
-        assert_eq!("", file_type.render(&flags).to_string().as_str());
+        assert_eq!("", file_type.render(&flags).to_string());
     }
 }
