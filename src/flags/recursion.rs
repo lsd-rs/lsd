@@ -84,7 +84,7 @@ impl Recursion {
             }
         }
 
-        Ok(usize::max_value())
+        Ok(usize::MAX)
     }
 
     /// Get a potential "depth" value from [ArgMatches].
@@ -121,7 +121,7 @@ impl Recursion {
 impl Default for Recursion {
     fn default() -> Self {
         Self {
-            depth: usize::max_value(),
+            depth: usize::MAX,
             enabled: false,
         }
     }
@@ -267,7 +267,7 @@ mod test {
     fn test_depth_from_config_none_max() {
         let argv = ["lsd"];
         assert_eq!(
-            usize::max_value(),
+            usize::MAX,
             Recursion::depth_from(
                 &app::build().get_matches_from_safe(argv).unwrap(),
                 &Config::with_none()
