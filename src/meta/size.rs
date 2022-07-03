@@ -317,8 +317,10 @@ mod test {
     #[test]
     fn render_short_nospaces() {
         let size = Size::new(42 * KB); // 42 kilobytes
-        let mut flags = Flags::default();
-        flags.size = SizeFlag::Short;
+        let flags = Flags {
+            size: SizeFlag::Short,
+            ..Default::default()
+        };
         let colors = Colors::new(ThemeOption::NoColor);
 
         assert_eq!(size.render(&colors, &flags, Some(2)).to_string(), "42K");

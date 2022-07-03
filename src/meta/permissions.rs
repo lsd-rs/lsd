@@ -221,8 +221,10 @@ mod test {
         let meta = file_path.metadata().expect("failed to get meta");
 
         let colors = Colors::new(ThemeOption::NoColor);
-        let mut flags = Flags::default();
-        flags.permission = PermissionFlag::Rwx;
+        let flags = Flags {
+            permission: PermissionFlag::Rwx,
+            ..Default::default()
+        };
         let perms = Permissions::from(&meta);
 
         assert_eq!("rwxrwxrwt", perms.render(&colors, &flags).content());
@@ -240,8 +242,10 @@ mod test {
         let meta = file_path.metadata().expect("failed to get meta");
 
         let colors = Colors::new(ThemeOption::NoColor);
-        let mut flags = Flags::default();
-        flags.permission = PermissionFlag::Octal;
+        let flags = Flags {
+            permission: PermissionFlag::Octal,
+            ..Default::default()
+        };
         let perms = Permissions::from(&meta);
 
         assert_eq!("0655", perms.render(&colors, &flags).content());
@@ -259,8 +263,10 @@ mod test {
         let meta = file_path.metadata().expect("failed to get meta");
 
         let colors = Colors::new(ThemeOption::NoColor);
-        let mut flags = Flags::default();
-        flags.permission = PermissionFlag::Octal;
+        let flags = Flags {
+            permission: PermissionFlag::Octal,
+            ..Default::default()
+        };
         let perms = Permissions::from(&meta);
 
         assert_eq!("0777", perms.render(&colors, &flags).content());
@@ -279,8 +285,10 @@ mod test {
         let meta = file_path.metadata().expect("failed to get meta");
 
         let colors = Colors::new(ThemeOption::NoColor);
-        let mut flags = Flags::default();
-        flags.permission = PermissionFlag::Octal;
+        let flags = Flags {
+            permission: PermissionFlag::Octal,
+            ..Default::default()
+        };
         let perms = Permissions::from(&meta);
 
         assert_eq!("1777", perms.render(&colors, &flags).content());
