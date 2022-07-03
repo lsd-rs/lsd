@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 ### Changed
 ### Fixed
+- Fix rendering issues in Windows from [meain](https://gitHub.com/meain)
 
 ## [0.22.0] - 2022-06-12
 ### Added
