@@ -445,7 +445,7 @@ mod test_blocks {
     #[test]
     fn test_from_config_one() {
         let mut c = Config::with_none();
-        c.blocks = Some(vec!["permission".into()].into());
+        c.blocks = Some(vec!["permission".into()]);
 
         let blocks = Blocks(vec![Block::Permission]);
         assert_eq!(Some(blocks), Blocks::from_config(&c));
@@ -462,17 +462,14 @@ mod test_blocks {
             Block::Permission,
         ]);
         let mut c = Config::with_none();
-        c.blocks = Some(
-            vec![
-                "name".into(),
-                "date".into(),
-                "size".into(),
-                "group".into(),
-                "user".into(),
-                "permission".into(),
-            ]
-            .into(),
-        );
+        c.blocks = Some(vec![
+            "name".into(),
+            "date".into(),
+            "size".into(),
+            "group".into(),
+            "user".into(),
+            "permission".into(),
+        ]);
 
         assert_eq!(Some(target), Blocks::from_config(&c));
     }
@@ -480,7 +477,7 @@ mod test_blocks {
     #[test]
     fn test_from_config_every_second_one() {
         let mut c = Config::with_none();
-        c.blocks = Some(vec!["permission".into(), "group".into(), "date".into()].into());
+        c.blocks = Some(vec!["permission".into(), "group".into(), "date".into()]);
         let blocks = Blocks(vec![Block::Permission, Block::Group, Block::Date]);
         assert_eq!(Some(blocks), Blocks::from_config(&c));
     }
@@ -488,7 +485,7 @@ mod test_blocks {
     #[test]
     fn test_from_config_invalid_is_ignored() {
         let mut c = Config::with_none();
-        c.blocks = Some(vec!["permission".into(), "foo".into(), "date".into()].into());
+        c.blocks = Some(vec!["permission".into(), "foo".into(), "date".into()]);
         let blocks = Blocks(vec![Block::Permission, Block::Date]);
         assert_eq!(Some(blocks), Blocks::from_config(&c));
     }

@@ -429,7 +429,7 @@ mod tests {
         ] {
             let path = Path::new(s);
             let name = Name::new(
-                &path,
+                path,
                 FileType::File {
                     exec: false,
                     uid: false,
@@ -463,7 +463,7 @@ mod tests {
         ] {
             let path = Path::new(s);
             let name = Name::new(
-                &path,
+                path,
                 FileType::File {
                     exec: false,
                     uid: false,
@@ -496,7 +496,7 @@ mod tests {
         ] {
             let path = Path::new(s);
             let name = Name::new(
-                &path,
+                path,
                 FileType::File {
                     exec: false,
                     uid: false,
@@ -538,7 +538,7 @@ mod tests {
         ] {
             let path = Path::new(s);
             let name = Name::new(
-                &path,
+                path,
                 FileType::File {
                     exec: false,
                     uid: false,
@@ -648,14 +648,14 @@ mod tests {
                 .nth(i)
                 .unwrap()
                 .split(|c| c == 'K' || c == 'B')
-                .nth(0)
+                .next()
                 .unwrap()
                 .len()
         };
         assert_eq!(length_before_b(0), length_before_b(1));
         assert_eq!(
-            output.lines().nth(0).unwrap().find("d"),
-            output.lines().nth(1).unwrap().find("└")
+            output.lines().next().unwrap().find('d'),
+            output.lines().nth(1).unwrap().find('└')
         );
     }
 
@@ -681,11 +681,11 @@ mod tests {
             &Icons::new(icon::Theme::NoIcon, " ".to_string()),
         );
 
-        assert_eq!(output.lines().nth(1).unwrap().chars().nth(0).unwrap(), '└');
+        assert_eq!(output.lines().nth(1).unwrap().chars().next().unwrap(), '└');
         assert_eq!(
             output
                 .lines()
-                .nth(0)
+                .next()
                 .unwrap()
                 .chars()
                 .position(|x| x == 'd'),
