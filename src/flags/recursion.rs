@@ -153,13 +153,10 @@ mod test {
     #[test]
     fn test_enabled_from_empty_matches_and_config() {
         let argv = ["lsd"];
-        assert_eq!(
-            false,
-            Recursion::enabled_from(
-                &app::build().get_matches_from_safe(argv).unwrap(),
-                &Config::with_none()
-            )
-        );
+        assert!(!Recursion::enabled_from(
+            &app::build().get_matches_from_safe(argv).unwrap(),
+            &Config::with_none()
+        ));
     }
 
     #[test]
@@ -170,10 +167,10 @@ mod test {
             enabled: Some(true),
             depth: None,
         });
-        assert_eq!(
-            true,
-            Recursion::enabled_from(&app::build().get_matches_from_safe(argv).unwrap(), &c)
-        );
+        assert!(Recursion::enabled_from(
+            &app::build().get_matches_from_safe(argv).unwrap(),
+            &c
+        ));
     }
 
     #[test]
@@ -184,10 +181,10 @@ mod test {
             enabled: Some(false),
             depth: None,
         });
-        assert_eq!(
-            false,
-            Recursion::enabled_from(&app::build().get_matches_from_safe(argv).unwrap(), &c)
-        );
+        assert!(!Recursion::enabled_from(
+            &app::build().get_matches_from_safe(argv).unwrap(),
+            &c
+        ));
     }
 
     // The following depth_from_arg_matches tests are implemented using match expressions instead

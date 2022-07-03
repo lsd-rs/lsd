@@ -358,7 +358,7 @@ mod test {
             .status()
             .expect("failed to exec mkfifo")
             .success();
-        assert_eq!(true, success, "failed to exec mkfifo");
+        assert!(success, "failed to exec mkfifo");
         let meta = pipe_path.metadata().expect("failed to get metas");
 
         let colors = Colors::new(color::ThemeOption::NoLscolors);
@@ -506,7 +506,7 @@ mod test {
             },
         );
 
-        assert_eq!(true, name_a < name_z);
+        assert!(name_a < name_z);
     }
 
     #[test]
@@ -529,7 +529,7 @@ mod test {
             },
         );
 
-        assert_eq!(true, name_a < name_z);
+        assert!(name_a < name_z);
     }
 
     #[test]
@@ -552,7 +552,7 @@ mod test {
             },
         );
 
-        assert_eq!(true, name_1 == name_2);
+        assert!(name_1 == name_2);
     }
 
     #[test]
@@ -575,7 +575,7 @@ mod test {
             },
         );
 
-        assert_eq!(true, name_1 == name_2);
+        assert!(name_1 == name_2);
     }
 
     #[test]
