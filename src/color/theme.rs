@@ -5,8 +5,83 @@ use crate::print_error;
 
 use crossterm::style::Color;
 use serde::Deserialize;
-use std::fs;
 use std::path::Path;
+use std::{fmt, fs};
+
+// Custom color deserialize
+fn deserialize_color<'de, D>(deserializer: D) -> Result<Color, D::Error>
+where
+    D: serde::de::Deserializer<'de>,
+{
+    struct ColorVisitor;
+    impl<'de> serde::de::Visitor<'de> for ColorVisitor {
+        type Value = Color;
+        fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+            formatter.write_str(
+                    "`black`, `blue`, `dark_blue`, `cyan`, `dark_cyan`, `green`, `dark_green`, `grey`, `dark_grey`, `magenta`, `dark_magenta`, `red`, `dark_red`, `white`, `yellow`, `dark_yellow`, `u8`, or `3 u8 array`",
+                )
+        }
+        fn visit_str<E>(self, value: &str) -> Result<Color, E>
+        where
+            E: serde::de::Error,
+        {
+            if let Ok(c) = Color::try_from(value) {
+                Ok(c)
+            } else {
+                Err(E::invalid_value(serde::de::Unexpected::Str(value), &self))
+            }
+        }
+
+        fn visit_u64<E>(self, value: u64) -> Result<Color, E>
+        where
+            E: serde::de::Error,
+        {
+            if value > 255 {
+                return Err(E::invalid_value(
+                    serde::de::Unexpected::Unsigned(value),
+                    &self,
+                ));
+            }
+            Ok(Color::AnsiValue(value as u8))
+        }
+
+        fn visit_seq<M>(self, mut seq: M) -> Result<Color, M::Error>
+        where
+            M: serde::de::SeqAccess<'de>,
+        {
+            let mut values = Vec::new();
+            if let Some(size) = seq.size_hint() {
+                if size != 3 {
+                    return Err(serde::de::Error::invalid_length(
+                        size,
+                        &"a list of size 3(RGB)",
+                    ));
+                }
+            }
+            loop {
+                match seq.next_element::<u8>() {
+                    Ok(Some(x)) => {
+                        values.push(x);
+                    }
+                    Ok(None) => break,
+                    Err(e) => {
+                        return Err(e);
+                    }
+                }
+            }
+            // recheck as size_hint sometimes not working
+            if values.len() != 3 {
+                return Err(serde::de::Error::invalid_length(
+                    values.len(),
+                    &"a list of size 3(RGB)",
+                ));
+            }
+            Ok(Color::from((values[0], values[1], values[2])))
+        }
+    }
+
+    deserializer.deserialize_any(ColorVisitor)
+}
 
 /// A struct holding the theme configuration
 /// Color table: https://upload.wikimedia.org/wikipedia/commons/1/15/Xterm_256color_chart.avg
@@ -15,12 +90,15 @@ use std::path::Path;
 #[serde(deny_unknown_fields)]
 #[serde(default)]
 pub struct Theme {
+    #[serde(deserialize_with = "deserialize_color")]
     pub user: Color,
+    #[serde(deserialize_with = "deserialize_color")]
     pub group: Color,
     pub permission: Permission,
     pub date: Date,
     pub size: Size,
     pub inode: INode,
+    #[serde(deserialize_with = "deserialize_color")]
     pub tree_edge: Color,
     pub links: Links,
 
@@ -33,13 +111,21 @@ pub struct Theme {
 #[serde(deny_unknown_fields)]
 #[serde(default)]
 pub struct Permission {
+    #[serde(deserialize_with = "deserialize_color")]
     pub read: Color,
+    #[serde(deserialize_with = "deserialize_color")]
     pub write: Color,
+    #[serde(deserialize_with = "deserialize_color")]
     pub exec: Color,
+    #[serde(deserialize_with = "deserialize_color")]
     pub exec_sticky: Color,
+    #[serde(deserialize_with = "deserialize_color")]
     pub no_access: Color,
+    #[serde(deserialize_with = "deserialize_color")]
     pub octal: Color,
+    #[serde(deserialize_with = "deserialize_color")]
     pub acl: Color,
+    #[serde(deserialize_with = "deserialize_color")]
     pub context: Color,
 }
 
@@ -50,11 +136,16 @@ pub struct Permission {
 pub struct FileType {
     pub file: File,
     pub dir: Dir,
+    #[serde(deserialize_with = "deserialize_color")]
     pub pipe: Color,
     pub symlink: Symlink,
+    #[serde(deserialize_with = "deserialize_color")]
     pub block_device: Color,
+    #[serde(deserialize_with = "deserialize_color")]
     pub char_device: Color,
+    #[serde(deserialize_with = "deserialize_color")]
     pub socket: Color,
+    #[serde(deserialize_with = "deserialize_color")]
     pub special: Color,
 }
 
@@ -63,9 +154,13 @@ pub struct FileType {
 #[serde(deny_unknown_fields)]
 #[serde(default)]
 pub struct File {
+    #[serde(deserialize_with = "deserialize_color")]
     pub exec_uid: Color,
+    #[serde(deserialize_with = "deserialize_color")]
     pub uid_no_exec: Color,
+    #[serde(deserialize_with = "deserialize_color")]
     pub exec_no_uid: Color,
+    #[serde(deserialize_with = "deserialize_color")]
     pub no_exec_no_uid: Color,
 }
 
@@ -74,7 +169,9 @@ pub struct File {
 #[serde(deny_unknown_fields)]
 #[serde(default)]
 pub struct Dir {
+    #[serde(deserialize_with = "deserialize_color")]
     pub uid: Color,
+    #[serde(deserialize_with = "deserialize_color")]
     pub no_uid: Color,
 }
 
@@ -83,8 +180,11 @@ pub struct Dir {
 #[serde(deny_unknown_fields)]
 #[serde(default)]
 pub struct Symlink {
+    #[serde(deserialize_with = "deserialize_color")]
     pub default: Color,
+    #[serde(deserialize_with = "deserialize_color")]
     pub broken: Color,
+    #[serde(deserialize_with = "deserialize_color")]
     pub missing_target: Color,
 }
 
@@ -93,8 +193,11 @@ pub struct Symlink {
 #[serde(deny_unknown_fields)]
 #[serde(default)]
 pub struct Date {
+    #[serde(deserialize_with = "deserialize_color")]
     pub hour_old: Color,
+    #[serde(deserialize_with = "deserialize_color")]
     pub day_old: Color,
+    #[serde(deserialize_with = "deserialize_color")]
     pub older: Color,
 }
 
@@ -103,9 +206,13 @@ pub struct Date {
 #[serde(deny_unknown_fields)]
 #[serde(default)]
 pub struct Size {
+    #[serde(deserialize_with = "deserialize_color")]
     pub none: Color,
+    #[serde(deserialize_with = "deserialize_color")]
     pub small: Color,
+    #[serde(deserialize_with = "deserialize_color")]
     pub medium: Color,
+    #[serde(deserialize_with = "deserialize_color")]
     pub large: Color,
 }
 
@@ -114,7 +221,9 @@ pub struct Size {
 #[serde(deny_unknown_fields)]
 #[serde(default)]
 pub struct INode {
+    #[serde(deserialize_with = "deserialize_color")]
     pub valid: Color,
+    #[serde(deserialize_with = "deserialize_color")]
     pub invalid: Color,
 }
 
@@ -123,7 +232,9 @@ pub struct INode {
 #[serde(deny_unknown_fields)]
 #[serde(default)]
 pub struct Links {
+    #[serde(deserialize_with = "deserialize_color")]
     pub valid: Color,
+    #[serde(deserialize_with = "deserialize_color")]
     pub invalid: Color,
 }
 
