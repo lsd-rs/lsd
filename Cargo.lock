@@ -409,7 +409,6 @@ version = "0.22.0"
 dependencies = [
  "assert_cmd",
  "assert_fs",
- "bitflags",
  "chrono",
  "chrono-humanize",
  "clap",
