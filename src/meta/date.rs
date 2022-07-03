@@ -235,7 +235,7 @@ mod test {
         let success = cross_platform_touch(&file_path, &creation_date)
             .unwrap()
             .success();
-        assert_eq!(true, success, "failed to exec touch");
+        assert!(success, "failed to exec touch");
 
         let colors = Colors::new(ThemeOption::Default);
         let date = Date::from(&file_path.metadata().unwrap());
@@ -260,7 +260,7 @@ mod test {
         let success = cross_platform_touch(&file_path, &creation_date)
             .unwrap()
             .success();
-        assert_eq!(true, success, "failed to exec touch");
+        assert!(success, "failed to exec touch");
 
         let colors = Colors::new(ThemeOption::Default);
         let date = Date::from(&file_path.metadata().unwrap());
@@ -288,7 +288,7 @@ mod test {
         let success = cross_platform_touch(&file_path, &creation_date)
             .unwrap()
             .success();
-        assert_eq!(true, success, "failed to exec touch");
+        assert!(success, "failed to exec touch");
 
         let colors = Colors::new(ThemeOption::Default);
         let date = Date::from(&file_path.metadata().unwrap());

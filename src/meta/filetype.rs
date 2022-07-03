@@ -217,7 +217,7 @@ mod test {
             .status()
             .expect("failed to exec mkfifo")
             .success();
-        assert_eq!(true, success, "failed to exec mkfifo");
+        assert!(success, "failed to exec mkfifo");
         let meta = pipe_path.metadata().expect("failed to get metas");
 
         let colors = Colors::new(ThemeOption::NoLscolors);
@@ -245,7 +245,7 @@ mod test {
             .status()
             .expect("failed to exec mknod")
             .success();
-        assert_eq!(true, success, "failed to exec mknod");
+        assert!(success, "failed to exec mknod");
         let meta = char_device_path.metadata().expect("failed to get metas");
 
         let colors = Colors::new(ThemeOption::NoLscolors);

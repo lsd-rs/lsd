@@ -217,7 +217,7 @@ mod tests {
             .unwrap()
             .success();
 
-        assert_eq!(true, success, "failed to change file timestamp");
+        assert!(success, "failed to change file timestamp");
         let meta_z = Meta::from_path(&path_z, false).expect("failed to get meta");
 
         let mut flags = Flags::default();
