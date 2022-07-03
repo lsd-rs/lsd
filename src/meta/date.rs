@@ -215,8 +215,10 @@ mod test {
         let colors = Colors::new(ThemeOption::Default);
         let date = Date::from(&file_path.metadata().unwrap());
 
-        let mut flags = Flags::default();
-        flags.date = DateFlag::Relative;
+        let flags = Flags {
+            date: DateFlag::Relative,
+            ..Default::default()
+        };
 
         assert_eq!(
             "2 days ago".to_string().with(Color::AnsiValue(36)),
@@ -240,8 +242,10 @@ mod test {
         let colors = Colors::new(ThemeOption::Default);
         let date = Date::from(&file_path.metadata().unwrap());
 
-        let mut flags = Flags::default();
-        flags.date = DateFlag::Relative;
+        let flags = Flags {
+            date: DateFlag::Relative,
+            ..Default::default()
+        };
 
         assert_eq!(
             "now".to_string().with(Color::AnsiValue(40)),
@@ -265,8 +269,10 @@ mod test {
         let colors = Colors::new(ThemeOption::Default);
         let date = Date::from(&file_path.metadata().unwrap());
 
-        let mut flags = Flags::default();
-        flags.date = DateFlag::Iso;
+        let flags = Flags {
+            date: DateFlag::Iso,
+            ..Default::default()
+        };
 
         assert_eq!(
             creation_date
@@ -293,8 +299,10 @@ mod test {
         let colors = Colors::new(ThemeOption::Default);
         let date = Date::from(&file_path.metadata().unwrap());
 
-        let mut flags = Flags::default();
-        flags.date = DateFlag::Iso;
+        let flags = Flags {
+            date: DateFlag::Iso,
+            ..Default::default()
+        };
 
         assert_eq!(
             creation_date
@@ -318,8 +326,10 @@ mod test {
         let colors = Colors::new(ThemeOption::Default);
         let date = Date::from(end_time);
 
-        let mut flags = Flags::default();
-        flags.date = DateFlag::Date;
+        let flags = Flags {
+            date: DateFlag::Date,
+            ..Default::default()
+        };
 
         assert_eq!(
             "-".to_string().with(Color::AnsiValue(36)),
