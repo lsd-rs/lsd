@@ -438,7 +438,7 @@ mod test {
         let path = Path::new("some-file.txt");
 
         let name = Name::new(
-            &path,
+            path,
             FileType::File {
                 uid: false,
                 exec: false,
@@ -453,7 +453,7 @@ mod test {
         let path = Path::new(".gitignore");
 
         let name = Name::new(
-            &path,
+            path,
             FileType::File {
                 uid: false,
                 exec: false,
@@ -467,7 +467,7 @@ mod test {
     fn test_order_impl_is_case_insensitive() {
         let path_1 = Path::new("/AAAA");
         let name_1 = Name::new(
-            &path_1,
+            path_1,
             FileType::File {
                 uid: false,
                 exec: false,
@@ -476,7 +476,7 @@ mod test {
 
         let path_2 = Path::new("/aaaa");
         let name_2 = Name::new(
-            &path_2,
+            path_2,
             FileType::File {
                 uid: false,
                 exec: false,
@@ -490,7 +490,7 @@ mod test {
     fn test_partial_order_impl() {
         let path_a = Path::new("/aaaa");
         let name_a = Name::new(
-            &path_a,
+            path_a,
             FileType::File {
                 uid: false,
                 exec: false,
@@ -499,7 +499,7 @@ mod test {
 
         let path_z = Path::new("/zzzz");
         let name_z = Name::new(
-            &path_z,
+            path_z,
             FileType::File {
                 uid: false,
                 exec: false,
@@ -513,7 +513,7 @@ mod test {
     fn test_partial_order_impl_is_case_insensitive() {
         let path_a = Path::new("aaaa");
         let name_a = Name::new(
-            &path_a,
+            path_a,
             FileType::File {
                 uid: false,
                 exec: false,
@@ -522,7 +522,7 @@ mod test {
 
         let path_z = Path::new("ZZZZ");
         let name_z = Name::new(
-            &path_z,
+            path_z,
             FileType::File {
                 uid: false,
                 exec: false,
@@ -536,7 +536,7 @@ mod test {
     fn test_partial_eq_impl() {
         let path_1 = Path::new("aaaa");
         let name_1 = Name::new(
-            &path_1,
+            path_1,
             FileType::File {
                 uid: false,
                 exec: false,
@@ -545,7 +545,7 @@ mod test {
 
         let path_2 = Path::new("aaaa");
         let name_2 = Name::new(
-            &path_2,
+            path_2,
             FileType::File {
                 uid: false,
                 exec: false,
@@ -559,7 +559,7 @@ mod test {
     fn test_partial_eq_impl_is_case_insensitive() {
         let path_1 = Path::new("AAAA");
         let name_1 = Name::new(
-            &path_1,
+            path_1,
             FileType::File {
                 uid: false,
                 exec: false,
@@ -568,7 +568,7 @@ mod test {
 
         let path_2 = Path::new("aaaa");
         let name_2 = Name::new(
-            &path_2,
+            path_2,
             FileType::File {
                 uid: false,
                 exec: false,

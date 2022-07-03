@@ -529,7 +529,7 @@ mod test {
     fn get_directory_icon() {
         let tmp_dir = tempdir().expect("failed to create temp dir");
         let file_path = tmp_dir.path();
-        let meta = Meta::from_path(&file_path.to_path_buf(), false).unwrap();
+        let meta = Meta::from_path(file_path, false).unwrap();
 
         let icon = Icons::new(Theme::Fancy, " ".to_string());
         let icon_str = icon.get(&meta.name);
@@ -541,7 +541,7 @@ mod test {
     fn get_directory_icon_unicode() {
         let tmp_dir = tempdir().expect("failed to create temp dir");
         let file_path = tmp_dir.path();
-        let meta = Meta::from_path(&file_path.to_path_buf(), false).unwrap();
+        let meta = Meta::from_path(file_path, false).unwrap();
 
         let icon = Icons::new(Theme::Unicode, " ".to_string());
         let icon_str = icon.get(&meta.name);
@@ -553,7 +553,7 @@ mod test {
     fn get_directory_icon_with_ext() {
         let tmp_dir = tempdir().expect("failed to create temp dir");
         let file_path = tmp_dir.path();
-        let meta = Meta::from_path(&file_path.to_path_buf(), false).unwrap();
+        let meta = Meta::from_path(file_path, false).unwrap();
 
         let icon = Icons::new(Theme::Fancy, " ".to_string());
         let icon_str = icon.get(&meta.name);

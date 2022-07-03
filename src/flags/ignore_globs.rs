@@ -168,7 +168,7 @@ mod test {
         let argv = ["lsd"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         let mut c = Config::with_none();
-        c.ignore_globs = Some(vec![".git".into()].into());
+        c.ignore_globs = Some(vec![".git".into()]);
         assert!(match IgnoreGlobs::configure_from(&matches, &c) {
             Ok(_) => true,
             _ => false,
