@@ -143,24 +143,20 @@ mod test {
     fn test_configuration_from_none() {
         let argv = ["lsd"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
-        assert!(
-            match IgnoreGlobs::configure_from(&matches, &Config::with_none()) {
-                Ok(_) => true,
-                _ => false,
-            }
-        );
+        assert!(matches!(
+            IgnoreGlobs::configure_from(&matches, &Config::with_none()),
+            Ok(..)
+        ));
     }
 
     #[test]
     fn test_configuration_from_args() {
         let argv = ["lsd", "--ignore-glob", ".git"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
-        assert!(
-            match IgnoreGlobs::configure_from(&matches, &Config::with_none()) {
-                Ok(_) => true,
-                _ => false,
-            }
-        );
+        assert!(matches!(
+            IgnoreGlobs::configure_from(&matches, &Config::with_none()),
+            Ok(..)
+        ));
     }
 
     #[test]
@@ -169,27 +165,21 @@ mod test {
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         let mut c = Config::with_none();
         c.ignore_globs = Some(vec![".git".into()]);
-        assert!(match IgnoreGlobs::configure_from(&matches, &c) {
-            Ok(_) => true,
-            _ => false,
-        });
+        assert!(matches!(IgnoreGlobs::configure_from(&matches, &c), Ok(..)));
     }
 
     #[test]
     fn test_from_arg_matches_none() {
         let argv = ["lsd"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
-        assert!(match IgnoreGlobs::from_arg_matches(&matches) {
-            None => true,
-            _ => false,
-        });
+        assert!(matches!(IgnoreGlobs::from_arg_matches(&matches), None));
     }
 
     #[test]
     fn test_from_config_none() {
-        assert!(match IgnoreGlobs::from_config(&Config::with_none()) {
-            None => true,
-            _ => false,
-        });
+        assert!(matches!(
+            IgnoreGlobs::from_config(&Config::with_none()),
+            None
+        ));
     }
 }

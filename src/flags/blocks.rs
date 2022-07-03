@@ -369,10 +369,7 @@ mod test_blocks {
     fn test_from_arg_matches_none() {
         let argv = ["lsd"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
-        assert!(match Blocks::from_arg_matches(&matches) {
-            None => true,
-            _ => false,
-        });
+        assert!(matches!(Blocks::from_arg_matches(&matches), None));
     }
 
     #[test]
@@ -380,10 +377,9 @@ mod test_blocks {
         let argv = ["lsd", "--blocks", "permission"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         let test_blocks = Blocks(vec![Block::Permission]);
-        assert!(match Blocks::from_arg_matches(&matches) {
-            Some(Ok(blocks)) if blocks == test_blocks => true,
-            _ => false,
-        });
+        assert!(
+            matches!(Blocks::from_arg_matches(&matches), Some(Ok(blocks)) if blocks == test_blocks)
+        );
     }
 
     #[test]
@@ -391,10 +387,9 @@ mod test_blocks {
         let argv = ["lsd", "--blocks", "permission", "--blocks", "name"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         let test_blocks = Blocks(vec![Block::Permission, Block::Name]);
-        assert!(match Blocks::from_arg_matches(&matches) {
-            Some(Ok(blocks)) if blocks == test_blocks => true,
-            _ => false,
-        });
+        assert!(
+            matches!(Blocks::from_arg_matches(&matches), Some(Ok(blocks)) if blocks == test_blocks)
+        );
     }
 
     #[test]
@@ -402,10 +397,9 @@ mod test_blocks {
         let argv = ["lsd", "--blocks", "permission,name"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         let test_blocks = Blocks(vec![Block::Permission, Block::Name]);
-        assert!(match Blocks::from_arg_matches(&matches) {
-            Some(Ok(blocks)) if blocks == test_blocks => true,
-            _ => false,
-        });
+        assert!(
+            matches!(Blocks::from_arg_matches(&matches), Some(Ok(blocks)) if blocks == test_blocks)
+        );
     }
 
     #[test]
@@ -420,10 +414,9 @@ mod test_blocks {
             Block::User,
             Block::Permission,
         ]);
-        assert!(match Blocks::from_arg_matches(&matches) {
-            Some(Ok(blocks)) if blocks == test_blocks => true,
-            _ => false,
-        });
+        assert!(
+            matches!(Blocks::from_arg_matches(&matches), Some(Ok(blocks)) if blocks == test_blocks)
+        );
     }
 
     #[test]
@@ -431,10 +424,9 @@ mod test_blocks {
         let argv = ["lsd", "--blocks", "permission,group,date"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         let test_blocks = Blocks(vec![Block::Permission, Block::Group, Block::Date]);
-        assert!(match Blocks::from_arg_matches(&matches) {
-            Some(Ok(blocks)) if blocks == test_blocks => true,
-            _ => false,
-        });
+        assert!(
+            matches!(Blocks::from_arg_matches(&matches), Some(Ok(blocks)) if blocks == test_blocks)
+        );
     }
 
     #[test]
