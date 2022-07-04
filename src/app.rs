@@ -353,7 +353,7 @@ pub fn validate_time_format(formatter: &str) -> Result<(), String> {
             Some('%') => match chars.next() {
                 Some('.') => match chars.next() {
                     Some('f') => (),
-                    Some(n @ '3') | Some(n @ '6') | Some(n @ '9') => match chars.next() {
+                    Some(n @ ('3' | '6' | '9')) => match chars.next() {
                         Some('f') => (),
                         Some(c) => return Err(format!("invalid format specifier: %.{}{}", n, c)),
                         None => return Err("missing format specifier".to_owned()),
@@ -361,28 +361,26 @@ pub fn validate_time_format(formatter: &str) -> Result<(), String> {
                     Some(c) => return Err(format!("invalid format specifier: %.{}", c)),
                     None => return Err("missing format specifier".to_owned()),
                 },
-                Some(n @ ':') | Some(n @ '#') => match chars.next() {
+                Some(n @ (':' | '#')) => match chars.next() {
                     Some('z') => (),
                     Some(c) => return Err(format!("invalid format specifier: %{}{}", n, c)),
                     None => return Err("missing format specifier".to_owned()),
                 },
-                Some(n @ '-') | Some(n @ '_') | Some(n @ '0') => match chars.next() {
-                    Some('C') | Some('d') | Some('e') | Some('f') | Some('G') | Some('g')
-                    | Some('H') | Some('I') | Some('j') | Some('k') | Some('l') | Some('M')
-                    | Some('m') | Some('S') | Some('s') | Some('U') | Some('u') | Some('V')
-                    | Some('W') | Some('w') | Some('Y') | Some('y') => (),
+                Some(n @ ('-' | '_' | '0')) => match chars.next() {
+                    Some(
+                        'C' | 'd' | 'e' | 'f' | 'G' | 'g' | 'H' | 'I' | 'j' | 'k' | 'l' | 'M' | 'm'
+                        | 'S' | 's' | 'U' | 'u' | 'V' | 'W' | 'w' | 'Y' | 'y',
+                    ) => (),
                     Some(c) => return Err(format!("invalid format specifier: %{}{}", n, c)),
                     None => return Err("missing format specifier".to_owned()),
                 },
-                Some('A') | Some('a') | Some('B') | Some('b') | Some('C') | Some('c')
-                | Some('D') | Some('d') | Some('e') | Some('F') | Some('f') | Some('G')
-                | Some('g') | Some('H') | Some('h') | Some('I') | Some('j') | Some('k')
-                | Some('l') | Some('M') | Some('m') | Some('n') | Some('P') | Some('p')
-                | Some('R') | Some('r') | Some('S') | Some('s') | Some('T') | Some('t')
-                | Some('U') | Some('u') | Some('V') | Some('v') | Some('W') | Some('w')
-                | Some('X') | Some('x') | Some('Y') | Some('y') | Some('Z') | Some('z')
-                | Some('+') | Some('%') => (),
-                Some(n @ '3') | Some(n @ '6') | Some(n @ '9') => match chars.next() {
+                Some(
+                    'A' | 'a' | 'B' | 'b' | 'C' | 'c' | 'D' | 'd' | 'e' | 'F' | 'f' | 'G' | 'g'
+                    | 'H' | 'h' | 'I' | 'j' | 'k' | 'l' | 'M' | 'm' | 'n' | 'P' | 'p' | 'R' | 'r'
+                    | 'S' | 's' | 'T' | 't' | 'U' | 'u' | 'V' | 'v' | 'W' | 'w' | 'X' | 'x' | 'Y'
+                    | 'y' | 'Z' | 'z' | '+' | '%',
+                ) => (),
+                Some(n @ ('3' | '6' | '9')) => match chars.next() {
                     Some('f') => (),
                     Some(c) => return Err(format!("invalid format specifier: %{}{}", n, c)),
                     None => return Err("missing format specifier".to_owned()),
