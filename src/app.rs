@@ -339,7 +339,7 @@ pub fn build() -> App<'static, 'static> {
 fn validate_date_argument(arg: String) -> Result<(), String> {
     if arg.starts_with('+') {
         validate_time_format(&arg)
-    } else if &arg == "date" || &arg == "relative" {
+    } else if arg == "date" || arg == "relative" {
         Result::Ok(())
     } else {
         Result::Err("possible values: date, relative, +date-time-format".to_owned())
