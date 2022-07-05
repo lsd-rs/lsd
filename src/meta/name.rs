@@ -105,29 +105,22 @@ impl Name {
                 // HyperlinkOption::Auto gets converted to None or Always in core.rs based on tty_available
                 match std::fs::canonicalize(&self.path) {
                     Ok(rp) => {
-                        match Url::from_file_path(&rp) {
-                            Ok(url) => {
-                                // Crossterm does not support hyperlinks as of now
-                                // https://gist.github.com/egmontkob/eb114294efbcd5adb1944c9f3cb5feda
-                                format!("\x1B]8;;{}\x1B\x5C{}\x1B]8;;\x1B\x5C", url, name)
-                            }
-                            Err(_) => {
-                                print_error!("{}: unable to form url.", name);
-                                name
-                            }
+                        if let Ok(url) = Url::from_file_path(&rp) {
+                            // Crossterm does not support hyperlinks as of now
+                            // https://gist.github.com/egmontkob/eb114294efbcd5adb1944c9f3cb5feda
+                            format!("\x1B]8;;{}\x1B\x5C{}\x1B]8;;\x1B\x5C", url, name)
+                        } else {
+                            print_error!("{}: unable to form url.", name);
+                            name
                         }
                     }
                     Err(err) => {
-                        match err.kind() {
-                            std::io::ErrorKind::NotFound => {
-                                // If this happens, it just means the file is a broken symlink. This is not an error, and the user is already warned that the symlink is broken by the colors.
-                                name
-                            }
-                            _ => {
-                                print_error!("{}: {}", name, err);
-                                name
-                            }
+                        // If the error is NotFound, it just means the file is a broken symlink.
+                        // That is not an error, and the user is already warned that the symlink is broken by the colors.
+                        if err.kind() != std::io::ErrorKind::NotFound {
+                            print_error!("{}: {}", name, err);
                         }
+                        name
                     }
                 }
             }

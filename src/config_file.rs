@@ -15,6 +15,7 @@ use std::path::{Path, PathBuf};
 use serde::Deserialize;
 
 use std::fs;
+use std::io;
 
 const CONF_DIR: &str = "lsd";
 const CONF_FILE_NAME: &str = "config";
@@ -111,10 +112,9 @@ impl Config {
                 }
             },
             Err(e) => {
-                match e.kind() {
-                    std::io::ErrorKind::NotFound => {}
-                    _ => print_error!("Can not open config file {}: {}.", &file, e),
-                };
+                if e.kind() != io::ErrorKind::NotFound {
+                    print_error!("Can not open config file {}: {}.", &file, e);
+                }
                 None
             }
         }
