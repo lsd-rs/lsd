@@ -21,12 +21,11 @@ pub enum DateFlag {
 impl DateFlag {
     /// Get a value from a date format string
     fn from_format_string(value: &str) -> Option<Self> {
-        match app::validate_time_format(value) {
-            Ok(()) => Some(Self::Formatted(value[1..].to_string())),
-            _ => {
-                print_error!("Not a valid date format: {}.", value);
-                None
-            }
+        if app::validate_time_format(value).is_ok() {
+            Some(Self::Formatted(value[1..].to_string()))
+        } else {
+            print_error!("Not a valid date format: {}.", value);
+            None
         }
     }
 
