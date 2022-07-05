@@ -16,20 +16,19 @@ where
     struct ColorVisitor;
     impl<'de> serde::de::Visitor<'de> for ColorVisitor {
         type Value = Color;
+
         fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
             formatter.write_str(
                     "`black`, `blue`, `dark_blue`, `cyan`, `dark_cyan`, `green`, `dark_green`, `grey`, `dark_grey`, `magenta`, `dark_magenta`, `red`, `dark_red`, `white`, `yellow`, `dark_yellow`, `u8`, or `3 u8 array`",
                 )
         }
+
         fn visit_str<E>(self, value: &str) -> Result<Color, E>
         where
             E: serde::de::Error,
         {
-            if let Ok(c) = Color::try_from(value) {
-                Ok(c)
-            } else {
-                Err(E::invalid_value(serde::de::Unexpected::Str(value), &self))
-            }
+            Color::try_from(value)
+                .map_err(|_| E::invalid_value(serde::de::Unexpected::Str(value), &self))
         }
 
         fn visit_u64<E>(self, value: u64) -> Result<Color, E>
