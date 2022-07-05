@@ -139,13 +139,13 @@ impl Colors {
     pub fn new(t: ThemeOption) -> Self {
         let theme = match t {
             ThemeOption::NoColor => None,
-            ThemeOption::Default => Some(Theme::default()),
-            ThemeOption::NoLscolors => Some(Theme::default()),
+            ThemeOption::Default | ThemeOption::NoLscolors => Some(Theme::default()),
             ThemeOption::Custom(ref file) => Some(Theme::from_path(file).unwrap_or_default()),
         };
         let lscolors = match t {
-            ThemeOption::Default => Some(LsColors::from_env().unwrap_or_default()),
-            ThemeOption::Custom(_) => Some(LsColors::from_env().unwrap_or_default()),
+            ThemeOption::Default | ThemeOption::Custom(_) => {
+                Some(LsColors::from_env().unwrap_or_default())
+            }
             _ => None,
         };
 
@@ -222,11 +222,7 @@ impl Colors {
             Elem::CharDevice => Some("cd"),
             Elem::BrokenSymLink => Some("or"),
             Elem::MissingSymLinkTarget => Some("mi"),
-            Elem::INode { valid } => match valid {
-                true => Some("so"),
-                false => Some("no"),
-            },
-            Elem::Links { valid } => match valid {
+            Elem::INode { valid } | Elem::Links { valid } => match valid {
                 true => Some("so"),
                 false => Some("no"),
             },
