@@ -51,10 +51,8 @@ impl Configurable<Self> for SortColumn {
     /// If either the "timesort" or "sizesort" arguments are passed, this returns the corresponding
     /// `SortColumn` variant in a [Some]. Otherwise this returns [None].
     fn from_arg_matches(matches: &ArgMatches) -> Option<Self> {
-        let sort = match matches.values_of("sort") {
-            Some(s) => s.last(),
-            None => None,
-        };
+        let sort = matches.values_of("sort").and_then(|s| s.last());
+
         if matches.is_present("timesort") || sort == Some("time") {
             Some(Self::Time)
         } else if matches.is_present("sizesort") || sort == Some("size") {
@@ -76,11 +74,7 @@ impl Configurable<Self> for SortColumn {
     /// this returns the corresponding variant in a [Some].
     /// Otherwise this returns [None].
     fn from_config(config: &Config) -> Option<Self> {
-        if let Some(sort) = &config.sorting {
-            sort.column
-        } else {
-            None
-        }
+        config.sorting.as_ref().and_then(|s| s.column)
     }
 }
 
@@ -118,19 +112,11 @@ impl Configurable<Self> for SortOrder {
     /// Otherwise [None] is returned.
     /// A `true` maps to [SortOrder::Reverse] while `false` maps to [SortOrder::Default].
     fn from_config(config: &Config) -> Option<Self> {
-        if let Some(sort) = &config.sorting {
-            if let Some(reverse) = sort.reverse {
-                if reverse {
-                    Some(Self::Reverse)
-                } else {
-                    Some(Self::Default)
-                }
-            } else {
-                None
-            }
-        } else {
-            None
-        }
+        config.sorting.as_ref().and_then(|s| match s.reverse {
+            Some(true) => Some(Self::Reverse),
+            Some(false) => Some(Self::Default),
+            None => None,
+        })
     }
 }
 
@@ -151,15 +137,14 @@ pub enum DirGrouping {
 }
 
 impl DirGrouping {
-    fn from_str(value: &str) -> Option<Self> {
+    fn from_arg_str(value: &str) -> Self {
         match value {
-            "first" => Some(Self::First),
-            "last" => Some(Self::Last),
-            "none" => Some(Self::None),
-            _ => panic!(
-                "Group Dir can only be one of first, last or none, but got {}.",
-                value
-            ),
+            "first" => Self::First,
+            "last" => Self::Last,
+            "none" => Self::None,
+            _ => {
+                unreachable!("Invalid value should be handled by `clap`");
+            }
         }
     }
 }
@@ -179,10 +164,12 @@ impl Configurable<Self> for DirGrouping {
         }
 
         if matches.occurrences_of("group-dirs") > 0 {
-            if let Some(group_dirs) = matches.values_of("group-dirs")?.last() {
-                return Self::from_str(group_dirs);
-            }
+            return matches
+                .values_of("group-dirs")?
+                .last()
+                .map(Self::from_arg_str);
         }
+
         None
     }
 
@@ -194,13 +181,11 @@ impl Configurable<Self> for DirGrouping {
     /// is one of "first", "last" or "none", this returns its corresponding variant in a [Some].
     /// Otherwise this returns [None].
     fn from_config(config: &Config) -> Option<Self> {
-        if let Some(true) = config.classic {
-            return Some(Self::None);
+        if config.classic == Some(true) {
+            Some(Self::None)
+        } else {
+            config.sorting.as_ref().and_then(|s| s.dir_grouping)
         }
-        if let Some(sort) = &config.sorting {
-            return sort.dir_grouping;
-        }
-        None
     }
 }
 
@@ -488,11 +473,9 @@ mod test_dir_grouping {
     use crate::flags::Configurable;
 
     #[test]
-    #[should_panic(
-        expected = "Group Dir can only be one of first, last or none, but got bad value."
-    )]
+    #[should_panic]
     fn test_from_str_bad_value() {
-        assert_eq!(None, DirGrouping::from_str("bad value"));
+        DirGrouping::from_arg_str("bad value");
     }
 
     #[test]

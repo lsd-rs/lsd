@@ -21,16 +21,13 @@ pub enum SizeFlag {
 }
 
 impl SizeFlag {
-    fn from_str(value: &str) -> Option<Self> {
+    fn from_arg_str(value: &str) -> Self {
         match value {
-            "default" => Some(Self::Default),
-            "short" => Some(Self::Short),
-            "bytes" => Some(Self::Bytes),
+            "default" => Self::Default,
+            "short" => Self::Short,
+            "bytes" => Self::Bytes,
             _ => {
-                panic!(
-                    "Size can only be one of default, short or bytes, but got {}.",
-                    value
-                );
+                unreachable!("Invalid value should be handled by `clap`");
             }
         }
     }
@@ -44,13 +41,12 @@ impl Configurable<Self> for SizeFlag {
     /// [None].
     fn from_arg_matches(matches: &ArgMatches) -> Option<Self> {
         if matches.is_present("classic") {
-            return Some(Self::Bytes);
+            Some(Self::Bytes)
         } else if matches.occurrences_of("size") > 0 {
-            if let Some(size) = matches.values_of("size")?.last() {
-                return Self::from_str(size);
-            }
+            matches.values_of("size")?.last().map(Self::from_arg_str)
+        } else {
+            None
         }
-        None
     }
 
     /// Get a potential `SizeFlag` variant from a [Config].
@@ -59,7 +55,7 @@ impl Configurable<Self> for SizeFlag {
     /// this returns the corresponding `SizeFlag` variant in a [Some].
     /// Otherwise this returns [None].
     fn from_config(config: &Config) -> Option<Self> {
-        if let Some(true) = config.classic {
+        if config.classic == Some(true) {
             Some(Self::Bytes)
         } else {
             config.size

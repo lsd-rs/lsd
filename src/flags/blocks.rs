@@ -71,24 +71,24 @@ impl Blocks {
     /// This errors if any of the parameter arguments causes [Block]'s implementation of
     /// [TryFrom::try_from] to return an [Err].
     fn from_arg_matches(matches: &ArgMatches) -> Option<Result<Self, Error>> {
-        if matches.occurrences_of("blocks") > 0 {
-            if let Some(values) = matches.values_of("blocks") {
-                let mut blocks: Vec<Block> = vec![];
-                for value in values {
-                    match Block::try_from(value) {
-                        Ok(block) => blocks.push(block),
-                        Err(message) => {
-                            return Some(Err(Error::with_description(
-                                &message,
-                                ErrorKind::ValueValidation,
-                            )))
-                        }
+        if matches.occurrences_of("blocks") == 0 {
+            return None;
+        }
+
+        if let Some(values) = matches.values_of("blocks") {
+            let mut blocks: Vec<Block> = Vec::with_capacity(values.len());
+            for value in values {
+                match Block::try_from(value) {
+                    Ok(block) => blocks.push(block),
+                    Err(message) => {
+                        return Some(Err(Error::with_description(
+                            &message,
+                            ErrorKind::ValueValidation,
+                        )))
                     }
                 }
-                Some(Ok(Self(blocks)))
-            } else {
-                None
             }
+            Some(Ok(Self(blocks)))
         } else {
             None
         }

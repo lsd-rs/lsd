@@ -17,6 +17,17 @@ pub enum HyperlinkOption {
     Never,
 }
 
+impl HyperlinkOption {
+    fn from_arg_str(value: &str) -> Self {
+        match value {
+            "always" => Self::Always,
+            "auto" => Self::Auto,
+            "never" => Self::Never,
+            _ => unreachable!("Invalid value should be handled by `clap`"),
+        }
+    }
+}
+
 impl Configurable<Self> for HyperlinkOption {
     /// Get a potential `HyperlinkOption` variant from [ArgMatches].
     ///
@@ -27,12 +38,10 @@ impl Configurable<Self> for HyperlinkOption {
         if matches.is_present("classic") {
             Some(Self::Never)
         } else if matches.occurrences_of("hyperlink") > 0 {
-            match matches.values_of("hyperlink")?.last() {
-                Some("always") => Some(Self::Always),
-                Some("auto") => Some(Self::Auto),
-                Some("never") => Some(Self::Never),
-                _ => panic!("This should not be reachable!"),
-            }
+            matches
+                .values_of("hyperlink")?
+                .last()
+                .map(Self::from_arg_str)
         } else {
             None
         }
@@ -45,11 +54,11 @@ impl Configurable<Self> for HyperlinkOption {
     /// this returns its corresponding variant in a [Some].
     /// Otherwise this returns [None].
     fn from_config(config: &Config) -> Option<Self> {
-        if let Some(true) = &config.classic {
-            return Some(Self::Never);
+        if config.classic == Some(true) {
+            Some(Self::Never)
+        } else {
+            config.hyperlink
         }
-
-        config.hyperlink
     }
 }
 
