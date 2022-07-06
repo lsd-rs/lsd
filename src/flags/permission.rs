@@ -19,15 +19,12 @@ pub enum PermissionFlag {
 }
 
 impl PermissionFlag {
-    fn from_str(value: &str) -> Option<Self> {
+    fn from_arg_str(value: &str) -> Self {
         match value {
-            "rwx" => Some(Self::Rwx),
-            "octal" => Some(Self::Octal),
+            "rwx" => Self::Rwx,
+            "octal" => Self::Octal,
             _ => {
-                panic!(
-                    "Permissions can only be one of rwx or octal, but got {}.",
-                    value
-                );
+                unreachable!("Invalid value should be handled by `serde` or `clap`");
             }
         }
     }
@@ -42,13 +39,15 @@ impl Configurable<Self> for PermissionFlag {
     /// Sets permissions to rwx if classic flag is enabled.
     fn from_arg_matches(matches: &ArgMatches) -> Option<Self> {
         if matches.is_present("classic") {
-            return Some(Self::Rwx);
+            Some(Self::Rwx)
         } else if matches.occurrences_of("permission") > 0 {
-            if let Some(permissions) = matches.values_of("permission")?.last() {
-                return Self::from_str(permissions);
-            }
+            matches
+                .values_of("permission")?
+                .last()
+                .map(Self::from_arg_str)
+        } else {
+            None
         }
-        None
     }
 
     /// Get a potential `PermissionFlag` variant from a [Config].
@@ -58,7 +57,7 @@ impl Configurable<Self> for PermissionFlag {
     /// Otherwise this returns [None].
     /// Sets permissions to rwx if classic flag is enabled.
     fn from_config(config: &Config) -> Option<Self> {
-        if let Some(true) = config.classic {
+        if config.classic == Some(true) {
             Some(Self::Rwx)
         } else {
             config.permission

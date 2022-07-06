@@ -30,7 +30,8 @@ impl DateFlag {
     }
 
     /// Get a value from a str.
-    fn from_str(value: &str) -> Option<Self> {
+    fn from_str<S: AsRef<str>>(value: S) -> Option<Self> {
+        let value = value.as_ref();
         match value {
             "date" => Some(Self::Date),
             "relative" => Some(Self::Relative),
@@ -53,14 +54,7 @@ impl Configurable<Self> for DateFlag {
         if matches.is_present("classic") {
             Some(Self::Date)
         } else if matches.occurrences_of("date") > 0 {
-            match matches.values_of("date")?.last() {
-                Some("date") => Some(Self::Date),
-                Some("relative") => Some(Self::Relative),
-                Some(format) if format.starts_with('+') => {
-                    Some(Self::Formatted(format[1..].to_owned()))
-                }
-                _ => panic!("This should not be reachable!"),
-            }
+            matches.values_of("date")?.last().and_then(Self::from_str)
         } else {
             None
         }
@@ -73,14 +67,10 @@ impl Configurable<Self> for DateFlag {
     /// this returns its corresponding variant in a [Some].
     /// Otherwise this returns [None].
     fn from_config(config: &Config) -> Option<Self> {
-        if let Some(true) = &config.classic {
-            return Some(Self::Date);
-        }
-
-        if let Some(date) = &config.date {
-            Self::from_str(date)
+        if config.classic == Some(true) {
+            Some(Self::Date)
         } else {
-            None
+            config.date.as_ref().and_then(Self::from_str)
         }
     }
 

@@ -45,6 +45,19 @@ pub enum IconOption {
     Never,
 }
 
+impl IconOption {
+    fn from_arg_str(value: &str) -> Self {
+        match value {
+            "always" => Self::Always,
+            "auto" => Self::Auto,
+            "never" => Self::Never,
+            _ => {
+                unreachable!("Invalid value should be handled by `clap`");
+            }
+        }
+    }
+}
+
 impl Configurable<Self> for IconOption {
     /// Get a potential `IconOption` variant from [ArgMatches].
     ///
@@ -55,12 +68,7 @@ impl Configurable<Self> for IconOption {
         if matches.is_present("classic") {
             Some(Self::Never)
         } else if matches.occurrences_of("icon") > 0 {
-            match matches.values_of("icon")?.last() {
-                Some("always") => Some(Self::Always),
-                Some("auto") => Some(Self::Auto),
-                Some("never") => Some(Self::Never),
-                _ => panic!("This should not be reachable!"),
-            }
+            matches.values_of("icon")?.last().map(Self::from_arg_str)
         } else {
             None
         }
@@ -73,14 +81,10 @@ impl Configurable<Self> for IconOption {
     /// this returns its corresponding variant in a [Some].
     /// Otherwise this returns [None].
     fn from_config(config: &Config) -> Option<Self> {
-        if let Some(true) = &config.classic {
-            return Some(Self::Never);
-        }
-
-        if let Some(icon) = &config.icons {
-            icon.when
+        if config.classic == Some(true) {
+            Some(Self::Never)
         } else {
-            None
+            config.icons.as_ref().and_then(|icon| icon.when)
         }
     }
 }
@@ -100,6 +104,18 @@ pub enum IconTheme {
     Fancy,
 }
 
+impl IconTheme {
+    fn from_arg_str(value: &str) -> Self {
+        match value {
+            "fancy" => Self::Fancy,
+            "unicode" => Self::Unicode,
+            _ => {
+                unreachable!("Invalid value should be handled by `clap`");
+            }
+        }
+    }
+}
+
 impl Configurable<Self> for IconTheme {
     /// Get a potential `IconTheme` variant from [ArgMatches].
     ///
@@ -107,11 +123,10 @@ impl Configurable<Self> for IconTheme {
     /// [Some]. Otherwise this returns [None].
     fn from_arg_matches(matches: &ArgMatches) -> Option<Self> {
         if matches.occurrences_of("icon-theme") > 0 {
-            match matches.values_of("icon-theme")?.last() {
-                Some("fancy") => Some(Self::Fancy),
-                Some("unicode") => Some(Self::Unicode),
-                _ => panic!("This should not be reachable!"),
-            }
+            matches
+                .values_of("icon-theme")?
+                .last()
+                .map(Self::from_arg_str)
         } else {
             None
         }
@@ -123,12 +138,7 @@ impl Configurable<Self> for IconTheme {
     /// this returns its corresponding variant in a [Some].
     /// Otherwise this returns [None].
     fn from_config(config: &Config) -> Option<Self> {
-        if let Some(icon) = &config.icons {
-            if let Some(theme) = icon.theme {
-                return Some(theme);
-            }
-        }
-        None
+        config.icons.as_ref().and_then(|icon| icon.theme)
     }
 }
 

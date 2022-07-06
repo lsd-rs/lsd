@@ -4,7 +4,6 @@
 use super::Configurable;
 
 use crate::config_file::Config;
-use crate::print_error;
 
 use clap::ArgMatches;
 use serde::de::{self, Deserializer, Visitor};
@@ -45,18 +44,15 @@ pub enum ThemeOption {
 
 impl ThemeOption {
     fn from_config(config: &Config) -> ThemeOption {
-        if let Some(classic) = config.classic {
-            if classic {
-                return ThemeOption::NoColor;
-            }
+        if config.classic == Some(true) {
+            ThemeOption::NoColor
+        } else {
+            config
+                .color
+                .as_ref()
+                .and_then(|c| c.theme.clone())
+                .unwrap_or_default()
         }
-        if let Some(c) = &config.color {
-            if let Some(t) = &c.theme {
-                return t.clone();
-            }
-        }
-
-        ThemeOption::default()
     }
 }
 
@@ -105,18 +101,13 @@ pub enum ColorOption {
 }
 
 impl ColorOption {
-    /// Get a Color value from a [String].
-    fn from_str(value: &str) -> Option<Self> {
+    fn from_arg_str(value: &str) -> Self {
         match value {
-            "always" => Some(Self::Always),
-            "auto" => Some(Self::Auto),
-            "never" => Some(Self::Never),
+            "always" => Self::Always,
+            "auto" => Self::Auto,
+            "never" => Self::Never,
             _ => {
-                print_error!(
-                    "Config color.when could only be one of auto, always and never, got {}.",
-                    &value
-                );
-                None
+                unreachable!("Invalid value should be handled by `clap`");
             }
         }
     }
@@ -132,11 +123,7 @@ impl Configurable<Self> for ColorOption {
         if matches.is_present("classic") {
             Some(Self::Never)
         } else if matches.occurrences_of("color") > 0 {
-            if let Some(color) = matches.values_of("color")?.last() {
-                Self::from_str(color)
-            } else {
-                panic!("Bad color args. This should not be reachable!");
-            }
+            matches.values_of("color")?.last().map(Self::from_arg_str)
         } else {
             None
         }
@@ -148,14 +135,10 @@ impl Configurable<Self> for ColorOption {
     /// Otherwise if the `Config::color::when` has value and is one of "always", "auto" or "never"
     /// this returns its corresponding variant in a [Some]. Otherwise this returns [None].
     fn from_config(config: &Config) -> Option<Self> {
-        if let Some(true) = config.classic {
-            return Some(Self::Never);
-        }
-
-        if let Some(c) = &config.color {
-            c.when
+        if config.classic == Some(true) {
+            Some(Self::Never)
         } else {
-            None
+            config.color.as_ref().and_then(|c| c.when)
         }
     }
 
