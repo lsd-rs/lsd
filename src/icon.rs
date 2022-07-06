@@ -122,6 +122,7 @@ impl Icons {
             (".inputrc", "\u{e615}"),           // ""
             (".node_repl_history", "\u{e718}"), // ""
             (".npm", "\u{e5fa}"),               // ""
+            (".profile", "\u{f68c}"),           // ""
             (".python_history", "\u{e606}"),    // ""
             (".release.toml", "\u{e7a8}"),      // ""
             (".rvm", "\u{e21e}"),               // ""
