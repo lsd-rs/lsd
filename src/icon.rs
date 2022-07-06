@@ -110,6 +110,7 @@ impl Icons {
             (".emacs.d", "\u{e779}"),           // ""
             (".doom.d", "\u{e779}"),            // ""
             (".git", "\u{e5fb}"),               // ""
+            (".git-credentials", "\u{f1d3}"),   // ""
             (".gitattributes", "\u{f1d3}"),     // ""
             (".gitconfig", "\u{f1d3}"),         // ""
             (".github", "\u{e5fd}"),            // ""
