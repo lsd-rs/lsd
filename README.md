@@ -81,9 +81,9 @@ You can also provide a configuration file from a non standard location:
 
 ### Config file content
 
-This is an example config file with the default values and some additional
-remarks.
-
+<details open>
+<summary>This is an example config file with the default values and some additional remarks.</summary>
+  
 ```yaml
 # == Classic ==
 # This is a shorthand to override some of the options to be backwards compatible
@@ -222,6 +222,8 @@ symlink-arrow: ⇒
 # Possible values: false, true
 header: false
 ```
+</details>
+
 
 ## Theme
 
