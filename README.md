@@ -14,6 +14,13 @@ The project is heavily inspired by the super [colorls](https://github.com/athity
 
 ## Installation
 
+<details>
+<summary>Packaging status</summary>
+<a href="https://repology.org/project/lsd/versions">
+    <img src="https://repology.org/badge/vertical-allrepos/lsd.svg?columns=3" alt="Packaging status">
+</a>
+</details>
+
 #### Prerequisites
 
 Install the patched fonts of powerline nerd-font and/or font-awesome. Have a look at the [Nerd Font README](https://github.com/ryanoasis/nerd-fonts/blob/master/readme.md) for more installation instructions. Don't forget to setup your terminal in order to use the correct font.
