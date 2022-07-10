@@ -418,7 +418,7 @@ mod tests {
 
     #[test]
     fn test_display_get_visible_width_without_icons() {
-        for (s, l) in &[
+        for (s, l) in [
             ("Ｈｅｌｌｏ,ｗｏｒｌｄ!", 22),
             ("ASCII1234-_", 11),
             ("制作样本。", 10),
@@ -444,13 +444,13 @@ mod tests {
                 )
                 .to_string();
 
-            assert_eq!(get_visible_width(&output, false), *l);
+            assert_eq!(get_visible_width(&output, false), l);
         }
     }
 
     #[test]
     fn test_display_get_visible_width_with_icons() {
-        for (s, l) in &[
+        for (s, l) in [
             // Add 3 characters for the icons.
             ("Ｈｅｌｌｏ,ｗｏｒｌｄ!", 24),
             ("ASCII1234-_", 13),
@@ -478,13 +478,13 @@ mod tests {
                 )
                 .to_string();
 
-            assert_eq!(get_visible_width(&output, false), *l);
+            assert_eq!(get_visible_width(&output, false), l);
         }
     }
 
     #[test]
     fn test_display_get_visible_width_with_colors() {
-        for (s, l) in &[
+        for (s, l) in [
             ("Ｈｅｌｌｏ,ｗｏｒｌｄ!", 22),
             ("ASCII1234-_", 11),
             ("File with space", 15),
@@ -519,13 +519,13 @@ mod tests {
             );
             assert!(output.ends_with("[39m"), "reset foreground color");
 
-            assert_eq!(get_visible_width(&output, false), *l, "visible match");
+            assert_eq!(get_visible_width(&output, false), l, "visible match");
         }
     }
 
     #[test]
     fn test_display_get_visible_width_without_colors() {
-        for (s, l) in &[
+        for (s, l) in [
             ("Ｈｅｌｌｏ,ｗｏｒｌｄ!", 22),
             ("ASCII1234-_", 11),
             ("File with space", 15),
@@ -556,13 +556,13 @@ mod tests {
             assert!(!output.starts_with("\u{1b}[38;5;"));
             assert!(!output.ends_with("[0m"));
 
-            assert_eq!(get_visible_width(&output, false), *l);
+            assert_eq!(get_visible_width(&output, false), l);
         }
     }
 
     #[test]
     fn test_display_get_visible_width_hypelink_simple() {
-        for (s, l) in &[
+        for (s, l) in [
             ("Ｈｅｌｌｏ,ｗｏｒｌｄ!", 22),
             ("ASCII1234-_", 11),
             ("File with space", 15),
@@ -574,7 +574,7 @@ mod tests {
         ] {
             // rending name require actual file, so we are mocking that
             let output = format!("\x1B]8;;{}\x1B\x5C{}\x1B]8;;\x1B\x5C", "url://fake-url", s);
-            assert_eq!(get_visible_width(&output, true), *l);
+            assert_eq!(get_visible_width(&output, true), l);
         }
     }
 
