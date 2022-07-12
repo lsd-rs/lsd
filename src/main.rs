@@ -107,8 +107,7 @@ fn main() {
     } else if matches.is_present("config-file") {
         let path = matches
             .value_of("config-file")
-            .expect("Invalid config file path")
-            .into();
+            .expect("Invalid config file path");
 
         Config::from_file(path).expect("Provided file path is invalid")
     } else {

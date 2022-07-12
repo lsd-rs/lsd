@@ -101,19 +101,28 @@ impl Config {
         }
     }
 
-    /// This constructs a Config struct with a passed file path [String].
-    pub fn from_file(file: String) -> Option<Self> {
-        match fs::read(&file) {
+    /// This constructs a Config struct with a passed file path.
+    pub fn from_file<P: AsRef<Path>>(file: P) -> Option<Self> {
+        let file = file.as_ref();
+        match fs::read(file) {
             Ok(f) => match Self::from_yaml(&String::from_utf8_lossy(&f)) {
                 Ok(c) => Some(c),
                 Err(e) => {
-                    print_error!("Configuration file {} format error, {}.", &file, e);
+                    print_error!(
+                        "Configuration file {} format error, {}.",
+                        file.to_string_lossy(),
+                        e
+                    );
                     None
                 }
             },
             Err(e) => {
                 if e.kind() != io::ErrorKind::NotFound {
-                    print_error!("Can not open config file {}: {}.", &file, e);
+                    print_error!(
+                        "Can not open config file {}: {}.",
+                        file.to_string_lossy(),
+                        e
+                    );
                 }
                 None
             }
@@ -176,11 +185,7 @@ impl Config {
 impl Default for Config {
     fn default() -> Self {
         if let Some(p) = Self::config_file_path() {
-            if let Some(c) = Self::from_file(
-                p.join([CONF_FILE_NAME, YAML_LONG_EXT].join("."))
-                    .to_string_lossy()
-                    .to_string(),
-            ) {
+            if let Some(c) = Self::from_file(p.join([CONF_FILE_NAME, YAML_LONG_EXT].join("."))) {
                 return c;
             }
         }
