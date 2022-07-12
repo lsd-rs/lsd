@@ -132,22 +132,19 @@ impl Config {
     pub fn config_file_path() -> Option<PathBuf> {
         use xdg::BaseDirectories;
         match BaseDirectories::with_prefix(CONF_DIR) {
-            Ok(p) => {
-                return Some(p.get_config_home());
+            Ok(p) => Some(p.get_config_home()),
+            Err(e) => {
+                print_error!("Can not open config file: {}.", e);
+                None
             }
-            Err(e) => print_error!("Can not open config file: {}.", e),
         }
-        None
     }
 
     /// This provides the path for a configuration file, inside the %APPDATA% directory.
     /// return None if error like PermissionDenied
     #[cfg(windows)]
     pub fn config_file_path() -> Option<PathBuf> {
-        if let Some(p) = dirs::config_dir() {
-            return Some(p.join(CONF_DIR));
-        }
-        None
+        dirs::config_dir().map(|x| x.join(CONF_DIR))
     }
 
     /// This expand the `~` in path to HOME dir
