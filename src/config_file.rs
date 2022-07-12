@@ -18,8 +18,7 @@ use std::fs;
 use std::io;
 
 const CONF_DIR: &str = "lsd";
-const CONF_FILE_NAME: &str = "config";
-const YAML_LONG_EXT: &str = "yaml";
+const CONF_FILE_NAME: &str = "config.yaml";
 
 /// A struct to hold an optional configuration items, and provides methods
 /// around error handling in a config file.
@@ -185,7 +184,7 @@ impl Config {
 impl Default for Config {
     fn default() -> Self {
         if let Some(p) = Self::config_file_path() {
-            if let Some(c) = Self::from_file(p.join([CONF_FILE_NAME, YAML_LONG_EXT].join("."))) {
+            if let Some(c) = Self::from_file(p.join(CONF_FILE_NAME)) {
                 return c;
             }
         }
