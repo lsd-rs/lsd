@@ -36,6 +36,7 @@ mod flags;
 mod icon;
 mod meta;
 mod sort;
+mod theme;
 
 use crate::config_file::Config;
 use crate::core::Core;
