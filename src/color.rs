@@ -1,13 +1,11 @@
-mod theme;
-
-use crossterm::style::{Attribute, ContentStyle, StyledContent, Stylize};
-use theme::Theme;
-
-pub use crate::flags::color::ThemeOption;
-
 use crossterm::style::Color;
+use crossterm::style::{Attribute, ContentStyle, StyledContent, Stylize};
 use lscolors::{Indicator, LsColors};
 use std::path::Path;
+
+use crate::theme::{Theme,color::ColorTheme};
+pub use crate::flags::color::ThemeOption;
+
 
 #[allow(dead_code)]
 #[derive(Hash, Debug, Eq, PartialEq, Clone)]
@@ -71,7 +69,7 @@ impl Elem {
         matches!(self, Elem::Dir { uid: true } | Elem::File { uid: true, .. })
     }
 
-    fn get_color(&self, theme: &theme::Theme) -> Color {
+    pub fn get_color(&self, theme: &ColorTheme) -> Color {
         match self {
             Elem::File {
                 exec: true,
@@ -131,7 +129,7 @@ impl Elem {
 pub type ColoredString = StyledContent<String>;
 
 pub struct Colors {
-    theme: Option<Theme>,
+    theme: Option<ColorTheme>,
     lscolors: Option<LsColors>,
 }
 
@@ -139,8 +137,8 @@ impl Colors {
     pub fn new(t: ThemeOption) -> Self {
         let theme = match t {
             ThemeOption::NoColor => None,
-            ThemeOption::Default | ThemeOption::NoLscolors => Some(Theme::default()),
-            ThemeOption::Custom(ref file) => Some(Theme::from_path(file).unwrap_or_default()),
+            ThemeOption::Default | ThemeOption::NoLscolors => Some(Theme::default().color),
+            ThemeOption::Custom(ref file) => Some(Theme::from_path(file).unwrap_or_default().color),
         };
         let lscolors = match t {
             ThemeOption::Default | ThemeOption::Custom(_) => {
@@ -301,7 +299,7 @@ fn to_content_style(ls: &lscolors::Style) -> ContentStyle {
 #[cfg(test)]
 mod tests {
     use super::Colors;
-    use crate::color::Theme;
+    use crate::theme::color_theme::Theme;
     use crate::color::ThemeOption;
     #[test]
     fn test_color_new_no_color_theme() {

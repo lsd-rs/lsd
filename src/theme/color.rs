@@ -1,16 +1,12 @@
 ///! This module provides methods to create theme from files and operations related to
 ///! this.
-use crate::config_file;
-use crate::print_error;
-
 use crossterm::style::Color;
 use serde::Deserialize;
-use std::path::Path;
-use std::{fmt, fs};
+use std::fmt;
 
 // Custom color deserialize
 fn deserialize_color<'de, D>(deserializer: D) -> Result<Color, D::Error>
-where
+    where
     D: serde::de::Deserializer<'de>,
 {
     struct ColorVisitor;
@@ -82,13 +78,14 @@ where
     deserializer.deserialize_any(ColorVisitor)
 }
 
+
 /// A struct holding the theme configuration
 /// Color table: https://upload.wikimedia.org/wikipedia/commons/1/15/Xterm_256color_chart.avg
 #[derive(Debug, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "kebab-case")]
 #[serde(deny_unknown_fields)]
 #[serde(default)]
-pub struct Theme {
+pub struct ColorTheme {
     #[serde(deserialize_with = "deserialize_color")]
     pub user: Color,
     #[serde(deserialize_with = "deserialize_color")]
@@ -328,65 +325,16 @@ impl Default for Links {
     }
 }
 
-impl Default for Theme {
+impl Default for ColorTheme {
     fn default() -> Self {
         // TODO(zwpaper): check terminal color and return light or dark
         Self::default_dark()
     }
 }
 
-impl Theme {
-    /// This read theme from file,
-    /// use the file path if it is absolute
-    /// prefix the config_file dir to it if it is not
-    pub fn from_path(file: &str) -> Option<Self> {
-        let real = if let Some(path) = config_file::Config::expand_home(file) {
-            path
-        } else {
-            print_error!("Not a valid theme file path: {}.", &file);
-            return None;
-        };
-        let path = if Path::new(&real).is_absolute() {
-            real
-        } else {
-            config_file::Config::config_file_path()?
-                .join("themes")
-                .join(real)
-        };
-        match fs::read(&path.with_extension("yaml")) {
-            Ok(f) => match Self::with_yaml(&String::from_utf8_lossy(&f)) {
-                Ok(t) => Some(t),
-                Err(e) => {
-                    print_error!("Theme file {} format error: {}.", &file, e);
-                    None
-                }
-            },
-            Err(_) => {
-                // try `yml` if `yaml` extension file not found
-                match fs::read(&path.with_extension("yml")) {
-                    Ok(f) => match Self::with_yaml(&String::from_utf8_lossy(&f)) {
-                        Ok(t) => Some(t),
-                        Err(e) => {
-                            print_error!("Theme file {} format error: {}.", &file, e);
-                            None
-                        }
-                    },
-                    Err(e) => {
-                        print_error!("Not a valid theme: {}, {}.", path.to_string_lossy(), e);
-                        None
-                    }
-                }
-            }
-        }
-    }
-
-    /// This constructs a Theme struct with a passed [Yaml] str.
-    fn with_yaml(yaml: &str) -> Result<Self, serde_yaml::Error> {
-        serde_yaml::from_str::<Self>(yaml)
-    }
-
+impl ColorTheme {
     pub fn default_dark() -> Self {
-        Theme {
+        ColorTheme {
             user: Color::AnsiValue(230),  // Cornsilk1
             group: Color::AnsiValue(187), // LightYellow3
             permission: Permission::default(),
