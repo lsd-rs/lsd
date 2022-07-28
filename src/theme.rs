@@ -1,7 +1,7 @@
 pub mod color;
 pub mod icon;
 
-use serde::Deserialize;
+use serde::{Deserialize, de::DeserializeOwned};
 use std::path::Path;
 use std::fs;
 
@@ -34,7 +34,7 @@ impl Theme {
     /// This read theme from file,
     /// use the file path if it is absolute
     /// prefix the config_file dir to it if it is not
-    pub fn from_path(file: &str) -> Option<Self> {
+    pub fn from_path<D: DeserializeOwned>(file: &str) -> Option<D> {
         let real = if let Some(path) = config_file::Config::expand_home(file) {
             path
         } else {
@@ -76,7 +76,7 @@ impl Theme {
     }
 
     /// This constructs a Theme struct with a passed [Yaml] str.
-    fn with_yaml(yaml: &str) -> Result<Self, serde_yaml::Error> {
-        serde_yaml::from_str::<Self>(yaml)
+    fn with_yaml<D: DeserializeOwned>(yaml: &str) -> Result<D, serde_yaml::Error> {
+        serde_yaml::from_str::<D>(yaml)
     }
 }

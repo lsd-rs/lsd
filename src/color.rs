@@ -138,7 +138,7 @@ impl Colors {
         let theme = match t {
             ThemeOption::NoColor => None,
             ThemeOption::Default | ThemeOption::NoLscolors => Some(Theme::default().color),
-            ThemeOption::Custom(ref file) => Some(Theme::from_path(file).unwrap_or_default().color),
+            ThemeOption::Custom(ref file) => Some(Theme::from_path::<ColorTheme>(file).unwrap_or_default()),
         };
         let lscolors = match t {
             ThemeOption::Default | ThemeOption::Custom(_) => {
