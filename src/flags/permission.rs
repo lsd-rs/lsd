@@ -23,8 +23,10 @@ impl PermissionFlag {
         match value {
             "rwx" => Self::Rwx,
             "octal" => Self::Octal,
-            _ => {
-                unreachable!("Invalid value should be handled by `serde` or `clap`");
+            other => {
+                unreachable!(
+                    "Invalid value '{other}' for 'permission' flag should be handled by `clap`"
+                );
             }
         }
     }

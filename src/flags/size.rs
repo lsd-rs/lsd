@@ -26,8 +26,8 @@ impl SizeFlag {
             "default" => Self::Default,
             "short" => Self::Short,
             "bytes" => Self::Bytes,
-            _ => {
-                unreachable!("Invalid value should be handled by `clap`");
+            other => {
+                unreachable!("Invalid value '{other}' for 'size' flag should be handled by `clap`");
             }
         }
     }

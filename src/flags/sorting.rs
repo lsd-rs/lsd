@@ -142,8 +142,10 @@ impl DirGrouping {
             "first" => Self::First,
             "last" => Self::Last,
             "none" => Self::None,
-            _ => {
-                unreachable!("Invalid value should be handled by `clap`");
+            other => {
+                unreachable!(
+                    "Invalid value '{other}' for 'group-dirs' flag should be handled by `clap`"
+                );
             }
         }
     }
