@@ -1,9 +1,9 @@
 pub mod color;
 pub mod icon;
 
-use serde::{Deserialize, de::DeserializeOwned};
-use std::path::Path;
+use serde::{de::DeserializeOwned, Deserialize};
 use std::fs;
+use std::path::Path;
 
 use crate::config_file;
 use crate::print_error;
@@ -23,7 +23,7 @@ pub struct Theme {
 impl Default for Theme {
     fn default() -> Self {
         // TODO(zwpaper): check terminal color and return light or dark
-        Theme{
+        Theme {
             color: ColorTheme::default(),
             icon: IconTheme::default(),
         }

@@ -47,11 +47,8 @@ impl Core {
             _ => flags.color.theme.clone(),
         };
 
-        let icon_theme = match (tty_available, flags.icons.when, flags.icons.theme) {
-            (_, IconOption::Never, _) | (false, IconOption::Auto, _) => icon::Theme::NoIcon,
-            (_, _, IconTheme::Fancy) => icon::Theme::Fancy,
-            (_, _, IconTheme::Unicode) => icon::Theme::Unicode,
-        };
+        let icon_when = flags.icons.when;
+        let icon_theme = flags.icons.theme.clone();
 
         // TODO: Rework this so that flags passed downstream does not
         // have Auto option for any (icon, color, hyperlink).
@@ -80,7 +77,7 @@ impl Core {
         Self {
             flags,
             colors: Colors::new(color_theme),
-            icons: Icons::new(icon_theme, icon_separator),
+            icons: Icons::new(tty_available, icon_when, icon_theme, icon_separator),
             sorters,
         }
     }

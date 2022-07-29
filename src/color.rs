@@ -3,9 +3,8 @@ use crossterm::style::{Attribute, ContentStyle, StyledContent, Stylize};
 use lscolors::{Indicator, LsColors};
 use std::path::Path;
 
-use crate::theme::{Theme,color::ColorTheme};
 pub use crate::flags::color::ThemeOption;
-
+use crate::theme::{color::ColorTheme, Theme};
 
 #[allow(dead_code)]
 #[derive(Hash, Debug, Eq, PartialEq, Clone)]
@@ -138,7 +137,9 @@ impl Colors {
         let theme = match t {
             ThemeOption::NoColor => None,
             ThemeOption::Default | ThemeOption::NoLscolors => Some(Theme::default().color),
-            ThemeOption::Custom(ref file) => Some(Theme::from_path::<ColorTheme>(file).unwrap_or_default()),
+            ThemeOption::Custom(ref file) => {
+                Some(Theme::from_path::<ColorTheme>(file).unwrap_or_default())
+            }
         };
         let lscolors = match t {
             ThemeOption::Default | ThemeOption::Custom(_) => {
@@ -299,8 +300,8 @@ fn to_content_style(ls: &lscolors::Style) -> ContentStyle {
 #[cfg(test)]
 mod tests {
     use super::Colors;
-    use crate::theme::color_theme::Theme;
     use crate::color::ThemeOption;
+    use crate::theme::color_theme::Theme;
     #[test]
     fn test_color_new_no_color_theme() {
         assert!(Colors::new(ThemeOption::NoColor).theme.is_none());

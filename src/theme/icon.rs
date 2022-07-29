@@ -1,5 +1,5 @@
-use std::collections::HashMap;
 use serde::Deserialize;
+use std::collections::HashMap;
 
 #[derive(Debug, Deserialize, PartialEq)]
 #[serde(rename_all = "kebab-case")]
@@ -16,7 +16,7 @@ pub struct IconTheme {
 impl Default for IconTheme {
     fn default() -> Self {
         // TODO(zwpaper): check terminal color and return light or dark
-        IconTheme{
+        IconTheme {
             icons_by_name: Self::get_default_icons_by_name(),
             icons_by_extension: Self::get_default_icons_by_extension(),
             default_folder_icon: "\u{f115}".into(),
@@ -26,6 +26,16 @@ impl Default for IconTheme {
 }
 
 impl IconTheme {
+    pub fn unicode() -> Self {
+        // TODO(zwpaper): check terminal color and return light or dark
+        IconTheme {
+            icons_by_name: HashMap::new(),
+            icons_by_extension: HashMap::new(),
+            default_folder_icon: "\u{1f5cb}".into(),
+            default_file_icon: "\u{1f5c1}".into(),
+        }
+    }
+
     fn get_default_icons_by_name() -> HashMap<String, String> {
         // Note: filenames must be lower-case
         [
@@ -147,15 +157,19 @@ impl IconTheme {
             ("xmonad.hs", "\u{e615}"),          // ""
             ("xorg.conf.d", "\u{e5fc}"),        // ""
             ("xbps.d", "\u{e5fc}"),             // ""
-        ].iter().map(|&s| (s.0.to_owned(), s.1.to_owned())).collect::<HashMap<_, _>>()
+        ]
+        .iter()
+        .map(|&s| (s.0.to_owned(), s.1.to_owned()))
+        .collect::<HashMap<_, _>>()
     }
 
     fn get_default_icons_by_extension() -> HashMap<String, String> {
         // Note: extensions must be lower-case
-        [("1", "\u{f02d}"),               // ""
-         ("7z", "\u{f410}"),              // ""
-         ("a", "\u{e624}"),               // ""
-         ("ai", "\u{e7b4}"),              // ""
+        [
+            ("1", "\u{f02d}"),               // ""
+            ("7z", "\u{f410}"),              // ""
+            ("a", "\u{e624}"),               // ""
+            ("ai", "\u{e7b4}"),              // ""
             ("ape", "\u{f001}"),             // ""
             ("apk", "\u{e70e}"),             // ""
             ("asc", "\u{f023}"),             // ""
@@ -407,6 +421,9 @@ impl IconTheme {
             ("zsh-theme", "\u{f489}"),       // ""
             ("zshrc", "\u{f489}"),           // ""
             ("zst", "\u{f410}"),             // ""
-        ].iter().map(|&s| (s.0.to_owned(), s.1.to_owned())).collect::<HashMap<_, _>>()
+        ]
+        .iter()
+        .map(|&s| (s.0.to_owned(), s.1.to_owned()))
+        .collect::<HashMap<_, _>>()
     }
 }
