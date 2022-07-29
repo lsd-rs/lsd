@@ -6,7 +6,7 @@ use std::fmt;
 
 // Custom color deserialize
 fn deserialize_color<'de, D>(deserializer: D) -> Result<Color, D::Error>
-    where
+where
     D: serde::de::Deserializer<'de>,
 {
     struct ColorVisitor;
@@ -77,7 +77,6 @@ fn deserialize_color<'de, D>(deserializer: D) -> Result<Color, D::Error>
 
     deserializer.deserialize_any(ColorVisitor)
 }
-
 
 /// A struct holding the theme configuration
 /// Color table: https://upload.wikimedia.org/wikipedia/commons/1/15/Xterm_256color_chart.avg

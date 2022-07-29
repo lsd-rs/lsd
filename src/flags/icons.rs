@@ -90,12 +90,13 @@ impl Configurable<Self> for IconOption {
 }
 
 /// The flag showing which icon theme to use.
-#[derive(Clone, Debug, Copy, PartialEq, Eq, Deserialize, Default)]
+#[derive(Clone, Debug, PartialEq, Eq, Deserialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum IconTheme {
     Unicode,
     #[default]
     Fancy,
+    Custom(String),
 }
 
 impl IconTheme {
