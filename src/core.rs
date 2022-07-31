@@ -1,10 +1,7 @@
 use crate::color::Colors;
 use crate::display;
-use crate::flags::{
-    ColorOption, Display, Flags, HyperlinkOption, IconOption, IconTheme, Layout, SortOrder,
-    ThemeOption,
-};
-use crate::icon::{self, Icons};
+use crate::flags::{ColorOption, Display, Flags, HyperlinkOption, Layout, SortOrder, ThemeOption};
+use crate::icon::Icons;
 use crate::meta::Meta;
 use crate::{print_error, print_output, sort, ExitCode};
 use std::path::PathBuf;

@@ -36,34 +36,34 @@ impl Icons {
                 // Check file types
                 let file_type: FileType = name.file_type();
                 let icon = match file_type {
-                    FileType::SymLink { is_dir: true } => "\u{f482}", // ""
-                    FileType::SymLink { is_dir: false } => "\u{f481}", // ""
-                    FileType::Socket => "\u{f6a7}",                   // ""
-                    FileType::Pipe => "\u{f731}",                     // ""
-                    FileType::CharDevice => "\u{e601}",               // ""
-                    FileType::BlockDevice => "\u{fc29}",              // "ﰩ"
-                    FileType::Special => "\u{f2dc}",                  // ""
+                    FileType::SymLink { is_dir: true } => &t.icons_by_filetype.symlink_dir,
+                    FileType::SymLink { is_dir: false } => &t.icons_by_filetype.symlink_file,
+                    FileType::Socket => &t.icons_by_filetype.socket,
+                    FileType::Pipe => &t.icons_by_filetype.pipe,
+                    FileType::CharDevice => &t.icons_by_filetype.device_char,
+                    FileType::BlockDevice => &t.icons_by_filetype.device_block,
+                    FileType::Special => &t.icons_by_filetype.special,
                     _ => {
-                        // Use the known names
                         if let Some(icon) = t
                             .icons_by_name
                             .get(name.file_name().to_lowercase().as_str())
                         {
                             icon
-                        }
-                        // Use the known extensions
-                        else if let Some(icon) = name.extension().and_then(|extension| {
-                            t.icons_by_extension.get(extension.to_lowercase().as_str())
-                        }) {
+                        } else if let Some(icon) = name
+                            .extension()
+                            .and_then(|ext| t.icons_by_extension.get(ext.to_lowercase().as_str()))
+                        {
                             icon
                         } else {
                             match file_type {
-                                FileType::Directory { .. } => &t.default_folder_icon,
+                                FileType::Directory { .. } => &t.icons_by_filetype.dir,
                                 // If a file has no extension and is executable, show an icon.
                                 // Except for Windows, it marks everything as an executable.
                                 #[cfg(not(windows))]
-                                FileType::File { exec: true, .. } => "\u{f489}", // ""
-                                _ => &t.default_file_icon,
+                                FileType::File { exec: true, .. } => {
+                                    &t.icons_by_filetype.executable
+                                }
+                                _ => &t.icons_by_filetype.file,
                             }
                         }
                     }
