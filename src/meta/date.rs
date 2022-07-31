@@ -18,11 +18,7 @@ impl From<SystemTime> for Date {
         // FIXME: This should really involve a result, but there's upstream issues in chrono. See https://github.com/chronotope/chrono/issues/110
         let res = panic::catch_unwind(|| systime.into());
 
-        if let Ok(time) = res {
-            Date::Date(time)
-        } else {
-            Date::Invalid
-        }
+        res.map_or(Date::Invalid, Date::Date)
     }
 }
 
@@ -37,16 +33,10 @@ impl From<&Metadata> for Date {
 impl Date {
     pub fn render(&self, colors: &Colors, flags: &Flags) -> ColoredString {
         let now = Local::now();
-        let elem = if let Date::Date(val) = self {
-            if *val > now - Duration::hours(1) {
-                Elem::HourOld
-            } else if *val > now - Duration::days(1) {
-                Elem::DayOld
-            } else {
-                Elem::Older
-            }
-        } else {
-            Elem::Older
+        let elem = match self {
+            &Date::Date(modified) if modified > now - Duration::hours(1) => Elem::HourOld,
+            &Date::Date(modified) if modified > now - Duration::days(1) => Elem::DayOld,
+            &Date::Date(_) | Date::Invalid => Elem::Older,
         };
         colors.colorize(self.date_string(flags), &elem)
     }
@@ -55,7 +45,7 @@ impl Date {
         if let Date::Date(val) = self {
             match &flags.date {
                 DateFlag::Date => val.format("%c").to_string(),
-                DateFlag::Relative => format!("{}", HumanTime::from(*val - Local::now())),
+                DateFlag::Relative => HumanTime::from(*val - Local::now()).to_string(),
                 DateFlag::Iso => {
                     // 365.2425 * 24 * 60 * 60 = 31556952 seconds per year
                     // 15778476 seconds are 6 months
@@ -68,7 +58,7 @@ impl Date {
                 DateFlag::Formatted(format) => val.format(format).to_string(),
             }
         } else {
-            String::from("-")
+            String::from('-')
         }
     }
 }
