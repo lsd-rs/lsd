@@ -8,31 +8,76 @@ use std::collections::HashMap;
 pub struct IconTheme {
     pub icons_by_name: HashMap<String, String>,
     pub icons_by_extension: HashMap<String, String>,
-    // pub icons_by_filetype: HashMap<String, String>,
-    pub default_folder_icon: String,
-    pub default_file_icon: String,
+    pub icons_by_filetype: IconByType,
+}
+
+#[derive(Debug, Deserialize, PartialEq)]
+#[serde(rename_all = "kebab-case")]
+#[serde(deny_unknown_fields)]
+#[serde(default)]
+pub struct IconByType {
+    pub dir: String,
+    pub file: String,
+    pub pipe: String,
+    pub socket: String,
+    pub executable: String,
+    pub device_char: String,
+    pub device_block: String,
+    pub special: String,
+    pub symlink_dir: String,
+    pub symlink_file: String,
 }
 
 impl Default for IconTheme {
     fn default() -> Self {
-        // TODO(zwpaper): check terminal color and return light or dark
         IconTheme {
             icons_by_name: Self::get_default_icons_by_name(),
             icons_by_extension: Self::get_default_icons_by_extension(),
-            default_folder_icon: "\u{f115}".into(),
-            default_file_icon: "\u{f016}".into(),
+            icons_by_filetype: IconByType::default(),
+        }
+    }
+}
+
+impl Default for IconByType {
+    fn default() -> IconByType {
+        IconByType {
+            dir: "\u{f115}".into(),          // 
+            file: "\u{f016}".into(),         // 
+            pipe: "\u{f731}".into(),         // 
+            socket: "\u{f6a7}".into(),       // 
+            executable: "\u{f489}".into(),   // 
+            symlink_dir: "\u{f482}".into(),  // 
+            symlink_file: "\u{f481}".into(), // 
+            device_char: "\u{e601}".into(),  // 
+            device_block: "\u{fc29}".into(), // ﰩ
+            special: "\u{f2dc}".into(),      // 
+        }
+    }
+}
+
+impl IconByType {
+    pub fn unicode() -> Self {
+        IconByType {
+            dir: "\u{1f4c2}".into(),
+            file: "\u{1f4c4}".into(),
+            pipe: "\u{1f4e9}".into(),
+            socket: "\u{1f4ec}".into(),
+            executable: "\u{1f3d7}".into(),
+            symlink_dir: "\u{1f5c2}".into(),
+            symlink_file: "\u{1f516}".into(),
+            device_char: "\u{1f5a8}".into(),
+            device_block: "\u{1f4bd}".into(),
+            special: "\u{1f4df}".into(),
         }
     }
 }
 
 impl IconTheme {
     pub fn unicode() -> Self {
-        // TODO(zwpaper): check terminal color and return light or dark
         IconTheme {
             icons_by_name: HashMap::new(),
             icons_by_extension: HashMap::new(),
-            default_folder_icon: "\u{1f5cb}".into(),
-            default_file_icon: "\u{1f5c1}".into(),
+            icons_by_filetype: IconByType::unicode(),
         }
     }
 

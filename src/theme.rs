@@ -11,23 +11,13 @@ use crate::print_error;
 use color::ColorTheme;
 use icon::IconTheme;
 
-#[derive(Debug, Deserialize, PartialEq)]
+#[derive(Debug, Deserialize, Default, PartialEq)]
 #[serde(rename_all = "kebab-case")]
 #[serde(deny_unknown_fields)]
 #[serde(default)]
 pub struct Theme {
     pub color: ColorTheme,
     pub icon: IconTheme,
-}
-
-impl Default for Theme {
-    fn default() -> Self {
-        // TODO(zwpaper): check terminal color and return light or dark
-        Theme {
-            color: ColorTheme::default(),
-            icon: IconTheme::default(),
-        }
-    }
 }
 
 impl Theme {
