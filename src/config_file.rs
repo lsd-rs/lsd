@@ -408,7 +408,7 @@ mod tests {
 
     #[test]
     fn test_read_config_file_not_found() {
-        let c = Config::from_file("not-existed".to_string());
+        let c = Config::from_file("not-existed");
         assert!(c.is_none())
     }
 
