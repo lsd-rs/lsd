@@ -83,7 +83,7 @@ impl Flags {
     /// the recursion depth parameter fails.
     pub fn configure_from(matches: &ArgMatches, config: &Config) -> Result<Self, Error> {
         Ok(Self {
-            blocks: Blocks::configure_from(matches, config)?,
+            blocks: Blocks::configure_from(matches, config),
             color: Color::configure_from(matches, config),
             date: DateFlag::configure_from(matches, config),
             dereference: Dereference::configure_from(matches, config),
