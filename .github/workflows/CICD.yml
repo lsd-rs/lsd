@@ -37,7 +37,7 @@ jobs:
       uses: actions-rs/cargo@v1
       with:
         command: clippy
-        args: -- -D warnings
+        args: --tests -- -D warnings
 
   min_version:
     name: MinSRV # Minimum supported rust version
