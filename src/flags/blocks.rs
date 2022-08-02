@@ -1,123 +1,19 @@
 //! This module defines the [Blocks] struct. To set it up from [ArgMatches], a [Config] and its
 //! [Default] value, use its [configure_from](Blocks::configure_from) method.
 
+use super::Configurable;
 use crate::config_file::Config;
 use crate::print_error;
 
 use std::convert::TryFrom;
 
-use clap::{ArgMatches, Error, ErrorKind};
+use clap::ArgMatches;
 
 /// A struct to hold a [Vec] of [Block]s and to provide methods to create it.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Blocks(pub Vec<Block>);
 
 impl Blocks {
-    /// Returns a value from either [ArgMatches], a [Config] or a default value.
-    /// Unless the "long" argument is passed, this returns [Default::default]. Otherwise the first
-    /// value, that is not [None], is used. The order of precedence for the value used is:
-    /// - [from_arg_matches](Blocks::from_arg_matches)
-    /// - [from_config](Blocks::from_config)
-    /// - [long](Blocks::long)
-    ///
-    /// No matter if the "long" argument was passed, if the "inode" argument is passed and the
-    /// `Blocks` does not contain a [Block] of variant [INode](Block::INode) yet, one is prepended
-    /// to the returned value.
-    ///
-    /// # Errors
-    ///
-    /// This errors if any of the [ArgMatches] parameter arguments causes [Block]'s implementation
-    /// of [TryFrom::try_from] to return an [Err].
-    pub fn configure_from(matches: &ArgMatches, config: &Config) -> Result<Self, Error> {
-        let mut result: Result<Self, Error> = if matches.is_present("long") {
-            Ok(Self::long())
-        } else {
-            Ok(Default::default())
-        };
-
-        if matches.is_present("long") && !matches.is_present("ignore-config") {
-            if let Some(value) = Self::from_config(config) {
-                result = Ok(value);
-            }
-        }
-
-        if let Some(value) = Self::from_arg_matches(matches) {
-            result = value;
-        }
-
-        if matches.is_present("context") {
-            if let Ok(blocks) = result.as_mut() {
-                blocks.optional_insert_context();
-            }
-        }
-
-        if matches.is_present("inode") {
-            if let Ok(blocks) = result.as_mut() {
-                blocks.optional_prepend_inode();
-            }
-        }
-
-        result
-    }
-
-    /// Get a potential `Blocks` struct from [ArgMatches].
-    ///
-    /// If the "blocks" argument is passed, then this returns a `Blocks` containing the parameter
-    /// values in a [Some]. Otherwise if the "long" argument is passed, this returns
-    /// [Blocks::long]. Finally if none of the previous happened, this returns [None].
-    ///
-    /// # Errors
-    ///
-    /// This errors if any of the parameter arguments causes [Block]'s implementation of
-    /// [TryFrom::try_from] to return an [Err].
-    fn from_arg_matches(matches: &ArgMatches) -> Option<Result<Self, Error>> {
-        if matches.occurrences_of("blocks") == 0 {
-            return None;
-        }
-
-        if let Some(values) = matches.values_of("blocks") {
-            let mut blocks: Vec<Block> = Vec::with_capacity(values.len());
-            for value in values {
-                match Block::try_from(value) {
-                    Ok(block) => blocks.push(block),
-                    Err(message) => {
-                        return Some(Err(Error::with_description(
-                            &message,
-                            ErrorKind::ValueValidation,
-                        )))
-                    }
-                }
-            }
-            Some(Ok(Self(blocks)))
-        } else {
-            None
-        }
-    }
-
-    /// Get a potential `Blocks` struct from a [Config].
-    ///
-    /// If the [Config] contains an array of blocks values,
-    /// its [String] values is returned as `Blocks` in a [Some].
-    /// Otherwise it returns [None].
-    fn from_config(config: &Config) -> Option<Self> {
-        if let Some(c) = &config.blocks {
-            let mut blocks: Vec<Block> = vec![];
-            for b in c.iter() {
-                match Block::try_from(b.as_str()) {
-                    Ok(block) => blocks.push(block),
-                    Err(err) => print_error!("{}.", err),
-                }
-            }
-            if blocks.is_empty() {
-                None
-            } else {
-                Some(Self(blocks))
-            }
-        } else {
-            None
-        }
-    }
-
     /// This returns a Blocks struct for the long format.
     ///
     /// It contains the [Block]s [Permission](Block::Permission), [User](Block::User),
@@ -169,6 +65,94 @@ impl Blocks {
         match pos {
             Some(pos) => self.0.insert(pos + 1, Block::Context),
             None => self.0.insert(0, Block::Context),
+        }
+    }
+}
+
+impl Configurable<Self> for Blocks {
+    /// Returns a value from either [ArgMatches], a [Config] or a default value.
+    /// Unless the "long" argument is passed, this returns [Default::default]. Otherwise the first
+    /// value, that is not [None], is used. The order of precedence for the value used is:
+    /// - [from_arg_matches](Blocks::from_arg_matches)
+    /// - [from_config](Blocks::from_config)
+    /// - [long](Blocks::long)
+    ///
+    /// No matter if the "long" argument was passed, if the "inode" argument is passed and the
+    /// `Blocks` does not contain a [Block] of variant [INode](Block::INode) yet, one is prepended
+    /// to the returned value.
+    fn configure_from(matches: &ArgMatches, config: &Config) -> Self {
+        let mut blocks = if matches.is_present("long") {
+            Self::long()
+        } else {
+            Default::default()
+        };
+
+        if matches.is_present("long") && !matches.is_present("ignore-config") {
+            if let Some(value) = Self::from_config(config) {
+                blocks = value;
+            }
+        }
+
+        if let Some(value) = Self::from_arg_matches(matches) {
+            blocks = value;
+        }
+
+        if matches.is_present("context") {
+            blocks.optional_insert_context();
+        }
+        if matches.is_present("inode") {
+            blocks.optional_prepend_inode();
+        }
+
+        blocks
+    }
+
+    /// Get a potential `Blocks` struct from [ArgMatches].
+    ///
+    /// If the "blocks" argument is passed, then this returns a `Blocks` containing the parameter
+    /// values in a [Some]. Otherwise if the "long" argument is passed, this returns
+    /// [Blocks::long]. Finally if none of the previous happened, this returns [None].
+    fn from_arg_matches(matches: &ArgMatches) -> Option<Self> {
+        if matches.occurrences_of("blocks") == 0 {
+            return None;
+        }
+
+        if let Some(values) = matches.values_of("blocks") {
+            let mut blocks: Vec<Block> = Vec::with_capacity(values.len());
+            for value in values {
+                blocks.push(Block::try_from(value).unwrap_or_else(|_| {
+                    unreachable!(
+                        "Invalid value '{value}' for 'blocks' flag should be handled by `clap`"
+                    )
+                }));
+            }
+            Some(Self(blocks))
+        } else {
+            None
+        }
+    }
+
+    /// Get a potential `Blocks` struct from a [Config].
+    ///
+    /// If the [Config] contains an array of blocks values,
+    /// its [String] values is returned as `Blocks` in a [Some].
+    /// Otherwise it returns [None].
+    fn from_config(config: &Config) -> Option<Self> {
+        if let Some(c) = &config.blocks {
+            let mut blocks: Vec<Block> = vec![];
+            for b in c.iter() {
+                match Block::try_from(b.as_str()) {
+                    Ok(block) => blocks.push(block),
+                    Err(err) => print_error!("{}.", err),
+                }
+            }
+            if blocks.is_empty() {
+                None
+            } else {
+                Some(Self(blocks))
+            }
+        } else {
+            None
         }
     }
 }
@@ -227,7 +211,7 @@ impl TryFrom<&str> for Block {
             "name" => Ok(Self::Name),
             "inode" => Ok(Self::INode),
             "links" => Ok(Self::Links),
-            _ => Err(format!("Not a valid block name: {}", &string)),
+            _ => Err(format!("Not a valid block name: {string}")),
         }
     }
 }
@@ -239,130 +223,105 @@ mod test_blocks {
 
     use crate::app;
     use crate::config_file::Config;
-
-    use clap::Error;
-
-    // The following tests are implemented using match expressions instead of the assert_eq macro,
-    // because clap::Error does not implement PartialEq.
-
-    macro_rules! assert_eq_ok {
-        ($left:expr, $right:expr) => {
-            assert!(
-                match &$left {
-                    Ok(inner) if inner == $right.as_ref().unwrap() => true,
-                    _ => false,
-                },
-                "\nComparison failed:\nWas:       {:?}\nShould be: {:?}\n",
-                &$left,
-                &$right
-            )
-        };
-    }
+    use crate::flags::Configurable;
 
     #[test]
     fn test_configure_from_without_long() {
         let argv = ["lsd"];
-        let target = Ok::<_, Error>(Blocks::default());
+        let target = Blocks::default();
 
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         let result = Blocks::configure_from(&matches, &Config::with_none());
 
-        assert_eq_ok!(result, target);
+        assert_eq!(result, target);
     }
 
     #[test]
     fn test_configure_from_with_long() {
         let argv = ["lsd", "--long"];
-        let target = Ok::<_, Error>(Blocks::long());
+        let target = Blocks::long();
 
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         let result = Blocks::configure_from(&matches, &Config::with_none());
 
-        assert_eq_ok!(result, target);
+        assert_eq!(result, target);
     }
 
     #[test]
     fn test_configure_from_with_blocks_and_without_long() {
         let argv = ["lsd", "--blocks", "permission"];
-        let target = Ok::<_, Error>(Blocks(vec![Block::Permission]));
+        let target = Blocks(vec![Block::Permission]);
 
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         let result = Blocks::configure_from(&matches, &Config::with_none());
 
-        assert_eq_ok!(result, target);
+        assert_eq!(result, target);
     }
 
     #[test]
     fn test_configure_from_with_blocks_and_long() {
         let argv = ["lsd", "--long", "--blocks", "permission"];
-        let target = Ok::<_, Error>(Blocks(vec![Block::Permission]));
+        let target = Blocks(vec![Block::Permission]);
 
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         let result = Blocks::configure_from(&matches, &Config::with_none());
 
-        assert_eq_ok!(result, target);
+        assert_eq!(result, target);
     }
 
     #[test]
     fn test_configure_from_with_inode() {
         let argv = ["lsd", "--inode"];
-
-        let mut target_blocks = Blocks::default();
-        target_blocks.0.insert(0, Block::INode);
-        let target = Ok::<_, Error>(target_blocks);
+        let target = Blocks(vec![Block::INode, Block::Name]);
 
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         let result = Blocks::configure_from(&matches, &Config::with_none());
 
-        assert_eq_ok!(result, target);
+        assert_eq!(result, target);
     }
 
     #[test]
     fn test_configure_from_prepend_inode_without_long() {
         let argv = ["lsd", "--blocks", "permission", "--inode"];
-
-        let mut target_blocks = Blocks(vec![Block::Permission]);
-        target_blocks.0.insert(0, Block::INode);
-        let target = Ok::<_, Error>(target_blocks);
+        let target = Blocks(vec![Block::INode, Block::Permission]);
 
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         let result = Blocks::configure_from(&matches, &Config::with_none());
 
-        assert_eq_ok!(result, target);
+        assert_eq!(result, target);
     }
 
     #[test]
     fn test_configure_from_prepend_inode_with_long() {
         let argv = ["lsd", "--long", "--blocks", "permission", "--inode"];
-        let target = Ok::<_, Error>(Blocks(vec![Block::INode, Block::Permission]));
+        let target = Blocks(vec![Block::INode, Block::Permission]);
 
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         let result = Blocks::configure_from(&matches, &Config::with_none());
 
-        assert_eq_ok!(result, target);
+        assert_eq!(result, target);
     }
 
     #[test]
     fn test_configure_from_ignore_prepend_inode_without_long() {
         let argv = ["lsd", "--blocks", "permission,inode", "--inode"];
-
-        let target = Ok::<_, Error>(Blocks(vec![Block::Permission, Block::INode]));
+        let target = Blocks(vec![Block::Permission, Block::INode]);
 
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         let result = Blocks::configure_from(&matches, &Config::with_none());
 
-        assert_eq_ok!(result, target);
+        assert_eq!(result, target);
     }
 
     #[test]
     fn test_configure_from_ignore_prepend_inode_with_long() {
         let argv = ["lsd", "--long", "--blocks", "permission,inode", "--inode"];
-        let target = Ok::<_, Error>(Blocks(vec![Block::Permission, Block::INode]));
+        let target = Blocks(vec![Block::Permission, Block::INode]);
 
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         let result = Blocks::configure_from(&matches, &Config::with_none());
 
-        assert_eq_ok!(result, target);
+        assert_eq!(result, target);
     }
 
     #[test]
@@ -377,9 +336,7 @@ mod test_blocks {
         let argv = ["lsd", "--blocks", "permission"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         let test_blocks = Blocks(vec![Block::Permission]);
-        assert!(
-            matches!(Blocks::from_arg_matches(&matches), Some(Ok(blocks)) if blocks == test_blocks)
-        );
+        assert_eq!(Blocks::from_arg_matches(&matches), Some(test_blocks));
     }
 
     #[test]
@@ -387,9 +344,7 @@ mod test_blocks {
         let argv = ["lsd", "--blocks", "permission", "--blocks", "name"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         let test_blocks = Blocks(vec![Block::Permission, Block::Name]);
-        assert!(
-            matches!(Blocks::from_arg_matches(&matches), Some(Ok(blocks)) if blocks == test_blocks)
-        );
+        assert_eq!(Blocks::from_arg_matches(&matches), Some(test_blocks));
     }
 
     #[test]
@@ -397,9 +352,7 @@ mod test_blocks {
         let argv = ["lsd", "--blocks", "permission,name"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         let test_blocks = Blocks(vec![Block::Permission, Block::Name]);
-        assert!(
-            matches!(Blocks::from_arg_matches(&matches), Some(Ok(blocks)) if blocks == test_blocks)
-        );
+        assert_eq!(Blocks::from_arg_matches(&matches), Some(test_blocks));
     }
 
     #[test]
@@ -414,9 +367,7 @@ mod test_blocks {
             Block::User,
             Block::Permission,
         ]);
-        assert!(
-            matches!(Blocks::from_arg_matches(&matches), Some(Ok(blocks)) if blocks == test_blocks)
-        );
+        assert_eq!(Blocks::from_arg_matches(&matches), Some(test_blocks));
     }
 
     #[test]
@@ -424,9 +375,7 @@ mod test_blocks {
         let argv = ["lsd", "--blocks", "permission,group,date"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         let test_blocks = Blocks(vec![Block::Permission, Block::Group, Block::Date]);
-        assert!(
-            matches!(Blocks::from_arg_matches(&matches), Some(Ok(blocks)) if blocks == test_blocks)
-        );
+        assert_eq!(Blocks::from_arg_matches(&matches), Some(test_blocks));
     }
 
     #[test]
@@ -486,7 +435,7 @@ mod test_blocks {
     fn test_context_not_present_on_cli() {
         let argv = ["lsd", "--long"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
-        let parsed_blocks = Blocks::configure_from(&matches, &Config::with_none()).unwrap();
+        let parsed_blocks = Blocks::configure_from(&matches, &Config::with_none());
         let it = parsed_blocks.0.iter();
         assert_eq!(it.filter(|&x| *x == Block::Context).count(), 0);
     }
@@ -495,7 +444,7 @@ mod test_blocks {
     fn test_context_present_if_context_on() {
         let argv = ["lsd", "--context"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
-        let parsed_blocks = Blocks::configure_from(&matches, &Config::with_none()).unwrap();
+        let parsed_blocks = Blocks::configure_from(&matches, &Config::with_none());
         let it = parsed_blocks.0.iter();
         assert_eq!(it.filter(|&x| *x == Block::Context).count(), 1);
     }
@@ -518,7 +467,7 @@ mod test_blocks {
             Block::User,
             Block::Permission,
         ]);
-        let parsed_blocks = Blocks::from_arg_matches(&matches).unwrap().unwrap();
+        let parsed_blocks = Blocks::from_arg_matches(&matches).unwrap();
         assert_eq!(test_blocks, parsed_blocks);
     }
 }
