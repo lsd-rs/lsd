@@ -435,6 +435,7 @@ dependencies = [
  "tempfile",
  "term_grid",
  "terminal_size",
+ "thiserror",
  "unicode-width",
  "url",
  "users",

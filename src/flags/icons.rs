@@ -96,7 +96,6 @@ pub enum IconTheme {
     Unicode,
     #[default]
     Fancy,
-    Custom(String),
 }
 
 impl IconTheme {

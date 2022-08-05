@@ -54,6 +54,8 @@ pub fn build() -> App<'static> {
             Arg::with_name("icon-theme")
                 .long("icon-theme")
                 .default_value("fancy")
+                .possible_value("fancy")
+                .possible_value("unicode")
                 .multiple_occurrences(true)
                 .takes_value(true)
                 .number_of_values(1)
