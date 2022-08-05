@@ -4,7 +4,6 @@ use crate::theme::{icon::IconTheme, Theme};
 
 pub struct Icons {
     icon_separator: String,
-
     theme: Option<IconTheme>,
 }
 
@@ -16,11 +15,14 @@ impl Icons {
     pub fn new(tty: bool, when: IconOption, theme: FlagTheme, icon_separator: String) -> Self {
         let icon_theme = match (tty, when, theme) {
             (_, IconOption::Never, _) | (false, IconOption::Auto, _) => None,
-            (_, _, FlagTheme::Fancy) => Some(IconTheme::default()),
+            (_, _, FlagTheme::Fancy) => {
+                if let Ok(t) = Theme::from_path::<IconTheme>("icons") {
+                    Some(t)
+                } else {
+                    Some(IconTheme::default())
+                }
+            },
             (_, _, FlagTheme::Unicode) => Some(IconTheme::unicode()),
-            (_, _, FlagTheme::Custom(ref file)) => {
-                Some(Theme::from_path::<IconTheme>(file).unwrap_or_default())
-            }
         };
 
         Self {
