@@ -96,20 +96,16 @@ impl IgnoreGlobs {
     ///
     /// This method is mainly a helper to wrap the handling of potential errors.
     fn create_glob(pattern: &str) -> Result<Glob, Error> {
-        match Glob::new(pattern) {
-            Ok(glob) => Ok(glob),
-            Err(err) => Err(Error::raw(ErrorKind::ValueValidation, err)),
-        }
+        Glob::new(pattern).map_err(|err| Error::raw(ErrorKind::ValueValidation, err))
     }
 
     /// Create a [GlobSet] from a provided [GlobSetBuilder].
     ///
     /// This method is mainly a helper to wrap the handling of potential errors.
     fn create_glob_set(builder: &GlobSetBuilder) -> Result<GlobSet, Error> {
-        match builder.build() {
-            Ok(glob_set) => Ok(glob_set),
-            Err(err) => Err(Error::raw(ErrorKind::ValueValidation, err)),
-        }
+        builder
+            .build()
+            .map_err(|err| Error::raw(ErrorKind::ValueValidation, err))
     }
 }
 
