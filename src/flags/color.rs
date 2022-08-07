@@ -106,11 +106,8 @@ impl ColorOption {
             "always" => Self::Always,
             "auto" => Self::Auto,
             "never" => Self::Never,
-            other => {
-                unreachable!(
-                    "Invalid value '{other}' for 'color' flag should be handled by `clap`"
-                );
-            }
+            // Invalid value should be handled by `clap` when building an `ArgMatches`
+            other => unreachable!("Invalid value '{other}' for 'color'"),
         }
     }
 }
