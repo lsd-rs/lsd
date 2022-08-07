@@ -23,11 +23,8 @@ impl PermissionFlag {
         match value {
             "rwx" => Self::Rwx,
             "octal" => Self::Octal,
-            other => {
-                unreachable!(
-                    "Invalid value '{other}' for 'permission' flag should be handled by `clap`"
-                );
-            }
+            // Invalid value should be handled by `clap` when building an `ArgMatches`
+            other => unreachable!("Invalid value '{other}' for 'permission'"),
         }
     }
 }

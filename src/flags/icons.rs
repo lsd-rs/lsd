@@ -51,9 +51,8 @@ impl IconOption {
             "always" => Self::Always,
             "auto" => Self::Auto,
             "never" => Self::Never,
-            other => {
-                unreachable!("Invalid value '{other}' for 'icon' flag should be handled by `clap`");
-            }
+            // Invalid value should be handled by `clap` when building an `ArgMatches`
+            other => unreachable!("Invalid value '{other}' for 'icon'"),
         }
     }
 }
@@ -109,11 +108,8 @@ impl IconTheme {
         match value {
             "fancy" => Self::Fancy,
             "unicode" => Self::Unicode,
-            other => {
-                unreachable!(
-                    "Invalid value '{other}' for 'icon-theme' flag should be handled by `clap`"
-                );
-            }
+            // Invalid value should be handled by `clap` when building an `ArgMatches`
+            other => unreachable!("Invalid value '{other}' for 'icon-theme'"),
         }
     }
 }
