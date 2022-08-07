@@ -9,10 +9,11 @@ use clap::ArgMatches;
 use serde::Deserialize;
 
 /// The flag showing which file permissions units to use.
-#[derive(Clone, Debug, Copy, PartialEq, Eq, Deserialize)]
+#[derive(Clone, Debug, Copy, PartialEq, Eq, Deserialize, Default)]
 #[serde(rename_all = "kebab-case")]
 pub enum PermissionFlag {
     /// The variant to show file permissions in rwx format
+    #[default]
     Rwx,
     /// The variant to show file permissions in octal format
     Octal,
@@ -61,13 +62,6 @@ impl Configurable<Self> for PermissionFlag {
         } else {
             config.permission
         }
-    }
-}
-
-/// The default value for `PermissionFlag` is [PermissionFlag::Default].
-impl Default for PermissionFlag {
-    fn default() -> Self {
-        Self::Rwx
     }
 }
 

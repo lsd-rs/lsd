@@ -34,11 +34,12 @@ impl Sorting {
 }
 
 /// The flag showing which column to use for sorting.
-#[derive(Clone, Debug, Copy, PartialEq, Eq, Deserialize)]
+#[derive(Clone, Debug, Copy, PartialEq, Eq, Deserialize, Default)]
 #[serde(rename_all = "kebab-case")]
 pub enum SortColumn {
     None,
     Extension,
+    #[default]
     Name,
     Time,
     Size,
@@ -78,16 +79,10 @@ impl Configurable<Self> for SortColumn {
     }
 }
 
-/// The default value for `SortColumn` is [SortColumn::Name].
-impl Default for SortColumn {
-    fn default() -> Self {
-        Self::Name
-    }
-}
-
 /// The flag showing which sort order to use.
-#[derive(Clone, Debug, Copy, PartialEq, Eq)]
+#[derive(Clone, Debug, Copy, PartialEq, Eq, Default)]
 pub enum SortOrder {
+    #[default]
     Default,
     Reverse,
 }
@@ -120,17 +115,11 @@ impl Configurable<Self> for SortOrder {
     }
 }
 
-/// The default value for `SortOrder` is [SortOrder::Default].
-impl Default for SortOrder {
-    fn default() -> Self {
-        Self::Default
-    }
-}
-
 /// The flag showing where to place directories.
-#[derive(Clone, Debug, Copy, PartialEq, Eq, Deserialize)]
+#[derive(Clone, Debug, Copy, PartialEq, Eq, Deserialize, Default)]
 #[serde(rename_all = "kebab-case")]
 pub enum DirGrouping {
+    #[default]
     None,
     First,
     Last,
@@ -185,13 +174,6 @@ impl Configurable<Self> for DirGrouping {
         } else {
             config.sorting.as_ref().and_then(|s| s.dir_grouping)
         }
-    }
-}
-
-/// The default value for `DirGrouping` is [DirGrouping::None].
-impl Default for DirGrouping {
-    fn default() -> Self {
-        Self::None
     }
 }
 

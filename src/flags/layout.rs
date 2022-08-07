@@ -9,9 +9,10 @@ use clap::ArgMatches;
 use serde::Deserialize;
 
 /// The flag showing which output layout to print.
-#[derive(Clone, Debug, Copy, PartialEq, Eq, Deserialize)]
+#[derive(Clone, Debug, Copy, PartialEq, Eq, Deserialize, Default)]
 #[serde(rename_all = "lowercase")]
 pub enum Layout {
+    #[default]
     Grid,
     Tree,
     OneLine,
@@ -47,13 +48,6 @@ impl Configurable<Layout> for Layout {
     /// Otherwise this returns [None].
     fn from_config(config: &Config) -> Option<Self> {
         config.layout
-    }
-}
-
-/// The default value for `Layout` is [Layout::Grid].
-impl Default for Layout {
-    fn default() -> Self {
-        Self::Grid
     }
 }
 

@@ -10,8 +10,9 @@ use crate::print_error;
 use clap::ArgMatches;
 
 /// The flag showing which kind of time stamps to display.
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Default)]
 pub enum DateFlag {
+    #[default]
     Date,
     Relative,
     Iso,
@@ -90,13 +91,6 @@ impl Configurable<Self> for DateFlag {
         } else {
             None
         }
-    }
-}
-
-/// The default value for `DateFlag` is [DateFlag::Date].
-impl Default for DateFlag {
-    fn default() -> Self {
-        Self::Date
     }
 }
 

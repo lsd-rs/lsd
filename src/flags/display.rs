@@ -9,12 +9,13 @@ use clap::ArgMatches;
 use serde::Deserialize;
 
 /// The flag showing which file system nodes to display.
-#[derive(Clone, Debug, Copy, PartialEq, Eq, Deserialize)]
+#[derive(Clone, Debug, Copy, PartialEq, Eq, Deserialize, Default)]
 #[serde(rename_all = "kebab-case")]
 pub enum Display {
     All,
     AlmostAll,
     DirectoryOnly,
+    #[default]
     VisibleOnly,
 }
 
@@ -44,13 +45,6 @@ impl Configurable<Self> for Display {
     /// Otherwise this returns [None].
     fn from_config(config: &Config) -> Option<Self> {
         config.display
-    }
-}
-
-/// The default value for `Display` is [Display::VisibleOnly].
-impl Default for Display {
-    fn default() -> Self {
-        Display::VisibleOnly
     }
 }
 
