@@ -121,9 +121,8 @@ impl Configurable<Self> for Blocks {
             let mut blocks: Vec<Block> = Vec::with_capacity(values.len());
             for value in values {
                 blocks.push(Block::try_from(value).unwrap_or_else(|_| {
-                    unreachable!(
-                        "Invalid value '{value}' for 'blocks' flag should be handled by `clap`"
-                    )
+                    // Invalid value should be handled by `clap` when building an `ArgMatches`
+                    unreachable!("Invalid value '{value}' for 'blocks'")
                 }));
             }
             Some(Self(blocks))
