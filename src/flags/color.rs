@@ -33,9 +33,10 @@ impl Color {
 /// ThemeOption could be one of the following:
 /// Custom(*.yaml): use the YAML theme file as theme file
 /// if error happened, use the default theme
-#[derive(PartialEq, Eq, Debug, Clone)]
+#[derive(PartialEq, Eq, Debug, Clone, Default)]
 pub enum ThemeOption {
     NoColor,
+    #[default]
     Default,
     #[allow(dead_code)]
     NoLscolors,
@@ -53,12 +54,6 @@ impl ThemeOption {
                 .and_then(|c| c.theme.clone())
                 .unwrap_or_default()
         }
-    }
-}
-
-impl Default for ThemeOption {
-    fn default() -> Self {
-        ThemeOption::Default
     }
 }
 
@@ -92,10 +87,11 @@ impl<'de> de::Deserialize<'de> for ThemeOption {
 }
 
 /// The flag showing when to use colors in the output.
-#[derive(Clone, Debug, Copy, PartialEq, Eq, Deserialize)]
+#[derive(Clone, Debug, Copy, PartialEq, Eq, Deserialize, Default)]
 #[serde(rename_all = "kebab-case")]
 pub enum ColorOption {
     Always,
+    #[default]
     Auto,
     Never,
 }
@@ -150,13 +146,6 @@ impl Configurable<Self> for ColorOption {
         } else {
             None
         }
-    }
-}
-
-/// The default value for `ColorOption` is [ColorOption::Auto].
-impl Default for ColorOption {
-    fn default() -> Self {
-        Self::Auto
     }
 }
 

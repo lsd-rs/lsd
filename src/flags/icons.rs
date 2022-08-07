@@ -37,10 +37,11 @@ impl Icons {
 }
 
 /// The flag showing when to use icons in the output.
-#[derive(Clone, Debug, Copy, PartialEq, Eq, Deserialize)]
+#[derive(Clone, Debug, Copy, PartialEq, Eq, Deserialize, Default)]
 #[serde(rename_all = "kebab-case")]
 pub enum IconOption {
     Always,
+    #[default]
     Auto,
     Never,
 }
@@ -89,18 +90,12 @@ impl Configurable<Self> for IconOption {
     }
 }
 
-/// The default value for the `IconOption` is [IconOption::Auto].
-impl Default for IconOption {
-    fn default() -> Self {
-        Self::Auto
-    }
-}
-
 /// The flag showing which icon theme to use.
-#[derive(Clone, Debug, Copy, PartialEq, Eq, Deserialize)]
+#[derive(Clone, Debug, Copy, PartialEq, Eq, Deserialize, Default)]
 #[serde(rename_all = "kebab-case")]
 pub enum IconTheme {
     Unicode,
+    #[default]
     Fancy,
 }
 
@@ -141,13 +136,6 @@ impl Configurable<Self> for IconTheme {
     /// Otherwise this returns [None].
     fn from_config(config: &Config) -> Option<Self> {
         config.icons.as_ref().and_then(|icon| icon.theme)
-    }
-}
-
-/// The default value for `IconTheme` is [IconTheme::Fancy].
-impl Default for IconTheme {
-    fn default() -> Self {
-        Self::Fancy
     }
 }
 

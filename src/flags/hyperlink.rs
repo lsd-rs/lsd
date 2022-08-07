@@ -9,11 +9,12 @@ use clap::ArgMatches;
 use serde::Deserialize;
 
 /// The flag showing when to use hyperlink in the output.
-#[derive(Clone, Debug, Copy, PartialEq, Eq, Deserialize)]
+#[derive(Clone, Debug, Copy, PartialEq, Eq, Deserialize, Default)]
 #[serde(rename_all = "kebab-case")]
 pub enum HyperlinkOption {
     Always,
     Auto,
+    #[default]
     Never,
 }
 
@@ -61,13 +62,6 @@ impl Configurable<Self> for HyperlinkOption {
         } else {
             config.hyperlink
         }
-    }
-}
-
-/// The default value for the `HyperlinkOption` is [HyperlinkOption::Auto].
-impl Default for HyperlinkOption {
-    fn default() -> Self {
-        Self::Never
     }
 }
 

@@ -9,10 +9,11 @@ use clap::ArgMatches;
 use serde::Deserialize;
 
 /// The flag showing which file size units to use.
-#[derive(Clone, Debug, Copy, PartialEq, Eq, Deserialize)]
+#[derive(Clone, Debug, Copy, PartialEq, Eq, Deserialize, Default)]
 #[serde(rename_all = "kebab-case")]
 pub enum SizeFlag {
     /// The variant to show file size with SI unit prefix and a B for bytes.
+    #[default]
     Default,
     /// The variant to show file size with only the SI unit prefix.
     Short,
@@ -60,13 +61,6 @@ impl Configurable<Self> for SizeFlag {
         } else {
             config.size
         }
-    }
-}
-
-/// The default value for `SizeFlag` is [SizeFlag::Default].
-impl Default for SizeFlag {
-    fn default() -> Self {
-        Self::Default
     }
 }
 
