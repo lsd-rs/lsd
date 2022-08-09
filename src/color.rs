@@ -301,7 +301,7 @@ fn to_content_style(ls: &lscolors::Style) -> ContentStyle {
 mod tests {
     use super::Colors;
     use crate::color::ThemeOption;
-    use crate::theme::color_theme::Theme;
+    use crate::theme::color::ColorTheme;
     #[test]
     fn test_color_new_no_color_theme() {
         assert!(Colors::new(ThemeOption::NoColor).theme.is_none());
@@ -311,7 +311,7 @@ mod tests {
     fn test_color_new_default_theme() {
         assert_eq!(
             Colors::new(ThemeOption::Default).theme,
-            Some(Theme::default_dark()),
+            Some(ColorTheme::default_dark()),
         );
     }
 
@@ -319,7 +319,7 @@ mod tests {
     fn test_color_new_bad_custom_theme() {
         assert_eq!(
             Colors::new(ThemeOption::Custom("not-existed".to_string())).theme,
-            Some(Theme::default_dark()),
+            Some(ColorTheme::default_dark()),
         );
     }
 }
@@ -327,15 +327,15 @@ mod tests {
 #[cfg(test)]
 mod elem {
     use super::Elem;
-    use crate::color::{theme, Theme};
+    use crate::theme::{color, color::ColorTheme};
     use crossterm::style::Color;
 
     #[cfg(test)]
-    fn test_theme() -> Theme {
-        Theme {
+    fn test_theme() -> ColorTheme {
+        ColorTheme {
             user: Color::AnsiValue(230),  // Cornsilk1
             group: Color::AnsiValue(187), // LightYellow3
-            permission: theme::Permission {
+            permission: color::Permission {
                 read: Color::Green,
                 write: Color::Yellow,
                 exec: Color::Red,
@@ -345,19 +345,19 @@ mod elem {
                 acl: Color::DarkCyan,
                 context: Color::Cyan,
             },
-            file_type: theme::FileType {
-                file: theme::File {
+            file_type: color::FileType {
+                file: color::File {
                     exec_uid: Color::AnsiValue(40),        // Green3
                     uid_no_exec: Color::AnsiValue(184),    // Yellow3
                     exec_no_uid: Color::AnsiValue(40),     // Green3
                     no_exec_no_uid: Color::AnsiValue(184), // Yellow3
                 },
-                dir: theme::Dir {
+                dir: color::Dir {
                     uid: Color::AnsiValue(33),    // DodgerBlue1
                     no_uid: Color::AnsiValue(33), // DodgerBlue1
                 },
                 pipe: Color::AnsiValue(44), // DarkTurquoise
-                symlink: theme::Symlink {
+                symlink: color::Symlink {
                     default: Color::AnsiValue(44),         // DarkTurquoise
                     broken: Color::AnsiValue(124),         // Red3
                     missing_target: Color::AnsiValue(124), // Red3
@@ -367,22 +367,22 @@ mod elem {
                 socket: Color::AnsiValue(44),       // DarkTurquoise
                 special: Color::AnsiValue(44),      // DarkTurquoise
             },
-            date: theme::Date {
+            date: color::Date {
                 hour_old: Color::AnsiValue(40), // Green3
                 day_old: Color::AnsiValue(42),  // SpringGreen2
                 older: Color::AnsiValue(36),    // DarkCyan
             },
-            size: theme::Size {
+            size: color::Size {
                 none: Color::AnsiValue(245),   // Grey
                 small: Color::AnsiValue(229),  // Wheat1
                 medium: Color::AnsiValue(216), // LightSalmon1
                 large: Color::AnsiValue(172),  // Orange3
             },
-            inode: theme::INode {
+            inode: color::INode {
                 valid: Color::AnsiValue(13),    // Pink
                 invalid: Color::AnsiValue(245), // Grey
             },
-            links: theme::Links {
+            links: color::Links {
                 valid: Color::AnsiValue(13),    // Pink
                 invalid: Color::AnsiValue(245), // Grey
             },

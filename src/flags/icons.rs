@@ -131,7 +131,7 @@ impl Configurable<Self> for IconTheme {
     /// this returns its corresponding variant in a [Some].
     /// Otherwise this returns [None].
     fn from_config(config: &Config) -> Option<Self> {
-        config.icons.as_ref().and_then(|icon| icon.theme)
+        config.icons.as_ref().and_then(|icon| icon.theme.clone())
     }
 }
 

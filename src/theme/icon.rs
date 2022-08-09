@@ -1,7 +1,7 @@
 use serde::Deserialize;
 use std::collections::HashMap;
 
-#[derive(Debug, Deserialize, PartialEq)]
+#[derive(Debug, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "kebab-case")]
 #[serde(deny_unknown_fields)]
 #[serde(default)]
@@ -11,7 +11,7 @@ pub struct IconTheme {
     pub icons_by_filetype: IconByType,
 }
 
-#[derive(Debug, Deserialize, PartialEq)]
+#[derive(Debug, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "kebab-case")]
 #[serde(deny_unknown_fields)]
 #[serde(default)]
@@ -81,7 +81,8 @@ impl IconTheme {
         }
     }
 
-    fn get_default_icons_by_name() -> HashMap<String, String> {
+    // pub only for testing in icons.rs
+    pub fn get_default_icons_by_name() -> HashMap<String, String> {
         // Note: filenames must be lower-case
         [
             (".trash", "\u{f1f8}"),             // ""
@@ -208,7 +209,8 @@ impl IconTheme {
         .collect::<HashMap<_, _>>()
     }
 
-    fn get_default_icons_by_extension() -> HashMap<String, String> {
+    // pub only for testing in icons.rs
+    pub fn get_default_icons_by_extension() -> HashMap<String, String> {
         // Note: extensions must be lower-case
         [
             ("1", "\u{f02d}"),               // ""
