@@ -379,13 +379,14 @@ tree-edge: 245
 
 #[cfg(test)]
 mod tests {
-    use super::Theme;
+    use super::ColorTheme;
+    use crate::theme::Theme;
 
     #[test]
     fn test_default_theme() {
         assert_eq!(
-            Theme::default_dark(),
-            Theme::with_yaml(Theme::default_yaml()).unwrap()
+            ColorTheme::default_dark(),
+            Theme::with_yaml(ColorTheme::default_yaml()).unwrap()
         );
     }
 
@@ -396,10 +397,10 @@ mod tests {
         let dir = assert_fs::TempDir::new().unwrap();
         let theme = dir.path().join("theme.yaml");
         let mut file = File::create(&theme).unwrap();
-        writeln!(file, "{}", Theme::default_yaml()).unwrap();
+        writeln!(file, "{}", ColorTheme::default_yaml()).unwrap();
 
         assert_eq!(
-            Theme::default_dark(),
+            ColorTheme::default_dark(),
             Theme::from_path(theme.to_str().unwrap()).unwrap()
         );
     }
@@ -408,8 +409,8 @@ mod tests {
     fn test_empty_theme_return_default() {
         // Must contain one field at least
         // ref https://github.com/dtolnay/serde-yaml/issues/86
-        let empty_theme = Theme::with_yaml("user: 230").unwrap(); // 230 is the default value
-        let default_theme = Theme::default_dark();
+        let empty_theme: ColorTheme = Theme::with_yaml("user: 230").unwrap(); // 230 is the default value
+        let default_theme = ColorTheme::default_dark();
         assert_eq!(empty_theme, default_theme);
     }
 
@@ -417,8 +418,8 @@ mod tests {
     fn test_first_level_theme_return_default_but_changed() {
         // Must contain one field at least
         // ref https://github.com/dtolnay/serde-yaml/issues/86
-        let empty_theme = Theme::with_yaml("user: 130").unwrap();
-        let mut theme = Theme::default_dark();
+        let empty_theme: ColorTheme = Theme::with_yaml("user: 130").unwrap();
+        let mut theme = ColorTheme::default_dark();
         use crossterm::style::Color;
         theme.user = Color::AnsiValue(130);
         assert_eq!(empty_theme, theme);
@@ -428,13 +429,13 @@ mod tests {
     fn test_second_level_theme_return_default_but_changed() {
         // Must contain one field at least
         // ref https://github.com/dtolnay/serde-yaml/issues/86
-        let empty_theme = Theme::with_yaml(
+        let empty_theme: ColorTheme = Theme::with_yaml(
             r#"---
 permission:
   read: 130"#,
         )
         .unwrap();
-        let mut theme = Theme::default_dark();
+        let mut theme = ColorTheme::default_dark();
         use crossterm::style::Color;
         theme.permission.read = Color::AnsiValue(130);
         assert_eq!(empty_theme, theme);

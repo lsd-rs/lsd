@@ -21,7 +21,7 @@ impl Icons {
                 } else {
                     Some(IconTheme::default())
                 }
-            },
+            }
             (_, _, FlagTheme::Unicode) => Some(IconTheme::unicode()),
         };
 
@@ -79,7 +79,8 @@ impl Icons {
 
 #[cfg(test)]
 mod test {
-    use super::{Icons, Theme};
+    use super::{IconTheme, Icons};
+    use crate::flags::{IconOption, IconTheme as FlagTheme};
     use crate::meta::Meta;
     use std::fs::File;
     use tempfile::tempdir;
@@ -91,7 +92,7 @@ mod test {
         File::create(&file_path).expect("failed to create file");
         let meta = Meta::from_path(&file_path, false).unwrap();
 
-        let icon = Icons::new(Theme::NoIcon, " ".to_string());
+        let icon = Icons::new(false, IconOption::Never, FlagTheme::Fancy, " ".to_string());
         let icon = icon.get(&meta.name);
 
         assert_eq!(icon, "");
@@ -104,7 +105,7 @@ mod test {
         File::create(&file_path).expect("failed to create file");
         let meta = Meta::from_path(&file_path, false).unwrap();
 
-        let icon = Icons::new(Theme::Fancy, " ".to_string());
+        let icon = Icons::new(false, IconOption::Always, FlagTheme::Fancy, " ".to_string());
         let icon_str = icon.get(&meta.name);
 
         assert_eq!(icon_str, "\u{f016} "); // 
@@ -117,10 +118,15 @@ mod test {
         File::create(&file_path).expect("failed to create file");
         let meta = Meta::from_path(&file_path, false).unwrap();
 
-        let icon = Icons::new(Theme::Unicode, " ".to_string());
+        let icon = Icons::new(
+            false,
+            IconOption::Always,
+            FlagTheme::Unicode,
+            " ".to_string(),
+        );
         let icon_str = icon.get(&meta.name);
 
-        assert_eq!(icon_str, "\u{1f5cb} ");
+        assert_eq!(icon_str, format!("{}{}", "\u{1f4c4}", icon.icon_separator));
     }
 
     #[test]
@@ -129,7 +135,7 @@ mod test {
         let file_path = tmp_dir.path();
         let meta = Meta::from_path(file_path, false).unwrap();
 
-        let icon = Icons::new(Theme::Fancy, " ".to_string());
+        let icon = Icons::new(false, IconOption::Always, FlagTheme::Fancy, " ".to_string());
         let icon_str = icon.get(&meta.name);
 
         assert_eq!(icon_str, "\u{f115} "); // 
@@ -141,10 +147,15 @@ mod test {
         let file_path = tmp_dir.path();
         let meta = Meta::from_path(file_path, false).unwrap();
 
-        let icon = Icons::new(Theme::Unicode, " ".to_string());
+        let icon = Icons::new(
+            false,
+            IconOption::Always,
+            FlagTheme::Unicode,
+            " ".to_string(),
+        );
         let icon_str = icon.get(&meta.name);
 
-        assert_eq!(icon_str, "\u{1f5c1} ");
+        assert_eq!(icon_str, format!("{}{}", "\u{1f4c2}", icon.icon_separator));
     }
 
     #[test]
@@ -153,7 +164,7 @@ mod test {
         let file_path = tmp_dir.path();
         let meta = Meta::from_path(file_path, false).unwrap();
 
-        let icon = Icons::new(Theme::Fancy, " ".to_string());
+        let icon = Icons::new(false, IconOption::Always, FlagTheme::Fancy, " ".to_string());
         let icon_str = icon.get(&meta.name);
 
         assert_eq!(icon_str, "\u{f115} "); // 
@@ -163,12 +174,12 @@ mod test {
     fn get_icon_by_name() {
         let tmp_dir = tempdir().expect("failed to create temp dir");
 
-        for (file_name, file_icon) in &Icons::get_default_icons_by_name() {
+        for (file_name, file_icon) in &IconTheme::get_default_icons_by_name() {
             let file_path = tmp_dir.path().join(file_name);
             File::create(&file_path).expect("failed to create file");
             let meta = Meta::from_path(&file_path, false).unwrap();
 
-            let icon = Icons::new(Theme::Fancy, " ".to_string());
+            let icon = Icons::new(false, IconOption::Always, FlagTheme::Fancy, " ".to_string());
             let icon_str = icon.get(&meta.name);
 
             assert_eq!(icon_str, format!("{}{}", file_icon, icon.icon_separator));
@@ -179,12 +190,12 @@ mod test {
     fn get_icon_by_extension() {
         let tmp_dir = tempdir().expect("failed to create temp dir");
 
-        for (ext, file_icon) in &Icons::get_default_icons_by_extension() {
+        for (ext, file_icon) in &IconTheme::get_default_icons_by_extension() {
             let file_path = tmp_dir.path().join(format!("file.{}", ext));
             File::create(&file_path).expect("failed to create file");
             let meta = Meta::from_path(&file_path, false).unwrap();
 
-            let icon = Icons::use Theme::Fancy, " ".to_string());
+            let icon = Icons::new(false, IconOption::Always, FlagTheme::Fancy, " ".to_string());
             let icon_str = icon.get(&meta.name);
 
             assert_eq!(icon_str, format!("{}{}", file_icon, icon.icon_separator));

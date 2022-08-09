@@ -13,7 +13,7 @@ use crate::print_error;
 use color::ColorTheme;
 use icon::IconTheme;
 
-#[derive(Debug, Deserialize, Default, PartialEq)]
+#[derive(Debug, Deserialize, Default, PartialEq, Eq)]
 #[serde(rename_all = "kebab-case")]
 #[serde(deny_unknown_fields)]
 #[serde(default)]

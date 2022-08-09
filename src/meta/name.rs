@@ -219,8 +219,8 @@ mod test {
     use super::DisplayOption;
     use super::Name;
     use crate::color::{self, Colors};
-    use crate::flags::HyperlinkOption;
-    use crate::icon::{self, Icons};
+    use crate::flags::{HyperlinkOption, IconOption, IconTheme as FlagTheme};
+    use crate::icon::Icons;
     use crate::meta::FileType;
     use crate::meta::Meta;
     #[cfg(unix)]
@@ -240,7 +240,7 @@ mod test {
     #[cfg(unix)] // Windows uses different default permissions
     fn test_print_file_name() {
         let tmp_dir = tempdir().expect("failed to create temp dir");
-        let icons = Icons::new(icon::Theme::Fancy, " ".to_string());
+        let icons = Icons::new(false, IconOption::Always, FlagTheme::Fancy, " ".to_string());
 
         // Create the file;
         let file_path = tmp_dir.path().join("file.txt");
@@ -266,7 +266,7 @@ mod test {
     #[test]
     fn test_print_dir_name() {
         let tmp_dir = tempdir().expect("failed to create temp dir");
-        let icons = Icons::new(icon::Theme::Fancy, " ".to_string());
+        let icons = &Icons::new(false, IconOption::Always, FlagTheme::Fancy, " ".to_string());
 
         // Create the directory
         let dir_path = tmp_dir.path().join("directory");
@@ -279,7 +279,7 @@ mod test {
             " directory".to_string().with(Color::AnsiValue(33)),
             meta.name.render(
                 &colors,
-                &icons,
+                icons,
                 &DisplayOption::FileName,
                 HyperlinkOption::Never,
                 false
@@ -291,7 +291,7 @@ mod test {
     #[cfg(unix)] // Symlinks are hard on Windows
     fn test_print_symlink_name_file() {
         let tmp_dir = tempdir().expect("failed to create temp dir");
-        let icons = Icons::new(icon::Theme::Fancy, " ".to_string());
+        let icons = &Icons::new(false, IconOption::Always, FlagTheme::Fancy, " ".to_string());
 
         // Create the file;
         let file_path = tmp_dir.path().join("file.tmp");
@@ -313,7 +313,7 @@ mod test {
             " target.tmp".to_string().with(Color::AnsiValue(44)),
             name.render(
                 &colors,
-                &icons,
+                icons,
                 &DisplayOption::FileName,
                 HyperlinkOption::Never,
                 false
@@ -325,7 +325,7 @@ mod test {
     #[cfg(unix)] // Symlinks are hard on Windows
     fn test_print_symlink_name_dir() {
         let tmp_dir = tempdir().expect("failed to create temp dir");
-        let icons = Icons::new(icon::Theme::Fancy, " ".to_string());
+        let icons = Icons::new(false, IconOption::Always, FlagTheme::Fancy, " ".to_string());
 
         // Create the directory;
         let dir_path = tmp_dir.path().join("tmp.d");
@@ -359,7 +359,7 @@ mod test {
     #[cfg(unix)]
     fn test_print_other_type_name() {
         let tmp_dir = tempdir().expect("failed to create temp dir");
-        let icons = Icons::new(icon::Theme::Fancy, " ".to_string());
+        let icons = &Icons::new(false, IconOption::Always, FlagTheme::Fancy, " ".to_string());
 
         // Create the pipe;
         let pipe_path = tmp_dir.path().join("pipe.tmp");
@@ -379,7 +379,7 @@ mod test {
             " pipe.tmp".to_string().with(Color::AnsiValue(184)),
             name.render(
                 &colors,
-                &icons,
+                icons,
                 &DisplayOption::FileName,
                 HyperlinkOption::Never,
                 false
@@ -390,7 +390,7 @@ mod test {
     #[test]
     fn test_print_without_icon_or_color() {
         let tmp_dir = tempdir().expect("failed to create temp dir");
-        let icons = Icons::new(icon::Theme::NoIcon, " ".to_string());
+        let icons = Icons::new(false, IconOption::Never, FlagTheme::Fancy, " ".to_string());
 
         // Create the file;
         let file_path = tmp_dir.path().join("file.txt");
@@ -416,7 +416,7 @@ mod test {
     #[test]
     fn test_print_hyperlink() {
         let tmp_dir = tempdir().expect("failed to create temp dir");
-        let icons = Icons::new(icon::Theme::NoIcon, " ".to_string());
+        let icons = Icons::new(false, IconOption::Never, FlagTheme::Fancy, " ".to_string());
 
         // Create the file;
         let file_path = tmp_dir.path().join("file.txt");
@@ -643,7 +643,7 @@ mod test {
     #[cfg(unix)]
     fn test_special_chars_in_filename() {
         let tmp_dir = tempdir().expect("failed to create temp dir");
-        let icons = Icons::new(icon::Theme::Fancy, " ".to_string());
+        let icons = Icons::new(false, IconOption::Always, FlagTheme::Fancy, " ".to_string());
 
         // Create the file;
         let file_path = tmp_dir.path().join("file\ttab.txt");

@@ -413,11 +413,11 @@ mod tests {
     use super::*;
     use crate::color;
     use crate::color::Colors;
-    use crate::flags::HyperlinkOption;
+    use crate::flags::{HyperlinkOption, IconOption, IconTheme as FlagTheme};
     use crate::icon::Icons;
     use crate::meta::{FileType, Name};
     use crate::Config;
-    use crate::{app, flags, icon, sort};
+    use crate::{app, flags, sort};
     use assert_fs::prelude::*;
     use std::path::Path;
 
@@ -443,7 +443,7 @@ mod tests {
             let output = name
                 .render(
                     &Colors::new(color::ThemeOption::NoColor),
-                    &Icons::new(icon::Theme::NoIcon, " ".to_string()),
+                    &Icons::new(false, IconOption::Never, FlagTheme::Fancy, " ".to_string()),
                     &DisplayOption::FileName,
                     HyperlinkOption::Never,
                     true,
@@ -478,7 +478,7 @@ mod tests {
             let output = name
                 .render(
                     &Colors::new(color::ThemeOption::NoColor),
-                    &Icons::new(icon::Theme::Fancy, " ".to_string()),
+                    &Icons::new(false, IconOption::Always, FlagTheme::Fancy, " ".to_string()),
                     &DisplayOption::FileName,
                     HyperlinkOption::Never,
                     true,
@@ -512,7 +512,7 @@ mod tests {
             let output = name
                 .render(
                     &Colors::new(color::ThemeOption::NoLscolors),
-                    &Icons::new(icon::Theme::NoIcon, " ".to_string()),
+                    &Icons::new(false, IconOption::Never, FlagTheme::Fancy, " ".to_string()),
                     &DisplayOption::FileName,
                     HyperlinkOption::Never,
                     true,
@@ -554,7 +554,7 @@ mod tests {
             let output = name
                 .render(
                     &Colors::new(color::ThemeOption::NoColor),
-                    &Icons::new(icon::Theme::NoIcon, " ".to_string()),
+                    &Icons::new(false, IconOption::Never, FlagTheme::Fancy, " ".to_string()),
                     &DisplayOption::FileName,
                     HyperlinkOption::Never,
                     true,
@@ -618,7 +618,7 @@ mod tests {
             &metas,
             &flags,
             &Colors::new(color::ThemeOption::NoColor),
-            &Icons::new(icon::Theme::NoIcon, " ".to_string()),
+            &Icons::new(false, IconOption::Never, FlagTheme::Fancy, " ".to_string()),
         );
 
         assert_eq!("one.d\n├── .hidden\n└── two\n", output);
@@ -649,7 +649,7 @@ mod tests {
             &metas,
             &flags,
             &Colors::new(color::ThemeOption::NoColor),
-            &Icons::new(icon::Theme::NoIcon, " ".to_string()),
+            &Icons::new(false, IconOption::Never, FlagTheme::Fancy, " ".to_string()),
         );
 
         let length_before_b = |i| -> usize {
@@ -689,7 +689,7 @@ mod tests {
             &metas,
             &flags,
             &Colors::new(color::ThemeOption::NoColor),
-            &Icons::new(icon::Theme::NoIcon, " ".to_string()),
+            &Icons::new(false, IconOption::Never, FlagTheme::Fancy, " ".to_string()),
         );
 
         assert_eq!(output.lines().nth(1).unwrap().chars().next().unwrap(), '└');
@@ -728,7 +728,7 @@ mod tests {
             &metas,
             &flags,
             &Colors::new(color::ThemeOption::NoColor),
-            &Icons::new(icon::Theme::NoIcon, " ".to_string()),
+            &Icons::new(false, IconOption::Never, FlagTheme::Fancy, " ".to_string()),
         );
 
         assert!(output.ends_with("└── two\n"));
@@ -758,7 +758,7 @@ mod tests {
             &metas,
             &flags,
             &Colors::new(color::ThemeOption::NoColor),
-            &Icons::new(icon::Theme::NoIcon, " ".to_string()),
+            &Icons::new(false, IconOption::Never, FlagTheme::Fancy, " ".to_string()),
         );
 
         dir.close().unwrap();
@@ -791,7 +791,7 @@ mod tests {
             &metas,
             &flags,
             &Colors::new(color::ThemeOption::NoColor),
-            &Icons::new(icon::Theme::NoIcon, " ".to_string()),
+            &Icons::new(false, IconOption::Never, FlagTheme::Fancy, " ".to_string()),
         );
 
         dir.close().unwrap();
