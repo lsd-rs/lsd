@@ -124,7 +124,7 @@ mod tests {
         let sorter = assemble_sorters(&flags);
         assert_eq!(by_meta(&sorter, &meta_a, &meta_z), Ordering::Less);
 
-        // Sort with file first reversed (thie files stay first)
+        // Sort with file first reversed (this files stay first)
         let sorter = assemble_sorters(&flags);
         assert_eq!(by_meta(&sorter, &meta_a, &meta_z), Ordering::Less);
     }
