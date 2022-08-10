@@ -119,7 +119,7 @@ lsd is a ls command with a lot of pretty colours and some other stuff to enrich 
 `-I, --ignore-glob <pattern>...`
 : Do not display files/directories with names matching the glob pattern(s). More than one can be specified by repeating the argument [default: ]
 
-  * [ ] `--permission <permission>...`
+`--permission <permission>...`
 : How to display permissions [default: rwx]  [possible values: rwx, octal]
 
 `--size <size>...`
@@ -160,4 +160,3 @@ lsd is a ls command with a lot of pretty colours and some other stuff to enrich 
 
 `XDG_CONFIG_HOME`
 : Used to locate optional config file. If `XDG_CONFIG_HOME` is set, use `$XDG_CONFIG_HOME/lsd/config.yaml` else `$HOME/.config/lsd/config.yaml`.
-

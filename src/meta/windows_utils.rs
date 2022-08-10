@@ -217,7 +217,7 @@ unsafe fn get_acl_access_mask(
 /// is
 ///
 /// Note: winapi's TRUSTEE_W looks different from the one in the MS docs because
-/// of some unusal pre-processor macros in the original .h file. The winapi
+/// of some unusual pre-processor macros in the original .h file. The winapi
 /// version is correct (MS's doc generator messed up)
 unsafe fn trustee_from_sid(sid_ptr: *mut c_void) -> TRUSTEE_W {
     let mut trustee: TRUSTEE_W = std::mem::zeroed();

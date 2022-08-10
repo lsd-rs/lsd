@@ -11,7 +11,6 @@
 This project is a rewrite of GNU `ls` with lot of added features like colors, icons, tree-view, more formatting options etc.
 The project is heavily inspired by the super [colorls](https://github.com/athityakumar/colorls) project.
 
-
 ## Installation
 
 <details>
@@ -21,7 +20,7 @@ The project is heavily inspired by the super [colorls](https://github.com/athity
 </a>
 </details>
 
-#### Prerequisites
+### Prerequisites
 
 Install the patched fonts of powerline nerd-font and/or font-awesome. Have a look at the [Nerd Font README](https://github.com/ryanoasis/nerd-fonts/blob/master/readme.md) for more installation instructions. Don't forget to setup your terminal in order to use the correct font.
 
@@ -39,7 +38,6 @@ Install the patched fonts of powerline nerd-font and/or font-awesome. Have a loo
 | Ubuntu/Debian based distro      | `sudo dpkg -i lsd_0.22.0_amd64.deb` get `.deb` file from [release page](https://github.com/Peltoche/lsd/releases) |
 | Solus                           | `eopkg it lsd`                                                                                                    |
 | Void Linux                      | `sudo xbps-install lsd`                                                                                           |
-
 
 ### From source
 
@@ -66,7 +64,7 @@ Check [Config file content](#config-file-content) for details.
 
 ### Config file location
 
-#### Non-Windows
+### Non-Windows
 
 On non-Windows systems `lsd` follows the
 [XDG Base Directory Specification](https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html)
@@ -76,12 +74,12 @@ called `config.yaml`.
 For most people it should be enough to put their config file at
 `~/.config/lsd/config.yaml`.
 
-#### Windows
+### Windows
 
 On Windows systems `lsd` only looks for the `config.yaml` files in one location:
 `%APPDATA%\lsd\`
 
-#### Custom
+### Custom
 
 You can also provide a configuration file from a non standard location:
 `lsd --config-file [PATH]`
@@ -90,7 +88,7 @@ You can also provide a configuration file from a non standard location:
 
 <details open>
 <summary>This is an example config file with the default values and some additional remarks.</summary>
-  
+
 ```yaml
 # == Classic ==
 # This is a shorthand to override some of the options to be backwards compatible
@@ -229,8 +227,8 @@ symlink-arrow: ⇒
 # Possible values: false, true
 header: false
 ```
-</details>
 
+</details>
 
 ## Theme
 
@@ -302,11 +300,9 @@ Please also notice that an empty theme is **NOT** supported due to
 
 ### Required
 
-Enable nerd fonts for your terminal, URxvt for example:
+Enable nerd fonts for your terminal, URxvt for example in `.Xresources`:
 
-.Xresources
-
-```
+```sh
 URxvt*font:    xft:Hack Nerd Font:style=Regular:size=11
 ```
 
@@ -365,12 +361,13 @@ The default colors are:
 _Checkout [trapd00r/LS_COLORS](https://github.com/trapd00r/LS_COLORS) and [sharkdp/vivid](https://github.com/sharkdp/vivid) for help in themeing using `LS_COLORS`._
 
 ### First char of folder/file getting trimmed
+
 Workaround for Konsole: ㅤEdit the config file (or [create it](#config-file-location) if it doesn't already exist) and paste the following into it (contains invisible unicode characters):
-  ```yml
+
+```yml
 icons:
     separator: " ㅤ"
 ```
-
 
 This is a known issue in a few terminal emulator. Try using a different terminal emulator like. [Alacritty](https://github.com/alacritty/alacritty) and [Kitty](https://github.com/kovidgoyal/kitty) are really good alternatives. You might also want to check if your font is responsible for causing this.
 To verify this, try running lsd with icons disabled and if it still does not have the first character, then this is an lsd bug:
