@@ -23,7 +23,7 @@ pub enum Theme {
 // s#\\u[0-9a-f]*#\=eval('"'.submatch(0).'"')#
 impl Icons {
     pub fn new(theme: Theme, icon_separator: String) -> Self {
-        let display_icons = theme == Theme::Fancy || theme == Theme::Unicode;
+        let display_icons = matches!(theme, Theme::Fancy | Theme::Unicode);
         let (icons_by_name, icons_by_extension, default_file_icon, default_folder_icon) =
             if theme == Theme::Fancy {
                 (
@@ -511,7 +511,7 @@ mod test {
         let icon = Icons::new(Theme::Fancy, " ".to_string());
         let icon_str = icon.get(&meta.name);
 
-        assert_eq!(icon_str, format!("{}{}", "\u{f016}", icon.icon_separator)); // 
+        assert_eq!(icon_str, "\u{f016} "); // 
     }
 
     #[test]
@@ -524,7 +524,7 @@ mod test {
         let icon = Icons::new(Theme::Unicode, " ".to_string());
         let icon_str = icon.get(&meta.name);
 
-        assert_eq!(icon_str, format!("{}{}", "\u{1f5cb}", icon.icon_separator));
+        assert_eq!(icon_str, "\u{1f5cb} ");
     }
 
     #[test]
@@ -536,7 +536,7 @@ mod test {
         let icon = Icons::new(Theme::Fancy, " ".to_string());
         let icon_str = icon.get(&meta.name);
 
-        assert_eq!(icon_str, format!("{}{}", "\u{f115}", icon.icon_separator)); // 
+        assert_eq!(icon_str, "\u{f115} "); // 
     }
 
     #[test]
@@ -548,7 +548,7 @@ mod test {
         let icon = Icons::new(Theme::Unicode, " ".to_string());
         let icon_str = icon.get(&meta.name);
 
-        assert_eq!(icon_str, format!("{}{}", "\u{1f5c1}", icon.icon_separator));
+        assert_eq!(icon_str, "\u{1f5c1} ");
     }
 
     #[test]
@@ -560,7 +560,7 @@ mod test {
         let icon = Icons::new(Theme::Fancy, " ".to_string());
         let icon_str = icon.get(&meta.name);
 
-        assert_eq!(icon_str, format!("{}{}", "\u{f115}", icon.icon_separator)); // 
+        assert_eq!(icon_str, "\u{f115} "); // 
     }
 
     #[test]
