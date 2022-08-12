@@ -78,7 +78,7 @@ impl Name {
             .collect()
     }
 
-    pub fn escape(&self, string: &str) -> String {
+    fn escape(&self, string: &str) -> String {
         if string
             .chars()
             .all(|c| c >= 0x20 as char && c != 0x7f as char)
