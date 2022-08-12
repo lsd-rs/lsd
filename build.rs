@@ -12,26 +12,21 @@ extern crate version_check;
 
 use clap::Shell;
 use std::fs;
-use std::io::{self, Write};
 use std::process::exit;
 
 include!("src/app.rs");
 
 fn main() {
-    match version_check::is_min_version("1.62.0") {
-        Some(true) => {}
-        // rustc version too small or can't figure it out
-        _ => {
-            writeln!(&mut io::stderr(), "'lsd' requires rustc >= 1.62.0").unwrap();
-            exit(1);
-        }
+    // rustc version too small or can't figure it out
+    if version_check::is_min_version("1.62.0") != Some(true) {
+        eprintln!("'lsd' requires rustc >= 1.62.0");
+        exit(1);
     }
 
-    let var = std::env::var_os("SHELL_COMPLETIONS_DIR").or_else(|| std::env::var_os("OUT_DIR"));
-    let outdir = match var {
-        None => return,
-        Some(outdir) => outdir,
-    };
+    let outdir = std::env::var_os("SHELL_COMPLETIONS_DIR")
+        .or_else(|| std::env::var_os("OUT_DIR"))
+        .unwrap_or_else(|| exit(0));
+
     fs::create_dir_all(&outdir).unwrap();
 
     let mut app = build();
