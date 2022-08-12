@@ -41,7 +41,7 @@ impl Date {
         colors.colorize(self.date_string(flags), &elem)
     }
 
-    pub fn date_string(&self, flags: &Flags) -> String {
+    fn date_string(&self, flags: &Flags) -> String {
         if let Date::Date(val) = self {
             match &flags.date {
                 DateFlag::Date => val.format("%c").to_string(),

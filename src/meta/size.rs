@@ -40,7 +40,7 @@ impl Size {
         format!("{0:.1$}", number, if number < 10.0 { 1 } else { 0 })
     }
 
-    pub fn get_unit(&self, flags: &Flags) -> Unit {
+    fn get_unit(&self, flags: &Flags) -> Unit {
         if flags.size == SizeFlag::Bytes {
             return Unit::Byte;
         }

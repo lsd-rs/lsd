@@ -67,11 +67,11 @@ pub enum Elem {
 }
 
 impl Elem {
-    pub fn has_suid(&self) -> bool {
+    fn has_suid(&self) -> bool {
         matches!(self, Elem::Dir { uid: true } | Elem::File { uid: true, .. })
     }
 
-    pub fn get_color(&self, theme: &theme::Theme) -> Color {
+    fn get_color(&self, theme: &theme::Theme) -> Color {
         match self {
             Elem::File {
                 exec: true,
