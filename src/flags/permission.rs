@@ -97,8 +97,8 @@ mod test {
 
     #[test]
     fn test_from_arg_matches_short() {
-        let args = vec!["lsd", "--permission", "octal"];
-        let matches = app::build().get_matches_from_safe(args).unwrap();
+        let argv = ["lsd", "--permission", "octal"];
+        let matches = app::build().get_matches_from_safe(argv).unwrap();
         assert_eq!(
             Some(PermissionFlag::Octal),
             PermissionFlag::from_arg_matches(&matches)
@@ -108,13 +108,13 @@ mod test {
     #[test]
     #[should_panic]
     fn test_from_arg_matches_unknown() {
-        let args = vec!["lsd", "--permission", "unknown"];
-        let _ = app::build().get_matches_from_safe(args).unwrap();
+        let argv = ["lsd", "--permission", "unknown"];
+        let _ = app::build().get_matches_from_safe(argv).unwrap();
     }
     #[test]
     fn test_from_arg_matches_permissions_multi() {
-        let args = vec!["lsd", "--permission", "octal", "--permission", "rwx"];
-        let matches = app::build().get_matches_from_safe(args).unwrap();
+        let argv = ["lsd", "--permission", "octal", "--permission", "rwx"];
+        let matches = app::build().get_matches_from_safe(argv).unwrap();
         assert_eq!(
             Some(PermissionFlag::Rwx),
             PermissionFlag::from_arg_matches(&matches)
@@ -123,8 +123,8 @@ mod test {
 
     #[test]
     fn test_from_arg_matches_permissions_classic() {
-        let args = vec!["lsd", "--permission", "rwx", "--classic"];
-        let matches = app::build().get_matches_from_safe(args).unwrap();
+        let argv = ["lsd", "--permission", "rwx", "--classic"];
+        let matches = app::build().get_matches_from_safe(argv).unwrap();
         assert_eq!(
             Some(PermissionFlag::Rwx),
             PermissionFlag::from_arg_matches(&matches)
