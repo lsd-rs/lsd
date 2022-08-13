@@ -95,35 +95,35 @@ mod test {
 
     #[test]
     fn test_from_arg_matches_short() {
-        let args = vec!["lsd", "--size", "short"];
-        let matches = app::build().get_matches_from_safe(args).unwrap();
+        let argv = ["lsd", "--size", "short"];
+        let matches = app::build().get_matches_from_safe(argv).unwrap();
         assert_eq!(Some(SizeFlag::Short), SizeFlag::from_arg_matches(&matches));
     }
 
     #[test]
     fn test_from_arg_matches_bytes() {
-        let args = vec!["lsd", "--size", "bytes"];
-        let matches = app::build().get_matches_from_safe(args).unwrap();
+        let argv = ["lsd", "--size", "bytes"];
+        let matches = app::build().get_matches_from_safe(argv).unwrap();
         assert_eq!(Some(SizeFlag::Bytes), SizeFlag::from_arg_matches(&matches));
     }
 
     #[test]
     #[should_panic]
     fn test_from_arg_matches_unknonwn() {
-        let args = vec!["lsd", "--size", "unknown"];
-        let _ = app::build().get_matches_from_safe(args).unwrap();
+        let argv = ["lsd", "--size", "unknown"];
+        let _ = app::build().get_matches_from_safe(argv).unwrap();
     }
     #[test]
     fn test_from_arg_matches_size_multi() {
-        let args = vec!["lsd", "--size", "bytes", "--size", "short"];
-        let matches = app::build().get_matches_from_safe(args).unwrap();
+        let argv = ["lsd", "--size", "bytes", "--size", "short"];
+        let matches = app::build().get_matches_from_safe(argv).unwrap();
         assert_eq!(Some(SizeFlag::Short), SizeFlag::from_arg_matches(&matches));
     }
 
     #[test]
     fn test_from_arg_matches_size_classic() {
-        let args = vec!["lsd", "--size", "short", "--classic"];
-        let matches = app::build().get_matches_from_safe(args).unwrap();
+        let argv = ["lsd", "--size", "short", "--classic"];
+        let matches = app::build().get_matches_from_safe(argv).unwrap();
         assert_eq!(Some(SizeFlag::Bytes), SizeFlag::from_arg_matches(&matches));
     }
 
