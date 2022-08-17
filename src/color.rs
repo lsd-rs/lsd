@@ -29,6 +29,8 @@ pub enum Elem {
     Socket,
     Special,
 
+    DirectoryIndicator,
+
     /// Permission
     Read,
     Write,
@@ -99,6 +101,12 @@ impl Elem {
             Elem::CharDevice => theme.file_type.char_device,
             Elem::Socket => theme.file_type.socket,
             Elem::Special => theme.file_type.special,
+
+            // default to dir color (no uid) if no special color specified
+            Elem::DirectoryIndicator => match theme.directory_indicator {
+                Some(color) => color,
+                None => theme.file_type.dir.no_uid,
+            },
 
             Elem::Read => theme.permission.read,
             Elem::Write => theme.permission.write,
@@ -215,6 +223,13 @@ impl Colors {
                     Some("di")
                 }
             }
+            Elem::DirectoryIndicator => match &self.theme {
+                Some(theme) => match theme.directory_indicator {
+                    Some(_) => None,
+                    None => Some("di"),
+                },
+                None => None,
+            },
             Elem::SymLink => Some("ln"),
             Elem::Pipe => Some("pi"),
             Elem::Socket => Some("so"),
@@ -336,6 +351,7 @@ mod elem {
         Theme {
             user: Color::AnsiValue(230),  // Cornsilk1
             group: Color::AnsiValue(187), // LightYellow3
+            directory_indicator: Some(Color::AnsiValue(15)),
             permission: theme::Permission {
                 read: Color::Green,
                 write: Color::Yellow,
@@ -425,5 +441,9 @@ mod elem {
             .get_color(&test_theme()),
             Color::AnsiValue(184),
         );
+        assert_eq!(
+            Elem::DirectoryIndicator.get_color(&test_theme()),
+            Color::AnsiValue(15)
+        )
     }
 }

@@ -92,7 +92,7 @@ impl FileType {
     pub fn render(self, colors: &Colors) -> ColoredString {
         match self {
             FileType::File { exec, .. } => colors.colorize('.', &Elem::File { exec, uid: false }),
-            FileType::Directory { .. } => colors.colorize('d', &Elem::Dir { uid: false }),
+            FileType::Directory { .. } => colors.colorize('d', &Elem::DirectoryIndicator),
             FileType::Pipe => colors.colorize('|', &Elem::Pipe),
             FileType::SymLink { .. } => colors.colorize('l', &Elem::SymLink),
             FileType::BlockDevice => colors.colorize('b', &Elem::BlockDevice),

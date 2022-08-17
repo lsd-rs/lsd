@@ -82,6 +82,16 @@ where
     deserializer.deserialize_any(ColorVisitor)
 }
 
+fn deserialize_optional_color<'de, D>(deserializer: D) -> Result<Option<Color>, D::Error>
+where
+    D: serde::de::Deserializer<'de>,
+{
+    match deserialize_color(deserializer) {
+        Ok(color) => Ok(Some(color)),
+        Err(e) => Err(e),
+    }
+}
+
 /// A struct holding the theme configuration
 /// Color table: https://upload.wikimedia.org/wikipedia/commons/1/15/Xterm_256color_chart.avg
 #[derive(Debug, Deserialize, PartialEq)]
@@ -93,6 +103,8 @@ pub struct Theme {
     pub user: Color,
     #[serde(deserialize_with = "deserialize_color")]
     pub group: Color,
+    #[serde(deserialize_with = "deserialize_optional_color")]
+    pub directory_indicator: Option<Color>,
     pub permission: Permission,
     pub date: Date,
     pub size: Size,
@@ -389,6 +401,7 @@ impl Theme {
         Theme {
             user: Color::AnsiValue(230),  // Cornsilk1
             group: Color::AnsiValue(187), // LightYellow3
+            directory_indicator: None,
             permission: Permission::default(),
             file_type: FileType::default(),
             date: Date::default(),
@@ -491,5 +504,19 @@ permission:
         use crossterm::style::Color;
         theme.permission.read = Color::AnsiValue(130);
         assert_eq!(empty_theme, theme);
+    }
+
+    #[test]
+    fn test_directory_indicator_override() {
+        let theme = Theme::with_yaml(
+            r#"---
+directory-indicator: 15
+"#,
+        )
+        .unwrap();
+        let mut expected_theme = Theme::default_dark();
+        use crossterm::style::Color;
+        expected_theme.directory_indicator = Some(Color::AnsiValue(15));
+        assert_eq!(theme, expected_theme)
     }
 }
