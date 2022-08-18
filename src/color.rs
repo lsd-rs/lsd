@@ -29,6 +29,9 @@ pub enum Elem {
     Socket,
     Special,
 
+    FileIndicator {
+        exec: bool,
+    },
     DirectoryIndicator,
 
     /// Permission
@@ -101,6 +104,18 @@ impl Elem {
             Elem::CharDevice => theme.file_type.char_device,
             Elem::Socket => theme.file_type.socket,
             Elem::Special => theme.file_type.special,
+
+            // use file color based upon exec vs no exec (always no uid)
+            Elem::FileIndicator { exec } => match theme.file_indicator {
+                Some(color) => color,
+                None => {
+                    if *exec {
+                        theme.file_type.file.exec_no_uid
+                    } else {
+                        theme.file_type.file.no_exec_no_uid
+                    }
+                }
+            },
 
             // default to dir color (no uid) if no special color specified
             Elem::DirectoryIndicator => match theme.directory_indicator {
@@ -222,13 +237,27 @@ impl Colors {
                 } else {
                     Some("di")
                 }
-            }
+            },
+            Elem::FileIndicator { exec } => {
+                let indicator_type = if *exec {
+                    "ex"
+                } else {
+                    "fi"
+                };
+                match &self.theme {
+                    Some(theme) => match theme.file_indicator {
+                        Some(_) => None,
+                        None => Some(indicator_type)
+                    },
+                    None => Some(indicator_type)
+                }
+            },
             Elem::DirectoryIndicator => match &self.theme {
                 Some(theme) => match theme.directory_indicator {
                     Some(_) => None,
                     None => Some("di"),
                 },
-                None => None,
+                None => Some("di"),
             },
             Elem::SymLink => Some("ln"),
             Elem::Pipe => Some("pi"),
@@ -351,7 +380,8 @@ mod elem {
         Theme {
             user: Color::AnsiValue(230),  // Cornsilk1
             group: Color::AnsiValue(187), // LightYellow3
-            directory_indicator: Some(Color::AnsiValue(15)),
+            file_indicator: None,
+            directory_indicator: None,
             permission: theme::Permission {
                 read: Color::Green,
                 write: Color::Yellow,
@@ -442,8 +472,44 @@ mod elem {
             Color::AnsiValue(184),
         );
         assert_eq!(
+            Elem::FileIndicator {
+                exec: false
+            }.get_color(&test_theme()),
+            Color::AnsiValue(184)
+        );
+        assert_eq!(
+            Elem::FileIndicator { exec: true }.get_color(&test_theme()),
+            Color::AnsiValue(40)
+        );
+        assert_eq!(
             Elem::DirectoryIndicator.get_color(&test_theme()),
+            Color::AnsiValue(33)
+        );
+    }
+
+    #[test]
+    fn test_file_indicator_override() {
+        let mut theme = test_theme();
+        theme.file_indicator = Some(Color::AnsiValue(15));
+        assert_eq!(
+            Elem::FileIndicator {
+                exec: false
+            }.get_color(&theme),
             Color::AnsiValue(15)
-        )
+        );
+        assert_eq!(
+            Elem::FileIndicator { exec: true }.get_color(&theme),
+            Color::AnsiValue(15)
+        );
+    }
+
+    #[test]
+    fn test_directory_indicator_override() {
+        let mut theme = test_theme();
+        theme.directory_indicator = Some(Color::AnsiValue(15));
+        assert_eq!(
+            Elem::DirectoryIndicator.get_color(&theme),
+            Color::AnsiValue(15)
+        );
     }
 }

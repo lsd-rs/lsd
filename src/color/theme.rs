@@ -104,6 +104,8 @@ pub struct Theme {
     #[serde(deserialize_with = "deserialize_color")]
     pub group: Color,
     #[serde(deserialize_with = "deserialize_optional_color")]
+    pub file_indicator: Option<Color>,
+    #[serde(deserialize_with = "deserialize_optional_color")]
     pub directory_indicator: Option<Color>,
     pub permission: Permission,
     pub date: Date,
@@ -401,6 +403,7 @@ impl Theme {
         Theme {
             user: Color::AnsiValue(230),  // Cornsilk1
             group: Color::AnsiValue(187), // LightYellow3
+            file_indicator: None,
             directory_indicator: None,
             permission: Permission::default(),
             file_type: FileType::default(),
