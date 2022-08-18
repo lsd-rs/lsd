@@ -510,6 +510,20 @@ permission:
     }
 
     #[test]
+    fn test_file_indicator_override() {
+        let theme = Theme::with_yaml(
+            r#"---
+file-indicator: 36
+"#,
+        )
+        .unwrap();
+        let mut expected_theme = Theme::default_dark();
+        use crossterm::style::Color;
+        expected_theme.file_indicator = Some(Color::AnsiValue(36));
+        assert_eq!(theme, expected_theme)
+    }
+
+    #[test]
     fn test_directory_indicator_override() {
         let theme = Theme::with_yaml(
             r#"---
