@@ -290,6 +290,8 @@ links:
 tree-edge: 245
 ```
 
+There are also optional fields `file-indicator` and `directory-indicator` to change the colors of the file indicator `.` and  directory indicator `d` in the `--long` view. These default to the regular colors of the file names and directory names respectively. 
+
 When creating a theme for `lsd`, you can specify any part of the default theme,
 and then change its colors, the items missed would fallback to use the default colors.
 
