@@ -474,3 +474,75 @@ impl IconTheme {
         .collect::<HashMap<_, _>>()
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::IconTheme;
+    use crate::theme::Theme;
+
+    fn partial_default_yaml() -> &'static str {
+        r#"---
+icons-by-name:
+  .trash: 
+  .cargo: 
+  .emacs.d: 
+  a.out: 
+icons-by-extension:
+  go: 
+  hs: 
+  rs: 
+icons-by-filetype:
+  dir: 
+  file: 
+  pipe: 
+  socket: 
+  executable: 
+  symlink-dir: 
+  symlink-file: 
+  device-char: 
+  device-block: ﰩ
+  special: 
+"#
+    }
+
+    fn check_partial_yaml(def: &IconTheme, yaml: &IconTheme) {
+        assert_eq!(def.icons_by_filetype.dir, yaml.icons_by_filetype.dir,);
+    }
+
+    #[test]
+    fn test_default_theme() {
+        let def = IconTheme::default();
+        let yaml = Theme::with_yaml(partial_default_yaml()).unwrap();
+        check_partial_yaml(&def, &yaml);
+    }
+
+    #[test]
+    fn test_tmp_partial_default_theme_file() {
+        use std::fs::File;
+        use std::io::Write;
+        let dir = assert_fs::TempDir::new().unwrap();
+        let theme = dir.path().join("icon.yaml");
+        let mut file = File::create(&theme).unwrap();
+        writeln!(file, "{}", partial_default_yaml()).unwrap();
+        let def = IconTheme::default();
+        let decoded = Theme::from_path(theme.to_str().unwrap()).unwrap();
+        check_partial_yaml(&def, &decoded);
+    }
+
+    #[test]
+    fn test_empty_theme_return_default() {
+        // Must contain one field at least
+        // ref https://github.com/dtolnay/serde-yaml/issues/86
+        let empty: IconTheme = Theme::with_yaml("icons-by-filetype:\n  dir: ").unwrap(); //  is the default value
+        let default = IconTheme::default();
+        check_partial_yaml(&empty, &default);
+    }
+
+    #[test]
+    fn test_serde_dir_from_yaml() {
+        // Must contain one field at least
+        // ref https://github.com/dtolnay/serde-yaml/issues/86
+        let empty: IconTheme = Theme::with_yaml("icons-by-filetype:\n  dir: ").unwrap();
+        assert_eq!(empty.icons_by_filetype.dir, "");
+    }
+}
