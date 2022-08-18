@@ -237,21 +237,17 @@ impl Colors {
                 } else {
                     Some("di")
                 }
-            },
+            }
             Elem::FileIndicator { exec } => {
-                let indicator_type = if *exec {
-                    "ex"
-                } else {
-                    "fi"
-                };
+                let indicator_type = if *exec { "ex" } else { "fi" };
                 match &self.theme {
                     Some(theme) => match theme.file_indicator {
                         Some(_) => None,
-                        None => Some(indicator_type)
+                        None => Some(indicator_type),
                     },
-                    None => Some(indicator_type)
+                    None => Some(indicator_type),
                 }
-            },
+            }
             Elem::DirectoryIndicator => match &self.theme {
                 Some(theme) => match theme.directory_indicator {
                     Some(_) => None,
@@ -472,9 +468,7 @@ mod elem {
             Color::AnsiValue(184),
         );
         assert_eq!(
-            Elem::FileIndicator {
-                exec: false
-            }.get_color(&test_theme()),
+            Elem::FileIndicator { exec: false }.get_color(&test_theme()),
             Color::AnsiValue(184)
         );
         assert_eq!(
@@ -492,9 +486,7 @@ mod elem {
         let mut theme = test_theme();
         theme.file_indicator = Some(Color::AnsiValue(15));
         assert_eq!(
-            Elem::FileIndicator {
-                exec: false
-            }.get_color(&theme),
+            Elem::FileIndicator { exec: false }.get_color(&theme),
             Color::AnsiValue(15)
         );
         assert_eq!(
