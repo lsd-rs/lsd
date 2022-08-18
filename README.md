@@ -233,9 +233,11 @@ header: false
 
 ## Theme
 
-`lsd` can be configured with a theme file to set the colors.
+`lsd` can be configured with theme files to set the colors or icons.
 
-Theme can be configured in the [configuration file](#configuration)(color.theme),
+### Color Theme
+
+Color theme can be configured in the [configuration file](#configuration)(color.theme),
 The valid theme configurations are:
 
 - `default`: the default color scheme shipped in `lsd`
@@ -247,9 +249,9 @@ when configured with the `theme-file-name` which is a `yaml` file,
 - relative name: check the themes under XDG Base Directory, e.g. ~/.config/lsd/themes/<theme-file-name>.yaml
 - absolute name: use the file path and name to find theme file
 
-Check [Theme file content](#theme-file-content) for details.
+Check [Color Theme file content](#color-theme-file-content) for details.
 
-### Theme file content
+#### Color Theme file content
 
 Theme file use the [crossterm](https://crates.io/crates/crossterm)
 to configure the colors, check [crossterm](https://docs.rs/crossterm/0.20.0/crossterm/style/enum.Color.html)
@@ -289,6 +291,71 @@ links:
   valid: 13
   invalid: 245
 tree-edge: 245
+```
+
+When creating a theme for `lsd`, you can specify any part of the default theme,
+and then change its colors, the items missed would fallback to use the default colors.
+
+Please also notice that an empty theme is **NOT** supported due to
+[a bug in serde lib](https://github.com/dtolnay/serde-yaml/issues/86).
+
+### Icon Theme
+
+Icon theme can be configured in a fixed location, `LSD_CONFIG_DIR/themes/icons.yaml`,
+for example, `~/.config/lsd/themes/icons.yam` on macOS,
+please check [Config file location](#config-file-location) to make sure where is `LSD_CONFIG_DIR`.
+
+As the file name indicated, the icon theme file is a `yaml` file.
+
+Check [Icon Theme file content](#icon-theme-file-content) for details.
+
+#### Icon Theme file content
+
+lsd support 3 kinds of icon configuration:
+- icons-by-filetype
+- icons-by-name
+- icons-by-extension
+
+The default icon theme scheme shipped with `lsd` can be check in [icon theme source code](src/theme/icon.rs), we will load the default theme, and overwrite it with user defined parts, here is a example for icon theme.
+
+lsd icon theme support both nerd font and Unicode in the same time, you can use any one to config the theme, or even combine them.
+
+nerd font:
+
+```yaml
+icons-by-name:
+  .trash: 
+  .cargo: 
+  .emacs.d: 
+  a.out: 
+icons-by-extension:
+  go: 
+  hs: 
+  rs: 
+icons-by-filetype:
+  dir: 
+  file: 
+  pipe: 
+  socket: 
+  executable: 
+  symlink-dir: 
+  symlink-file: 
+  device-char: 
+  device-block: ﰩ
+  special: 
+```
+
+Unicode:
+
+```yaml
+icons-by-name:
+  .trash: 🗑
+icons-by-extension:
+  rs: 🦀
+icons-by-filetype:
+  dir: 📂
+  file: 📄
+  pipe: 📩
 ```
 
 When creating a theme for `lsd`, you can specify any part of the default theme,
