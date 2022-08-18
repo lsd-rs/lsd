@@ -345,9 +345,14 @@ impl ColorTheme {
             tree_edge: Color::AnsiValue(245), // Grey
         }
     }
+}
 
-    #[cfg(test)]
-    pub fn default_yaml() -> &'static str {
+#[cfg(test)]
+mod tests {
+    use super::ColorTheme;
+    use crate::theme::Theme;
+
+    fn default_yaml() -> &'static str {
         r#"---
 user: 230
 group: 187
@@ -375,18 +380,12 @@ links:
 tree-edge: 245
 "#
     }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::ColorTheme;
-    use crate::theme::Theme;
 
     #[test]
     fn test_default_theme() {
         assert_eq!(
             ColorTheme::default_dark(),
-            Theme::with_yaml(ColorTheme::default_yaml()).unwrap()
+            Theme::with_yaml(default_yaml()).unwrap()
         );
     }
 
@@ -397,7 +396,7 @@ mod tests {
         let dir = assert_fs::TempDir::new().unwrap();
         let theme = dir.path().join("theme.yaml");
         let mut file = File::create(&theme).unwrap();
-        writeln!(file, "{}", ColorTheme::default_yaml()).unwrap();
+        writeln!(file, "{}", default_yaml()).unwrap();
 
         assert_eq!(
             ColorTheme::default_dark(),
