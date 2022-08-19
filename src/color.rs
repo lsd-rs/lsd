@@ -367,9 +367,10 @@ mod tests {
 
 #[cfg(test)]
 mod elem {
-    use super::Elem;
+    use super::{Colors, Elem};
     use crate::color::{theme, Theme};
     use crossterm::style::Color;
+    use lscolors::Indicator;
 
     #[cfg(test)]
     fn test_theme() -> Theme {
@@ -502,6 +503,29 @@ mod elem {
         assert_eq!(
             Elem::DirectoryIndicator.get_color(&theme),
             Color::AnsiValue(15)
+        );
+    }
+
+    // test the default behavior without x-indicator properties set
+    #[test]
+    fn test_file_indicator_lscolors_defaults() {
+        let colors = Colors::new(super::ThemeOption::Default);
+        assert_eq!(
+            colors.get_indicator_from_elem(&Elem::FileIndicator { exec: false }),
+            Indicator::from("fi")
+        );
+        assert_eq!(
+            colors.get_indicator_from_elem(&Elem::FileIndicator { exec: true }),
+            Indicator::from("ex")
+        );
+    }
+
+    #[test]
+    fn test_directory_indicator_lscolors_defaults() {
+        let colors = Colors::new(super::ThemeOption::Default);
+        assert_eq!(
+            colors.get_indicator_from_elem(&Elem::DirectoryIndicator),
+            Indicator::from("di")
         );
     }
 }
