@@ -59,3 +59,9 @@ serial_test = "0.5"
 
 [features]
 sudo = []
+
+[profile.release]
+lto = true
+codegen-units = 1
+strip = true
+debug = false
