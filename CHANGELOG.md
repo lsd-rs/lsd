@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased] - ReleaseDate
 ### Added
 ### Changed
+- Reduce the binary size and improve the performance from [sabify](https://github.com/sabify)
 ### Fixed
 - Fix rendering issues in Windows from [meain](https://gitHub.com/meain)
 
