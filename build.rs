@@ -6,11 +6,11 @@
 // notice may not be copied, modified, or distributed except
 // according to those terms.
 
-#[macro_use]
 extern crate clap;
 extern crate version_check;
 
-use clap::Shell;
+use clap_complete::generate_to;
+use clap_complete::shells::*;
 use std::fs;
 use std::process::exit;
 
@@ -30,8 +30,10 @@ fn main() {
     fs::create_dir_all(&outdir).unwrap();
 
     let mut app = build();
-    app.gen_completions("lsd", Shell::Bash, &outdir);
-    app.gen_completions("lsd", Shell::Fish, &outdir);
-    app.gen_completions("lsd", Shell::Zsh, &outdir);
-    app.gen_completions("lsd", Shell::PowerShell, &outdir);
+    let bin_name = "lsd";
+    generate_to(Bash, &mut app, bin_name, &outdir).expect("Failed to generate Bash completions");
+    generate_to(Fish, &mut app, bin_name, &outdir).expect("Failed to generate Fish completions");
+    generate_to(Zsh, &mut app, bin_name, &outdir).expect("Failed to generate Zsh completions");
+    generate_to(PowerShell, &mut app, bin_name, &outdir)
+        .expect("Failed to generate PowerShell completions");
 }
