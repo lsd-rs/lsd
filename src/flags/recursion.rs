@@ -106,9 +106,9 @@ impl Recursion {
             match str.parse::<usize>() {
                 Ok(value) => return Some(Ok(value)),
                 Err(_) => {
-                    return Some(Err(Error::with_description(
-                        "The argument '--depth' requires a valid positive number.",
+                    return Some(Err(Error::raw(
                         ErrorKind::ValueValidation,
+                        "The argument '--depth' requires a valid positive number.",
                     )))
                 }
             }

@@ -1,24 +1,24 @@
 use clap::{App, Arg};
 
-pub fn build() -> App<'static, 'static> {
+pub fn build() -> App<'static> {
     App::new("lsd")
-        .version(crate_version!())
-        .about(crate_description!())
+        .version(env!("CARGO_PKG_VERSION"))
+        .about(env!("CARGO_PKG_DESCRIPTION"))
         .arg(Arg::with_name("FILE").multiple(true).default_value("."))
         .arg(
             Arg::with_name("all")
-                .short("a")
+                .short('a')
                 .overrides_with("almost-all")
                 .long("all")
-                .multiple(true)
+                .multiple_occurrences(true)
                 .help("Do not ignore entries starting with ."),
         )
         .arg(
             Arg::with_name("almost-all")
-                .short("A")
+                .short('A')
                 .overrides_with("all")
                 .long("almost-all")
-                .multiple(true)
+                .multiple_occurrences(true)
                 .help("Do not list implied . and .."),
         )
         .arg(
@@ -28,7 +28,8 @@ pub fn build() -> App<'static, 'static> {
                 .possible_value("auto")
                 .possible_value("never")
                 .default_value("auto")
-                .multiple(true)
+                .multiple_occurrences(true)
+                .takes_value(true)
                 .number_of_values(1)
                 .help("When to use terminal colours"),
         )
@@ -39,7 +40,8 @@ pub fn build() -> App<'static, 'static> {
                 .possible_value("auto")
                 .possible_value("never")
                 .default_value("auto")
-                .multiple(true)
+                .multiple_occurrences(true)
+                .takes_value(true)
                 .number_of_values(1)
                 .help("When to print the icons"),
         )
@@ -49,22 +51,23 @@ pub fn build() -> App<'static, 'static> {
                 .possible_value("fancy")
                 .possible_value("unicode")
                 .default_value("fancy")
-                .multiple(true)
+                .multiple_occurrences(true)
+                .takes_value(true)
                 .number_of_values(1)
                 .help("Whether to use fancy or unicode icons"),
         )
         .arg(
             Arg::with_name("indicators")
-                .short("F")
+                .short('F')
                 .long("classify")
-                .multiple(true)
+                .multiple_occurrences(true)
                 .help("Append indicator (one of */=>@|) at the end of the file names"),
         )
         .arg(
             Arg::with_name("long")
-                .short("l")
+                .short('l')
                 .long("long")
-                .multiple(true)
+                .multiple_occurrences(true)
                 .help("Display extended file metadata as a table"),
         )
         .arg(
@@ -81,44 +84,44 @@ pub fn build() -> App<'static, 'static> {
         )
         .arg(
             Arg::with_name("oneline")
-                .short("1")
+                .short('1')
                 .long("oneline")
-                .multiple(true)
+                .multiple_occurrences(true)
                 .help("Display one entry per line"),
         )
         .arg(
             Arg::with_name("recursive")
-                .short("R")
+                .short('R')
                 .long("recursive")
-                .multiple(true)
+                .multiple_occurrences(true)
                 .conflicts_with("tree")
                 .help("Recurse into directories"),
         )
         .arg(
             Arg::with_name("human_readable")
-                .short("h")
+                .short('h')
                 .long("human-readable")
-                .multiple(true)
+                .multiple_occurrences(true)
                 .help("For ls compatibility purposes ONLY, currently set by default"),
         )
         .arg(
             Arg::with_name("tree")
                 .long("tree")
-                .multiple(true)
+                .multiple_occurrences(true)
                 .conflicts_with("recursive")
                 .help("Recurse into directories and present the result as a tree"),
         )
         .arg(
             Arg::with_name("depth")
                 .long("depth")
-                .multiple(true)
+                .multiple_occurrences(true)
                 .takes_value(true)
                 .value_name("num")
                 .help("Stop recursing into directories after reaching specified depth"),
         )
         .arg(
             Arg::with_name("directory-only")
-                .short("d")
+                .short('d')
                 .long("directory-only")
                 .conflicts_with("depth")
                 .conflicts_with("recursive")
@@ -130,7 +133,8 @@ pub fn build() -> App<'static, 'static> {
                 .default_value("rwx")
                 .possible_value("rwx")
                 .possible_value("octal")
-                .multiple(true)
+                .multiple_occurrences(true)
+                .takes_value(true)
                 .number_of_values(1)
                 .help("How to display permissions"),
         )
@@ -141,14 +145,15 @@ pub fn build() -> App<'static, 'static> {
                 .possible_value("short")
                 .possible_value("bytes")
                 .default_value("default")
-                .multiple(true)
+                .multiple_occurrences(true)
+                .takes_value(true)
                 .number_of_values(1)
                 .help("How to display size"),
         )
         .arg(
             Arg::with_name("total-size")
                 .long("total-size")
-                .multiple(true)
+                .multiple_occurrences(true)
                 .help("Display the total size of directories"),
         )
         .arg(
@@ -156,51 +161,52 @@ pub fn build() -> App<'static, 'static> {
                 .long("date")
                 .validator(validate_date_argument)
                 .default_value("date")
-                .multiple(true)
+                .multiple_occurrences(true)
+                .takes_value(true)
                 .number_of_values(1)
                 .help("How to display date [possible values: date, relative, +date-time-format]"),
         )
         .arg(
             Arg::with_name("timesort")
-                .short("t")
+                .short('t')
                 .long("timesort")
                 .overrides_with("sizesort")
                 .overrides_with("extensionsort")
                 .overrides_with("versionsort")
                 .overrides_with("sort")
                 .overrides_with("no-sort")
-                .multiple(true)
+                .multiple_occurrences(true)
                 .help("Sort by time modified"),
         )
         .arg(
             Arg::with_name("sizesort")
-                .short("S")
+                .short('S')
                 .long("sizesort")
                 .overrides_with("timesort")
                 .overrides_with("extensionsort")
                 .overrides_with("versionsort")
                 .overrides_with("sort")
                 .overrides_with("no-sort")
-                .multiple(true)
+                .multiple_occurrences(true)
                 .help("Sort by size"),
         )
         .arg(
             Arg::with_name("extensionsort")
-                .short("X")
+                .short('X')
                 .long("extensionsort")
                 .overrides_with("sizesort")
                 .overrides_with("timesort")
                 .overrides_with("versionsort")
                 .overrides_with("sort")
                 .overrides_with("no-sort")
-                .multiple(true)
+                .multiple_occurrences(true)
                 .help("Sort by file extension"),
         )
         .arg(
             Arg::with_name("versionsort")
-                .short("v")
+                .short('v')
                 .long("versionsort")
-                .multiple(true)
+                .multiple_occurrences(true)
                 .overrides_with("timesort")
                 .overrides_with("sizesort")
                 .overrides_with("extensionsort")
@@ -211,7 +217,7 @@ pub fn build() -> App<'static, 'static> {
         .arg(
             Arg::with_name("sort")
                 .long("sort")
-                .multiple(true)
+                .multiple_occurrences(true)
                 .possible_values(&["size", "time", "version", "extension", "none"])
                 .takes_value(true)
                 .value_name("WORD")
@@ -224,9 +230,9 @@ pub fn build() -> App<'static, 'static> {
         )
         .arg(
             Arg::with_name("no-sort")
-            .short("U")
+            .short('U')
             .long("no-sort")
-            .multiple(true)
+            .multiple_occurrences(true)
             .overrides_with("timesort")
             .overrides_with("sizesort")
             .overrides_with("extensionsort")
@@ -236,9 +242,9 @@ pub fn build() -> App<'static, 'static> {
         )
         .arg(
             Arg::with_name("reverse")
-                .short("r")
+                .short('r')
                 .long("reverse")
-                .multiple(true)
+                .multiple_occurrences(true)
                 .help("Reverse the order of the sort"),
         )
         .arg(
@@ -247,7 +253,7 @@ pub fn build() -> App<'static, 'static> {
                 .possible_value("none")
                 .possible_value("first")
                 .possible_value("last")
-                .multiple(true)
+                .multiple_occurrences(true)
                 .number_of_values(1)
                 .help("Sort the directories then the files"),
         )
@@ -259,8 +265,10 @@ pub fn build() -> App<'static, 'static> {
         .arg(
             Arg::with_name("blocks")
                 .long("blocks")
-                .multiple(true)
-                .number_of_values(1)
+                .multiple_occurrences(true)
+                .multiple_values(true)
+                .takes_value(true)
+                .use_value_delimiter(true)
                 .require_delimiter(true)
                 .possible_values(&[
                     "permission",
@@ -283,14 +291,14 @@ pub fn build() -> App<'static, 'static> {
         .arg(
             Arg::with_name("no-symlink")
                 .long("no-symlink")
-                .multiple(true)
+                .multiple_occurrences(true)
                 .help("Do not display symlink target"),
         )
         .arg(
             Arg::with_name("ignore-glob")
-                .short("I")
+                .short('I')
                 .long("ignore-glob")
-                .multiple(true)
+                .multiple_occurrences(true)
                 .number_of_values(1)
                 .value_name("pattern")
                 .default_value("")
@@ -298,21 +306,21 @@ pub fn build() -> App<'static, 'static> {
         )
         .arg(
             Arg::with_name("inode")
-                .short("i")
+                .short('i')
                 .long("inode")
-                .multiple(true)
+                .multiple_occurrences(true)
                 .help("Display the index number of each file"),
         )
         .arg(
             Arg::with_name("dereference")
-                .short("L")
+                .short('L')
                 .long("dereference")
-                .multiple(true)
+                .multiple_occurrences(true)
                 .help("When showing file information for a symbolic link, show information for the file the link references rather than for the link itself"),
         )
         .arg(
             Arg::with_name("context")
-                .short("Z")
+                .short('Z')
                 .long("context")
                 .required(false)
                 .takes_value(false)
@@ -325,7 +333,8 @@ pub fn build() -> App<'static, 'static> {
                 .possible_value("auto")
                 .possible_value("never")
                 .default_value("never")
-                .multiple(true)
+                .multiple_occurrences(true)
+                .takes_value(true)
                 .number_of_values(1)
                 .help("Attach hyperlink to filenames"),
         )
@@ -336,7 +345,7 @@ pub fn build() -> App<'static, 'static> {
         )
 }
 
-fn validate_date_argument(arg: String) -> Result<(), String> {
+fn validate_date_argument(arg: &str) -> Result<(), String> {
     if arg.starts_with('+') {
         validate_time_format(&arg)
     } else if arg == "date" || arg == "relative" {
