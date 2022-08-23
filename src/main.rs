@@ -5,7 +5,6 @@
     clippy::cast_possible_wrap
 )]
 
-#[macro_use]
 extern crate clap;
 extern crate chrono;
 extern crate chrono_humanize;
