@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased] - ReleaseDate
 ### Added
 - Add icon for Zstandard from [nix6839](https://github.com/nix6839)
+- Add optional theme overrides for file indicator (`file-indicator`) and directory indicator (`directory-indicator`) in `--long` view from [themkat](https://github.com/themkat)
 ### Changed
 ### Fixed
 - Fix rendering issues in Windows from [meain](https://gitHub.com/meain)
