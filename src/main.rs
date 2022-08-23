@@ -5,9 +5,9 @@
     clippy::cast_possible_wrap
 )]
 
-extern crate clap;
 extern crate chrono;
 extern crate chrono_humanize;
+extern crate clap;
 extern crate dirs;
 extern crate libc;
 extern crate lscolors;
