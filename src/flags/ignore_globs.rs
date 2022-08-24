@@ -25,10 +25,8 @@ impl IgnoreGlobs {
             return value;
         }
 
-        if !matches.is_present("ignore-config") {
-            if let Some(value) = Self::from_config(config) {
-                return value;
-            }
+        if let Some(value) = Self::from_config(config) {
+            return value;
         }
 
         Ok(Default::default())

@@ -87,7 +87,7 @@ impl Configurable<Self> for Blocks {
             Default::default()
         };
 
-        if matches.is_present("long") && !matches.is_present("ignore-config") {
+        if matches.is_present("long") {
             if let Some(value) = Self::from_config(config) {
                 blocks = value;
             }
