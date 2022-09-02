@@ -1,0 +1,3 @@
+# use empty config file to ensure that `rustfmt` will always use 
+# the default configuration when formatting code
+# even if there is a `rustfmt.toml` file in parent directories
