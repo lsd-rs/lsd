@@ -27,7 +27,7 @@ pub use self::symlink::SymLink;
 pub use crate::icon::Icons;
 
 use crate::flags::{Display, Flags, Layout};
-use crate::print_error;
+use crate::{print_error, ExitCode};
 
 use std::io::{self, Error, ErrorKind};
 use std::path::{Component, Path, PathBuf};
@@ -50,30 +50,34 @@ pub struct Meta {
 }
 
 impl Meta {
-    pub fn recurse_into(&self, depth: usize, flags: &Flags) -> io::Result<Option<Vec<Meta>>> {
+    pub fn recurse_into(
+        &self,
+        depth: usize,
+        flags: &Flags,
+    ) -> io::Result<(Option<Vec<Meta>>, ExitCode)> {
         if depth == 0 {
-            return Ok(None);
+            return Ok((None, ExitCode::OK));
         }
 
         if flags.display == Display::DirectoryOnly && flags.layout != Layout::Tree {
-            return Ok(None);
+            return Ok((None, ExitCode::OK));
         }
 
         match self.file_type {
             FileType::Directory { .. } => (),
             FileType::SymLink { is_dir: true } => {
                 if flags.layout == Layout::OneLine {
-                    return Ok(None);
+                    return Ok((None, ExitCode::OK));
                 }
             }
-            _ => return Ok(None),
+            _ => return Ok((None, ExitCode::OK)),
         }
 
         let entries = match self.path.read_dir() {
             Ok(entries) => entries,
             Err(err) => {
                 print_error!("{}: {}.", self.path.display(), err);
-                return Ok(None);
+                return Ok((None, ExitCode::MinorIssue));
             }
         };
 
@@ -90,6 +94,8 @@ impl Meta {
             content.push(current_meta);
             content.push(parent_meta);
         }
+
+        let mut exit_code = ExitCode::OK;
 
         for entry in entries {
             let entry = entry?;
@@ -111,6 +117,7 @@ impl Meta {
                 Ok(res) => res,
                 Err(err) => {
                     print_error!("{}: {}.", path.display(), err);
+                    exit_code.set_if_greater(ExitCode::MinorIssue);
                     continue;
                 }
             };
@@ -126,9 +133,13 @@ impl Meta {
             // check dereferencing
             if flags.dereference.0 || !matches!(entry_meta.file_type, FileType::SymLink { .. }) {
                 match entry_meta.recurse_into(depth - 1, flags) {
-                    Ok(content) => entry_meta.content = content,
+                    Ok((content, rec_exit_code)) => {
+                        entry_meta.content = content;
+                        exit_code.set_if_greater(rec_exit_code);
+                    }
                     Err(err) => {
                         print_error!("{}: {}.", path.display(), err);
+                        exit_code.set_if_greater(ExitCode::MinorIssue);
                         continue;
                     }
                 };
@@ -137,7 +148,7 @@ impl Meta {
             content.push(entry_meta);
         }
 
-        Ok(Some(content))
+        Ok((Some(content), exit_code))
     }
 
     pub fn calculate_total_size(&mut self) {
