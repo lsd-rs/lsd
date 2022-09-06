@@ -42,6 +42,21 @@ use crate::core::Core;
 use crate::flags::Flags;
 use std::path::PathBuf;
 
+#[derive(PartialEq, Eq, PartialOrd, Copy, Clone)]
+pub enum ExitCode {
+    OK,
+    MinorIssue,
+    MajorIssue,
+}
+impl ExitCode {
+    pub fn set_if_greater(&mut self, code: ExitCode) {
+        let self_i32 = *self as i32;
+        let code_i32 = code as i32;
+        if self_i32 < code_i32 {
+            *self = code;
+        }
+    }
+}
 /// Macro used to avoid panicking when the lsd method is used with a pipe and
 /// stderr close before our program.
 #[macro_export]
@@ -115,5 +130,6 @@ fn main() {
     let flags = Flags::configure_from(&matches, &config).unwrap_or_else(|err| err.exit());
     let core = Core::new(flags);
 
-    core.run(inputs);
+    let exit_code = core.run(inputs);
+    std::process::exit(exit_code as i32);
 }

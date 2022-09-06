@@ -602,6 +602,7 @@ mod tests {
             .unwrap()
             .recurse_into(42, &flags)
             .unwrap()
+            .0
             .unwrap();
         sort(&mut metas, &sort::assemble_sorters(&flags));
         let output = tree(
@@ -633,6 +634,7 @@ mod tests {
             .unwrap()
             .recurse_into(42, &flags)
             .unwrap()
+            .0
             .unwrap();
         let output = tree(
             &metas,
@@ -672,6 +674,7 @@ mod tests {
             .unwrap()
             .recurse_into(42, &flags)
             .unwrap()
+            .0
             .unwrap();
         let output = tree(
             &metas,
@@ -710,6 +713,7 @@ mod tests {
             .unwrap()
             .recurse_into(42, &flags)
             .unwrap()
+            .0
             .unwrap();
         let output = tree(
             &metas,
@@ -739,6 +743,7 @@ mod tests {
             .unwrap()
             .recurse_into(1, &flags)
             .unwrap()
+            .0
             .unwrap();
         let output = grid(
             &metas,
@@ -771,6 +776,7 @@ mod tests {
             .unwrap()
             .recurse_into(1, &flags)
             .unwrap()
+            .0
             .unwrap();
         let output = grid(
             &metas,

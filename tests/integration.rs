@@ -8,6 +8,8 @@ use std::process::Command;
 
 #[cfg(unix)]
 use std::os::unix::fs;
+#[cfg(unix)]
+use std::os::unix::fs::PermissionsExt;
 
 #[test]
 fn test_runs_okay() {
@@ -639,6 +641,45 @@ fn test_custom_config_file_parsing() {
         .arg(dir.child("folder").path())
         .assert()
         .stdout(predicate::str::is_match("folder\n└── file").unwrap());
+}
+
+#[test]
+fn test_cannot_access_file_exit_status() {
+    let dir = tempdir();
+    let does_not_exist = dir.path().join("does_not_exist");
+
+    let status = cmd()
+        .arg("-l")
+        .arg("--ignore-config")
+        .arg(does_not_exist)
+        .status()
+        .unwrap()
+        .code()
+        .unwrap();
+
+    assert_eq!(status, 2)
+}
+
+#[cfg(unix)]
+#[test]
+fn test_cannot_access_subdir_exit_status() {
+    let tmp = tempdir();
+
+    let readonly = std::fs::Permissions::from_mode(0o400);
+    tmp.child("d/subdir/onemore").create_dir_all().unwrap();
+
+    std::fs::set_permissions(tmp.child("d").path().join("subdir"), readonly).unwrap();
+
+    let status = cmd()
+        .arg("--tree")
+        .arg("--ignore-config")
+        .arg(tmp.child("d").path())
+        .status()
+        .unwrap()
+        .code()
+        .unwrap();
+
+    assert_eq!(status, 1)
 }
 
 #[test]

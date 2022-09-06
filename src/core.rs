@@ -6,7 +6,7 @@ use crate::flags::{
 };
 use crate::icon::{self, Icons};
 use crate::meta::Meta;
-use crate::{print_error, print_output, sort};
+use crate::{print_error, print_output, sort, ExitCode};
 use std::path::PathBuf;
 
 #[cfg(not(target_os = "windows"))]
@@ -83,14 +83,16 @@ impl Core {
         }
     }
 
-    pub fn run(self, paths: Vec<PathBuf>) {
-        let mut meta_list = self.fetch(paths);
+    pub fn run(self, paths: Vec<PathBuf>) -> ExitCode {
+        let (mut meta_list, exit_code) = self.fetch(paths);
 
         self.sort(&mut meta_list);
-        self.display(&meta_list)
+        self.display(&meta_list);
+        exit_code
     }
 
-    fn fetch(&self, paths: Vec<PathBuf>) -> Vec<Meta> {
+    fn fetch(&self, paths: Vec<PathBuf>) -> (Vec<Meta>, ExitCode) {
+        let mut exit_code = ExitCode::OK;
         let mut meta_list = Vec::with_capacity(paths.len());
         let depth = match self.flags.layout {
             Layout::Tree { .. } => self.flags.recursion.depth,
@@ -103,6 +105,7 @@ impl Core {
                 Ok(meta) => meta,
                 Err(err) => {
                     print_error!("{}: {}.", path.display(), err);
+                    exit_code.set_if_greater(ExitCode::MajorIssue);
                     continue;
                 }
             };
@@ -111,12 +114,14 @@ impl Core {
                 self.flags.layout == Layout::Tree || self.flags.display != Display::DirectoryOnly;
             if recurse {
                 match meta.recurse_into(depth, &self.flags) {
-                    Ok(content) => {
+                    Ok((content, path_exit_code)) => {
                         meta.content = content;
                         meta_list.push(meta);
+                        exit_code.set_if_greater(path_exit_code);
                     }
                     Err(err) => {
                         print_error!("lsd: {}: {}\n", path.display(), err);
+                        exit_code.set_if_greater(ExitCode::MinorIssue);
                         continue;
                     }
                 };
@@ -131,7 +136,7 @@ impl Core {
             }
         }
 
-        meta_list
+        (meta_list, exit_code)
     }
 
     fn sort(&self, metas: &mut Vec<Meta>) {
