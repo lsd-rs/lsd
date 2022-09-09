@@ -1,10 +1,15 @@
-use clap::{App, Arg};
+use clap::{App, Arg, ValueHint};
 
 pub fn build() -> App<'static> {
     App::new("lsd")
         .version(env!("CARGO_PKG_VERSION"))
         .about(env!("CARGO_PKG_DESCRIPTION"))
-        .arg(Arg::with_name("FILE").multiple(true).default_value("."))
+        .arg(
+            Arg::with_name("FILE")
+                .multiple(true)
+                .default_value(".")
+                .value_hint(ValueHint::AnyPath),
+        )
         .arg(
             Arg::with_name("all")
                 .short('a')
