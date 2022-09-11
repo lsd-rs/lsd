@@ -38,6 +38,7 @@ Install the patched fonts of powerline nerd-font and/or font-awesome. Have a loo
 | Ubuntu/Debian based distro      | `sudo dpkg -i lsd_0.23.0_amd64.deb` get `.deb` file from [release page](https://github.com/Peltoche/lsd/releases) |
 | Solus                           | `eopkg it lsd`                                                                                                    |
 | Void Linux                      | `sudo xbps-install lsd`                                                                                           |
+| openSUSE                        | `sudo zypper install lsd`                                                                                         |
 
 ### From source
 
