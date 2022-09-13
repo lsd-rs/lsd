@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## 0.23.1 - 2022-09-13
+## [0.23.1] - 2022-09-13
 
 ### Fixed
 - Fix tab completion for paths in ZSH from [duhdugg](https://github.com/duhdugg)
