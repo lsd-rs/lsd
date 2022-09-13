@@ -7,8 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased] - ReleaseDate
 
 ### Fixed
-- Fix tab completion for paths in ZSH
-- Fix POSIX-compatible exit status
+- Fix tab completion for paths in ZSH from [duhdugg](https://github.com/duhdugg)
+- Fix POSIX-compatible exit status from [duhdugg](https://github.com/duhdugg)
 
 ## [0.23.0] - 2022-09-05
 ### Added
@@ -354,7 +354,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Change the component alignment by using term_grid
 
 
-[0.23.0]: https://github.com/Peltoche/lsd/compare/0.22.0...HEAD
+
+[Unreleased]: https://github.com/Peltoche/lsd/compare/0.23.0...HEAD
+[0.23.0]: https://github.com/Peltoche/lsd/compare/0.22.0...0.23.0
 [0.22.0]: https://github.com/Peltoche/lsd/compare/0.21.0...0.22.0
 [0.21.0]: https://github.com/Peltoche/lsd/compare/0.20.1...0.21.0
 [0.20.1]: https://github.com/Peltoche/lsd/compare/0.20.0...0.20.1
