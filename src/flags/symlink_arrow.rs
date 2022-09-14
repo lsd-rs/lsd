@@ -62,9 +62,10 @@ mod test {
     #[test]
     fn test_symlink_arrow_from_args_none() {
         use clap::App;
+        let empty_args: [String; 0] = [];
         assert_eq!(
             None,
-            SymlinkArrow::from_arg_matches(&App::new("lsd").get_matches())
+            SymlinkArrow::from_arg_matches(&App::new("lsd").get_matches_from(empty_args))
         );
     }
 
