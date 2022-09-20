@@ -654,6 +654,60 @@ mod test {
             )
         );
 
+        let file_path = tmp_dir.path().join("a$a.txt");
+        File::create(&file_path).expect("failed to create file");
+        let meta = file_path.metadata().expect("failed to get metas");
+
+        let colors = Colors::new(color::ThemeOption::NoLscolors);
+        let file_type = FileType::new(&meta, None, &Permissions::from(&meta));
+        let name = Name::new(&file_path, file_type);
+
+        assert_eq!(
+            " \'a$a.txt\'".to_string().with(Color::AnsiValue(184)),
+            name.render(
+                &colors,
+                &icons,
+                &DisplayOption::FileName,
+                HyperlinkOption::Never
+            )
+        );
+
+        let file_path = tmp_dir.path().join("\\.txt");
+        File::create(&file_path).expect("failed to create file");
+        let meta = file_path.metadata().expect("failed to get metas");
+
+        let colors = Colors::new(color::ThemeOption::NoLscolors);
+        let file_type = FileType::new(&meta, None, &Permissions::from(&meta));
+        let name = Name::new(&file_path, file_type);
+
+        assert_eq!(
+            " \'\\.txt\'".to_string().with(Color::AnsiValue(184)),
+            name.render(
+                &colors,
+                &icons,
+                &DisplayOption::FileName,
+                HyperlinkOption::Never
+            )
+        );
+
+        let file_path = tmp_dir.path().join("\"\'.txt");
+        File::create(&file_path).expect("failed to create file");
+        let meta = file_path.metadata().expect("failed to get metas");
+
+        let colors = Colors::new(color::ThemeOption::NoLscolors);
+        let file_type = FileType::new(&meta, None, &Permissions::from(&meta));
+        let name = Name::new(&file_path, file_type);
+
+        assert_eq!(
+            " \'\"\'\\\'\'.txt\'".to_string().with(Color::AnsiValue(184)),
+            name.render(
+                &colors,
+                &icons,
+                &DisplayOption::FileName,
+                HyperlinkOption::Never
+            )
+        );
+
         let file_path = tmp_dir.path().join("file\nnewline.txt");
         File::create(&file_path).expect("failed to create file");
         let meta = file_path.metadata().expect("failed to get metas");
