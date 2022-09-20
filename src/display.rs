@@ -321,7 +321,8 @@ fn get_output(
             Block::Date => block_vec.push(meta.date.render(colors, flags)),
             Block::Name => {
                 block_vec.extend([
-                    meta.name.render(colors, icons, display_option, flags.hyperlink),
+                    meta.name
+                        .render(colors, icons, display_option, flags.hyperlink),
                     meta.indicator.render(flags),
                 ]);
                 if !(flags.no_symlink.0 || flags.dereference.0 || flags.layout == Layout::Grid) {
