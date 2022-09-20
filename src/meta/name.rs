@@ -79,6 +79,16 @@ impl Name {
     }
 
     fn escape(&self, string: &str) -> String {
+        let mut name = string.to_string();
+        if name.contains('\\') || name.contains('"') {
+            name = name.replace('\'', "\'\\\'\'");
+            name = format!("\'{}\'", &name);
+        } else if name.contains('\'') {
+            name = format!("\"{}\"", &name);
+        } else if name.contains(' ') || name.contains('$') {
+            name = format!("\'{}\'", &name);
+        }
+        let string = name;
         if string
             .chars()
             .all(|c| c >= 0x20 as char && c != 0x7f as char)
