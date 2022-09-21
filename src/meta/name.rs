@@ -699,7 +699,9 @@ mod test {
         let name = Name::new(&file_path, file_type);
 
         assert_eq!(
-            " \'\"\'\\\'\'.txt\'".to_string().with(Color::AnsiValue(184)),
+            " \'\"\'\\\'\'.txt\'"
+                .to_string()
+                .with(Color::AnsiValue(184)),
             name.render(
                 &colors,
                 &icons,
