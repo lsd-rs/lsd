@@ -105,7 +105,7 @@ pub struct Theme {
     pub file_type: FileType,
 }
 
-#[derive(Debug, Deserialize, PartialEq)]
+#[derive(Debug, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "kebab-case")]
 #[serde(deny_unknown_fields)]
 #[serde(default)]
@@ -128,7 +128,7 @@ pub struct Permission {
     pub context: Color,
 }
 
-#[derive(Debug, Deserialize, PartialEq)]
+#[derive(Debug, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "kebab-case")]
 #[serde(deny_unknown_fields)]
 #[serde(default)]
@@ -148,7 +148,7 @@ pub struct FileType {
     pub special: Color,
 }
 
-#[derive(Debug, Deserialize, PartialEq)]
+#[derive(Debug, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "kebab-case")]
 #[serde(deny_unknown_fields)]
 #[serde(default)]
@@ -163,7 +163,7 @@ pub struct File {
     pub no_exec_no_uid: Color,
 }
 
-#[derive(Debug, Deserialize, PartialEq)]
+#[derive(Debug, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "kebab-case")]
 #[serde(deny_unknown_fields)]
 #[serde(default)]
@@ -174,7 +174,7 @@ pub struct Dir {
     pub no_uid: Color,
 }
 
-#[derive(Debug, Deserialize, PartialEq)]
+#[derive(Debug, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "kebab-case")]
 #[serde(deny_unknown_fields)]
 #[serde(default)]
@@ -187,7 +187,7 @@ pub struct Symlink {
     pub missing_target: Color,
 }
 
-#[derive(Debug, Deserialize, PartialEq)]
+#[derive(Debug, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "kebab-case")]
 #[serde(deny_unknown_fields)]
 #[serde(default)]
@@ -200,7 +200,7 @@ pub struct Date {
     pub older: Color,
 }
 
-#[derive(Debug, Deserialize, PartialEq)]
+#[derive(Debug, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "kebab-case")]
 #[serde(deny_unknown_fields)]
 #[serde(default)]
@@ -215,7 +215,7 @@ pub struct Size {
     pub large: Color,
 }
 
-#[derive(Debug, Deserialize, PartialEq)]
+#[derive(Debug, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "kebab-case")]
 #[serde(deny_unknown_fields)]
 #[serde(default)]
@@ -226,7 +226,7 @@ pub struct INode {
     pub invalid: Color,
 }
 
-#[derive(Debug, Deserialize, PartialEq)]
+#[derive(Debug, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "kebab-case")]
 #[serde(deny_unknown_fields)]
 #[serde(default)]

@@ -93,7 +93,7 @@ impl Name {
             .chars()
             .all(|c| c >= 0x20 as char && c != 0x7f as char)
         {
-            string.to_string()
+            string
         } else {
             let mut chars = String::new();
             for c in string.chars() {
