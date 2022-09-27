@@ -6,16 +6,16 @@ use std::collections::HashMap;
 #[serde(deny_unknown_fields)]
 #[serde(default)]
 pub struct IconTheme {
-    pub icons_by_name: HashMap<String, String>,
-    pub icons_by_extension: HashMap<String, String>,
-    pub icons_by_filetype: IconByType,
+    pub name: HashMap<String, String>,
+    pub extension: HashMap<String, String>,
+    pub filetype: ByType,
 }
 
 #[derive(Debug, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "kebab-case")]
 #[serde(deny_unknown_fields)]
 #[serde(default)]
-pub struct IconByType {
+pub struct ByType {
     pub dir: String,
     pub file: String,
     pub pipe: String,
@@ -31,16 +31,16 @@ pub struct IconByType {
 impl Default for IconTheme {
     fn default() -> Self {
         IconTheme {
-            icons_by_name: Self::get_default_icons_by_name(),
-            icons_by_extension: Self::get_default_icons_by_extension(),
-            icons_by_filetype: IconByType::default(),
+            name: Self::get_default_icons_by_name(),
+            extension: Self::get_default_icons_by_extension(),
+            filetype: ByType::default(),
         }
     }
 }
 
-impl Default for IconByType {
-    fn default() -> IconByType {
-        IconByType {
+impl Default for ByType {
+    fn default() -> ByType {
+        ByType {
             dir: "\u{f115}".into(),          // 
             file: "\u{f016}".into(),         // 
             pipe: "\u{f731}".into(),         // 
@@ -55,9 +55,9 @@ impl Default for IconByType {
     }
 }
 
-impl IconByType {
+impl ByType {
     pub fn unicode() -> Self {
-        IconByType {
+        ByType {
             dir: "\u{1f4c2}".into(),
             file: "\u{1f4c4}".into(),
             pipe: "\u{1f4e9}".into(),
@@ -75,9 +75,9 @@ impl IconByType {
 impl IconTheme {
     pub fn unicode() -> Self {
         IconTheme {
-            icons_by_name: HashMap::new(),
-            icons_by_extension: HashMap::new(),
-            icons_by_filetype: IconByType::unicode(),
+            name: HashMap::new(),
+            extension: HashMap::new(),
+            filetype: ByType::unicode(),
         }
     }
 
@@ -482,16 +482,16 @@ mod tests {
 
     fn partial_default_yaml() -> &'static str {
         r#"---
-icons-by-name:
+name:
   .trash: 
   .cargo: 
   .emacs.d: 
   a.out: 
-icons-by-extension:
+extension:
   go: 
   hs: 
   rs: 
-icons-by-filetype:
+filetype:
   dir: 
   file: 
   pipe: 
@@ -506,7 +506,7 @@ icons-by-filetype:
     }
 
     fn check_partial_yaml(def: &IconTheme, yaml: &IconTheme) {
-        assert_eq!(def.icons_by_filetype.dir, yaml.icons_by_filetype.dir,);
+        assert_eq!(def.filetype.dir, yaml.filetype.dir,);
     }
 
     #[test]
@@ -533,7 +533,16 @@ icons-by-filetype:
     fn test_empty_theme_return_default() {
         // Must contain one field at least
         // ref https://github.com/dtolnay/serde-yaml/issues/86
-        let empty: IconTheme = Theme::with_yaml("icons-by-filetype:\n  dir: ").unwrap(); //  is the default value
+        let empty: IconTheme = Theme::with_yaml("  ").unwrap();
+        let default = IconTheme::default();
+        check_partial_yaml(&empty, &default);
+    }
+
+    #[test]
+    fn test_partial_theme_return_default() {
+        // Must contain one field at least
+        // ref https://github.com/dtolnay/serde-yaml/issues/86
+        let empty: IconTheme = Theme::with_yaml("filetype:\n  dir: ").unwrap(); //  is the default value
         let default = IconTheme::default();
         check_partial_yaml(&empty, &default);
     }
@@ -542,7 +551,7 @@ icons-by-filetype:
     fn test_serde_dir_from_yaml() {
         // Must contain one field at least
         // ref https://github.com/dtolnay/serde-yaml/issues/86
-        let empty: IconTheme = Theme::with_yaml("icons-by-filetype:\n  dir: ").unwrap();
-        assert_eq!(empty.icons_by_filetype.dir, "");
+        let empty: IconTheme = Theme::with_yaml("filetype:\n  dir: ").unwrap();
+        assert_eq!(empty.filetype.dir, "");
     }
 }

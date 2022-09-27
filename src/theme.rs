@@ -38,7 +38,10 @@ impl Theme {
     /// This read theme from file,
     /// use the file path if it is absolute
     /// prefix the config_file dir to it if it is not
-    pub fn from_path<D: DeserializeOwned>(file: &str) -> Result<D, Error> {
+    pub fn from_path<D>(file: &str) -> Result<D, Error>
+    where
+        D: DeserializeOwned + Default,
+    {
         let real = if let Some(path) = config_file::Config::expand_home(file) {
             path
         } else {
@@ -49,7 +52,7 @@ impl Theme {
             real
         } else {
             match config_file::Config::config_file_path() {
-                Some(p) => p.join("themes").join(real),
+                Some(p) => p.join(real),
                 None => return Err(Error::InvalidPath("config home not existed".into())),
             }
         };
@@ -72,7 +75,13 @@ impl Theme {
     }
 
     /// This constructs a Theme struct with a passed [Yaml] str.
-    fn with_yaml<D: DeserializeOwned>(yaml: &str) -> Result<D, serde_yaml::Error> {
+    fn with_yaml<D>(yaml: &str) -> Result<D, serde_yaml::Error>
+    where
+        D: DeserializeOwned + Default,
+    {
+        if yaml.trim() == "" {
+            return Ok(D::default());
+        }
         serde_yaml::from_str::<D>(yaml)
     }
 }

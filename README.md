@@ -246,7 +246,7 @@ The valid theme configurations are:
 when configured with the `theme-file-name` which is a `yaml` file,
 `lsd` will look up the theme file in the following way:
 
-- relative name: check the themes under XDG Base Directory, e.g. ~/.config/lsd/themes/<theme-file-name>.yaml
+- relative name: check the XDG Base Directory, e.g. ~/.config/lsd/<theme-file-name>.yaml
 - absolute name: use the file path and name to find theme file
 
 Check [Color Theme file content](#color-theme-file-content) for details.
@@ -301,9 +301,9 @@ Please also notice that an empty theme is **NOT** supported due to
 
 ### Icon Theme
 
-Icon theme can be configured in a fixed location, `LSD_CONFIG_DIR/themes/icons.yaml`,
-for example, `~/.config/lsd/themes/icons.yam` on macOS,
-please check [Config file location](#config-file-location) to make sure where is `LSD_CONFIG_DIR`.
+Icon theme can be configured in a fixed location, `$XDG_CONFIG_DIR/lsd/icons.yaml`,
+for example, `~/.config/lsd/icons.yaml` on macOS,
+please check [Config file location](#config-file-location) to make sure where is `$XDG_CONFIG_DIR`.
 
 As the file name indicated, the icon theme file is a `yaml` file.
 
@@ -312,9 +312,9 @@ Check [Icon Theme file content](#icon-theme-file-content) for details.
 #### Icon Theme file content
 
 lsd support 3 kinds of icon configuration:
-- icons-by-filetype
-- icons-by-name
-- icons-by-extension
+- filetype
+- name
+- extension
 
 The default icon theme scheme shipped with `lsd` can be check in [icon theme source code](src/theme/icon.rs), we will load the default theme, and overwrite it with user defined parts, here is a example for icon theme.
 
@@ -323,16 +323,16 @@ lsd icon theme support both nerd font and Unicode in the same time, you can use 
 nerd font:
 
 ```yaml
-icons-by-name:
+name:
   .trash: 
   .cargo: 
   .emacs.d: 
   a.out: 
-icons-by-extension:
+extension:
   go: 
   hs: 
   rs: 
-icons-by-filetype:
+filetype:
   dir: 
   file: 
   pipe: 
@@ -348,11 +348,11 @@ icons-by-filetype:
 Unicode:
 
 ```yaml
-icons-by-name:
+name:
   .trash: 🗑
-icons-by-extension:
+extension:
   rs: 🦀
-icons-by-filetype:
+filetype:
   dir: 📂
   file: 📄
   pipe: 📩
@@ -360,9 +360,6 @@ icons-by-filetype:
 
 When creating a theme for `lsd`, you can specify any part of the default theme,
 and then change its colors, the items missed would fallback to use the default colors.
-
-Please also notice that an empty theme is **NOT** supported due to
-[a bug in serde lib](https://github.com/dtolnay/serde-yaml/issues/86).
 
 ## External Configurations
 
