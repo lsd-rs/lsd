@@ -71,6 +71,8 @@ impl Core {
             // Most of the programs does not handle correctly the ansi colors
             // or require a raw output (like the `wc` command).
             inner_flags.layout = Layout::OneLine;
+
+            flags.should_quote = false;
         };
 
         let sorters = sort::assemble_sorters(&flags);

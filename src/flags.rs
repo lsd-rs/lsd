@@ -72,6 +72,7 @@ pub struct Flags {
     pub symlink_arrow: SymlinkArrow,
     pub hyperlink: HyperlinkOption,
     pub header: Header,
+    pub should_quote: bool,
 }
 
 impl Flags {
@@ -101,6 +102,7 @@ impl Flags {
             symlink_arrow: SymlinkArrow::configure_from(matches, config),
             hyperlink: HyperlinkOption::configure_from(matches, config),
             header: Header::configure_from(matches, config),
+            should_quote: true,
         })
     }
 }
