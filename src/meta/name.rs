@@ -78,15 +78,17 @@ impl Name {
             .collect()
     }
 
-    fn escape(&self, string: &str) -> String {
+    fn escape(&self, string: &str, should_quote: bool) -> String {
         let mut name = string.to_string();
-        if name.contains('\\') || name.contains('"') {
-            name = name.replace('\'', "\'\\\'\'");
-            name = format!("\'{}\'", &name);
-        } else if name.contains('\'') {
-            name = format!("\"{}\"", &name);
-        } else if name.contains(' ') || name.contains('$') {
-            name = format!("\'{}\'", &name);
+        if should_quote {
+            if name.contains('\\') || name.contains('"') {
+                name = name.replace('\'', "\'\\\'\'");
+                name = format!("\'{}\'", &name);
+            } else if name.contains('\'') {
+                name = format!("\"{}\"", &name);
+            } else if name.contains(' ') || name.contains('$') {
+                name = format!("\'{}\'", &name);
+            }
         }
         let string = name;
         if string
@@ -144,27 +146,28 @@ impl Name {
         icons: &Icons,
         display_option: &DisplayOption,
         hyperlink: HyperlinkOption,
+        quote: bool,
     ) -> ColoredString {
         let content = match display_option {
             DisplayOption::FileName => {
                 format!(
                     "{}{}",
                     icons.get(self),
-                    self.hyperlink(self.escape(self.file_name()), hyperlink)
+                    self.hyperlink(self.escape(self.file_name(), quote), hyperlink)
                 )
             }
             DisplayOption::Relative { base_path } => format!(
                 "{}{}",
                 icons.get(self),
                 self.hyperlink(
-                    self.escape(&self.relative_path(base_path).to_string_lossy()),
+                    self.escape(&self.relative_path(base_path).to_string_lossy(), quote),
                     hyperlink
                 )
             ),
             DisplayOption::None => format!(
                 "{}{}",
                 icons.get(self),
-                self.hyperlink(self.escape(&self.path.to_string_lossy()), hyperlink)
+                self.hyperlink(self.escape(&self.path.to_string_lossy(), quote), hyperlink)
             ),
         };
 
@@ -254,7 +257,8 @@ mod test {
                 &colors,
                 &icons,
                 &DisplayOption::FileName,
-                HyperlinkOption::Never
+                HyperlinkOption::Never,
+                false,
             )
         );
     }
@@ -277,7 +281,8 @@ mod test {
                 &colors,
                 &icons,
                 &DisplayOption::FileName,
-                HyperlinkOption::Never
+                HyperlinkOption::Never,
+                false
             )
         );
     }
@@ -310,7 +315,8 @@ mod test {
                 &colors,
                 &icons,
                 &DisplayOption::FileName,
-                HyperlinkOption::Never
+                HyperlinkOption::Never,
+                false
             )
         );
     }
@@ -343,7 +349,8 @@ mod test {
                 &colors,
                 &icons,
                 &DisplayOption::FileName,
-                HyperlinkOption::Never
+                HyperlinkOption::Never,
+                false
             )
         );
     }
@@ -374,7 +381,8 @@ mod test {
                 &colors,
                 &icons,
                 &DisplayOption::FileName,
-                HyperlinkOption::Never
+                HyperlinkOption::Never,
+                false
             )
         );
     }
@@ -398,7 +406,8 @@ mod test {
                     &colors,
                     &icons,
                     &DisplayOption::FileName,
-                    HyperlinkOption::Never
+                    HyperlinkOption::Never,
+                    false
                 )
                 .to_string()
         );
@@ -430,7 +439,8 @@ mod test {
                     &colors,
                     &icons,
                     &DisplayOption::FileName,
-                    HyperlinkOption::Always
+                    HyperlinkOption::Always,
+                    false
                 )
                 .to_string()
         );
@@ -650,7 +660,8 @@ mod test {
                 &colors,
                 &icons,
                 &DisplayOption::FileName,
-                HyperlinkOption::Never
+                HyperlinkOption::Never,
+                true,
             )
         );
 
@@ -668,7 +679,8 @@ mod test {
                 &colors,
                 &icons,
                 &DisplayOption::FileName,
-                HyperlinkOption::Never
+                HyperlinkOption::Never,
+                true,
             )
         );
 
@@ -686,7 +698,8 @@ mod test {
                 &colors,
                 &icons,
                 &DisplayOption::FileName,
-                HyperlinkOption::Never
+                HyperlinkOption::Never,
+                true,
             )
         );
 
@@ -706,7 +719,8 @@ mod test {
                 &colors,
                 &icons,
                 &DisplayOption::FileName,
-                HyperlinkOption::Never
+                HyperlinkOption::Never,
+                true,
             )
         );
 
@@ -726,7 +740,8 @@ mod test {
                 &colors,
                 &icons,
                 &DisplayOption::FileName,
-                HyperlinkOption::Never
+                HyperlinkOption::Never,
+                true,
             )
         );
     }
