@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - In keeping with the coreutils change, add quotes and escapes for necessary filenames from [merelymyself](https://github.com/merelymyself)
 
+### Fixed
+- Do not quote filename when piping into another program from [TeamTamoad](https://github.com/TeamTamoad)
+
 ## [0.23.1] - 2022-09-13
 
 ### Fixed
