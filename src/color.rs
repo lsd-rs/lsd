@@ -139,7 +139,12 @@ impl Colors {
             ThemeOption::Default | ThemeOption::NoLscolors => Some(Theme::default().color),
             ThemeOption::Custom(ref file) => {
                 // TODO: drop the `themes` dir prefix, adding it here only for backwards compatibility
-                Some(Theme::from_path::<ColorTheme>(Path::new("themes").join(file).to_str().unwrap_or(file)).unwrap_or_default())
+                Some(
+                    Theme::from_path::<ColorTheme>(
+                        Path::new("themes").join(file).to_str().unwrap_or(file),
+                    )
+                    .unwrap_or_default(),
+                )
             }
         };
         let lscolors = match t {
