@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Added
 - In keeping with the coreutils change, add quotes and escapes for necessary filenames from [merelymyself](https://github.com/merelymyself)
+- Add support for icon theme from [zwpaper](https://github.com/zwpaper)
 
 ### Fixed
 - Do not quote filename when piping into another program from [TeamTamoad](https://github.com/TeamTamoad)
@@ -23,7 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Reduce the binary size and improve the performance from [sabify](https://github.com/sabify)
 ### Fixed
-- Fix rendering issues in Windows from [meain](https://gitHub.com/meain)
+- Fix rendering issues in Windows from [meain](https://github.com/meain)
 
 ## [0.22.0] - 2022-06-12
 ### Added
