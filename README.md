@@ -246,7 +246,7 @@ The valid theme configurations are:
 when configured with the `theme-file-name` which is a `yaml` file,
 `lsd` will look up the theme file in the following way:
 
-- relative name: check the XDG Base Directory, e.g. ~/.config/lsd/<theme-file-name>.yaml
+- relative name: check the XDG Base Directory, e.g. ~/.config/lsd/themes/<theme-file-name>.yaml
 - absolute name: use the file path and name to find theme file
 
 Check [Color Theme file content](#color-theme-file-content) for details.
@@ -318,7 +318,7 @@ lsd support 3 kinds of icon configuration:
 
 The default icon theme scheme shipped with `lsd` can be check in [icon theme source code](src/theme/icon.rs), we will load the default theme, and overwrite it with user defined parts, here is a example for icon theme.
 
-lsd icon theme support both nerd font and Unicode in the same time, you can use any one to config the theme, or even combine them.
+lsd icon theme support both nerd font and Unicode in the same time, you can use any one to config the theme, this is the default but you can customize this to use glyphs from nerd-font or Unicode emojis in the same time.
 
 nerd font:
 
@@ -358,8 +358,36 @@ filetype:
   pipe: 📩
 ```
 
+mixed:
+
+```yaml
+name:
+  .trash: 
+  .cargo: 
+  .emacs.d: 
+  a.out: 
+extension:
+  go: 
+  hs: 
+  rs: 🦀
+filetype:
+  dir: 📂
+  file: 📄
+  pipe: 📩
+  dir: 
+  file: 
+  pipe: 
+  socket: 
+  executable: 
+  symlink-dir: 
+  symlink-file: 
+  device-char: 
+  device-block: ﰩ
+  special: 
+```
+
 When creating a theme for `lsd`, you can specify any part of the default theme,
-and then change its colors, the items missed would fallback to use the default colors.
+and then change its icons, the items missed would fallback to use the default icons.
 
 ## External Configurations
 
