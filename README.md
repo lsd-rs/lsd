@@ -311,54 +311,11 @@ Check [Icon Theme file content](#icon-theme-file-content) for details.
 
 #### Icon Theme file content
 
-lsd support 3 kinds of icon configuration:
-- filetype
-- name
-- extension
+`lsd` support 3 kinds of icon overrides, by `name`, by `filetype` and by `extension`.
+The final set of icons used will be a combination of what is shipped with in `lsd` with overrides from config applied on top of it.
+*You can find the default set of icons [here](src/theme/icon.rs).*
 
-The default icon theme scheme shipped with `lsd` can be check in [icon theme source code](src/theme/icon.rs), we will load the default theme, and overwrite it with user defined parts, here is a example for icon theme.
-
-lsd icon theme support both nerd font and Unicode in the same time, you can use any one to config the theme, this is the default but you can customize this to use glyphs from nerd-font or Unicode emojis in the same time.
-
-nerd font:
-
-```yaml
-name:
-  .trash: 
-  .cargo: 
-  .emacs.d: 
-  a.out: 
-extension:
-  go: 
-  hs: 
-  rs: 
-filetype:
-  dir: 
-  file: 
-  pipe: 
-  socket: 
-  executable: 
-  symlink-dir: 
-  symlink-file: 
-  device-char: 
-  device-block: ﰩ
-  special: 
-```
-
-Unicode:
-
-```yaml
-name:
-  .trash: 🗑
-extension:
-  rs: 🦀
-filetype:
-  dir: 📂
-  file: 📄
-  pipe: 📩
-```
-
-mixed:
+Both nerd font glyphs and unicode emojis can be used for icons. You can find an example of icons customization below.
 
 ```yaml
 name:
@@ -374,9 +331,6 @@ filetype:
   dir: 📂
   file: 📄
   pipe: 📩
-  dir: 
-  file: 
-  pipe: 
   socket: 
   executable: 
   symlink-dir: 
@@ -384,10 +338,6 @@ filetype:
   device-char: 
   device-block: ﰩ
   special: 
-```
-
-When creating a theme for `lsd`, you can specify any part of the default theme,
-and then change its icons, the items missed would fallback to use the default icons.
 
 ## External Configurations
 
