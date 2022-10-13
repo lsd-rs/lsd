@@ -109,7 +109,7 @@ mod test {
 
     #[test]
     #[should_panic]
-    fn test_from_arg_matches_unknonwn() {
+    fn test_from_arg_matches_unknown() {
         let argv = ["lsd", "--size", "unknown"];
         let _ = app::build().get_matches_from_safe(argv).unwrap();
     }

@@ -195,7 +195,7 @@ mod test_icon_option {
     }
 
     #[test]
-    fn test_from_arg_matches_autp() {
+    fn test_from_arg_matches_auto() {
         let argv = ["lsd", "--icon", "auto"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         assert_eq!(

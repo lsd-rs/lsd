@@ -8,7 +8,7 @@
 
 ![image](https://raw.githubusercontent.com/Peltoche/lsd/assets/screen_lsd.png)
 
-This project is a rewrite of GNU `ls` with lot of added features like colors, icons, tree-view, more formatting options etc.
+This project is a rewrite of GNU `ls` with lots of added features like colors, icons, tree-view, more formatting options etc.
 The project is heavily inspired by the super [colorls](https://github.com/athityakumar/colorls) project.
 
 ## Installation
@@ -56,7 +56,7 @@ cargo install --git https://github.com/Peltoche/lsd.git --branch master
 
 ### From Binaries
 
-The [release page](https://github.com/Peltoche/lsd/releases) includes precompiled binaries for Linux, macOS and Windows for every release. You can also get the latest binary of `master` branch from the [Github action build artifacts](https://github.com/Peltoche/lsd/actions?query=branch%3Amaster+is%3Asuccess+event%3Apush) (choose the top action and scroll down to the artifacts section).
+The [release page](https://github.com/Peltoche/lsd/releases) includes precompiled binaries for Linux, macOS and Windows for every release. You can also get the latest binary of `master` branch from the [GitHub action build artifacts](https://github.com/Peltoche/lsd/actions?query=branch%3Amaster+is%3Asuccess+event%3Apush) (choose the top action and scroll down to the artifacts section).
 
 ## Configuration
 
@@ -127,7 +127,7 @@ color:
 
 # == Date ==
 # This specifies the date format for the date column. The freeform format
-# accepts an strftime like string.
+# accepts a strftime like string.
 # When "classic" is set, this is set to "date".
 # Possible values: date, relative, '+<date_format>'
 # `date_format` will be a `strftime` formatted value. e.g. `date: '+%d %b %y %X'` will give you a date like this: 17 Jun 21 20:14:55
