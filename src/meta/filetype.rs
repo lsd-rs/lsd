@@ -147,7 +147,7 @@ mod test {
         let metadata = tmp_dir.path().metadata().expect("failed to get metas");
 
         let colors = Colors::new(ThemeOption::NoLscolors);
-        let file_type = FileType::new(&metadata, None, &meta.permissions);
+        let file_type = FileType::new(&metadata, None, &meta.permissions.unwrap());
 
         assert_eq!(
             "d".to_string().with(Color::AnsiValue(33)),
