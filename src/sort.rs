@@ -48,7 +48,12 @@ fn with_dirs_first(a: &Meta, b: &Meta) -> Ordering {
 }
 
 fn by_size(a: &Meta, b: &Meta) -> Ordering {
-    b.size.get_bytes().cmp(&a.size.get_bytes())
+    match (&a.size, &b.size) {
+        (Some(a_size), Some(b_size)) => b_size.get_bytes().cmp(&a_size.get_bytes()),
+        (Some(_), None) => Ordering::Greater,
+        (None, Some(_)) => Ordering::Less,
+        (None, None) => Ordering::Equal,
+    }
 }
 
 fn by_name(a: &Meta, b: &Meta) -> Ordering {

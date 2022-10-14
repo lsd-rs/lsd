@@ -36,17 +36,17 @@ use std::path::{Component, Path, PathBuf};
 pub struct Meta {
     pub name: Name,
     pub path: PathBuf,
-    pub permissions: Permissions,
-    pub date: Date,
-    pub owner: Owner,
+    pub permissions: Option<Permissions>,
+    pub date: Option<Date>,
+    pub owner: Option<Owner>,
     pub file_type: FileType,
-    pub size: Size,
+    pub size: Option<Size>,
     pub symlink: SymLink,
     pub indicator: Indicator,
-    pub inode: INode,
-    pub links: Links,
+    pub inode: Option<INode>,
+    pub links: Option<Links>,
     pub content: Option<Vec<Meta>>,
-    pub access_control: AccessControl,
+    pub access_control: Option<AccessControl>,
 }
 
 impl Meta {
@@ -152,17 +152,27 @@ impl Meta {
     }
 
     pub fn calculate_total_size(&mut self) {
+        if let None = self.size {
+            return;
+        }
+
         if let FileType::Directory { .. } = self.file_type {
             if let Some(metas) = &mut self.content {
-                let mut size_accumulated = self.size.get_bytes();
+                let mut size_accumulated = match &self.size {
+                    Some(size) => size.get_bytes(),
+                    None => 0,
+                };
                 for x in &mut metas.iter_mut() {
                     x.calculate_total_size();
-                    size_accumulated += x.size.get_bytes();
+                    size_accumulated += match &x.size {
+                        Some(size) => size.get_bytes(),
+                        None => 0,
+                    };
                 }
-                self.size = Size::new(size_accumulated);
+                self.size = Some(Size::new(size_accumulated));
             } else {
                 // possibility that 'depth' limited the recursion in 'recurse_into'
-                self.size = Size::new(Meta::calculate_total_file_size(&self.path));
+                self.size = Some(Size::new(Meta::calculate_total_file_size(&self.path)));
             }
         }
     }
@@ -208,6 +218,7 @@ impl Meta {
     pub fn from_path(path: &Path, dereference: bool) -> io::Result<Self> {
         let mut metadata = path.symlink_metadata()?;
         let mut symlink_meta = None;
+        let mut broken_link = false;
         if metadata.file_type().is_symlink() {
             match path.metadata() {
                 Ok(m) => {
@@ -221,7 +232,8 @@ impl Meta {
                     // This case, it is definitely a symlink or
                     // path.symlink_metadata would have errored out
                     if dereference {
-                        return Err(e);
+                        broken_link = true;
+                        eprintln!("lsd: {}: {}\n", path.to_str().unwrap_or(""), e);
                     }
                 }
             }
@@ -235,19 +247,29 @@ impl Meta {
         #[cfg(windows)]
         let (owner, permissions) = windows_utils::get_file_data(path)?;
 
-        let access_control = AccessControl::for_path(path);
         let file_type = FileType::new(&metadata, symlink_meta.as_ref(), &permissions);
         let name = Name::new(path, file_type);
-        let inode = INode::from(&metadata);
-        let links = Links::from(&metadata);
+
+        let (inode, links, size, date, owner, permissions, access_control) = match broken_link {
+            true => (None, None, None, None, None, None, None),
+            false => (
+                Some(INode::from(&metadata)),
+                Some(Links::from(&metadata)),
+                Some(Size::from(&metadata)),
+                Some(Date::from(&metadata)),
+                Some(owner),
+                Some(permissions),
+                Some(AccessControl::for_path(path)),
+            ),
+        };
 
         Ok(Self {
             inode,
             links,
             path: path.to_path_buf(),
             symlink: SymLink::from(path),
-            size: Size::from(&metadata),
-            date: Date::from(&metadata),
+            size,
+            date,
             indicator: Indicator::from(file_type),
             owner,
             permissions,
