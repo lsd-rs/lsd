@@ -249,6 +249,7 @@ impl IconTheme {
             ("robots.txt", "\u{fba7}"),         // "ﮧ"
             ("root", "\u{f023}"),               // ""
             ("sbin", "\u{e5fc}"),               // ""
+            ("src", "\u{f121}"),                // ""
             ("scripts", "\u{f489}"),            // ""
             ("shadow", "\u{e615}"),             // ""
             ("share", "\u{f064}"),              // ""
