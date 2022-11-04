@@ -9,9 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - In keeping with the coreutils change, add quotes and escapes for necessary filenames from [merelymyself](https://github.com/merelymyself)
 - Add support for icon theme from [zwpaper](https://github.com/zwpaper)
 - Add many icons from <https://github.com/Peltoche/lsd/issues/764>
-- Improve assembly icon
-- Add PKGBUILD icon
-- Add JSONC icon
+- Improve assembly and executable file icons
+- Add PKGBUILD and JSONC icons
 
 ### Fixed
 - Do not quote filename when piping into another program from [TeamTamoad](https://github.com/TeamTamoad)

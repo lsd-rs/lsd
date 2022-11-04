@@ -45,7 +45,7 @@ impl Default for ByType {
             file: "\u{f016}".into(),         // 
             pipe: "\u{f731}".into(),         // 
             socket: "\u{f6a7}".into(),       // 
-            executable: "\u{f489}".into(),   // 
+            executable: "\u{f40d}".into(),   // 
             symlink_dir: "\u{f482}".into(),  // 
             symlink_file: "\u{f481}".into(), // 
             device_char: "\u{e601}".into(),  // 
@@ -62,7 +62,7 @@ impl ByType {
             file: "\u{1f4c4}".into(),
             pipe: "\u{1f4e9}".into(),
             socket: "\u{1f4ec}".into(),
-            executable: "\u{1f3d7}".into(),
+            executable: "\u{f40d}".into(),
             symlink_dir: "\u{1f5c2}".into(),
             symlink_file: "\u{1f516}".into(),
             device_char: "\u{1f5a8}".into(),
@@ -149,7 +149,7 @@ impl IconTheme {
             (".zshrc", "\u{f489}"),             // ""
             (".zsh_history", "\u{e615}"),       // ""
             ("__pycache__", "\u{f81f}"),        // ""
-            ("a.out", "\u{f489}"),              // ""
+            ("a.out", ""),                     // ""
             ("api", "\u{f98c}"),                // "歷"
             ("authorized_keys", "\u{e60a}"),    // ""
             ("backups", "\u{f56e}"),            // ""
@@ -583,7 +583,7 @@ name:
   .trash: 
   .cargo: 
   .emacs.d: 
-  a.out: 
+  a.out: 
 extension:
   go: 
   hs: 
@@ -593,7 +593,7 @@ filetype:
   file: 
   pipe: 
   socket: 
-  executable: 
+  executable: 
   symlink-dir: 
   symlink-file: 
   device-char: 
