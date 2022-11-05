@@ -149,7 +149,7 @@ impl IconTheme {
             (".zshrc", "\u{f489}"),             // ""
             (".zsh_history", "\u{e615}"),       // ""
             ("__pycache__", "\u{f81f}"),        // ""
-            ("a.out", ""),                     // ""
+            ("a.out", ""),                   // ""
             ("api", "\u{f98c}"),                // "歷"
             ("authorized_keys", "\u{e60a}"),    // ""
             ("backups", "\u{f56e}"),            // ""
