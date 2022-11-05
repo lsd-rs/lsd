@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add support for icon theme from [zwpaper](https://github.com/zwpaper)
 - Add many icons from <https://github.com/Peltoche/lsd/issues/764>
 - Improve assembly and executable file icons
-- Add PKGBUILD and JSONC icons
+- Add PKGBUILD, trash and JSONC icons
 
 ### Fixed
 - Do not quote filename when piping into another program from [TeamTamoad](https://github.com/TeamTamoad)
