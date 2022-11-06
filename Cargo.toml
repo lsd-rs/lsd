@@ -45,7 +45,7 @@ users = "0.11.*"
 xattr = "0.2.*"
 
 [target.'cfg(windows)'.dependencies]
-winapi = {version = "0.3.*", features = ["aclapi", "accctrl", "winnt", "winerror", "securitybaseapi", "winbase"]}
+windows = { version = "0.43.0", features = ["Win32_Foundation", "Win32_Security_Authorization", "Win32_Storage_FileSystem", "Win32_System_Memory"] }
 
 [dependencies.clap]
 features = ["suggestions", "color", "wrap_help"]
