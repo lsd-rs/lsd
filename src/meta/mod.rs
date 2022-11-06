@@ -109,7 +109,14 @@ impl Meta {
                 continue;
             }
 
-            if flags.display == Display::VisibleOnly && name.to_string_lossy().starts_with('.') {
+            #[cfg(windows)]
+            let is_hidden =
+                name.to_string_lossy().starts_with('.') || windows_utils::is_path_hidden(&path);
+            #[cfg(not(windows))]
+            let is_hidden = name.to_string_lossy().starts_with('.');
+
+            // TODO: skip windows hidded
+            if flags.display == Display::VisibleOnly && is_hidden {
                 continue;
             }
 
