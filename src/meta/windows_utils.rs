@@ -303,6 +303,35 @@ fn buf_from_os(os: &OsStr) -> Vec<u16> {
     buf
 }
 
+/// Checks wether the given [`FILE_FLAGS_AND_ATTRIBUTES`] are set for the given
+/// [`Path`]
+///
+/// [`FILE_FLAGS_AND_ATTRIBUTES`]: windows::Win32::Storage::FileSystem::FILE_FLAGS_AND_ATTRIBUTES
+#[inline]
+fn has_path_attribute(
+    path: &Path,
+    flags: windows::Win32::Storage::FileSystem::FILE_FLAGS_AND_ATTRIBUTES,
+) -> bool {
+    let windows_path = buf_from_os(path.as_os_str());
+    let file_attributes = unsafe {
+        windows::Win32::Storage::FileSystem::GetFileAttributesW(windows::core::PCWSTR(
+            windows_path.as_ptr(),
+        ))
+    };
+    file_attributes & flags.0 > 0
+}
+
+/// Checks whether the windows [`hidden`] attribute is set for the given
+/// [`Path`]
+///
+/// [`hidden`]: windows::Win32::Storage::FileSystem::FILE_ATTRIBUTE_HIDDEN
+pub fn is_path_hidden(path: &Path) -> bool {
+    has_path_attribute(
+        path,
+        windows::Win32::Storage::FileSystem::FILE_ATTRIBUTE_HIDDEN,
+    )
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
