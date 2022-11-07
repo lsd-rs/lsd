@@ -8,9 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - In keeping with the coreutils change, add quotes and escapes for necessary filenames from [merelymyself](https://github.com/merelymyself)
 - Add support for icon theme from [zwpaper](https://github.com/zwpaper)
-- Add many icons from <https://github.com/Peltoche/lsd/issues/764> ([@TruncatedDinosour](https://ari-web.xyz/gh))
-- Improve assembly and executable file icons ([@TruncatedDinosour](https://ari-web.xyz/gh))
-- Add PKGBUILD, trash and JSONC icons ([@TruncatedDinosour](https://ari-web.xyz/gh))
+- Add many icons from https://github.com/Peltoche/lsd/issues/764 [@TruncatedDinosour](https://ari-web.xyz/gh)
+- Improve assembly and executable file icons [@TruncatedDinosour](https://ari-web.xyz/gh)
+- Add PKGBUILD, trash and JSONC icons [@TruncatedDinosour](https://ari-web.xyz/gh)
 
 ### Fixed
 - Do not quote filename when piping into another program from [TeamTamoad](https://github.com/TeamTamoad)
