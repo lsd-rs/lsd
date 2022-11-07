@@ -91,7 +91,6 @@ impl IconTheme {
             (".bash_logout", "\u{e615}"),       // ""
             (".bpython_history", "\u{e606}"),   // ""
             (".bashrc", "\u{f489}"),            // ""
-            (".bash_history", "\u{f489}"),      // ""
             (".kshrc", "\u{f489}"),             // ""
             (".cargo", "\u{e7a8}"),             // ""
             (".clang-format", "\u{e615}"),      // ""
