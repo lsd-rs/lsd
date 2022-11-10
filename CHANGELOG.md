@@ -9,9 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - In keeping with the coreutils change, add quotes and escapes for necessary filenames from [merelymyself](https://github.com/merelymyself)
 - Add support for icon theme from [zwpaper](https://github.com/zwpaper)
 - Add icon for kt and kts from [LeeWeeder](https://github.com/LeeWeeder)
+- Add `--system-protected` to include files with the Windows `system` flag set,
+  on other platform the same as `--all` [#752](https://github.com/Peltoche/lsd/issues/752)
 
 ### Fixed
 - Do not quote filename when piping into another program from [TeamTamoad](https://github.com/TeamTamoad)
+- Respect `hidden` flag on Windows [#752](https://github.com/Peltoche/lsd/issues/752)
 
 ## [0.23.1] - 2022-09-13
 
