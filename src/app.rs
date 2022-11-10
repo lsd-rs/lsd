@@ -348,6 +348,12 @@ pub fn build() -> App<'static> {
                 .long("header")
                 .help("Display block headers"),
         )
+        .arg(
+            Arg::with_name("system-protected")
+                .long("system-protected")
+                .help("Includes files with the windows system protection flag set. This is the same as --all on other platforms")
+                .hide(!cfg!(windows)),
+        )
 }
 
 fn validate_date_argument(arg: &str) -> Result<(), String> {
