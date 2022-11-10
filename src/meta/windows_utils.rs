@@ -332,6 +332,17 @@ pub fn is_path_hidden(path: &Path) -> bool {
     )
 }
 
+/// Checks whether the windows [`system`] attribute is set for the given
+/// [`Path`]
+///
+/// [`system`]: windows::Win32::Storage::FileSystem::FILE_ATTRIBUTE_SYSTEM
+pub fn is_path_system(path: &Path) -> bool {
+    has_path_attribute(
+        path,
+        windows::Win32::Storage::FileSystem::FILE_ATTRIBUTE_SYSTEM,
+    )
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
