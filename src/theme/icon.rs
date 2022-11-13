@@ -102,7 +102,7 @@ impl IconTheme {
             (".eslintrc.yml", "\u{f462}"),      // ""
             (".eslintrc.json", "\u{f462}"),     // ""
             (".doom.d", "\u{e779}"),            // ""
-            (".dbus", "\u{f023}"),              // ""
+            (".dbus", "\u{f013}"),              // ""
             (".git", "\u{e5fb}"),               // ""
             (".git-credentials", "\u{e60a}"),   // ""
             (".gitattributes", "\u{f1d3}"),     // ""
