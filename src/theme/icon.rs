@@ -148,7 +148,7 @@ impl IconTheme {
             (".zshrc", "\u{f489}"),             // ""
             (".zsh_history", "\u{e615}"),       // ""
             ("__pycache__", "\u{f81f}"),        // ""
-            ("a.out", ""),                   // ""
+            ("a.out", "\u{f489}"),              // ""
             ("api", "\u{f98c}"),                // "歷"
             ("authorized_keys", "\u{e60a}"),    // ""
             ("backups", "\u{f56e}"),            // ""
@@ -585,7 +585,7 @@ name:
   .trash: 
   .cargo: 
   .emacs.d: 
-  a.out: 
+  a.out: 
 extension:
   go: 
   hs: 
@@ -595,7 +595,7 @@ filetype:
   file: 
   pipe: 
   socket: 
-  executable: 
+  executable: 
   symlink-dir: 
   symlink-file: 
   device-char: 
