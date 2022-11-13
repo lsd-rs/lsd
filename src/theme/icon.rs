@@ -45,7 +45,7 @@ impl Default for ByType {
             file: "\u{f016}".into(),         // 
             pipe: "\u{f731}".into(),         // 
             socket: "\u{f6a7}".into(),       // 
-            executable: "\u{f40d}".into(),   // 
+            executable: "\u{f489}".into(),   // 
             symlink_dir: "\u{f482}".into(),  // 
             symlink_file: "\u{f481}".into(), // 
             device_char: "\u{e601}".into(),  // 
