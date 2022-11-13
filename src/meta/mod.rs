@@ -83,7 +83,9 @@ impl Meta {
 
         let mut content: Vec<Meta> = Vec::new();
 
-        if Display::All == flags.display && flags.layout != Layout::Tree {
+        if matches!(flags.display, Display::All | Display::SystemProtected)
+            && flags.layout != Layout::Tree
+        {
             let mut current_meta = self.clone();
             current_meta.name.name = ".".to_owned();
 
@@ -109,8 +111,23 @@ impl Meta {
                 continue;
             }
 
-            if flags.display == Display::VisibleOnly && name.to_string_lossy().starts_with('.') {
-                continue;
+            #[cfg(windows)]
+            let is_hidden =
+                name.to_string_lossy().starts_with('.') || windows_utils::is_path_hidden(&path);
+            #[cfg(not(windows))]
+            let is_hidden = name.to_string_lossy().starts_with('.');
+
+            #[cfg(windows)]
+            let is_system = windows_utils::is_path_system(&path);
+            #[cfg(not(windows))]
+            let is_system = false;
+
+            match flags.display {
+                // show hidden files, but ignore system protected files
+                Display::All | Display::AlmostAll if is_system => continue,
+                // ignore hidden and system protected files
+                Display::VisibleOnly if is_hidden || is_system => continue,
+                _ => {}
             }
 
             let mut entry_meta = match Self::from_path(&path, flags.dereference.0) {

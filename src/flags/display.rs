@@ -12,6 +12,8 @@ use serde::Deserialize;
 #[derive(Clone, Debug, Copy, PartialEq, Eq, Deserialize, Default)]
 #[serde(rename_all = "kebab-case")]
 pub enum Display {
+    /// windows only, used to show files with system protected flag
+    SystemProtected,
     All,
     AlmostAll,
     DirectoryOnly,
@@ -32,6 +34,12 @@ impl Configurable<Self> for Display {
             Some(Self::AlmostAll)
         } else if matches.is_present("all") {
             Some(Self::All)
+        } else if matches.is_present("system-protected") {
+            #[cfg(windows)]
+            return Some(Self::SystemProtected);
+
+            #[cfg(not(windows))]
+            return Some(Self::All);
         } else {
             None
         }
@@ -61,6 +69,20 @@ mod test {
         let argv = ["lsd"];
         let matches = app::build().get_matches_from_safe(argv).unwrap();
         assert_eq!(None, Display::from_arg_matches(&matches));
+    }
+
+    #[test]
+    fn test_from_arg_matches_system_protected() {
+        let argv = ["lsd", "--system-protected"];
+        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        #[cfg(windows)]
+        assert_eq!(
+            Some(Display::SystemProtected),
+            Display::from_arg_matches(&matches)
+        );
+
+        #[cfg(not(windows))]
+        assert_eq!(Some(Display::All), Display::from_arg_matches(&matches));
     }
 
     #[test]
