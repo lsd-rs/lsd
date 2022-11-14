@@ -1,5 +1,4 @@
 use crate::color::{ColoredString, Colors, Elem};
-use crate::meta::Permissions;
 use std::fs::Metadata;
 
 #[derive(Debug, PartialEq, Eq, Copy, Clone)]
@@ -16,11 +15,14 @@ pub enum FileType {
 }
 
 impl FileType {
+    #[cfg(windows)]
+    const EXECUTABLE_EXTENSIONS: &[&'static str] = &["exe", "msi", "bat", "ps1"];
+
     #[cfg(unix)]
     pub fn new(
         meta: &Metadata,
         symlink_meta: Option<&Metadata>,
-        permissions: &Permissions,
+        permissions: &crate::meta::Permissions,
     ) -> Self {
         use std::os::unix::fs::FileTypeExt;
 
@@ -54,22 +56,22 @@ impl FileType {
     }
 
     #[cfg(windows)]
-    pub fn new(
-        meta: &Metadata,
-        symlink_meta: Option<&Metadata>,
-        permissions: &Permissions,
-    ) -> Self {
+    pub fn new(meta: &Metadata, symlink_meta: Option<&Metadata>, path: &std::path::Path) -> Self {
         let file_type = meta.file_type();
 
         if file_type.is_file() {
-            FileType::File {
-                exec: permissions.is_executable(),
-                uid: permissions.setuid,
-            }
+            let exec = path
+                .extension()
+                .map(|ext| {
+                    Self::EXECUTABLE_EXTENSIONS
+                        .iter()
+                        .map(std::ffi::OsStr::new)
+                        .any(|exec_ext| ext == exec_ext)
+                })
+                .unwrap_or(false);
+            FileType::File { exec, uid: false }
         } else if file_type.is_dir() {
-            FileType::Directory {
-                uid: permissions.setuid,
-            }
+            FileType::Directory { uid: false }
         } else if file_type.is_symlink() {
             FileType::SymLink {
                 // if broken, defaults to false
@@ -107,7 +109,6 @@ impl FileType {
 mod test {
     use super::FileType;
     use crate::color::{Colors, ThemeOption};
-    use crate::meta::Meta;
     #[cfg(unix)]
     use crate::meta::Permissions;
     use crossterm::style::{Color, Stylize};
@@ -143,11 +144,16 @@ mod test {
     #[test]
     fn test_dir_type() {
         let tmp_dir = tempdir().expect("failed to create temp dir");
-        let meta = Meta::from_path(tmp_dir.path(), false).expect("failed to get tempdir path");
+        #[cfg(not(windows))]
+        let meta = crate::meta::Meta::from_path(tmp_dir.path(), false)
+            .expect("failed to get tempdir path");
         let metadata = tmp_dir.path().metadata().expect("failed to get metas");
 
         let colors = Colors::new(ThemeOption::NoLscolors);
+        #[cfg(not(windows))]
         let file_type = FileType::new(&metadata, None, &meta.permissions);
+        #[cfg(windows)]
+        let file_type = FileType::new(&metadata, None, tmp_dir.path());
 
         assert_eq!(
             "d".to_string().with(Color::AnsiValue(33)),

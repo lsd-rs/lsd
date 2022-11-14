@@ -253,7 +253,13 @@ impl Meta {
         let (owner, permissions) = windows_utils::get_file_data(path)?;
 
         let access_control = AccessControl::for_path(path);
+
+        #[cfg(not(windows))]
         let file_type = FileType::new(&metadata, symlink_meta.as_ref(), &permissions);
+
+        #[cfg(windows)]
+        let file_type = FileType::new(&metadata, symlink_meta.as_ref(), path);
+
         let name = Name::new(path, file_type);
         let inode = INode::from(&metadata);
         let links = Links::from(&metadata);
