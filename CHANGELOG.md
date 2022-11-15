@@ -16,6 +16,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Do not quote filename when piping into another program from [TeamTamoad](https://github.com/TeamTamoad)
 - Respect `hidden` flag on Windows [#752](https://github.com/Peltoche/lsd/issues/752)
+- Do not show every file are `executable` (green) on Windows
+  [#712](https://github.com/Peltoche/lsd/issues/712). Executables will be marked
+  based on the file extension: `exe`, `msi`, `bat` and `ps1`.
+  [`LS_COLORS`](README.md#Colors) can be used to customize.
 
 ## [0.23.1] - 2022-09-13
 
