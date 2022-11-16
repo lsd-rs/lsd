@@ -11,9 +11,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add icon for kt and kts from [LeeWeeder](https://github.com/LeeWeeder)
 - Add `--system-protected` to include files with the Windows `system` flag set,
   on other platform the same as `--all` [#752](https://github.com/Peltoche/lsd/issues/752)
-- Add many icons from https://github.com/Peltoche/lsd/issues/764 [@TruncatedDinosour](https://ari-web.xyz/gh)
-- Improve assembly file icon [@TruncatedDinosour](https://ari-web.xyz/gh)
-- Add PKGBUILD, trash and JSONC icons [@TruncatedDinosour](https://ari-web.xyz/gh)
 
 ### Fixed
 - Do not quote filename when piping into another program from [TeamTamoad](https://github.com/TeamTamoad)
