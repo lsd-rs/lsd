@@ -342,6 +342,7 @@ filetype:
   device-char: 
   device-block: ﰩ
   special: 
+```
 
 ## External Configurations
 
