@@ -301,6 +301,10 @@ Please also notice that an empty theme is **NOT** supported due to
 
 ### Icon Theme
 
+> **NOTE:** This feature is not available in a release yet. You can
+> get this feature by [building from
+> `master`](https://github.com/Peltoche/lsd#from-source).
+
 Icon theme can be configured in a fixed location, `$XDG_CONFIG_DIR/lsd/icons.yaml`,
 for example, `~/.config/lsd/icons.yaml` on macOS,
 please check [Config file location](#config-file-location) to make sure where is `$XDG_CONFIG_DIR`.
