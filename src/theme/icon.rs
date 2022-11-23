@@ -62,7 +62,7 @@ impl ByType {
             file: "\u{1f4c4}".into(),
             pipe: "\u{1f4e9}".into(),
             socket: "\u{1f4ec}".into(),
-            executable: "\u{f40d}".into(),
+            executable: "\u{1f3d7}".into(),
             symlink_dir: "\u{1f5c2}".into(),
             symlink_file: "\u{1f516}".into(),
             device_char: "\u{1f5a8}".into(),
@@ -417,11 +417,9 @@ impl IconTheme {
             ("js", "\u{e74e}"),              // ""
             ("jsx", "\u{e7ba}"),             // ""
             ("key", "\u{e60a}"),             // ""
-            ("kt", "\u{e634}"),              // ""
-            ("kts", "\u{e634}"),             // ""
             ("ksh", "\u{f489}"),             // ""
-            ("kts", "\u{e634}"),             // ""
             ("kt", "\u{e634}"),              // ""
+            ("kts", "\u{e634}"),             // ""
             ("ldb", "\u{f1c0}"),             // ""
             ("ld", "\u{e624}"),              // ""
             ("less", "\u{e758}"),            // ""
