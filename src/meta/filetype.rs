@@ -112,7 +112,6 @@ mod test {
     #[cfg(unix)]
     use crate::meta::Permissions;
     use crossterm::style::{Color, Stylize};
-    #[cfg(unix)]
     use std::fs::File;
     #[cfg(unix)]
     use std::os::unix::fs::symlink;
@@ -278,6 +277,44 @@ mod test {
 
         assert_eq!(
             "s".to_string().with(Color::AnsiValue(44)),
+            file_type.render(&colors)
+        );
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn test_file_executable() {
+        let tmp_dir = tempdir().expect("failed to create temp dir");
+        for ext in FileType::EXECUTABLE_EXTENSIONS {
+            // Create the file;
+            let file_path = tmp_dir.path().join(format!("file.{ext}"));
+            File::create(&file_path).expect("failed to create file");
+            let meta = file_path.metadata().expect("failed to get metas");
+
+            let colors = Colors::new(ThemeOption::NoLscolors);
+            let file_type = FileType::new(&meta, None, &file_path);
+
+            assert_eq!(
+                ".".to_string().with(Color::AnsiValue(40)),
+                file_type.render(&colors)
+            );
+        }
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn test_file_not_executable() {
+        let tmp_dir = tempdir().expect("failed to create temp dir");
+        // Create the file;
+        let file_path = tmp_dir.path().join("file.txt");
+        File::create(&file_path).expect("failed to create file");
+        let meta = file_path.metadata().expect("failed to get metas");
+
+        let colors = Colors::new(ThemeOption::NoLscolors);
+        let file_type = FileType::new(&meta, None, &file_path);
+
+        assert_eq!(
+            ".".to_string().with(Color::AnsiValue(184)),
             file_type.render(&colors)
         );
     }
