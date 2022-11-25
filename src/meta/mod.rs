@@ -281,15 +281,61 @@ impl Meta {
     }
 }
 
-#[cfg(unix)]
 #[cfg(test)]
 mod tests {
     use super::Meta;
+    use std::fs::File;
+    use tempfile::tempdir;
 
+    #[cfg(unix)]
     #[test]
     fn test_from_path_path() {
         let dir = assert_fs::TempDir::new().unwrap();
         let meta = Meta::from_path(dir.path(), false).unwrap();
         assert_eq!(meta.path, dir.path())
+    }
+
+    #[test]
+    fn test_from_path() {
+        let tmp_dir = tempdir().expect("failed to create temp dir");
+
+        let path_a = tmp_dir.path().join("aaa.aa");
+        File::create(&path_a).expect("failed to create file");
+        let meta_a = Meta::from_path(&path_a, false).expect("failed to get meta");
+
+        let path_b = tmp_dir.path().join("bbb.bb");
+        let path_c = tmp_dir.path().join("ccc.cc");
+
+        #[cfg(unix)]
+        std::os::unix::fs::symlink(&path_c, &path_b).expect("failed to create broken symlink");
+
+        // this needs to be tested on Windows
+        // likely to fail because of permission issue
+        // see https://doc.rust-lang.org/std/os/windows/fs/fn.symlink_file.html
+        #[cfg(windows)]
+        std::os::windows::fs::symlink_file(&path_c, &path_b)
+            .expect("failed to create broken symlink");
+
+        let meta_b = Meta::from_path(&path_b, true).expect("failed to get meta");
+
+        assert!(
+            meta_a.inode.is_some()
+                && meta_a.links.is_some()
+                && meta_a.size.is_some()
+                && meta_a.date.is_some()
+                && meta_a.owner.is_some()
+                && meta_a.permissions.is_some()
+                && meta_a.access_control.is_some()
+        );
+
+        assert!(
+            meta_b.inode.is_none()
+                && meta_b.links.is_none()
+                && meta_b.size.is_none()
+                && meta_b.date.is_none()
+                && meta_b.owner.is_none()
+                && meta_b.permissions.is_none()
+                && meta_b.access_control.is_none()
+        );
     }
 }
