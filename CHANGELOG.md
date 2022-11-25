@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - Do not quote filename when piping into another program from [TeamTamoad](https://github.com/TeamTamoad)
+- Handle dereference (-L) with broken symlink from [r3dArch](https://github.com/r3dArch)
 
 ## [0.23.1] - 2022-09-13
 
