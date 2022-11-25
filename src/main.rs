@@ -25,7 +25,7 @@ extern crate yaml_rust;
 extern crate users;
 
 #[cfg(windows)]
-extern crate winapi;
+extern crate windows;
 
 mod app;
 mod color;

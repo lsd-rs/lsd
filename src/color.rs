@@ -116,8 +116,8 @@ impl Elem {
             Elem::FileLarge => theme.size.large,
             Elem::FileMedium => theme.size.medium,
             Elem::FileSmall => theme.size.small,
-            Elem::INode { valid: false } => theme.inode.valid,
-            Elem::INode { valid: true } => theme.inode.invalid,
+            Elem::INode { valid: true } => theme.inode.valid,
+            Elem::INode { valid: false } => theme.inode.invalid,
             Elem::TreeEdge => theme.tree_edge,
             Elem::Links { valid: false } => theme.links.invalid,
             Elem::Links { valid: true } => theme.links.valid,
@@ -227,10 +227,6 @@ impl Colors {
             Elem::CharDevice => Some("cd"),
             Elem::BrokenSymLink => Some("or"),
             Elem::MissingSymLinkTarget => Some("mi"),
-            Elem::INode { valid } | Elem::Links { valid } => match valid {
-                true => Some("so"),
-                false => Some("no"),
-            },
             _ => None,
         };
 
