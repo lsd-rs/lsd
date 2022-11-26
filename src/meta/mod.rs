@@ -169,7 +169,7 @@ impl Meta {
     }
 
     pub fn calculate_total_size(&mut self) {
-        if let None = self.size {
+        if self.size.is_none() {
             return;
         }
 
