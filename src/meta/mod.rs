@@ -264,7 +264,12 @@ impl Meta {
         #[cfg(windows)]
         let (owner, permissions) = windows_utils::get_file_data(path)?;
 
+        #[cfg(not(windows))]
         let file_type = FileType::new(&metadata, symlink_meta.as_ref(), &permissions);
+
+        #[cfg(windows)]
+        let file_type = FileType::new(&metadata, symlink_meta.as_ref(), path);
+
         let name = Name::new(path, file_type);
 
         let (inode, links, size, date, owner, permissions, access_control) = match broken_link {

@@ -127,6 +127,7 @@ impl Permissions {
         ColoredString::new(Colors::default_style(), res)
     }
 
+    #[cfg(not(windows))]
     pub fn is_executable(&self) -> bool {
         self.user_execute || self.group_execute || self.other_execute
     }
