@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   [#712](https://github.com/Peltoche/lsd/issues/712). Executables will be marked
   based on the file extension: `exe`, `msi`, `bat` and `ps1`.
   [`LS_COLORS`](README.md#Colors) can be used to customize.
+- Handle dereference (-L) with broken symlink from [r3dArch](https://github.com/r3dArch)
 
 ## [0.23.1] - 2022-09-13
 

@@ -289,6 +289,8 @@ fn get_output(
     tree: (usize, &str),
 ) -> Vec<String> {
     let mut strings: Vec<String> = Vec::new();
+    let colorize_missing = |string: &str| colors.colorize(string, &Elem::NoAccess);
+
     for (i, block) in flags.blocks.0.iter().enumerate() {
         let mut block_vec = if Layout::Tree == flags.layout && tree.0 == i {
             vec![colors.colorize(tree.1, &Elem::TreeEdge)]
@@ -297,28 +299,58 @@ fn get_output(
         };
 
         match block {
-            Block::INode => block_vec.push(meta.inode.render(colors)),
-            Block::Links => block_vec.push(meta.links.render(colors)),
+            Block::INode => block_vec.push(match &meta.inode {
+                Some(inode) => inode.render(colors),
+                None => colorize_missing("?"),
+            }),
+            Block::Links => block_vec.push(match &meta.links {
+                Some(links) => links.render(colors),
+                None => colorize_missing("?"),
+            }),
             Block::Permission => {
                 block_vec.extend([
                     meta.file_type.render(colors),
-                    meta.permissions.render(colors, flags),
-                    meta.access_control.render_method(colors),
+                    match meta.permissions {
+                        Some(permissions) => permissions.render(colors, flags),
+                        None => colorize_missing("?????????"),
+                    },
+                    match &meta.access_control {
+                        Some(access_control) => access_control.render_method(colors),
+                        None => colorize_missing(""),
+                    },
                 ]);
             }
-            Block::User => block_vec.push(meta.owner.render_user(colors)),
-            Block::Group => block_vec.push(meta.owner.render_group(colors)),
-            Block::Context => block_vec.push(meta.access_control.render_context(colors)),
+            Block::User => block_vec.push(match &meta.owner {
+                Some(owner) => owner.render_user(colors),
+                None => colorize_missing("?"),
+            }),
+            Block::Group => block_vec.push(match &meta.owner {
+                Some(owner) => owner.render_group(colors),
+                None => colorize_missing("?"),
+            }),
+            Block::Context => block_vec.push(match &meta.access_control {
+                Some(access_control) => access_control.render_context(colors),
+                None => colorize_missing("?"),
+            }),
             Block::Size => {
                 let pad = if Layout::Tree == flags.layout && 0 == tree.0 && 0 == i {
                     None
                 } else {
                     Some(padding_rules[&Block::SizeValue])
                 };
-                block_vec.push(meta.size.render(colors, flags, pad))
+                block_vec.push(match &meta.size {
+                    Some(size) => size.render(colors, flags, pad),
+                    None => colorize_missing("?"),
+                })
             }
-            Block::SizeValue => block_vec.push(meta.size.render_value(colors, flags)),
-            Block::Date => block_vec.push(meta.date.render(colors, flags)),
+            Block::SizeValue => block_vec.push(match &meta.size {
+                Some(size) => size.render_value(colors, flags),
+                None => colorize_missing("?"),
+            }),
+            Block::Date => block_vec.push(match &meta.date {
+                Some(date) => date.render(colors, flags),
+                None => colorize_missing("?"),
+            }),
             Block::Name => {
                 block_vec.extend([
                     meta.name.render(
@@ -377,7 +409,10 @@ fn detect_size_lengths(metas: &[Meta], flags: &Flags) -> usize {
     let mut max_value_length: usize = 0;
 
     for meta in metas {
-        let value_len = meta.size.value_string(flags).len();
+        let value_len = match &meta.size {
+            Some(size) => size.value_string(flags).len(),
+            None => 0,
+        };
 
         if value_len > max_value_length {
             max_value_length = value_len;

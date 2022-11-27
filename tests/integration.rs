@@ -289,6 +289,39 @@ fn test_dereference_link_broken_link() {
         .stderr(predicate::str::contains("No such file or directory"));
 }
 
+#[test]
+fn test_dereference_link_broken_link_output() {
+    let dir = tempdir();
+
+    let link = dir.path().join("link");
+    let target = dir.path().join("target");
+
+    #[cfg(unix)]
+    fs::symlink(&target, &link).unwrap();
+
+    // this needs to be tested on Windows
+    // likely to fail because of permission issue
+    // see https://doc.rust-lang.org/std/os/windows/fs/fn.symlink_file.html
+    #[cfg(windows)]
+    std::os::windows::fs::symlink_file(&target, &link).expect("failed to create broken symlink");
+
+    cmd()
+        .arg("-l")
+        .arg("--dereference")
+        .arg("--ignore-config")
+        .arg(&link)
+        .assert()
+        .stdout(predicate::str::starts_with("l????????? ? ? ? ?"));
+
+    cmd()
+        .arg("-l")
+        .arg("-L")
+        .arg("--ignore-config")
+        .arg(link)
+        .assert()
+        .stdout(predicate::str::starts_with("l????????? ? ? ? ?"));
+}
+
 #[cfg(unix)]
 #[test]
 fn test_show_folder_content_of_symlink() {

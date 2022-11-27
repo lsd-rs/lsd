@@ -149,8 +149,9 @@ mod test {
         let metadata = tmp_dir.path().metadata().expect("failed to get metas");
 
         let colors = Colors::new(ThemeOption::NoLscolors);
+
         #[cfg(not(windows))]
-        let file_type = FileType::new(&metadata, None, &meta.permissions);
+        let file_type = FileType::new(&metadata, None, &meta.permissions.unwrap());
         #[cfg(windows)]
         let file_type = FileType::new(&metadata, None, tmp_dir.path());
 
