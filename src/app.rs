@@ -90,10 +90,10 @@ pub fn build() -> Command<'static> {
                 .help("Display one entry per line"),
         )
         .arg(
-            Arg::with_name("recursive")
+            Arg::new("recursive")
                 .short('R')
                 .long("recursive")
-                .multiple_occurrences(true)
+                .action(ArgAction::SetTrue)
                 .conflicts_with("tree")
                 .help("Recurse into directories"),
         )
