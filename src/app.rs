@@ -315,10 +315,10 @@ pub fn build() -> Command<'static> {
                 .help("Display the index number of each file"),
         )
         .arg(
-            Arg::with_name("dereference")
+            Arg::new("dereference")
                 .short('L')
                 .long("dereference")
-                .multiple_occurrences(true)
+                .action(ArgAction::SetTrue)
                 .help("When showing file information for a symbolic link, show information for the file the link references rather than for the link itself"),
         )
         .arg(
