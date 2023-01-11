@@ -1,7 +1,7 @@
-use clap::{App, Arg, ValueHint};
+use clap::{Arg, Command, ValueHint};
 
-pub fn build() -> App<'static> {
-    App::new("lsd")
+pub fn build() -> Command<'static> {
+    Command::new("lsd")
         .version(env!("CARGO_PKG_VERSION"))
         .about(env!("CARGO_PKG_DESCRIPTION"))
         .arg(
