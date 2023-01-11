@@ -11,19 +11,19 @@ pub fn build() -> Command<'static> {
                 .value_hint(ValueHint::AnyPath),
         )
         .arg(
-            Arg::with_name("all")
+            Arg::new("all")
                 .short('a')
                 .overrides_with("almost-all")
                 .long("all")
-                .multiple_occurrences(true)
+                .action(ArgAction::SetTrue)
                 .help("Do not ignore entries starting with ."),
         )
         .arg(
-            Arg::with_name("almost-all")
+            Arg::new("almost-all")
                 .short('A')
                 .overrides_with("all")
                 .long("almost-all")
-                .multiple_occurrences(true)
+                .action(ArgAction::SetTrue)
                 .help("Do not list implied . and .."),
         )
         .arg(
@@ -115,17 +115,18 @@ pub fn build() -> Command<'static> {
                 .help("Recurse into directories and present the result as a tree"),
         )
         .arg(
-            Arg::with_name("depth")
+            Arg::new("depth")
                 .long("depth")
-                .multiple_occurrences(true)
+                .action(ArgAction::Append)
                 .takes_value(true)
                 .value_name("num")
                 .help("Stop recursing into directories after reaching specified depth"),
         )
         .arg(
-            Arg::with_name("directory-only")
+            Arg::new("directory-only")
                 .short('d')
                 .long("directory-only")
+                .action(ArgAction::SetTrue)
                 .conflicts_with("depth")
                 .conflicts_with("recursive")
                 .help("Display directories themselves, and not their contents (recursively when used with --tree)"),
@@ -347,8 +348,9 @@ pub fn build() -> Command<'static> {
                 .help("Display block headers"),
         )
         .arg(
-            Arg::with_name("system-protected")
+            Arg::new("system-protected")
                 .long("system-protected")
+                .action(ArgAction::SetTrue)
                 .help("Includes files with the windows system protection flag set. This is the same as --all on other platforms")
                 .hide(!cfg!(windows)),
         )
