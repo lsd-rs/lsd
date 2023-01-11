@@ -57,10 +57,10 @@ pub fn build() -> Command<'static> {
                 .help("Whether to use fancy or unicode icons"),
         )
         .arg(
-            Arg::with_name("indicators")
+            Arg::new("indicators")
                 .short('F')
                 .long("classify")
-                .multiple_occurrences(true)
+                .action(ArgAction::SetTrue)
                 .help("Append indicator (one of */=>@|) at the end of the file names"),
         )
         .arg(
