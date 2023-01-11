@@ -296,10 +296,10 @@ pub fn build() -> Command<'static> {
                 .help("Do not display symlink target"),
         )
         .arg(
-            Arg::with_name("ignore-glob")
+            Arg::new("ignore-glob")
                 .short('I')
                 .long("ignore-glob")
-                .multiple_occurrences(true)
+                .action(ArgAction::Append)
                 .number_of_values(1)
                 .value_name("pattern")
                 .default_value("")
