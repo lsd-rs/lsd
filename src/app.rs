@@ -149,9 +149,9 @@ pub fn build() -> Command<'static> {
                 .help("How to display size"),
         )
         .arg(
-            Arg::with_name("total-size")
+            Arg::new("total-size")
                 .long("total-size")
-                .multiple_occurrences(true)
+                .action(ArgAction::SetTrue)
                 .help("Display the total size of directories"),
         )
         .arg(

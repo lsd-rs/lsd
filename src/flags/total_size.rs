@@ -17,7 +17,7 @@ impl Configurable<Self> for TotalSize {
     /// If the "total-size" argument is passed, this returns a `TotalSize` with value `true` in a
     /// [Some]. Otherwise this returns [None].
     fn from_arg_matches(matches: &ArgMatches) -> Option<Self> {
-        if matches.is_present("total-size") {
+        if matches.get_one("total-size").unwrap_or(&false).clone() {
             Some(Self(true))
         } else {
             None
@@ -45,14 +45,14 @@ mod test {
     #[test]
     fn test_from_arg_matches_none() {
         let argv = ["lsd"];
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         assert_eq!(None, TotalSize::from_arg_matches(&matches));
     }
 
     #[test]
     fn test_from_arg_matches_true() {
         let argv = ["lsd", "--total-size"];
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         assert_eq!(Some(TotalSize(true)), TotalSize::from_arg_matches(&matches));
     }
 
