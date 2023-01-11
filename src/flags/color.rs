@@ -115,7 +115,7 @@ impl Configurable<Self> for ColorOption {
     /// a [Some]. Otherwise if the argument is passed, this returns the variant corresponding to
     /// its parameter in a [Some]. Otherwise this returns [None].
     fn from_arg_matches(matches: &ArgMatches) -> Option<Self> {
-        if matches.contains_id("classic") {
+        if matches.get_one("classic").unwrap_or(&false).clone() {
             Some(Self::Never)
         } else if matches.value_source("color") == Some(ValueSource::CommandLine) {
             matches

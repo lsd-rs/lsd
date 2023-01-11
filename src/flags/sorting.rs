@@ -149,7 +149,7 @@ impl Configurable<Self> for DirGrouping {
     /// [Some]. Otherwise if the argument is passed, this returns the variant corresponding to its
     /// parameter in a [Some]. Otherwise this returns [None].
     fn from_arg_matches(matches: &ArgMatches) -> Option<Self> {
-        if matches.is_present("classic") {
+        if matches.get_one("classic").unwrap_or(&false).clone() {
             return Some(Self::None);
         }
 

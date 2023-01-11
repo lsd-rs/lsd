@@ -52,7 +52,7 @@ impl Configurable<Self> for DateFlag {
     /// [Some]. Otherwise if the argument is passed, this returns the variant corresponding to its
     /// parameter in a [Some]. Otherwise this returns [None].
     fn from_arg_matches(matches: &ArgMatches) -> Option<Self> {
-        if matches.contains_id("classic") {
+        if matches.get_one("classic").unwrap_or(&false).clone() {
             Some(Self::Date)
         } else if matches.value_source("date") == Some(ValueSource::CommandLine) {
             matches

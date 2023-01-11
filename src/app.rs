@@ -285,6 +285,7 @@ pub fn build() -> Command<'static> {
         .arg(
             Arg::new("classic")
                 .long("classic")
+                .action(ArgAction::SetTrue)
                 .help("Enable classic mode (display output similar to ls)"),
         )
         .arg(
