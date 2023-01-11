@@ -288,7 +288,7 @@ pub fn build() -> Command<'static> {
                 .help("Specify the blocks that will be displayed and in what order"),
         )
         .arg(
-            Arg::with_name("classic")
+            Arg::new("classic")
                 .long("classic")
                 .help("Enable classic mode (display output similar to ls)"),
         )
@@ -331,13 +331,11 @@ pub fn build() -> Command<'static> {
                 .help("Print security context (label) of each file"),
         )
         .arg(
-            Arg::with_name("hyperlink")
+            Arg::new("hyperlink")
                 .long("hyperlink")
-                .possible_value("always")
-                .possible_value("auto")
-                .possible_value("never")
+                .value_parser(["always", "auto", "never"])
                 .default_value("never")
-                .multiple_occurrences(true)
+                .action(ArgAction::Append)
                 .takes_value(true)
                 .number_of_values(1)
                 .help("Attach hyperlink to filenames"),

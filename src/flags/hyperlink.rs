@@ -5,7 +5,7 @@ use super::Configurable;
 
 use crate::config_file::Config;
 
-use clap::ArgMatches;
+use clap::{ArgMatches, ValueSource};
 use serde::Deserialize;
 
 /// The flag showing when to use hyperlink in the output.
@@ -39,10 +39,11 @@ impl Configurable<Self> for HyperlinkOption {
     fn from_arg_matches(matches: &ArgMatches) -> Option<Self> {
         if matches.is_present("classic") {
             Some(Self::Never)
-        } else if matches.occurrences_of("hyperlink") > 0 {
+        } else if matches.value_source("hyperlink") == Some(ValueSource::CommandLine) {
             matches
-                .values_of("hyperlink")?
+                .get_many::<String>("hyperlink")?
                 .last()
+                .map(String::as_str)
                 .map(Self::from_arg_str)
         } else {
             None
@@ -75,14 +76,14 @@ mod test_hyperlink_option {
     #[test]
     fn test_from_arg_matches_none() {
         let argv = ["lsd"];
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         assert_eq!(None, HyperlinkOption::from_arg_matches(&matches));
     }
 
     #[test]
     fn test_from_arg_matches_always() {
         let argv = ["lsd", "--hyperlink", "always"];
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         assert_eq!(
             Some(HyperlinkOption::Always),
             HyperlinkOption::from_arg_matches(&matches)
@@ -92,7 +93,7 @@ mod test_hyperlink_option {
     #[test]
     fn test_from_arg_matches_auto() {
         let argv = ["lsd", "--hyperlink", "auto"];
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         assert_eq!(
             Some(HyperlinkOption::Auto),
             HyperlinkOption::from_arg_matches(&matches)
@@ -102,7 +103,7 @@ mod test_hyperlink_option {
     #[test]
     fn test_from_arg_matches_never() {
         let argv = ["lsd", "--hyperlink", "never"];
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         assert_eq!(
             Some(HyperlinkOption::Never),
             HyperlinkOption::from_arg_matches(&matches)
@@ -112,7 +113,7 @@ mod test_hyperlink_option {
     #[test]
     fn test_from_arg_matches_classic_mode() {
         let argv = ["lsd", "--hyperlink", "always", "--classic"];
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         assert_eq!(
             Some(HyperlinkOption::Never),
             HyperlinkOption::from_arg_matches(&matches)
@@ -122,7 +123,7 @@ mod test_hyperlink_option {
     #[test]
     fn test_from_arg_matches_hyperlink_when_multi() {
         let argv = ["lsd", "--hyperlink", "always", "--hyperlink", "never"];
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         assert_eq!(
             Some(HyperlinkOption::Never),
             HyperlinkOption::from_arg_matches(&matches)
