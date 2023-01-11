@@ -343,8 +343,9 @@ pub fn build() -> Command<'static> {
                 .help("Attach hyperlink to filenames"),
         )
         .arg(
-            Arg::with_name("header")
+            Arg::new("header")
                 .long("header")
+                .action(ArgAction::SetTrue)
                 .help("Display block headers"),
         )
         .arg(
