@@ -37,24 +37,21 @@ pub fn build() -> Command<'static> {
                 .help("When to use terminal colours"),
         )
         .arg(
-            Arg::with_name("icon")
+            Arg::new("icon")
                 .long("icon")
-                .possible_value("always")
-                .possible_value("auto")
-                .possible_value("never")
+                .value_parser(["always", "auto", "never"])
                 .default_value("auto")
-                .multiple_occurrences(true)
+                .action(ArgAction::Append)
                 .takes_value(true)
                 .number_of_values(1)
                 .help("When to print the icons"),
         )
         .arg(
-            Arg::with_name("icon-theme")
+            Arg::new("icon-theme")
                 .long("icon-theme")
                 .default_value("fancy")
-                .possible_value("fancy")
-                .possible_value("unicode")
-                .multiple_occurrences(true)
+                .value_parser(["fancy", "unicode"])
+                .action(ArgAction::Append)
                 .takes_value(true)
                 .number_of_values(1)
                 .help("Whether to use fancy or unicode icons"),
