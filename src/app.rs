@@ -139,13 +139,11 @@ pub fn build() -> Command<'static> {
                 .help("How to display permissions"),
         )
         .arg(
-            Arg::with_name("size")
+            Arg::new("size")
                 .long("size")
-                .possible_value("default")
-                .possible_value("short")
-                .possible_value("bytes")
+                .value_parser(["default", "short", "bytes"])
                 .default_value("default")
-                .multiple_occurrences(true)
+                .action(ArgAction::Append)
                 .takes_value(true)
                 .number_of_values(1)
                 .help("How to display size"),
