@@ -286,9 +286,9 @@ pub fn build() -> Command<'static> {
                 .help("Enable classic mode (display output similar to ls)"),
         )
         .arg(
-            Arg::with_name("no-symlink")
+            Arg::new("no-symlink")
                 .long("no-symlink")
-                .multiple_occurrences(true)
+                .action(ArgAction::SetTrue)
                 .help("Do not display symlink target"),
         )
         .arg(
