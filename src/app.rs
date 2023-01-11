@@ -64,10 +64,10 @@ pub fn build() -> Command<'static> {
                 .help("Append indicator (one of */=>@|) at the end of the file names"),
         )
         .arg(
-            Arg::with_name("long")
+            Arg::new("long")
                 .short('l')
                 .long("long")
-                .multiple_occurrences(true)
+                .action(ArgAction::SetTrue)
                 .help("Display extended file metadata as a table"),
         )
         .arg(
@@ -83,10 +83,10 @@ pub fn build() -> Command<'static> {
                 .takes_value(true)
         )
         .arg(
-            Arg::with_name("oneline")
+            Arg::new("oneline")
                 .short('1')
                 .long("oneline")
-                .multiple_occurrences(true)
+                .action(ArgAction::SetTrue)
                 .help("Display one entry per line"),
         )
         .arg(
@@ -105,9 +105,9 @@ pub fn build() -> Command<'static> {
                 .help("For ls compatibility purposes ONLY, currently set by default"),
         )
         .arg(
-            Arg::with_name("tree")
+            Arg::new("tree")
                 .long("tree")
-                .multiple_occurrences(true)
+                .action(ArgAction::SetTrue)
                 .conflicts_with("recursive")
                 .help("Recurse into directories and present the result as a tree"),
         )
@@ -306,10 +306,10 @@ pub fn build() -> Command<'static> {
                 .help("Do not display files/directories with names matching the glob pattern(s). More than one can be specified by repeating the argument"),
         )
         .arg(
-            Arg::with_name("inode")
+            Arg::new("inode")
                 .short('i')
                 .long("inode")
-                .multiple_occurrences(true)
+                .action(ArgAction::SetTrue)
                 .help("Display the index number of each file"),
         )
         .arg(
@@ -320,11 +320,12 @@ pub fn build() -> Command<'static> {
                 .help("When showing file information for a symbolic link, show information for the file the link references rather than for the link itself"),
         )
         .arg(
-            Arg::with_name("context")
+            Arg::new("context")
                 .short('Z')
                 .long("context")
                 .required(false)
                 .takes_value(false)
+                .action(ArgAction::SetTrue)
                 .help("Print security context (label) of each file"),
         )
         .arg(
