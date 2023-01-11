@@ -38,6 +38,8 @@ mod meta;
 mod sort;
 mod theme;
 
+use clap::ValueSource;
+
 use crate::config_file::Config;
 use crate::core::Core;
 use crate::flags::Flags;
@@ -112,16 +114,16 @@ fn main() {
     // * to all files matched
     // '*' remain as '*'
     let inputs = matches
-        .values_of("FILE")
+        .get_many::<String>("FILE")
         .expect("failed to retrieve cli value")
         .map(PathBuf::from)
         .collect();
 
-    let config = if matches.is_present("ignore-config") {
+    let config = if matches.get_one("ignore-config") == Some(&true) {
         Config::with_none()
-    } else if matches.is_present("config-file") {
+    } else if matches.value_source("config-file") == Some(ValueSource::CommandLine) {
         let path = matches
-            .value_of("config-file")
+            .get_one::<String>("config-file")
             .expect("Invalid config file path");
 
         Config::from_file(path).expect("Provided file path is invalid")
