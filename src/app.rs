@@ -165,7 +165,7 @@ pub fn build() -> Command<'static> {
                 .help("How to display date [possible values: date, relative, +date-time-format]"),
         )
         .arg(
-            Arg::with_name("timesort")
+            Arg::new("timesort")
                 .short('t')
                 .long("timesort")
                 .overrides_with("sizesort")
@@ -173,11 +173,11 @@ pub fn build() -> Command<'static> {
                 .overrides_with("versionsort")
                 .overrides_with("sort")
                 .overrides_with("no-sort")
-                .multiple_occurrences(true)
+                .action(ArgAction::SetTrue)
                 .help("Sort by time modified"),
         )
         .arg(
-            Arg::with_name("sizesort")
+            Arg::new("sizesort")
                 .short('S')
                 .long("sizesort")
                 .overrides_with("timesort")
@@ -185,11 +185,11 @@ pub fn build() -> Command<'static> {
                 .overrides_with("versionsort")
                 .overrides_with("sort")
                 .overrides_with("no-sort")
-                .multiple_occurrences(true)
+                .action(ArgAction::SetTrue)
                 .help("Sort by size"),
         )
         .arg(
-            Arg::with_name("extensionsort")
+            Arg::new("extensionsort")
                 .short('X')
                 .long("extensionsort")
                 .overrides_with("sizesort")
@@ -197,14 +197,14 @@ pub fn build() -> Command<'static> {
                 .overrides_with("versionsort")
                 .overrides_with("sort")
                 .overrides_with("no-sort")
-                .multiple_occurrences(true)
+                .action(ArgAction::SetTrue)
                 .help("Sort by file extension"),
         )
         .arg(
-            Arg::with_name("versionsort")
+            Arg::new("versionsort")
                 .short('v')
                 .long("versionsort")
-                .multiple_occurrences(true)
+                .action(ArgAction::SetTrue)
                 .overrides_with("timesort")
                 .overrides_with("sizesort")
                 .overrides_with("extensionsort")
@@ -213,10 +213,10 @@ pub fn build() -> Command<'static> {
                 .help("Natural sort of (version) numbers within text"),
         )
         .arg(
-            Arg::with_name("sort")
+            Arg::new("sort")
                 .long("sort")
-                .multiple_occurrences(true)
-                .possible_values(&["size", "time", "version", "extension", "none"])
+                .action(ArgAction::Append)
+                .value_parser(["size", "time", "version", "extension", "none"])
                 .takes_value(true)
                 .value_name("WORD")
                 .overrides_with("timesort")
@@ -227,10 +227,10 @@ pub fn build() -> Command<'static> {
                 .help("sort by WORD instead of name")
         )
         .arg(
-            Arg::with_name("no-sort")
+            Arg::new("no-sort")
             .short('U')
             .long("no-sort")
-            .multiple_occurrences(true)
+            .action(ArgAction::SetTrue)
             .overrides_with("timesort")
             .overrides_with("sizesort")
             .overrides_with("extensionsort")
@@ -239,25 +239,24 @@ pub fn build() -> Command<'static> {
             .help("Do not sort. List entries in directory order")
         )
         .arg(
-            Arg::with_name("reverse")
+            Arg::new("reverse")
                 .short('r')
                 .long("reverse")
-                .multiple_occurrences(true)
+                .action(ArgAction::SetTrue)
                 .help("Reverse the order of the sort"),
         )
         .arg(
-            Arg::with_name("group-dirs")
+            Arg::new("group-dirs")
                 .long("group-dirs")
-                .possible_value("none")
-                .possible_value("first")
-                .possible_value("last")
-                .multiple_occurrences(true)
+                .value_parser(["none", "first", "last"])
+                .action(ArgAction::Append)
                 .number_of_values(1)
                 .help("Sort the directories then the files"),
         )
         .arg(
-            Arg::with_name("group-directories-first")
+            Arg::new("group-directories-first")
                 .long("group-directories-first")
+                .action(ArgAction::SetTrue)
                 .help("Groups the directories at the top before the files. Same as --group-dirs=first")
         )
         .arg(

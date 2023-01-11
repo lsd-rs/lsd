@@ -5,7 +5,7 @@ use super::Configurable;
 
 use crate::config_file::Config;
 
-use clap::ArgMatches;
+use clap::{ArgMatches, ValueSource};
 use serde::Deserialize;
 
 /// A collection of flags on how to sort the output.
@@ -52,17 +52,23 @@ impl Configurable<Self> for SortColumn {
     /// If either the "timesort" or "sizesort" arguments are passed, this returns the corresponding
     /// `SortColumn` variant in a [Some]. Otherwise this returns [None].
     fn from_arg_matches(matches: &ArgMatches) -> Option<Self> {
-        let sort = matches.values_of("sort").and_then(|s| s.last());
+        let sort = matches
+            .get_many::<String>("sort")
+            .and_then(|s| s.last().map(String::as_str));
 
-        if matches.is_present("timesort") || sort == Some("time") {
+        if matches.get_one("timesort").unwrap_or(&false).clone() || sort == Some("time") {
             Some(Self::Time)
-        } else if matches.is_present("sizesort") || sort == Some("size") {
+        } else if matches.get_one("sizesort").unwrap_or(&false).clone() || sort == Some("size") {
             Some(Self::Size)
-        } else if matches.is_present("extensionsort") || sort == Some("extension") {
+        } else if matches.get_one("extensionsort").unwrap_or(&false).clone()
+            || sort == Some("extension")
+        {
             Some(Self::Extension)
-        } else if matches.is_present("versionsort") || sort == Some("version") {
+        } else if matches.get_one("versionsort").unwrap_or(&false).clone()
+            || sort == Some("version")
+        {
             Some(Self::Version)
-        } else if matches.is_present("no-sort") || sort == Some("none") {
+        } else if matches.get_one("no-sort").unwrap_or(&false).clone() || sort == Some("none") {
             Some(Self::None)
         } else {
             None
@@ -93,7 +99,7 @@ impl Configurable<Self> for SortOrder {
     /// If the "reverse" argument is passed, this returns [SortOrder::Reverse] in a [Some].
     /// Otherwise this returns [None].
     fn from_arg_matches(matches: &ArgMatches) -> Option<Self> {
-        if matches.is_present("reverse") {
+        if matches.get_one("reverse").unwrap_or(&false).clone() {
             Some(Self::Reverse)
         } else {
             None
@@ -147,14 +153,19 @@ impl Configurable<Self> for DirGrouping {
             return Some(Self::None);
         }
 
-        if matches.is_present("group-directories-first") {
+        if matches
+            .get_one("group-directories-first")
+            .unwrap_or(&false)
+            .clone()
+        {
             return Some(Self::First);
         }
 
-        if matches.occurrences_of("group-dirs") > 0 {
+        if matches.value_source("group-dirs") == Some(ValueSource::CommandLine) {
             return matches
-                .values_of("group-dirs")?
+                .get_many::<String>("group-dirs")?
                 .last()
+                .map(String::as_str)
                 .map(Self::from_arg_str);
         }
 
@@ -188,14 +199,14 @@ mod test_sort_column {
     #[test]
     fn test_from_arg_matches_none() {
         let argv = ["lsd"];
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         assert_eq!(None, SortColumn::from_arg_matches(&matches));
     }
 
     #[test]
     fn test_from_arg_matches_extension() {
         let argv = ["lsd", "--extensionsort"];
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         assert_eq!(
             Some(SortColumn::Extension),
             SortColumn::from_arg_matches(&matches)
@@ -205,7 +216,7 @@ mod test_sort_column {
     #[test]
     fn test_from_arg_matches_time() {
         let argv = ["lsd", "--timesort"];
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         assert_eq!(
             Some(SortColumn::Time),
             SortColumn::from_arg_matches(&matches)
@@ -215,7 +226,7 @@ mod test_sort_column {
     #[test]
     fn test_from_arg_matches_size() {
         let argv = ["lsd", "--sizesort"];
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         assert_eq!(
             Some(SortColumn::Size),
             SortColumn::from_arg_matches(&matches)
@@ -225,7 +236,7 @@ mod test_sort_column {
     #[test]
     fn test_from_arg_matches_version() {
         let argv = ["lsd", "--versionsort"];
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         assert_eq!(
             Some(SortColumn::Version),
             SortColumn::from_arg_matches(&matches)
@@ -235,7 +246,7 @@ mod test_sort_column {
     #[test]
     fn test_from_arg_matches_no_sort() {
         let argv = ["lsd", "--no-sort"];
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         assert_eq!(
             Some(SortColumn::None),
             SortColumn::from_arg_matches(&matches)
@@ -245,35 +256,35 @@ mod test_sort_column {
     #[test]
     fn test_from_arg_matches_sort() {
         let argv = ["lsd", "--sort", "time"];
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         assert_eq!(
             Some(SortColumn::Time),
             SortColumn::from_arg_matches(&matches)
         );
 
         let argv = ["lsd", "--sort", "size"];
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         assert_eq!(
             Some(SortColumn::Size),
             SortColumn::from_arg_matches(&matches)
         );
 
         let argv = ["lsd", "--sort", "extension"];
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         assert_eq!(
             Some(SortColumn::Extension),
             SortColumn::from_arg_matches(&matches)
         );
 
         let argv = ["lsd", "--sort", "version"];
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         assert_eq!(
             Some(SortColumn::Version),
             SortColumn::from_arg_matches(&matches)
         );
 
         let argv = ["lsd", "--sort", "none"];
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         assert_eq!(
             Some(SortColumn::None),
             SortColumn::from_arg_matches(&matches)
@@ -283,7 +294,7 @@ mod test_sort_column {
     #[test]
     fn test_multi_sort() {
         let argv = ["lsd", "--sort", "size", "--sort", "time"];
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         assert_eq!(
             Some(SortColumn::Time),
             SortColumn::from_arg_matches(&matches)
@@ -293,7 +304,7 @@ mod test_sort_column {
     #[test]
     fn test_multi_sort_use_last() {
         let argv = ["lsd", "--sort", "size", "-t", "-S", "-X", "--sort", "time"];
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         assert_eq!(
             Some(SortColumn::Time),
             SortColumn::from_arg_matches(&matches)
@@ -384,14 +395,14 @@ mod test_sort_order {
     #[test]
     fn test_from_arg_matches_none() {
         let argv = ["lsd"];
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         assert_eq!(None, SortOrder::from_arg_matches(&matches));
     }
 
     #[test]
     fn test_from_arg_matches_reverse() {
         let argv = ["lsd", "--reverse"];
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         assert_eq!(
             Some(SortOrder::Reverse),
             SortOrder::from_arg_matches(&matches)
@@ -462,14 +473,14 @@ mod test_dir_grouping {
     #[test]
     fn test_from_arg_matches_none() {
         let argv = ["lsd"];
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         assert_eq!(None, DirGrouping::from_arg_matches(&matches));
     }
 
     #[test]
     fn test_from_arg_matches_first() {
         let argv = ["lsd", "--group-dirs", "first"];
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         assert_eq!(
             Some(DirGrouping::First),
             DirGrouping::from_arg_matches(&matches)
@@ -479,7 +490,7 @@ mod test_dir_grouping {
     #[test]
     fn test_from_arg_matches_last() {
         let argv = ["lsd", "--group-dirs", "last"];
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         assert_eq!(
             Some(DirGrouping::Last),
             DirGrouping::from_arg_matches(&matches)
@@ -489,7 +500,7 @@ mod test_dir_grouping {
     #[test]
     fn test_from_arg_matches_explicit_none() {
         let argv = ["lsd", "--group-dirs", "none"];
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         assert_eq!(
             Some(DirGrouping::None),
             DirGrouping::from_arg_matches(&matches)
@@ -499,7 +510,7 @@ mod test_dir_grouping {
     #[test]
     fn test_from_arg_matches_classic_mode() {
         let argv = ["lsd", "--group-dirs", "first", "--classic"];
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         assert_eq!(
             Some(DirGrouping::None),
             DirGrouping::from_arg_matches(&matches)
@@ -509,7 +520,7 @@ mod test_dir_grouping {
     #[test]
     fn test_from_arg_matches_group_dirs_multi() {
         let argv = ["lsd", "--group-dirs", "first", "--group-dirs", "last"];
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         assert_eq!(
             Some(DirGrouping::Last),
             DirGrouping::from_arg_matches(&matches)
@@ -519,7 +530,7 @@ mod test_dir_grouping {
     #[test]
     fn test_from_arg_matches_group_directories_first() {
         let argv = ["lsd", "--group-directories-first"];
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         assert_eq!(
             Some(DirGrouping::First),
             DirGrouping::from_arg_matches(&matches)
