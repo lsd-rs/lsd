@@ -1,4 +1,4 @@
-use clap::{Arg, Command, ValueHint};
+use clap::{Arg, ArgAction, Command, ValueHint};
 
 pub fn build() -> Command<'static> {
     Command::new("lsd")
@@ -268,14 +268,14 @@ pub fn build() -> Command<'static> {
                 .help("Groups the directories at the top before the files. Same as --group-dirs=first")
         )
         .arg(
-            Arg::with_name("blocks")
+            Arg::new("blocks")
                 .long("blocks")
-                .multiple_occurrences(true)
+                .action(ArgAction::Append)
                 .multiple_values(true)
                 .takes_value(true)
                 .use_value_delimiter(true)
-                .require_delimiter(true)
-                .possible_values(&[
+                .require_value_delimiter(true)
+                .value_parser([
                     "permission",
                     "user",
                     "group",

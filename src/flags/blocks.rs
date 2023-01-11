@@ -81,13 +81,13 @@ impl Configurable<Self> for Blocks {
     /// `Blocks` does not contain a [Block] of variant [INode](Block::INode) yet, one is prepended
     /// to the returned value.
     fn configure_from(matches: &ArgMatches, config: &Config) -> Self {
-        let mut blocks = if matches.is_present("long") {
+        let mut blocks = if matches.contains_id("long") {
             Self::long()
         } else {
             Default::default()
         };
 
-        if matches.is_present("long") {
+        if matches.contains_id("long") {
             if let Some(value) = Self::from_config(config) {
                 blocks = value;
             }
@@ -97,10 +97,10 @@ impl Configurable<Self> for Blocks {
             blocks = value;
         }
 
-        if matches.is_present("context") {
+        if matches.contains_id("context") {
             blocks.optional_insert_context();
         }
-        if matches.is_present("inode") {
+        if matches.contains_id("inode") {
             blocks.optional_prepend_inode();
         }
 
@@ -113,11 +113,14 @@ impl Configurable<Self> for Blocks {
     /// values in a [Some]. Otherwise if the "long" argument is passed, this returns
     /// [Blocks::long]. Finally if none of the previous happened, this returns [None].
     fn from_arg_matches(matches: &ArgMatches) -> Option<Self> {
-        if matches.occurrences_of("blocks") == 0 {
+        if matches.get_many::<String>("blocks")?.len() == 0 {
             return None;
         }
 
-        if let Some(values) = matches.values_of("blocks") {
+        if let Some(values) = matches
+            .get_many::<String>("blocks")
+            .map(|values| values.map(String::as_str))
+        {
             let mut blocks: Vec<Block> = Vec::with_capacity(values.len());
             for value in values {
                 blocks.push(Block::try_from(value).unwrap_or_else(|_| {
@@ -229,7 +232,7 @@ mod test_blocks {
         let argv = ["lsd"];
         let target = Blocks::default();
 
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         let result = Blocks::configure_from(&matches, &Config::with_none());
 
         assert_eq!(result, target);
@@ -240,7 +243,7 @@ mod test_blocks {
         let argv = ["lsd", "--long"];
         let target = Blocks::long();
 
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         let result = Blocks::configure_from(&matches, &Config::with_none());
 
         assert_eq!(result, target);
@@ -251,7 +254,7 @@ mod test_blocks {
         let argv = ["lsd", "--blocks", "permission"];
         let target = Blocks(vec![Block::Permission]);
 
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         let result = Blocks::configure_from(&matches, &Config::with_none());
 
         assert_eq!(result, target);
@@ -262,7 +265,7 @@ mod test_blocks {
         let argv = ["lsd", "--long", "--blocks", "permission"];
         let target = Blocks(vec![Block::Permission]);
 
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         let result = Blocks::configure_from(&matches, &Config::with_none());
 
         assert_eq!(result, target);
@@ -273,7 +276,7 @@ mod test_blocks {
         let argv = ["lsd", "--inode"];
         let target = Blocks(vec![Block::INode, Block::Name]);
 
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         let result = Blocks::configure_from(&matches, &Config::with_none());
 
         assert_eq!(result, target);
@@ -284,7 +287,7 @@ mod test_blocks {
         let argv = ["lsd", "--blocks", "permission", "--inode"];
         let target = Blocks(vec![Block::INode, Block::Permission]);
 
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         let result = Blocks::configure_from(&matches, &Config::with_none());
 
         assert_eq!(result, target);
@@ -295,7 +298,7 @@ mod test_blocks {
         let argv = ["lsd", "--long", "--blocks", "permission", "--inode"];
         let target = Blocks(vec![Block::INode, Block::Permission]);
 
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         let result = Blocks::configure_from(&matches, &Config::with_none());
 
         assert_eq!(result, target);
@@ -306,7 +309,7 @@ mod test_blocks {
         let argv = ["lsd", "--blocks", "permission,inode", "--inode"];
         let target = Blocks(vec![Block::Permission, Block::INode]);
 
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         let result = Blocks::configure_from(&matches, &Config::with_none());
 
         assert_eq!(result, target);
@@ -317,7 +320,7 @@ mod test_blocks {
         let argv = ["lsd", "--long", "--blocks", "permission,inode", "--inode"];
         let target = Blocks(vec![Block::Permission, Block::INode]);
 
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         let result = Blocks::configure_from(&matches, &Config::with_none());
 
         assert_eq!(result, target);
@@ -326,14 +329,14 @@ mod test_blocks {
     #[test]
     fn test_from_arg_matches_none() {
         let argv = ["lsd"];
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         assert!(matches!(Blocks::from_arg_matches(&matches), None));
     }
 
     #[test]
     fn test_from_arg_matches_one() {
         let argv = ["lsd", "--blocks", "permission"];
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         let test_blocks = Blocks(vec![Block::Permission]);
         assert_eq!(Blocks::from_arg_matches(&matches), Some(test_blocks));
     }
@@ -341,7 +344,7 @@ mod test_blocks {
     #[test]
     fn test_from_arg_matches_multi_occurences() {
         let argv = ["lsd", "--blocks", "permission", "--blocks", "name"];
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         let test_blocks = Blocks(vec![Block::Permission, Block::Name]);
         assert_eq!(Blocks::from_arg_matches(&matches), Some(test_blocks));
     }
@@ -349,7 +352,7 @@ mod test_blocks {
     #[test]
     fn test_from_arg_matches_multi_values() {
         let argv = ["lsd", "--blocks", "permission,name"];
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         let test_blocks = Blocks(vec![Block::Permission, Block::Name]);
         assert_eq!(Blocks::from_arg_matches(&matches), Some(test_blocks));
     }
@@ -357,7 +360,7 @@ mod test_blocks {
     #[test]
     fn test_from_arg_matches_reversed_default() {
         let argv = ["lsd", "--blocks", "name,date,size,group,user,permission"];
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         let test_blocks = Blocks(vec![
             Block::Name,
             Block::Date,
@@ -372,7 +375,7 @@ mod test_blocks {
     #[test]
     fn test_from_arg_matches_every_second_one() {
         let argv = ["lsd", "--blocks", "permission,group,date"];
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         let test_blocks = Blocks(vec![Block::Permission, Block::Group, Block::Date]);
         assert_eq!(Blocks::from_arg_matches(&matches), Some(test_blocks));
     }
@@ -433,7 +436,7 @@ mod test_blocks {
     #[test]
     fn test_context_not_present_on_cli() {
         let argv = ["lsd", "--long"];
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         let parsed_blocks = Blocks::configure_from(&matches, &Config::with_none());
         let it = parsed_blocks.0.iter();
         assert_eq!(it.filter(|&x| *x == Block::Context).count(), 0);
@@ -442,7 +445,7 @@ mod test_blocks {
     #[test]
     fn test_context_present_if_context_on() {
         let argv = ["lsd", "--context"];
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         let parsed_blocks = Blocks::configure_from(&matches, &Config::with_none());
         let it = parsed_blocks.0.iter();
         assert_eq!(it.filter(|&x| *x == Block::Context).count(), 1);
@@ -456,7 +459,7 @@ mod test_blocks {
             "--blocks",
             "name,date,size,context,group,user,permission",
         ];
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         let test_blocks = Blocks(vec![
             Block::Name,
             Block::Date,
