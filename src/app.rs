@@ -129,12 +129,11 @@ pub fn build() -> Command<'static> {
                 .help("Display directories themselves, and not their contents (recursively when used with --tree)"),
         )
         .arg(
-            Arg::with_name("permission")
+            Arg::new("permission")
                 .long("permission")
                 .default_value("rwx")
-                .possible_value("rwx")
-                .possible_value("octal")
-                .multiple_occurrences(true)
+                .value_parser(["rwx", "octal"])
+                .action(ArgAction::Append)
                 .takes_value(true)
                 .number_of_values(1)
                 .help("How to display permissions"),
