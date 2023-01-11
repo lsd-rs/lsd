@@ -17,7 +17,7 @@ impl Configurable<Self> for Header {
     /// If the "header" argument is passed, this returns a `Header` with value `true` in a
     /// [Some]. Otherwise this returns [None].
     fn from_arg_matches(matches: &ArgMatches) -> Option<Self> {
-        if matches.get_one("header").unwrap_or(&false).clone() {
+        if matches.get_one("header") == Some(&true) {
             Some(Self(true))
         } else {
             None

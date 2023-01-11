@@ -81,13 +81,13 @@ impl Configurable<Self> for Blocks {
     /// `Blocks` does not contain a [Block] of variant [INode](Block::INode) yet, one is prepended
     /// to the returned value.
     fn configure_from(matches: &ArgMatches, config: &Config) -> Self {
-        let mut blocks = if matches.get_one("long").unwrap_or(&false).clone() {
+        let mut blocks = if matches.get_one("long") == Some(&true) {
             Self::long()
         } else {
             Default::default()
         };
 
-        if matches.get_one("long").unwrap_or(&false).clone() {
+        if matches.get_one("long") == Some(&true) {
             if let Some(value) = Self::from_config(config) {
                 blocks = value;
             }
@@ -97,10 +97,10 @@ impl Configurable<Self> for Blocks {
             blocks = value;
         }
 
-        if matches.get_one("context").unwrap_or(&false).clone() {
+        if matches.get_one("context") == Some(&true) {
             blocks.optional_insert_context();
         }
-        if matches.get_one("inode").unwrap_or(&false).clone() {
+        if matches.get_one("inode") == Some(&true) {
             blocks.optional_prepend_inode();
         }
 

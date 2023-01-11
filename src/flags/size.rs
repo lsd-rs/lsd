@@ -40,7 +40,7 @@ impl Configurable<Self> for SizeFlag {
     /// `SizeFlag` variant is returned in a [Some]. If neither of them is passed, this returns
     /// [None].
     fn from_arg_matches(matches: &ArgMatches) -> Option<Self> {
-        if matches.get_one("classic").unwrap_or(&false).clone() {
+        if matches.get_one("classic") == Some(&true) {
             Some(Self::Bytes)
         } else if matches.value_source("size") == Some(ValueSource::CommandLine) {
             matches

@@ -38,7 +38,7 @@ impl Configurable<Self> for PermissionFlag {
     /// this returns [None].
     /// Sets permissions to rwx if classic flag is enabled.
     fn from_arg_matches(matches: &ArgMatches) -> Option<Self> {
-        if matches.get_one("classic").unwrap_or(&false).clone() {
+        if matches.get_one("classic") == Some(&true) {
             Some(Self::Rwx)
         } else if matches.value_source("permission") == Some(ValueSource::CommandLine) {
             matches

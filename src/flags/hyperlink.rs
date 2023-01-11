@@ -37,7 +37,7 @@ impl Configurable<Self> for HyperlinkOption {
     /// a [Some]. Otherwise if the argument is passed, this returns the variant corresponding to
     /// its parameter in a [Some]. Otherwise this returns [None].
     fn from_arg_matches(matches: &ArgMatches) -> Option<Self> {
-        if matches.get_one("classic").unwrap_or(&false).clone() {
+        if matches.get_one("classic") == Some(&true) {
             Some(Self::Never)
         } else if matches.value_source("hyperlink") == Some(ValueSource::CommandLine) {
             matches

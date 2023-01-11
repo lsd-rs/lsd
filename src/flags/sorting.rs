@@ -56,19 +56,15 @@ impl Configurable<Self> for SortColumn {
             .get_many::<String>("sort")
             .and_then(|s| s.last().map(String::as_str));
 
-        if matches.get_one("timesort").unwrap_or(&false).clone() || sort == Some("time") {
+        if matches.get_one("timesort") == Some(&true) || sort == Some("time") {
             Some(Self::Time)
-        } else if matches.get_one("sizesort").unwrap_or(&false).clone() || sort == Some("size") {
+        } else if matches.get_one("sizesort") == Some(&true) || sort == Some("size") {
             Some(Self::Size)
-        } else if matches.get_one("extensionsort").unwrap_or(&false).clone()
-            || sort == Some("extension")
-        {
+        } else if matches.get_one("extensionsort") == Some(&true) || sort == Some("extension") {
             Some(Self::Extension)
-        } else if matches.get_one("versionsort").unwrap_or(&false).clone()
-            || sort == Some("version")
-        {
+        } else if matches.get_one("versionsort") == Some(&true) || sort == Some("version") {
             Some(Self::Version)
-        } else if matches.get_one("no-sort").unwrap_or(&false).clone() || sort == Some("none") {
+        } else if matches.get_one("no-sort") == Some(&true) || sort == Some("none") {
             Some(Self::None)
         } else {
             None
@@ -99,7 +95,7 @@ impl Configurable<Self> for SortOrder {
     /// If the "reverse" argument is passed, this returns [SortOrder::Reverse] in a [Some].
     /// Otherwise this returns [None].
     fn from_arg_matches(matches: &ArgMatches) -> Option<Self> {
-        if matches.get_one("reverse").unwrap_or(&false).clone() {
+        if matches.get_one("reverse") == Some(&true) {
             Some(Self::Reverse)
         } else {
             None
@@ -149,15 +145,11 @@ impl Configurable<Self> for DirGrouping {
     /// [Some]. Otherwise if the argument is passed, this returns the variant corresponding to its
     /// parameter in a [Some]. Otherwise this returns [None].
     fn from_arg_matches(matches: &ArgMatches) -> Option<Self> {
-        if matches.get_one("classic").unwrap_or(&false).clone() {
+        if matches.get_one("classic") == Some(&true) {
             return Some(Self::None);
         }
 
-        if matches
-            .get_one("group-directories-first")
-            .unwrap_or(&false)
-            .clone()
-        {
+        if matches.get_one("group-directories-first") == Some(&true) {
             return Some(Self::First);
         }
 

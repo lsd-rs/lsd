@@ -17,7 +17,7 @@ impl Configurable<Self> for TotalSize {
     /// If the "total-size" argument is passed, this returns a `TotalSize` with value `true` in a
     /// [Some]. Otherwise this returns [None].
     fn from_arg_matches(matches: &ArgMatches) -> Option<Self> {
-        if matches.get_one("total-size").unwrap_or(&false).clone() {
+        if matches.get_one("total-size") == Some(&true) {
             Some(Self(true))
         } else {
             None

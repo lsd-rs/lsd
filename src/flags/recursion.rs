@@ -52,7 +52,7 @@ impl Recursion {
     /// If the "recursive" argument is passed, this returns `true` in a [Some]. Otherwise this
     /// returns [None].
     fn enabled_from_arg_matches(matches: &ArgMatches) -> Option<bool> {
-        if matches.get_one("recursive").unwrap_or(&false).clone() {
+        if matches.get_one("recursive") == Some(&true) {
             Some(true)
         } else {
             None

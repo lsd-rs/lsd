@@ -17,7 +17,7 @@ impl Configurable<Self> for Indicators {
     /// If the "indicators" argument is passed, this returns an `Indicators` with value `true` in a
     /// [Some]. Otherwise this returns [None].
     fn from_arg_matches(matches: &ArgMatches) -> Option<Self> {
-        if matches.get_one("indicators").unwrap_or(&false).clone() {
+        if matches.get_one("indicators") == Some(&true) {
             Some(Self(true))
         } else {
             None

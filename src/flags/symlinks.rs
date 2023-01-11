@@ -17,7 +17,7 @@ impl Configurable<Self> for NoSymlink {
     /// If the "no-symlink" argument is passed, this returns a `NoSymlink` with value `true` in a
     /// [Some]. Otherwise this returns [None].
     fn from_arg_matches(matches: &ArgMatches) -> Option<Self> {
-        if matches.get_one("no-symlink").unwrap_or(&false).clone() {
+        if matches.get_one("no-symlink") == Some(&true) {
             Some(Self(true))
         } else {
             None

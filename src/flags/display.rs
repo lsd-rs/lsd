@@ -28,21 +28,13 @@ impl Configurable<Self> for Display {
     /// corresponding `Display` variant in a [Some]. If neither of them is passed, this returns
     /// [None].
     fn from_arg_matches(matches: &ArgMatches) -> Option<Self> {
-        if matches.get_one("directory-only").unwrap_or(&false).clone() {
+        if matches.get_one("directory-only") == Some(&true) {
             Some(Self::DirectoryOnly)
-        } else if matches
-            .get_one::<bool>("almost-all")
-            .unwrap_or(&false)
-            .clone()
-        {
+        } else if matches.get_one("almost-all") == Some(&true) {
             Some(Self::AlmostAll)
-        } else if matches.get_one::<bool>("all").unwrap_or(&false).clone() {
+        } else if matches.get_one::<bool>("all") == Some(&true) {
             Some(Self::All)
-        } else if matches
-            .get_one::<bool>("system-protected")
-            .unwrap_or(&false)
-            .clone()
-        {
+        } else if matches.get_one("system-protected") == Some(&true) {
             #[cfg(windows)]
             return Some(Self::SystemProtected);
 

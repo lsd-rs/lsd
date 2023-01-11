@@ -26,12 +26,12 @@ impl Configurable<Layout> for Layout {
     /// arguments is greater than 1, this also returns the [OneLine](Layout::OneLine) variant.
     /// Finally if neither of them is passed, this returns [None].
     fn from_arg_matches(matches: &ArgMatches) -> Option<Self> {
-        if matches.get_one("tree").unwrap_or(&false).clone() {
+        if matches.get_one("tree") == Some(&true) {
             Some(Self::Tree)
-        } else if matches.get_one("long").unwrap_or(&false).clone()
-            || matches.get_one("oneline").unwrap_or(&false).clone()
-            || matches.get_one("inode").unwrap_or(&false).clone()
-            || matches.get_one("context").unwrap_or(&false).clone()
+        } else if matches.get_one("long") == Some(&true)
+            || matches.get_one("oneline") == Some(&true)
+            || matches.get_one("inode") == Some(&true)
+            || matches.get_one("context") == Some(&true)
             || matches!(matches.get_many::<String>("blocks"), Some(values) if values.len() > 1)
         // TODO: handle this differently
         {
