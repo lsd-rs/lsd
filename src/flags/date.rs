@@ -7,7 +7,7 @@ use crate::app;
 use crate::config_file::Config;
 use crate::print_error;
 
-use clap::ArgMatches;
+use clap::{ArgMatches, ValueSource};
 
 /// The flag showing which kind of time stamps to display.
 #[derive(Clone, Debug, PartialEq, Eq, Default)]
@@ -52,10 +52,14 @@ impl Configurable<Self> for DateFlag {
     /// [Some]. Otherwise if the argument is passed, this returns the variant corresponding to its
     /// parameter in a [Some]. Otherwise this returns [None].
     fn from_arg_matches(matches: &ArgMatches) -> Option<Self> {
-        if matches.is_present("classic") {
+        if matches.contains_id("classic") {
             Some(Self::Date)
-        } else if matches.occurrences_of("date") > 0 {
-            matches.values_of("date")?.last().and_then(Self::from_str)
+        } else if matches.value_source("date") == Some(ValueSource::CommandLine) {
+            matches
+                .get_many("date")?
+                .last()
+                .map(String::as_str)
+                .and_then(Self::from_str)
         } else {
             None
         }
@@ -105,21 +109,21 @@ mod test {
     #[test]
     fn test_from_arg_matches_none() {
         let argv = ["lsd"];
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         assert_eq!(None, DateFlag::from_arg_matches(&matches));
     }
 
     #[test]
     fn test_from_arg_matches_date() {
         let argv = ["lsd", "--date", "date"];
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         assert_eq!(Some(DateFlag::Date), DateFlag::from_arg_matches(&matches));
     }
 
     #[test]
     fn test_from_arg_matches_relative() {
         let argv = ["lsd", "--date", "relative"];
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         assert_eq!(
             Some(DateFlag::Relative),
             DateFlag::from_arg_matches(&matches)
@@ -129,7 +133,7 @@ mod test {
     #[test]
     fn test_from_arg_matches_format() {
         let argv = ["lsd", "--date", "+%F"];
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         assert_eq!(
             Some(DateFlag::Formatted("%F".to_string())),
             DateFlag::from_arg_matches(&matches)
@@ -140,21 +144,21 @@ mod test {
     #[should_panic(expected = "invalid format specifier: %J")]
     fn test_from_arg_matches_format_invalid() {
         let argv = ["lsd", "--date", "+%J"];
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         DateFlag::from_arg_matches(&matches);
     }
 
     #[test]
     fn test_from_arg_matches_classic_mode() {
         let argv = ["lsd", "--date", "date", "--classic"];
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         assert_eq!(Some(DateFlag::Date), DateFlag::from_arg_matches(&matches));
     }
 
     #[test]
     fn test_from_arg_matches_date_multi() {
         let argv = ["lsd", "--date", "relative", "--date", "date"];
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         assert_eq!(Some(DateFlag::Date), DateFlag::from_arg_matches(&matches));
     }
 
@@ -252,7 +256,7 @@ mod test {
     fn test_parsing_order_arg() {
         std::env::set_var("TIME_STYLE", "+%R");
         let argv = ["lsd", "--date", "+%F"];
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         let mut config = Config::with_none();
         config.date = Some("+%c".into());
         assert_eq!(
@@ -266,7 +270,7 @@ mod test {
     fn test_parsing_order_env() {
         std::env::set_var("TIME_STYLE", "+%R");
         let argv = ["lsd"];
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         let mut config = Config::with_none();
         config.date = Some("+%c".into());
         assert_eq!(
@@ -280,7 +284,7 @@ mod test {
     fn test_parsing_order_config() {
         std::env::set_var("TIME_STYLE", "");
         let argv = ["lsd"];
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         let mut config = Config::with_none();
         config.date = Some("+%c".into());
         assert_eq!(

@@ -160,11 +160,11 @@ pub fn build() -> Command<'static> {
                 .help("Display the total size of directories"),
         )
         .arg(
-            Arg::with_name("date")
+            Arg::new("date")
                 .long("date")
-                .validator(validate_date_argument)
+                .value_parser(validate_date_argument)
                 .default_value("date")
-                .multiple_occurrences(true)
+                .action(ArgAction::Append)
                 .takes_value(true)
                 .number_of_values(1)
                 .help("How to display date [possible values: date, relative, +date-time-format]"),
@@ -354,17 +354,17 @@ pub fn build() -> Command<'static> {
         )
 }
 
-fn validate_date_argument(arg: &str) -> Result<(), String> {
+fn validate_date_argument(arg: &str) -> Result<String, String> {
     if arg.starts_with('+') {
         validate_time_format(arg)
     } else if arg == "date" || arg == "relative" {
-        Result::Ok(())
+        Result::Ok(arg.to_owned())
     } else {
         Result::Err("possible values: date, relative, +date-time-format".to_owned())
     }
 }
 
-pub fn validate_time_format(formatter: &str) -> Result<(), String> {
+pub fn validate_time_format(formatter: &str) -> Result<String, String> {
     let mut chars = formatter.chars();
     loop {
         match chars.next() {
@@ -410,5 +410,5 @@ pub fn validate_time_format(formatter: &str) -> Result<(), String> {
             _ => continue,
         }
     }
-    Ok(())
+    Ok(formatter.to_owned())
 }
