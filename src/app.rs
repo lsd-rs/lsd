@@ -5,8 +5,9 @@ pub fn build() -> Command<'static> {
         .version(env!("CARGO_PKG_VERSION"))
         .about(env!("CARGO_PKG_DESCRIPTION"))
         .arg(
-            Arg::with_name("FILE")
-                .multiple(true)
+            Arg::new("FILE")
+                .action(ArgAction::Append)
+                .multiple_values(true)
                 .default_value(".")
                 .value_hint(ValueHint::AnyPath),
         )
@@ -71,12 +72,13 @@ pub fn build() -> Command<'static> {
                 .help("Display extended file metadata as a table"),
         )
         .arg(
-            Arg::with_name("ignore-config")
+            Arg::new("ignore-config")
                 .long("ignore-config")
+                .action(ArgAction::SetTrue)
                 .help("Ignore the configuration file"),
         )
         .arg(
-            Arg::with_name("config-file")
+            Arg::new("config-file")
                 .long("config-file")
                 .help("Provide a custom lsd configuration file")
                 .value_name("config-file")
@@ -98,10 +100,10 @@ pub fn build() -> Command<'static> {
                 .help("Recurse into directories"),
         )
         .arg(
-            Arg::with_name("human_readable")
+            Arg::new("human_readable")
                 .short('h')
                 .long("human-readable")
-                .multiple_occurrences(true)
+                .action(ArgAction::SetTrue)
                 .help("For ls compatibility purposes ONLY, currently set by default"),
         )
         .arg(
