@@ -27,13 +27,11 @@ pub fn build() -> Command<'static> {
                 .help("Do not list implied . and .."),
         )
         .arg(
-            Arg::with_name("color")
+            Arg::new("color")
                 .long("color")
-                .possible_value("always")
-                .possible_value("auto")
-                .possible_value("never")
+                .value_parser(["always", "auto", "never"])
                 .default_value("auto")
-                .multiple_occurrences(true)
+                .action(ArgAction::Append)
                 .takes_value(true)
                 .number_of_values(1)
                 .help("When to use terminal colours"),
