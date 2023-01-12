@@ -38,6 +38,12 @@ jobs:
       with:
         command: clippy
         args: --tests -- -D warnings
+    - name: "`clap` deprecated checks"
+      if: success() || failure() # run regardless of prior step ("`fmt` testing") success/failure
+      uses: actions-rs/cargo@v1
+      with:
+        command: check
+        args: --features clap/deprecated
 
   min_version:
     name: MinSRV # Minimum supported rust version
