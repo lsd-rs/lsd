@@ -635,7 +635,7 @@ mod tests {
     #[test]
     fn test_display_tree_with_all() {
         let argv = ["lsd", "--tree", "--all"];
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         let flags = Flags::configure_from(&matches, &Config::with_none()).unwrap();
 
         let dir = assert_fs::TempDir::new().unwrap();
@@ -668,7 +668,7 @@ mod tests {
     #[test]
     fn test_tree_align_subfolder() {
         let argv = ["lsd", "--tree", "--blocks", "size,name"];
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         let flags = Flags::configure_from(&matches, &Config::with_none()).unwrap();
 
         let dir = assert_fs::TempDir::new().unwrap();
@@ -708,7 +708,7 @@ mod tests {
     #[cfg(unix)]
     fn test_tree_size_first_without_name() {
         let argv = ["lsd", "--tree", "--blocks", "size,permission"];
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         let flags = Flags::configure_from(&matches, &Config::with_none()).unwrap();
 
         let dir = assert_fs::TempDir::new().unwrap();
@@ -747,7 +747,7 @@ mod tests {
     #[test]
     fn test_tree_edge_before_name() {
         let argv = ["lsd", "--tree", "--long"];
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         let flags = Flags::configure_from(&matches, &Config::with_none()).unwrap();
 
         let dir = assert_fs::TempDir::new().unwrap();
@@ -777,7 +777,7 @@ mod tests {
             "--blocks",
             "permission,user,group,size,date,name,inode,links",
         ];
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         let flags = Flags::configure_from(&matches, &Config::with_none()).unwrap();
 
         let dir = assert_fs::TempDir::new().unwrap();
@@ -811,7 +811,7 @@ mod tests {
     #[test]
     fn test_grid_no_header_with_empty_meta() {
         let argv = ["lsd", "--header", "-l"];
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         let flags = Flags::configure_from(&matches, &Config::with_none()).unwrap();
 
         let dir = assert_fs::TempDir::new().unwrap();

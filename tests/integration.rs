@@ -769,3 +769,16 @@ fn test_all_directory() {
         .assert()
         .stdout(predicate::str::is_match(".").unwrap());
 }
+
+#[test]
+fn test_multiple_files() {
+    let dir = tempdir();
+    dir.child("one").touch().unwrap();
+    dir.child("two").touch().unwrap();
+
+    cmd()
+        .arg(dir.path().join("one"))
+        .arg(dir.path().join("two"))
+        .assert()
+        .stdout(predicate::str::is_match(".").unwrap());
+}

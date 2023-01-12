@@ -28,13 +28,13 @@ impl Configurable<Self> for Display {
     /// corresponding `Display` variant in a [Some]. If neither of them is passed, this returns
     /// [None].
     fn from_arg_matches(matches: &ArgMatches) -> Option<Self> {
-        if matches.is_present("directory-only") {
+        if matches.get_one("directory-only") == Some(&true) {
             Some(Self::DirectoryOnly)
-        } else if matches.is_present("almost-all") {
+        } else if matches.get_one("almost-all") == Some(&true) {
             Some(Self::AlmostAll)
-        } else if matches.is_present("all") {
+        } else if matches.get_one::<bool>("all") == Some(&true) {
             Some(Self::All)
-        } else if matches.is_present("system-protected") {
+        } else if matches.get_one("system-protected") == Some(&true) {
             #[cfg(windows)]
             return Some(Self::SystemProtected);
 
@@ -67,14 +67,14 @@ mod test {
     #[test]
     fn test_from_arg_matches_none() {
         let argv = ["lsd"];
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         assert_eq!(None, Display::from_arg_matches(&matches));
     }
 
     #[test]
     fn test_from_arg_matches_system_protected() {
         let argv = ["lsd", "--system-protected"];
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         #[cfg(windows)]
         assert_eq!(
             Some(Display::SystemProtected),
@@ -88,14 +88,14 @@ mod test {
     #[test]
     fn test_from_arg_matches_all() {
         let argv = ["lsd", "--all"];
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         assert_eq!(Some(Display::All), Display::from_arg_matches(&matches));
     }
 
     #[test]
     fn test_from_arg_matches_almost_all() {
         let argv = ["lsd", "--almost-all"];
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         assert_eq!(
             Some(Display::AlmostAll),
             Display::from_arg_matches(&matches)
@@ -105,7 +105,7 @@ mod test {
     #[test]
     fn test_from_arg_matches_directory_only() {
         let argv = ["lsd", "--directory-only"];
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         assert_eq!(
             Some(Display::DirectoryOnly),
             Display::from_arg_matches(&matches)

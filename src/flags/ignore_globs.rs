@@ -3,7 +3,7 @@
 
 use crate::config_file::Config;
 
-use clap::{ArgMatches, Error, ErrorKind};
+use clap::{ArgMatches, Error, ErrorKind, ValueSource};
 use globset::{Glob, GlobSet, GlobSetBuilder};
 
 /// The struct holding a [GlobSet] and methods to build it.
@@ -38,11 +38,11 @@ impl IgnoreGlobs {
     /// either the built [IgnoreGlobs] or an [Error], if any error was encountered while creating the
     /// [IgnoreGlobs]. If the argument has not been passed, this returns [None].
     fn from_arg_matches(matches: &ArgMatches) -> Option<Result<Self, Error>> {
-        if matches.occurrences_of("ignore-glob") == 0 {
+        if matches.value_source("ignore-glob") != Some(ValueSource::CommandLine) {
             return None;
         }
 
-        let values = matches.values_of("ignore-glob")?;
+        let values = matches.get_many::<String>("ignore-glob")?;
         let mut glob_set_builder = GlobSetBuilder::new();
 
         for value in values {
@@ -120,7 +120,7 @@ mod test {
     #[test]
     fn test_configuration_from_none() {
         let argv = ["lsd"];
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         assert!(matches!(
             IgnoreGlobs::configure_from(&matches, &Config::with_none()),
             Ok(..)
@@ -130,7 +130,7 @@ mod test {
     #[test]
     fn test_configuration_from_args() {
         let argv = ["lsd", "--ignore-glob", ".git"];
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         assert!(matches!(
             IgnoreGlobs::configure_from(&matches, &Config::with_none()),
             Ok(..)
@@ -140,7 +140,7 @@ mod test {
     #[test]
     fn test_configuration_from_config() {
         let argv = ["lsd"];
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         let mut c = Config::with_none();
         c.ignore_globs = Some(vec![".git".into()]);
         assert!(matches!(IgnoreGlobs::configure_from(&matches, &c), Ok(..)));
@@ -149,7 +149,7 @@ mod test {
     #[test]
     fn test_from_arg_matches_none() {
         let argv = ["lsd"];
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         assert!(matches!(IgnoreGlobs::from_arg_matches(&matches), None));
     }
 

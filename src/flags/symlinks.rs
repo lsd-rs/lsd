@@ -17,7 +17,7 @@ impl Configurable<Self> for NoSymlink {
     /// If the "no-symlink" argument is passed, this returns a `NoSymlink` with value `true` in a
     /// [Some]. Otherwise this returns [None].
     fn from_arg_matches(matches: &ArgMatches) -> Option<Self> {
-        if matches.is_present("no-symlink") {
+        if matches.get_one("no-symlink") == Some(&true) {
             Some(Self(true))
         } else {
             None
@@ -45,14 +45,14 @@ mod test {
     #[test]
     fn test_from_arg_matches_none() {
         let argv = ["lsd"];
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         assert_eq!(None, NoSymlink::from_arg_matches(&matches));
     }
 
     #[test]
     fn test_from_arg_matches_true() {
         let argv = ["lsd", "--no-symlink"];
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         assert_eq!(Some(NoSymlink(true)), NoSymlink::from_arg_matches(&matches));
     }
 

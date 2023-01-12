@@ -87,7 +87,7 @@ mod tests {
             valid: true,
         };
         let argv = ["lsd"];
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         assert_eq!(
             format!("{}", " ⇒ /target"),
             link.render(
@@ -105,7 +105,7 @@ mod tests {
             valid: false,
         };
         let argv = ["lsd"];
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         assert_eq!(
             format!("{}", " ⇒ /target"),
             link.render(
@@ -123,7 +123,7 @@ mod tests {
             valid: false,
         };
         let argv = ["lsd"];
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         assert_eq!(
             format!("{}", " ⇒ \u{1b}[38;5;124m/target\u{1b}[39m"),
             link.render(

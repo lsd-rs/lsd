@@ -17,7 +17,7 @@ impl Configurable<Self> for Header {
     /// If the "header" argument is passed, this returns a `Header` with value `true` in a
     /// [Some]. Otherwise this returns [None].
     fn from_arg_matches(matches: &ArgMatches) -> Option<Self> {
-        if matches.is_present("header") {
+        if matches.get_one("header") == Some(&true) {
             Some(Self(true))
         } else {
             None
@@ -45,14 +45,14 @@ mod test {
     #[test]
     fn test_from_arg_matches_none() {
         let argv = ["lsd"];
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         assert_eq!(None, Header::from_arg_matches(&matches));
     }
 
     #[test]
     fn test_from_arg_matches_true() {
         let argv = ["lsd", "--header"];
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         assert_eq!(Some(Header(true)), Header::from_arg_matches(&matches));
     }
 

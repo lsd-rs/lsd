@@ -5,7 +5,7 @@ use super::Configurable;
 
 use crate::config_file::Config;
 
-use clap::ArgMatches;
+use clap::{ArgMatches, ValueSource};
 use serde::Deserialize;
 
 /// The flag showing which file permissions units to use.
@@ -38,12 +38,13 @@ impl Configurable<Self> for PermissionFlag {
     /// this returns [None].
     /// Sets permissions to rwx if classic flag is enabled.
     fn from_arg_matches(matches: &ArgMatches) -> Option<Self> {
-        if matches.is_present("classic") {
+        if matches.get_one("classic") == Some(&true) {
             Some(Self::Rwx)
-        } else if matches.occurrences_of("permission") > 0 {
+        } else if matches.value_source("permission") == Some(ValueSource::CommandLine) {
             matches
-                .values_of("permission")?
+                .get_many::<String>("permission")?
                 .last()
+                .map(String::as_str)
                 .map(Self::from_arg_str)
         } else {
             None
@@ -81,14 +82,14 @@ mod test {
     #[test]
     fn test_from_arg_matches_none() {
         let argv = ["lsd"];
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         assert_eq!(None, PermissionFlag::from_arg_matches(&matches));
     }
 
     #[test]
     fn test_from_arg_matches_default() {
         let argv = ["lsd", "--permission", "rwx"];
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         assert_eq!(
             Some(PermissionFlag::Rwx),
             PermissionFlag::from_arg_matches(&matches)
@@ -98,7 +99,7 @@ mod test {
     #[test]
     fn test_from_arg_matches_short() {
         let argv = ["lsd", "--permission", "octal"];
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         assert_eq!(
             Some(PermissionFlag::Octal),
             PermissionFlag::from_arg_matches(&matches)
@@ -109,12 +110,12 @@ mod test {
     #[should_panic]
     fn test_from_arg_matches_unknown() {
         let argv = ["lsd", "--permission", "unknown"];
-        let _ = app::build().get_matches_from_safe(argv).unwrap();
+        let _ = app::build().try_get_matches_from(argv).unwrap();
     }
     #[test]
     fn test_from_arg_matches_permissions_multi() {
         let argv = ["lsd", "--permission", "octal", "--permission", "rwx"];
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         assert_eq!(
             Some(PermissionFlag::Rwx),
             PermissionFlag::from_arg_matches(&matches)
@@ -124,7 +125,7 @@ mod test {
     #[test]
     fn test_from_arg_matches_permissions_classic() {
         let argv = ["lsd", "--permission", "rwx", "--classic"];
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         assert_eq!(
             Some(PermissionFlag::Rwx),
             PermissionFlag::from_arg_matches(&matches)

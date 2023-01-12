@@ -52,7 +52,7 @@ impl Recursion {
     /// If the "recursive" argument is passed, this returns `true` in a [Some]. Otherwise this
     /// returns [None].
     fn enabled_from_arg_matches(matches: &ArgMatches) -> Option<bool> {
-        if matches.is_present("recursive") {
+        if matches.get_one("recursive") == Some(&true) {
             Some(true)
         } else {
             None
@@ -98,7 +98,7 @@ impl Recursion {
     /// If the parameter to the "depth" argument can not be parsed, this returns an [Error] in a
     /// [Some].
     fn depth_from_arg_matches(matches: &ArgMatches) -> Option<Result<usize, Error>> {
-        let depth = match matches.values_of("depth") {
+        let depth = match matches.get_many::<String>("depth") {
             Some(d) => d.last(),
             None => None,
         };
@@ -139,14 +139,14 @@ mod test {
     #[test]
     fn test_enabled_from_arg_matches_empty() {
         let argv = ["lsd"];
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         assert_eq!(None, Recursion::enabled_from_arg_matches(&matches));
     }
 
     #[test]
     fn test_enabled_from_arg_matches_true() {
         let argv = ["lsd", "--recursive"];
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         assert_eq!(Some(true), Recursion::enabled_from_arg_matches(&matches));
     }
 
@@ -154,7 +154,7 @@ mod test {
     fn test_enabled_from_empty_matches_and_config() {
         let argv = ["lsd"];
         assert!(!Recursion::enabled_from(
-            &app::build().get_matches_from_safe(argv).unwrap(),
+            &app::build().try_get_matches_from(argv).unwrap(),
             &Config::with_none()
         ));
     }
@@ -168,7 +168,7 @@ mod test {
             depth: None,
         });
         assert!(Recursion::enabled_from(
-            &app::build().get_matches_from_safe(argv).unwrap(),
+            &app::build().try_get_matches_from(argv).unwrap(),
             &c
         ));
     }
@@ -182,7 +182,7 @@ mod test {
             depth: None,
         });
         assert!(!Recursion::enabled_from(
-            &app::build().get_matches_from_safe(argv).unwrap(),
+            &app::build().try_get_matches_from(argv).unwrap(),
             &c
         ));
     }
@@ -193,14 +193,14 @@ mod test {
     #[test]
     fn test_depth_from_arg_matches_empty() {
         let argv = ["lsd"];
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         assert!(matches!(Recursion::depth_from_arg_matches(&matches), None));
     }
 
     #[test]
     fn test_depth_from_arg_matches_integer() {
         let argv = ["lsd", "--depth", "42"];
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         assert!(
             matches!(Recursion::depth_from_arg_matches(&matches), Some(Ok(value)) if value == 42)
         );
@@ -209,7 +209,7 @@ mod test {
     #[test]
     fn test_depth_from_arg_matches_depth_multi() {
         let argv = ["lsd", "--depth", "4", "--depth", "2"];
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         assert!(
             matches!(Recursion::depth_from_arg_matches(&matches), Some(Ok(value)) if value == 2)
         );
@@ -218,18 +218,18 @@ mod test {
     #[test]
     fn test_depth_from_arg_matches_neg_int() {
         let argv = ["lsd", "--depth", "\\-42"];
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         assert!(
-            matches!(Recursion::depth_from_arg_matches(&matches), Some(Err(e)) if e.kind == ErrorKind::ValueValidation)
+            matches!(Recursion::depth_from_arg_matches(&matches), Some(Err(e)) if e.kind() == ErrorKind::ValueValidation)
         );
     }
 
     #[test]
     fn test_depth_from_arg_matches_non_int() {
         let argv = ["lsd", "--depth", "foo"];
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         assert!(
-            matches!(Recursion::depth_from_arg_matches(&matches), Some(Err(e)) if e.kind == ErrorKind::ValueValidation)
+            matches!(Recursion::depth_from_arg_matches(&matches), Some(Err(e)) if e.kind() == ErrorKind::ValueValidation)
         );
     }
 
@@ -239,7 +239,7 @@ mod test {
         assert_eq!(
             usize::MAX,
             Recursion::depth_from(
-                &app::build().get_matches_from_safe(argv).unwrap(),
+                &app::build().try_get_matches_from(argv).unwrap(),
                 &Config::with_none()
             )
             .unwrap()
@@ -256,7 +256,7 @@ mod test {
         });
         assert_eq!(
             42,
-            Recursion::depth_from(&app::build().get_matches_from_safe(argv).unwrap(), &c).unwrap()
+            Recursion::depth_from(&app::build().try_get_matches_from(argv).unwrap(), &c).unwrap()
         );
     }
 }

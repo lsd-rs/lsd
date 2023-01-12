@@ -26,13 +26,13 @@ impl Configurable<Layout> for Layout {
     /// arguments is greater than 1, this also returns the [OneLine](Layout::OneLine) variant.
     /// Finally if neither of them is passed, this returns [None].
     fn from_arg_matches(matches: &ArgMatches) -> Option<Self> {
-        if matches.is_present("tree") {
+        if matches.get_one("tree") == Some(&true) {
             Some(Self::Tree)
-        } else if matches.is_present("long")
-            || matches.is_present("oneline")
-            || matches.is_present("inode")
-            || matches.is_present("context")
-            || matches!(matches.values_of("blocks"), Some(values) if values.len() > 1)
+        } else if matches.get_one("long") == Some(&true)
+            || matches.get_one("oneline") == Some(&true)
+            || matches.get_one("inode") == Some(&true)
+            || matches.get_one("context") == Some(&true)
+            || matches!(matches.get_many::<String>("blocks"), Some(values) if values.len() > 1)
         // TODO: handle this differently
         {
             Some(Self::OneLine)
@@ -62,35 +62,35 @@ mod test {
     #[test]
     fn test_from_arg_matches_none() {
         let argv = ["lsd"];
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         assert_eq!(None, Layout::from_arg_matches(&matches));
     }
 
     #[test]
     fn test_from_arg_matches_tree() {
         let argv = ["lsd", "--tree"];
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         assert_eq!(Some(Layout::Tree), Layout::from_arg_matches(&matches));
     }
 
     #[test]
     fn test_from_arg_matches_oneline() {
         let argv = ["lsd", "--oneline"];
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         assert_eq!(Some(Layout::OneLine), Layout::from_arg_matches(&matches));
     }
 
     #[test]
     fn test_from_arg_matches_oneline_through_long() {
         let argv = ["lsd", "--long"];
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         assert_eq!(Some(Layout::OneLine), Layout::from_arg_matches(&matches));
     }
 
     #[test]
     fn test_from_arg_matches_oneline_through_blocks() {
         let argv = ["lsd", "--blocks", "permission,name"];
-        let matches = app::build().get_matches_from_safe(argv).unwrap();
+        let matches = app::build().try_get_matches_from(argv).unwrap();
         assert_eq!(Some(Layout::OneLine), Layout::from_arg_matches(&matches));
     }
 
