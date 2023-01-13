@@ -153,6 +153,8 @@ impl Configurable<Self> for Blocks {
             } else {
                 Some(Self(blocks))
             }
+        } else if let Some(true) = config.long {
+            Some(Self::long())
         } else {
             None
         }
@@ -422,6 +424,14 @@ mod test_blocks {
         let mut c = Config::with_none();
         c.blocks = Some(vec!["permission".into(), "group".into(), "date".into()]);
         let blocks = Blocks(vec![Block::Permission, Block::Group, Block::Date]);
+        assert_eq!(Some(blocks), Blocks::from_config(&c));
+    }
+
+    #[test]
+    fn test_from_config_with_long() {
+        let mut c = Config::with_none();
+        c.long = Some(true);
+        let blocks = Blocks::long();
         assert_eq!(Some(blocks), Blocks::from_config(&c));
     }
 

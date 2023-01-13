@@ -123,4 +123,11 @@ mod test {
         c.layout = Some(Layout::Grid);
         assert_eq!(Some(Layout::Grid), Layout::from_config(&c));
     }
+
+    #[test]
+    fn test_from_config_long() {
+        let mut c = Config::with_none();
+        c.long = Some(true);
+        assert_eq!(Some(Layout::OneLine), Layout::from_config(&c));
+    }
 }
