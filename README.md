@@ -173,6 +173,11 @@ indicators: false
 # Possible values: grid, tree, oneline
 layout: grid
 
+# == Long ==
+# Whether to use "long" display mode by default, showing additional columns
+# (specified above in "blocks")
+long: false
+
 # == Recursion ==
 recursion:
   # Whether to enable recursion.
