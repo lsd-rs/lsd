@@ -47,7 +47,11 @@ impl Configurable<Layout> for Layout {
     /// this returns the corresponding `Layout` variant in a [Some].
     /// Otherwise this returns [None].
     fn from_config(config: &Config) -> Option<Self> {
-        config.layout
+        if config.long == Some(true) {
+            Some(Self::OneLine)
+        } else {
+            config.layout
+        }
     }
 }
 

@@ -36,6 +36,7 @@ pub struct Config {
     pub ignore_globs: Option<Vec<String>>,
     pub indicators: Option<bool>,
     pub layout: Option<Layout>,
+    pub long: Option<bool>,
     pub recursion: Option<Recursion>,
     pub size: Option<SizeFlag>,
     pub permission: Option<PermissionFlag>,
@@ -88,6 +89,7 @@ impl Config {
             ignore_globs: None,
             indicators: None,
             layout: None,
+            long: None,
             recursion: None,
             size: None,
             permission: None,
@@ -273,6 +275,11 @@ indicators: false
 # Possible values: grid, tree, oneline
 layout: grid
 
+# == Long ==
+# Whether to use "long" display mode by default, showing additional columns
+# (specified above in "blocks")
+long: false
+
 # == Recursion ==
 recursion:
   # Whether to enable recursion.
@@ -373,6 +380,7 @@ mod tests {
                 ignore_globs: None,
                 indicators: Some(false),
                 layout: Some(Layout::Grid),
+                long: Some(false),
                 recursion: Some(config_file::Recursion {
                     enabled: Some(false),
                     depth: None,
