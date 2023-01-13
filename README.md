@@ -111,6 +111,10 @@ blocks:
   - date
   - name
 
+# == Long ==
+# Always display file metadata (i.e. the blocks specified above.)
+long: false
+
 # == Color ==
 # This has various color options. (Will be expanded in the future.)
 color:
@@ -172,11 +176,6 @@ indicators: false
 # called "one-per-line". It might be changed in the future.
 # Possible values: grid, tree, oneline
 layout: grid
-
-# == Long ==
-# Whether to use "long" display mode by default, showing additional columns
-# (specified above in "blocks")
-long: false
 
 # == Recursion ==
 recursion:
