@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   [`LS_COLORS`](README.md#Colors) can be used to customize.
 - Handle dereference (-L) with broken symlink from [r3dArch](https://github.com/r3dArch)
 - Avoid using Clap's deprecated structs and functions [sudame](https://github.com/sudame)
+- Icon theme with overrides from config [sudame](https://github.com/sudame)
 
 ## [0.23.1] - 2022-09-13
 
