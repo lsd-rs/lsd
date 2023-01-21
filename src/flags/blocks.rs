@@ -168,10 +168,6 @@ impl Configurable<Self> for Blocks {
             None
         }
     }
-
-    fn from_environment() -> Option<Self> {
-        None
-    }
 }
 
 /// The default value for `Blocks` contains a [Vec] of [Name](Block::Name).
