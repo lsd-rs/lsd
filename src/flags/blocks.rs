@@ -74,7 +74,7 @@ impl Configurable<Self> for Blocks {
     /// This returns [Default::default] unless either the "long" argument is passed,
     /// or "always_long" is set to `true` in the config file **and** the "grid"
     /// argument is *not* passed.
-    /// 
+    ///
     /// In these cases, the first value that is not [None] is used. The order of precedence
     /// for the value used is:
     /// - [from_arg_matches](Blocks::from_arg_matches)
