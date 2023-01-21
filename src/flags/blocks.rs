@@ -71,26 +71,35 @@ impl Blocks {
 
 impl Configurable<Self> for Blocks {
     /// Returns a value from either [ArgMatches], a [Config] or a default value.
-    /// Unless the "long" argument is passed, this returns [Default::default]. Otherwise the first
-    /// value, that is not [None], is used. The order of precedence for the value used is:
+    /// This returns [Default::default] unless either the "long" argument is passed,
+    /// or "always_long" is set to `true` in the config file **and** the "grid"
+    /// argument is *not* passed.
+    /// 
+    /// In these cases, the first value that is not [None] is used. The order of precedence
+    /// for the value used is:
     /// - [from_arg_matches](Blocks::from_arg_matches)
     /// - [from_config](Blocks::from_config)
     /// - [long](Blocks::long)
     ///
-    /// No matter if the "long" argument was passed, if the "inode" argument is passed and the
-    /// `Blocks` does not contain a [Block] of variant [INode](Block::INode) yet, one is prepended
+    /// Regardless of the above, if the "inode" argument is passed and the `Blocks` does
+    /// not contain a [Block] of variant [INode](Block::INode) yet, one is prepended
     /// to the returned value.
     fn configure_from(matches: &ArgMatches, config: &Config) -> Self {
-        let mut blocks = if matches.get_one("long") == Some(&true) || config.long.unwrap_or(false) {
-            Self::long()
-        } else {
-            Default::default()
-        };
+        let mut blocks;
 
-        if matches.get_one("long") == Some(&true) || config.long.unwrap_or(false) {
+        if matches.get_one("long") == Some(&true) || config.always_long.unwrap_or(false) {
             if let Some(value) = Self::from_config(config) {
                 blocks = value;
+            } else {
+                blocks = Self::long()
             }
+        } else {
+            blocks = Default::default();
+        }
+
+        // "grid" overrides "long"
+        if matches.get_one("grid") == Some(&true) {
+            blocks = Default::default();
         }
 
         if let Some(value) = Self::from_arg_matches(matches) {
@@ -153,11 +162,15 @@ impl Configurable<Self> for Blocks {
             } else {
                 Some(Self(blocks))
             }
-        } else if let Some(true) = config.long {
+        } else if let Some(true) = config.always_long {
             Some(Self::long())
         } else {
             None
         }
+    }
+
+    fn from_environment() -> Option<Self> {
+        None
     }
 }
 
@@ -269,6 +282,19 @@ mod test_blocks {
 
         let matches = app::build().try_get_matches_from(argv).unwrap();
         let result = Blocks::configure_from(&matches, &Config::with_none());
+
+        assert_eq!(result, target);
+    }
+
+    #[test]
+    fn test_configure_from_with_grid_and_always_long() {
+        let argv = ["lsd", "--grid"];
+        let mut c = Config::with_none();
+        c.always_long = Some(true);
+        let target = Blocks(vec![Block::Name]);
+
+        let matches = app::build().try_get_matches_from(argv).unwrap();
+        let result = Blocks::configure_from(&matches, &c);
 
         assert_eq!(result, target);
     }
@@ -430,7 +456,7 @@ mod test_blocks {
     #[test]
     fn test_from_config_with_long() {
         let mut c = Config::with_none();
-        c.long = Some(true);
+        c.always_long = Some(true);
         let blocks = Blocks::long();
         assert_eq!(Some(blocks), Blocks::from_config(&c));
     }

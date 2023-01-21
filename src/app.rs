@@ -1,4 +1,4 @@
-use clap::{Arg, ArgAction, Command, ValueHint};
+use clap::{Arg, ArgAction, ArgGroup, Command, ValueHint};
 
 pub fn build() -> Command<'static> {
     Command::new("lsd")
@@ -85,11 +85,31 @@ pub fn build() -> Command<'static> {
                 .takes_value(true)
         )
         .arg(
+            Arg::new("grid")
+                 .long("grid")
+                 .action(ArgAction::SetTrue)
+                 .conflicts_with("long")
+                 .help("Display in a grid (default)")
+        )
+        .arg(
+            Arg::new("tree")
+                .long("tree")
+                .action(ArgAction::SetTrue)
+                .conflicts_with("recursive")
+                .help("Recurse into directories and present the result as a tree"),
+        )
+        .arg(
             Arg::new("oneline")
                 .short('1')
                 .long("oneline")
                 .action(ArgAction::SetTrue)
                 .help("Display one entry per line"),
+        )
+        .group(
+            ArgGroup::new("layout")
+                      .arg("grid")
+                      .arg("tree")
+                      .arg("oneline")
         )
         .arg(
             Arg::new("recursive")
@@ -105,13 +125,6 @@ pub fn build() -> Command<'static> {
                 .long("human-readable")
                 .action(ArgAction::SetTrue)
                 .help("For ls compatibility purposes ONLY, currently set by default"),
-        )
-        .arg(
-            Arg::new("tree")
-                .long("tree")
-                .action(ArgAction::SetTrue)
-                .conflicts_with("recursive")
-                .help("Recurse into directories and present the result as a tree"),
         )
         .arg(
             Arg::new("depth")

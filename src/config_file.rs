@@ -36,7 +36,7 @@ pub struct Config {
     pub ignore_globs: Option<Vec<String>>,
     pub indicators: Option<bool>,
     pub layout: Option<Layout>,
-    pub long: Option<bool>,
+    pub always_long: Option<bool>,
     pub recursion: Option<Recursion>,
     pub size: Option<SizeFlag>,
     pub permission: Option<PermissionFlag>,
@@ -89,7 +89,7 @@ impl Config {
             ignore_globs: None,
             indicators: None,
             layout: None,
-            long: None,
+            always_long: None,
             recursion: None,
             size: None,
             permission: None,
@@ -214,9 +214,9 @@ blocks:
   - date
   - name
 
-# == Long ==
+# == Long form display ==
 # Always display file metadata (i.e. the blocks specified above.)
-long: false
+always-long: false
 
 # == Color ==
 # This has various color options. (Will be expanded in the future.)
@@ -379,7 +379,7 @@ mod tests {
                 ignore_globs: None,
                 indicators: Some(false),
                 layout: Some(Layout::Grid),
-                long: Some(false),
+                always_long: Some(false),
                 recursion: Some(config_file::Recursion {
                     enabled: Some(false),
                     depth: None,

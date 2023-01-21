@@ -111,9 +111,9 @@ blocks:
   - date
   - name
 
-# == Long ==
+# == Long form display ==
 # Always display file metadata (i.e. the blocks specified above.)
-long: false
+always-long: false
 
 # == Color ==
 # This has various color options. (Will be expanded in the future.)

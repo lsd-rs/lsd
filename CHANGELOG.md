@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add `--system-protected` to include files with the Windows `system` flag set,
   on other platform the same as `--all` [#752](https://github.com/Peltoche/lsd/issues/752)
 - Add many icons from https://github.com/Peltoche/lsd/issues/764 [@TruncatedDinosour](https://ari-web.xyz/gh)
+- Add `long` option to config file to default to long display [jfmontanaro](https://github.com/jfmontanaro)
 
 ### Fixed
 - Do not quote filename when piping into another program from [TeamTamoad](https://github.com/TeamTamoad)
@@ -22,7 +23,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   [`LS_COLORS`](README.md#Colors) can be used to customize.
 - Handle dereference (-L) with broken symlink from [r3dArch](https://github.com/r3dArch)
 - Avoid using Clap's deprecated structs and functions [sudame](https://github.com/sudame)
-- Add `long` option to config file to default to long display [jfmontanaro](https://github.com/jfmontanaro)
 
 ## [0.23.1] - 2022-09-13
 
