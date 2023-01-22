@@ -55,6 +55,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.21.0] - 2022-01-16
 ### Added
+- Added support for coloring symlink targets.
 - Added support for the MISSING / mi= dircolors variable for broken symlink targets.
 - Add support for theme from [zwpaper](https://github.com/zwpaper) [#452](https://github.com/Peltoche/lsd/pull/452)
 - Update theme to support partial themes [zwpaper](https://github.com/zwpaper) [#591](https://github.com/Peltoche/lsd/pull/591)

@@ -1,17 +1,29 @@
 use crate::color::{ColoredString, Colors, Elem};
 use crate::flags::Flags;
+use crate::meta::{FileType, Permissions};
 use std::fs::read_link;
 use std::path::Path;
 
 #[derive(Clone, Debug)]
 pub struct SymLink {
     target: Option<String>,
+    target_type: Option<FileType>,
     valid: bool,
 }
 
 impl From<&Path> for SymLink {
     fn from(path: &Path) -> Self {
         if let Ok(target) = read_link(path) {
+            // Extract the symlink's target type if possible, so it can have proper colors.
+            let target_type = match target.metadata() {
+                Ok(metadata) => Some(FileType::new(
+                    &metadata,
+                    None,
+                    &Permissions::from(&metadata),
+                )),
+                Err(_) => None,
+            };
+
             if target.is_absolute() || path.parent() == None {
                 return Self {
                     valid: target.exists(),
@@ -21,6 +33,7 @@ impl From<&Path> for SymLink {
                             .expect("failed to convert symlink to str")
                             .to_string(),
                     ),
+                    target_type,
                 };
             }
 
@@ -31,12 +44,14 @@ impl From<&Path> for SymLink {
                         .expect("failed to convert symlink to str")
                         .to_string(),
                 ),
+                target_type,
                 valid: path.parent().unwrap().join(target).exists(),
             };
         }
 
         Self {
             target: None,
+            target_type: None,
             valid: false,
         }
     }
@@ -50,7 +65,20 @@ impl SymLink {
     pub fn render(&self, colors: &Colors, flag: &Flags) -> ColoredString {
         if let Some(target_string) = self.symlink_string() {
             let elem = if self.valid {
-                &Elem::SymLink
+                // Proper colors for symlink target file types.
+                match self.target_type {
+                    Some(FileType::BlockDevice) => &Elem::BlockDevice,
+                    Some(FileType::CharDevice) => &Elem::CharDevice,
+                    Some(FileType::Directory { uid: _ }) => &Elem::Dir { uid: false },
+                    Some(FileType::File { uid: _, exec: _ }) => &Elem::File {
+                        uid: false,
+                        exec: false,
+                    },
+                    Some(FileType::Pipe) => &Elem::Pipe,
+                    Some(FileType::Socket) => &Elem::Socket,
+                    Some(FileType::Special) => &Elem::Special,
+                    _ => &Elem::SymLink,
+                }
             } else {
                 &Elem::MissingSymLinkTarget
             };
@@ -79,11 +107,13 @@ mod tests {
     use crate::color::{Colors, ThemeOption};
     use crate::config_file::Config;
     use crate::flags::Flags;
+    use crate::meta::FileType;
 
     #[test]
     fn test_symlink_render_default_valid_target_nocolor() {
         let link = SymLink {
             target: Some("/target".to_string()),
+            target_type: None,
             valid: true,
         };
         let argv = ["lsd"];
@@ -102,6 +132,7 @@ mod tests {
     fn test_symlink_render_default_invalid_target_nocolor() {
         let link = SymLink {
             target: Some("/target".to_string()),
+            target_type: None,
             valid: false,
         };
         let argv = ["lsd"];
@@ -120,6 +151,7 @@ mod tests {
     fn test_symlink_render_default_invalid_target_withcolor() {
         let link = SymLink {
             target: Some("/target".to_string()),
+            target_type: Some(FileType::SymLink { is_dir: false }),
             valid: false,
         };
         let argv = ["lsd"];
