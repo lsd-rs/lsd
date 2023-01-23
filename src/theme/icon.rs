@@ -1,28 +1,38 @@
 use serde::Deserialize;
-use std::{collections::HashMap, hash::Hash};
+use std::collections::HashMap;
 
-/** Merge two hashmaps into one hashmap. */
-fn merge_hashmap<K, V>(hashmap1: HashMap<K, V>, hashmap2: HashMap<K, V>) -> HashMap<K, V>
+enum ByFilename {
+    Name,
+    Extension,
+}
+
+fn deserialize_by_filename<'de, D>(
+    deserializer: D,
+    by: ByFilename,
+) -> Result<HashMap<String, String>, D::Error>
 where
-    K: Hash + Eq,
+    D: serde::de::Deserializer<'de>,
 {
-    hashmap1.into_iter().chain(hashmap2.into_iter()).collect()
+    let default = match by {
+        ByFilename::Name => IconTheme::get_default_icons_by_name(),
+        ByFilename::Extension => IconTheme::get_default_icons_by_extension(),
+    };
+    HashMap::<_, _>::deserialize(deserializer)
+        .map(|input| default.into_iter().chain(input.into_iter()).collect())
 }
 
 fn deserialize_by_name<'de, D>(deserializer: D) -> Result<HashMap<String, String>, D::Error>
 where
     D: serde::de::Deserializer<'de>,
 {
-    let default = IconTheme::get_default_icons_by_name();
-    HashMap::<String, String>::deserialize(deserializer).map(|input| merge_hashmap(default, input))
+    deserialize_by_filename(deserializer, ByFilename::Name)
 }
 
 fn deserialize_by_extension<'de, D>(deserializer: D) -> Result<HashMap<String, String>, D::Error>
 where
     D: serde::de::Deserializer<'de>,
 {
-    let default = IconTheme::get_default_icons_by_extension();
-    HashMap::<String, String>::deserialize(deserializer).map(|input| merge_hashmap(default, input))
+    deserialize_by_filename(deserializer, ByFilename::Extension)
 }
 
 #[derive(Debug, Deserialize, PartialEq, Eq)]
