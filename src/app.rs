@@ -1,4 +1,4 @@
-use clap::{Arg, ArgAction, ArgGroup, Command, ValueHint};
+use clap::{Arg, ArgAction, Command, ValueHint};
 
 pub fn build() -> Command<'static> {
     Command::new("lsd")
@@ -85,13 +85,6 @@ pub fn build() -> Command<'static> {
                 .takes_value(true)
         )
         .arg(
-            Arg::new("grid")
-                 .long("grid")
-                 .action(ArgAction::SetTrue)
-                 .conflicts_with("long")
-                 .help("Display in a grid (default)")
-        )
-        .arg(
             Arg::new("tree")
                 .long("tree")
                 .action(ArgAction::SetTrue)
@@ -104,12 +97,6 @@ pub fn build() -> Command<'static> {
                 .long("oneline")
                 .action(ArgAction::SetTrue)
                 .help("Display one entry per line"),
-        )
-        .group(
-            ArgGroup::new("layout")
-                      .arg("grid")
-                      .arg("tree")
-                      .arg("oneline")
         )
         .arg(
             Arg::new("recursive")

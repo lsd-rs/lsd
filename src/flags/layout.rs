@@ -26,9 +26,7 @@ impl Configurable<Layout> for Layout {
     /// arguments is greater than 1, this also returns the [OneLine](Layout::OneLine) variant.
     /// Finally if neither of them is passed, this returns [None].
     fn from_arg_matches(matches: &ArgMatches) -> Option<Self> {
-        if matches.get_one("grid") == Some(&true) {
-            Some(Self::Grid)
-        } else if matches.get_one("tree") == Some(&true) {
+        if matches.get_one("tree") == Some(&true) {
             Some(Self::Tree)
         } else if matches.get_one("long") == Some(&true)
             || matches.get_one("oneline") == Some(&true)
@@ -70,13 +68,6 @@ mod test {
         let argv = ["lsd"];
         let matches = app::build().try_get_matches_from(argv).unwrap();
         assert_eq!(None, Layout::from_arg_matches(&matches));
-    }
-
-    #[test]
-    fn test_from_arg_matches_grid() {
-        let argv = ["lsd", "--grid"];
-        let matches = app::build().try_get_matches_from(argv).unwrap();
-        assert_eq!(Some(Layout::Grid), Layout::from_arg_matches(&matches));
     }
 
     #[test]

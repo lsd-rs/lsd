@@ -97,11 +97,6 @@ impl Configurable<Self> for Blocks {
             blocks = Default::default();
         }
 
-        // "grid" overrides "long"
-        if matches.get_one("grid") == Some(&true) {
-            blocks = Default::default();
-        }
-
         if let Some(value) = Self::from_arg_matches(matches) {
             blocks = value;
         }
@@ -283,19 +278,6 @@ mod test_blocks {
     }
 
     #[test]
-    fn test_configure_from_with_grid_and_always_long() {
-        let argv = ["lsd", "--grid"];
-        let mut c = Config::with_none();
-        c.always_long = Some(true);
-        let target = Blocks(vec![Block::Name]);
-
-        let matches = app::build().try_get_matches_from(argv).unwrap();
-        let result = Blocks::configure_from(&matches, &c);
-
-        assert_eq!(result, target);
-    }
-
-    #[test]
     fn test_configure_from_with_inode() {
         let argv = ["lsd", "--inode"];
         let target = Blocks(vec![Block::INode, Block::Name]);
@@ -450,7 +432,7 @@ mod test_blocks {
     }
 
     #[test]
-    fn test_from_config_with_long() {
+    fn test_from_config_with_always_long() {
         let mut c = Config::with_none();
         c.always_long = Some(true);
         let blocks = Blocks::long();
