@@ -74,10 +74,9 @@ impl Icons {
 
 #[cfg(test)]
 mod test {
-    use super::Icons;
+    use super::{IconTheme, Icons};
     use crate::flags::{IconOption, IconTheme as FlagTheme};
     use crate::meta::Meta;
-    use crate::theme::icon::ByFilename;
     use std::fs::File;
     use tempfile::tempdir;
 
@@ -208,7 +207,7 @@ mod test {
     fn get_icon_by_name() {
         let tmp_dir = tempdir().expect("failed to create temp dir");
 
-        for (file_name, file_icon) in ByFilename::default_name() {
+        for (file_name, file_icon) in &IconTheme::get_default_icons_by_name() {
             let file_path = tmp_dir.path().join(file_name);
             File::create(&file_path).expect("failed to create file");
             let meta = Meta::from_path(&file_path, false).unwrap();
@@ -224,7 +223,7 @@ mod test {
     fn get_icon_by_extension() {
         let tmp_dir = tempdir().expect("failed to create temp dir");
 
-        for (ext, file_icon) in ByFilename::default_extension() {
+        for (ext, file_icon) in &IconTheme::get_default_icons_by_extension() {
             let file_path = tmp_dir.path().join(format!("file.{}", ext));
             File::create(&file_path).expect("failed to create file");
             let meta = Meta::from_path(&file_path, false).unwrap();
