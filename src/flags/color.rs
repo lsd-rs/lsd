@@ -1,11 +1,11 @@
-//! This module defines the [Color]. To set it up from [ArgMatches], a [Config] and its [Default]
+//! This module defines the [Color]. To set it up from [Cli], a [Config] and its [Default]
 //! value, use its [configure_from](Configurable::configure_from) method.
 
 use super::Configurable;
 
+use crate::app::Cli;
 use crate::config_file::Config;
 
-use clap::{ArgMatches, ValueSource};
 use serde::de::{self, Deserializer, Visitor};
 use serde::Deserialize;
 use std::env;
@@ -20,11 +20,11 @@ pub struct Color {
 }
 
 impl Color {
-    /// Get a `Color` struct from [ArgMatches], a [Config] or the [Default] values.
+    /// Get a `Color` struct from [Cli], a [Config] or the [Default] values.
     ///
     /// The [ColorOption] is configured with their respective [Configurable] implementation.
-    pub fn configure_from(matches: &ArgMatches, config: &Config) -> Self {
-        let when = ColorOption::configure_from(matches, config);
+    pub fn configure_from(cli: &Cli, config: &Config) -> Self {
+        let when = ColorOption::configure_from(cli, config);
         let theme = ThemeOption::from_config(config);
         Self { when, theme }
     }
@@ -102,29 +102,23 @@ impl ColorOption {
             "always" => Self::Always,
             "auto" => Self::Auto,
             "never" => Self::Never,
-            // Invalid value should be handled by `clap` when building an `ArgMatches`
+            // Invalid value should be handled by `clap` when building an `Cli`
             other => unreachable!("Invalid value '{other}' for 'color'"),
         }
     }
 }
 
 impl Configurable<Self> for ColorOption {
-    /// Get a potential `ColorOption` variant from [ArgMatches].
+    /// Get a potential `ColorOption` variant from [Cli].
     ///
     /// If the "classic" argument is passed, then this returns the [ColorOption::Never] variant in
     /// a [Some]. Otherwise if the argument is passed, this returns the variant corresponding to
     /// its parameter in a [Some]. Otherwise this returns [None].
-    fn from_arg_matches(matches: &ArgMatches) -> Option<Self> {
-        if matches.get_one("classic") == Some(&true) {
+    fn from_cli(cli: &Cli) -> Option<Self> {
+        if cli.classic {
             Some(Self::Never)
-        } else if matches.value_source("color") == Some(ValueSource::CommandLine) {
-            matches
-                .get_many::<String>("color")?
-                .last()
-                .map(String::as_str)
-                .map(Self::from_arg_str)
         } else {
-            None
+            cli.color.as_deref().map(Self::from_arg_str)
         }
     }
 
@@ -152,49 +146,42 @@ impl Configurable<Self> for ColorOption {
 
 #[cfg(test)]
 mod test_color_option {
+    use clap::Parser;
+
     use super::ColorOption;
 
-    use crate::app;
+    use crate::app::Cli;
     use crate::config_file::{self, Config};
     use crate::flags::Configurable;
 
     use std::env::set_var;
 
     #[test]
-    fn test_from_arg_matches_none() {
+    fn test_from_cli_none() {
         let argv = ["lsd"];
-        let matches = app::build().try_get_matches_from(argv).unwrap();
-        assert_eq!(None, ColorOption::from_arg_matches(&matches));
+        let cli = Cli::try_parse_from(argv).unwrap();
+        assert_eq!(None, ColorOption::from_cli(&cli));
     }
 
     #[test]
-    fn test_from_arg_matches_always() {
+    fn test_from_cli_always() {
         let argv = ["lsd", "--color", "always"];
-        let matches = app::build().try_get_matches_from(argv).unwrap();
-        assert_eq!(
-            Some(ColorOption::Always),
-            ColorOption::from_arg_matches(&matches)
-        );
+        let cli = Cli::try_parse_from(argv).unwrap();
+        assert_eq!(Some(ColorOption::Always), ColorOption::from_cli(&cli));
     }
 
     #[test]
-    fn test_from_arg_matches_auto() {
+    fn test_from_cli_auto() {
         let argv = ["lsd", "--color", "auto"];
-        let matches = app::build().try_get_matches_from(argv).unwrap();
-        assert_eq!(
-            Some(ColorOption::Auto),
-            ColorOption::from_arg_matches(&matches)
-        );
+        let cli = Cli::try_parse_from(argv).unwrap();
+        assert_eq!(Some(ColorOption::Auto), ColorOption::from_cli(&cli));
     }
 
     #[test]
-    fn test_from_arg_matches_never() {
+    fn test_from_cli_never() {
         let argv = ["lsd", "--color", "never"];
-        let matches = app::build().try_get_matches_from(argv).unwrap();
-        assert_eq!(
-            Some(ColorOption::Never),
-            ColorOption::from_arg_matches(&matches)
-        );
+        let cli = Cli::try_parse_from(argv).unwrap();
+        assert_eq!(Some(ColorOption::Never), ColorOption::from_cli(&cli));
     }
 
     #[test]
@@ -204,23 +191,17 @@ mod test_color_option {
     }
 
     #[test]
-    fn test_from_arg_matches_classic_mode() {
+    fn test_from_cli_classic_mode() {
         let argv = ["lsd", "--color", "always", "--classic"];
-        let matches = app::build().try_get_matches_from(argv).unwrap();
-        assert_eq!(
-            Some(ColorOption::Never),
-            ColorOption::from_arg_matches(&matches)
-        );
+        let cli = Cli::try_parse_from(argv).unwrap();
+        assert_eq!(Some(ColorOption::Never), ColorOption::from_cli(&cli));
     }
 
     #[test]
-    fn test_from_arg_matches_color_multiple() {
+    fn test_from_cli_color_multiple() {
         let argv = ["lsd", "--color", "always", "--color", "never"];
-        let matches = app::build().try_get_matches_from(argv).unwrap();
-        assert_eq!(
-            Some(ColorOption::Never),
-            ColorOption::from_arg_matches(&matches)
-        );
+        let cli = Cli::try_parse_from(argv).unwrap();
+        assert_eq!(Some(ColorOption::Never), ColorOption::from_cli(&cli));
     }
 
     #[test]

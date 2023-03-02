@@ -1,23 +1,22 @@
-//! This module defines the [Indicators] flag. To set it up from [ArgMatches], a [Config] and its
+//! This module defines the [Indicators] flag. To set it up from [Cli], a [Config] and its
 //! [Default] value, use the [configure_from](Configurable::configure_from) method.
 
 use super::Configurable;
 
+use crate::app::Cli;
 use crate::config_file::Config;
-
-use clap::ArgMatches;
 
 /// The flag showing whether to print file type indicators.
 #[derive(Clone, Debug, Copy, PartialEq, Eq, Default)]
 pub struct Indicators(pub bool);
 
 impl Configurable<Self> for Indicators {
-    /// Get a potential `Indicators` value from [ArgMatches].
+    /// Get a potential `Indicators` value from [Cli].
     ///
     /// If the "indicators" argument is passed, this returns an `Indicators` with value `true` in a
     /// [Some]. Otherwise this returns [None].
-    fn from_arg_matches(matches: &ArgMatches) -> Option<Self> {
-        if matches.get_one("indicators") == Some(&true) {
+    fn from_cli(cli: &Cli) -> Option<Self> {
+        if cli.indicators {
             Some(Self(true))
         } else {
             None
@@ -36,27 +35,26 @@ impl Configurable<Self> for Indicators {
 
 #[cfg(test)]
 mod test {
+    use clap::Parser;
+
     use super::Indicators;
 
-    use crate::app;
+    use crate::app::Cli;
     use crate::config_file::Config;
     use crate::flags::Configurable;
 
     #[test]
-    fn test_from_arg_matches_none() {
+    fn test_from_cli_none() {
         let argv = ["lsd"];
-        let matches = app::build().try_get_matches_from(argv).unwrap();
-        assert_eq!(None, Indicators::from_arg_matches(&matches));
+        let cli = Cli::try_parse_from(argv).unwrap();
+        assert_eq!(None, Indicators::from_cli(&cli));
     }
 
     #[test]
-    fn test_from_arg_matches_true() {
+    fn test_from_cli_true() {
         let argv = ["lsd", "--classify"];
-        let matches = app::build().try_get_matches_from(argv).unwrap();
-        assert_eq!(
-            Some(Indicators(true)),
-            Indicators::from_arg_matches(&matches)
-        );
+        let cli = Cli::try_parse_from(argv).unwrap();
+        assert_eq!(Some(Indicators(true)), Indicators::from_cli(&cli));
     }
 
     #[test]

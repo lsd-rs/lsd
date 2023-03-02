@@ -16,8 +16,8 @@ name = "lsd"
 path = "src/main.rs"
 
 [build-dependencies]
-clap = "3.2.17"
-clap_complete = "3.2.4"
+clap = { version = "4.1", features = ["derive"] }
+clap_complete = "4.1"
 version_check = "0.9.*"
 
 [dependencies]
@@ -50,8 +50,8 @@ xattr = "0.2.*"
 windows = { version = "0.43.0", features = ["Win32_Foundation", "Win32_Security_Authorization", "Win32_Storage_FileSystem", "Win32_System_Memory"] }
 
 [dependencies.clap]
-features = ["suggestions", "color", "wrap_help"]
-version = "3.2.17"
+features = ["derive", "wrap_help"]
+version = "4.1"
 
 [dev-dependencies]
 assert_cmd = "1"

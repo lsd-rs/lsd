@@ -1,23 +1,22 @@
-//! This module defines the [TotalSize] flag. To set it up from [ArgMatches], a [Config] and its
+//! This module defines the [TotalSize] flag. To set it up from [Cli], a [Config] and its
 //! [Default] value, use the [configure_from](Configurable::configure_from) method.
 
 use super::Configurable;
 
+use crate::app::Cli;
 use crate::config_file::Config;
-
-use clap::ArgMatches;
 
 /// The flag showing whether to show the total size for directories.
 #[derive(Clone, Debug, Copy, PartialEq, Eq, Default)]
 pub struct TotalSize(pub bool);
 
 impl Configurable<Self> for TotalSize {
-    /// Get a potential `TotalSize` value from [ArgMatches].
+    /// Get a potential `TotalSize` value from [Cli].
     ///
     /// If the "total-size" argument is passed, this returns a `TotalSize` with value `true` in a
     /// [Some]. Otherwise this returns [None].
-    fn from_arg_matches(matches: &ArgMatches) -> Option<Self> {
-        if matches.get_one("total-size") == Some(&true) {
+    fn from_cli(cli: &Cli) -> Option<Self> {
+        if cli.total_size {
             Some(Self(true))
         } else {
             None
@@ -36,24 +35,26 @@ impl Configurable<Self> for TotalSize {
 
 #[cfg(test)]
 mod test {
+    use clap::Parser;
+
     use super::TotalSize;
 
-    use crate::app;
+    use crate::app::Cli;
     use crate::config_file::Config;
     use crate::flags::Configurable;
 
     #[test]
-    fn test_from_arg_matches_none() {
+    fn test_from_cli_none() {
         let argv = ["lsd"];
-        let matches = app::build().try_get_matches_from(argv).unwrap();
-        assert_eq!(None, TotalSize::from_arg_matches(&matches));
+        let cli = Cli::try_parse_from(argv).unwrap();
+        assert_eq!(None, TotalSize::from_cli(&cli));
     }
 
     #[test]
-    fn test_from_arg_matches_true() {
+    fn test_from_cli_true() {
         let argv = ["lsd", "--total-size"];
-        let matches = app::build().try_get_matches_from(argv).unwrap();
-        assert_eq!(Some(TotalSize(true)), TotalSize::from_arg_matches(&matches));
+        let cli = Cli::try_parse_from(argv).unwrap();
+        assert_eq!(Some(TotalSize(true)), TotalSize::from_cli(&cli));
     }
 
     #[test]

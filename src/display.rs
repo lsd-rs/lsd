@@ -446,14 +446,16 @@ fn get_padding_rules(metas: &[Meta], flags: &Flags) -> HashMap<Block, usize> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::app::Cli;
     use crate::color;
     use crate::color::Colors;
     use crate::flags::{HyperlinkOption, IconOption, IconTheme as FlagTheme};
     use crate::icon::Icons;
     use crate::meta::{FileType, Name};
     use crate::Config;
-    use crate::{app, flags, sort};
+    use crate::{flags, sort};
     use assert_fs::prelude::*;
+    use clap::Parser;
     use std::path::Path;
 
     #[test]
@@ -635,8 +637,8 @@ mod tests {
     #[test]
     fn test_display_tree_with_all() {
         let argv = ["lsd", "--tree", "--all"];
-        let matches = app::build().try_get_matches_from(argv).unwrap();
-        let flags = Flags::configure_from(&matches, &Config::with_none()).unwrap();
+        let cli = Cli::try_parse_from(argv).unwrap();
+        let flags = Flags::configure_from(&cli, &Config::with_none()).unwrap();
 
         let dir = assert_fs::TempDir::new().unwrap();
         dir.child("one.d").create_dir_all().unwrap();
@@ -668,8 +670,8 @@ mod tests {
     #[test]
     fn test_tree_align_subfolder() {
         let argv = ["lsd", "--tree", "--blocks", "size,name"];
-        let matches = app::build().try_get_matches_from(argv).unwrap();
-        let flags = Flags::configure_from(&matches, &Config::with_none()).unwrap();
+        let cli = Cli::try_parse_from(argv).unwrap();
+        let flags = Flags::configure_from(&cli, &Config::with_none()).unwrap();
 
         let dir = assert_fs::TempDir::new().unwrap();
         dir.child("dir").create_dir_all().unwrap();
@@ -708,8 +710,8 @@ mod tests {
     #[cfg(unix)]
     fn test_tree_size_first_without_name() {
         let argv = ["lsd", "--tree", "--blocks", "size,permission"];
-        let matches = app::build().try_get_matches_from(argv).unwrap();
-        let flags = Flags::configure_from(&matches, &Config::with_none()).unwrap();
+        let cli = Cli::try_parse_from(argv).unwrap();
+        let flags = Flags::configure_from(&cli, &Config::with_none()).unwrap();
 
         let dir = assert_fs::TempDir::new().unwrap();
         dir.child("dir").create_dir_all().unwrap();
@@ -747,8 +749,8 @@ mod tests {
     #[test]
     fn test_tree_edge_before_name() {
         let argv = ["lsd", "--tree", "--long"];
-        let matches = app::build().try_get_matches_from(argv).unwrap();
-        let flags = Flags::configure_from(&matches, &Config::with_none()).unwrap();
+        let cli = Cli::try_parse_from(argv).unwrap();
+        let flags = Flags::configure_from(&cli, &Config::with_none()).unwrap();
 
         let dir = assert_fs::TempDir::new().unwrap();
         dir.child("one.d").create_dir_all().unwrap();
@@ -777,8 +779,8 @@ mod tests {
             "--blocks",
             "permission,user,group,size,date,name,inode,links",
         ];
-        let matches = app::build().try_get_matches_from(argv).unwrap();
-        let flags = Flags::configure_from(&matches, &Config::with_none()).unwrap();
+        let cli = Cli::try_parse_from(argv).unwrap();
+        let flags = Flags::configure_from(&cli, &Config::with_none()).unwrap();
 
         let dir = assert_fs::TempDir::new().unwrap();
         dir.child("testdir").create_dir_all().unwrap();
@@ -811,8 +813,8 @@ mod tests {
     #[test]
     fn test_grid_no_header_with_empty_meta() {
         let argv = ["lsd", "--header", "-l"];
-        let matches = app::build().try_get_matches_from(argv).unwrap();
-        let flags = Flags::configure_from(&matches, &Config::with_none()).unwrap();
+        let cli = Cli::try_parse_from(argv).unwrap();
+        let flags = Flags::configure_from(&cli, &Config::with_none()).unwrap();
 
         let dir = assert_fs::TempDir::new().unwrap();
         dir.child("testdir").create_dir_all().unwrap();

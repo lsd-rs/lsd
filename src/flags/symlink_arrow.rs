@@ -1,18 +1,17 @@
 use super::Configurable;
 
+use crate::app::Cli;
 use crate::config_file::Config;
-
-use clap::ArgMatches;
 
 /// The flag showing how to display symbolic arrow.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct SymlinkArrow(String);
 
 impl Configurable<Self> for SymlinkArrow {
-    /// `SymlinkArrow` can not be configured by [ArgMatches]
+    /// `SymlinkArrow` can not be configured by [Cli]
     ///
     /// Return `None`
-    fn from_arg_matches(_: &ArgMatches) -> Option<Self> {
+    fn from_cli(_: &Cli) -> Option<Self> {
         None
     }
     /// Get a potential `SymlinkArrow` value from a [Config].
@@ -45,6 +44,9 @@ impl fmt::Display for SymlinkArrow {
 
 #[cfg(test)]
 mod test {
+    use clap::Parser;
+
+    use crate::app::Cli;
     use crate::config_file::Config;
     use crate::flags::Configurable;
 
@@ -61,12 +63,9 @@ mod test {
 
     #[test]
     fn test_symlink_arrow_from_args_none() {
-        use clap::Command;
-        let empty_args: [String; 0] = [];
-        assert_eq!(
-            None,
-            SymlinkArrow::from_arg_matches(&Command::new("lsd").get_matches_from(empty_args))
-        );
+        let argv = ["lsd"];
+        let cli = Cli::try_parse_from(argv).unwrap();
+        assert_eq!(None, SymlinkArrow::from_cli(&cli));
     }
 
     #[test]

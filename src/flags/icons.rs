@@ -1,11 +1,11 @@
-//! This module defines the [IconOption]. To set it up from [ArgMatches], a [Config] and its
+//! This module defines the [IconOption]. To set it up from [Cli], a [Config] and its
 //! [Default] value, use its [configure_from](Configurable::configure_from) method.
 
 use super::Configurable;
 
+use crate::app::Cli;
 use crate::config_file::Config;
 
-use clap::{ArgMatches, ValueSource};
 use serde::Deserialize;
 
 /// A collection of flags on how to use icons.
@@ -20,14 +20,14 @@ pub struct Icons {
 }
 
 impl Icons {
-    /// Get an `Icons` struct from [ArgMatches], a [Config] or the [Default] values.
+    /// Get an `Icons` struct from [Cli], a [Config] or the [Default] values.
     ///
     /// The [IconOption] and [IconTheme] are configured with their respective [Configurable]
     /// implementation.
-    pub fn configure_from(matches: &ArgMatches, config: &Config) -> Self {
-        let when = IconOption::configure_from(matches, config);
-        let theme = IconTheme::configure_from(matches, config);
-        let separator = IconSeparator::configure_from(matches, config);
+    pub fn configure_from(cli: &Cli, config: &Config) -> Self {
+        let when = IconOption::configure_from(cli, config);
+        let theme = IconTheme::configure_from(cli, config);
+        let separator = IconSeparator::configure_from(cli, config);
         Self {
             when,
             theme,
@@ -52,29 +52,23 @@ impl IconOption {
             "always" => Self::Always,
             "auto" => Self::Auto,
             "never" => Self::Never,
-            // Invalid value should be handled by `clap` when building an `ArgMatches`
+            // Invalid value should be handled by `clap` when building an `Cli`
             other => unreachable!("Invalid value '{other}' for 'icon'"),
         }
     }
 }
 
 impl Configurable<Self> for IconOption {
-    /// Get a potential `IconOption` variant from [ArgMatches].
+    /// Get a potential `IconOption` variant from [Cli].
     ///
     /// If the "classic" argument is passed, then this returns the [IconOption::Never] variant in
     /// a [Some]. Otherwise if the argument is passed, this returns the variant corresponding to
     /// its parameter in a [Some]. Otherwise this returns [None].
-    fn from_arg_matches(matches: &ArgMatches) -> Option<Self> {
-        if matches.get_one("classic") == Some(&true) {
+    fn from_cli(cli: &Cli) -> Option<Self> {
+        if cli.classic {
             Some(Self::Never)
-        } else if matches.value_source("icon") == Some(ValueSource::CommandLine) {
-            matches
-                .get_many::<String>("icon")?
-                .last()
-                .map(String::as_str)
-                .map(Self::from_arg_str)
         } else {
-            None
+            cli.icon.as_deref().map(Self::from_arg_str)
         }
     }
 
@@ -107,27 +101,19 @@ impl IconTheme {
         match value {
             "fancy" => Self::Fancy,
             "unicode" => Self::Unicode,
-            // Invalid value should be handled by `clap` when building an `ArgMatches`
+            // Invalid value should be handled by `clap` when building an `Cli`
             other => unreachable!("Invalid value '{other}' for 'icon-theme'"),
         }
     }
 }
 
 impl Configurable<Self> for IconTheme {
-    /// Get a potential `IconTheme` variant from [ArgMatches].
+    /// Get a potential `IconTheme` variant from [Cli].
     ///
     /// If the argument is passed, this returns the variant corresponding to its parameter in a
     /// [Some]. Otherwise this returns [None].
-    fn from_arg_matches(matches: &ArgMatches) -> Option<Self> {
-        if matches.value_source("icon-theme") == Some(ValueSource::CommandLine) {
-            matches
-                .get_many::<String>("icon-theme")?
-                .last()
-                .map(String::as_str)
-                .map(Self::from_arg_str)
-        } else {
-            None
-        }
+    fn from_cli(cli: &Cli) -> Option<Self> {
+        cli.icon_theme.as_deref().map(Self::from_arg_str)
     }
 
     /// Get a potential `IconTheme` variant from a [Config].
@@ -145,11 +131,11 @@ impl Configurable<Self> for IconTheme {
 pub struct IconSeparator(pub String);
 
 impl Configurable<Self> for IconSeparator {
-    /// Get a potential `IconSeparator` variant from [ArgMatches].
+    /// Get a potential `IconSeparator` variant from [Cli].
     ///
     /// If the argument is passed, this returns the variant corresponding to its parameter in a
     /// [Some]. Otherwise this returns [None].
-    fn from_arg_matches(_matches: &ArgMatches) -> Option<Self> {
+    fn from_cli(_cli: &Cli) -> Option<Self> {
         None
     }
 
@@ -176,67 +162,54 @@ impl Default for IconSeparator {
 
 #[cfg(test)]
 mod test_icon_option {
+    use clap::Parser;
+
     use super::IconOption;
 
-    use crate::app;
+    use crate::app::Cli;
     use crate::config_file::{Config, Icons};
     use crate::flags::Configurable;
 
     #[test]
-    fn test_from_arg_matches_none() {
+    fn test_from_cli_none() {
         let argv = ["lsd"];
-        let matches = app::build().try_get_matches_from(argv).unwrap();
-        assert_eq!(None, IconOption::from_arg_matches(&matches));
+        let cli = Cli::try_parse_from(argv).unwrap();
+        assert_eq!(None, IconOption::from_cli(&cli));
     }
 
     #[test]
-    fn test_from_arg_matches_always() {
+    fn test_from_cli_always() {
         let argv = ["lsd", "--icon", "always"];
-        let matches = app::build().try_get_matches_from(argv).unwrap();
-        assert_eq!(
-            Some(IconOption::Always),
-            IconOption::from_arg_matches(&matches)
-        );
+        let cli = Cli::try_parse_from(argv).unwrap();
+        assert_eq!(Some(IconOption::Always), IconOption::from_cli(&cli));
     }
 
     #[test]
-    fn test_from_arg_matches_auto() {
+    fn test_from_cli_auto() {
         let argv = ["lsd", "--icon", "auto"];
-        let matches = app::build().try_get_matches_from(argv).unwrap();
-        assert_eq!(
-            Some(IconOption::Auto),
-            IconOption::from_arg_matches(&matches)
-        );
+        let cli = Cli::try_parse_from(argv).unwrap();
+        assert_eq!(Some(IconOption::Auto), IconOption::from_cli(&cli));
     }
 
     #[test]
-    fn test_from_arg_matches_never() {
+    fn test_from_cli_never() {
         let argv = ["lsd", "--icon", "never"];
-        let matches = app::build().try_get_matches_from(argv).unwrap();
-        assert_eq!(
-            Some(IconOption::Never),
-            IconOption::from_arg_matches(&matches)
-        );
+        let cli = Cli::try_parse_from(argv).unwrap();
+        assert_eq!(Some(IconOption::Never), IconOption::from_cli(&cli));
     }
 
     #[test]
-    fn test_from_arg_matches_classic_mode() {
+    fn test_from_cli_classic_mode() {
         let argv = ["lsd", "--icon", "always", "--classic"];
-        let matches = app::build().try_get_matches_from(argv).unwrap();
-        assert_eq!(
-            Some(IconOption::Never),
-            IconOption::from_arg_matches(&matches)
-        );
+        let cli = Cli::try_parse_from(argv).unwrap();
+        assert_eq!(Some(IconOption::Never), IconOption::from_cli(&cli));
     }
 
     #[test]
-    fn test_from_arg_matches_icon_when_multi() {
+    fn test_from_cli_icon_when_multi() {
         let argv = ["lsd", "--icon", "always", "--icon", "never"];
-        let matches = app::build().try_get_matches_from(argv).unwrap();
-        assert_eq!(
-            Some(IconOption::Never),
-            IconOption::from_arg_matches(&matches)
-        );
+        let cli = Cli::try_parse_from(argv).unwrap();
+        assert_eq!(Some(IconOption::Never), IconOption::from_cli(&cli));
     }
 
     #[test]
@@ -292,47 +265,40 @@ mod test_icon_option {
 
 #[cfg(test)]
 mod test_icon_theme {
+    use clap::Parser;
+
     use super::IconTheme;
 
-    use crate::app;
+    use crate::app::Cli;
     use crate::config_file::{Config, Icons};
     use crate::flags::Configurable;
 
     #[test]
-    fn test_from_arg_matches_none() {
+    fn test_from_cli_none() {
         let argv = ["lsd"];
-        let matches = app::build().try_get_matches_from(argv).unwrap();
-        assert_eq!(None, IconTheme::from_arg_matches(&matches));
+        let cli = Cli::try_parse_from(argv).unwrap();
+        assert_eq!(None, IconTheme::from_cli(&cli));
     }
 
     #[test]
-    fn test_from_arg_matches_fancy() {
+    fn test_from_cli_fancy() {
         let argv = ["lsd", "--icon-theme", "fancy"];
-        let matches = app::build().try_get_matches_from(argv).unwrap();
-        assert_eq!(
-            Some(IconTheme::Fancy),
-            IconTheme::from_arg_matches(&matches)
-        );
+        let cli = Cli::try_parse_from(argv).unwrap();
+        assert_eq!(Some(IconTheme::Fancy), IconTheme::from_cli(&cli));
     }
 
     #[test]
-    fn test_from_arg_matches_unicode() {
+    fn test_from_cli_unicode() {
         let argv = ["lsd", "--icon-theme", "unicode"];
-        let matches = app::build().try_get_matches_from(argv).unwrap();
-        assert_eq!(
-            Some(IconTheme::Unicode),
-            IconTheme::from_arg_matches(&matches)
-        );
+        let cli = Cli::try_parse_from(argv).unwrap();
+        assert_eq!(Some(IconTheme::Unicode), IconTheme::from_cli(&cli));
     }
 
     #[test]
-    fn test_from_arg_matches_icon_multi() {
+    fn test_from_cli_icon_multi() {
         let argv = ["lsd", "--icon-theme", "fancy", "--icon-theme", "unicode"];
-        let matches = app::build().try_get_matches_from(argv).unwrap();
-        assert_eq!(
-            Some(IconTheme::Unicode),
-            IconTheme::from_arg_matches(&matches)
-        );
+        let cli = Cli::try_parse_from(argv).unwrap();
+        assert_eq!(Some(IconTheme::Unicode), IconTheme::from_cli(&cli));
     }
 
     #[test]

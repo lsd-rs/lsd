@@ -1,11 +1,11 @@
-//! This module defines the [Layout] flag. To set it up from [ArgMatches], a [Config] and its
+//! This module defines the [Layout] flag. To set it up from [Cli], a [Config] and its
 //! [Default] value, use its [configure_from](Configurable::configure_from) method.
 
+use crate::app::Cli;
 use crate::config_file::Config;
 
 use super::Configurable;
 
-use clap::ArgMatches;
 use serde::Deserialize;
 
 /// The flag showing which output layout to print.
@@ -19,20 +19,16 @@ pub enum Layout {
 }
 
 impl Configurable<Layout> for Layout {
-    /// Get a potential `Layout` variant from [ArgMatches].
+    /// Get a potential `Layout` variant from [Cli].
     ///
     /// If any of the "tree", "long" or "oneline" arguments is passed, this returns the
     /// corresponding `Layout` variant in a [Some]. Otherwise if the number of passed "blocks"
     /// arguments is greater than 1, this also returns the [OneLine](Layout::OneLine) variant.
     /// Finally if neither of them is passed, this returns [None].
-    fn from_arg_matches(matches: &ArgMatches) -> Option<Self> {
-        if matches.get_one("tree") == Some(&true) {
+    fn from_cli(cli: &Cli) -> Option<Self> {
+        if cli.tree {
             Some(Self::Tree)
-        } else if matches.get_one("long") == Some(&true)
-            || matches.get_one("oneline") == Some(&true)
-            || matches.get_one("inode") == Some(&true)
-            || matches.get_one("context") == Some(&true)
-            || matches!(matches.get_many::<String>("blocks"), Some(values) if values.len() > 1)
+        } else if cli.long || cli.oneline || cli.inode || cli.context || cli.blocks.len() > 1
         // TODO: handle this differently
         {
             Some(Self::OneLine)
@@ -53,45 +49,47 @@ impl Configurable<Layout> for Layout {
 
 #[cfg(test)]
 mod test {
+    use clap::Parser;
+
     use super::Layout;
 
-    use crate::app;
+    use crate::app::Cli;
     use crate::config_file::Config;
     use crate::flags::Configurable;
 
     #[test]
-    fn test_from_arg_matches_none() {
+    fn test_from_cli_none() {
         let argv = ["lsd"];
-        let matches = app::build().try_get_matches_from(argv).unwrap();
-        assert_eq!(None, Layout::from_arg_matches(&matches));
+        let cli = Cli::try_parse_from(argv).unwrap();
+        assert_eq!(None, Layout::from_cli(&cli));
     }
 
     #[test]
-    fn test_from_arg_matches_tree() {
+    fn test_from_cli_tree() {
         let argv = ["lsd", "--tree"];
-        let matches = app::build().try_get_matches_from(argv).unwrap();
-        assert_eq!(Some(Layout::Tree), Layout::from_arg_matches(&matches));
+        let cli = Cli::try_parse_from(argv).unwrap();
+        assert_eq!(Some(Layout::Tree), Layout::from_cli(&cli));
     }
 
     #[test]
-    fn test_from_arg_matches_oneline() {
+    fn test_from_cli_oneline() {
         let argv = ["lsd", "--oneline"];
-        let matches = app::build().try_get_matches_from(argv).unwrap();
-        assert_eq!(Some(Layout::OneLine), Layout::from_arg_matches(&matches));
+        let cli = Cli::try_parse_from(argv).unwrap();
+        assert_eq!(Some(Layout::OneLine), Layout::from_cli(&cli));
     }
 
     #[test]
-    fn test_from_arg_matches_oneline_through_long() {
+    fn test_from_cli_oneline_through_long() {
         let argv = ["lsd", "--long"];
-        let matches = app::build().try_get_matches_from(argv).unwrap();
-        assert_eq!(Some(Layout::OneLine), Layout::from_arg_matches(&matches));
+        let cli = Cli::try_parse_from(argv).unwrap();
+        assert_eq!(Some(Layout::OneLine), Layout::from_cli(&cli));
     }
 
     #[test]
-    fn test_from_arg_matches_oneline_through_blocks() {
+    fn test_from_cli_oneline_through_blocks() {
         let argv = ["lsd", "--blocks", "permission,name"];
-        let matches = app::build().try_get_matches_from(argv).unwrap();
-        assert_eq!(Some(Layout::OneLine), Layout::from_arg_matches(&matches));
+        let cli = Cli::try_parse_from(argv).unwrap();
+        assert_eq!(Some(Layout::OneLine), Layout::from_cli(&cli));
     }
 
     #[test]

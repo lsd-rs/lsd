@@ -1,11 +1,11 @@
-//! This module defines the [Display] flag. To set it up from [ArgMatches], a [Config] and its
+//! This module defines the [Display] flag. To set it up from [Cli], a [Config] and its
 //! [Default] value, use its [configure_from](Configurable::configure_from) method.
 
 use super::Configurable;
 
+use crate::app::Cli;
 use crate::config_file::Config;
 
-use clap::ArgMatches;
 use serde::Deserialize;
 
 /// The flag showing which file system nodes to display.
@@ -22,19 +22,19 @@ pub enum Display {
 }
 
 impl Configurable<Self> for Display {
-    /// Get a potential `Display` variant from [ArgMatches].
+    /// Get a potential `Display` variant from [Cli].
     ///
     /// If any of the "all", "almost-all" or "directory-only" arguments is passed, this returns the
     /// corresponding `Display` variant in a [Some]. If neither of them is passed, this returns
     /// [None].
-    fn from_arg_matches(matches: &ArgMatches) -> Option<Self> {
-        if matches.get_one("directory-only") == Some(&true) {
+    fn from_cli(cli: &Cli) -> Option<Self> {
+        if cli.directory_only {
             Some(Self::DirectoryOnly)
-        } else if matches.get_one("almost-all") == Some(&true) {
+        } else if cli.almost_all {
             Some(Self::AlmostAll)
-        } else if matches.get_one::<bool>("all") == Some(&true) {
+        } else if cli.all {
             Some(Self::All)
-        } else if matches.get_one("system-protected") == Some(&true) {
+        } else if cli.system_protected {
             #[cfg(windows)]
             return Some(Self::SystemProtected);
 
@@ -58,58 +58,51 @@ impl Configurable<Self> for Display {
 
 #[cfg(test)]
 mod test {
+    use clap::Parser;
+
     use super::Display;
 
-    use crate::app;
+    use crate::app::Cli;
     use crate::config_file::Config;
     use crate::flags::Configurable;
 
     #[test]
-    fn test_from_arg_matches_none() {
+    fn test_from_cli_none() {
         let argv = ["lsd"];
-        let matches = app::build().try_get_matches_from(argv).unwrap();
-        assert_eq!(None, Display::from_arg_matches(&matches));
+        let cli = Cli::try_parse_from(argv).unwrap();
+        assert_eq!(None, Display::from_cli(&cli));
     }
 
     #[test]
-    fn test_from_arg_matches_system_protected() {
+    fn test_from_cli_system_protected() {
         let argv = ["lsd", "--system-protected"];
-        let matches = app::build().try_get_matches_from(argv).unwrap();
+        let cli = Cli::try_parse_from(argv).unwrap();
         #[cfg(windows)]
-        assert_eq!(
-            Some(Display::SystemProtected),
-            Display::from_arg_matches(&matches)
-        );
+        assert_eq!(Some(Display::SystemProtected), Display::from_cli(&cli));
 
         #[cfg(not(windows))]
-        assert_eq!(Some(Display::All), Display::from_arg_matches(&matches));
+        assert_eq!(Some(Display::All), Display::from_cli(&cli));
     }
 
     #[test]
-    fn test_from_arg_matches_all() {
+    fn test_from_cli_all() {
         let argv = ["lsd", "--all"];
-        let matches = app::build().try_get_matches_from(argv).unwrap();
-        assert_eq!(Some(Display::All), Display::from_arg_matches(&matches));
+        let cli = Cli::try_parse_from(argv).unwrap();
+        assert_eq!(Some(Display::All), Display::from_cli(&cli));
     }
 
     #[test]
-    fn test_from_arg_matches_almost_all() {
+    fn test_from_cli_almost_all() {
         let argv = ["lsd", "--almost-all"];
-        let matches = app::build().try_get_matches_from(argv).unwrap();
-        assert_eq!(
-            Some(Display::AlmostAll),
-            Display::from_arg_matches(&matches)
-        );
+        let cli = Cli::try_parse_from(argv).unwrap();
+        assert_eq!(Some(Display::AlmostAll), Display::from_cli(&cli));
     }
 
     #[test]
-    fn test_from_arg_matches_directory_only() {
+    fn test_from_cli_directory_only() {
         let argv = ["lsd", "--directory-only"];
-        let matches = app::build().try_get_matches_from(argv).unwrap();
-        assert_eq!(
-            Some(Display::DirectoryOnly),
-            Display::from_arg_matches(&matches)
-        );
+        let cli = Cli::try_parse_from(argv).unwrap();
+        assert_eq!(Some(Display::DirectoryOnly), Display::from_cli(&cli));
     }
 
     #[test]

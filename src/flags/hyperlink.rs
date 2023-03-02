@@ -1,11 +1,11 @@
-//! This module defines the [HyperlinkOption]. To set it up from [ArgMatches], a [Config] and its
+//! This module defines the [HyperlinkOption]. To set it up from [Cli], a [Config] and its
 //! [Default] value, use its [configure_from](Configurable::configure_from) method.
 
 use super::Configurable;
 
+use crate::app::Cli;
 use crate::config_file::Config;
 
-use clap::{ArgMatches, ValueSource};
 use serde::Deserialize;
 
 /// The flag showing when to use hyperlink in the output.
@@ -24,29 +24,23 @@ impl HyperlinkOption {
             "always" => Self::Always,
             "auto" => Self::Auto,
             "never" => Self::Never,
-            // Invalid value should be handled by `clap` when building an `ArgMatches`
+            // Invalid value should be handled by `clap` when building an `Cli`
             other => unreachable!("Invalid value '{other}' for 'hyperlink'"),
         }
     }
 }
 
 impl Configurable<Self> for HyperlinkOption {
-    /// Get a potential `HyperlinkOption` variant from [ArgMatches].
+    /// Get a potential `HyperlinkOption` variant from [Cli].
     ///
     /// If the "classic" argument is passed, then this returns the [HyperlinkOption::Never] variant in
     /// a [Some]. Otherwise if the argument is passed, this returns the variant corresponding to
     /// its parameter in a [Some]. Otherwise this returns [None].
-    fn from_arg_matches(matches: &ArgMatches) -> Option<Self> {
-        if matches.get_one("classic") == Some(&true) {
+    fn from_cli(cli: &Cli) -> Option<Self> {
+        if cli.classic {
             Some(Self::Never)
-        } else if matches.value_source("hyperlink") == Some(ValueSource::CommandLine) {
-            matches
-                .get_many::<String>("hyperlink")?
-                .last()
-                .map(String::as_str)
-                .map(Self::from_arg_str)
         } else {
-            None
+            cli.hyperlink.as_deref().map(Self::from_arg_str)
         }
     }
 
@@ -67,66 +61,65 @@ impl Configurable<Self> for HyperlinkOption {
 
 #[cfg(test)]
 mod test_hyperlink_option {
+    use clap::Parser;
+
     use super::HyperlinkOption;
 
-    use crate::app;
+    use crate::app::Cli;
     use crate::config_file::Config;
     use crate::flags::Configurable;
 
     #[test]
-    fn test_from_arg_matches_none() {
+    fn test_from_cli_none() {
         let argv = ["lsd"];
-        let matches = app::build().try_get_matches_from(argv).unwrap();
-        assert_eq!(None, HyperlinkOption::from_arg_matches(&matches));
+        let cli = Cli::try_parse_from(argv).unwrap();
+        assert_eq!(None, HyperlinkOption::from_cli(&cli));
     }
 
     #[test]
-    fn test_from_arg_matches_always() {
+    fn test_from_cli_always() {
         let argv = ["lsd", "--hyperlink", "always"];
-        let matches = app::build().try_get_matches_from(argv).unwrap();
+        let cli = Cli::try_parse_from(argv).unwrap();
         assert_eq!(
             Some(HyperlinkOption::Always),
-            HyperlinkOption::from_arg_matches(&matches)
+            HyperlinkOption::from_cli(&cli)
         );
     }
 
     #[test]
-    fn test_from_arg_matches_auto() {
+    fn test_from_cli_auto() {
         let argv = ["lsd", "--hyperlink", "auto"];
-        let matches = app::build().try_get_matches_from(argv).unwrap();
-        assert_eq!(
-            Some(HyperlinkOption::Auto),
-            HyperlinkOption::from_arg_matches(&matches)
-        );
+        let cli = Cli::try_parse_from(argv).unwrap();
+        assert_eq!(Some(HyperlinkOption::Auto), HyperlinkOption::from_cli(&cli));
     }
 
     #[test]
-    fn test_from_arg_matches_never() {
+    fn test_from_cli_never() {
         let argv = ["lsd", "--hyperlink", "never"];
-        let matches = app::build().try_get_matches_from(argv).unwrap();
+        let cli = Cli::try_parse_from(argv).unwrap();
         assert_eq!(
             Some(HyperlinkOption::Never),
-            HyperlinkOption::from_arg_matches(&matches)
+            HyperlinkOption::from_cli(&cli)
         );
     }
 
     #[test]
-    fn test_from_arg_matches_classic_mode() {
+    fn test_from_cli_classic_mode() {
         let argv = ["lsd", "--hyperlink", "always", "--classic"];
-        let matches = app::build().try_get_matches_from(argv).unwrap();
+        let cli = Cli::try_parse_from(argv).unwrap();
         assert_eq!(
             Some(HyperlinkOption::Never),
-            HyperlinkOption::from_arg_matches(&matches)
+            HyperlinkOption::from_cli(&cli)
         );
     }
 
     #[test]
-    fn test_from_arg_matches_hyperlink_when_multi() {
+    fn test_from_cli_hyperlink_when_multi() {
         let argv = ["lsd", "--hyperlink", "always", "--hyperlink", "never"];
-        let matches = app::build().try_get_matches_from(argv).unwrap();
+        let cli = Cli::try_parse_from(argv).unwrap();
         assert_eq!(
             Some(HyperlinkOption::Never),
-            HyperlinkOption::from_arg_matches(&matches)
+            HyperlinkOption::from_cli(&cli)
         );
     }
 

@@ -1,11 +1,11 @@
-//! This module defines the [SizeFlag]. To set it up from [ArgMatches], a [Config] and its
+//! This module defines the [SizeFlag]. To set it up from [Cli], a [Config] and its
 //! [Default] value, use its [configure_from](Configurable::configure_from) method.
 
 use super::Configurable;
 
+use crate::app::Cli;
 use crate::config_file::Config;
 
-use clap::{ArgMatches, ValueSource};
 use serde::Deserialize;
 
 /// The flag showing which file size units to use.
@@ -27,29 +27,23 @@ impl SizeFlag {
             "default" => Self::Default,
             "short" => Self::Short,
             "bytes" => Self::Bytes,
-            // Invalid value should be handled by `clap` when building an `ArgMatches`
+            // Invalid value should be handled by `clap` when building an `Cli`
             other => unreachable!("Invalid value '{other}' for 'size'"),
         }
     }
 }
 
 impl Configurable<Self> for SizeFlag {
-    /// Get a potential `SizeFlag` variant from [ArgMatches].
+    /// Get a potential `SizeFlag` variant from [Cli].
     ///
     /// If any of the "default", "short" or "bytes" arguments is passed, the corresponding
     /// `SizeFlag` variant is returned in a [Some]. If neither of them is passed, this returns
     /// [None].
-    fn from_arg_matches(matches: &ArgMatches) -> Option<Self> {
-        if matches.get_one("classic") == Some(&true) {
+    fn from_cli(cli: &Cli) -> Option<Self> {
+        if cli.classic {
             Some(Self::Bytes)
-        } else if matches.value_source("size") == Some(ValueSource::CommandLine) {
-            matches
-                .get_many::<String>("size")?
-                .last()
-                .map(String::as_str)
-                .map(Self::from_arg_str)
         } else {
-            None
+            cli.size.as_deref().map(Self::from_arg_str)
         }
     }
 
@@ -69,9 +63,11 @@ impl Configurable<Self> for SizeFlag {
 
 #[cfg(test)]
 mod test {
+    use clap::Parser;
+
     use super::SizeFlag;
 
-    use crate::app;
+    use crate::app::Cli;
     use crate::config_file::Config;
     use crate::flags::Configurable;
 
@@ -81,54 +77,51 @@ mod test {
     }
 
     #[test]
-    fn test_from_arg_matches_none() {
+    fn test_from_cli_none() {
         let argv = ["lsd"];
-        let matches = app::build().try_get_matches_from(argv).unwrap();
-        assert_eq!(None, SizeFlag::from_arg_matches(&matches));
+        let cli = Cli::try_parse_from(argv).unwrap();
+        assert_eq!(None, SizeFlag::from_cli(&cli));
     }
 
     #[test]
-    fn test_from_arg_matches_default() {
+    fn test_from_cli_default() {
         let argv = ["lsd", "--size", "default"];
-        let matches = app::build().try_get_matches_from(argv).unwrap();
-        assert_eq!(
-            Some(SizeFlag::Default),
-            SizeFlag::from_arg_matches(&matches)
-        );
+        let cli = Cli::try_parse_from(argv).unwrap();
+        assert_eq!(Some(SizeFlag::Default), SizeFlag::from_cli(&cli));
     }
 
     #[test]
-    fn test_from_arg_matches_short() {
+    fn test_from_cli_short() {
         let argv = ["lsd", "--size", "short"];
-        let matches = app::build().try_get_matches_from(argv).unwrap();
-        assert_eq!(Some(SizeFlag::Short), SizeFlag::from_arg_matches(&matches));
+        let cli = Cli::try_parse_from(argv).unwrap();
+        assert_eq!(Some(SizeFlag::Short), SizeFlag::from_cli(&cli));
     }
 
     #[test]
-    fn test_from_arg_matches_bytes() {
+    fn test_from_cli_bytes() {
         let argv = ["lsd", "--size", "bytes"];
-        let matches = app::build().try_get_matches_from(argv).unwrap();
-        assert_eq!(Some(SizeFlag::Bytes), SizeFlag::from_arg_matches(&matches));
+        let cli = Cli::try_parse_from(argv).unwrap();
+        assert_eq!(Some(SizeFlag::Bytes), SizeFlag::from_cli(&cli));
     }
 
     #[test]
     #[should_panic]
-    fn test_from_arg_matches_unknown() {
+    fn test_from_cli_unknown() {
         let argv = ["lsd", "--size", "unknown"];
-        let _ = app::build().try_get_matches_from(argv).unwrap();
+        let _ = Cli::try_parse_from(argv).unwrap();
     }
     #[test]
-    fn test_from_arg_matches_size_multi() {
+    fn test_from_cli_size_multi() {
         let argv = ["lsd", "--size", "bytes", "--size", "short"];
-        let matches = app::build().try_get_matches_from(argv).unwrap();
-        assert_eq!(Some(SizeFlag::Short), SizeFlag::from_arg_matches(&matches));
+        let cli = Cli::try_parse_from(argv).unwrap();
+        assert_eq!(Some(SizeFlag::Short), SizeFlag::from_cli(&cli));
     }
 
     #[test]
-    fn test_from_arg_matches_size_classic() {
+    fn test_from_cli_size_classic() {
         let argv = ["lsd", "--size", "short", "--classic"];
-        let matches = app::build().try_get_matches_from(argv).unwrap();
-        assert_eq!(Some(SizeFlag::Bytes), SizeFlag::from_arg_matches(&matches));
+        let cli = Cli::try_parse_from(argv).unwrap();
+        assert_eq!(Some(SizeFlag::Bytes), SizeFlag::from_cli(&cli));
     }
 
     #[test]

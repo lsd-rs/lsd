@@ -1,11 +1,11 @@
-//! This module defines the [PermissionFlag]. To set it up from [ArgMatches], a [Config] and its
+//! This module defines the [PermissionFlag]. To set it up from [Cli], a [Config] and its
 //! [Default] value, use its [configure_from](Configurable::configure_from) method.
 
 use super::Configurable;
 
+use crate::app::Cli;
 use crate::config_file::Config;
 
-use clap::{ArgMatches, ValueSource};
 use serde::Deserialize;
 
 /// The flag showing which file permissions units to use.
@@ -24,30 +24,24 @@ impl PermissionFlag {
         match value {
             "rwx" => Self::Rwx,
             "octal" => Self::Octal,
-            // Invalid value should be handled by `clap` when building an `ArgMatches`
+            // Invalid value should be handled by `clap` when building an `Cli`
             other => unreachable!("Invalid value '{other}' for 'permission'"),
         }
     }
 }
 
 impl Configurable<Self> for PermissionFlag {
-    /// Get a potential `PermissionFlag` variant from [ArgMatches].
+    /// Get a potential `PermissionFlag` variant from [Cli].
     ///
     /// If any of the "rwx" or "octal" arguments is passed, the corresponding
     /// `PermissionFlag` variant is returned in a [Some]. If neither of them is passed,
     /// this returns [None].
     /// Sets permissions to rwx if classic flag is enabled.
-    fn from_arg_matches(matches: &ArgMatches) -> Option<Self> {
-        if matches.get_one("classic") == Some(&true) {
+    fn from_cli(cli: &Cli) -> Option<Self> {
+        if cli.classic {
             Some(Self::Rwx)
-        } else if matches.value_source("permission") == Some(ValueSource::CommandLine) {
-            matches
-                .get_many::<String>("permission")?
-                .last()
-                .map(String::as_str)
-                .map(Self::from_arg_str)
         } else {
-            None
+            cli.permission.as_deref().map(Self::from_arg_str)
         }
     }
 
@@ -68,9 +62,11 @@ impl Configurable<Self> for PermissionFlag {
 
 #[cfg(test)]
 mod test {
+    use clap::Parser;
+
     use super::PermissionFlag;
 
-    use crate::app;
+    use crate::app::Cli;
     use crate::config_file::Config;
     use crate::flags::Configurable;
 
@@ -80,56 +76,44 @@ mod test {
     }
 
     #[test]
-    fn test_from_arg_matches_none() {
+    fn test_from_cli_none() {
         let argv = ["lsd"];
-        let matches = app::build().try_get_matches_from(argv).unwrap();
-        assert_eq!(None, PermissionFlag::from_arg_matches(&matches));
+        let cli = Cli::try_parse_from(argv).unwrap();
+        assert_eq!(None, PermissionFlag::from_cli(&cli));
     }
 
     #[test]
-    fn test_from_arg_matches_default() {
+    fn test_from_cli_default() {
         let argv = ["lsd", "--permission", "rwx"];
-        let matches = app::build().try_get_matches_from(argv).unwrap();
-        assert_eq!(
-            Some(PermissionFlag::Rwx),
-            PermissionFlag::from_arg_matches(&matches)
-        );
+        let cli = Cli::try_parse_from(argv).unwrap();
+        assert_eq!(Some(PermissionFlag::Rwx), PermissionFlag::from_cli(&cli));
     }
 
     #[test]
-    fn test_from_arg_matches_short() {
+    fn test_from_cli_short() {
         let argv = ["lsd", "--permission", "octal"];
-        let matches = app::build().try_get_matches_from(argv).unwrap();
-        assert_eq!(
-            Some(PermissionFlag::Octal),
-            PermissionFlag::from_arg_matches(&matches)
-        );
+        let cli = Cli::try_parse_from(argv).unwrap();
+        assert_eq!(Some(PermissionFlag::Octal), PermissionFlag::from_cli(&cli));
     }
 
     #[test]
     #[should_panic]
-    fn test_from_arg_matches_unknown() {
+    fn test_from_cli_unknown() {
         let argv = ["lsd", "--permission", "unknown"];
-        let _ = app::build().try_get_matches_from(argv).unwrap();
+        let _ = Cli::try_parse_from(argv).unwrap();
     }
     #[test]
-    fn test_from_arg_matches_permissions_multi() {
+    fn test_from_cli_permissions_multi() {
         let argv = ["lsd", "--permission", "octal", "--permission", "rwx"];
-        let matches = app::build().try_get_matches_from(argv).unwrap();
-        assert_eq!(
-            Some(PermissionFlag::Rwx),
-            PermissionFlag::from_arg_matches(&matches)
-        );
+        let cli = Cli::try_parse_from(argv).unwrap();
+        assert_eq!(Some(PermissionFlag::Rwx), PermissionFlag::from_cli(&cli));
     }
 
     #[test]
-    fn test_from_arg_matches_permissions_classic() {
+    fn test_from_cli_permissions_classic() {
         let argv = ["lsd", "--permission", "rwx", "--classic"];
-        let matches = app::build().try_get_matches_from(argv).unwrap();
-        assert_eq!(
-            Some(PermissionFlag::Rwx),
-            PermissionFlag::from_arg_matches(&matches)
-        );
+        let cli = Cli::try_parse_from(argv).unwrap();
+        assert_eq!(Some(PermissionFlag::Rwx), PermissionFlag::from_cli(&cli));
     }
 
     #[test]
