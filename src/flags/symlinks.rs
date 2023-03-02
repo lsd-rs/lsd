@@ -1,23 +1,22 @@
-//! This module defines the [NoSymlink] flag. To set it up from [ArgMatches], a [Config] and its
+//! This module defines the [NoSymlink] flag. To set it up from [Cli], a [Config] and its
 //! [Default] value, use the [configure_from](Configurable::configure_from) method.
 
 use super::Configurable;
 
+use crate::app::Cli;
 use crate::config_file::Config;
-
-use clap::ArgMatches;
 
 /// The flag showing whether to follow symbolic links.
 #[derive(Clone, Debug, Copy, PartialEq, Eq, Default)]
 pub struct NoSymlink(pub bool);
 
 impl Configurable<Self> for NoSymlink {
-    /// Get a potential `NoSymlink` value from [ArgMatches].
+    /// Get a potential `NoSymlink` value from [Cli].
     ///
     /// If the "no-symlink" argument is passed, this returns a `NoSymlink` with value `true` in a
     /// [Some]. Otherwise this returns [None].
-    fn from_arg_matches(matches: &ArgMatches) -> Option<Self> {
-        if matches.get_one("no-symlink") == Some(&true) {
+    fn from_cli(cli: &Cli) -> Option<Self> {
+        if cli.no_symlink {
             Some(Self(true))
         } else {
             None
@@ -36,24 +35,26 @@ impl Configurable<Self> for NoSymlink {
 
 #[cfg(test)]
 mod test {
+    use clap::Parser;
+
     use super::NoSymlink;
 
-    use crate::app;
+    use crate::app::Cli;
     use crate::config_file::Config;
     use crate::flags::Configurable;
 
     #[test]
-    fn test_from_arg_matches_none() {
+    fn test_from_cli_none() {
         let argv = ["lsd"];
-        let matches = app::build().try_get_matches_from(argv).unwrap();
-        assert_eq!(None, NoSymlink::from_arg_matches(&matches));
+        let cli = Cli::try_parse_from(argv).unwrap();
+        assert_eq!(None, NoSymlink::from_cli(&cli));
     }
 
     #[test]
-    fn test_from_arg_matches_true() {
+    fn test_from_cli_true() {
         let argv = ["lsd", "--no-symlink"];
-        let matches = app::build().try_get_matches_from(argv).unwrap();
-        assert_eq!(Some(NoSymlink(true)), NoSymlink::from_arg_matches(&matches));
+        let cli = Cli::try_parse_from(argv).unwrap();
+        assert_eq!(Some(NoSymlink(true)), NoSymlink::from_cli(&cli));
     }
 
     #[test]

@@ -1,9 +1,11 @@
-//! This module defines the [IgnoreGlobs]. To set it up from [ArgMatches], a [Config] and its
+//! This module defines the [IgnoreGlobs]. To set it up from [Cli], a [Config] and its
 //! [Default] value, use the [configure_from](IgnoreGlobs::configure_from) method.
 
+use crate::app::Cli;
 use crate::config_file::Config;
 
-use clap::{ArgMatches, Error, ErrorKind, ValueSource};
+use clap::error::ErrorKind;
+use clap::Error;
 use globset::{Glob, GlobSet, GlobSetBuilder};
 
 /// The struct holding a [GlobSet] and methods to build it.
@@ -11,17 +13,17 @@ use globset::{Glob, GlobSet, GlobSetBuilder};
 pub struct IgnoreGlobs(pub GlobSet);
 
 impl IgnoreGlobs {
-    /// Returns a value from either [ArgMatches], a [Config] or a [Default] value. The first value
+    /// Returns a value from either [Cli], a [Config] or a [Default] value. The first value
     /// that is not [None] is used. The order of precedence for the value used is:
-    /// - [from_arg_matches](IgnoreGlobs::from_arg_matches)
+    /// - [from_cli](IgnoreGlobs::from_cli)
     /// - [from_config](IgnoreGlobs::from_config)
     /// - [Default::default]
     ///
     /// # Errors
     ///
     /// If either of the [Glob::new] or [GlobSetBuilder.build] methods return an [Err].
-    pub fn configure_from(matches: &ArgMatches, config: &Config) -> Result<Self, Error> {
-        if let Some(value) = Self::from_arg_matches(matches) {
+    pub fn configure_from(cli: &Cli, config: &Config) -> Result<Self, Error> {
+        if let Some(value) = Self::from_cli(cli) {
             return value;
         }
 
@@ -32,20 +34,19 @@ impl IgnoreGlobs {
         Ok(Default::default())
     }
 
-    /// Get a potential [IgnoreGlobs] from [ArgMatches].
+    /// Get a potential [IgnoreGlobs] from [Cli].
     ///
     /// If the "ignore-glob" argument has been passed, this returns a [Result] in a [Some] with
     /// either the built [IgnoreGlobs] or an [Error], if any error was encountered while creating the
     /// [IgnoreGlobs]. If the argument has not been passed, this returns [None].
-    fn from_arg_matches(matches: &ArgMatches) -> Option<Result<Self, Error>> {
-        if matches.value_source("ignore-glob") != Some(ValueSource::CommandLine) {
+    fn from_cli(cli: &Cli) -> Option<Result<Self, Error>> {
+        if cli.ignore_glob.is_empty() {
             return None;
         }
 
-        let values = matches.get_many::<String>("ignore-glob")?;
         let mut glob_set_builder = GlobSetBuilder::new();
 
-        for value in values {
+        for value in &cli.ignore_glob {
             match Self::create_glob(value) {
                 Ok(glob) => {
                     glob_set_builder.add(glob);
@@ -106,9 +107,11 @@ impl Default for IgnoreGlobs {
 
 #[cfg(test)]
 mod test {
+    use clap::Parser;
+
     use super::IgnoreGlobs;
 
-    use crate::app;
+    use crate::app::Cli;
     use crate::config_file::Config;
 
     // The following tests are implemented using match expressions instead of the assert_eq macro,
@@ -120,9 +123,9 @@ mod test {
     #[test]
     fn test_configuration_from_none() {
         let argv = ["lsd"];
-        let matches = app::build().try_get_matches_from(argv).unwrap();
+        let cli = Cli::try_parse_from(argv).unwrap();
         assert!(matches!(
-            IgnoreGlobs::configure_from(&matches, &Config::with_none()),
+            IgnoreGlobs::configure_from(&cli, &Config::with_none()),
             Ok(..)
         ));
     }
@@ -130,9 +133,9 @@ mod test {
     #[test]
     fn test_configuration_from_args() {
         let argv = ["lsd", "--ignore-glob", ".git"];
-        let matches = app::build().try_get_matches_from(argv).unwrap();
+        let cli = Cli::try_parse_from(argv).unwrap();
         assert!(matches!(
-            IgnoreGlobs::configure_from(&matches, &Config::with_none()),
+            IgnoreGlobs::configure_from(&cli, &Config::with_none()),
             Ok(..)
         ));
     }
@@ -140,17 +143,17 @@ mod test {
     #[test]
     fn test_configuration_from_config() {
         let argv = ["lsd"];
-        let matches = app::build().try_get_matches_from(argv).unwrap();
+        let cli = Cli::try_parse_from(argv).unwrap();
         let mut c = Config::with_none();
         c.ignore_globs = Some(vec![".git".into()]);
-        assert!(matches!(IgnoreGlobs::configure_from(&matches, &c), Ok(..)));
+        assert!(matches!(IgnoreGlobs::configure_from(&cli, &c), Ok(..)));
     }
 
     #[test]
-    fn test_from_arg_matches_none() {
+    fn test_from_cli_none() {
         let argv = ["lsd"];
-        let matches = app::build().try_get_matches_from(argv).unwrap();
-        assert!(matches!(IgnoreGlobs::from_arg_matches(&matches), None));
+        let cli = Cli::try_parse_from(argv).unwrap();
+        assert!(matches!(IgnoreGlobs::from_cli(&cli), None));
     }
 
     #[test]

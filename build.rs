@@ -6,9 +6,7 @@
 // notice may not be copied, modified, or distributed except
 // according to those terms.
 
-extern crate clap;
-extern crate version_check;
-
+use clap::CommandFactory;
 use clap_complete::generate_to;
 use clap_complete::shells::*;
 use std::fs;
@@ -29,7 +27,7 @@ fn main() {
 
     fs::create_dir_all(&outdir).unwrap();
 
-    let mut app = build();
+    let mut app = Cli::command();
     let bin_name = "lsd";
     generate_to(Bash, &mut app, bin_name, &outdir).expect("Failed to generate Bash completions");
     generate_to(Fish, &mut app, bin_name, &outdir).expect("Failed to generate Fish completions");

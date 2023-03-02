@@ -38,12 +38,12 @@ mod meta;
 mod sort;
 mod theme;
 
-use clap::ValueSource;
+use clap::Parser;
 
+use crate::app::Cli;
 use crate::config_file::Config;
 use crate::core::Core;
 use crate::flags::Flags;
-use std::path::PathBuf;
 
 #[derive(PartialEq, Eq, PartialOrd, Copy, Clone)]
 pub enum ExitCode {
@@ -107,32 +107,18 @@ macro_rules! print_output {
 }
 
 fn main() {
-    let matches = app::build().get_matches_from(wild::args_os());
+    let cli = Cli::parse_from(wild::args_os());
 
-    // input translate glob FILE without single quote into real names
-    // for example:
-    // * to all files matched
-    // '*' remain as '*'
-    let inputs = matches
-        .get_many::<String>("FILE")
-        .expect("failed to retrieve cli value")
-        .map(PathBuf::from)
-        .collect();
-
-    let config = if matches.get_one("ignore-config") == Some(&true) {
+    let config = if cli.ignore_config {
         Config::with_none()
-    } else if matches.value_source("config-file") == Some(ValueSource::CommandLine) {
-        let path = matches
-            .get_one::<String>("config-file")
-            .expect("Invalid config file path");
-
+    } else if let Some(path) = &cli.config_file {
         Config::from_file(path).expect("Provided file path is invalid")
     } else {
         Config::default()
     };
-    let flags = Flags::configure_from(&matches, &config).unwrap_or_else(|err| err.exit());
+    let flags = Flags::configure_from(&cli, &config).unwrap_or_else(|err| err.exit());
     let core = Core::new(flags);
 
-    let exit_code = core.run(inputs);
+    let exit_code = core.run(cli.inputs);
     std::process::exit(exit_code as i32);
 }

@@ -1,355 +1,180 @@
-use clap::{Arg, ArgAction, Command, ValueHint};
+use std::path::PathBuf;
 
-pub fn build() -> Command<'static> {
-    Command::new("lsd")
-        .version(env!("CARGO_PKG_VERSION"))
-        .about(env!("CARGO_PKG_DESCRIPTION"))
-        .arg(
-            Arg::new("FILE")
-                .action(ArgAction::Append)
-                .multiple_values(true)
-                .default_value(".")
-                .value_hint(ValueHint::AnyPath),
-        )
-        .arg(
-            Arg::new("all")
-                .short('a')
-                .overrides_with("almost-all")
-                .long("all")
-                .action(ArgAction::SetTrue)
-                .help("Do not ignore entries starting with ."),
-        )
-        .arg(
-            Arg::new("almost-all")
-                .short('A')
-                .overrides_with("all")
-                .long("almost-all")
-                .action(ArgAction::SetTrue)
-                .help("Do not list implied . and .."),
-        )
-        .arg(
-            Arg::new("color")
-                .long("color")
-                .value_parser(["always", "auto", "never"])
-                .default_value("auto")
-                .action(ArgAction::Append)
-                .takes_value(true)
-                .number_of_values(1)
-                .help("When to use terminal colours"),
-        )
-        .arg(
-            Arg::new("icon")
-                .long("icon")
-                .value_parser(["always", "auto", "never"])
-                .default_value("auto")
-                .action(ArgAction::Append)
-                .takes_value(true)
-                .number_of_values(1)
-                .help("When to print the icons"),
-        )
-        .arg(
-            Arg::new("icon-theme")
-                .long("icon-theme")
-                .default_value("fancy")
-                .value_parser(["fancy", "unicode"])
-                .action(ArgAction::Append)
-                .takes_value(true)
-                .number_of_values(1)
-                .help("Whether to use fancy or unicode icons"),
-        )
-        .arg(
-            Arg::new("indicators")
-                .short('F')
-                .long("classify")
-                .action(ArgAction::SetTrue)
-                .help("Append indicator (one of */=>@|) at the end of the file names"),
-        )
-        .arg(
-            Arg::new("long")
-                .short('l')
-                .long("long")
-                .action(ArgAction::SetTrue)
-                .help("Display extended file metadata as a table"),
-        )
-        .arg(
-            Arg::new("ignore-config")
-                .long("ignore-config")
-                .action(ArgAction::SetTrue)
-                .help("Ignore the configuration file"),
-        )
-        .arg(
-            Arg::new("config-file")
-                .long("config-file")
-                .help("Provide a custom lsd configuration file")
-                .value_name("config-file")
-                .takes_value(true)
-        )
-        .arg(
-            Arg::new("oneline")
-                .short('1')
-                .long("oneline")
-                .action(ArgAction::SetTrue)
-                .help("Display one entry per line"),
-        )
-        .arg(
-            Arg::new("recursive")
-                .short('R')
-                .long("recursive")
-                .action(ArgAction::SetTrue)
-                .conflicts_with("tree")
-                .help("Recurse into directories"),
-        )
-        .arg(
-            Arg::new("human_readable")
-                .short('h')
-                .long("human-readable")
-                .action(ArgAction::SetTrue)
-                .help("For ls compatibility purposes ONLY, currently set by default"),
-        )
-        .arg(
-            Arg::new("tree")
-                .long("tree")
-                .action(ArgAction::SetTrue)
-                .conflicts_with("recursive")
-                .help("Recurse into directories and present the result as a tree"),
-        )
-        .arg(
-            Arg::new("depth")
-                .long("depth")
-                .action(ArgAction::Append)
-                .takes_value(true)
-                .value_name("num")
-                .help("Stop recursing into directories after reaching specified depth"),
-        )
-        .arg(
-            Arg::new("directory-only")
-                .short('d')
-                .long("directory-only")
-                .action(ArgAction::SetTrue)
-                .conflicts_with("depth")
-                .conflicts_with("recursive")
-                .help("Display directories themselves, and not their contents (recursively when used with --tree)"),
-        )
-        .arg(
-            Arg::new("permission")
-                .long("permission")
-                .default_value("rwx")
-                .value_parser(["rwx", "octal"])
-                .action(ArgAction::Append)
-                .takes_value(true)
-                .number_of_values(1)
-                .help("How to display permissions"),
-        )
-        .arg(
-            Arg::new("size")
-                .long("size")
-                .value_parser(["default", "short", "bytes"])
-                .default_value("default")
-                .action(ArgAction::Append)
-                .takes_value(true)
-                .number_of_values(1)
-                .help("How to display size"),
-        )
-        .arg(
-            Arg::new("total-size")
-                .long("total-size")
-                .action(ArgAction::SetTrue)
-                .help("Display the total size of directories"),
-        )
-        .arg(
-            Arg::new("date")
-                .long("date")
-                .value_parser(validate_date_argument)
-                .default_value("date")
-                .action(ArgAction::Append)
-                .takes_value(true)
-                .number_of_values(1)
-                .help("How to display date [possible values: date, relative, +date-time-format]"),
-        )
-        .arg(
-            Arg::new("timesort")
-                .short('t')
-                .long("timesort")
-                .overrides_with("sizesort")
-                .overrides_with("extensionsort")
-                .overrides_with("versionsort")
-                .overrides_with("sort")
-                .overrides_with("no-sort")
-                .action(ArgAction::SetTrue)
-                .help("Sort by time modified"),
-        )
-        .arg(
-            Arg::new("sizesort")
-                .short('S')
-                .long("sizesort")
-                .overrides_with("timesort")
-                .overrides_with("extensionsort")
-                .overrides_with("versionsort")
-                .overrides_with("sort")
-                .overrides_with("no-sort")
-                .action(ArgAction::SetTrue)
-                .help("Sort by size"),
-        )
-        .arg(
-            Arg::new("extensionsort")
-                .short('X')
-                .long("extensionsort")
-                .overrides_with("sizesort")
-                .overrides_with("timesort")
-                .overrides_with("versionsort")
-                .overrides_with("sort")
-                .overrides_with("no-sort")
-                .action(ArgAction::SetTrue)
-                .help("Sort by file extension"),
-        )
-        .arg(
-            Arg::new("versionsort")
-                .short('v')
-                .long("versionsort")
-                .action(ArgAction::SetTrue)
-                .overrides_with("timesort")
-                .overrides_with("sizesort")
-                .overrides_with("extensionsort")
-                .overrides_with("sort")
-                .overrides_with("no-sort")
-                .help("Natural sort of (version) numbers within text"),
-        )
-        .arg(
-            Arg::new("sort")
-                .long("sort")
-                .action(ArgAction::Append)
-                .value_parser(["size", "time", "version", "extension", "none"])
-                .takes_value(true)
-                .value_name("WORD")
-                .overrides_with("timesort")
-                .overrides_with("sizesort")
-                .overrides_with("extensionsort")
-                .overrides_with("versionsort")
-                .overrides_with("no-sort")
-                .help("sort by WORD instead of name")
-        )
-        .arg(
-            Arg::new("no-sort")
-            .short('U')
-            .long("no-sort")
-            .action(ArgAction::SetTrue)
-            .overrides_with("timesort")
-            .overrides_with("sizesort")
-            .overrides_with("extensionsort")
-            .overrides_with("sort")
-            .overrides_with("versionsort")
-            .help("Do not sort. List entries in directory order")
-        )
-        .arg(
-            Arg::new("reverse")
-                .short('r')
-                .long("reverse")
-                .action(ArgAction::SetTrue)
-                .help("Reverse the order of the sort"),
-        )
-        .arg(
-            Arg::new("group-dirs")
-                .long("group-dirs")
-                .value_parser(["none", "first", "last"])
-                .action(ArgAction::Append)
-                .number_of_values(1)
-                .help("Sort the directories then the files"),
-        )
-        .arg(
-            Arg::new("group-directories-first")
-                .long("group-directories-first")
-                .action(ArgAction::SetTrue)
-                .help("Groups the directories at the top before the files. Same as --group-dirs=first")
-        )
-        .arg(
-            Arg::new("blocks")
-                .long("blocks")
-                .action(ArgAction::Append)
-                .multiple_values(true)
-                .takes_value(true)
-                .use_value_delimiter(true)
-                .require_value_delimiter(true)
-                .value_parser([
-                    "permission",
-                    "user",
-                    "group",
-                    "context",
-                    "size",
-                    "date",
-                    "name",
-                    "inode",
-                    "links",
-                ])
-                .help("Specify the blocks that will be displayed and in what order"),
-        )
-        .arg(
-            Arg::new("classic")
-                .long("classic")
-                .action(ArgAction::SetTrue)
-                .help("Enable classic mode (display output similar to ls)"),
-        )
-        .arg(
-            Arg::new("no-symlink")
-                .long("no-symlink")
-                .action(ArgAction::SetTrue)
-                .help("Do not display symlink target"),
-        )
-        .arg(
-            Arg::new("ignore-glob")
-                .short('I')
-                .long("ignore-glob")
-                .action(ArgAction::Append)
-                .number_of_values(1)
-                .value_name("pattern")
-                .default_value("")
-                .help("Do not display files/directories with names matching the glob pattern(s). More than one can be specified by repeating the argument"),
-        )
-        .arg(
-            Arg::new("inode")
-                .short('i')
-                .long("inode")
-                .action(ArgAction::SetTrue)
-                .help("Display the index number of each file"),
-        )
-        .arg(
-            Arg::new("dereference")
-                .short('L')
-                .long("dereference")
-                .action(ArgAction::SetTrue)
-                .help("When showing file information for a symbolic link, show information for the file the link references rather than for the link itself"),
-        )
-        .arg(
-            Arg::new("context")
-                .short('Z')
-                .long("context")
-                .required(false)
-                .takes_value(false)
-                .action(ArgAction::SetTrue)
-                .help("Print security context (label) of each file"),
-        )
-        .arg(
-            Arg::new("hyperlink")
-                .long("hyperlink")
-                .value_parser(["always", "auto", "never"])
-                .default_value("never")
-                .action(ArgAction::Append)
-                .takes_value(true)
-                .number_of_values(1)
-                .help("Attach hyperlink to filenames"),
-        )
-        .arg(
-            Arg::new("header")
-                .long("header")
-                .action(ArgAction::SetTrue)
-                .help("Display block headers"),
-        )
-        .arg(
-            Arg::new("system-protected")
-                .long("system-protected")
-                .action(ArgAction::SetTrue)
-                .help("Includes files with the windows system protection flag set. This is the same as --all on other platforms")
-                .hide(!cfg!(windows)),
-        )
+use clap::{ArgAction, Parser, ValueHint};
+
+#[derive(Debug, Parser)]
+#[command(about, version, args_override_self = true, disable_help_flag = true)]
+pub struct Cli {
+    #[arg(value_name = "FILE", default_value = ".", value_hint = ValueHint::AnyPath)]
+    pub inputs: Vec<PathBuf>,
+
+    /// Do not ignore entries starting with .
+    #[arg(short, long, overrides_with = "almost_all")]
+    pub all: bool,
+
+    /// Do not list implied . and ..
+    #[arg(short = 'A', long)]
+    pub almost_all: bool,
+
+    /// When to use terminal colours [default: auto]
+    #[arg(long, value_name = "MODE", value_parser = ["always", "auto", "never"])]
+    pub color: Option<String>,
+
+    /// When to print the icons [default: auto]
+    #[arg(long, value_name = "MODE", value_parser = ["always", "auto", "never"])]
+    pub icon: Option<String>,
+
+    /// Whether to use fancy or unicode icons [default: fancy]
+    #[arg(long, value_name = "THEME", value_parser = ["fancy", "unicode"])]
+    pub icon_theme: Option<String>,
+
+    /// Append indicator (one of */=>@|) at the end of the file names
+    #[arg(short = 'F', long = "classify")]
+    pub indicators: bool,
+
+    /// Display extended file metadata as a table
+    #[arg(short, long)]
+    pub long: bool,
+
+    /// Ignore the configuration file
+    #[arg(long)]
+    pub ignore_config: bool,
+
+    /// Provide a custom lsd configuration file
+    #[arg(long, value_name = "PATH")]
+    pub config_file: Option<PathBuf>,
+
+    /// Display one entry per line
+    #[arg(short = '1', long)]
+    pub oneline: bool,
+
+    /// Recurse into directories
+    #[arg(short = 'R', long, conflicts_with = "tree")]
+    pub recursive: bool,
+
+    /// For ls compatibility purposes ONLY, currently set by default
+    #[arg(short, long)]
+    human_readable: bool,
+
+    /// Recurse into directories and present the result as a tree
+    #[arg(long)]
+    pub tree: bool,
+
+    /// Stop recursing into directories after reaching specified depth
+    #[arg(long, value_name = "NUM")]
+    pub depth: Option<usize>,
+
+    /// Display directories themselves, and not their contents (recursively when used with --tree)
+    #[arg(short, long, conflicts_with_all = ["depth", "recursive"])]
+    pub directory_only: bool,
+
+    /// How to display permissions [default: rwx]
+    #[arg(long, value_name = "MODE", value_parser = ["rwx", "octal"])]
+    pub permission: Option<String>,
+
+    /// How to display size [default: default]
+    #[arg(long, value_name = "MODE", value_parser = ["default", "short", "bytes"])]
+    pub size: Option<String>,
+
+    /// Display the total size of directories
+    #[arg(long)]
+    pub total_size: bool,
+
+    /// How to display date [default: date] [possible values: date, relative, +date-time-format]
+    #[arg(long, value_parser = validate_date_argument)]
+    pub date: Option<String>,
+
+    /// Sort by time modified
+    #[arg(short = 't', long)]
+    pub timesort: bool,
+
+    /// Sort by size
+    #[arg(short = 'S', long)]
+    pub sizesort: bool,
+
+    /// Sort by file extension
+    #[arg(short = 'X', long)]
+    pub extensionsort: bool,
+
+    /// Natural sort of (version) numbers within text
+    #[arg(short = 'v', long)]
+    pub versionsort: bool,
+
+    /// Sort by TYPE instead of name
+    #[arg(
+        long,
+        value_name = "TYPE",
+        value_parser = ["size", "time", "version", "extension", "none"],
+        overrides_with_all = ["timesort", "sizesort", "extensionsort", "versionsort", "no_sort"]
+    )]
+    pub sort: Option<String>,
+
+    /// Do not sort. List entries in directory order
+    #[arg(short = 'U', long, overrides_with_all = ["timesort", "sizesort", "extensionsort", "versionsort", "sort"])]
+    pub no_sort: bool,
+
+    /// Reverse the order of the sort
+    #[arg(short, long)]
+    pub reverse: bool,
+
+    /// Sort the directories then the files
+    #[arg(long, value_name = "MODE", value_parser = ["none", "first", "last"])]
+    pub group_dirs: Option<String>,
+
+    /// Groups the directories at the top before the files. Same as --group-dirs=first
+    #[arg(long)]
+    pub group_directories_first: bool,
+
+    /// Specify the blocks that will be displayed and in what order
+    #[arg(
+        long,
+        value_delimiter = ',',
+        value_parser = ["permission", "user", "group", "context", "size", "date", "name", "inode", "links"],
+    )]
+    pub blocks: Vec<String>,
+
+    /// Enable classic mode (display output similar to ls)
+    #[arg(long)]
+    pub classic: bool,
+
+    /// Do not display symlink target
+    #[arg(long)]
+    pub no_symlink: bool,
+
+    /// Do not display files/directories with names matching the glob pattern(s).
+    /// More than one can be specified by repeating the argument
+    #[arg(short = 'I', long, value_name = "PATTERN")]
+    pub ignore_glob: Vec<String>,
+
+    /// Display the index number of each file
+    #[arg(short, long)]
+    pub inode: bool,
+
+    /// When showing file information for a symbolic link,
+    /// show information for the file the link references rather than for the link itself
+    #[arg(short = 'L', long)]
+    pub dereference: bool,
+
+    /// Print security context (label) of each file
+    #[arg(short = 'Z', long)]
+    pub context: bool,
+
+    /// Attach hyperlink to filenames [default: never]
+    #[arg(long, value_name = "MODE", value_parser = ["always", "auto", "never"])]
+    pub hyperlink: Option<String>,
+
+    /// Display block headers
+    #[arg(long)]
+    pub header: bool,
+
+    /// Includes files with the windows system protection flag set.
+    /// This is the same as --all on other platforms
+    #[arg(long, hide = !cfg!(windows))]
+    pub system_protected: bool,
+
+    /// Print help information
+    #[arg(long, action = ArgAction::Help)]
+    help: (),
 }
 
 fn validate_date_argument(arg: &str) -> Result<String, String> {
