@@ -164,7 +164,7 @@ jobs:
         echo set-output name=CARGO_USE_CROSS::${CARGO_USE_CROSS:-<empty>/false}
         echo ::set-output name=CARGO_USE_CROSS::${CARGO_USE_CROSS}
         # * test only binary for arm-type targets
-        unset CARGO_TEST_OPTIONS ; case ${{ matrix.job.target }} in arm-* | aarch64-*-linux-*) CARGO_TEST_OPTIONS="--bin ${PROJECT_NAME}" ;; esac;
+        unset CARGO_TEST_OPTIONS ; case ${{ matrix.job.target }} in arm-* | aarch64-*) CARGO_TEST_OPTIONS="--bin ${PROJECT_NAME}" ;; esac;
         echo set-output name=CARGO_TEST_OPTIONS::${CARGO_TEST_OPTIONS}
         echo ::set-output name=CARGO_TEST_OPTIONS::${CARGO_TEST_OPTIONS}
         # * strip executable?
