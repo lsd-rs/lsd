@@ -84,7 +84,7 @@ mod test {
         Command::new("touch")
             .arg("-t")
             .arg(date.format("%Y%m%d%H%M.%S").to_string())
-            .arg(&path)
+            .arg(path)
             .status()
     }
 

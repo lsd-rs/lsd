@@ -330,7 +330,7 @@ mod tests {
         let path_c = tmp_dir.path().join("ccc.cc");
 
         #[cfg(unix)]
-        std::os::unix::fs::symlink(&path_c, &path_b).expect("failed to create broken symlink");
+        std::os::unix::fs::symlink(path_c, &path_b).expect("failed to create broken symlink");
 
         // this needs to be tested on Windows
         // likely to fail because of permission issue

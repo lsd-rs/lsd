@@ -41,7 +41,7 @@ mod tests {
     use std::process::{Command, ExitStatus};
 
     fn cross_platform_touch(path: &Path) -> io::Result<ExitStatus> {
-        Command::new("touch").arg(&path).status()
+        Command::new("touch").arg(path).status()
     }
 
     #[test]

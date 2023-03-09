@@ -297,7 +297,7 @@ fn test_dereference_link_broken_link_output() {
     let target = dir.path().join("target");
 
     #[cfg(unix)]
-    fs::symlink(&target, &link).unwrap();
+    fs::symlink(target, &link).unwrap();
 
     // this needs to be tested on Windows
     // likely to fail because of permission issue
@@ -369,7 +369,7 @@ fn test_show_folder_of_symlink_for_long_multi() {
     let dir = tempdir();
     dir.child("target").child("inside").touch().unwrap();
     let link = dir.path().join("link");
-    fs::symlink("target", &link).unwrap();
+    fs::symlink("target", link).unwrap();
 
     cmd()
         .arg("-l")
@@ -552,7 +552,7 @@ fn test_tree_no_dereference() {
     tmp.child("one.d").create_dir_all().unwrap();
     tmp.child("one.d/samplefile").touch().unwrap();
     let link = tmp.path().join("link");
-    fs::symlink("one.d", &link).unwrap();
+    fs::symlink("one.d", link).unwrap();
 
     cmd()
         .arg("--tree")
@@ -571,7 +571,7 @@ fn test_tree_dereference() {
     tmp.child("one.d").create_dir_all().unwrap();
     tmp.child("one.d/samplefile").touch().unwrap();
     let link = tmp.path().join("link");
-    fs::symlink("one.d", &link).unwrap();
+    fs::symlink("one.d", link).unwrap();
 
     cmd()
         .arg("--ignore-config")
