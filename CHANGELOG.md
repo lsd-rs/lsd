@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add `--system-protected` to include files with the Windows `system` flag set,
   on other platform the same as `--all` [#752](https://github.com/Peltoche/lsd/issues/752)
 - Add many icons from https://github.com/Peltoche/lsd/issues/764 [@TruncatedDinosour](https://ari-web.xyz/gh)
+- Add support for localization from [scarf](https://github.com/scarf005)
 
 ### Fixed
 - Do not quote filename when piping into another program from [TeamTamoad](https://github.com/TeamTamoad)
