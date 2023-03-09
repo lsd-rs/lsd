@@ -4,6 +4,7 @@ mod filetype;
 mod indicator;
 mod inode;
 mod links;
+mod locale;
 pub mod name;
 mod owner;
 mod permissions;
