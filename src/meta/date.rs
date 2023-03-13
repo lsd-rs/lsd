@@ -1,3 +1,4 @@
+use super::locale::current_locale;
 use crate::color::{ColoredString, Colors, Elem};
 use crate::flags::{DateFlag, Flags};
 use chrono::{DateTime, Duration, Local};
@@ -42,9 +43,11 @@ impl Date {
     }
 
     fn date_string(&self, flags: &Flags) -> String {
+        let locale = current_locale();
+
         if let Date::Date(val) = self {
             match &flags.date {
-                DateFlag::Date => val.format("%c").to_string(),
+                DateFlag::Date => val.format_localized("%c", locale).to_string(),
                 DateFlag::Relative => HumanTime::from(*val - Local::now()).to_string(),
                 DateFlag::Iso => {
                     // 365.2425 * 24 * 60 * 60 = 31556952 seconds per year
@@ -55,7 +58,7 @@ impl Date {
                         val.format("%F").to_string()
                     }
                 }
-                DateFlag::Formatted(format) => val.format(format).to_string(),
+                DateFlag::Formatted(format) => val.format_localized(format, locale).to_string(),
             }
         } else {
             String::from('-')
@@ -68,6 +71,7 @@ mod test {
     use super::Date;
     use crate::color::{Colors, ThemeOption};
     use crate::flags::{DateFlag, Flags};
+    use crate::meta::locale::current_locale;
     use chrono::{DateTime, Duration, Local};
     use crossterm::style::{Color, Stylize};
     use std::io;
@@ -80,7 +84,7 @@ mod test {
         Command::new("touch")
             .arg("-t")
             .arg(date.format("%Y%m%d%H%M.%S").to_string())
-            .arg(&path)
+            .arg(path)
             .status()
     }
 
@@ -127,7 +131,7 @@ mod test {
 
         assert_eq!(
             creation_date
-                .format("%c")
+                .format_localized("%c", current_locale())
                 .to_string()
                 .with(Color::AnsiValue(40)),
             date.render(&colors, &flags)
@@ -154,7 +158,7 @@ mod test {
 
         assert_eq!(
             creation_date
-                .format("%c")
+                .format_localized("%c", current_locale())
                 .to_string()
                 .with(Color::AnsiValue(42)),
             date.render(&colors, &flags)
@@ -181,7 +185,7 @@ mod test {
 
         assert_eq!(
             creation_date
-                .format("%c")
+                .format_localized("%c", current_locale())
                 .to_string()
                 .with(Color::AnsiValue(36)),
             date.render(&colors, &flags)

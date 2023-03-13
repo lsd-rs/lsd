@@ -12,7 +12,7 @@ pub struct SymLink {
 impl From<&Path> for SymLink {
     fn from(path: &Path) -> Self {
         if let Ok(target) = read_link(path) {
-            if target.is_absolute() || path.parent() == None {
+            if target.is_absolute() || path.parent().is_none() {
                 return Self {
                     valid: target.exists(),
                     target: Some(

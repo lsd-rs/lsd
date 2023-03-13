@@ -117,7 +117,7 @@ impl Name {
                 // HyperlinkOption::Auto gets converted to None or Always in core.rs based on tty_available
                 match std::fs::canonicalize(&self.path) {
                     Ok(rp) => {
-                        if let Ok(url) = Url::from_file_path(&rp) {
+                        if let Ok(url) = Url::from_file_path(rp) {
                             // Crossterm does not support hyperlinks as of now
                             // https://gist.github.com/egmontkob/eb114294efbcd5adb1944c9f3cb5feda
                             format!("\x1B]8;;{}\x1B\x5C{}\x1B]8;;\x1B\x5C", url, name)
@@ -426,7 +426,7 @@ mod test {
         let colors = Colors::new(color::ThemeOption::NoColor);
 
         let real_path = std::fs::canonicalize(&file_path).expect("canonicalize");
-        let expected_url = Url::from_file_path(&real_path).expect("absolute path");
+        let expected_url = Url::from_file_path(real_path).expect("absolute path");
         let expected_text = format!(
             "\x1B]8;;{}\x1B\x5C{}\x1B]8;;\x1B\x5C",
             expected_url, "file.txt"
