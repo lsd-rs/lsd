@@ -113,18 +113,34 @@ impl Size {
         match flags.size {
             SizeFlag::Si => match unit {
                 Unit::Byte => self.bytes.to_string(),
-                Unit::Kilo => self.format_size(((self.bytes as f64 / KB as f64) * 10.0).round() / 10.0),
-                Unit::Mega => self.format_size(((self.bytes as f64 / MB as f64) * 10.0).round() / 10.0),
-                Unit::Giga => self.format_size(((self.bytes as f64 / GB as f64) * 10.0).round() / 10.0),
-                Unit::Tera => self.format_size(((self.bytes as f64 / TB as f64) * 10.0).round() / 10.0),
-            }
+                Unit::Kilo => {
+                    self.format_size(((self.bytes as f64 / KB as f64) * 10.0).round() / 10.0)
+                }
+                Unit::Mega => {
+                    self.format_size(((self.bytes as f64 / MB as f64) * 10.0).round() / 10.0)
+                }
+                Unit::Giga => {
+                    self.format_size(((self.bytes as f64 / GB as f64) * 10.0).round() / 10.0)
+                }
+                Unit::Tera => {
+                    self.format_size(((self.bytes as f64 / TB as f64) * 10.0).round() / 10.0)
+                }
+            },
             _ => match unit {
                 Unit::Byte => self.bytes.to_string(),
-                Unit::Kilo => self.format_size(((self.bytes as f64 / KIB as f64) * 10.0).round() / 10.0),
-                Unit::Mega => self.format_size(((self.bytes as f64 / MIB as f64) * 10.0).round() / 10.0),
-                Unit::Giga => self.format_size(((self.bytes as f64 / GIB as f64) * 10.0).round() / 10.0),
-                Unit::Tera => self.format_size(((self.bytes as f64 / TIB as f64) * 10.0).round() / 10.0),
-            }
+                Unit::Kilo => {
+                    self.format_size(((self.bytes as f64 / KIB as f64) * 10.0).round() / 10.0)
+                }
+                Unit::Mega => {
+                    self.format_size(((self.bytes as f64 / MIB as f64) * 10.0).round() / 10.0)
+                }
+                Unit::Giga => {
+                    self.format_size(((self.bytes as f64 / GIB as f64) * 10.0).round() / 10.0)
+                }
+                Unit::Tera => {
+                    self.format_size(((self.bytes as f64 / TIB as f64) * 10.0).round() / 10.0)
+                }
+            },
         }
     }
 
@@ -166,7 +182,7 @@ impl Size {
 
 #[cfg(test)]
 mod test {
-    use super::{Size, KIB, MIB, GIB, TIB};
+    use super::{Size, GIB, KIB, MIB, TIB};
     use crate::color::{Colors, ThemeOption};
     use crate::flags::{Flags, SizeFlag};
 
