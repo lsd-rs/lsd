@@ -184,7 +184,7 @@ recursion:
 
 # == Size ==
 # Specifies the format of the size column.
-# Possible values: default, short, bytes
+# Possible values: default, short, iec, si, bytes
 size: default
 
 # == Permission ==

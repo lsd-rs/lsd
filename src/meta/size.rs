@@ -2,10 +2,14 @@ use crate::color::{ColoredString, Colors, Elem};
 use crate::flags::{Flags, SizeFlag};
 use std::fs::Metadata;
 
-const KB: u64 = 1024;
-const MB: u64 = 1024_u64.pow(2);
-const GB: u64 = 1024_u64.pow(3);
-const TB: u64 = 1024_u64.pow(4);
+const KIB: u64 = 1024;
+const MIB: u64 = 1024_u64.pow(2);
+const GIB: u64 = 1024_u64.pow(3);
+const TIB: u64 = 1024_u64.pow(4);
+const KB: u64 = 1000;
+const MB: u64 = 1000_u64.pow(2);
+const GB: u64 = 1000_u64.pow(3);
+const TB: u64 = 1000_u64.pow(4);
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Unit {
@@ -46,10 +50,10 @@ impl Size {
         }
 
         match self.bytes {
-            b if b < KB => Unit::Byte,
-            b if b < MB => Unit::Kilo,
-            b if b < GB => Unit::Mega,
-            b if b < TB => Unit::Giga,
+            b if b < KIB => Unit::Byte,
+            b if b < MIB => Unit::Kilo,
+            b if b < GIB => Unit::Mega,
+            b if b < TIB => Unit::Giga,
             _ => Unit::Tera,
         }
     }
@@ -106,12 +110,21 @@ impl Size {
     pub fn value_string(&self, flags: &Flags) -> String {
         let unit = self.get_unit(flags);
 
-        match unit {
-            Unit::Byte => self.bytes.to_string(),
-            Unit::Kilo => self.format_size(((self.bytes as f64 / KB as f64) * 10.0).round() / 10.0),
-            Unit::Mega => self.format_size(((self.bytes as f64 / MB as f64) * 10.0).round() / 10.0),
-            Unit::Giga => self.format_size(((self.bytes as f64 / GB as f64) * 10.0).round() / 10.0),
-            Unit::Tera => self.format_size(((self.bytes as f64 / TB as f64) * 10.0).round() / 10.0),
+        match flags.size {
+            SizeFlag::Si => match unit {
+                Unit::Byte => self.bytes.to_string(),
+                Unit::Kilo => self.format_size(((self.bytes as f64 / KB as f64) * 10.0).round() / 10.0),
+                Unit::Mega => self.format_size(((self.bytes as f64 / MB as f64) * 10.0).round() / 10.0),
+                Unit::Giga => self.format_size(((self.bytes as f64 / GB as f64) * 10.0).round() / 10.0),
+                Unit::Tera => self.format_size(((self.bytes as f64 / TB as f64) * 10.0).round() / 10.0),
+            }
+            _ => match unit {
+                Unit::Byte => self.bytes.to_string(),
+                Unit::Kilo => self.format_size(((self.bytes as f64 / KIB as f64) * 10.0).round() / 10.0),
+                Unit::Mega => self.format_size(((self.bytes as f64 / MIB as f64) * 10.0).round() / 10.0),
+                Unit::Giga => self.format_size(((self.bytes as f64 / GIB as f64) * 10.0).round() / 10.0),
+                Unit::Tera => self.format_size(((self.bytes as f64 / TIB as f64) * 10.0).round() / 10.0),
+            }
         }
     }
 
@@ -125,13 +138,6 @@ impl Size {
         let unit = self.get_unit(flags);
 
         match flags.size {
-            SizeFlag::Default => match unit {
-                Unit::Byte => String::from('B'),
-                Unit::Kilo => String::from("KB"),
-                Unit::Mega => String::from("MB"),
-                Unit::Giga => String::from("GB"),
-                Unit::Tera => String::from("TB"),
-            },
             SizeFlag::Short => match unit {
                 Unit::Byte => String::from('B'),
                 Unit::Kilo => String::from('K'),
@@ -139,14 +145,28 @@ impl Size {
                 Unit::Giga => String::from('G'),
                 Unit::Tera => String::from('T'),
             },
+            SizeFlag::Iec => match unit {
+                Unit::Byte => String::from('B'),
+                Unit::Kilo => String::from("KiB"),
+                Unit::Mega => String::from("MiB"),
+                Unit::Giga => String::from("GiB"),
+                Unit::Tera => String::from("TiB"),
+            },
             SizeFlag::Bytes => String::from(""),
+            _ => match unit {
+                Unit::Byte => String::from('B'),
+                Unit::Kilo => String::from("KB"),
+                Unit::Mega => String::from("MB"),
+                Unit::Giga => String::from("GB"),
+                Unit::Tera => String::from("TB"),
+            },
         }
     }
 }
 
 #[cfg(test)]
 mod test {
-    use super::{Size, GB, KB, MB, TB};
+    use super::{Size, KIB, MIB, GIB, TIB};
     use crate::color::{Colors, ThemeOption};
     use crate::flags::{Flags, SizeFlag};
 
@@ -166,139 +186,187 @@ mod test {
 
     #[test]
     fn render_10_minus_kilobyte() {
-        let size = Size::new(4 * KB); // 4 kilobytes
+        let size = Size::new(4 * KIB); // 4 kilobytes
         let mut flags = Flags::default();
 
         assert_eq!(size.value_string(&flags), "4.0");
         assert_eq!(size.unit_string(&flags), "KB");
         flags.size = SizeFlag::Short;
         assert_eq!(size.unit_string(&flags), "K");
+        flags.size = SizeFlag::Iec;
+        assert_eq!(size.unit_string(&flags), "KiB");
+        flags.size = SizeFlag::Si;
+        assert_eq!(size.unit_string(&flags), "KB");
     }
 
     #[test]
     fn render_kilobyte() {
-        let size = Size::new(42 * KB); // 42 kilobytes
+        let size = Size::new(42 * KIB); // 42 kilobytes
         let mut flags = Flags::default();
 
         assert_eq!(size.value_string(&flags), "42");
         assert_eq!(size.unit_string(&flags), "KB");
         flags.size = SizeFlag::Short;
         assert_eq!(size.unit_string(&flags), "K");
+        flags.size = SizeFlag::Iec;
+        assert_eq!(size.unit_string(&flags), "KiB");
+        flags.size = SizeFlag::Si;
+        assert_eq!(size.unit_string(&flags), "KB");
     }
 
     #[test]
     fn render_100_plus_kilobyte() {
-        let size = Size::new(420 * KB + 420); // 420.4 kilobytes
+        let size = Size::new(420 * KIB + 420); // 420.4 kilobytes
         let mut flags = Flags::default();
 
         assert_eq!(size.value_string(&flags), "420");
         assert_eq!(size.unit_string(&flags), "KB");
         flags.size = SizeFlag::Short;
         assert_eq!(size.unit_string(&flags), "K");
+        flags.size = SizeFlag::Iec;
+        assert_eq!(size.unit_string(&flags), "KiB");
+        flags.size = SizeFlag::Si;
+        assert_eq!(size.unit_string(&flags), "KB");
     }
 
     #[test]
     fn render_10_minus_megabyte() {
-        let size = Size::new(4 * MB); // 4 megabytes
+        let size = Size::new(4 * MIB); // 4 megabytes
         let mut flags = Flags::default();
 
         assert_eq!(size.value_string(&flags), "4.0");
         assert_eq!(size.unit_string(&flags), "MB");
         flags.size = SizeFlag::Short;
         assert_eq!(size.unit_string(&flags), "M");
+        flags.size = SizeFlag::Iec;
+        assert_eq!(size.unit_string(&flags), "MiB");
+        flags.size = SizeFlag::Si;
+        assert_eq!(size.unit_string(&flags), "MB");
     }
 
     #[test]
     fn render_megabyte() {
-        let size = Size::new(42 * MB); // 42 megabytes
+        let size = Size::new(42 * MIB); // 42 megabytes
         let mut flags = Flags::default();
 
         assert_eq!(size.value_string(&flags), "42");
         assert_eq!(size.unit_string(&flags), "MB");
         flags.size = SizeFlag::Short;
         assert_eq!(size.unit_string(&flags), "M");
+        flags.size = SizeFlag::Iec;
+        assert_eq!(size.unit_string(&flags), "MiB");
+        flags.size = SizeFlag::Si;
+        assert_eq!(size.unit_string(&flags), "MB");
     }
 
     #[test]
     fn render_100_plus_megabyte() {
-        let size = Size::new(420 * MB + 420 * KB); // 420.4 megabytes
+        let size = Size::new(420 * MIB + 420 * KIB); // 420.4 megabytes
         let mut flags = Flags::default();
 
         assert_eq!(size.value_string(&flags), "420");
         assert_eq!(size.unit_string(&flags), "MB");
         flags.size = SizeFlag::Short;
         assert_eq!(size.unit_string(&flags), "M");
+        flags.size = SizeFlag::Iec;
+        assert_eq!(size.unit_string(&flags), "MiB");
+        flags.size = SizeFlag::Si;
+        assert_eq!(size.unit_string(&flags), "MB");
     }
 
     #[test]
     fn render_10_minus_gigabyte() {
-        let size = Size::new(4 * GB); // 4 gigabytes
+        let size = Size::new(4 * GIB); // 4 gigabytes
         let mut flags = Flags::default();
 
         assert_eq!(size.value_string(&flags), "4.0");
         assert_eq!(size.unit_string(&flags), "GB");
         flags.size = SizeFlag::Short;
         assert_eq!(size.unit_string(&flags), "G");
+        flags.size = SizeFlag::Iec;
+        assert_eq!(size.unit_string(&flags), "GiB");
+        flags.size = SizeFlag::Si;
+        assert_eq!(size.unit_string(&flags), "GB");
     }
 
     #[test]
     fn render_gigabyte() {
-        let size = Size::new(42 * GB); // 42 gigabytes
+        let size = Size::new(42 * GIB); // 42 gigabytes
         let mut flags = Flags::default();
 
         assert_eq!(size.value_string(&flags), "42");
         assert_eq!(size.unit_string(&flags), "GB");
         flags.size = SizeFlag::Short;
         assert_eq!(size.unit_string(&flags), "G");
+        flags.size = SizeFlag::Iec;
+        assert_eq!(size.unit_string(&flags), "GiB");
+        flags.size = SizeFlag::Si;
+        assert_eq!(size.unit_string(&flags), "GB");
     }
 
     #[test]
     fn render_100_plus_gigabyte() {
-        let size = Size::new(420 * GB + 420 * MB); // 420.4 gigabytes
+        let size = Size::new(420 * GIB + 420 * MIB); // 420.4 gigabytes
         let mut flags = Flags::default();
 
         assert_eq!(size.value_string(&flags), "420");
         assert_eq!(size.unit_string(&flags), "GB");
         flags.size = SizeFlag::Short;
         assert_eq!(size.unit_string(&flags), "G");
+        flags.size = SizeFlag::Iec;
+        assert_eq!(size.unit_string(&flags), "GiB");
+        flags.size = SizeFlag::Si;
+        assert_eq!(size.unit_string(&flags), "GB");
     }
 
     #[test]
     fn render_10_minus_terabyte() {
-        let size = Size::new(4 * TB); // 4 terabytes
+        let size = Size::new(4 * TIB); // 4 terabytes
         let mut flags = Flags::default();
 
         assert_eq!(size.value_string(&flags), "4.0");
         assert_eq!(size.unit_string(&flags), "TB");
         flags.size = SizeFlag::Short;
         assert_eq!(size.unit_string(&flags), "T");
+        flags.size = SizeFlag::Iec;
+        assert_eq!(size.unit_string(&flags), "TiB");
+        flags.size = SizeFlag::Si;
+        assert_eq!(size.unit_string(&flags), "TB");
     }
 
     #[test]
     fn render_terabyte() {
-        let size = Size::new(42 * TB); // 42 terabytes
+        let size = Size::new(42 * TIB); // 42 terabytes
         let mut flags = Flags::default();
 
         assert_eq!(size.value_string(&flags), "42");
         assert_eq!(size.unit_string(&flags), "TB");
         flags.size = SizeFlag::Short;
         assert_eq!(size.unit_string(&flags), "T");
+        flags.size = SizeFlag::Iec;
+        assert_eq!(size.unit_string(&flags), "TiB");
+        flags.size = SizeFlag::Si;
+        assert_eq!(size.unit_string(&flags), "TB");
     }
 
     #[test]
     fn render_100_plus_terabyte() {
-        let size = Size::new(420 * TB + 420 * GB); // 420.4 terabytes
+        let size = Size::new(420 * TIB + 420 * GIB); // 420.4 terabytes
         let mut flags = Flags::default();
 
         assert_eq!(size.value_string(&flags), "420");
         assert_eq!(size.unit_string(&flags), "TB");
         flags.size = SizeFlag::Short;
         assert_eq!(size.unit_string(&flags), "T");
+        flags.size = SizeFlag::Iec;
+        assert_eq!(size.unit_string(&flags), "TiB");
+        flags.size = SizeFlag::Si;
+        assert_eq!(size.unit_string(&flags), "TB");
     }
 
     #[test]
     fn render_with_a_fraction() {
-        let size = Size::new(42 * KB + 103); // 42.1 kilobytes
+        let size = Size::new(42 * KIB + 103); // 42.1 kilobytes
         let flags = Flags::default();
 
         assert_eq!(size.value_string(&flags), "42");
@@ -307,7 +375,7 @@ mod test {
 
     #[test]
     fn render_with_a_truncated_fraction() {
-        let size = Size::new(42 * KB + 1); // 42.001 kilobytes == 42 kilobytes
+        let size = Size::new(42 * KIB + 1); // 42.001 kilobytes == 42 kilobytes
         let flags = Flags::default();
 
         assert_eq!(size.value_string(&flags), "42");
@@ -316,7 +384,7 @@ mod test {
 
     #[test]
     fn render_short_nospaces() {
-        let size = Size::new(42 * KB); // 42 kilobytes
+        let size = Size::new(42 * KIB); // 42 kilobytes
         let flags = Flags {
             size: SizeFlag::Short,
             ..Default::default()

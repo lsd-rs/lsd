@@ -123,7 +123,7 @@ lsd is a ls command with a lot of pretty colours and some other stuff to enrich 
 : How to display permissions [default: rwx]  [possible values: rwx, octal]
 
 `--size <size>...`
-: How to display size [default: default]  [possible values: default, short, bytes]
+: How to display size [default: default]  [possible values: default, short, iec, si, bytes]
 
 `--sort <WORD>...`
 : Sort by WORD instead of name [possible values: size, time, version, extension]
