@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
+- Add IEC and SI units and unit prefixes to `--size`
 - In keeping with the coreutils change, add quotes and escapes for necessary filenames from [merelymyself](https://github.com/merelymyself)
 - Add support for icon theme from [zwpaper](https://github.com/zwpaper)
 - Add icon for kt and kts from [LeeWeeder](https://github.com/LeeWeeder)
