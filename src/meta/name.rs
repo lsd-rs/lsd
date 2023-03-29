@@ -376,7 +376,7 @@ mod test {
         let name = Name::new(&pipe_path, file_type);
 
         assert_eq!(
-            " pipe.tmp".to_string().with(Color::AnsiValue(184)),
+            "󰈲 pipe.tmp".to_string().with(Color::AnsiValue(184)),
             name.render(
                 &colors,
                 icons,

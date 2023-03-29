@@ -336,12 +336,12 @@ filetype:
   dir: 📂
   file: 📄
   pipe: 📩
-  socket: 
+  socket: 󰆨
   executable: 
   symlink-dir: 
   symlink-file: 
   device-char: 
-  device-block: ﰩ
+  device-block: 󰜫
   special: 
 ```
 
