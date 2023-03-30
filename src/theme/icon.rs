@@ -86,7 +86,7 @@ impl IconTheme {
         // Note: filenames must be lower-case
         [
             ("a.out", "\u{f489}"),              // ""
-            ("api", "\u{f98c}"),                // "󰒍"
+            ("api", "\u{f048d}"),               // "󰒍"
             (".atom", "\u{e764}"),              // ""
             ("authorized_keys", "\u{e60a}"),    // ""
             ("backups", "\u{f006f}"),           // "󰁯"
@@ -496,7 +496,7 @@ impl IconTheme {
             ("rl", "\u{f11c}"),              // ""
             ("rmd", "\u{e609}"),             // ""
             ("rpm", "\u{f187}"),             // ""
-            ("rproj", "\u{fac5}"),           // "󰗆"
+            ("rproj", "\u{f05c6}"),          // "󰗆"
             ("rspec_parallel", "\u{e21e}"),  // ""
             ("rspec_status", "\u{e21e}"),    // ""
             ("rspec", "\u{e21e}"),           // ""
