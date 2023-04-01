@@ -132,6 +132,8 @@ color:
 # When "classic" is set, this is set to "date".
 # Possible values: date, relative, '+<date_format>'
 # `date_format` will be a `strftime` formatted value. e.g. `date: '+%d %b %y %X'` will give you a date like this: 17 Jun 21 20:14:55
+# `date_format` can contain a second format after a new-line. The second format is used to format dates for files from the last six months.
+
 date: date
 
 # == Dereference ==

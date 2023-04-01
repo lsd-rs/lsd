@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add support for localization from [scarf](https://github.com/scarf005)
 - Add icons for cjs, cts and mts from [Han Yeong-woo](https://github.com/nix6839)
 - Fix obsolete Nerd Font icons from [Han Yeong-woo](https://github.com/nix6839)
+- Add support to format dates for recent files differently. If `'+<date_format>'` contains a second format it is applied to files from the last six months. The formats are separated by new-line, similar to `TIME_STYLE` in GNU ls.
 
 ### Fixed
 - Do not quote filename when piping into another program from [TeamTamoad](https://github.com/TeamTamoad)
