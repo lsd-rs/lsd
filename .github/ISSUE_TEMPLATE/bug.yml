@@ -1,0 +1,91 @@
+name: Bug Report Form
+description: Create a report to help us improve, by the new GitHub form
+title: "[Bug]: "
+labels: ["bug"]
+assignees:
+  - zwpaper
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this bug report!
+  - type: checkboxes
+    id: latest-version
+    attributes:
+      label: Version
+      description: Please make sure you can reproduce in the [latest release](https://github.com/lsd-rs/lsd/releases/latest)
+      options:
+        - label: latest
+          required: true
+  - type: textarea
+    id: version
+    attributes:
+      label: version
+      description: "`lsd --version` output"
+      placeholder: lsd --version
+    validations:
+      required: true
+  - type: dropdown
+    id: os
+    attributes:
+      label: What OS are you seeing the problem on?
+      multiple: true
+      options:
+        - Windows
+        - Linux
+        - macOS
+        - Others
+  - type: textarea
+    id: installation
+    attributes:
+      label: installation
+      description: "how do you install lsd?"
+      placeholder: "how do you install lsd?"
+    validations:
+      required: true
+  - type: textarea
+    id: term
+    attributes:
+      label: term
+      description: "`echo $TERM` output"
+      placeholder: echo $TERM
+    validations:
+      required: false
+  - type: textarea
+    id: ls-colors
+    attributes:
+      label: ls-colors
+      description: "`echo $LS_COLORS` output"
+      placeholder: echo $LS_COLORS
+    validations:
+      required: false
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: Tell us what happen?
+      placeholder: |
+        If applicable, add the output of the classic ls command (`\ls -la`) in order to show the buggy file/directory.
+      render: markdown
+    validations:
+      required: true
+  - type: textarea
+    id: what-expected
+    attributes:
+      label: What expected?
+      description: What did you expect to happen?
+      placeholder: |
+        If the application panics run the command with the trace (`RUST_BACKTRACE=1 lsd ...`).
+        In case of graphical errors, add a screenshot if possible."
+      render: markdown
+    validations:
+      required: true
+  - type: textarea
+    id: others
+    attributes:
+      label: What else?
+      description: Is there anything else you want to tell us?
+      placeholder: "Others"
+      render: markdown
+    validations:
+      required: false
