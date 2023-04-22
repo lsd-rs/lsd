@@ -1,12 +1,48 @@
 use serde::Deserialize;
 use std::collections::HashMap;
 
+enum ByFilename {
+    Name,
+    Extension,
+}
+
+fn deserialize_by_filename<'de, D>(
+    deserializer: D,
+    by: ByFilename,
+) -> Result<HashMap<String, String>, D::Error>
+where
+    D: serde::de::Deserializer<'de>,
+{
+    let default = match by {
+        ByFilename::Name => IconTheme::get_default_icons_by_name(),
+        ByFilename::Extension => IconTheme::get_default_icons_by_extension(),
+    };
+    HashMap::<_, _>::deserialize(deserializer)
+        .map(|input| default.into_iter().chain(input.into_iter()).collect())
+}
+
+fn deserialize_by_name<'de, D>(deserializer: D) -> Result<HashMap<String, String>, D::Error>
+where
+    D: serde::de::Deserializer<'de>,
+{
+    deserialize_by_filename(deserializer, ByFilename::Name)
+}
+
+fn deserialize_by_extension<'de, D>(deserializer: D) -> Result<HashMap<String, String>, D::Error>
+where
+    D: serde::de::Deserializer<'de>,
+{
+    deserialize_by_filename(deserializer, ByFilename::Extension)
+}
+
 #[derive(Debug, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "kebab-case")]
 #[serde(deny_unknown_fields)]
 #[serde(default)]
 pub struct IconTheme {
+    #[serde(deserialize_with = "deserialize_by_name")]
     pub name: HashMap<String, String>,
+    #[serde(deserialize_with = "deserialize_by_extension")]
     pub extension: HashMap<String, String>,
     pub filetype: ByType,
 }
@@ -655,5 +691,37 @@ filetype:
         // ref https://github.com/dtolnay/serde-yaml/issues/86
         let empty: IconTheme = Theme::with_yaml("filetype:\n  dir: ").unwrap();
         assert_eq!(empty.filetype.dir, "");
+    }
+
+    #[test]
+    fn test_custom_icon_by_name() {
+        // When a user sets to use 📦-icon for a cargo.toml file,
+        let theme: IconTheme = Theme::with_yaml("name:\n  cargo.toml: 📦").unwrap();
+        // 📦-icon should be used for a cargo.toml file.
+        assert_eq!(theme.name.get("cargo.toml").unwrap(), "📦");
+    }
+
+    #[test]
+    fn test_default_icon_by_name_with_custom_entry() {
+        // When a user sets to use 📦-icon for a cargo.toml file,
+        let theme: IconTheme = Theme::with_yaml("name:\n  cargo.toml: 📦").unwrap();
+        // the default icon  should be used for a cargo.lock file.
+        assert_eq!(theme.name.get("cargo.lock").unwrap(), "\u{e7a8}");
+    }
+
+    #[test]
+    fn test_custom_icon_by_extension() {
+        // When a user sets to use 🦀-icon for *.rs files,
+        let theme: IconTheme = Theme::with_yaml("extension:\n  rs: 🦀").unwrap();
+        // 🦀-icon should be used for *.rs files.
+        assert_eq!(theme.extension.get("rs").unwrap(), "🦀");
+    }
+
+    #[test]
+    fn test_default_icon_by_extension_with_custom_entry() {
+        // When a user sets to use 🦀-icon for *.rs files,
+        let theme: IconTheme = Theme::with_yaml("extension:\n  rs: 🦀").unwrap();
+        // the default icon  should be used for *.go files.
+        assert_eq!(theme.extension.get("go").unwrap(), "\u{e627}");
     }
 }
