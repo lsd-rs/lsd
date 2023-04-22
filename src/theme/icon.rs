@@ -41,16 +41,16 @@ impl Default for IconTheme {
 impl Default for ByType {
     fn default() -> ByType {
         ByType {
-            dir: "\u{f115}".into(),          // 
-            file: "\u{f016}".into(),         // 
-            pipe: "\u{f731}".into(),         // 
-            socket: "\u{f6a7}".into(),       // 
-            executable: "\u{f489}".into(),   // 
-            symlink_dir: "\u{f482}".into(),  // 
-            symlink_file: "\u{f481}".into(), // 
-            device_char: "\u{e601}".into(),  // 
-            device_block: "\u{fc29}".into(), // ﰩ
-            special: "\u{f2dc}".into(),      // 
+            dir: "\u{f115}".into(),           // 
+            file: "\u{f016}".into(),          // 
+            pipe: "\u{f0232}".into(),         // 󰈲
+            socket: "\u{f01a8}".into(),       // 󰆨
+            executable: "\u{f489}".into(),    // 
+            symlink_dir: "\u{f482}".into(),   // 
+            symlink_file: "\u{f481}".into(),  // 
+            device_char: "\u{e601}".into(),   // 
+            device_block: "\u{f072b}".into(), // 󰜫
+            special: "\u{f2dc}".into(),       // 
         }
     }
 }
@@ -86,10 +86,10 @@ impl IconTheme {
         // Note: filenames must be lower-case
         [
             ("a.out", "\u{f489}"),              // ""
-            ("api", "\u{f98c}"),                // "歷"
+            ("api", "\u{f048d}"),               // "󰒍"
             (".atom", "\u{e764}"),              // ""
             ("authorized_keys", "\u{e60a}"),    // ""
-            ("backups", "\u{f56e}"),            // ""
+            ("backups", "\u{f006f}"),           // "󰁯"
             (".bash_logout", "\u{e615}"),       // ""
             (".bash_profile", "\u{e615}"),      // ""
             (".bashrc", "\u{f489}"),            // ""
@@ -160,7 +160,7 @@ impl IconTheme {
             ("hidden", "\u{f023}"),             // ""
             ("home", "\u{f015}"),               // ""
             ("hostname", "\u{e615}"),           // ""
-            ("hosts", "\u{f502}"),              // ""
+            ("hosts", "\u{f0002}"),             // "󰀂"
             (".htaccess", "\u{e615}"),          // ""
             ("htoprc", "\u{e615}"),             // ""
             (".htpasswd", "\u{e615}"),          // ""
@@ -185,15 +185,15 @@ impl IconTheme {
             ("localized", "\u{f179}"),          // ""
             ("lsb-release", "\u{e615}"),        // ""
             (".lynxrc", "\u{e615}"),            // ""
-            (".mailcap", "\u{f6ef}"),           // ""
-            ("mail", "\u{f6ef}"),               // ""
+            (".mailcap", "\u{f01f0}"),          // "󰇰"
+            ("mail", "\u{f01f0}"),              // "󰇰"
             ("maintainers", "\u{e60a}"),        // ""
             ("makefile.ac", "\u{e615}"),        // ""
             ("makefile", "\u{e615}"),           // ""
             ("manifest", "\u{f292}"),           // ""
             ("metadata", "\u{e5fc}"),           // ""
             ("metadata.xml", "\u{f462}"),       // ""
-            ("mime.types", "\u{fb44}"),         // "פּ"
+            ("mime.types", "\u{f0645}"),        // "󰙅"
             ("module.symvers", "\u{f471}"),     // ""
             (".mozilla", "\u{e786}"),           // ""
             ("music", "\u{f025}"),              // ""
@@ -215,18 +215,18 @@ impl IconTheme {
             (".pki", "\u{f023}"),               // ""
             ("portage", "\u{e5fc}"),            // ""
             ("profile", "\u{e615}"),            // ""
-            (".profile", "\u{f68c}"),           // ""
+            (".profile", "\u{f018d}"),          // "󰆍"
             ("public", "\u{f415}"),             // ""
-            ("__pycache__", "\u{f81f}"),        // ""
+            ("__pycache__", "\u{f0320}"),       // "󰌠"
             (".python_history", "\u{e606}"),    // ""
             ("rc.lua", "\u{e615}"),             // ""
             ("readme", "\u{e609}"),             // ""
             (".release.toml", "\u{e7a8}"),      // ""
-            ("requirements.txt", "\u{f81f}"),   // ""
-            ("robots.txt", "\u{fba7}"),         // "ﮧ"
+            ("requirements.txt", "\u{f0320}"),  // "󰌠"
+            ("robots.txt", "\u{f06a9}"),        // "󰚩"
             ("root", "\u{f023}"),               // ""
             ("rubydoc", "\u{e73b}"),            // ""
-            ("runtime.txt", "\u{f81f}"),        // ""
+            ("runtime.txt", "\u{f0320}"),       // "󰌠"
             (".rustup", "\u{e7a8}"),            // ""
             (".rvm", "\u{e21e}"),               // ""
             ("sass", "\u{e603}"),               // ""
@@ -244,14 +244,14 @@ impl IconTheme {
             ("sudoers", "\u{f023}"),            // ""
             ("sxhkdrc", "\u{e615}"),            // ""
             ("tigrc", "\u{e615}"),              // ""
-            ("tox.ini", "\u{f81f}"),            // ""
+            ("tox.ini", "\u{f0320}"),           // "󰌠"
             (".trash", "\u{f1f8}"),             // ""
             ("ts", "\u{e628}"),                 // ""
             ("unlicense", "\u{e60a}"),          // ""
             ("url", "\u{f0ac}"),                // ""
             ("user-dirs.dirs", "\u{e5fc}"),     // ""
             ("vagrantfile", "\u{e615}"),        // ""
-            ("venv", "\u{f81f}"),               // ""
+            ("venv", "\u{f0320}"),              // "󰌠"
             ("videos", "\u{f03d}"),             // ""
             (".viminfo", "\u{e62b}"),           // ""
             (".vimrc", "\u{e62b}"),             // ""
@@ -259,7 +259,7 @@ impl IconTheme {
             (".vim", "\u{e62b}"),               // ""
             ("vim", "\u{e62b}"),                // ""
             (".vscode", "\u{e70c}"),            // ""
-            ("webpack.config.js", "\u{fc29}"),  // "ﰩ"
+            ("webpack.config.js", "\u{f072b}"), // "󰜫"
             (".wgetrc", "\u{e615}"),            // ""
             ("wgetrc", "\u{e615}"),             // ""
             (".xauthority", "\u{e615}"),        // ""
@@ -305,14 +305,14 @@ impl IconTheme {
             ("avi", "\u{f008}"),             // ""
             ("avro", "\u{e60b}"),            // ""
             ("awk", "\u{f489}"),             // ""
-            ("bak", "\u{f56e}"),             // ""
+            ("bak", "\u{f006f}"),            // "󰁯"
             ("bash_history", "\u{f489}"),    // ""
             ("bash_profile", "\u{f489}"),    // ""
             ("bashrc", "\u{f489}"),          // ""
             ("bash", "\u{f489}"),            // ""
             ("bat", "\u{f17a}"),             // ""
             ("bin", "\u{f489}"),             // ""
-            ("bio", "\u{f910}"),             // "蘿"
+            ("bio", "\u{f0411}"),            // "󰐑"
             ("bmp", "\u{f1c5}"),             // ""
             ("bz2", "\u{f410}"),             // ""
             ("cc", "\u{e61d}"),              // ""
@@ -322,18 +322,18 @@ impl IconTheme {
             ("cljs", "\u{e76a}"),            // ""
             ("clj", "\u{e768}"),             // ""
             ("cls", "\u{e600}"),             // ""
-            ("cl", "\u{f671}"),              // ""
+            ("cl", "\u{f0172}"),             // "󰅲"
             ("coffee", "\u{f0f4}"),          // ""
             ("conf", "\u{e615}"),            // ""
             ("cpp", "\u{e61d}"),             // ""
             ("cp", "\u{e61d}"),              // ""
             ("cshtml", "\u{f1fa}"),          // ""
             ("csh", "\u{f489}"),             // ""
-            ("csproj", "\u{f81a}"),          // ""
+            ("csproj", "\u{f031b}"),         // "󰌛"
             ("css", "\u{e749}"),             // ""
-            ("cs", "\u{f81a}"),              // ""
+            ("cs", "\u{f031b}"),             // "󰌛"
             ("csv", "\u{f1c3}"),             // ""
-            ("csx", "\u{f81a}"),             // ""
+            ("csx", "\u{f031b}"),            // "󰌛"
             ("cts", "\u{e628}"),             // ""
             ("c++", "\u{e61d}"),             // ""
             ("c", "\u{e61e}"),               // ""
@@ -356,10 +356,10 @@ impl IconTheme {
             ("eclass", "\u{f30d}"),          // ""
             ("editorconfig", "\u{e615}"),    // ""
             ("ejs", "\u{e618}"),             // ""
-            ("elc", "\u{f671}"),             // ""
+            ("elc", "\u{f0172}"),            // "󰅲"
             ("elf", "\u{f489}"),             // ""
             ("elm", "\u{e62c}"),             // ""
-            ("el", "\u{f671}"),              // ""
+            ("el", "\u{f0172}"),             // "󰅲"
             ("env", "\u{f462}"),             // ""
             ("eot", "\u{f031}"),             // ""
             ("epub", "\u{e28a}"),            // ""
@@ -372,7 +372,7 @@ impl IconTheme {
             ("flac", "\u{f001}"),            // ""
             ("flv", "\u{f008}"),             // ""
             ("font", "\u{f031}"),            // ""
-            ("fpl", "\u{f910}"),             // "蘿"
+            ("fpl", "\u{f0411}"),            // "󰐑"
             ("fsi", "\u{e7a7}"),             // ""
             ("fs", "\u{e7a7}"),              // ""
             ("fsx", "\u{e7a7}"),             // ""
@@ -427,7 +427,7 @@ impl IconTheme {
             ("less", "\u{e758}"),            // ""
             ("lhs", "\u{e777}"),             // ""
             ("license", "\u{e60a}"),         // ""
-            ("lisp", "\u{f671}"),            // ""
+            ("lisp", "\u{f0172}"),           // "󰅲"
             ("list", "\u{f03a}"),            // ""
             ("localized", "\u{f179}"),       // ""
             ("lock", "\u{f023}"),            // ""
@@ -435,8 +435,8 @@ impl IconTheme {
             ("lss", "\u{e749}"),             // ""
             ("lua", "\u{e620}"),             // ""
             ("lz", "\u{f410}"),              // ""
-            ("m3u8", "\u{f910}"),            // "蘿"
-            ("m3u", "\u{f910}"),             // "蘿"
+            ("m3u8", "\u{f0411}"),           // "󰐑"
+            ("m3u", "\u{f0411}"),            // "󰐑"
             ("m4a", "\u{f001}"),             // ""
             ("m4v", "\u{f008}"),             // ""
             ("magnet", "\u{f076}"),          // ""
@@ -458,18 +458,18 @@ impl IconTheme {
             ("npmignore", "\u{e71e}"),       // ""
             ("ogg", "\u{f001}"),             // ""
             ("ogv", "\u{f008}"),             // ""
-            ("old", "\u{f56e}"),             // ""
+            ("old", "\u{f006f}"),            // "󰁯"
             ("opus", "\u{f001}"),            // ""
-            ("orig", "\u{f56e}"),            // ""
+            ("orig", "\u{f006f}"),           // "󰁯"
             ("otf", "\u{f031}"),             // ""
             ("o", "\u{e624}"),               // ""
             ("pdf", "\u{f1c1}"),             // ""
-            ("pem", "\u{f805}"),             // ""
+            ("pem", "\u{f0306}"),            // "󰌆"
             ("phar", "\u{e608}"),            // ""
             ("php", "\u{e608}"),             // ""
             ("pkg", "\u{f187}"),             // ""
             ("plist", "\u{f302}"),           // ""
-            ("pls", "\u{f910}"),             // "蘿"
+            ("pls", "\u{f0411}"),            // "󰐑"
             ("pl", "\u{e769}"),              // ""
             ("pm", "\u{e769}"),              // ""
             ("png", "\u{f1c5}"),             // ""
@@ -487,16 +487,16 @@ impl IconTheme {
             ("rar", "\u{f410}"),             // ""
             ("razor", "\u{f1fa}"),           // ""
             ("rb", "\u{e21e}"),              // ""
-            ("rdata", "\u{fcd2}"),           // "ﳒ"
+            ("rdata", "\u{f07d4}"),          // "󰟔"
             ("rdb", "\u{e76d}"),             // ""
             ("rdoc", "\u{e609}"),            // ""
-            ("rds", "\u{fcd2}"),             // "ﳒ"
+            ("rds", "\u{f07d4}"),            // "󰟔"
             ("readme", "\u{e609}"),          // ""
             ("rlib", "\u{e7a8}"),            // ""
             ("rl", "\u{f11c}"),              // ""
             ("rmd", "\u{e609}"),             // ""
             ("rpm", "\u{f187}"),             // ""
-            ("rproj", "\u{fac5}"),           // "鉶"
+            ("rproj", "\u{f05c6}"),          // "󰗆"
             ("rspec_parallel", "\u{e21e}"),  // ""
             ("rspec_status", "\u{e21e}"),    // ""
             ("rspec", "\u{e21e}"),           // ""
@@ -504,7 +504,7 @@ impl IconTheme {
             ("rs", "\u{e7a8}"),              // ""
             ("rtf", "\u{f15c}"),             // ""
             ("rubydoc", "\u{e73b}"),         // ""
-            ("r", "\u{fcd2}"),               // "ﳒ"
+            ("r", "\u{f07d4}"),              // "󰟔"
             ("ru", "\u{e21e}"),              // ""
             ("sass", "\u{e603}"),            // ""
             ("scala", "\u{e737}"),           // ""
@@ -534,7 +534,7 @@ impl IconTheme {
             ("tgz", "\u{f410}"),             // ""
             ("tiff", "\u{f1c5}"),            // ""
             ("toml", "\u{e60b}"),            // ""
-            ("torrent", "\u{f98c}"),         // "歷"
+            ("torrent", "\u{f048d}"),        // "󰒍"
             ("trash", "\u{f1f8}"),           // ""
             ("ts", "\u{e628}"),              // ""
             ("tsx", "\u{e7ba}"),             // ""
@@ -545,8 +545,8 @@ impl IconTheme {
             ("txt", "\u{f15c}"),             // ""
             ("video", "\u{f008}"),           // ""
             ("vim", "\u{e62b}"),             // ""
-            ("vlc", "\u{f910}"),             // "蘿"
-            ("vue", "\u{fd42}"),             // "﵂"
+            ("vlc", "\u{f0411}"),            // "󰐑"
+            ("vue", "\u{f0844}"),            // "󰡄"
             ("wav", "\u{f001}"),             // ""
             ("webm", "\u{f008}"),            // ""
             ("webp", "\u{f1c5}"),            // ""
@@ -555,7 +555,7 @@ impl IconTheme {
             ("wmv", "\u{f008}"),             // ""
             ("woff2", "\u{f031}"),           // ""
             ("woff", "\u{f031}"),            // ""
-            ("wpl", "\u{f910}"),             // "蘿"
+            ("wpl", "\u{f0411}"),            // "󰐑"
             ("xbps", "\u{f187}"),            // ""
             ("xcf", "\u{f1c5}"),             // ""
             ("xls", "\u{f1c3}"),             // ""
@@ -596,13 +596,13 @@ extension:
 filetype:
   dir: 
   file: 
-  pipe: 
-  socket: 
+  pipe: 󰈲
+  socket: 󰆨
   executable: 
   symlink-dir: 
   symlink-file: 
   device-char: 
-  device-block: ﰩ
+  device-block: 󰜫
   special: 
 "#
     }
