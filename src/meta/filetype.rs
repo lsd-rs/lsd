@@ -16,7 +16,7 @@ pub enum FileType {
 
 impl FileType {
     #[cfg(windows)]
-    const EXECUTABLE_EXTENSIONS: &[&'static str] = &["exe", "msi", "bat", "ps1", "cmd", "com" ];
+    const EXECUTABLE_EXTENSIONS: &[&'static str] = &["exe", "msi", "bat", "ps1", "cmd", "com", "py", "sh", "lua", "js", "rb", "pl", "vbs", "vbe" ];
 
     #[cfg(unix)]
     pub fn new(
