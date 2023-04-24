@@ -12,6 +12,7 @@ use crate::print_error;
 pub enum DateFlag {
     #[default]
     Date,
+    Locale,
     Relative,
     Iso,
     Formatted(String),
@@ -33,6 +34,7 @@ impl DateFlag {
         let value = value.as_ref();
         match value {
             "date" => Some(Self::Date),
+            "locale" => Some(Self::Locale),
             "relative" => Some(Self::Relative),
             _ if value.starts_with('+') => Self::from_format_string(value),
             _ => {
@@ -77,6 +79,7 @@ impl Configurable<Self> for DateFlag {
             match value.as_str() {
                 "full-iso" => Some(Self::Formatted("%F %T.%f %z".into())),
                 "long-iso" => Some(Self::Formatted("%F %R".into())),
+                "locale" => Some(Self::Locale),
                 "iso" => Some(Self::Iso),
                 _ if value.starts_with('+') => Self::from_format_string(&value),
                 _ => {
@@ -112,6 +115,13 @@ mod test {
         let argv = ["lsd", "--date", "date"];
         let cli = Cli::try_parse_from(argv).unwrap();
         assert_eq!(Some(DateFlag::Date), DateFlag::from_cli(&cli));
+    }
+
+    #[test]
+    fn test_from_cli_locale() {
+        let argv = ["lsd", "--date", "locale"];
+        let cli = Cli::try_parse_from(argv).unwrap();
+        assert_eq!(Some(DateFlag::Locale), DateFlag::from_cli(&cli));
     }
 
     #[test]

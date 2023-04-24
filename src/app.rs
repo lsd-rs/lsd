@@ -180,10 +180,10 @@ pub struct Cli {
 fn validate_date_argument(arg: &str) -> Result<String, String> {
     if arg.starts_with('+') {
         validate_time_format(arg)
-    } else if arg == "date" || arg == "relative" {
+    } else if arg == "date" || arg == "relative" || arg == "locale" {
         Result::Ok(arg.to_owned())
     } else {
-        Result::Err("possible values: date, relative, +date-time-format".to_owned())
+        Result::Err("possible values: date, locale, relative, +date-time-format".to_owned())
     }
 }
 
