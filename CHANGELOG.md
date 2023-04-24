@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add many icons from https://github.com/Peltoche/lsd/issues/764 [@TruncatedDinosour](https://ari-web.xyz/gh)
 - Add support for localization from [scarf](https://github.com/scarf005)
 - Add icons for cjs, cts and mts from [Han Yeong-woo](https://github.com/nix6839)
+- Fix obsolete Nerd Font icons from [Han Yeong-woo](https://github.com/nix6839)
 
 ### Fixed
 - Do not quote filename when piping into another program from [TeamTamoad](https://github.com/TeamTamoad)
@@ -24,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   [`LS_COLORS`](README.md#Colors) can be used to customize.
 - Handle dereference (-L) with broken symlink from [r3dArch](https://github.com/r3dArch)
 - Avoid using Clap's deprecated structs and functions [sudame](https://github.com/sudame)
+- Icon theme with overrides from config [sudame](https://github.com/sudame)
 
 ## [0.23.1] - 2022-09-13
 

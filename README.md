@@ -336,12 +336,12 @@ filetype:
   dir: 📂
   file: 📄
   pipe: 📩
-  socket: 
+  socket: 󰆨
   executable: 
   symlink-dir: 
   symlink-file: 
   device-char: 
-  device-block: ﰩ
+  device-block: 󰜫
   special: 
 ```
 
@@ -428,6 +428,12 @@ lsd --icon never --ignore-config
 ### UTF-8 Chars
 
 `lsd` will try to display the UTF-8 chars in file name, A `U+FFFD REPLACEMENT CHARACTER`(�) is used to represent the invalid UTF-8 chars.
+
+### Icons are showing up strangely
+
+Nerd Fonts is moving the codepoints of the Material Design Icons in 3.0, so lsd has updated the icons in #830. If your icons look weird, use fonts that have been patched using Nerd Fonts v2.3.0 or later.
+
+See also: <https://github.com/ryanoasis/nerd-fonts/releases/tag/v2.3.3>
 
 ## Contributors
 
