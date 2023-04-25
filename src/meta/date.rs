@@ -58,7 +58,17 @@ impl Date {
                         val.format("%F").to_string()
                     }
                 }
-                DateFlag::Formatted(format) => val.format_localized(format, locale).to_string(),
+                DateFlag::Formatted(format) => {
+                    let vec: Vec<&str> = format.split('\n').collect();
+
+                    if vec.len() == 1 {
+                        val.format_localized(format, locale).to_string()
+                    } else if *val > Local::now() - Duration::seconds(15_778_476) {
+                        val.format_localized(vec[1], locale).to_string()
+                    } else {
+                        val.format_localized(vec[0], locale).to_string()
+                    }
+                }
             }
         } else {
             String::from('-')
@@ -297,6 +307,62 @@ mod test {
             date: DateFlag::Iso,
             ..Default::default()
         };
+
+        assert_eq!(
+            creation_date
+                .format("%F")
+                .to_string()
+                .with(Color::AnsiValue(36)),
+            date.render(&colors, &flags)
+        );
+
+        fs::remove_file(file_path).unwrap();
+    }
+
+    #[test]
+    fn test_recent_format_now() {
+        let mut file_path = env::temp_dir();
+        file_path.push("test_recent_format_now.tmp");
+
+        let creation_date = Local::now();
+        let success = cross_platform_touch(&file_path, &creation_date)
+            .unwrap()
+            .success();
+        assert_eq!(true, success, "failed to exec touch");
+
+        let colors = Colors::new(ThemeOption::Default);
+        let date = Date::from(&file_path.metadata().unwrap());
+
+        let mut flags = Flags::default();
+        flags.date = DateFlag::Formatted(String::from("%F\n%H:%M"));
+
+        assert_eq!(
+            creation_date
+                .format("%H:%M")
+                .to_string()
+                .with(Color::AnsiValue(40)),
+            date.render(&colors, &flags)
+        );
+
+        fs::remove_file(file_path).unwrap();
+    }
+
+    #[test]
+    fn test_recent_format_year_old() {
+        let mut file_path = env::temp_dir();
+        file_path.push("test_recent_format_year_old.tmp");
+
+        let creation_date = Local::now() - Duration::days(400);
+        let success = cross_platform_touch(&file_path, &creation_date)
+            .unwrap()
+            .success();
+        assert_eq!(true, success, "failed to exec touch");
+
+        let colors = Colors::new(ThemeOption::Default);
+        let date = Date::from(&file_path.metadata().unwrap());
+
+        let mut flags = Flags::default();
+        flags.date = DateFlag::Formatted(String::from("%F\n%H:%M"));
 
         assert_eq!(
             creation_date
