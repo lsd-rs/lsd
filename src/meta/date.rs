@@ -47,7 +47,8 @@ impl Date {
 
         if let Date::Date(val) = self {
             match &flags.date {
-                DateFlag::Date => val.format_localized("%c", locale).to_string(),
+                DateFlag::Date => val.format("%c").to_string(),
+                DateFlag::Locale => val.format_localized("%c", locale).to_string(),
                 DateFlag::Relative => HumanTime::from(*val - Local::now()).to_string(),
                 DateFlag::Iso => {
                     // 365.2425 * 24 * 60 * 60 = 31556952 seconds per year
@@ -131,7 +132,7 @@ mod test {
 
         assert_eq!(
             creation_date
-                .format_localized("%c", current_locale())
+                .format("%c")
                 .to_string()
                 .with(Color::AnsiValue(40)),
             date.render(&colors, &flags)
@@ -158,7 +159,7 @@ mod test {
 
         assert_eq!(
             creation_date
-                .format_localized("%c", current_locale())
+                .format("%c")
                 .to_string()
                 .with(Color::AnsiValue(42)),
             date.render(&colors, &flags)
@@ -185,7 +186,7 @@ mod test {
 
         assert_eq!(
             creation_date
-                .format_localized("%c", current_locale())
+                .format("%c")
                 .to_string()
                 .with(Color::AnsiValue(36)),
             date.render(&colors, &flags)
@@ -303,6 +304,36 @@ mod test {
                 .format("%F")
                 .to_string()
                 .with(Color::AnsiValue(36)),
+            date.render(&colors, &flags)
+        );
+
+        fs::remove_file(file_path).unwrap();
+    }
+
+    #[test]
+    fn test_locale_format_now() {
+        let mut file_path = env::temp_dir();
+        file_path.push("test_locale_format_now.tmp");
+
+        let creation_date = Local::now();
+        let success = cross_platform_touch(&file_path, &creation_date)
+            .unwrap()
+            .success();
+        assert!(success, "failed to exec touch");
+
+        let colors = Colors::new(ThemeOption::Default);
+        let date = Date::from(&file_path.metadata().unwrap());
+
+        let flags = Flags {
+            date: DateFlag::Locale,
+            ..Default::default()
+        };
+
+        assert_eq!(
+            creation_date
+                .format_localized("%c", current_locale())
+                .to_string()
+                .with(Color::AnsiValue(40)),
             date.render(&colors, &flags)
         );
 
