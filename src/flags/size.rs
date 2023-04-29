@@ -17,6 +17,10 @@ pub enum SizeFlag {
     Default,
     /// The variant to show file size with only the SI unit prefix.
     Short,
+    /// The variant to show file size with IEC unit prefix and a B for bytes
+    Iec,
+    /// The variant to show file size with SI units and SI unit prefixes and a B for bytes
+    Si,
     /// The variant to show file size in bytes.
     Bytes,
 }
@@ -26,6 +30,8 @@ impl SizeFlag {
         match value {
             "default" => Self::Default,
             "short" => Self::Short,
+            "iec" => Self::Iec,
+            "si" => Self::Si,
             "bytes" => Self::Bytes,
             // Invalid value should be handled by `clap` when building an `Cli`
             other => unreachable!("Invalid value '{other}' for 'size'"),
@@ -98,6 +104,20 @@ mod test {
     }
 
     #[test]
+    fn test_from_cli_iec() {
+        let argv = ["lsd", "--size", "iec"];
+        let cli = Cli::try_parse_from(argv).unwrap();
+        assert_eq!(Some(SizeFlag::Iec), SizeFlag::from_cli(&cli));
+    }
+
+    #[test]
+    fn test_from_cli_si() {
+        let argv = ["lsd", "--size", "si"];
+        let cli = Cli::try_parse_from(argv).unwrap();
+        assert_eq!(Some(SizeFlag::Si), SizeFlag::from_cli(&cli));
+    }
+
+    #[test]
     fn test_from_cli_bytes() {
         let argv = ["lsd", "--size", "bytes"];
         let cli = Cli::try_parse_from(argv).unwrap();
@@ -141,6 +161,20 @@ mod test {
         let mut c = Config::with_none();
         c.size = Some(SizeFlag::Short);
         assert_eq!(Some(SizeFlag::Short), SizeFlag::from_config(&c));
+    }
+
+    #[test]
+    fn test_from_config_iec() {
+        let mut c = Config::with_none();
+        c.size = Some(SizeFlag::Iec);
+        assert_eq!(Some(SizeFlag::Iec), SizeFlag::from_config(&c));
+    }
+
+    #[test]
+    fn test_from_config_si() {
+        let mut c = Config::with_none();
+        c.size = Some(SizeFlag::Si);
+        assert_eq!(Some(SizeFlag::Si), SizeFlag::from_config(&c));
     }
 
     #[test]

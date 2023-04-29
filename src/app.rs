@@ -73,7 +73,7 @@ pub struct Cli {
     pub permission: Option<String>,
 
     /// How to display size [default: default]
-    #[arg(long, value_name = "MODE", value_parser = ["default", "short", "bytes"])]
+    #[arg(long, value_name = "MODE", value_parser = ["default", "short", "iec", "si", "bytes"])]
     pub size: Option<String>,
 
     /// Display the total size of directories
