@@ -96,6 +96,7 @@ pub struct Cli {
     #[arg(short = 'X', long)]
     pub extensionsort: bool,
 
+    /// Sort by git status
     #[arg(short = 'G', long)]
     pub gitsort: bool,
 
