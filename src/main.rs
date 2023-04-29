@@ -34,7 +34,7 @@ mod core;
 mod display;
 mod flags;
 mod git;
-mod git_symbol;
+mod git_theme;
 mod icon;
 mod meta;
 mod sort;

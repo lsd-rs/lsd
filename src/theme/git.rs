@@ -4,7 +4,7 @@ use serde::Deserialize;
 #[serde(rename_all = "kebab-case")]
 #[serde(deny_unknown_fields)]
 #[serde(default)]
-pub struct GitSymbolTheme {
+pub struct GitThemeSymbols {
     pub default: String,
     pub unmodified: String,
     pub new_in_index: String,
@@ -17,28 +17,11 @@ pub struct GitSymbolTheme {
     pub conflicted: String,
 }
 
-impl Default for GitSymbolTheme {
-    fn default() -> GitSymbolTheme {
-        GitSymbolTheme {
-            default: " ".into(),
-            unmodified: "_".into(), // "\u{f00c}
-            new_in_index: "\u{f067}".into(),
-            new_in_workdir: "?".into(),
-            deleted: "\u{f014}".into(), // or f06
-            modified: "\u{f8ea}".into(),
-            renamed: "\u{f8ea}".into(),
-            ignored: "I".into(),
-            typechange: "\u{f0ec}".into(),
-            conflicted: "\u{f071}".into(),
-        }
-    }
-}
-
-impl GitSymbolTheme {
-    pub fn unicode() -> Self {
-        GitSymbolTheme {
+impl Default for GitThemeSymbols {
+    fn default() -> GitThemeSymbols {
+        GitThemeSymbols {
             default: "-".into(),
-            unmodified: "-".into(),
+            unmodified: ".".into(),
             new_in_index: "N".into(),
             new_in_workdir: "?".into(),
             deleted: "D".into(),

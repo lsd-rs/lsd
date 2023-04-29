@@ -14,7 +14,7 @@ use std::io;
 use std::os::unix::io::AsRawFd;
 
 use crate::flags::blocks::Block;
-use crate::git_symbol::GitSymbols;
+use crate::git_theme::GitTheme;
 #[cfg(target_os = "windows")]
 use terminal_size::terminal_size;
 
@@ -22,7 +22,7 @@ pub struct Core {
     flags: Flags,
     icons: Icons,
     colors: Colors,
-    git_symbols: GitSymbols,
+    git_theme: GitTheme,
     sorters: Vec<(SortOrder, sort::SortFn)>,
 }
 
@@ -51,7 +51,7 @@ impl Core {
 
         let icon_when = flags.icons.when;
         let icon_theme = flags.icons.theme.clone();
-        let git_theme = flags.icons.theme.clone();
+        let git_theme = flags.git_theme.clone();
 
         // TODO: Rework this so that flags passed downstream does not
         // have Auto option for any (icon, color, hyperlink).
@@ -81,7 +81,7 @@ impl Core {
             flags,
             colors: Colors::new(color_theme),
             icons: Icons::new(tty_available, icon_when, icon_theme, icon_separator),
-            git_symbols: GitSymbols::new(git_theme),
+            git_theme: GitTheme::new(git_theme),
             sorters,
         }
     }
@@ -167,7 +167,7 @@ impl Core {
                 &self.flags,
                 &self.colors,
                 &self.icons,
-                &self.git_symbols,
+                &self.git_theme,
             )
         } else {
             display::grid(
@@ -175,7 +175,7 @@ impl Core {
                 &self.flags,
                 &self.colors,
                 &self.icons,
-                &self.git_symbols,
+                &self.git_theme,
             )
         };
 

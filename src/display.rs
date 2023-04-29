@@ -1,7 +1,7 @@
 use crate::color::{Colors, Elem};
 use crate::flags::blocks::Block;
 use crate::flags::{Display, Flags, HyperlinkOption, Layout};
-use crate::git_symbol::GitSymbols;
+use crate::git_theme::GitTheme;
 use crate::icon::Icons;
 use crate::meta::name::DisplayOption;
 use crate::meta::{FileType, Meta};
@@ -20,7 +20,7 @@ pub fn grid(
     flags: &Flags,
     colors: &Colors,
     icons: &Icons,
-    git_symbols: &GitSymbols,
+    git_theme: &GitTheme,
 ) -> String {
     let term_width = terminal_size().map(|(w, _)| w.0 as usize);
 
@@ -30,7 +30,7 @@ pub fn grid(
         flags,
         colors,
         icons,
-        git_symbols,
+        git_theme,
         0,
         term_width,
     )
@@ -41,7 +41,7 @@ pub fn tree(
     flags: &Flags,
     colors: &Colors,
     icons: &Icons,
-    git_symbols: &GitSymbols,
+    git_theme: &GitTheme,
 ) -> String {
     let mut grid = Grid::new(GridOptions {
         filling: Filling::Spaces(1),
@@ -62,7 +62,7 @@ pub fn tree(
         flags,
         colors,
         icons,
-        git_symbols,
+        git_theme,
         (0, ""),
         &padding_rules,
         index,
@@ -73,14 +73,14 @@ pub fn tree(
     grid.fit_into_columns(flags.blocks.0.len()).to_string()
 }
 
-#[allow(clippy::too_many_arguments)] // should wrap flags, colors, icons, git_symbols into one struct
+#[allow(clippy::too_many_arguments)] // should wrap flags, colors, icons, git_theme into one struct
 fn inner_display_grid(
     display_option: &DisplayOption,
     metas: &[Meta],
     flags: &Flags,
     colors: &Colors,
     icons: &Icons,
-    git_symbols: &GitSymbols,
+    git_theme: &GitTheme,
     depth: usize,
     term_width: Option<usize>,
 ) -> String {
@@ -119,7 +119,7 @@ fn inner_display_grid(
             meta,
             colors,
             icons,
-            git_symbols,
+            git_theme,
             flags,
             display_option,
             &padding_rules,
@@ -179,7 +179,7 @@ fn inner_display_grid(
                 flags,
                 colors,
                 icons,
-                git_symbols,
+                git_theme,
                 depth + 1,
                 term_width,
             );
@@ -226,7 +226,7 @@ fn inner_display_tree(
     flags: &Flags,
     colors: &Colors,
     icons: &Icons,
-    git_symbols: &GitSymbols,
+    git_theme: &GitTheme,
     tree_depth_prefix: (usize, &str),
     padding_rules: &HashMap<Block, usize>,
     tree_index: usize,
@@ -250,7 +250,7 @@ fn inner_display_tree(
             meta,
             colors,
             icons,
-            git_symbols,
+            git_theme,
             flags,
             &DisplayOption::FileName,
             padding_rules,
@@ -279,7 +279,7 @@ fn inner_display_tree(
                 flags,
                 colors,
                 icons,
-                git_symbols,
+                git_theme,
                 (tree_depth_prefix.0 + 1, &new_prefix),
                 padding_rules,
                 tree_index,
@@ -316,7 +316,7 @@ fn get_output(
     meta: &Meta,
     colors: &Colors,
     icons: &Icons,
-    git_symbols: &GitSymbols,
+    git_theme: &GitTheme,
     flags: &Flags,
     display_option: &DisplayOption,
     padding_rules: &HashMap<Block, usize>,
@@ -402,7 +402,7 @@ fn get_output(
             }
             Block::GitStatus => {
                 if let Some(_s) = &meta.git_status {
-                    block_vec.push(_s.render(colors, git_symbols));
+                    block_vec.push(_s.render(colors, git_theme));
                 }
             }
         };
@@ -488,7 +488,9 @@ mod tests {
     use crate::app::Cli;
     use crate::color;
     use crate::color::Colors;
-    use crate::flags::{HyperlinkOption, IconOption, IconTheme as FlagTheme};
+    use crate::flags::{
+        GitTheme as GitFlagTheme, HyperlinkOption, IconOption, IconTheme as FlagTheme,
+    };
     use crate::icon::Icons;
     use crate::meta::{FileType, Name};
     use crate::Config;
@@ -695,7 +697,7 @@ mod tests {
             &flags,
             &Colors::new(color::ThemeOption::NoColor),
             &Icons::new(false, IconOption::Never, FlagTheme::Fancy, " ".to_string()),
-            &GitSymbols::new(FlagTheme::Fancy),
+            &GitTheme::new(GitFlagTheme::Default),
         );
 
         assert_eq!("one.d\n├── .hidden\n└── two\n", output);
@@ -727,7 +729,7 @@ mod tests {
             &flags,
             &Colors::new(color::ThemeOption::NoColor),
             &Icons::new(false, IconOption::Never, FlagTheme::Fancy, " ".to_string()),
-            &GitSymbols::new(FlagTheme::Fancy),
+            &GitTheme::new(GitFlagTheme::Default),
         );
 
         let length_before_b = |i| -> usize {
@@ -768,7 +770,7 @@ mod tests {
             &flags,
             &Colors::new(color::ThemeOption::NoColor),
             &Icons::new(false, IconOption::Never, FlagTheme::Fancy, " ".to_string()),
-            &GitSymbols::new(FlagTheme::Fancy),
+            &GitTheme::new(GitFlagTheme::Default),
         );
 
         assert_eq!(output.lines().nth(1).unwrap().chars().next().unwrap(), '└');
@@ -808,7 +810,7 @@ mod tests {
             &flags,
             &Colors::new(color::ThemeOption::NoColor),
             &Icons::new(false, IconOption::Never, FlagTheme::Fancy, " ".to_string()),
-            &GitSymbols::new(FlagTheme::Fancy),
+            &GitTheme::new(GitFlagTheme::Default),
         );
 
         assert!(output.ends_with("└── two\n"));
@@ -839,7 +841,7 @@ mod tests {
             &flags,
             &Colors::new(color::ThemeOption::NoColor),
             &Icons::new(false, IconOption::Never, FlagTheme::Fancy, " ".to_string()),
-            &GitSymbols::new(FlagTheme::Fancy),
+            &GitTheme::new(GitFlagTheme::Default),
         );
 
         dir.close().unwrap();
@@ -873,7 +875,7 @@ mod tests {
             &flags,
             &Colors::new(color::ThemeOption::NoColor),
             &Icons::new(false, IconOption::Never, FlagTheme::Fancy, " ".to_string()),
-            &GitSymbols::new(FlagTheme::Fancy),
+            &GitTheme::new(GitFlagTheme::Default),
         );
 
         dir.close().unwrap();

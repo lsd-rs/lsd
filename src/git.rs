@@ -1,5 +1,4 @@
 use crate::meta::git_file_status::GitFileStatus;
-use crate::print_error;
 use std::path::{Path, PathBuf};
 
 #[allow(dead_code)]
@@ -71,7 +70,7 @@ impl GitCache {
                     }
                 }
                 Err(err) => {
-                    print_error!(
+                    crate::print_error!(
                         "Cannot retrieve Git statuses for directory {:?}: {}",
                         workdir,
                         err
@@ -96,7 +95,7 @@ impl GitCache {
         match std::fs::canonicalize(filepath) {
             Ok(filename) => Some(self.inner_get(&filename, is_directory)),
             Err(err) => {
-                print_error!("Cannot get git status for {:?}:  {}", filepath, err);
+                crate::print_error!("Cannot get git status for {:?}:  {}", filepath, err);
                 None
             }
         }

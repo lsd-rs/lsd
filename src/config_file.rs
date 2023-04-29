@@ -4,8 +4,8 @@ use crate::flags::layout::Layout;
 use crate::flags::permission::PermissionFlag;
 use crate::flags::size::SizeFlag;
 use crate::flags::sorting::{DirGrouping, SortColumn};
-use crate::flags::HyperlinkOption;
 use crate::flags::{ColorOption, ThemeOption};
+use crate::flags::{GitTheme, HyperlinkOption};
 ///! This module provides methods to handle the program's config files and operations related to
 ///! this.
 use crate::print_error;
@@ -45,7 +45,7 @@ pub struct Config {
     pub symlink_arrow: Option<String>,
     pub hyperlink: Option<HyperlinkOption>,
     pub header: Option<bool>,
-    pub git: Option<bool>,
+    pub git_theme: Option<GitTheme>,
 }
 
 #[derive(Eq, PartialEq, Debug, Deserialize)]
@@ -98,7 +98,7 @@ impl Config {
             symlink_arrow: None,
             hyperlink: None,
             header: None,
-            git: None,
+            git_theme: None,
         }
     }
 
@@ -325,6 +325,15 @@ hyperlink: never
 # == Symlink arrow ==
 # Specifies how the symlink arrow display, chars in both ascii and utf8
 symlink-arrow: ⇒
+
+# == Git ==
+  # How to display git status
+  # When "classic" is set, this is set to "default".
+  # Possible values: default, <theme-file-name>
+  # when specifying <theme-file-name>, lsd will look up theme file
+  # XDG Base Directory if relative, e.g. ~/.config/lsd/themes/<theme-file-name>.yaml,
+  # The file path if absolute
+git-theme: default
 "#;
 
 #[cfg(test)]
@@ -344,7 +353,7 @@ mod tests {
     use crate::flags::permission::PermissionFlag;
     use crate::flags::size::SizeFlag;
     use crate::flags::sorting::{DirGrouping, SortColumn};
-    use crate::flags::HyperlinkOption;
+    use crate::flags::{GitTheme, HyperlinkOption};
 
     #[test]
     fn test_read_default() {
@@ -391,7 +400,7 @@ mod tests {
                 symlink_arrow: Some("⇒".into()),
                 hyperlink: Some(HyperlinkOption::Never),
                 header: None,
-                git: None,
+                git_theme: Some(GitTheme::Default)
             },
             c
         );

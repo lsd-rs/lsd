@@ -103,7 +103,7 @@ classic: false
 # == Blocks ==
 # This specifies the columns and their order when using the long and the tree
 # layout.
-# Possible values: permission, user, group, context, size, date, name, inode, links
+# Possible values: permission, user, group, context, size, date, name, inode, links, git
 blocks:
   - permission
   - user
@@ -229,6 +229,19 @@ symlink-arrow: ⇒
 # Whether to display block headers.
 # Possible values: false, true
 header: false
+
+# == Git ==
+git:
+  # Whether to display git status
+  # Possible values: false, true
+  enabled: false
+  # How to display git status
+  # When "classic" is set, this is set to "default".
+  # Possible values: default, <theme-file-name>
+  # when specifying <theme-file-name>, lsd will look up theme file
+  # XDG Base Directory if relative, e.g. ~/.config/lsd/themes/<theme-file-name>.yaml,
+  # The file path if absolute
+  theme: default
 ```
 
 </details>

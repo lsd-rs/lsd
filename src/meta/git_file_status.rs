@@ -1,6 +1,6 @@
 use crate::color::{self, ColoredString, Colors};
 use crate::git::GitStatus;
-use crate::git_symbol::GitSymbols;
+use crate::git_theme::GitTheme;
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct GitFileStatus {
@@ -43,14 +43,14 @@ impl GitFileStatus {
         }
     }
 
-    pub fn render(&self, colors: &Colors, git_symbols: &GitSymbols) -> ColoredString {
+    pub fn render(&self, colors: &Colors, git_theme: &GitTheme) -> ColoredString {
         let res = [
             colors.colorize(
-                git_symbols.get_status(&self.index),
+                git_theme.get_symbol(&self.index),
                 &color::Elem::GitStatus { status: self.index },
             ),
             colors.colorize(
-                git_symbols.get_status(&self.workdir),
+                git_theme.get_symbol(&self.workdir),
                 &color::Elem::GitStatus {
                     status: self.workdir,
                 },
