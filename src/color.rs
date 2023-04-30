@@ -4,6 +4,7 @@ use lscolors::{Indicator, LsColors};
 use std::path::Path;
 
 pub use crate::flags::color::ThemeOption;
+use crate::git::GitStatus;
 use crate::theme::{color::ColorTheme, Theme};
 
 #[allow(dead_code)]
@@ -61,6 +62,10 @@ pub enum Elem {
     },
 
     TreeEdge,
+
+    GitStatus {
+        status: GitStatus,
+    },
 }
 
 impl Elem {
@@ -121,6 +126,7 @@ impl Elem {
             Elem::TreeEdge => theme.tree_edge,
             Elem::Links { valid: false } => theme.links.invalid,
             Elem::Links { valid: true } => theme.links.valid,
+            Elem::GitStatus { .. } => theme.git_status.default,
         }
     }
 }
@@ -389,6 +395,7 @@ mod elem {
                 invalid: Color::AnsiValue(245), // Grey
             },
             tree_edge: Color::AnsiValue(245), // Grey
+            git_status: Default::default(),
         }
     }
 

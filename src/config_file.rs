@@ -45,6 +45,7 @@ pub struct Config {
     pub symlink_arrow: Option<String>,
     pub hyperlink: Option<HyperlinkOption>,
     pub header: Option<bool>,
+    pub git: Option<bool>,
 }
 
 #[derive(Eq, PartialEq, Debug, Deserialize)]
@@ -97,6 +98,7 @@ impl Config {
             symlink_arrow: None,
             hyperlink: None,
             header: None,
+            git: None,
         }
     }
 
@@ -203,7 +205,7 @@ classic: false
 # == Blocks ==
 # This specifies the columns and their order when using the long and the tree
 # layout.
-# Possible values: permission, user, group, context, size, date, name, inode
+# Possible values: permission, user, group, context, size, date, name, inode, git
 blocks:
   - permission
   - user
@@ -388,7 +390,8 @@ mod tests {
                 total_size: Some(false),
                 symlink_arrow: Some("⇒".into()),
                 hyperlink: Some(HyperlinkOption::Never),
-                header: None
+                header: None,
+                git: None,
             },
             c
         );

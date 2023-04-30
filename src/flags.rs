@@ -3,6 +3,7 @@ pub mod color;
 pub mod date;
 pub mod dereference;
 pub mod display;
+pub mod git;
 pub mod header;
 pub mod hyperlink;
 pub mod icons;
@@ -17,7 +18,6 @@ pub mod symlink_arrow;
 pub mod symlinks;
 pub mod total_size;
 
-pub use blocks::Block;
 pub use blocks::Blocks;
 pub use color::Color;
 pub use color::{ColorOption, ThemeOption};
@@ -46,6 +46,7 @@ pub use total_size::TotalSize;
 
 use crate::app::Cli;
 use crate::config_file::Config;
+use crate::flags::git::Git;
 
 use clap::Error;
 
@@ -73,6 +74,7 @@ pub struct Flags {
     pub symlink_arrow: SymlinkArrow,
     pub hyperlink: HyperlinkOption,
     pub header: Header,
+    pub git: Git,
     pub should_quote: bool,
 }
 
@@ -103,6 +105,7 @@ impl Flags {
             symlink_arrow: SymlinkArrow::configure_from(cli, config),
             hyperlink: HyperlinkOption::configure_from(cli, config),
             header: Header::configure_from(cli, config),
+            git: Git::configure_from(cli, config),
             should_quote: true,
         })
     }

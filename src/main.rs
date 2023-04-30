@@ -33,6 +33,8 @@ mod config_file;
 mod core;
 mod display;
 mod flags;
+mod git;
+mod git_symbol;
 mod icon;
 mod meta;
 mod sort;

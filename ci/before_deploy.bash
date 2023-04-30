@@ -4,7 +4,7 @@
 set -ex
 
 build() {
-    cargo build --target "$TARGET" --release --verbose
+    cargo build --target "$TARGET" --features="$FEATURES" --release --verbose
 }
 
 pack() {

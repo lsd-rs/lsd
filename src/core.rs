@@ -1,7 +1,9 @@
 use crate::color::Colors;
 use crate::display;
 use crate::flags::{ColorOption, Display, Flags, HyperlinkOption, Layout, SortOrder, ThemeOption};
+use crate::git::GitCache;
 use crate::icon::Icons;
+
 use crate::meta::Meta;
 use crate::{print_error, print_output, sort, ExitCode};
 use std::path::PathBuf;
@@ -11,6 +13,8 @@ use std::io;
 #[cfg(not(target_os = "windows"))]
 use std::os::unix::io::AsRawFd;
 
+use crate::flags::blocks::Block;
+use crate::git_symbol::GitSymbols;
 #[cfg(target_os = "windows")]
 use terminal_size::terminal_size;
 
@@ -18,6 +22,7 @@ pub struct Core {
     flags: Flags,
     icons: Icons,
     colors: Colors,
+    git_symbols: GitSymbols,
     sorters: Vec<(SortOrder, sort::SortFn)>,
 }
 
@@ -46,6 +51,7 @@ impl Core {
 
         let icon_when = flags.icons.when;
         let icon_theme = flags.icons.theme.clone();
+        let git_theme = flags.icons.theme.clone();
 
         // TODO: Rework this so that flags passed downstream does not
         // have Auto option for any (icon, color, hyperlink).
@@ -75,6 +81,7 @@ impl Core {
             flags,
             colors: Colors::new(color_theme),
             icons: Icons::new(tty_available, icon_when, icon_theme, icon_separator),
+            git_symbols: GitSymbols::new(git_theme),
             sorters,
         }
     }
@@ -106,12 +113,19 @@ impl Core {
                 }
             };
 
+            let cache = if self.flags.blocks.0.contains(&Block::GitStatus) {
+                Some(GitCache::new(&path))
+            } else {
+                None
+            };
+
             let recurse =
                 self.flags.layout == Layout::Tree || self.flags.display != Display::DirectoryOnly;
             if recurse {
-                match meta.recurse_into(depth, &self.flags) {
+                match meta.recurse_into(depth, &self.flags, cache.as_ref()) {
                     Ok((content, path_exit_code)) => {
                         meta.content = content;
+                        meta.git_status = cache.and_then(|cache| cache.get(&meta.path, true));
                         meta_list.push(meta);
                         exit_code.set_if_greater(path_exit_code);
                     }
@@ -122,6 +136,7 @@ impl Core {
                     }
                 };
             } else {
+                meta.git_status = cache.and_then(|cache| cache.get(&meta.path, true));
                 meta_list.push(meta);
             };
         }
@@ -147,9 +162,21 @@ impl Core {
 
     fn display(&self, metas: &[Meta]) {
         let output = if self.flags.layout == Layout::Tree {
-            display::tree(metas, &self.flags, &self.colors, &self.icons)
+            display::tree(
+                metas,
+                &self.flags,
+                &self.colors,
+                &self.icons,
+                &self.git_symbols,
+            )
         } else {
-            display::grid(metas, &self.flags, &self.colors, &self.icons)
+            display::grid(
+                metas,
+                &self.flags,
+                &self.colors,
+                &self.icons,
+                &self.git_symbols,
+            )
         };
 
         print_output!("{}", output);

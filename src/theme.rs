@@ -1,4 +1,5 @@
 pub mod color;
+pub mod git_symbol;
 pub mod icon;
 
 use std::path::Path;
@@ -11,6 +12,7 @@ use crate::config_file;
 use crate::print_error;
 
 use color::ColorTheme;
+use git_symbol::GitSymbolTheme;
 use icon::IconTheme;
 
 #[derive(Debug, Deserialize, Default, PartialEq, Eq)]
@@ -20,6 +22,7 @@ use icon::IconTheme;
 pub struct Theme {
     pub color: ColorTheme,
     pub icon: IconTheme,
+    pub git_symbols: GitSymbolTheme,
 }
 
 #[derive(Error, Debug)]
