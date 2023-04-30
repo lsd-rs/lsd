@@ -37,6 +37,7 @@ mod icon;
 mod meta;
 mod sort;
 mod theme;
+mod versionsort;
 
 use clap::Parser;
 
