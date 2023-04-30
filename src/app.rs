@@ -96,6 +96,10 @@ pub struct Cli {
     #[arg(short = 'X', long)]
     pub extensionsort: bool,
 
+    /// Sort by git status
+    #[arg(short = 'G', long)]
+    pub gitsort: bool,
+
     /// Natural sort of (version) numbers within text
     #[arg(short = 'v', long)]
     pub versionsort: bool,
@@ -104,13 +108,13 @@ pub struct Cli {
     #[arg(
         long,
         value_name = "TYPE",
-        value_parser = ["size", "time", "version", "extension", "none"],
-        overrides_with_all = ["timesort", "sizesort", "extensionsort", "versionsort", "no_sort"]
+        value_parser = ["size", "time", "version", "extension", "git", "none"],
+        overrides_with_all = ["timesort", "sizesort", "extensionsort", "versionsort", "gitsort", "no_sort"]
     )]
     pub sort: Option<String>,
 
     /// Do not sort. List entries in directory order
-    #[arg(short = 'U', long, overrides_with_all = ["timesort", "sizesort", "extensionsort", "versionsort", "sort"])]
+    #[arg(short = 'U', long, overrides_with_all = ["timesort", "sizesort", "extensionsort", "versionsort", "gitsort", "sort"])]
     pub no_sort: bool,
 
     /// Reverse the order of the sort
@@ -127,9 +131,9 @@ pub struct Cli {
 
     /// Specify the blocks that will be displayed and in what order
     #[arg(
-        long,
-        value_delimiter = ',',
-        value_parser = ["permission", "user", "group", "context", "size", "date", "name", "inode", "links"],
+    long,
+    value_delimiter = ',',
+    value_parser = ["permission", "user", "group", "context", "size", "date", "name", "inode", "links", "git"],
     )]
     pub blocks: Vec<String>,
 
@@ -149,6 +153,11 @@ pub struct Cli {
     /// Display the index number of each file
     #[arg(short, long)]
     pub inode: bool,
+
+    /// Show git status on file and directory"
+    /// Only when used with --long option
+    #[arg(short, long)]
+    pub git: bool,
 
     /// When showing file information for a symbolic link,
     /// show information for the file the link references rather than for the link itself
@@ -196,15 +205,15 @@ pub fn validate_time_format(formatter: &str) -> Result<String, String> {
                     Some('f') => (),
                     Some(n @ ('3' | '6' | '9')) => match chars.next() {
                         Some('f') => (),
-                        Some(c) => return Err(format!("invalid format specifier: %.{}{}", n, c)),
+                        Some(c) => return Err(format!("invalid format specifier: %.{n}{c}")),
                         None => return Err("missing format specifier".to_owned()),
                     },
-                    Some(c) => return Err(format!("invalid format specifier: %.{}", c)),
+                    Some(c) => return Err(format!("invalid format specifier: %.{c}")),
                     None => return Err("missing format specifier".to_owned()),
                 },
                 Some(n @ (':' | '#')) => match chars.next() {
                     Some('z') => (),
-                    Some(c) => return Err(format!("invalid format specifier: %{}{}", n, c)),
+                    Some(c) => return Err(format!("invalid format specifier: %{n}{c}")),
                     None => return Err("missing format specifier".to_owned()),
                 },
                 Some(n @ ('-' | '_' | '0')) => match chars.next() {
@@ -212,7 +221,7 @@ pub fn validate_time_format(formatter: &str) -> Result<String, String> {
                         'C' | 'd' | 'e' | 'f' | 'G' | 'g' | 'H' | 'I' | 'j' | 'k' | 'l' | 'M' | 'm'
                         | 'S' | 's' | 'U' | 'u' | 'V' | 'W' | 'w' | 'Y' | 'y',
                     ) => (),
-                    Some(c) => return Err(format!("invalid format specifier: %{}{}", n, c)),
+                    Some(c) => return Err(format!("invalid format specifier: %{n}{c}")),
                     None => return Err("missing format specifier".to_owned()),
                 },
                 Some(
@@ -223,10 +232,10 @@ pub fn validate_time_format(formatter: &str) -> Result<String, String> {
                 ) => (),
                 Some(n @ ('3' | '6' | '9')) => match chars.next() {
                     Some('f') => (),
-                    Some(c) => return Err(format!("invalid format specifier: %{}{}", n, c)),
+                    Some(c) => return Err(format!("invalid format specifier: %{n}{c}")),
                     None => return Err("missing format specifier".to_owned()),
                 },
-                Some(c) => return Err(format!("invalid format specifier: %{}", c)),
+                Some(c) => return Err(format!("invalid format specifier: %{c}")),
                 None => return Err("missing format specifier".to_owned()),
             },
             None => break,
@@ -234,4 +243,20 @@ pub fn validate_time_format(formatter: &str) -> Result<String, String> {
         }
     }
     Ok(formatter.to_owned())
+}
+
+// Wrapper for value_parser to simply remove non supported option (mainly git flag)
+// required since value_parser requires impl Into<ValueParser> that Vec do not support
+// should be located here, since this file is included by build.rs
+struct LabelFilter<Filter: Fn(&'static str) -> bool, const C: usize>([&'static str; C], Filter);
+
+impl<Filter: Fn(&'static str) -> bool, const C: usize> From<LabelFilter<Filter, C>>
+    for clap::builder::ValueParser
+{
+    fn from(label_filter: LabelFilter<Filter, C>) -> Self {
+        let filter = label_filter.1;
+        let values = label_filter.0.into_iter().filter(|x| filter(x));
+        let inner = clap::builder::PossibleValuesParser::from(values);
+        Self::from(inner)
+    }
 }

@@ -96,6 +96,7 @@ pub struct ColorTheme {
     #[serde(deserialize_with = "deserialize_color")]
     pub tree_edge: Color,
     pub links: Links,
+    pub git_status: GitStatus,
 
     #[serde(skip)]
     pub file_type: FileType,
@@ -233,6 +234,15 @@ pub struct Links {
     pub invalid: Color,
 }
 
+#[derive(Debug, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "kebab-case")]
+#[serde(deny_unknown_fields)]
+#[serde(default)]
+pub struct GitStatus {
+    #[serde(deserialize_with = "deserialize_color")]
+    pub default: Color,
+}
+
 impl Default for Permission {
     fn default() -> Self {
         Permission {
@@ -324,6 +334,14 @@ impl Default for Links {
     }
 }
 
+impl Default for GitStatus {
+    fn default() -> Self {
+        GitStatus {
+            default: Color::AnsiValue(13), // Pink
+        }
+    }
+}
+
 impl Default for ColorTheme {
     fn default() -> Self {
         // TODO(zwpaper): check terminal color and return light or dark
@@ -343,6 +361,7 @@ impl ColorTheme {
             inode: INode::default(),
             links: Links::default(),
             tree_edge: Color::AnsiValue(245), // Grey
+            git_status: Default::default(),
         }
     }
 }

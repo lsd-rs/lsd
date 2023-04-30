@@ -17,7 +17,6 @@ pub mod symlink_arrow;
 pub mod symlinks;
 pub mod total_size;
 
-pub use blocks::Block;
 pub use blocks::Blocks;
 pub use color::Color;
 pub use color::{ColorOption, ThemeOption};

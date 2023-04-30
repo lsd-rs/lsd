@@ -66,6 +66,28 @@ impl Blocks {
             None => self.0.insert(0, Block::Context),
         }
     }
+
+    /// Checks whether `self` already contains a [Block] of variant [GitStatus](Block::GitSatus).
+    fn contains_git_status(&self) -> bool {
+        self.0.contains(&Block::GitStatus)
+    }
+
+    /// Put a [Block] of variant [GitStatus](Block::GitSatus) on the left of [GitStatus](Block::Name) to `self`.
+    fn add_git_status(&mut self) {
+        if let Some(position) = self.0.iter().position(|&b| b == Block::Name) {
+            self.0.insert(position, Block::GitStatus);
+        } else {
+            self.0.push(Block::GitStatus);
+        }
+    }
+
+    /// Prepends a [Block] of variant [GitStatus](Block::GitSatus), if `self` does not already contain a
+    /// Block of that variant.
+    fn optional_add_git_status(&mut self) {
+        if !self.contains_git_status() {
+            self.add_git_status()
+        }
+    }
 }
 
 impl Configurable<Self> for Blocks {
@@ -101,6 +123,10 @@ impl Configurable<Self> for Blocks {
         }
         if cli.inode {
             blocks.optional_prepend_inode();
+        }
+
+        if !cfg!(feature = "no-git") && cli.git && cli.long {
+            blocks.optional_add_git_status();
         }
 
         blocks
@@ -168,6 +194,7 @@ pub enum Block {
     Name,
     INode,
     Links,
+    GitStatus,
 }
 
 impl Block {
@@ -183,6 +210,7 @@ impl Block {
             Block::SizeValue => "SizeValue",
             Block::Date => "Date Modified",
             Block::Name => "Name",
+            Block::GitStatus => "Git",
         }
     }
 }
@@ -202,6 +230,7 @@ impl TryFrom<&str> for Block {
             "name" => Ok(Self::Name),
             "inode" => Ok(Self::INode),
             "links" => Ok(Self::Links),
+            "git" => Ok(Self::GitStatus),
             _ => Err(format!("Not a valid block name: {string}")),
         }
     }
@@ -369,6 +398,30 @@ mod test_blocks {
         let cli = Cli::try_parse_from(argv).unwrap();
         let test_blocks = Blocks(vec![Block::Permission, Block::Group, Block::Date]);
         assert_eq!(Blocks::from_cli(&cli), Some(test_blocks));
+    }
+
+    #[cfg(not(feature = "no-git"))]
+    #[test]
+    fn test_from_cli_implicit_add_git_block() {
+        let argv = vec![
+            "lsd",
+            "--blocks",
+            "permission,name,group,date",
+            "--git",
+            "--long",
+        ];
+        let cli = Cli::try_parse_from(argv).unwrap();
+        let test_blocks = Blocks(vec![
+            Block::Permission,
+            Block::GitStatus,
+            Block::Name,
+            Block::Group,
+            Block::Date,
+        ]);
+        assert_eq!(
+            Blocks::configure_from(&cli, &Config::with_none()),
+            test_blocks
+        );
     }
 
     #[test]
@@ -541,5 +594,11 @@ mod test_block {
         assert_eq!(Block::SizeValue.get_header(), "SizeValue");
         assert_eq!(Block::Date.get_header(), "Date Modified");
         assert_eq!(Block::Name.get_header(), "Name");
+        assert_eq!(Block::GitStatus.get_header(), "Git");
+    }
+
+    #[test]
+    fn test_git_status() {
+        assert_eq!(Ok(Block::GitStatus), Block::try_from("git"));
     }
 }

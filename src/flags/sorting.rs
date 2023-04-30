@@ -44,6 +44,7 @@ pub enum SortColumn {
     Time,
     Size,
     Version,
+    GitStatus,
 }
 
 impl Configurable<Self> for SortColumn {
@@ -62,6 +63,8 @@ impl Configurable<Self> for SortColumn {
             Some(Self::Extension)
         } else if cli.versionsort || sort == Some("version") {
             Some(Self::Version)
+        } else if cli.gitsort || sort == Some("git") {
+            Some(Self::GitStatus)
         } else if cli.no_sort || sort == Some("none") {
             Some(Self::None)
         } else {
@@ -213,6 +216,13 @@ mod test_sort_column {
     }
 
     #[test]
+    fn test_from_cli_git() {
+        let argv = ["lsd", "--gitsort"];
+        let cli = Cli::try_parse_from(argv).unwrap();
+        assert_eq!(Some(SortColumn::GitStatus), SortColumn::from_cli(&cli));
+    }
+
+    #[test]
     fn test_from_cli_version() {
         let argv = ["lsd", "--versionsort"];
         let cli = Cli::try_parse_from(argv).unwrap();
@@ -247,6 +257,14 @@ mod test_sort_column {
         let argv = ["lsd", "--sort", "none"];
         let cli = Cli::try_parse_from(argv).unwrap();
         assert_eq!(Some(SortColumn::None), SortColumn::from_cli(&cli));
+    }
+
+    #[cfg(not(feature = "no-git"))]
+    #[test]
+    fn test_from_arg_cli_sort_git() {
+        let argv = ["lsd", "--sort", "git"];
+        let cli = Cli::try_parse_from(argv).unwrap();
+        assert_eq!(Some(SortColumn::GitStatus), SortColumn::from_cli(&cli));
     }
 
     #[test]
@@ -333,6 +351,17 @@ mod test_sort_column {
             dir_grouping: None,
         });
         assert_eq!(Some(SortColumn::Version), SortColumn::from_config(&c));
+    }
+
+    #[test]
+    fn test_from_config_git_status() {
+        let mut c = Config::with_none();
+        c.sorting = Some(Sorting {
+            column: Some(SortColumn::GitStatus),
+            reverse: None,
+            dir_grouping: None,
+        });
+        assert_eq!(Some(SortColumn::GitStatus), SortColumn::from_config(&c));
     }
 }
 

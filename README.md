@@ -103,7 +103,7 @@ classic: false
 # == Blocks ==
 # This specifies the columns and their order when using the long and the tree
 # layout.
-# Possible values: permission, user, group, context, size, date, name, inode, links
+# Possible values: permission, user, group, context, size, date, name, inode, links, git
 blocks:
   - permission
   - user
