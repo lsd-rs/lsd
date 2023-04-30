@@ -214,6 +214,19 @@ mod test {
     }
 
     #[test]
+    fn test_unusual_test_case() {
+        let mut list = vec![
+            "a.txt", "b 1.txt", "b 10.txt", "b 11.txt", "b 5.txt", "Ssm.txt",
+        ];
+        list.sort_by(|a, b| compare(a, b));
+
+        assert_eq!(
+            list,
+            vec!["Ssm.txt", "a.txt", "b 1.txt", "b 5.txt", "b 10.txt", "b 11.txt",]
+        );
+    }
+
+    #[test]
     fn test_small_list() {
         let mut list = vec![
             "file_1.txt",
@@ -228,7 +241,7 @@ mod test {
             "file_001.txt",
         ];
 
-        list.sort_by(|a, b| compareXXX(a, b));
+        list.sort_by(|a, b| compare(a, b));
 
         assert_eq!(
             list,
@@ -335,7 +348,7 @@ mod test {
             "fileb202.txt",
             "fileb1002.txt",
         ];
-        original_list.sort_by(|a, b| compareXXX(a, b));
+        original_list.sort_by(|a, b| compare(a, b));
         let expected = vec![
             "file1.txt",
             "file1a.txt",
