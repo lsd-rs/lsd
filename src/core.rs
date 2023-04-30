@@ -51,7 +51,6 @@ impl Core {
 
         let icon_when = flags.icons.when;
         let icon_theme = flags.icons.theme.clone();
-        let git_theme = flags.git_theme.clone();
 
         // TODO: Rework this so that flags passed downstream does not
         // have Auto option for any (icon, color, hyperlink).
@@ -81,7 +80,7 @@ impl Core {
             flags,
             colors: Colors::new(color_theme),
             icons: Icons::new(tty_available, icon_when, icon_theme, icon_separator),
-            git_theme: GitTheme::new(git_theme),
+            git_theme: GitTheme::new(),
             sorters,
         }
     }

@@ -488,9 +488,7 @@ mod tests {
     use crate::app::Cli;
     use crate::color;
     use crate::color::Colors;
-    use crate::flags::{
-        GitTheme as GitFlagTheme, HyperlinkOption, IconOption, IconTheme as FlagTheme,
-    };
+    use crate::flags::{HyperlinkOption, IconOption, IconTheme as FlagTheme};
     use crate::icon::Icons;
     use crate::meta::{FileType, Name};
     use crate::Config;
@@ -697,7 +695,7 @@ mod tests {
             &flags,
             &Colors::new(color::ThemeOption::NoColor),
             &Icons::new(false, IconOption::Never, FlagTheme::Fancy, " ".to_string()),
-            &GitTheme::new(GitFlagTheme::Default),
+            &GitTheme::new(),
         );
 
         assert_eq!("one.d\n├── .hidden\n└── two\n", output);
@@ -729,7 +727,7 @@ mod tests {
             &flags,
             &Colors::new(color::ThemeOption::NoColor),
             &Icons::new(false, IconOption::Never, FlagTheme::Fancy, " ".to_string()),
-            &GitTheme::new(GitFlagTheme::Default),
+            &GitTheme::new(),
         );
 
         let length_before_b = |i| -> usize {
@@ -770,7 +768,7 @@ mod tests {
             &flags,
             &Colors::new(color::ThemeOption::NoColor),
             &Icons::new(false, IconOption::Never, FlagTheme::Fancy, " ".to_string()),
-            &GitTheme::new(GitFlagTheme::Default),
+            &GitTheme::new(),
         );
 
         assert_eq!(output.lines().nth(1).unwrap().chars().next().unwrap(), '└');
@@ -810,7 +808,7 @@ mod tests {
             &flags,
             &Colors::new(color::ThemeOption::NoColor),
             &Icons::new(false, IconOption::Never, FlagTheme::Fancy, " ".to_string()),
-            &GitTheme::new(GitFlagTheme::Default),
+            &GitTheme::new(),
         );
 
         assert!(output.ends_with("└── two\n"));
@@ -841,7 +839,7 @@ mod tests {
             &flags,
             &Colors::new(color::ThemeOption::NoColor),
             &Icons::new(false, IconOption::Never, FlagTheme::Fancy, " ".to_string()),
-            &GitTheme::new(GitFlagTheme::Default),
+            &GitTheme::new(),
         );
 
         dir.close().unwrap();
@@ -875,7 +873,7 @@ mod tests {
             &flags,
             &Colors::new(color::ThemeOption::NoColor),
             &Icons::new(false, IconOption::Never, FlagTheme::Fancy, " ".to_string()),
-            &GitTheme::new(GitFlagTheme::Default),
+            &GitTheme::new(),
         );
 
         dir.close().unwrap();

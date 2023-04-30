@@ -3,7 +3,6 @@ pub mod color;
 pub mod date;
 pub mod dereference;
 pub mod display;
-pub mod git_theme;
 pub mod header;
 pub mod hyperlink;
 pub mod icons;
@@ -24,7 +23,6 @@ pub use color::{ColorOption, ThemeOption};
 pub use date::DateFlag;
 pub use dereference::Dereference;
 pub use display::Display;
-pub use git_theme::GitTheme;
 pub use header::Header;
 pub use hyperlink::HyperlinkOption;
 pub use icons::IconOption;
@@ -74,7 +72,6 @@ pub struct Flags {
     pub symlink_arrow: SymlinkArrow,
     pub hyperlink: HyperlinkOption,
     pub header: Header,
-    pub git_theme: GitTheme,
     pub should_quote: bool,
 }
 
@@ -105,7 +102,6 @@ impl Flags {
             symlink_arrow: SymlinkArrow::configure_from(cli, config),
             hyperlink: HyperlinkOption::configure_from(cli, config),
             header: Header::configure_from(cli, config),
-            git_theme: GitTheme::configure_from(cli, config),
             should_quote: true,
         })
     }

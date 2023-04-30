@@ -1,23 +1,13 @@
-use crate::flags::GitTheme as GitFlagTheme;
 use crate::git::GitStatus;
 use crate::theme::git::GitThemeSymbols;
-use crate::theme::Theme;
-use std::path::Path;
 
 pub struct GitTheme {
     symbols: GitThemeSymbols,
 }
 
 impl GitTheme {
-    pub fn new(theme: GitFlagTheme) -> GitTheme {
-        let git_symbols = match theme {
-            GitFlagTheme::Default => GitThemeSymbols::default(),
-            GitFlagTheme::Custom(ref file) => Theme::from_path::<GitThemeSymbols>(
-                Path::new("themes").join(file).to_str().unwrap_or(file),
-            )
-            .unwrap_or_default(),
-        };
-
+    pub fn new() -> GitTheme {
+        let git_symbols = GitThemeSymbols::default();
         Self {
             symbols: git_symbols,
         }
