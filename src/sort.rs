@@ -1,7 +1,7 @@
 use crate::flags::{DirGrouping, Flags, SortColumn, SortOrder};
 use crate::meta::Meta;
-use std::cmp::Ordering;
 use crate::versionsort::compare;
+use std::cmp::Ordering;
 
 pub type SortFn = fn(&Meta, &Meta) -> Ordering;
 

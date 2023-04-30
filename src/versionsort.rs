@@ -18,7 +18,6 @@ pub fn compare_version_sort(a: &str, b: &str) -> Ordering {
         let (a_digit_part, out_a) = digit_seq(remainder_a);
         let (b_digit_part, out_b) = digit_seq(remainder_b);
 
-
         let a_digits = a_digit_part.parse::<u64>().unwrap_or_default();
         let b_digits = b_digit_part.parse::<u64>().unwrap_or_default();
         let cmp = a_digits.cmp(&b_digits);
@@ -67,10 +66,9 @@ fn split_extension(s: &str) -> (&str, &str) {
             let (a, b) = s.split_at(m.start());
             (a, b)
         }
-        None => (s, "")
+        None => (s, ""),
     }
 }
-
 
 #[derive(Eq)]
 struct VersionSortChar(Option<char>);
@@ -161,7 +159,6 @@ fn digit_seq(a: &str) -> (&str, &str) {
     (&a[..ind], &a[ind..])
 }
 
-
 #[cfg(test)]
 mod test {
     use super::*;
@@ -171,45 +168,34 @@ mod test {
         // Examples from https://github.com/coreutils/coreutils/blob/master/doc/sort-version.texi
         assert_eq!(split_extension("hello-8.txt"), ("hello-8", ".txt"));
         assert_eq!(split_extension("hello-8.2.txt"), ("hello-8.2", ".txt"));
-        assert_eq!(split_extension("hello-8.0.12.tar.gz"), ("hello-8.0.12", ".tar.gz"));
+        assert_eq!(
+            split_extension("hello-8.0.12.tar.gz"),
+            ("hello-8.0.12", ".tar.gz")
+        );
         assert_eq!(split_extension("hello-8.2"), ("hello-8.2", ""));
         assert_eq!(split_extension("hello.foobar65"), ("hello", ".foobar65"));
-        assert_eq!(split_extension("gcc-c++-10.8.12-0.7rc2.fc9.tar.bz2"), ("gcc-c++-10.8.12-0.7rc2", ".fc9.tar.bz2"));
+        assert_eq!(
+            split_extension("gcc-c++-10.8.12-0.7rc2.fc9.tar.bz2"),
+            ("gcc-c++-10.8.12-0.7rc2", ".fc9.tar.bz2")
+        );
         assert_eq!(split_extension(".autom4te.cfg"), ("", ".autom4te.cfg"));
     }
 
     #[test]
     fn test_non_digit_sorting() {
-        let mut list = vec![
-            "aaa",
-            "aa",
-            "aab",
-            "aa&",
-            "aa_",
-            "aa~",
-            "a",
-        ];
+        let mut list = vec!["aaa", "aa", "aab", "aa&", "aa_", "aa~", "a"];
         list.sort_by(|a, b| compare_non_digit_seq(a, b));
 
         assert_eq!(
             list,
             vec![
                 // Absolute shortest comes first
-                "a",
-
-                // Tilde comes before empty string
-                "aa~",
-                "aa",
-
-                // ASCII letters come before other bytes
-                "aaa",
-                "aab",
-                "aa&",
-                "aa_",
+                "a", // Tilde comes before empty string
+                "aa~", "aa", // ASCII letters come before other bytes
+                "aaa", "aab", "aa&", "aa_",
             ]
         );
     }
-
 
     #[test]
     fn test_non_digit_seq() {
