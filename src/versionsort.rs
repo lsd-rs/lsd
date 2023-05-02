@@ -28,6 +28,7 @@ pub fn compare_version_sort(a: &str, b: &str) -> Ordering {
         remainder_a = out_a;
         remainder_b = out_b;
 
+        // If any or both strings have been exhausted we can determine the ordering.
         if remainder_a.is_empty() && remainder_b.is_empty() {
             return Ordering::Equal;
         }
@@ -40,25 +41,30 @@ pub fn compare_version_sort(a: &str, b: &str) -> Ordering {
     }
 }
 
+/// compare implements GNU version-sort.
 pub fn compare(a: &str, b: &str) -> Ordering {
     let (a_str, _) = split_extension(a);
     let (b_str, _) = split_extension(b);
-    // compare without the file extensions
+    // Compare without the file extensions
     let cmp = compare_version_sort(a_str, b_str);
     if cmp != Ordering::Equal {
         return cmp;
     }
-    // compare with the file extensions
+    // Compare with the file extensions
     let cmp = compare_version_sort(a, b);
     if cmp != Ordering::Equal {
         return cmp;
     }
-    // at this point the file extensions are the same, so we compare the full strings.
-    // this helps with cases like a0001 and a1
+    // At this point the file extensions are the same, so we compare the full strings.
+    // this helps with cases like a0001 and a1 so that they have a consistent ordering.
     a.cmp(b)
 }
 
 fn split_extension(s: &str) -> (&str, &str) {
+    // According to GNU sort, an extension is defined as a dot, followed by an
+    // ASCII letter or tilde, followed by zero or more ASCII letters, digits,
+    // or tildes; all repeated zero or more times, and ending at string end.
+    // The regex is from https://github.com/coreutils/coreutils/blob/master/doc/sort-version.texi#L584-L591
     let re = Regex::new(r"(\.[A-Za-z~][A-Za-z0-9~]*)*$").unwrap();
 
     match re.find(s) {
