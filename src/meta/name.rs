@@ -120,7 +120,7 @@ impl Name {
                         if let Ok(url) = Url::from_file_path(rp) {
                             // Crossterm does not support hyperlinks as of now
                             // https://gist.github.com/egmontkob/eb114294efbcd5adb1944c9f3cb5feda
-                            format!("\x1B]8;;{}\x1B\x5C{}\x1B]8;;\x1B\x5C", url, name)
+                            format!("\x1B]8;;{url}\x1B\x5C{name}\x1B]8;;\x1B\x5C")
                         } else {
                             print_error!("{}: unable to form url.", name);
                             name

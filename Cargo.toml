@@ -21,7 +21,7 @@ clap_complete = "4.1"
 version_check = "0.9.*"
 
 [dependencies]
-crossterm = { version = "0.24.0", features = ["serde"]}
+crossterm = { version = "0.24.0", features = ["serde"] }
 dirs = "3.0.*"
 libc = "0.2.*"
 human-sort = "0.2.2"
@@ -42,6 +42,10 @@ serde = { version = "1.0", features = ["derive"] }
 serde_yaml = "0.8"
 url = "2.1.*"
 
+[target."cfg(not(all(windows, target_arch = \"x86\", target_env = \"gnu\")))".dependencies]
+# if ssl feature is enabled compilation will fail on arm-unknown-linux-gnueabihf and i686-pc-windows-gnu
+git2 = { version = "0.16", optional = true, default-features = false }
+
 [target.'cfg(unix)'.dependencies]
 users = "0.11.*"
 xattr = "0.2.*"
@@ -61,7 +65,9 @@ tempfile = "3"
 serial_test = "0.5"
 
 [features]
+default = ["git2"]
 sudo = []
+no-git = [] # force disabling git even if available by default
 
 [profile.release]
 lto = true

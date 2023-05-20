@@ -34,4 +34,15 @@ fn main() {
     generate_to(Zsh, &mut app, bin_name, &outdir).expect("Failed to generate Zsh completions");
     generate_to(PowerShell, &mut app, bin_name, &outdir)
         .expect("Failed to generate PowerShell completions");
+
+    // Disable git feature for these target where git2 is not well supported
+    if !std::env::var("CARGO_FEATURE_GIT2")
+        .map(|flag| flag == "1")
+        .unwrap_or(false)
+        || std::env::var("TARGET")
+            .map(|target| target == "i686-pc-windows-gnu")
+            .unwrap_or(false)
+    {
+        println!(r#"cargo:rustc-cfg=feature="no-git""#);
+    }
 }
