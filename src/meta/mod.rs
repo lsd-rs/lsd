@@ -92,18 +92,25 @@ impl Meta {
         if matches!(flags.display, Display::All | Display::SystemProtected)
             && flags.layout != Layout::Tree
         {
-            let mut current_meta = self.clone();
-            current_meta.name.name = ".".to_owned();
+            if !flags.ignore_globs.0.is_match(".") {
+                let mut current_meta = self.clone();
+                current_meta.name.name = ".".to_owned();
 
-            let mut parent_meta =
-                Self::from_path(&self.path.join(Component::ParentDir), flags.dereference.0)?;
-            parent_meta.name.name = "..".to_owned();
+                current_meta.git_status =
+                    cache.and_then(|cache| cache.get(&current_meta.path, true));
 
-            current_meta.git_status = cache.and_then(|cache| cache.get(&current_meta.path, true));
-            parent_meta.git_status = cache.and_then(|cache| cache.get(&parent_meta.path, true));
+                content.push(current_meta);
+            }
 
-            content.push(current_meta);
-            content.push(parent_meta);
+            if !flags.ignore_globs.0.is_match("..") {
+                let mut parent_meta =
+                    Self::from_path(&self.path.join(Component::ParentDir), flags.dereference.0)?;
+                parent_meta.name.name = "..".to_owned();
+
+                parent_meta.git_status = cache.and_then(|cache| cache.get(&parent_meta.path, true));
+
+                content.push(parent_meta);
+            }
         }
 
         let mut exit_code = ExitCode::OK;
