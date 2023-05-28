@@ -121,10 +121,8 @@ color:
   when: auto
   # How to colorize the output.
   # When "classic" is set, this is set to "no-color".
-  # Possible values: default, <theme-file-name>
-  # when specifying <theme-file-name>, lsd will look up theme file
-  # XDG Base Directory if relative, e.g. ~/.config/lsd/themes/<theme-file-name>.yaml,
-  # The file path if absolute
+  # Possible values: default, custom
+  # When "custom" is set, lsd will look in the config directory for `colors.conf`.
   theme: default
 
 # == Date ==
@@ -243,9 +241,13 @@ Color theme can be configured in the [configuration file](#configuration)(color.
 The valid theme configurations are:
 
 - `default`: the default color scheme shipped in `lsd`
-- theme-file-name(yaml): use the theme file to specify colors(without the `yaml` extension)
+- `custom`: use a custom color scheme defined in `colors.yaml`
+- *(deprecated) theme_file_name(yaml): use the theme file to specify colors(without the `yaml` extension)*
 
-when configured with the `theme-file-name` which is a `yaml` file,
+When set to `custom`, `lsd` will look for `colors.yaml` in the 
+XDG Base Directory, e.g. ~/.config/lsd/colors.yaml
+
+When configured with the `theme-file-name` which is a `yaml` file,
 `lsd` will look up the theme file in the following way:
 
 - relative name: check the XDG Base Directory, e.g. ~/.config/lsd/themes/<theme-file-name>.yaml
