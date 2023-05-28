@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fix obsolete Nerd Font icons from [Han Yeong-woo](https://github.com/nix6839)
 
 ### Fixed
+- `profile` and `.profile` now share the same icon
 - Do not quote filename when piping into another program from [TeamTamoad](https://github.com/TeamTamoad)
 - Respect `hidden` flag on Windows [#752](https://github.com/Peltoche/lsd/issues/752)
 - Do not show every file are `executable` (green) on Windows

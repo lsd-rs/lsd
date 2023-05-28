@@ -251,7 +251,7 @@ impl IconTheme {
             (".pki", "\u{f023}"),               // ""
             ("portage", "\u{e5fc}"),            // ""
             ("profile", "\u{e615}"),            // ""
-            (".profile", "\u{f018d}"),          // "󰆍"
+            (".profile", "\u{e615}"),           // ""
             ("public", "\u{f415}"),             // ""
             ("__pycache__", "\u{f0320}"),       // "󰌠"
             (".python_history", "\u{e606}"),    // ""
