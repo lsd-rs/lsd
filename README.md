@@ -122,7 +122,7 @@ color:
   # How to colorize the output.
   # When "classic" is set, this is set to "no-color".
   # Possible values: default, custom
-  # When "custom" is set, lsd will look in the config directory for `colors.conf`.
+  # When "custom" is set, lsd will look in the config directory for `colors.yaml`.
   theme: default
 
 # == Date ==
