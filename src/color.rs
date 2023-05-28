@@ -5,7 +5,7 @@ use std::path::Path;
 
 pub use crate::flags::color::ThemeOption;
 use crate::git::GitStatus;
-use crate::{print_output};
+use crate::print_output;
 use crate::theme::{color::ColorTheme, Theme};
 
 #[allow(dead_code)]
@@ -144,18 +144,16 @@ impl Colors {
         let theme = match t {
             ThemeOption::NoColor => None,
             ThemeOption::Default | ThemeOption::NoLscolors => Some(Theme::default().color),
-            ThemeOption::Custom => {
-                Some(
-                    Theme::from_path::<ColorTheme>(
-                        Path::new("colors.yaml").to_str().unwrap()
-                    )
+            ThemeOption::Custom => Some(
+                Theme::from_path::<ColorTheme>(Path::new("colors").to_str().unwrap())
                     .unwrap_or_default(),
-                )
-            }
+            ),
             ThemeOption::CustomLegacy(ref file) => {
-                print_output!("Warning: the 'themes' directory is deprecated, use 'colors.yaml' instead.");
+                print_output!(
+                    "Warning: the 'themes' directory is deprecated, use 'colors.yaml' instead."
+                );
                 // TODO: drop the `themes` dir prefix, adding it here only for backwards compatibility
-                Some(                    
+                Some(
                     Theme::from_path::<ColorTheme>(
                         Path::new("themes").join(file).to_str().unwrap_or(file),
                     )
@@ -164,7 +162,7 @@ impl Colors {
             }
         };
         let lscolors = match t {
-            ThemeOption::Default | ThemeOption::CustomLegacy(_) => {
+            ThemeOption::Default | ThemeOption::Custom | ThemeOption::CustomLegacy(_) => {
                 Some(LsColors::from_env().unwrap_or_default())
             }
             _ => None,
