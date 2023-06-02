@@ -293,6 +293,17 @@ links:
   valid: 13
   invalid: 245
 tree-edge: 245
+git-status:
+  default: 245
+  unmodified: 245
+  ignored: 245
+  new-in-index: dark_green
+  new-in-workdir: dark_green
+  typechange: dark_yellow
+  deleted: dark_red
+  renamed: dark_green
+  modified: dark_yellow
+  conflicted: dark_red
 ```
 
 When creating a theme for `lsd`, you can specify any part of the default theme,

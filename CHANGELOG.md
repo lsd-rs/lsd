@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
+- Add complete color theming support for Git [k4yt3x](https://github.com/k4yt3x]
 - Add [Git integration](https://github.com/Peltoche/lsd/issues/7) from [hpwxf](https://github.com/hpwxf)
 - In keeping with the coreutils change, add quotes and escapes for necessary filenames from [merelymyself](https://github.com/merelymyself)
 - Add support for icon theme from [zwpaper](https://github.com/zwpaper)
