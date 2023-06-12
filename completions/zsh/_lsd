@@ -1,0 +1,52 @@
+#compdef lsd
+
+# Save this file as _lsd in /usr/local/share/zsh/site-functions or in any
+# other folder in $fpath.  E.g. save it in a folder called ~/.zfunc and add a
+# line containing `fpath=(~/.zfunc $fpath)` somewhere before `compinit` in your
+# ~/.zshrc.
+
+__lsd() {
+  _arguments -s -S \
+    {-1,--oneline}"[Display one entry per line]" \
+    {-a,--all}"[Do not ignore entries starting with .]" \
+    {-A,--almost-all}"[Do not list implied . and ..]" \
+    --blocks"[Specify the blocks that will be displayed and in what order]:(blocks):(permission user group context size date name inode links)" \
+    --classic"[Enable classic mode (display output similar to ls)]" \
+    --color="[When to use terminal colours]:(color):(always auto never)" \
+    --config-file"[Provide a custom lsd configuration file]" \
+    {-d,--directory-only}"[Display directories themselves, and not their contents (recursively when used with --tree)]" \
+    --date"[How to display date]:(date):(date relative +date-time-format)" \
+    --depth="[stop recursing into directories after reaching specified depth]:(depth):(0 1 2 3 4 5 6 7 8 9)" \
+    {-F,--classify}"[Append indicator (one of */=>@|) at the end of the file names]" \
+    --group-directories-first"[Groups the directories at the top before the files. Same as --group-dirs=first ]" \
+    --group-dirs="[Sort the directories then the files]:(group dirs):(none first last)" \
+    {-h,--human-readable}"[For ls compatibility purposes ONLY, currently set by default]" \
+    --header"[Display block headers]" \
+    --help"[Print help information]" \
+    --hyperlink="[Attach hyperlink to filenames]:(hyperlink):(always auto never)" \
+    {-i,--inode}"[Display the index number of each file]" \
+    {-I,--ignore-glob}"[Do not display files/directories with names matching the glob pattern(s). More than one can be specified by repeating the argument ]" \
+    --icon="[When to print the icons]:(icon):(always auto never)" \
+    --icon-theme="[Whether to use fancy or unicode icons]:(icon theme):(fancy unicode)" \
+    --ignore-config"[Ignore the configuration file]" \
+    {-l,--long}"[Display extended file metadata as a table]" \
+    {-L,--dereference}"[When showing file information for a symbolic link, show information for the file the link references rather than for the link itself]" \
+    --no-symlink"[Do not display symlink target]" \
+    --permission="[How to display permissions]:(permission):(rwx octal)" \
+    {-r,--reverse}"[Reverse the order of the sort]" \
+    {-R,--recursive}"[Recurse into directories]" \
+    {-S,--sizesort}"[Sort by size]" \
+    --size="[How to display size]:(size):(default short bytes)" \
+    --sort="[sort by WORD instead of name]:(sort):(size time version extension none)" \
+    {-t,--timesort}"[Sort by time modified]" \
+    --total-size"[Display the total size of directories]" \
+    --tree"[Recurse into directories and present the result as a tree]" \
+    {-U,--no-sort}"[Do not sort. List entries in directory order]" \
+    {-v,--versionsort}"[Natural sort of (version) numbers within text]" \
+    {-V,--version}"[Print version information]" \
+    {-X,--extensionsort}"[Sort by file extension]" \
+    {-Z,--context}"[Print security context (label) of each file]" \
+    '*:filename:_files'
+}
+
+__lsd

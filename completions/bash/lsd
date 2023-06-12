@@ -1,0 +1,93 @@
+# Place the content of this file in .bashrc or related bash configuration files, or activate the file by using the source command in the configuration file
+
+parse_long() {
+  local -n pl_ret="$1"
+  pl_ret=()
+  local -A lt
+  local exp_l='(\-\-[[:alnum:]-]+)'
+  : "$(lsd --help)"
+  for res_l in ${_}
+  do
+     [[ "$res_l" =~ $exp_l ]] && { [[ -z ${lt[${BASH_REMATCH[1]}]} ]] && lt[${BASH_REMATCH[1]}]=1; }
+  done
+  read -ra pl_ret <<< "${!lt[@]}" 
+}
+
+parse_short() {
+  local -n ps_ret="$1"
+  ps_ret=()
+  local -A st
+  local exp_s='(^\s*?\-\w)'
+  : "$(lsd --help)"
+  for res_s in ${_}
+  do
+    [[ "$res_s" =~ $exp_s ]] && { [[ -z ${st[${BASH_REMATCH[1]}]} ]] && st[${BASH_REMATCH[1]}]=1; }
+  done
+  read -ra ps_ret <<< "${!st[@]}" 
+}
+
+_lsd() {
+  cur=${COMP_WORDS[COMP_CWORD]}
+  pre=${COMP_WORDS[COMP_CWORD-1]}
+  case "$pre" in
+    --blocks)
+      COMPREPLY=( $(compgen -W 'permission user group context size date name inode links' -- "$cur" ) )
+      return
+      ;;
+    --color)
+      COMPREPLY=( $(compgen -W 'always auto never' -- "$cur" ) )
+      return
+      ;;
+    --date)
+      COMPREPLY=( $(compgen -W 'date relative +date-time-format' -- "$cur" ) )
+      return
+      ;;
+    --depth)
+      COMPREPLY=( $(compgen -W '{0..9}' -- "$cur" ) )
+      return
+      ;;
+    --group-dirs)
+      COMPREPLY=( $(compgen -W 'none first last' -- "$cur" ) )
+      return
+      ;;
+    --hyperlink)
+      COMPREPLY=( $(compgen -W 'never always auto' -- "$cur" ) )
+      return
+      ;;
+    --icon)
+      COMPREPLY=( $(compgen -W 'always auto never' -- "$cur" ) )
+      return
+      ;;
+    --icon-theme)
+      COMPREPLY=( $(compgen -W 'fancy unicode' -- "$cur" ) )
+      return
+      ;;
+    --permission)
+      COMPREPLY=( $(compgen -W 'rwx octal' -- "$cur" ) )
+      return
+      ;;
+    --size)
+      COMPREPLY=( $(compgen -W 'default short bytes' -- "$cur" ) )
+      return
+      ;;
+    --sort)
+      COMPREPLY=( $(compgen -W 'size time version extension none' -- "$cur" ) )
+      return
+      ;;
+  esac
+
+  case "$cur" in
+    --*)
+        parse_long matched_long
+        COMPREPLY=( $(compgen -W "${matched_long[*]}" -- "$cur" ) )
+      ;;
+    -*)
+        parse_short matched_short
+        COMPREPLY=( $(compgen -W "${matched_short[*]}" -- "$cur" ) )
+      ;;
+    *)
+      _filedir
+      ;;
+  esac
+} &&
+complete -o filenames -o bashdefault -F _lsd lsd
