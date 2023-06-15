@@ -89,7 +89,17 @@ impl Size {
     fn paint(&self, colors: &Colors, flags: &Flags, content: String) -> ColoredString {
         let unit = self.get_unit(flags);
         let elem = match unit {
-            Unit::Byte | Unit::Kilo => &Elem::FileSmall,
+            Unit::Byte => {
+                let bytes = self.get_bytes();
+                if bytes >= GB {
+                    &Elem::FileLarge
+                } else if bytes >= MB {
+                    &Elem::FileMedium
+                } else {
+                    &Elem::FileSmall
+                }
+            }
+            Unit::Kilo => &Elem::FileSmall,
             Unit::Mega => &Elem::FileMedium,
             _ => &Elem::FileLarge,
         };
