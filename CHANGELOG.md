@@ -28,6 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Handle dereference (-L) with broken symlink from [r3dArch](https://github.com/r3dArch)
 - Avoid using Clap's deprecated structs and functions [sudame](https://github.com/sudame)
 - Icon theme with overrides from config [sudame](https://github.com/sudame)
+- Incorrect colorizing with `--size=bytes` [bells307](https://github.com/bells307)
 
 ## [0.23.1] - 2022-09-13
 
