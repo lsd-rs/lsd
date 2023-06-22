@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fix obsolete Nerd Font icons from [Han Yeong-woo](https://github.com/nix6839)
 
 ### Fixed
+- `profile` and `.profile` now share the same icon from [Aaron Lichtman](https://github.com/alichtman)
 - Make tox.ini files use the gear/settings icon ([#859](https://github.com/lsd-rs/lsd/pull/859))
 - Do not quote filename when piping into another program from [TeamTamoad](https://github.com/TeamTamoad)
 - Respect `hidden` flag on Windows [#752](https://github.com/Peltoche/lsd/issues/752)
