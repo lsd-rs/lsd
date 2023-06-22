@@ -86,12 +86,15 @@ impl Size {
         ColoredString::new(Colors::default_style(), res)
     }
 
-    fn paint(&self, colors: &Colors, flags: &Flags, content: String) -> ColoredString {
-        let unit = self.get_unit(flags);
-        let elem = match unit {
-            Unit::Byte | Unit::Kilo => &Elem::FileSmall,
-            Unit::Mega => &Elem::FileMedium,
-            _ => &Elem::FileLarge,
+    fn paint(&self, colors: &Colors, content: String) -> ColoredString {
+        let bytes = self.get_bytes();
+
+        let elem = if bytes >= GB {
+            &Elem::FileLarge
+        } else if bytes >= MB {
+            &Elem::FileMedium
+        } else {
+            &Elem::FileSmall
         };
 
         colors.colorize(content, elem)
@@ -100,7 +103,7 @@ impl Size {
     pub fn render_value(&self, colors: &Colors, flags: &Flags) -> ColoredString {
         let content = self.value_string(flags);
 
-        self.paint(colors, flags, content)
+        self.paint(colors, content)
     }
 
     pub fn value_string(&self, flags: &Flags) -> String {
@@ -118,7 +121,7 @@ impl Size {
     pub fn render_unit(&self, colors: &Colors, flags: &Flags) -> ColoredString {
         let content = self.unit_string(flags);
 
-        self.paint(colors, flags, content)
+        self.paint(colors, content)
     }
 
     pub fn unit_string(&self, flags: &Flags) -> String {

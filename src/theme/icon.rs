@@ -280,7 +280,7 @@ impl IconTheme {
             ("sudoers", "\u{f023}"),            // ""
             ("sxhkdrc", "\u{e615}"),            // ""
             ("tigrc", "\u{e615}"),              // ""
-            ("tox.ini", "\u{f0320}"),           // "󰌠"
+            ("tox.ini", "\u{e615}"),            // ""
             (".trash", "\u{f1f8}"),             // ""
             ("ts", "\u{e628}"),                 // ""
             ("unlicense", "\u{e60a}"),          // ""
