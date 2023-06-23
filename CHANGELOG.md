@@ -31,6 +31,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Icon theme with overrides from config [sudame](https://github.com/sudame)
 - Incorrect colorizing with `--size=bytes` [bells307](https://github.com/bells307)
 
+### Changed
+- Color theme is now expected to be in `$XDG/lsd/colors.yaml` by default from [peppidesu](https://github.com/peppidesu)
+  Legacy behaviour (`themes` folder) is marked as deprecated but is still supported.
+  [#749](https://github.com/lsd-rs/lsd/issues/749)
+
 ## [0.23.1] - 2022-09-13
 
 ### Fixed

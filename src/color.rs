@@ -5,6 +5,7 @@ use std::path::Path;
 
 pub use crate::flags::color::ThemeOption;
 use crate::git::GitStatus;
+use crate::print_output;
 use crate::theme::{color::ColorTheme, Theme};
 
 #[allow(dead_code)]
@@ -143,7 +144,14 @@ impl Colors {
         let theme = match t {
             ThemeOption::NoColor => None,
             ThemeOption::Default | ThemeOption::NoLscolors => Some(Theme::default().color),
-            ThemeOption::Custom(ref file) => {
+            ThemeOption::Custom => Some(
+                Theme::from_path::<ColorTheme>(Path::new("colors").to_str().unwrap())
+                    .unwrap_or_default(),
+            ),
+            ThemeOption::CustomLegacy(ref file) => {
+                print_output!(
+                    "Warning: the 'themes' directory is deprecated, use 'colors.yaml' instead."
+                );
                 // TODO: drop the `themes` dir prefix, adding it here only for backwards compatibility
                 Some(
                     Theme::from_path::<ColorTheme>(
@@ -154,7 +162,7 @@ impl Colors {
             }
         };
         let lscolors = match t {
-            ThemeOption::Default | ThemeOption::Custom(_) => {
+            ThemeOption::Default | ThemeOption::Custom | ThemeOption::CustomLegacy(_) => {
                 Some(LsColors::from_env().unwrap_or_default())
             }
             _ => None,
@@ -316,17 +324,25 @@ mod tests {
     }
 
     #[test]
-    fn test_color_new_default_theme() {
+    fn test_color_new_custom_theme() {
         assert_eq!(
-            Colors::new(ThemeOption::Default).theme,
+            Colors::new(ThemeOption::Custom).theme,
             Some(ColorTheme::default_dark()),
         );
     }
 
     #[test]
-    fn test_color_new_bad_custom_theme() {
+    fn test_color_new_custom_no_file_theme() {
         assert_eq!(
-            Colors::new(ThemeOption::Custom("not-existed".to_string())).theme,
+            Colors::new(ThemeOption::Custom).theme,
+            Some(ColorTheme::default_dark()),
+        );
+    }
+
+    #[test]
+    fn test_color_new_bad_legacy_custom_theme() {
+        assert_eq!(
+            Colors::new(ThemeOption::CustomLegacy("not-existed".to_string())).theme,
             Some(ColorTheme::default_dark()),
         );
     }
