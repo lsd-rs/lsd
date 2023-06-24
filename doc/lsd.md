@@ -163,3 +163,6 @@ lsd is a ls command with a lot of pretty colours and some other stuff to enrich 
 
 `XDG_CONFIG_HOME`
 : Used to locate optional config file. If `XDG_CONFIG_HOME` is set, use `$XDG_CONFIG_HOME/lsd/config.yaml` else `$HOME/.config/lsd/config.yaml`.
+
+`SHELL_COMPLETIONS_DIR` or `OUT_DIR`
+: Used to specify the directory for generating a shell completions file. If neither are set, no completions file will be generated. The directory will be created if it does not exist.
