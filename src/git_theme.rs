@@ -29,3 +29,28 @@ impl GitTheme {
         symbol.to_string()
     }
 }
+
+#[test]
+fn test_git_get_symbol() {
+    let git_theme = GitTheme::new();
+    let mut git_status = GitStatus::Default;
+    assert_eq!(git_theme.get_symbol(&git_status), "-".to_string());
+    git_status = GitStatus::Unmodified;
+    assert_eq!(git_theme.get_symbol(&git_status), ".".to_string());
+    git_status = GitStatus::Ignored;
+    assert_eq!(git_theme.get_symbol(&git_status), "I".to_string());
+    git_status = GitStatus::NewInIndex;
+    assert_eq!(git_theme.get_symbol(&git_status), "N".to_string());
+    git_status = GitStatus::NewInWorkdir;
+    assert_eq!(git_theme.get_symbol(&git_status), "?".to_string());
+    git_status = GitStatus::Typechange;
+    assert_eq!(git_theme.get_symbol(&git_status), "T".to_string());
+    git_status = GitStatus::Deleted;
+    assert_eq!(git_theme.get_symbol(&git_status), "D".to_string());
+    git_status = GitStatus::Renamed;
+    assert_eq!(git_theme.get_symbol(&git_status), "R".to_string());
+    git_status = GitStatus::Modified;
+    assert_eq!(git_theme.get_symbol(&git_status), "M".to_string());
+    git_status = GitStatus::Conflicted;
+    assert_eq!(git_theme.get_symbol(&git_status), "C".to_string());
+}
