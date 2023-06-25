@@ -40,7 +40,8 @@ pub enum ThemeOption {
     Default,
     #[allow(dead_code)]
     NoLscolors,
-    Custom(String),
+    CustomLegacy(String),
+    Custom,
 }
 
 impl ThemeOption {
@@ -77,7 +78,8 @@ impl<'de> de::Deserialize<'de> for ThemeOption {
             {
                 match value {
                     "default" => Ok(ThemeOption::Default),
-                    str => Ok(ThemeOption::Custom(str.to_string())),
+                    "custom" => Ok(ThemeOption::Custom),
+                    str => Ok(ThemeOption::CustomLegacy(str.to_string())),
                 }
             }
         }
@@ -301,10 +303,10 @@ mod test_theme_option {
         let mut c = Config::with_none();
         c.color = Some(config_file::Color {
             when: None,
-            theme: Some(ThemeOption::Custom("not-existed".to_string())),
+            theme: Some(ThemeOption::CustomLegacy("not-existed".to_string())),
         });
         assert_eq!(
-            ThemeOption::Custom("not-existed".to_string()),
+            ThemeOption::CustomLegacy("not-existed".to_string()),
             ThemeOption::from_config(&c)
         );
     }
