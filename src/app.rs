@@ -41,7 +41,7 @@ pub struct Cli {
     pub file_type: bool,
 
     /// Append / indicator to directories
-    #[arg(short = 'p')]
+    #[arg(short = 'p', conflicts_with_all = ["file_type", "indicators"])]
     pub slash: bool,
 
     /// Display extended file metadata as a table
