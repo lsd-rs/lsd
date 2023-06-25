@@ -166,6 +166,11 @@ icons:
 # Possible values: false, true
 indicators: false
 
+# == Indicator Style ==
+# Specifies which indicators style to use
+# Possible values: none, slash, file-type, classify
+indicator-style: classify
+
 # == Layout ==
 # Which layout to use. "oneline" might be a bit confusing here and should be
 # called "one-per-line". It might be changed in the future.
@@ -244,7 +249,7 @@ The valid theme configurations are:
 - `custom`: use a custom color scheme defined in `colors.yaml`
 - *(deprecated) theme_file_name(yaml): use the theme file to specify colors(without the `yaml` extension)*
 
-When set to `custom`, `lsd` will look for `colors.yaml` in the 
+When set to `custom`, `lsd` will look for `colors.yaml` in the
 XDG Base Directory, e.g. ~/.config/lsd/colors.yaml
 
 When configured with the `theme-file-name` which is a `yaml` file,

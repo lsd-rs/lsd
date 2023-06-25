@@ -28,9 +28,21 @@ pub struct Cli {
     #[arg(long, value_name = "THEME", value_parser = ["fancy", "unicode"])]
     pub icon_theme: Option<String>,
 
+    /// Choose indicator style
+    #[arg(long, value_name = "WORD", value_parser = ["none", "slash", "file-type", "classify"])]
+    pub indicator_style: Option<String>,
+
     /// Append indicator (one of */=>@|) at the end of the file names
     #[arg(short = 'F', long = "classify")]
     pub indicators: bool,
+
+    /// Likewise, except do not append '*'
+    #[arg(long)]
+    pub file_type: bool,
+
+    /// Append / indicator to directories
+    #[arg(short = 'p')]
+    pub slash: bool,
 
     /// Display extended file metadata as a table
     #[arg(short, long)]

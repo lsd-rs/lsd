@@ -53,8 +53,17 @@ lsd is a ls command with a lot of pretty colours and some other stuff to enrich 
 `--config-file <path>`
 : Provide the config file from a custom location
 
-`-F`, `--classify`
+`--indicator-style <word>`
+: Append indicator with style WORD to entry names: none (default), slash (-p), file-type (--file-type), classify (-F)
+
+`-F`, `--classify`, `--indicator-style=classify`
 : Append indicator (one of \*/=>@|) at the end of the file names
+
+`--file-type`, `--indicator-style=file-type`
+: likewise, except do not append '*'
+
+`-p`, `--indicator-style=slash`
+: Append / indicator to directories
 
 `-i`, `--inode`
 : Display the index number of each file

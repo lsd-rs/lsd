@@ -7,6 +7,7 @@ pub mod header;
 pub mod hyperlink;
 pub mod icons;
 pub mod ignore_globs;
+pub mod indicator_style;
 pub mod indicators;
 pub mod layout;
 pub mod permission;
@@ -30,6 +31,7 @@ pub use icons::IconSeparator;
 pub use icons::IconTheme;
 pub use icons::Icons;
 pub use ignore_globs::IgnoreGlobs;
+pub use indicator_style::IndicatorStyle;
 pub use indicators::Indicators;
 pub use layout::Layout;
 pub use permission::PermissionFlag;
@@ -60,6 +62,7 @@ pub struct Flags {
     pub dereference: Dereference,
     pub display: Display,
     pub display_indicators: Indicators,
+    pub indicator_style: IndicatorStyle,
     pub icons: Icons,
     pub ignore_globs: IgnoreGlobs,
     pub layout: Layout,
@@ -83,6 +86,18 @@ impl Flags {
     /// This can return an [Error], when either the building of the ignore globs or the parsing of
     /// the recursion depth parameter fails.
     pub fn configure_from(cli: &Cli, config: &Config) -> Result<Self, Error> {
+        let mut display_indicators = Indicators::configure_from_option(cli, config);
+        let mut indicator_style = IndicatorStyle::configure_from_option(cli, config);
+        if cli.file_type {
+            indicator_style = Some(IndicatorStyle::FileType);
+        } else if cli.slash {
+            indicator_style = Some(IndicatorStyle::Slash);
+        }
+        if display_indicators.is_none() && indicator_style.is_some() {
+            display_indicators = Some(Indicators(true));
+        }
+        let display_indicators = display_indicators.unwrap_or_default();
+        let indicator_style = indicator_style.unwrap_or_default();
         Ok(Self {
             blocks: Blocks::configure_from(cli, config),
             color: Color::configure_from(cli, config),
@@ -92,7 +107,8 @@ impl Flags {
             layout: Layout::configure_from(cli, config),
             size: SizeFlag::configure_from(cli, config),
             permission: PermissionFlag::configure_from(cli, config),
-            display_indicators: Indicators::configure_from(cli, config),
+            display_indicators,
+            indicator_style,
             icons: Icons::configure_from(cli, config),
             ignore_globs: IgnoreGlobs::configure_from(cli, config)?,
             no_symlink: NoSymlink::configure_from(cli, config),
@@ -125,19 +141,33 @@ where
     /// The configuration file's Yaml is read in any case, to be able to check for errors and print
     /// out warnings.
     fn configure_from(cli: &Cli, config: &Config) -> T {
+        Self::configure_from_option(cli, config).unwrap_or_default()
+    }
+
+    /// Returns an optional value from either [Cli], a [Config] or the environment value.
+    /// The first value that is not [None] is used. The order of precedence for the value used is:
+    /// - [from_cli](Configurable::from_cli)
+    /// - [from_environment](Configurable::from_environment)
+    /// - [from_config](Configurable::from_config)
+    ///
+    /// # Note
+    ///
+    /// The configuration file's Yaml is read in any case, to be able to check for errors and print
+    /// out warnings.
+    fn configure_from_option(cli: &Cli, config: &Config) -> Option<T> {
         if let Some(value) = Self::from_cli(cli) {
-            return value;
+            return Some(value);
         }
 
         if let Some(value) = Self::from_environment() {
-            return value;
+            return Some(value);
         }
 
         if let Some(value) = Self::from_config(config) {
-            return value;
+            return Some(value);
         }
 
-        Default::default()
+        None
     }
 
     /// The method to implement the value fetching from command line parameters.
