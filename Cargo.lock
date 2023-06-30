@@ -509,7 +509,6 @@ dependencies = [
  "lscolors",
  "once_cell",
  "predicates 1.0.8",
- "regex",
  "serde",
  "serde_yaml",
  "serial_test",
@@ -522,6 +521,7 @@ dependencies = [
  "url",
  "users",
  "version_check",
+ "vsort",
  "wild",
  "windows",
  "xattr",
@@ -1110,6 +1110,12 @@ name = "version_check"
 version = "0.9.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "49874b5167b65d7193b8aba1567f5c7d93d001cafc34600cee003eda787e483f"
+
+[[package]]
+name = "vsort"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "84afa8e70fb599a53474f4d83c085bd9e8848d02b7a774c6f39ebcebbbfddd16"
 
 [[package]]
 name = "wait-timeout"

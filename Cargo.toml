@@ -41,7 +41,7 @@ yaml-rust = "0.4.*"
 serde = { version = "1.0", features = ["derive"] }
 serde_yaml = "0.8"
 url = "2.1.*"
-regex = "1.7.3"
+vsort = "0.1.0"
 
 [target.'cfg(unix)'.dependencies]
 users = "0.11.*"
