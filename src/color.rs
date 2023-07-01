@@ -127,16 +127,36 @@ impl Elem {
             Elem::Links { valid: false } => theme.links.invalid,
             Elem::Links { valid: true } => theme.links.valid,
 
-            Elem::GitStatus { status: GitStatus::Default } => theme.git_status.default,
-            Elem::GitStatus { status: GitStatus::Unmodified } => theme.git_status.unmodified,
-            Elem::GitStatus { status: GitStatus::Ignored } => theme.git_status.ignored,
-            Elem::GitStatus { status: GitStatus::NewInIndex } => theme.git_status.new_in_index,
-            Elem::GitStatus { status: GitStatus::NewInWorkdir } => theme.git_status.new_in_workdir,
-            Elem::GitStatus { status: GitStatus::Typechange } => theme.git_status.typechange,
-            Elem::GitStatus { status: GitStatus::Deleted } => theme.git_status.deleted,
-            Elem::GitStatus { status: GitStatus::Renamed } => theme.git_status.renamed,
-            Elem::GitStatus { status: GitStatus::Modified } => theme.git_status.modified,
-            Elem::GitStatus { status: GitStatus::Conflicted } => theme.git_status.conflicted,
+            Elem::GitStatus {
+                status: GitStatus::Default,
+            } => theme.git_status.default,
+            Elem::GitStatus {
+                status: GitStatus::Unmodified,
+            } => theme.git_status.unmodified,
+            Elem::GitStatus {
+                status: GitStatus::Ignored,
+            } => theme.git_status.ignored,
+            Elem::GitStatus {
+                status: GitStatus::NewInIndex,
+            } => theme.git_status.new_in_index,
+            Elem::GitStatus {
+                status: GitStatus::NewInWorkdir,
+            } => theme.git_status.new_in_workdir,
+            Elem::GitStatus {
+                status: GitStatus::Typechange,
+            } => theme.git_status.typechange,
+            Elem::GitStatus {
+                status: GitStatus::Deleted,
+            } => theme.git_status.deleted,
+            Elem::GitStatus {
+                status: GitStatus::Renamed,
+            } => theme.git_status.renamed,
+            Elem::GitStatus {
+                status: GitStatus::Modified,
+            } => theme.git_status.modified,
+            Elem::GitStatus {
+                status: GitStatus::Conflicted,
+            } => theme.git_status.conflicted,
         }
     }
 }
