@@ -134,6 +134,4 @@ fn test_print_output() {
         .expect("lsd command failed")
         .wait()
         .expect("wait failed");
-
 }
-
