@@ -4,6 +4,8 @@ use lscolors::{Indicator, LsColors};
 use std::path::Path;
 
 pub use crate::flags::color::ThemeOption;
+use crate::git::GitStatus;
+use crate::print_output;
 use crate::theme::{color::ColorTheme, Theme};
 
 #[allow(dead_code)]
@@ -61,6 +63,10 @@ pub enum Elem {
     },
 
     TreeEdge,
+
+    GitStatus {
+        status: GitStatus,
+    },
 }
 
 impl Elem {
@@ -121,6 +127,37 @@ impl Elem {
             Elem::TreeEdge => theme.tree_edge,
             Elem::Links { valid: false } => theme.links.invalid,
             Elem::Links { valid: true } => theme.links.valid,
+
+            Elem::GitStatus {
+                status: GitStatus::Default,
+            } => theme.git_status.default,
+            Elem::GitStatus {
+                status: GitStatus::Unmodified,
+            } => theme.git_status.unmodified,
+            Elem::GitStatus {
+                status: GitStatus::Ignored,
+            } => theme.git_status.ignored,
+            Elem::GitStatus {
+                status: GitStatus::NewInIndex,
+            } => theme.git_status.new_in_index,
+            Elem::GitStatus {
+                status: GitStatus::NewInWorkdir,
+            } => theme.git_status.new_in_workdir,
+            Elem::GitStatus {
+                status: GitStatus::Typechange,
+            } => theme.git_status.typechange,
+            Elem::GitStatus {
+                status: GitStatus::Deleted,
+            } => theme.git_status.deleted,
+            Elem::GitStatus {
+                status: GitStatus::Renamed,
+            } => theme.git_status.renamed,
+            Elem::GitStatus {
+                status: GitStatus::Modified,
+            } => theme.git_status.modified,
+            Elem::GitStatus {
+                status: GitStatus::Conflicted,
+            } => theme.git_status.conflicted,
         }
     }
 }
@@ -137,7 +174,14 @@ impl Colors {
         let theme = match t {
             ThemeOption::NoColor => None,
             ThemeOption::Default | ThemeOption::NoLscolors => Some(Theme::default().color),
-            ThemeOption::Custom(ref file) => {
+            ThemeOption::Custom => Some(
+                Theme::from_path::<ColorTheme>(Path::new("colors").to_str().unwrap())
+                    .unwrap_or_default(),
+            ),
+            ThemeOption::CustomLegacy(ref file) => {
+                print_output!(
+                    "Warning: the 'themes' directory is deprecated, use 'colors.yaml' instead."
+                );
                 // TODO: drop the `themes` dir prefix, adding it here only for backwards compatibility
                 Some(
                     Theme::from_path::<ColorTheme>(
@@ -148,7 +192,7 @@ impl Colors {
             }
         };
         let lscolors = match t {
-            ThemeOption::Default | ThemeOption::Custom(_) => {
+            ThemeOption::Default | ThemeOption::Custom | ThemeOption::CustomLegacy(_) => {
                 Some(LsColors::from_env().unwrap_or_default())
             }
             _ => None,
@@ -310,17 +354,25 @@ mod tests {
     }
 
     #[test]
-    fn test_color_new_default_theme() {
+    fn test_color_new_custom_theme() {
         assert_eq!(
-            Colors::new(ThemeOption::Default).theme,
+            Colors::new(ThemeOption::Custom).theme,
             Some(ColorTheme::default_dark()),
         );
     }
 
     #[test]
-    fn test_color_new_bad_custom_theme() {
+    fn test_color_new_custom_no_file_theme() {
         assert_eq!(
-            Colors::new(ThemeOption::Custom("not-existed".to_string())).theme,
+            Colors::new(ThemeOption::Custom).theme,
+            Some(ColorTheme::default_dark()),
+        );
+    }
+
+    #[test]
+    fn test_color_new_bad_legacy_custom_theme() {
+        assert_eq!(
+            Colors::new(ThemeOption::CustomLegacy("not-existed".to_string())).theme,
             Some(ColorTheme::default_dark()),
         );
     }
@@ -389,6 +441,7 @@ mod elem {
                 invalid: Color::AnsiValue(245), // Grey
             },
             tree_edge: Color::AnsiValue(245), // Grey
+            git_status: Default::default(),
         }
     }
 

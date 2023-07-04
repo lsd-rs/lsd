@@ -1,6 +1,7 @@
 mod access_control;
 mod date;
 mod filetype;
+pub mod git_file_status;
 mod indicator;
 mod inode;
 mod links;
@@ -17,6 +18,7 @@ mod windows_utils;
 pub use self::access_control::AccessControl;
 pub use self::date::Date;
 pub use self::filetype::FileType;
+pub use self::git_file_status::GitFileStatus;
 pub use self::indicator::Indicator;
 pub use self::inode::INode;
 pub use self::links::Links;
@@ -30,6 +32,7 @@ pub use crate::icon::Icons;
 use crate::flags::{Display, Flags, Layout};
 use crate::{print_error, ExitCode};
 
+use crate::git::GitCache;
 use std::io::{self, Error, ErrorKind};
 use std::path::{Component, Path, PathBuf};
 
@@ -48,6 +51,7 @@ pub struct Meta {
     pub links: Option<Links>,
     pub content: Option<Vec<Meta>>,
     pub access_control: Option<AccessControl>,
+    pub git_status: Option<GitFileStatus>,
 }
 
 impl Meta {
@@ -55,6 +59,7 @@ impl Meta {
         &self,
         depth: usize,
         flags: &Flags,
+        cache: Option<&GitCache>,
     ) -> io::Result<(Option<Vec<Meta>>, ExitCode)> {
         if depth == 0 {
             return Ok((None, ExitCode::OK));
@@ -93,6 +98,9 @@ impl Meta {
             let mut parent_meta =
                 Self::from_path(&self.path.join(Component::ParentDir), flags.dereference.0)?;
             parent_meta.name.name = "..".to_owned();
+
+            current_meta.git_status = cache.and_then(|cache| cache.get(&current_meta.path, true));
+            parent_meta.git_status = cache.and_then(|cache| cache.get(&parent_meta.path, true));
 
             content.push(current_meta);
             content.push(parent_meta);
@@ -150,7 +158,7 @@ impl Meta {
 
             // check dereferencing
             if flags.dereference.0 || !matches!(entry_meta.file_type, FileType::SymLink { .. }) {
-                match entry_meta.recurse_into(depth - 1, flags) {
+                match entry_meta.recurse_into(depth - 1, flags, cache) {
                     Ok((content, rec_exit_code)) => {
                         entry_meta.content = content;
                         exit_code.set_if_greater(rec_exit_code);
@@ -163,6 +171,9 @@ impl Meta {
                 };
             }
 
+            let is_directory = entry.file_type()?.is_dir();
+            entry_meta.git_status =
+                cache.and_then(|cache| cache.get(&entry_meta.path, is_directory));
             content.push(entry_meta);
         }
 
@@ -300,6 +311,7 @@ impl Meta {
             file_type,
             content: None,
             access_control,
+            git_status: None,
         })
     }
 }

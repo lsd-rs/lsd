@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
+- Add complete color theming support for Git [k4yt3x](https://github.com/k4yt3x]
+- Add [Git integration](https://github.com/Peltoche/lsd/issues/7) from [hpwxf](https://github.com/hpwxf)
 - In keeping with the coreutils change, add quotes and escapes for necessary filenames from [merelymyself](https://github.com/merelymyself)
 - Add support for icon theme from [zwpaper](https://github.com/zwpaper)
 - Add icon for kt and kts from [LeeWeeder](https://github.com/LeeWeeder)
@@ -13,8 +15,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   on other platform the same as `--all` [#752](https://github.com/Peltoche/lsd/issues/752)
 - Add many icons from https://github.com/Peltoche/lsd/issues/764 [@TruncatedDinosour](https://ari-web.xyz/gh)
 - Add support for localization from [scarf](https://github.com/scarf005)
+- Add icons for cjs, cts and mts from [Han Yeong-woo](https://github.com/nix6839)
+- Fix obsolete Nerd Font icons from [Han Yeong-woo](https://github.com/nix6839)
 
 ### Fixed
+- `profile` and `.profile` now share the same icon from [Aaron Lichtman](https://github.com/alichtman)
+- Make tox.ini files use the gear/settings icon ([#859](https://github.com/lsd-rs/lsd/pull/859))
 - Do not quote filename when piping into another program from [TeamTamoad](https://github.com/TeamTamoad)
 - Respect `hidden` flag on Windows [#752](https://github.com/Peltoche/lsd/issues/752)
 - Do not show every file are `executable` (green) on Windows
@@ -23,6 +29,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   [`LS_COLORS`](README.md#Colors) can be used to customize.
 - Handle dereference (-L) with broken symlink from [r3dArch](https://github.com/r3dArch)
 - Avoid using Clap's deprecated structs and functions [sudame](https://github.com/sudame)
+- Icon theme with overrides from config [sudame](https://github.com/sudame)
+- Incorrect colorizing with `--size=bytes` [bells307](https://github.com/bells307)
+
+### Changed
+- Color theme is now expected to be in `$XDG/lsd/colors.yaml` by default from [peppidesu](https://github.com/peppidesu)
+  Legacy behaviour (`themes` folder) is marked as deprecated but is still supported.
+  [#749](https://github.com/lsd-rs/lsd/issues/749)
 
 ## [0.23.1] - 2022-09-13
 

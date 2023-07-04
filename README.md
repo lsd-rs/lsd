@@ -36,7 +36,8 @@ Install the patched fonts of powerline nerd-font and/or font-awesome. Have a loo
 | Windows                         | `scoop install lsd`                                                                                                                              |
 | Android (via Termux)            | `pkg install lsd`                                                                                                                                |
 | Debian sid and bookworm         | `apt install lsd`                                                                                                                                |
-| Ubuntu/Debian based distro      | **snap discontinued**, use `sudo dpkg -i lsd_0.23.1_amd64.deb` and get `.deb` file from [release page](https://github.com/Peltoche/lsd/releases) |
+| Ubuntu 23.04 (Lunar Lobster)    | `apt install lsd`                                                                                                                                |
+| Earlier Ubuntu/Debian versions  | **snap discontinued**, use `sudo dpkg -i lsd_0.23.1_amd64.deb` and get `.deb` file from [release page](https://github.com/Peltoche/lsd/releases) |
 | Solus                           | `eopkg it lsd`                                                                                                                                   |
 | Void Linux                      | `sudo xbps-install lsd`                                                                                                                          |
 | openSUSE                        | `sudo zypper install lsd`                                                                                                                        |
@@ -102,7 +103,7 @@ classic: false
 # == Blocks ==
 # This specifies the columns and their order when using the long and the tree
 # layout.
-# Possible values: permission, user, group, context, size, date, name, inode, links
+# Possible values: permission, user, group, context, size, date, name, inode, links, git
 blocks:
   - permission
   - user
@@ -120,10 +121,8 @@ color:
   when: auto
   # How to colorize the output.
   # When "classic" is set, this is set to "no-color".
-  # Possible values: default, <theme-file-name>
-  # when specifying <theme-file-name>, lsd will look up theme file
-  # XDG Base Directory if relative, e.g. ~/.config/lsd/themes/<theme-file-name>.yaml,
-  # The file path if absolute
+  # Possible values: default, custom
+  # When "custom" is set, lsd will look in the config directory for `colors.yaml`.
   theme: default
 
 # == Date ==
@@ -242,9 +241,13 @@ Color theme can be configured in the [configuration file](#configuration)(color.
 The valid theme configurations are:
 
 - `default`: the default color scheme shipped in `lsd`
-- theme-file-name(yaml): use the theme file to specify colors(without the `yaml` extension)
+- `custom`: use a custom color scheme defined in `colors.yaml`
+- *(deprecated) theme_file_name(yaml): use the theme file to specify colors(without the `yaml` extension)*
 
-when configured with the `theme-file-name` which is a `yaml` file,
+When set to `custom`, `lsd` will look for `colors.yaml` in the 
+XDG Base Directory, e.g. ~/.config/lsd/colors.yaml
+
+When configured with the `theme-file-name` which is a `yaml` file,
 `lsd` will look up the theme file in the following way:
 
 - relative name: check the XDG Base Directory, e.g. ~/.config/lsd/themes/<theme-file-name>.yaml
@@ -292,6 +295,17 @@ links:
   valid: 13
   invalid: 245
 tree-edge: 245
+git-status:
+  default: 245
+  unmodified: 245
+  ignored: 245
+  new-in-index: dark_green
+  new-in-workdir: dark_green
+  typechange: dark_yellow
+  deleted: dark_red
+  renamed: dark_green
+  modified: dark_yellow
+  conflicted: dark_red
 ```
 
 When creating a theme for `lsd`, you can specify any part of the default theme,
@@ -336,12 +350,12 @@ filetype:
   dir: 📂
   file: 📄
   pipe: 📩
-  socket: 
+  socket: 󰆨
   executable: 
   symlink-dir: 
   symlink-file: 
   device-char: 
-  device-block: ﰩ
+  device-block: 󰜫
   special: 
 ```
 
@@ -428,6 +442,12 @@ lsd --icon never --ignore-config
 ### UTF-8 Chars
 
 `lsd` will try to display the UTF-8 chars in file name, A `U+FFFD REPLACEMENT CHARACTER`(�) is used to represent the invalid UTF-8 chars.
+
+### Icons are showing up strangely
+
+Nerd Fonts is moving the codepoints of the Material Design Icons in 3.0, so lsd has updated the icons in #830. If your icons look weird, use fonts that have been patched using Nerd Fonts v2.3.0 or later.
+
+See also: <https://github.com/ryanoasis/nerd-fonts/releases/tag/v2.3.3>
 
 ## Contributors
 

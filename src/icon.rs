@@ -224,7 +224,7 @@ mod test {
         let tmp_dir = tempdir().expect("failed to create temp dir");
 
         for (ext, file_icon) in &IconTheme::get_default_icons_by_extension() {
-            let file_path = tmp_dir.path().join(format!("file.{}", ext));
+            let file_path = tmp_dir.path().join(format!("file.{ext}"));
             File::create(&file_path).expect("failed to create file");
             let meta = Meta::from_path(&file_path, false).unwrap();
 
