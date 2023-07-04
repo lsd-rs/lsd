@@ -241,6 +241,24 @@ pub struct Links {
 pub struct GitStatus {
     #[serde(deserialize_with = "deserialize_color")]
     pub default: Color,
+    #[serde(deserialize_with = "deserialize_color")]
+    pub unmodified: Color,
+    #[serde(deserialize_with = "deserialize_color")]
+    pub ignored: Color,
+    #[serde(deserialize_with = "deserialize_color")]
+    pub new_in_index: Color,
+    #[serde(deserialize_with = "deserialize_color")]
+    pub new_in_workdir: Color,
+    #[serde(deserialize_with = "deserialize_color")]
+    pub typechange: Color,
+    #[serde(deserialize_with = "deserialize_color")]
+    pub deleted: Color,
+    #[serde(deserialize_with = "deserialize_color")]
+    pub renamed: Color,
+    #[serde(deserialize_with = "deserialize_color")]
+    pub modified: Color,
+    #[serde(deserialize_with = "deserialize_color")]
+    pub conflicted: Color,
 }
 
 impl Default for Permission {
@@ -337,7 +355,16 @@ impl Default for Links {
 impl Default for GitStatus {
     fn default() -> Self {
         GitStatus {
-            default: Color::AnsiValue(13), // Pink
+            default: Color::AnsiValue(245),    // Grey
+            unmodified: Color::AnsiValue(245), // Grey
+            ignored: Color::AnsiValue(245),    // Grey
+            new_in_index: Color::DarkGreen,
+            new_in_workdir: Color::DarkGreen,
+            typechange: Color::DarkYellow,
+            deleted: Color::DarkRed,
+            renamed: Color::DarkGreen,
+            modified: Color::DarkYellow,
+            conflicted: Color::DarkRed,
         }
     }
 }
