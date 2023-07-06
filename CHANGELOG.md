@@ -36,6 +36,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Color theme is now expected to be in `$XDG/lsd/colors.yaml` by default from [peppidesu](https://github.com/peppidesu)
   Legacy behaviour (`themes` folder) is marked as deprecated but is still supported.
   [#749](https://github.com/lsd-rs/lsd/issues/749)
+- Version sort option `-v, --versionsort` has been updated to match GNU version sort logic, 
+  similar to `ls -v` and `sort -V` [#801](https://github.com/lsd-rs/lsd/issues/801) from [juansc](https://github.com/juansc)
 
 ## [0.23.1] - 2022-09-13
 
