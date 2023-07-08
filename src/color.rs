@@ -180,7 +180,7 @@ impl Colors {
             ),
             ThemeOption::CustomLegacy(ref file) => {
                 print_output!(
-                    "Warning: the 'themes' directory is deprecated, use 'colors.yaml' instead."
+                    "Warning: the 'themes' directory is deprecated, use 'colors.yaml' instead.\n\n"
                 );
                 // TODO: drop the `themes` dir prefix, adding it here only for backwards compatibility
                 Some(
