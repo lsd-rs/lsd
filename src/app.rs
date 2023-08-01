@@ -176,6 +176,14 @@ pub struct Cli {
     #[arg(long)]
     pub header: bool,
 
+    /// Truncate the user and group names if they exceed a certain number of characters
+    #[arg(long, value_name = "NUM")]
+    pub truncate_owner_after: Option<usize>,
+
+    /// Truncation marker appended to a truncated user or group name
+    #[arg(long, value_name = "STR")]
+    pub truncate_owner_marker: Option<String>,
+
     /// Includes files with the windows system protection flag set.
     /// This is the same as --all on other platforms
     #[arg(long, hide = !cfg!(windows))]

@@ -16,6 +16,7 @@ pub mod sorting;
 pub mod symlink_arrow;
 pub mod symlinks;
 pub mod total_size;
+pub mod truncate_owner;
 
 pub use blocks::Blocks;
 pub use color::Color;
@@ -42,6 +43,7 @@ pub use sorting::Sorting;
 pub use symlink_arrow::SymlinkArrow;
 pub use symlinks::NoSymlink;
 pub use total_size::TotalSize;
+pub use truncate_owner::TruncateOwner;
 
 use crate::app::Cli;
 use crate::config_file::Config;
@@ -72,6 +74,7 @@ pub struct Flags {
     pub symlink_arrow: SymlinkArrow,
     pub hyperlink: HyperlinkOption,
     pub header: Header,
+    pub truncate_owner: TruncateOwner,
     pub should_quote: bool,
 }
 
@@ -102,6 +105,7 @@ impl Flags {
             symlink_arrow: SymlinkArrow::configure_from(cli, config),
             hyperlink: HyperlinkOption::configure_from(cli, config),
             header: Header::configure_from(cli, config),
+            truncate_owner: TruncateOwner::configure_from(cli, config),
             should_quote: true,
         })
     }
