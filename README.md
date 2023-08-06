@@ -36,7 +36,7 @@ Install the patched fonts of powerline nerd-font and/or font-awesome. Have a loo
 | Windows                         | `scoop install lsd`                                                                                                                              |
 | Android (via Termux)            | `pkg install lsd`                                                                                                                                |
 | Debian sid and bookworm         | `apt install lsd`                                                                                                                                |
-| Ubuntu 23.04 (Lunar Lobster)    | `apt install lsd`                                                                                                                                |
+| Ubuntu 23.04 (Lunar Lobster)    | `snap install lsd`                                                                                                                                |
 | Earlier Ubuntu/Debian versions  | **snap discontinued**, use `sudo dpkg -i lsd_0.23.1_amd64.deb` and get `.deb` file from [release page](https://github.com/Peltoche/lsd/releases) |
 | Solus                           | `eopkg it lsd`                                                                                                                                   |
 | Void Linux                      | `sudo xbps-install lsd`                                                                                                                          |
