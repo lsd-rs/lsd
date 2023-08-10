@@ -162,7 +162,6 @@ impl IconTheme {
             ("doc", "\u{f02d}"),                // ""
             ("documents", "\u{f02d}"),          // ""
             (".doom.d", "\u{e779}"),            // ""
-            ("downloads", "\u{f498}"),          // ""
             (".ds_store", "\u{f179}"),          // ""
             (".editorconfig", "\u{e615}"),      // ""
             (".emacs.d", "\u{e779}"),           // ""
