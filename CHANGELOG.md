@@ -4,7 +4,8 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [v1.0.0] - 2023-08-25
+
 ### Added
 - Add CI to build aarch64 macOS target and skip on test [#878](https://github.com/lsd-rs/lsd/pull/878) from [zwpaper](https://github.com/zwpaper)
 - Add complete color theming support for Git [k4yt3x](https://github.com/k4yt3x]
@@ -391,8 +392,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-[Unreleased]: https://github.com/Peltoche/lsd/compare/0.23.1...HEAD
-[0.23.1]:  https://github.com/Peltoche/lsd/compare/0.23.0...0.23.1
+[v1.0.0]: https://github.com/lsd-rs/lsd/compare/0.23.1...v1.0.0
+[0.23.1]: https://github.com/Peltoche/lsd/compare/0.23.0...0.23.1
 [0.23.0]: https://github.com/Peltoche/lsd/compare/0.22.0...0.23.0
 [0.22.0]: https://github.com/Peltoche/lsd/compare/0.21.0...0.22.0
 [0.21.0]: https://github.com/Peltoche/lsd/compare/0.20.1...0.21.0
