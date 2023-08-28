@@ -16,6 +16,15 @@ impl Owner {
     }
 }
 
+impl Default for Owner {
+    fn default() -> Owner {
+        Owner {
+            user: String::from("-"),
+            group: String::from("-"),
+        }
+    }
+}
+
 #[cfg(unix)]
 impl From<&Metadata> for Owner {
     fn from(meta: &Metadata) -> Self {
