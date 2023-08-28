@@ -29,7 +29,7 @@ pub use self::size::Size;
 pub use self::symlink::SymLink;
 pub use crate::icon::Icons;
 
-use crate::flags::{Display, Flags, Layout};
+use crate::flags::{Display, Flags, Layout, PermissionFlag};
 use crate::{print_error, ExitCode};
 
 use crate::git::GitCache;
@@ -95,8 +95,11 @@ impl Meta {
             let mut current_meta = self.clone();
             current_meta.name.name = ".".to_owned();
 
-            let mut parent_meta =
-                Self::from_path(&self.path.join(Component::ParentDir), flags.dereference.0)?;
+            let mut parent_meta = Self::from_path(
+                &self.path.join(Component::ParentDir),
+                flags.dereference.0,
+                flags.permission == PermissionFlag::Disable,
+            )?;
             parent_meta.name.name = "..".to_owned();
 
             current_meta.git_status = cache.and_then(|cache| cache.get(&current_meta.path, true));
@@ -139,7 +142,11 @@ impl Meta {
                 _ => {}
             }
 
-            let mut entry_meta = match Self::from_path(&path, flags.dereference.0) {
+            let mut entry_meta = match Self::from_path(
+                &path,
+                flags.dereference.0,
+                flags.permission == PermissionFlag::Disable,
+            ) {
                 Ok(res) => res,
                 Err(err) => {
                     print_error!("{}: {}.", path.display(), err);
@@ -244,7 +251,7 @@ impl Meta {
         }
     }
 
-    pub fn from_path(path: &Path, dereference: bool) -> io::Result<Self> {
+    pub fn from_path(path: &Path, dereference: bool, disable_permission: bool) -> io::Result<Self> {
         let mut metadata = path.symlink_metadata()?;
         let mut symlink_meta = None;
         let mut broken_link = false;
@@ -269,15 +276,34 @@ impl Meta {
         }
 
         #[cfg(unix)]
-        let owner = Owner::from(&metadata);
-        #[cfg(unix)]
-        let permissions = Permissions::from(&metadata);
+        let (owner, permissions) = if disable_permission {
+            (None, None)
+        } else {
+            (
+                Some(Owner::from(&metadata)),
+                Some(Permissions::from(&metadata)),
+            )
+        };
 
         #[cfg(windows)]
-        let (owner, permissions) = windows_utils::get_file_data(path)?;
+        let (owner, permissions) = if disable_permission {
+            (None, None)
+        } else {
+            match windows_utils::get_file_data(path) {
+                Ok((owner, permissions)) => (Some(owner), Some(permissions)),
+                Err(e) => {
+                    eprintln!("lsd: {}: {}\n", path.to_str().unwrap_or(""), e);
+                    (None, None)
+                }
+            }
+        };
 
         #[cfg(not(windows))]
-        let file_type = FileType::new(&metadata, symlink_meta.as_ref(), &permissions);
+        let file_type = FileType::new(
+            &metadata,
+            symlink_meta.as_ref(),
+            &permissions.unwrap_or_default(),
+        );
 
         #[cfg(windows)]
         let file_type = FileType::new(&metadata, symlink_meta.as_ref(), path);
@@ -305,8 +331,8 @@ impl Meta {
             size,
             date,
             indicator: Indicator::from(file_type),
-            owner,
-            permissions,
+            owner: owner.unwrap_or_default(),
+            permissions: permissions.unwrap_or_default(),
             name,
             file_type,
             content: None,

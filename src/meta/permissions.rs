@@ -54,6 +54,25 @@ impl From<&Metadata> for Permissions {
     }
 }
 
+impl Default for Permissions {
+    fn default() -> Permissions {
+        Permissions {
+            user_read: false,
+            user_write: false,
+            user_execute: false,
+            group_read: false,
+            group_write: false,
+            group_execute: false,
+            other_read: false,
+            other_write: false,
+            other_execute: false,
+            sticky: false,
+            setgid: false,
+            setuid: false,
+        }
+    }
+}
+
 impl Permissions {
     fn bits_to_octal(r: bool, w: bool, x: bool) -> u8 {
         (r as u8) * 4 + (w as u8) * 2 + (x as u8)
@@ -122,6 +141,7 @@ impl Permissions {
 
                 colors.colorize(octals, &Elem::Octal).to_string()
             }
+            PermissionFlag::Disable => colors.colorize('-', &Elem::NoAccess).to_string(),
         };
 
         ColoredString::new(Colors::default_style(), res)

@@ -69,7 +69,7 @@ pub struct Cli {
     pub directory_only: bool,
 
     /// How to display permissions [default: rwx]
-    #[arg(long, value_name = "MODE", value_parser = ["rwx", "octal"])]
+    #[arg(long, value_name = "MODE", value_parser = ["rwx", "octal", "disable"])]
     pub permission: Option<String>,
 
     /// How to display size [default: default]
