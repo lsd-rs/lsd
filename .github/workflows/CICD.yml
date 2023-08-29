@@ -80,6 +80,9 @@ jobs:
           - { os: windows-latest , target: i686-pc-windows-msvc }
           - { os: windows-latest , target: x86_64-pc-windows-gnu }
           - { os: windows-latest , target: x86_64-pc-windows-msvc }
+    outputs:
+      DEPLOY: ${{ steps.vars.outputs.DEPLOY }}
+
     steps:
     - uses: actions/checkout@v1
     - name: Install any prerequisites
@@ -322,6 +325,18 @@ jobs:
           target/${{ matrix.job.target }}/release/${{ env.PROJECT_NAME }}${{ steps.vars.outputs.EXE_suffix }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  winget:
+    runs-on: ubuntu-latest
+    needs: build
+    if: ${{ needs.build.outputs.DEPLOY }}
+    steps:
+      - name: Publish to Winget
+        uses: vedantmgoyal9/winget-releaser@main
+        with:
+          identifier: lsd-rs.lsd
+          installers-regex: 'pc-windows-msvc\.zip$'
+          token: ${{ secrets.WINGET_TOKEN }}
 
   coverage:
     name: Code Coverage
