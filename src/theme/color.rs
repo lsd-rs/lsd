@@ -1,7 +1,7 @@
 ///! This module provides methods to create theme from files and operations related to
 ///! this.
 use crossterm::style::Color;
-use serde::Deserialize;
+use serde::{de::IntoDeserializer, Deserialize};
 use std::fmt;
 
 // Custom color deserialize
@@ -23,8 +23,7 @@ where
         where
             E: serde::de::Error,
         {
-            Color::try_from(value)
-                .map_err(|_| E::invalid_value(serde::de::Unexpected::Str(value), &self))
+            Color::deserialize(value.into_deserializer())
         }
 
         fn visit_u64<E>(self, value: u64) -> Result<Color, E>
@@ -468,6 +467,21 @@ tree-edge: 245
         use crossterm::style::Color;
         theme.user = Color::AnsiValue(130);
         assert_eq!(empty_theme, theme);
+    }
+
+    #[test]
+    fn test_hexadecimal_colors() {
+        // Must contain one field at least
+        // ref https://github.com/dtolnay/serde-yaml/issues/86
+        let empty_theme: ColorTheme = Theme::with_yaml("user: \"#ff007f\"").unwrap();
+        assert_eq!(
+            empty_theme.user,
+            crossterm::style::Color::Rgb {
+                r: 255,
+                g: 0,
+                b: 127
+            }
+        );
     }
 
     #[test]
