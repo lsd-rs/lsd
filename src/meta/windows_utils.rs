@@ -303,7 +303,7 @@ fn buf_from_os(os: &OsStr) -> Vec<u16> {
     buf
 }
 
-/// Checks wether the given [`FILE_FLAGS_AND_ATTRIBUTES`] are set for the given
+/// Checks whether the given [`FILE_FLAGS_AND_ATTRIBUTES`] are set for the given
 /// [`Path`]
 ///
 /// [`FILE_FLAGS_AND_ATTRIBUTES`]: windows::Win32::Storage::FileSystem::FILE_FLAGS_AND_ATTRIBUTES
