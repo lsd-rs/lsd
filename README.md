@@ -1,12 +1,12 @@
 # LSD (LSDeluxe)
 
-[![license](http://img.shields.io/badge/license-Apache%20v2-blue.svg)](https://raw.githubusercontent.com/Peltoche/lsd/master/LICENSE)
+[![license](http://img.shields.io/badge/license-Apache%20v2-blue.svg)](https://raw.githubusercontent.com/lsd-rs/lsd/master/LICENSE)
 [![Latest version](https://img.shields.io/crates/v/lsd.svg)](https://crates.io/crates/lsd)
-[![build](https://github.com/Peltoche/lsd/workflows/CICD/badge.svg)](https://github.com/Peltoche/lsd/actions)
-[![codecov](https://codecov.io/gh/Peltoche/lsd/branch/master/graph/badge.svg)](https://codecov.io/gh/Peltoche/lsd)
+[![build](https://github.com/lsd-rs/lsd/workflows/CICD/badge.svg)](https://github.com/lsd-rs/lsd/actions)
+[![codecov](https://codecov.io/gh/lsd-rs/lsd/branch/master/graph/badge.svg)](https://codecov.io/gh/lsd-rs/lsd)
 [![versions](https://img.shields.io/repology/repositories/lsd)](https://repology.org/project/lsd/versions)
 
-![image](https://raw.githubusercontent.com/Peltoche/lsd/assets/screen_lsd.png)
+![image](https://raw.githubusercontent.com/lsd-rs/lsd/assets/screen_lsd.png)
 
 This project is a rewrite of GNU `ls` with lots of added features like colors, icons, tree-view, more formatting options etc.
 The project is heavily inspired by the super [colorls](https://github.com/athityakumar/colorls) project.
@@ -25,7 +25,7 @@ The project is heavily inspired by the super [colorls](https://github.com/athity
 Install the patched fonts of powerline nerd-font and/or font-awesome. Have a look at the [Nerd Font README](https://github.com/ryanoasis/nerd-fonts/blob/master/readme.md) for more installation instructions. Don't forget to setup your terminal in order to use the correct font.
 
 | OS/Distro                       | Command                                                              |
-|---------------------------------|----------------------------------------------------------------------|
+| ------------------------------- | -------------------------------------------------------------------- |
 | Archlinux                       | `pacman -S lsd`                                                      |
 | Fedora                          | `dnf install lsd`                                                    |
 | Gentoo                          | `sudo emerge sys-apps/lsd`                                           |
@@ -53,12 +53,12 @@ cargo install lsd
 If you want to install the latest master branch commit:
 
 ```sh
-cargo install --git https://github.com/Peltoche/lsd.git --branch master
+cargo install --git https://github.com/lsd-rs/lsd.git --branch master
 ```
 
 ### From Binaries
 
-The [release page](https://github.com/Peltoche/lsd/releases) includes precompiled binaries for Linux, macOS and Windows for every release. You can also get the latest binary of `master` branch from the [GitHub action build artifacts](https://github.com/Peltoche/lsd/actions?query=branch%3Amaster+is%3Asuccess+event%3Apush) (choose the top action and scroll down to the artifacts section).
+The [release page](https://github.com/lsd-rs/lsd/releases) includes precompiled binaries for Linux, macOS and Windows for every release. You can also get the latest binary of `master` branch from the [GitHub action build artifacts](https://github.com/lsd-rs/lsd/actions?query=branch%3Amaster+is%3Asuccess+event%3Apush) (choose the top action and scroll down to the artifacts section).
 
 ## Configuration
 
@@ -318,7 +318,7 @@ Please also notice that an empty theme is **NOT** supported due to
 
 > **NOTE:** This feature is not available in a release yet. You can
 > get this feature by [building from
-> `master`](https://github.com/Peltoche/lsd#from-source).
+> `master`](https://github.com/lsd-rs/lsd#from-source).
 
 Icon theme can be configured in a fixed location, `$XDG_CONFIG_DIR/lsd/icons.yaml`,
 for example, `~/.config/lsd/icons.yaml` on macOS,
@@ -392,9 +392,9 @@ alias lt='ls --tree'
 ### Icons not showing up
 
 For `lsd` to be able to display icons, the font has to include special font glyphs. This might not be the case for most fonts that you download. Thankfully, you can patch most fonts using [NerdFont](https://www.nerdfonts.com/) and add these icons. Or you can just download an already patched version of your favourite font from [NerdFont font download page](https://www.nerdfonts.com/font-downloads).
-Here is a guide on how to setup fonts on [macOS](https://github.com/Peltoche/lsd/issues/199#issuecomment-494218334) and [Android](https://github.com/Peltoche/lsd/issues/423).
+Here is a guide on how to setup fonts on [macOS](https://github.com/lsd-rs/lsd/issues/199#issuecomment-494218334) and [Android](https://github.com/lsd-rs/lsd/issues/423).
 
-To check if the font you are using is setup correctly, try running the following snippet in a shell and see if that [prints a folder icon](https://github.com/Peltoche/lsd/issues/510#issuecomment-860000306). If it prints a box, or question mark or something else, then you might have some issues in how you setup the font or how your terminal emulator renders the font.
+To check if the font you are using is setup correctly, try running the following snippet in a shell and see if that [prints a folder icon](https://github.com/lsd-rs/lsd/issues/510#issuecomment-860000306). If it prints a box, or question mark or something else, then you might have some issues in how you setup the font or how your terminal emulator renders the font.
 
 ```sh
 echo $'\uf115'
@@ -404,7 +404,7 @@ echo $'\uf115'
 
 First of all, make sure a patched font is installed and PuTTY/KiTTY is configurated to use it, please check [Prerequisites](#prerequisites).
 
-There are problems for PuTTY/KiTTY to show 2 char wide icons, make sure using a 1 char wide font like [Hack Regular Nerd Font Complete Mono Windows Compatible](https://github.com/ryanoasis/nerd-fonts/blob/master/patched-fonts/Hack/Regular/complete/Hack%20Regular%20Nerd%20Font%20Complete%20Mono%20Windows%20Compatible.ttf), check [this issue](https://github.com/Peltoche/lsd/issues/331) for detail.
+There are problems for PuTTY/KiTTY to show 2 char wide icons, make sure using a 1 char wide font like [Hack Regular Nerd Font Complete Mono Windows Compatible](https://github.com/ryanoasis/nerd-fonts/blob/master/patched-fonts/Hack/Regular/complete/Hack%20Regular%20Nerd%20Font%20Complete%20Mono%20Windows%20Compatible.ttf), check [this issue](https://github.com/lsd-rs/lsd/issues/331) for detail.
 
 ### Colors
 
@@ -463,4 +463,4 @@ Special thanks to:
 - [danieldulaney](https://github.com/danieldulaney) for the Windows integration
 - [sharkdp](https://github.com/sharkdp) and his superb [fd](https://github.com/sharkdp/fd) from which I have stolen a lot of CI stuff.
 - [athityakumar](https://github.com/athityakumar) for the project [colorls](https://github.com/athityakumar/colorls)
-- [All the other contributors](https://github.com/Peltoche/lsd/graphs/contributors)
+- [All the other contributors](https://github.com/lsd-rs/lsd/graphs/contributors)

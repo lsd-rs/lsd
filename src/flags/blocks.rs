@@ -67,12 +67,12 @@ impl Blocks {
         }
     }
 
-    /// Checks whether `self` already contains a [Block] of variant [GitStatus](Block::GitSatus).
+    /// Checks whether `self` already contains a [Block] of variant [GitStatus](Block::GitStatus).
     fn contains_git_status(&self) -> bool {
         self.0.contains(&Block::GitStatus)
     }
 
-    /// Put a [Block] of variant [GitStatus](Block::GitSatus) on the left of [GitStatus](Block::Name) to `self`.
+    /// Put a [Block] of variant [GitStatus](Block::GitStatus) on the left of [GitStatus](Block::Name) to `self`.
     fn add_git_status(&mut self) {
         if let Some(position) = self.0.iter().position(|&b| b == Block::Name) {
             self.0.insert(position, Block::GitStatus);
@@ -81,7 +81,7 @@ impl Blocks {
         }
     }
 
-    /// Prepends a [Block] of variant [GitStatus](Block::GitSatus), if `self` does not already contain a
+    /// Prepends a [Block] of variant [GitStatus](Block::GitStatus), if `self` does not already contain a
     /// Block of that variant.
     fn optional_add_git_status(&mut self) {
         if !self.contains_git_status() {

@@ -343,7 +343,7 @@ mod test {
     #[test]
     #[cfg(all(not(windows), target_arch = "x86_64"))]
     fn test_bad_date() {
-        // 4437052 is the bad year taken from https://github.com/Peltoche/lsd/issues/529 that we know is both
+        // 4437052 is the bad year taken from https://github.com/lsd-rs/lsd/issues/529 that we know is both
         // a) high enough to break chrono
         // b) not high enough to break SystemTime (as Duration::MAX would)
         let end_time = std::time::SystemTime::UNIX_EPOCH
