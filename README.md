@@ -33,7 +33,8 @@ Install the patched fonts of powerline nerd-font and/or font-awesome. Have a loo
 | NixOS                           | `nix-env -iA nixos.lsd`                                              |
 | FreeBSD                         | `pkg install lsd`                                                    |
 | NetBSD or any `pkgsrc` platform | `pkgin install lsd` or `cd /usr/pkgsrc/sysutils/lsd && make install` |
-| Windows                         | `scoop install lsd`                                                  |
+| Windows                         | `winget install lsd`                                                 |
+| Windows (Scoop)                 | `scoop install lsd`                                                  |
 | Android (via Termux)            | `pkg install lsd`                                                    |
 | Debian sid and bookworm         | `apt install lsd`                                                    |
 | Ubuntu 23.04 (Lunar Lobster)    | `apt install lsd`                                                    |
