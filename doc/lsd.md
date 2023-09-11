@@ -140,6 +140,9 @@ lsd is a ls command with a lot of pretty colours and some other stuff to enrich 
 `--header`
 : Display block headers
 
+`--literal`
+: Do not show quotes on filenames
+
 # ARGS
 
 `<FILE>...`
