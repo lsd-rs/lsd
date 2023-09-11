@@ -392,7 +392,7 @@ fn get_output(
                         icons,
                         display_option,
                         flags.hyperlink,
-                        flags.should_quote,
+                        !flags.should_quote.0,
                     ),
                     meta.indicator.render(flags),
                 ]);

@@ -45,6 +45,7 @@ pub struct Config {
     pub symlink_arrow: Option<String>,
     pub hyperlink: Option<HyperlinkOption>,
     pub header: Option<bool>,
+    pub literal: Option<bool>,
 }
 
 #[derive(Eq, PartialEq, Debug, Deserialize)]
@@ -97,6 +98,7 @@ impl Config {
             symlink_arrow: None,
             hyperlink: None,
             header: None,
+            literal: None,
         }
     }
 
@@ -323,6 +325,11 @@ hyperlink: never
 # == Symlink arrow ==
 # Specifies how the symlink arrow display, chars in both ascii and utf8
 symlink-arrow: ⇒
+
+# == Literal ==
+# Whether to display the quotes on filenames.
+# Possible values: false, true
+literal: false
 "#;
 
 #[cfg(test)]
@@ -389,6 +396,7 @@ mod tests {
                 symlink_arrow: Some("⇒".into()),
                 hyperlink: Some(HyperlinkOption::Never),
                 header: None,
+                literal: None,
             },
             c
         );
