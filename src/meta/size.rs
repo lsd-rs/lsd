@@ -2,6 +2,7 @@ use crate::color::{ColoredString, Colors, Elem};
 use crate::flags::{Flags, SizeFlag};
 use std::fs::Metadata;
 
+// IEC constants are capitalized to follow Rust naming style
 const KIB: u64 = 1024;
 const MIB: u64 = 1024_u64.pow(2);
 const GIB: u64 = 1024_u64.pow(3);

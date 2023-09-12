@@ -56,6 +56,10 @@ pub struct Cli {
     #[arg(short, long)]
     human_readable: bool,
 
+    /// Shows size using SI units (powers of 1000)
+    #[arg(long)]
+    pub si: bool,
+
     /// Recurse into directories and present the result as a tree
     #[arg(long)]
     pub tree: bool,

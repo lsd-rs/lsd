@@ -42,14 +42,18 @@ impl SizeFlag {
 impl Configurable<Self> for SizeFlag {
     /// Get a potential `SizeFlag` variant from [Cli].
     ///
-    /// If any of the "default", "short" or "bytes" arguments is passed, the corresponding
-    /// `SizeFlag` variant is returned in a [Some]. If neither of them is passed, this returns
-    /// [None].
+    /// If any of the "default", "short", "iec", "si", or "bytes" arguments is passed,
+    /// the corresponding `SizeFlag` variant is returned in a [Some]. If neither of them is passed,
+    /// this returns [None].
     fn from_cli(cli: &Cli) -> Option<Self> {
         if cli.classic {
             Some(Self::Bytes)
         } else {
-            cli.size.as_deref().map(Self::from_arg_str)
+            if cli.si {
+                Some(Self::Si)
+            } else {
+                cli.size.as_deref().map(Self::from_arg_str)
+            }
         }
     }
 
