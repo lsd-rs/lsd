@@ -181,8 +181,8 @@ pub struct Cli {
     #[arg(long, hide = !cfg!(windows))]
     pub system_protected: bool,
 
-    /// When showing files do not quote their names
-    #[arg(long)]
+    /// Print entry names without quoting
+    #[arg(short = 'N', long)]
     pub literal: bool,
 
     /// Print help information
