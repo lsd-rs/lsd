@@ -73,7 +73,7 @@ impl Core {
             // or require a raw output (like the `wc` command).
             inner_flags.layout = Layout::OneLine;
 
-            flags.should_quote = Literal(false);
+            flags.literal = Literal(true);
         };
 
         let sorters = sort::assemble_sorters(&flags);

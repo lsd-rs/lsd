@@ -74,7 +74,7 @@ pub struct Flags {
     pub symlink_arrow: SymlinkArrow,
     pub hyperlink: HyperlinkOption,
     pub header: Header,
-    pub should_quote: Literal,
+    pub literal: Literal,
 }
 
 impl Flags {
@@ -104,7 +104,7 @@ impl Flags {
             symlink_arrow: SymlinkArrow::configure_from(cli, config),
             hyperlink: HyperlinkOption::configure_from(cli, config),
             header: Header::configure_from(cli, config),
-            should_quote: Literal::configure_from(cli, config),
+            literal: Literal::configure_from(cli, config),
         })
     }
 }

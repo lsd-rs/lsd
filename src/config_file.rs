@@ -327,7 +327,7 @@ hyperlink: never
 symlink-arrow: ⇒
 
 # == Literal ==
-# Whether to display the quotes on filenames.
+# Whether to print entry names without quoting
 # Possible values: false, true
 literal: false
 "#;
@@ -396,7 +396,7 @@ mod tests {
                 symlink_arrow: Some("⇒".into()),
                 hyperlink: Some(HyperlinkOption::Never),
                 header: None,
-                literal: None,
+                literal: Some(false),
             },
             c
         );

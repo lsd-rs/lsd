@@ -78,9 +78,9 @@ impl Name {
             .collect()
     }
 
-    fn escape(&self, string: &str, should_quote: bool) -> String {
+    fn escape(&self, string: &str, literal: bool) -> String {
         let mut name = string.to_string();
-        if should_quote {
+        if !literal {
             if name.contains('\\') || name.contains('"') {
                 name = name.replace('\'', "\'\\\'\'");
                 name = format!("\'{}\'", &name);
@@ -153,21 +153,21 @@ impl Name {
                 format!(
                     "{}{}",
                     icons.get(self),
-                    self.hyperlink(self.escape(self.file_name(), quote), hyperlink)
+                    self.hyperlink(self.escape(self.file_name(), !quote), hyperlink)
                 )
             }
             DisplayOption::Relative { base_path } => format!(
                 "{}{}",
                 icons.get(self),
                 self.hyperlink(
-                    self.escape(&self.relative_path(base_path).to_string_lossy(), quote),
+                    self.escape(&self.relative_path(base_path).to_string_lossy(), !quote),
                     hyperlink
                 )
             ),
             DisplayOption::None => format!(
                 "{}{}",
                 icons.get(self),
-                self.hyperlink(self.escape(&self.path.to_string_lossy(), quote), hyperlink)
+                self.hyperlink(self.escape(&self.path.to_string_lossy(), !quote), hyperlink)
             ),
         };
 
