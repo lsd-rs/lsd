@@ -5,7 +5,7 @@ use std::os::windows::ffi::{OsStrExt, OsStringExt};
 use std::path::Path;
 
 use windows::Win32::Foundation::PSID;
-use windows::Win32::Security::{self, Authorization::TRUSTEE_W, ACL};
+use windows::Win32::Security::{self, ACL};
 
 use super::{Owner, Permissions};
 
@@ -137,21 +137,8 @@ pub fn get_file_data(path: &Path) -> Result<(Owner, Permissions), io::Error> {
         } as i32));
     }
 
-    // Assumptions:
-    // - xxxxx_sid_ptr are valid pointers to SIDs
-    // - xxxxx_trustee is only valid as long as its SID pointer is
-    let owner_trustee = unsafe { trustee_from_sid(owner_sid_ptr) };
-    let group_trustee = unsafe { trustee_from_sid(group_sid_ptr) };
-    let world_trustee = unsafe { trustee_from_sid(world_sid_ptr) };
-
-    // Assumptions:
-    // - xxxxx_trustee are still valid (including underlying SID)
-    // - dacl_ptr is still valid
-    let owner_access_mask = unsafe { get_acl_access_mask(dacl_ptr, &owner_trustee) }?;
-
-    let group_access_mask = unsafe { get_acl_access_mask(dacl_ptr, &group_trustee) }?;
-
-    let world_access_mask = unsafe { get_acl_access_mask(dacl_ptr, &world_trustee) }?;
+    let (owner_access_mask, group_access_mask, world_access_mask) =
+        get_acl_access_masks(dacl_ptr, owner_sid_ptr, group_sid_ptr, world_sid_ptr)?;
 
     let permissions = {
         use windows::Win32::Storage::FileSystem::{
@@ -190,15 +177,53 @@ pub fn get_file_data(path: &Path) -> Result<(Owner, Permissions), io::Error> {
     Ok((owner, permissions))
 }
 
+#[cfg(all(windows, not(feature = "windows-acl-permissions")))]
+fn get_acl_access_masks(
+    _dacl_ptr: *const ACL,
+    _owner_sid_ptr: PSID,
+    _group_sid_ptr: PSID,
+    _world_sid_ptr: PSID,
+) -> Result<(u32, u32, u32), io::Error> {
+    Ok((0, 0, 0))
+}
+
+#[cfg(all(windows, feature = "windows-acl-permissions"))]
+fn get_acl_access_masks(
+    dacl_ptr: *const ACL,
+    owner_sid_ptr: PSID,
+    group_sid_ptr: PSID,
+    world_sid_ptr: PSID,
+) -> Result<(u32, u32, u32), io::Error> {
+    // Assumptions:
+    // - xxxxx_sid_ptr are valid pointers to SIDs
+    // - xxxxx_trustee is only valid as long as its SID pointer is
+    let owner_trustee = unsafe { trustee_from_sid(owner_sid_ptr) };
+    let group_trustee = unsafe { trustee_from_sid(group_sid_ptr) };
+    let world_trustee = unsafe { trustee_from_sid(world_sid_ptr) };
+
+    // Assumptions:
+    // - xxxxx_trustee are still valid (including underlying SID)
+    // - dacl_ptr is still valid
+
+    let owner_access_mask = unsafe { get_acl_access_mask(dacl_ptr, &owner_trustee) }?;
+
+    let group_access_mask = unsafe { get_acl_access_mask(dacl_ptr, &group_trustee) }?;
+
+    let world_access_mask = unsafe { get_acl_access_mask(dacl_ptr, &world_trustee) }?;
+
+    Ok((owner_access_mask, group_access_mask, world_access_mask))
+}
+
 /// Evaluate an ACL for a particular trustee and get its access rights
 ///
 /// Assumptions:
 /// - acl_ptr points to a valid ACL data structure
 /// - trustee_ptr points to a valid trustee data structure
 /// - Both remain valid through the function call (no long-term requirement)
+#[cfg(all(windows, feature = "windows-acl-permissions"))]
 unsafe fn get_acl_access_mask(
     acl_ptr: *const ACL,
-    trustee_ptr: *const TRUSTEE_W,
+    trustee_ptr: *const Security::Authorization::TRUSTEE_W,
 ) -> Result<u32, io::Error> {
     let mut access_mask = 0;
 
@@ -223,8 +248,9 @@ unsafe fn get_acl_access_mask(
 /// Note: winapi's TRUSTEE_W looks different from the one in the MS docs because
 /// of some unusual pre-processor macros in the original .h file. The winapi
 /// version is correct (MS's doc generator messed up)
-unsafe fn trustee_from_sid<P: Into<PSID>>(sid_ptr: P) -> TRUSTEE_W {
-    let mut trustee = TRUSTEE_W::default();
+#[cfg(all(windows, feature = "windows-acl-permissions"))]
+unsafe fn trustee_from_sid<P: Into<PSID>>(sid_ptr: P) -> Security::Authorization::TRUSTEE_W {
+    let mut trustee = Security::Authorization::TRUSTEE_W::default();
 
     Security::Authorization::BuildTrusteeWithSidW(&mut trustee, sid_ptr);
 

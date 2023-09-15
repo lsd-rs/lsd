@@ -69,6 +69,7 @@ serial_test = "0.5"
 default = ["git2"]
 sudo = []
 no-git = [] # force disabling git even if available by default
+windows-acl-permissions = []
 
 [profile.release]
 lto = true
