@@ -27,7 +27,6 @@ impl SizeFlag {
             "default" => Self::Default,
             "short" => Self::Short,
             "bytes" => Self::Bytes,
-            "h" => Self::Default,
             // Invalid value should be handled by `clap` when building an `Cli`
             other => unreachable!("Invalid value '{other}' for 'size'"),
         }
