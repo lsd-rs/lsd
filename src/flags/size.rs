@@ -27,6 +27,7 @@ impl SizeFlag {
             "default" => Self::Default,
             "short" => Self::Short,
             "bytes" => Self::Bytes,
+            "h" => Self::Default,
             // Invalid value should be handled by `clap` when building an `Cli`
             other => unreachable!("Invalid value '{other}' for 'size'"),
         }
@@ -40,6 +41,9 @@ impl Configurable<Self> for SizeFlag {
     /// `SizeFlag` variant is returned in a [Some]. If neither of them is passed, this returns
     /// [None].
     fn from_cli(cli: &Cli) -> Option<Self> {
+        if cli.human_readable {
+            return Some(Self::Default)
+        }
         if cli.classic {
             Some(Self::Bytes)
         } else {

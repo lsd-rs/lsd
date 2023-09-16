@@ -54,7 +54,7 @@ pub struct Cli {
 
     /// For ls compatibility purposes ONLY, currently set by default
     #[arg(short, long)]
-    human_readable: bool,
+    pub human_readable: bool,
 
     /// Recurse into directories and present the result as a tree
     #[arg(long)]
