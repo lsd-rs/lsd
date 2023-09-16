@@ -523,7 +523,7 @@ mod tests {
                     &Icons::new(false, IconOption::Never, FlagTheme::Fancy, " ".to_string()),
                     &DisplayOption::FileName,
                     HyperlinkOption::Never,
-                    true,
+                    false,
                 )
                 .to_string();
 
@@ -558,7 +558,7 @@ mod tests {
                     &Icons::new(false, IconOption::Always, FlagTheme::Fancy, " ".to_string()),
                     &DisplayOption::FileName,
                     HyperlinkOption::Never,
-                    true,
+                    false,
                 )
                 .to_string();
 
@@ -592,7 +592,7 @@ mod tests {
                     &Icons::new(false, IconOption::Never, FlagTheme::Fancy, " ".to_string()),
                     &DisplayOption::FileName,
                     HyperlinkOption::Never,
-                    true,
+                    false,
                 )
                 .to_string();
 
@@ -633,7 +633,7 @@ mod tests {
                     &Icons::new(false, IconOption::Never, FlagTheme::Fancy, " ".to_string()),
                     &DisplayOption::FileName,
                     HyperlinkOption::Never,
-                    true,
+                    false,
                 )
                 .to_string();
 
