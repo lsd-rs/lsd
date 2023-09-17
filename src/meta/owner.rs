@@ -1,4 +1,5 @@
 use crate::color::{ColoredString, Colors, Elem};
+use crate::Flags;
 #[cfg(unix)]
 use std::fs::Metadata;
 
@@ -35,12 +36,72 @@ impl From<&Metadata> for Owner {
     }
 }
 
-impl Owner {
-    pub fn render_user(&self, colors: &Colors) -> ColoredString {
-        colors.colorize(self.user.clone(), &Elem::User)
+fn truncate(input: &str, after: Option<usize>, marker: Option<String>) -> String {
+    let mut output = input.to_string();
+
+    if let Some(after) = after {
+        if output.len() > after {
+            output.truncate(after);
+
+            if let Some(marker) = marker {
+                output.push_str(&marker);
+            }
+        }
     }
 
-    pub fn render_group(&self, colors: &Colors) -> ColoredString {
-        colors.colorize(self.group.clone(), &Elem::Group)
+    output
+}
+
+impl Owner {
+    pub fn render_user(&self, colors: &Colors, flags: &Flags) -> ColoredString {
+        colors.colorize(
+            truncate(
+                &self.user,
+                flags.truncate_owner.after,
+                flags.truncate_owner.marker.clone(),
+            ),
+            &Elem::User,
+        )
+    }
+
+    pub fn render_group(&self, colors: &Colors, flags: &Flags) -> ColoredString {
+        colors.colorize(
+            truncate(
+                &self.group,
+                flags.truncate_owner.after,
+                flags.truncate_owner.marker.clone(),
+            ),
+            &Elem::Group,
+        )
+    }
+}
+
+#[cfg(test)]
+mod test_truncate {
+    use crate::meta::owner::truncate;
+
+    #[test]
+    fn test_none() {
+        assert_eq!("a", truncate("a", None, None));
+    }
+
+    #[test]
+    fn test_unchanged_without_marker() {
+        assert_eq!("a", truncate("a", Some(1), None));
+    }
+
+    #[test]
+    fn test_unchanged_with_marker() {
+        assert_eq!("a", truncate("a", Some(1), Some("…".to_string())));
+    }
+
+    #[test]
+    fn test_truncated_without_marker() {
+        assert_eq!("a", truncate("ab", Some(1), None));
+    }
+
+    #[test]
+    fn test_truncated_with_marker() {
+        assert_eq!("a…", truncate("ab", Some(1), Some("…".to_string())));
     }
 }

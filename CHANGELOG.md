@@ -4,10 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-
 ## [Unreleased]
 
 ### Added
+- Add CLI parameters `--truncate-owner-after` and `--truncate-owner-marker` (and equivalent
+  configuration fields) to truncate user and group names if they exceed a certain number
+  of characters (disabled by default).
 
 ### Fixed
 
@@ -401,7 +403,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Change the component alignment by using term_grid
 
 
-
+[Unreleased]: https://github.com/lsd-rs/lsd/compare/v1.0.0...HEAD
 [v1.0.0]: https://github.com/lsd-rs/lsd/compare/0.23.1...v1.0.0
 [0.23.1]: https://github.com/Peltoche/lsd/compare/0.23.0...0.23.1
 [0.23.0]: https://github.com/Peltoche/lsd/compare/0.22.0...0.23.0
