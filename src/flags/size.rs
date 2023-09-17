@@ -41,7 +41,7 @@ impl Configurable<Self> for SizeFlag {
     /// [None].
     fn from_cli(cli: &Cli) -> Option<Self> {
         if cli.human_readable {
-            return Some(Self::Default)
+            return Some(Self::Default);
         }
         if cli.classic {
             Some(Self::Bytes)
