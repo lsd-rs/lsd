@@ -101,6 +101,20 @@ mod test {
     }
 
     #[test]
+    fn test_from_cli_human_readable() {
+        let argv = ["lsd", "--human-readable"];
+        let cli = Cli::try_parse_from(argv).unwrap();
+        assert_eq!(Some(SizeFlag::Default), SizeFlag::from_cli(&cli));
+    }
+
+    #[test]
+    fn test_from_cli_minus_h() {
+        let argv = ["lsd", "-h"];
+        let cli = Cli::try_parse_from(argv).unwrap();
+        assert_eq!(Some(SizeFlag::Default), SizeFlag::from_cli(&cli));
+    }
+
+    #[test]
     fn test_from_cli_bytes() {
         let argv = ["lsd", "--size", "bytes"];
         let cli = Cli::try_parse_from(argv).unwrap();
