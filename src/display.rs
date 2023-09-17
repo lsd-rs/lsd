@@ -355,11 +355,11 @@ fn get_output(
                 ]);
             }
             Block::User => block_vec.push(match &meta.owner {
-                Some(owner) => owner.render_user(colors),
+                Some(owner) => owner.render_user(colors, flags),
                 None => colorize_missing("?"),
             }),
             Block::Group => block_vec.push(match &meta.owner {
-                Some(owner) => owner.render_group(colors),
+                Some(owner) => owner.render_group(colors, flags),
                 None => colorize_missing("?"),
             }),
             Block::Context => block_vec.push(match &meta.access_control {

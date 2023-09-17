@@ -46,6 +46,7 @@ pub struct Config {
     pub hyperlink: Option<HyperlinkOption>,
     pub header: Option<bool>,
     pub literal: Option<bool>,
+    pub truncate_owner: Option<TruncateOwner>,
 }
 
 #[derive(Eq, PartialEq, Debug, Deserialize)]
@@ -75,6 +76,12 @@ pub struct Sorting {
     pub dir_grouping: Option<DirGrouping>,
 }
 
+#[derive(Eq, PartialEq, Debug, Deserialize)]
+pub struct TruncateOwner {
+    pub after: Option<usize>,
+    pub marker: Option<String>,
+}
+
 impl Config {
     /// This constructs a Config struct with all None
     pub fn with_none() -> Self {
@@ -99,6 +106,7 @@ impl Config {
             hyperlink: None,
             header: None,
             literal: None,
+            truncate_owner: None,
         }
     }
 
@@ -330,6 +338,15 @@ symlink-arrow: ⇒
 # Whether to print entry names without quoting
 # Possible values: false, true
 literal: false
+
+# == Truncate owner ==
+# How to truncate the username and group name for the file if they exceed a
+# certain number of characters.
+truncate-owner:
+  # Number of characters to keep. By default, no truncation is done (empty value).
+  after:
+  # String to be appended to a name if truncated.
+  marker: ""
 "#;
 
 #[cfg(test)]
@@ -397,6 +414,10 @@ mod tests {
                 hyperlink: Some(HyperlinkOption::Never),
                 header: None,
                 literal: Some(false),
+                truncate_owner: Some(config_file::TruncateOwner {
+                    after: None,
+                    marker: Some("".to_string()),
+                }),
             },
             c
         );
