@@ -1,3 +1,5 @@
+//! This module provides methods to handle the program's config files and
+//! operations related to this.
 use crate::flags::display::Display;
 use crate::flags::icons::{IconOption, IconTheme};
 use crate::flags::layout::Layout;
@@ -6,8 +8,6 @@ use crate::flags::size::SizeFlag;
 use crate::flags::sorting::{DirGrouping, SortColumn};
 use crate::flags::HyperlinkOption;
 use crate::flags::{ColorOption, ThemeOption};
-///! This module provides methods to handle the program's config files and operations related to
-///! this.
 use crate::print_error;
 
 use std::path::{Path, PathBuf};

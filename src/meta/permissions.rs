@@ -2,7 +2,7 @@ use crate::color::{ColoredString, Colors, Elem};
 use crate::flags::{Flags, PermissionFlag};
 use std::fs::Metadata;
 
-#[derive(Debug, PartialEq, Eq, Copy, Clone)]
+#[derive(Default, Debug, PartialEq, Eq, Copy, Clone)]
 pub struct Permissions {
     pub user_read: bool,
     pub user_write: bool,
@@ -51,25 +51,6 @@ impl From<&Metadata> for Permissions {
     #[cfg(windows)]
     fn from(_: &Metadata) -> Self {
         panic!("Cannot get permissions from metadata on Windows")
-    }
-}
-
-impl Default for Permissions {
-    fn default() -> Permissions {
-        Permissions {
-            user_read: false,
-            user_write: false,
-            user_execute: false,
-            group_read: false,
-            group_write: false,
-            group_execute: false,
-            other_read: false,
-            other_write: false,
-            other_execute: false,
-            sticky: false,
-            setgid: false,
-            setuid: false,
-        }
     }
 }
 
@@ -313,5 +294,26 @@ mod test {
         let perms = Permissions::from(&meta);
 
         assert_eq!("1777", perms.render(&colors, &flags).content());
+    }
+
+    #[test]
+    fn permission_disable() {
+        let tmp_dir = tempdir().expect("failed to create temp dir");
+
+        // Create the file;
+        let file_path = tmp_dir.path().join("file.txt");
+        File::create(&file_path).expect("failed to create file");
+        fs::set_permissions(&file_path, fs::Permissions::from_mode(0o655))
+            .expect("unable to set permissions to file");
+        let meta = file_path.metadata().expect("failed to get meta");
+
+        let colors = Colors::new(ThemeOption::NoColor);
+        let flags = Flags {
+            permission: PermissionFlag::Disable,
+            ..Default::default()
+        };
+        let perms = Permissions::from(&meta);
+
+        assert_eq!("-", perms.render(&colors, &flags).content());
     }
 }

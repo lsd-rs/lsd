@@ -18,7 +18,7 @@ where
         ByFilename::Extension => IconTheme::get_default_icons_by_extension(),
     };
     HashMap::<_, _>::deserialize(deserializer)
-        .map(|input| default.into_iter().chain(input.into_iter()).collect())
+        .map(|input| default.into_iter().chain(input).collect())
 }
 
 fn deserialize_by_name<'de, D>(deserializer: D) -> Result<HashMap<String, String>, D::Error>

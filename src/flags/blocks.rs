@@ -350,7 +350,7 @@ mod test_blocks {
     fn test_from_cli_none() {
         let argv = ["lsd"];
         let cli = Cli::try_parse_from(argv).unwrap();
-        assert!(matches!(Blocks::from_cli(&cli), None));
+        assert!(Blocks::from_cli(&cli).is_none());
     }
 
     #[test]
