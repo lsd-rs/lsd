@@ -153,14 +153,11 @@ mod test {
     fn test_from_cli_none() {
         let argv = ["lsd"];
         let cli = Cli::try_parse_from(argv).unwrap();
-        assert!(matches!(IgnoreGlobs::from_cli(&cli), None));
+        assert!(IgnoreGlobs::from_cli(&cli).is_none());
     }
 
     #[test]
     fn test_from_config_none() {
-        assert!(matches!(
-            IgnoreGlobs::from_config(&Config::with_none()),
-            None
-        ));
+        assert!(IgnoreGlobs::from_config(&Config::with_none()).is_none());
     }
 }

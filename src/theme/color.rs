@@ -1,5 +1,5 @@
-///! This module provides methods to create theme from files and operations related to
-///! this.
+//! This module provides methods to create theme from files and operations related to
+//! this.
 use crossterm::style::Color;
 use serde::{de::IntoDeserializer, Deserialize};
 use std::fmt;

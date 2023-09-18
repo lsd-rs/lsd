@@ -100,6 +100,16 @@ mod test {
     }
 
     #[test]
+    fn test_from_cli_permissions_disable() {
+        let argv = ["lsd", "--permission", "disable"];
+        let cli = Cli::try_parse_from(argv).unwrap();
+        assert_eq!(
+            Some(PermissionFlag::Disable),
+            PermissionFlag::from_cli(&cli)
+        );
+    }
+
+    #[test]
     #[should_panic]
     fn test_from_cli_unknown() {
         let argv = ["lsd", "--permission", "unknown"];

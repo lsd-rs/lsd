@@ -269,7 +269,7 @@ impl Meta {
                     // path.symlink_metadata would have errored out
                     if dereference {
                         broken_link = true;
-                        eprintln!("lsd: {}: {}\n", path.to_str().unwrap_or(""), e);
+                        eprintln!("lsd: {}: {}", path.to_str().unwrap_or(""), e);
                     }
                 }
             }
@@ -292,7 +292,11 @@ impl Meta {
             match windows_utils::get_file_data(path) {
                 Ok((owner, permissions)) => (Some(owner), Some(permissions)),
                 Err(e) => {
-                    eprintln!("lsd: {}: {}\n", path.to_str().unwrap_or(""), e);
+                    eprintln!(
+                        "lsd: {}: {}(Hint: Consider using `--permission disabled`.)",
+                        path.to_str().unwrap_or(""),
+                        e
+                    );
                     (None, None)
                 }
             }
@@ -352,8 +356,16 @@ mod tests {
     #[test]
     fn test_from_path_path() {
         let dir = assert_fs::TempDir::new().unwrap();
-        let meta = Meta::from_path(dir.path(), false).unwrap();
+        let meta = Meta::from_path(dir.path(), false, false).unwrap();
         assert_eq!(meta.path, dir.path())
+    }
+
+    #[test]
+    fn test_from_path_disable_permission() {
+        let dir = assert_fs::TempDir::new().unwrap();
+        let meta = Meta::from_path(dir.path(), false, true).unwrap();
+        assert!(meta.permissions.is_none());
+        assert!(meta.owner.is_none());
     }
 
     #[test]
@@ -362,7 +374,7 @@ mod tests {
 
         let path_a = tmp_dir.path().join("aaa.aa");
         File::create(&path_a).expect("failed to create file");
-        let meta_a = Meta::from_path(&path_a, false).expect("failed to get meta");
+        let meta_a = Meta::from_path(&path_a, false, false).expect("failed to get meta");
 
         let path_b = tmp_dir.path().join("bbb.bb");
         let path_c = tmp_dir.path().join("ccc.cc");
@@ -377,7 +389,7 @@ mod tests {
         std::os::windows::fs::symlink_file(&path_c, &path_b)
             .expect("failed to create broken symlink");
 
-        let meta_b = Meta::from_path(&path_b, true).expect("failed to get meta");
+        let meta_b = Meta::from_path(&path_b, true, false).expect("failed to get meta");
 
         assert!(
             meta_a.inode.is_some()
