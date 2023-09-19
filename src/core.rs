@@ -1,6 +1,8 @@
 use crate::color::Colors;
 use crate::display;
-use crate::flags::{ColorOption, Display, Flags, HyperlinkOption, Layout, SortOrder, ThemeOption};
+use crate::flags::{
+    ColorOption, Display, Flags, HyperlinkOption, Layout, Literal, SortOrder, ThemeOption,
+};
 use crate::git::GitCache;
 use crate::icon::Icons;
 
@@ -71,7 +73,7 @@ impl Core {
             // or require a raw output (like the `wc` command).
             inner_flags.layout = Layout::OneLine;
 
-            flags.should_quote = false;
+            flags.literal = Literal(true);
         };
 
         let sorters = sort::assemble_sorters(&flags);

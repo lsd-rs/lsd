@@ -229,6 +229,11 @@ symlink-arrow: ⇒
 # Possible values: false, true
 header: false
 
+# == Literal ==
+# Whether to show quotes on filenames.
+# Possible values: false, true
+literal: false
+
 # == Truncate owner ==
 # How to truncate the username and group names for a file if they exceed a certain
 # number of characters.

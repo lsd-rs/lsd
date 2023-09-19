@@ -9,6 +9,7 @@ pub mod icons;
 pub mod ignore_globs;
 pub mod indicators;
 pub mod layout;
+pub mod literal;
 pub mod permission;
 pub mod recursion;
 pub mod size;
@@ -33,6 +34,7 @@ pub use icons::Icons;
 pub use ignore_globs::IgnoreGlobs;
 pub use indicators::Indicators;
 pub use layout::Layout;
+pub use literal::Literal;
 pub use permission::PermissionFlag;
 pub use recursion::Recursion;
 pub use size::SizeFlag;
@@ -74,8 +76,8 @@ pub struct Flags {
     pub symlink_arrow: SymlinkArrow,
     pub hyperlink: HyperlinkOption,
     pub header: Header,
+    pub literal: Literal,
     pub truncate_owner: TruncateOwner,
-    pub should_quote: bool,
 }
 
 impl Flags {
@@ -105,8 +107,8 @@ impl Flags {
             symlink_arrow: SymlinkArrow::configure_from(cli, config),
             hyperlink: HyperlinkOption::configure_from(cli, config),
             header: Header::configure_from(cli, config),
+            literal: Literal::configure_from(cli, config),
             truncate_owner: TruncateOwner::configure_from(cli, config),
-            should_quote: true,
         })
     }
 }

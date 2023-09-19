@@ -189,6 +189,10 @@ pub struct Cli {
     #[arg(long, hide = !cfg!(windows))]
     pub system_protected: bool,
 
+    /// Print entry names without quoting
+    #[arg(short = 'N', long)]
+    pub literal: bool,
+
     /// Print help information
     #[arg(long, action = ArgAction::Help)]
     help: (),

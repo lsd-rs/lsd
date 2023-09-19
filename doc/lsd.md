@@ -140,6 +140,9 @@ lsd is a ls command with a lot of pretty colours and some other stuff to enrich 
 `--header`
 : Display block headers
 
+`-N --literal`
+: Print entry names without quoting
+
 `--truncate-owner-after`
 : Truncate the user and group names if they exceed a certain number of characters
 

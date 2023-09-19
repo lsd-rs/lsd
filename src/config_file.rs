@@ -45,6 +45,7 @@ pub struct Config {
     pub symlink_arrow: Option<String>,
     pub hyperlink: Option<HyperlinkOption>,
     pub header: Option<bool>,
+    pub literal: Option<bool>,
     pub truncate_owner: Option<TruncateOwner>,
 }
 
@@ -104,6 +105,7 @@ impl Config {
             symlink_arrow: None,
             hyperlink: None,
             header: None,
+            literal: None,
             truncate_owner: None,
         }
     }
@@ -332,6 +334,11 @@ hyperlink: never
 # Specifies how the symlink arrow display, chars in both ascii and utf8
 symlink-arrow: ⇒
 
+# == Literal ==
+# Whether to print entry names without quoting
+# Possible values: false, true
+literal: false
+
 # == Truncate owner ==
 # How to truncate the username and group name for the file if they exceed a
 # certain number of characters.
@@ -406,6 +413,7 @@ mod tests {
                 symlink_arrow: Some("⇒".into()),
                 hyperlink: Some(HyperlinkOption::Never),
                 header: None,
+                literal: Some(false),
                 truncate_owner: Some(config_file::TruncateOwner {
                     after: None,
                     marker: Some("".to_string()),
