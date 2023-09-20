@@ -1,4 +1,7 @@
 # Changelog
+
+NOTE: This file is no longer being updated. For release notes follow [GitHub releases](https://github.com/lsd-rs/lsd/releases).
+
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
@@ -10,11 +13,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add CLI parameters `--truncate-owner-after` and `--truncate-owner-marker` (and equivalent
   configuration fields) to truncate user and group names if they exceed a certain number
   of characters (disabled by default).
+- Add support for `--literal` from [PanGan21](https://github.com/PanGan21)
 
 ## [v1.0.0] - 2023-08-25
 
 ### Added
-- Add support for `--literal` from [PanGan21](https://github.com/PanGan21)
 - Add CI to build aarch64 macOS target and skip on test [#878](https://github.com/lsd-rs/lsd/pull/878) from [zwpaper](https://github.com/zwpaper)
 - Add complete color theming support for Git [k4yt3x](https://github.com/k4yt3x)
 - Add [Git integration](https://github.com/Peltoche/lsd/issues/7) from [hpwxf](https://github.com/hpwxf)
