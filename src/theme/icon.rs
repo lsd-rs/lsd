@@ -241,6 +241,7 @@ impl IconTheme {
             ("npmignore", "\u{e71e}"),          // ""
             (".npm", "\u{e5fa}"),               // ""
             ("nvim", "\u{e62b}"),               // ""
+            ("obj", "\u{e624}"),                // ""
             ("os-release", "\u{e615}"),         // ""
             ("package.json", "\u{e718}"),       // ""
             ("package-lock.json", "\u{e718}"),  // ""
