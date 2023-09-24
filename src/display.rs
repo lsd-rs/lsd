@@ -344,8 +344,10 @@ fn get_output(
             Block::Permission => {
                 block_vec.extend([
                     meta.file_type.render(colors),
-                    match meta.permissions {
-                        Some(permissions) => permissions.render(colors, flags),
+                    match &meta.permissions_or_attributes {
+                        Some(permissions_or_attributes) => {
+                            permissions_or_attributes.render(colors, flags)
+                        }
                         None => colorize_missing("?????????"),
                     },
                     match &meta.access_control {
@@ -488,7 +490,7 @@ mod tests {
     use crate::app::Cli;
     use crate::color;
     use crate::color::Colors;
-    use crate::flags::{HyperlinkOption, IconOption, IconTheme as FlagTheme};
+    use crate::flags::{HyperlinkOption, IconOption, IconTheme as FlagTheme, PermissionFlag};
     use crate::icon::Icons;
     use crate::meta::{FileType, Name};
     use crate::Config;
@@ -683,7 +685,7 @@ mod tests {
         dir.child("one.d").create_dir_all().unwrap();
         dir.child("one.d/two").touch().unwrap();
         dir.child("one.d/.hidden").touch().unwrap();
-        let mut metas = Meta::from_path(Path::new(dir.path()), false, false)
+        let mut metas = Meta::from_path(Path::new(dir.path()), false, PermissionFlag::Rwx)
             .unwrap()
             .recurse_into(42, &flags, None)
             .unwrap()
@@ -716,7 +718,7 @@ mod tests {
         let dir = assert_fs::TempDir::new().unwrap();
         dir.child("dir").create_dir_all().unwrap();
         dir.child("dir/file").touch().unwrap();
-        let metas = Meta::from_path(Path::new(dir.path()), false, false)
+        let metas = Meta::from_path(Path::new(dir.path()), false, PermissionFlag::Rwx)
             .unwrap()
             .recurse_into(42, &flags, None)
             .unwrap()
@@ -757,7 +759,7 @@ mod tests {
         let dir = assert_fs::TempDir::new().unwrap();
         dir.child("dir").create_dir_all().unwrap();
         dir.child("dir/file").touch().unwrap();
-        let metas = Meta::from_path(Path::new(dir.path()), false, false)
+        let metas = Meta::from_path(Path::new(dir.path()), false, PermissionFlag::Rwx)
             .unwrap()
             .recurse_into(42, &flags, None)
             .unwrap()
@@ -797,7 +799,7 @@ mod tests {
         let dir = assert_fs::TempDir::new().unwrap();
         dir.child("one.d").create_dir_all().unwrap();
         dir.child("one.d/two").touch().unwrap();
-        let metas = Meta::from_path(Path::new(dir.path()), false, false)
+        let metas = Meta::from_path(Path::new(dir.path()), false, PermissionFlag::Rwx)
             .unwrap()
             .recurse_into(42, &flags, None)
             .unwrap()
@@ -828,7 +830,7 @@ mod tests {
         let dir = assert_fs::TempDir::new().unwrap();
         dir.child("testdir").create_dir_all().unwrap();
         dir.child("test").touch().unwrap();
-        let metas = Meta::from_path(Path::new(dir.path()), false, false)
+        let metas = Meta::from_path(Path::new(dir.path()), false, PermissionFlag::Rwx)
             .unwrap()
             .recurse_into(1, &flags, None)
             .unwrap()
@@ -862,7 +864,7 @@ mod tests {
 
         let dir = assert_fs::TempDir::new().unwrap();
         dir.child("testdir").create_dir_all().unwrap();
-        let metas = Meta::from_path(Path::new(dir.path()), false, false)
+        let metas = Meta::from_path(Path::new(dir.path()), false, PermissionFlag::Rwx)
             .unwrap()
             .recurse_into(1, &flags, None)
             .unwrap()
@@ -892,11 +894,11 @@ mod tests {
 
         let file_path = tmp_dir.path().join("file");
         std::fs::File::create(&file_path).expect("failed to create the file");
-        let file = Meta::from_path(&file_path, false, false).unwrap();
+        let file = Meta::from_path(&file_path, false, PermissionFlag::Rwx).unwrap();
 
         let dir_path = tmp_dir.path().join("dir");
         std::fs::create_dir(&dir_path).expect("failed to create the dir");
-        let dir = Meta::from_path(&dir_path, false, false).unwrap();
+        let dir = Meta::from_path(&dir_path, false, PermissionFlag::Rwx).unwrap();
 
         assert_eq!(
             display_folder_path(&dir),
@@ -942,15 +944,15 @@ mod tests {
 
         let file_path = tmp_dir.path().join("file");
         std::fs::File::create(&file_path).expect("failed to create the file");
-        let file = Meta::from_path(&file_path, false, false).unwrap();
+        let file = Meta::from_path(&file_path, false, PermissionFlag::Rwx).unwrap();
 
         let dir_path = tmp_dir.path().join("dir");
         std::fs::create_dir(&dir_path).expect("failed to create the dir");
-        let dir = Meta::from_path(&dir_path, false, false).unwrap();
+        let dir = Meta::from_path(&dir_path, false, PermissionFlag::Rwx).unwrap();
 
         let link_path = tmp_dir.path().join("link");
         std::os::unix::fs::symlink("dir", &link_path).unwrap();
-        let link = Meta::from_path(&link_path, false, false).unwrap();
+        let link = Meta::from_path(&link_path, false, PermissionFlag::Rwx).unwrap();
 
         let grid_flags = Flags {
             layout: Layout::Grid,

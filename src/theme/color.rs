@@ -89,6 +89,7 @@ pub struct ColorTheme {
     #[serde(deserialize_with = "deserialize_color")]
     pub group: Color,
     pub permission: Permission,
+    pub attributes: Attributes,
     pub date: Date,
     pub size: Size,
     pub inode: INode,
@@ -122,6 +123,21 @@ pub struct Permission {
     pub acl: Color,
     #[serde(deserialize_with = "deserialize_color")]
     pub context: Color,
+}
+
+#[derive(Debug, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "kebab-case")]
+#[serde(deny_unknown_fields)]
+#[serde(default)]
+pub struct Attributes {
+    #[serde(deserialize_with = "deserialize_color")]
+    pub archive: Color,
+    #[serde(deserialize_with = "deserialize_color")]
+    pub read: Color,
+    #[serde(deserialize_with = "deserialize_color")]
+    pub hidden: Color,
+    #[serde(deserialize_with = "deserialize_color")]
+    pub system: Color,
 }
 
 #[derive(Debug, Deserialize, PartialEq, Eq)]
@@ -274,6 +290,16 @@ impl Default for Permission {
         }
     }
 }
+impl Default for Attributes {
+    fn default() -> Self {
+        Attributes {
+            archive: Color::DarkGreen,
+            read: Color::DarkYellow,
+            hidden: Color::AnsiValue(13), // Pink,
+            system: Color::AnsiValue(13), // Pink,
+        }
+    }
+}
 impl Default for FileType {
     fn default() -> Self {
         FileType {
@@ -381,6 +407,7 @@ impl ColorTheme {
             user: Color::AnsiValue(230),  // Cornsilk1
             group: Color::AnsiValue(187), // LightYellow3
             permission: Permission::default(),
+            attributes: Attributes::default(),
             file_type: FileType::default(),
             date: Date::default(),
             size: Size::default(),

@@ -68,8 +68,8 @@ pub struct Cli {
     #[arg(short, long, conflicts_with_all = ["depth", "recursive"])]
     pub directory_only: bool,
 
-    /// How to display permissions [default: rwx]
-    #[arg(long, value_name = "MODE", value_parser = ["rwx", "octal", "disable"])]
+    /// How to display permissions [default: rwx for non-windows, attributes for windows]
+    #[arg(long, value_name = "MODE", value_parser = ["rwx", "octal", "attributes", "disable"])]
     pub permission: Option<String>,
 
     /// How to display size [default: default]
