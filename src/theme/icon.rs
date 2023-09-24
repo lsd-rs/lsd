@@ -341,7 +341,7 @@ impl IconTheme {
             ("avi", "\u{f008}"),             // ""
             ("avro", "\u{e60b}"),            // ""
             ("awk", "\u{f489}"),             // ""
-            ("bak", "\u{f006f}"),            // "󰁯"
+            ("bak", "\u{f016}"),             // ""
             ("bash_history", "\u{f489}"),    // ""
             ("bash_profile", "\u{f489}"),    // ""
             ("bashrc", "\u{f489}"),          // ""
