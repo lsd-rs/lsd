@@ -222,6 +222,7 @@ mod test {
     use super::DisplayOption;
     use super::Name;
     use crate::color::{self, Colors};
+    use crate::flags::PermissionFlag;
     use crate::flags::{HyperlinkOption, IconOption, IconTheme as FlagTheme};
     use crate::icon::Icons;
     use crate::meta::FileType;
@@ -274,7 +275,7 @@ mod test {
         // Create the directory
         let dir_path = tmp_dir.path().join("directory");
         fs::create_dir(&dir_path).expect("failed to create the dir");
-        let meta = Meta::from_path(&dir_path, false, false).unwrap();
+        let meta = Meta::from_path(&dir_path, false, PermissionFlag::Rwx).unwrap();
 
         let colors = Colors::new(color::ThemeOption::NoLscolors);
 
@@ -398,7 +399,7 @@ mod test {
         // Create the file;
         let file_path = tmp_dir.path().join("file.txt");
         File::create(&file_path).expect("failed to create file");
-        let meta = Meta::from_path(&file_path, false, false).unwrap();
+        let meta = Meta::from_path(&file_path, false, PermissionFlag::Rwx).unwrap();
 
         let colors = Colors::new(color::ThemeOption::NoColor);
 
@@ -424,7 +425,7 @@ mod test {
         // Create the file;
         let file_path = tmp_dir.path().join("file.txt");
         File::create(&file_path).expect("failed to create file");
-        let meta = Meta::from_path(&file_path, false, false).unwrap();
+        let meta = Meta::from_path(&file_path, false, PermissionFlag::Rwx).unwrap();
 
         let colors = Colors::new(color::ThemeOption::NoColor);
 

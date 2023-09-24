@@ -299,8 +299,8 @@ size: default
 
 # == Permission ==
 # Specify the format of the permission column.
-# Possible value: rwx, octal
-permission: rwx
+# Possible value: rwx, octal, attributes, disable
+# permission: rwx
 
 # == Sorting ==
 sorting:
@@ -363,7 +363,6 @@ mod tests {
     use crate::flags::color::{ColorOption, ThemeOption};
     use crate::flags::icons::{IconOption, IconTheme};
     use crate::flags::layout::Layout;
-    use crate::flags::permission::PermissionFlag;
     use crate::flags::size::SizeFlag;
     use crate::flags::sorting::{DirGrouping, SortColumn};
     use crate::flags::HyperlinkOption;
@@ -402,7 +401,7 @@ mod tests {
                     depth: None,
                 }),
                 size: Some(SizeFlag::Default),
-                permission: Some(PermissionFlag::Rwx),
+                permission: None,
                 sorting: Some(config_file::Sorting {
                     column: Some(SortColumn::Name),
                     reverse: Some(false),

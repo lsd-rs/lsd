@@ -110,6 +110,10 @@ mod test {
     use super::FileType;
     use crate::color::{Colors, ThemeOption};
     #[cfg(unix)]
+    use crate::flags::PermissionFlag;
+    #[cfg(unix)]
+    use crate::meta::permissions_or_attributes::PermissionsOrAttributes;
+    #[cfg(unix)]
     use crate::meta::Permissions;
     use crossterm::style::{Color, Stylize};
     use std::fs::File;
@@ -144,14 +148,19 @@ mod test {
     fn test_dir_type() {
         let tmp_dir = tempdir().expect("failed to create temp dir");
         #[cfg(not(windows))]
-        let meta = crate::meta::Meta::from_path(tmp_dir.path(), false, false)
+        let meta = crate::meta::Meta::from_path(tmp_dir.path(), false, PermissionFlag::Rwx)
             .expect("failed to get tempdir path");
         let metadata = tmp_dir.path().metadata().expect("failed to get metas");
 
         let colors = Colors::new(ThemeOption::NoLscolors);
 
         #[cfg(not(windows))]
-        let file_type = FileType::new(&metadata, None, &meta.permissions.unwrap());
+        let file_type = match meta.permissions_or_attributes {
+            Some(PermissionsOrAttributes::Permissions(permissions)) => {
+                FileType::new(&metadata, None, &permissions)
+            }
+            _ => panic!("unexpected"),
+        };
         #[cfg(windows)]
         let file_type = FileType::new(&metadata, None, tmp_dir.path());
 
