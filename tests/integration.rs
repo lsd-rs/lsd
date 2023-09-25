@@ -661,6 +661,24 @@ fn test_upper_case_ext_icon_match() {
 
 #[cfg(unix)]
 #[test]
+fn test_truncate_owner() {
+    let dir = tempdir();
+    dir.child("foo").touch().unwrap();
+
+    cmd()
+        .arg("-l")
+        .arg("--ignore-config")
+        .arg("--truncate-owner-after")
+        .arg("1")
+        .arg("--truncate-owner-marker")
+        .arg("…")
+        .arg(dir.path())
+        .assert()
+        .stdout(predicate::str::is_match(" .… .… ").unwrap());
+}
+
+#[cfg(unix)]
+#[test]
 fn test_custom_config_file_parsing() {
     let dir = tempdir();
     dir.child("config.yaml").write_str("layout: tree").unwrap();

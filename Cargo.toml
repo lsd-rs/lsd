@@ -7,8 +7,8 @@ keywords = ["ls"]
 license = "Apache-2.0"
 name = "lsd"
 readme = "./README.md"
-repository = "https://github.com/Peltoche/lsd"
-version = "0.23.1"
+repository = "https://github.com/lsd-rs/lsd"
+version = "1.0.0"
 edition = "2021"
 
 [[bin]]
@@ -21,7 +21,7 @@ clap_complete = "4.1"
 version_check = "0.9.*"
 
 [dependencies]
-crossterm = { version = "0.24.0", features = ["serde"] }
+crossterm = { version = "0.27.0", features = ["serde"] }
 dirs = "3.0.*"
 libc = "0.2.*"
 human-sort = "0.2.2"
@@ -41,6 +41,7 @@ yaml-rust = "0.4.*"
 serde = { version = "1.0", features = ["derive"] }
 serde_yaml = "0.8"
 url = "2.1.*"
+vsort = "0.1.0"
 
 [target."cfg(not(all(windows, target_arch = \"x86\", target_env = \"gnu\")))".dependencies]
 # if ssl feature is enabled compilation will fail on arm-unknown-linux-gnueabihf and i686-pc-windows-gnu

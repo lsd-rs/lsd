@@ -18,7 +18,7 @@ where
         ByFilename::Extension => IconTheme::get_default_icons_by_extension(),
     };
     HashMap::<_, _>::deserialize(deserializer)
-        .map(|input| default.into_iter().chain(input.into_iter()).collect())
+        .map(|input| default.into_iter().chain(input).collect())
 }
 
 fn deserialize_by_name<'de, D>(deserializer: D) -> Result<HashMap<String, String>, D::Error>
@@ -241,6 +241,7 @@ impl IconTheme {
             ("npmignore", "\u{e71e}"),          // ""
             (".npm", "\u{e5fa}"),               // ""
             ("nvim", "\u{e62b}"),               // ""
+            ("obj", "\u{e624}"),                // ""
             ("os-release", "\u{e615}"),         // ""
             ("package.json", "\u{e718}"),       // ""
             ("package-lock.json", "\u{e718}"),  // ""
@@ -251,7 +252,7 @@ impl IconTheme {
             (".pki", "\u{f023}"),               // ""
             ("portage", "\u{e5fc}"),            // ""
             ("profile", "\u{e615}"),            // ""
-            (".profile", "\u{f018d}"),          // "󰆍"
+            (".profile", "\u{e615}"),           // ""
             ("public", "\u{f415}"),             // ""
             ("__pycache__", "\u{f0320}"),       // "󰌠"
             (".python_history", "\u{e606}"),    // ""
@@ -280,7 +281,7 @@ impl IconTheme {
             ("sudoers", "\u{f023}"),            // ""
             ("sxhkdrc", "\u{e615}"),            // ""
             ("tigrc", "\u{e615}"),              // ""
-            ("tox.ini", "\u{f0320}"),           // "󰌠"
+            ("tox.ini", "\u{e615}"),            // ""
             (".trash", "\u{f1f8}"),             // ""
             ("ts", "\u{e628}"),                 // ""
             ("unlicense", "\u{e60a}"),          // ""
@@ -562,6 +563,7 @@ impl IconTheme {
             ("sub", "\u{f02d}"),             // ""
             ("s", "\u{f471}"),               // ""
             ("svg", "\u{f1c5}"),             // ""
+            ("svelte", "\u{e697}"),          // ""
             ("swift", "\u{e755}"),           // ""
             ("swp", "\u{e62b}"),             // ""
             ("sym", "\u{e624}"),             // ""

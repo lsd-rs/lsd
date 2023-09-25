@@ -17,6 +17,8 @@ pub enum PermissionFlag {
     Rwx,
     /// The variant to show file permissions in octal format
     Octal,
+    /// Disable the display of owner and permissions, may be used to speed up in Windows
+    Disable,
 }
 
 impl PermissionFlag {
@@ -24,6 +26,7 @@ impl PermissionFlag {
         match value {
             "rwx" => Self::Rwx,
             "octal" => Self::Octal,
+            "disable" => Self::Disable,
             // Invalid value should be handled by `clap` when building an `Cli`
             other => unreachable!("Invalid value '{other}' for 'permission'"),
         }
@@ -94,6 +97,16 @@ mod test {
         let argv = ["lsd", "--permission", "octal"];
         let cli = Cli::try_parse_from(argv).unwrap();
         assert_eq!(Some(PermissionFlag::Octal), PermissionFlag::from_cli(&cli));
+    }
+
+    #[test]
+    fn test_from_cli_permissions_disable() {
+        let argv = ["lsd", "--permission", "disable"];
+        let cli = Cli::try_parse_from(argv).unwrap();
+        assert_eq!(
+            Some(PermissionFlag::Disable),
+            PermissionFlag::from_cli(&cli)
+        );
     }
 
     #[test]

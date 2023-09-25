@@ -2,7 +2,7 @@ use crate::color::{ColoredString, Colors, Elem};
 use crate::flags::{Flags, PermissionFlag};
 use std::fs::Metadata;
 
-#[derive(Debug, PartialEq, Eq, Copy, Clone)]
+#[derive(Default, Debug, PartialEq, Eq, Copy, Clone)]
 pub struct Permissions {
     pub user_read: bool,
     pub user_write: bool,
@@ -122,6 +122,7 @@ impl Permissions {
 
                 colors.colorize(octals, &Elem::Octal).to_string()
             }
+            PermissionFlag::Disable => colors.colorize('-', &Elem::NoAccess).to_string(),
         };
 
         ColoredString::new(Colors::default_style(), res)
@@ -293,5 +294,26 @@ mod test {
         let perms = Permissions::from(&meta);
 
         assert_eq!("1777", perms.render(&colors, &flags).content());
+    }
+
+    #[test]
+    fn permission_disable() {
+        let tmp_dir = tempdir().expect("failed to create temp dir");
+
+        // Create the file;
+        let file_path = tmp_dir.path().join("file.txt");
+        File::create(&file_path).expect("failed to create file");
+        fs::set_permissions(&file_path, fs::Permissions::from_mode(0o655))
+            .expect("unable to set permissions to file");
+        let meta = file_path.metadata().expect("failed to get meta");
+
+        let colors = Colors::new(ThemeOption::NoColor);
+        let flags = Flags {
+            permission: PermissionFlag::Disable,
+            ..Default::default()
+        };
+        let perms = Permissions::from(&meta);
+
+        assert_eq!("-", perms.render(&colors, &flags).content());
     }
 }

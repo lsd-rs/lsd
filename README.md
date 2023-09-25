@@ -1,12 +1,12 @@
 # LSD (LSDeluxe)
 
-[![license](http://img.shields.io/badge/license-Apache%20v2-blue.svg)](https://raw.githubusercontent.com/Peltoche/lsd/master/LICENSE)
+[![license](http://img.shields.io/badge/license-Apache%20v2-blue.svg)](https://raw.githubusercontent.com/lsd-rs/lsd/master/LICENSE)
 [![Latest version](https://img.shields.io/crates/v/lsd.svg)](https://crates.io/crates/lsd)
-[![build](https://github.com/Peltoche/lsd/workflows/CICD/badge.svg)](https://github.com/Peltoche/lsd/actions)
-[![codecov](https://codecov.io/gh/Peltoche/lsd/branch/master/graph/badge.svg)](https://codecov.io/gh/Peltoche/lsd)
+[![build](https://github.com/lsd-rs/lsd/workflows/CICD/badge.svg)](https://github.com/lsd-rs/lsd/actions)
+[![codecov](https://codecov.io/gh/lsd-rs/lsd/branch/master/graph/badge.svg)](https://codecov.io/gh/lsd-rs/lsd)
 [![versions](https://img.shields.io/repology/repositories/lsd)](https://repology.org/project/lsd/versions)
 
-![image](https://raw.githubusercontent.com/Peltoche/lsd/assets/screen_lsd.png)
+![image](https://raw.githubusercontent.com/lsd-rs/lsd/assets/screen_lsd.png)
 
 This project is a rewrite of GNU `ls` with lots of added features like colors, icons, tree-view, more formatting options etc.
 The project is heavily inspired by the super [colorls](https://github.com/athityakumar/colorls) project.
@@ -24,23 +24,24 @@ The project is heavily inspired by the super [colorls](https://github.com/athity
 
 Install the patched fonts of powerline nerd-font and/or font-awesome. Have a look at the [Nerd Font README](https://github.com/ryanoasis/nerd-fonts/blob/master/readme.md) for more installation instructions. Don't forget to setup your terminal in order to use the correct font.
 
-| OS/Distro                       | Command                                                                                                                                          |
-| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Archlinux                       | `pacman -S lsd`                                                                                                                                  |
-| Fedora                          | `dnf install lsd`                                                                                                                                |
-| Gentoo                          | `sudo emerge sys-apps/lsd`                                                                                                                       |
-| macOS                           | `brew install lsd` or `sudo port install lsd`                                                                                                    |
-| NixOS                           | `nix-env -iA nixos.lsd`                                                                                                                          |
-| FreeBSD                         | `pkg install lsd`                                                                                                                                |
-| NetBSD or any `pkgsrc` platform | `pkgin install lsd` or `cd /usr/pkgsrc/sysutils/lsd && make install`                                                                             |
-| Windows                         | `scoop install lsd`                                                                                                                              |
-| Android (via Termux)            | `pkg install lsd`                                                                                                                                |
-| Debian sid and bookworm         | `apt install lsd`                                                                                                                                |
-| Ubuntu 23.04 (Lunar Lobster)    | `apt install lsd`                                                                                                                                |
-| Earlier Ubuntu/Debian versions  | **snap discontinued**, use `sudo dpkg -i lsd_0.23.1_amd64.deb` and get `.deb` file from [release page](https://github.com/Peltoche/lsd/releases) |
-| Solus                           | `eopkg it lsd`                                                                                                                                   |
-| Void Linux                      | `sudo xbps-install lsd`                                                                                                                          |
-| openSUSE                        | `sudo zypper install lsd`                                                                                                                        |
+| OS/Distro                       | Command                                                              |
+| ------------------------------- | -------------------------------------------------------------------- |
+| Archlinux                       | `pacman -S lsd`                                                      |
+| Fedora                          | `dnf install lsd`                                                    |
+| Gentoo                          | `sudo emerge sys-apps/lsd`                                           |
+| macOS                           | `brew install lsd` or `sudo port install lsd`                        |
+| NixOS                           | `nix-env -iA nixos.lsd`                                              |
+| FreeBSD                         | `pkg install lsd`                                                    |
+| NetBSD or any `pkgsrc` platform | `pkgin install lsd` or `cd /usr/pkgsrc/sysutils/lsd && make install` |
+| OpenBSD                         | `pkg_add lsd`                                                        |
+| Windows                         | `scoop install lsd`                                                  |
+| Android (via Termux)            | `pkg install lsd`                                                    |
+| Debian sid and bookworm         | `apt install lsd`                                                    |
+| Ubuntu 23.04 (Lunar Lobster)    | `apt install lsd`                                                    |
+| Earlier Ubuntu/Debian versions  | **snap discontinued**, use [From Binaries](#from-binaries)           |
+| Solus                           | `eopkg it lsd`                                                       |
+| Void Linux                      | `sudo xbps-install lsd`                                              |
+| openSUSE                        | `sudo zypper install lsd`                                            |
 
 ### From source
 
@@ -53,12 +54,12 @@ cargo install lsd
 If you want to install the latest master branch commit:
 
 ```sh
-cargo install --git https://github.com/Peltoche/lsd.git --branch master
+cargo install --git https://github.com/lsd-rs/lsd.git --branch master
 ```
 
 ### From Binaries
 
-The [release page](https://github.com/Peltoche/lsd/releases) includes precompiled binaries for Linux, macOS and Windows for every release. You can also get the latest binary of `master` branch from the [GitHub action build artifacts](https://github.com/Peltoche/lsd/actions?query=branch%3Amaster+is%3Asuccess+event%3Apush) (choose the top action and scroll down to the artifacts section).
+The [release page](https://github.com/lsd-rs/lsd/releases) includes precompiled binaries for Linux, macOS and Windows for every release. You can also get the latest binary of `master` branch from the [GitHub action build artifacts](https://github.com/lsd-rs/lsd/actions?query=branch%3Amaster+is%3Asuccess+event%3Apush) (choose the top action and scroll down to the artifacts section).
 
 ## Configuration
 
@@ -121,10 +122,8 @@ color:
   when: auto
   # How to colorize the output.
   # When "classic" is set, this is set to "no-color".
-  # Possible values: default, <theme-file-name>
-  # when specifying <theme-file-name>, lsd will look up theme file
-  # XDG Base Directory if relative, e.g. ~/.config/lsd/themes/<theme-file-name>.yaml,
-  # The file path if absolute
+  # Possible values: default, custom
+  # When "custom" is set, lsd will look in the config directory for `colors.yaml`.
   theme: default
 
 # == Date ==
@@ -229,6 +228,20 @@ symlink-arrow: ⇒
 # Whether to display block headers.
 # Possible values: false, true
 header: false
+
+# == Literal ==
+# Whether to show quotes on filenames.
+# Possible values: false, true
+literal: false
+
+# == Truncate owner ==
+# How to truncate the username and group names for a file if they exceed a certain
+# number of characters.
+truncate-owner:
+  # Number of characters to keep. By default, no truncation is done (empty value).
+  after:
+  # String to be appended to a name if truncated.
+  marker: ""
 ```
 
 </details>
@@ -243,9 +256,13 @@ Color theme can be configured in the [configuration file](#configuration)(color.
 The valid theme configurations are:
 
 - `default`: the default color scheme shipped in `lsd`
-- theme-file-name(yaml): use the theme file to specify colors(without the `yaml` extension)
+- `custom`: use a custom color scheme defined in `colors.yaml`
+- *(deprecated) theme_file_name(yaml): use the theme file to specify colors(without the `yaml` extension)*
 
-when configured with the `theme-file-name` which is a `yaml` file,
+When set to `custom`, `lsd` will look for `colors.yaml` in the
+XDG Base Directory, e.g. ~/.config/lsd/colors.yaml
+
+When configured with the `theme-file-name` which is a `yaml` file,
 `lsd` will look up the theme file in the following way:
 
 - relative name: check the XDG Base Directory, e.g. ~/.config/lsd/themes/<theme-file-name>.yaml
@@ -293,6 +310,17 @@ links:
   valid: 13
   invalid: 245
 tree-edge: 245
+git-status:
+  default: 245
+  unmodified: 245
+  ignored: 245
+  new-in-index: dark_green
+  new-in-workdir: dark_green
+  typechange: dark_yellow
+  deleted: dark_red
+  renamed: dark_green
+  modified: dark_yellow
+  conflicted: dark_red
 ```
 
 When creating a theme for `lsd`, you can specify any part of the default theme,
@@ -305,7 +333,7 @@ Please also notice that an empty theme is **NOT** supported due to
 
 > **NOTE:** This feature is not available in a release yet. You can
 > get this feature by [building from
-> `master`](https://github.com/Peltoche/lsd#from-source).
+> `master`](https://github.com/lsd-rs/lsd#from-source).
 
 Icon theme can be configured in a fixed location, `$XDG_CONFIG_DIR/lsd/icons.yaml`,
 for example, `~/.config/lsd/icons.yaml` on macOS,
@@ -379,9 +407,9 @@ alias lt='ls --tree'
 ### Icons not showing up
 
 For `lsd` to be able to display icons, the font has to include special font glyphs. This might not be the case for most fonts that you download. Thankfully, you can patch most fonts using [NerdFont](https://www.nerdfonts.com/) and add these icons. Or you can just download an already patched version of your favourite font from [NerdFont font download page](https://www.nerdfonts.com/font-downloads).
-Here is a guide on how to setup fonts on [macOS](https://github.com/Peltoche/lsd/issues/199#issuecomment-494218334) and [Android](https://github.com/Peltoche/lsd/issues/423).
+Here is a guide on how to setup fonts on [macOS](https://github.com/lsd-rs/lsd/issues/199#issuecomment-494218334) and [Android](https://github.com/lsd-rs/lsd/issues/423).
 
-To check if the font you are using is setup correctly, try running the following snippet in a shell and see if that [prints a folder icon](https://github.com/Peltoche/lsd/issues/510#issuecomment-860000306). If it prints a box, or question mark or something else, then you might have some issues in how you setup the font or how your terminal emulator renders the font.
+To check if the font you are using is setup correctly, try running the following snippet in a shell and see if that [prints a folder icon](https://github.com/lsd-rs/lsd/issues/510#issuecomment-860000306). If it prints a box, or question mark or something else, then you might have some issues in how you setup the font or how your terminal emulator renders the font.
 
 ```sh
 echo $'\uf115'
@@ -391,7 +419,7 @@ echo $'\uf115'
 
 First of all, make sure a patched font is installed and PuTTY/KiTTY is configurated to use it, please check [Prerequisites](#prerequisites).
 
-There are problems for PuTTY/KiTTY to show 2 char wide icons, make sure using a 1 char wide font like [Hack Regular Nerd Font Complete Mono Windows Compatible](https://github.com/ryanoasis/nerd-fonts/blob/master/patched-fonts/Hack/Regular/complete/Hack%20Regular%20Nerd%20Font%20Complete%20Mono%20Windows%20Compatible.ttf), check [this issue](https://github.com/Peltoche/lsd/issues/331) for detail.
+There are problems for PuTTY/KiTTY to show 2 char wide icons, make sure using a 1 char wide font like [Hack Regular Nerd Font Complete Mono Windows Compatible](https://github.com/ryanoasis/nerd-fonts/blob/master/patched-fonts/Hack/Regular/complete/Hack%20Regular%20Nerd%20Font%20Complete%20Mono%20Windows%20Compatible.ttf), check [this issue](https://github.com/lsd-rs/lsd/issues/331) for detail.
 
 ### Colors
 
@@ -450,4 +478,4 @@ Special thanks to:
 - [danieldulaney](https://github.com/danieldulaney) for the Windows integration
 - [sharkdp](https://github.com/sharkdp) and his superb [fd](https://github.com/sharkdp/fd) from which I have stolen a lot of CI stuff.
 - [athityakumar](https://github.com/athityakumar) for the project [colorls](https://github.com/athityakumar/colorls)
-- [All the other contributors](https://github.com/Peltoche/lsd/graphs/contributors)
+- [All the other contributors](https://github.com/lsd-rs/lsd/graphs/contributors)

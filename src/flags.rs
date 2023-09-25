@@ -9,6 +9,7 @@ pub mod icons;
 pub mod ignore_globs;
 pub mod indicators;
 pub mod layout;
+pub mod literal;
 pub mod permission;
 pub mod recursion;
 pub mod size;
@@ -16,6 +17,7 @@ pub mod sorting;
 pub mod symlink_arrow;
 pub mod symlinks;
 pub mod total_size;
+pub mod truncate_owner;
 
 pub use blocks::Blocks;
 pub use color::Color;
@@ -32,6 +34,7 @@ pub use icons::Icons;
 pub use ignore_globs::IgnoreGlobs;
 pub use indicators::Indicators;
 pub use layout::Layout;
+pub use literal::Literal;
 pub use permission::PermissionFlag;
 pub use recursion::Recursion;
 pub use size::SizeFlag;
@@ -42,6 +45,7 @@ pub use sorting::Sorting;
 pub use symlink_arrow::SymlinkArrow;
 pub use symlinks::NoSymlink;
 pub use total_size::TotalSize;
+pub use truncate_owner::TruncateOwner;
 
 use crate::app::Cli;
 use crate::config_file::Config;
@@ -72,7 +76,8 @@ pub struct Flags {
     pub symlink_arrow: SymlinkArrow,
     pub hyperlink: HyperlinkOption,
     pub header: Header,
-    pub should_quote: bool,
+    pub literal: Literal,
+    pub truncate_owner: TruncateOwner,
 }
 
 impl Flags {
@@ -102,7 +107,8 @@ impl Flags {
             symlink_arrow: SymlinkArrow::configure_from(cli, config),
             hyperlink: HyperlinkOption::configure_from(cli, config),
             header: Header::configure_from(cli, config),
-            should_quote: true,
+            literal: Literal::configure_from(cli, config),
+            truncate_owner: TruncateOwner::configure_from(cli, config),
         })
     }
 }

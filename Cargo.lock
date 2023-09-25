@@ -61,6 +61,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bef38d45163c2f1dde094a7dfd33ccf595c92905c8f8f4fdc18d06fb1037718a"
 
 [[package]]
+name = "bitflags"
+version = "2.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b4682ae6287fcf752ecaabbfcc7b6f9b72aa33933dc23a554d853aea8eea8635"
+dependencies = [
+ "serde",
+]
+
+[[package]]
 name = "bstr"
 version = "0.2.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -121,7 +130,7 @@ version = "4.1.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c3d7ae14b20b94cb02149ed21a86c423859cbe18dc7ed69845cace50e52b40a5"
 dependencies = [
- "bitflags",
+ "bitflags 1.3.2",
  "clap_derive",
  "clap_lex",
  "is-terminal",
@@ -174,11 +183,11 @@ dependencies = [
 
 [[package]]
 name = "crossterm"
-version = "0.24.0"
+version = "0.27.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ab9f7409c70a38a56216480fba371ee460207dd8926ccf5b4160591759559170"
+checksum = "f476fe445d41c9e991fd07515a6f463074b782242ccf4a5b7b1d1012e70824df"
 dependencies = [
- "bitflags",
+ "bitflags 2.4.0",
  "crossterm_winapi",
  "libc",
  "mio",
@@ -191,9 +200,9 @@ dependencies = [
 
 [[package]]
 name = "crossterm_winapi"
-version = "0.9.0"
+version = "0.9.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2ae1b35a484aa10e07fe0638d02301c5ad24de82d310ccbd2f3693da5f09bf1c"
+checksum = "acdd7c62a3665c7f6830a51635d9ac9b23ed385797f70a83bb8bafe9c572ab2b"
 dependencies = [
  "winapi",
 ]
@@ -304,7 +313,7 @@ version = "0.16.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ccf7f68c2995f392c49fffb4f95ae2c873297830eb25c6bc4c114ce8f4562acc"
 dependencies = [
- "bitflags",
+ "bitflags 1.3.2",
  "libc",
  "libgit2-sys",
  "log",
@@ -336,7 +345,7 @@ version = "0.8.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "93e3af942408868f6934a7b85134a3230832b9977cf66125df2f9edcfce4ddcc"
 dependencies = [
- "bitflags",
+ "bitflags 1.3.2",
  "ignore",
  "walkdir",
 ]
@@ -542,7 +551,7 @@ dependencies = [
 
 [[package]]
 name = "lsd"
-version = "0.23.1"
+version = "1.0.0"
 dependencies = [
  "assert_cmd",
  "assert_fs",
@@ -571,6 +580,7 @@ dependencies = [
  "url",
  "users",
  "version_check",
+ "vsort",
  "wild",
  "windows",
  "xattr",
@@ -793,7 +803,7 @@ version = "0.2.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8ae183fc1b06c149f0c1793e1eb447c8b04bfe46d48e9e48bfb8d2d7ed64ecf0"
 dependencies = [
- "bitflags",
+ "bitflags 1.3.2",
 ]
 
 [[package]]
@@ -809,9 +819,9 @@ dependencies = [
 
 [[package]]
 name = "regex"
-version = "1.5.5"
+version = "1.7.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1a11647b6b25ff05a515cb92c365cec08801e83423a235b51e231e1808747286"
+checksum = "8b1f693b24f6ac912f4893ef08244d70b6067480d2f1a46e950c9691e6749d1d"
 dependencies = [
  "aho-corasick",
  "memchr",
@@ -826,9 +836,9 @@ checksum = "6c230d73fb8d8c1b9c0b3135c5142a8acee3a0558fb8db5cf1cb65f8d7862132"
 
 [[package]]
 name = "regex-syntax"
-version = "0.6.25"
+version = "0.6.29"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f497285884f3fcff424ffc933e56d7cbca511def0c9831a7f9b5f6153e3cc89b"
+checksum = "f162c6dd7b008981e4d40210aca20b4bd0f9b60ca9271061b07f78537722f2e1"
 
 [[package]]
 name = "remove_dir_all"
@@ -845,7 +855,7 @@ version = "0.36.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d4fdebc4b395b7fbb9ab11e462e20ed9051e7b16e42d24042c776eca0ac81b03"
 dependencies = [
- "bitflags",
+ "bitflags 1.3.2",
  "errno",
  "io-lifetimes",
  "libc",
@@ -930,9 +940,9 @@ dependencies = [
 
 [[package]]
 name = "signal-hook"
-version = "0.3.14"
+version = "0.3.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a253b5e89e2698464fc26b545c9edceb338e18a89effeeecfea192c3025be29d"
+checksum = "8621587d4798caf8eb44879d42e56b9a93ea5dcd315a6487c357130095b62801"
 dependencies = [
  "libc",
  "signal-hook-registry",
@@ -1171,6 +1181,12 @@ name = "version_check"
 version = "0.9.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "49874b5167b65d7193b8aba1567f5c7d93d001cafc34600cee003eda787e483f"
+
+[[package]]
+name = "vsort"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "84afa8e70fb599a53474f4d83c085bd9e8848d02b7a774c6f39ebcebbbfddd16"
 
 [[package]]
 name = "wait-timeout"
