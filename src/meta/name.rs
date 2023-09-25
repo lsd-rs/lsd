@@ -78,9 +78,9 @@ impl Name {
             .collect()
     }
 
-    fn escape(&self, string: &str, should_quote: bool) -> String {
+    fn escape(&self, string: &str, literal: bool) -> String {
         let mut name = string.to_string();
-        if should_quote {
+        if !literal {
             if name.contains('\\') || name.contains('"') {
                 name = name.replace('\'', "\'\\\'\'");
                 name = format!("\'{}\'", &name);
@@ -146,28 +146,31 @@ impl Name {
         icons: &Icons,
         display_option: &DisplayOption,
         hyperlink: HyperlinkOption,
-        quote: bool,
+        literal: bool,
     ) -> ColoredString {
         let content = match display_option {
             DisplayOption::FileName => {
                 format!(
                     "{}{}",
                     icons.get(self),
-                    self.hyperlink(self.escape(self.file_name(), quote), hyperlink)
+                    self.hyperlink(self.escape(self.file_name(), literal), hyperlink)
                 )
             }
             DisplayOption::Relative { base_path } => format!(
                 "{}{}",
                 icons.get(self),
                 self.hyperlink(
-                    self.escape(&self.relative_path(base_path).to_string_lossy(), quote),
+                    self.escape(&self.relative_path(base_path).to_string_lossy(), literal),
                     hyperlink
                 )
             ),
             DisplayOption::None => format!(
                 "{}{}",
                 icons.get(self),
-                self.hyperlink(self.escape(&self.path.to_string_lossy(), quote), hyperlink)
+                self.hyperlink(
+                    self.escape(&self.path.to_string_lossy(), literal),
+                    hyperlink
+                )
             ),
         };
 
@@ -258,7 +261,7 @@ mod test {
                 &icons,
                 &DisplayOption::FileName,
                 HyperlinkOption::Never,
-                false,
+                true,
             )
         );
     }
@@ -271,7 +274,7 @@ mod test {
         // Create the directory
         let dir_path = tmp_dir.path().join("directory");
         fs::create_dir(&dir_path).expect("failed to create the dir");
-        let meta = Meta::from_path(&dir_path, false).unwrap();
+        let meta = Meta::from_path(&dir_path, false, false).unwrap();
 
         let colors = Colors::new(color::ThemeOption::NoLscolors);
 
@@ -282,7 +285,7 @@ mod test {
                 icons,
                 &DisplayOption::FileName,
                 HyperlinkOption::Never,
-                false
+                true
             )
         );
     }
@@ -316,7 +319,7 @@ mod test {
                 icons,
                 &DisplayOption::FileName,
                 HyperlinkOption::Never,
-                false
+                true
             )
         );
     }
@@ -350,7 +353,7 @@ mod test {
                 &icons,
                 &DisplayOption::FileName,
                 HyperlinkOption::Never,
-                false
+                true
             )
         );
     }
@@ -382,7 +385,7 @@ mod test {
                 icons,
                 &DisplayOption::FileName,
                 HyperlinkOption::Never,
-                false
+                true
             )
         );
     }
@@ -395,7 +398,7 @@ mod test {
         // Create the file;
         let file_path = tmp_dir.path().join("file.txt");
         File::create(&file_path).expect("failed to create file");
-        let meta = Meta::from_path(&file_path, false).unwrap();
+        let meta = Meta::from_path(&file_path, false, false).unwrap();
 
         let colors = Colors::new(color::ThemeOption::NoColor);
 
@@ -407,7 +410,7 @@ mod test {
                     &icons,
                     &DisplayOption::FileName,
                     HyperlinkOption::Never,
-                    false
+                    true
                 )
                 .to_string()
         );
@@ -421,7 +424,7 @@ mod test {
         // Create the file;
         let file_path = tmp_dir.path().join("file.txt");
         File::create(&file_path).expect("failed to create file");
-        let meta = Meta::from_path(&file_path, false).unwrap();
+        let meta = Meta::from_path(&file_path, false, false).unwrap();
 
         let colors = Colors::new(color::ThemeOption::NoColor);
 
@@ -440,7 +443,7 @@ mod test {
                     &icons,
                     &DisplayOption::FileName,
                     HyperlinkOption::Always,
-                    false
+                    true
                 )
                 .to_string()
         );
@@ -661,7 +664,7 @@ mod test {
                 &icons,
                 &DisplayOption::FileName,
                 HyperlinkOption::Never,
-                true,
+                false,
             )
         );
 
@@ -680,7 +683,7 @@ mod test {
                 &icons,
                 &DisplayOption::FileName,
                 HyperlinkOption::Never,
-                true,
+                false,
             )
         );
 
@@ -699,7 +702,7 @@ mod test {
                 &icons,
                 &DisplayOption::FileName,
                 HyperlinkOption::Never,
-                true,
+                false,
             )
         );
 
@@ -720,7 +723,7 @@ mod test {
                 &icons,
                 &DisplayOption::FileName,
                 HyperlinkOption::Never,
-                true,
+                false,
             )
         );
 
@@ -741,7 +744,7 @@ mod test {
                 &icons,
                 &DisplayOption::FileName,
                 HyperlinkOption::Never,
-                true,
+                false,
             )
         );
     }

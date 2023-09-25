@@ -144,7 +144,7 @@ mod test {
     fn test_dir_type() {
         let tmp_dir = tempdir().expect("failed to create temp dir");
         #[cfg(not(windows))]
-        let meta = crate::meta::Meta::from_path(tmp_dir.path(), false)
+        let meta = crate::meta::Meta::from_path(tmp_dir.path(), false, false)
             .expect("failed to get tempdir path");
         let metadata = tmp_dir.path().metadata().expect("failed to get metas");
 

@@ -162,7 +162,7 @@ mod test {
     fn test_depth_from_cli_empty() {
         let argv = ["lsd"];
         let cli = Cli::try_parse_from(argv).unwrap();
-        assert!(matches!(cli.depth, None));
+        assert!(cli.depth.is_none());
     }
 
     #[test]

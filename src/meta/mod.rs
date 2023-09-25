@@ -29,7 +29,7 @@ pub use self::size::Size;
 pub use self::symlink::SymLink;
 pub use crate::icon::Icons;
 
-use crate::flags::{Display, Flags, Layout};
+use crate::flags::{Display, Flags, Layout, PermissionFlag};
 use crate::{print_error, ExitCode};
 
 use crate::git::GitCache;
@@ -95,8 +95,11 @@ impl Meta {
             let mut current_meta = self.clone();
             current_meta.name.name = ".".to_owned();
 
-            let mut parent_meta =
-                Self::from_path(&self.path.join(Component::ParentDir), flags.dereference.0)?;
+            let mut parent_meta = Self::from_path(
+                &self.path.join(Component::ParentDir),
+                flags.dereference.0,
+                flags.permission == PermissionFlag::Disable,
+            )?;
             parent_meta.name.name = "..".to_owned();
 
             current_meta.git_status = cache.and_then(|cache| cache.get(&current_meta.path, true));
@@ -139,7 +142,11 @@ impl Meta {
                 _ => {}
             }
 
-            let mut entry_meta = match Self::from_path(&path, flags.dereference.0) {
+            let mut entry_meta = match Self::from_path(
+                &path,
+                flags.dereference.0,
+                flags.permission == PermissionFlag::Disable,
+            ) {
                 Ok(res) => res,
                 Err(err) => {
                     print_error!("{}: {}.", path.display(), err);
@@ -244,7 +251,7 @@ impl Meta {
         }
     }
 
-    pub fn from_path(path: &Path, dereference: bool) -> io::Result<Self> {
+    pub fn from_path(path: &Path, dereference: bool, disable_permission: bool) -> io::Result<Self> {
         let mut metadata = path.symlink_metadata()?;
         let mut symlink_meta = None;
         let mut broken_link = false;
@@ -262,22 +269,45 @@ impl Meta {
                     // path.symlink_metadata would have errored out
                     if dereference {
                         broken_link = true;
-                        eprintln!("lsd: {}: {}\n", path.to_str().unwrap_or(""), e);
+                        eprintln!("lsd: {}: {}", path.to_str().unwrap_or(""), e);
                     }
                 }
             }
         }
 
         #[cfg(unix)]
-        let owner = Owner::from(&metadata);
-        #[cfg(unix)]
-        let permissions = Permissions::from(&metadata);
+        let (owner, permissions) = if disable_permission {
+            (None, None)
+        } else {
+            (
+                Some(Owner::from(&metadata)),
+                Some(Permissions::from(&metadata)),
+            )
+        };
 
         #[cfg(windows)]
-        let (owner, permissions) = windows_utils::get_file_data(path)?;
+        let (owner, permissions) = if disable_permission {
+            (None, None)
+        } else {
+            match windows_utils::get_file_data(path) {
+                Ok((owner, permissions)) => (Some(owner), Some(permissions)),
+                Err(e) => {
+                    eprintln!(
+                        "lsd: {}: {}(Hint: Consider using `--permission disabled`.)",
+                        path.to_str().unwrap_or(""),
+                        e
+                    );
+                    (None, None)
+                }
+            }
+        };
 
         #[cfg(not(windows))]
-        let file_type = FileType::new(&metadata, symlink_meta.as_ref(), &permissions);
+        let file_type = FileType::new(
+            &metadata,
+            symlink_meta.as_ref(),
+            &permissions.unwrap_or_default(),
+        );
 
         #[cfg(windows)]
         let file_type = FileType::new(&metadata, symlink_meta.as_ref(), path);
@@ -305,8 +335,8 @@ impl Meta {
             size,
             date,
             indicator: Indicator::from(file_type),
-            owner,
-            permissions,
+            owner: owner.unwrap_or_default(),
+            permissions: permissions.unwrap_or_default(),
             name,
             file_type,
             content: None,
@@ -326,8 +356,16 @@ mod tests {
     #[test]
     fn test_from_path_path() {
         let dir = assert_fs::TempDir::new().unwrap();
-        let meta = Meta::from_path(dir.path(), false).unwrap();
+        let meta = Meta::from_path(dir.path(), false, false).unwrap();
         assert_eq!(meta.path, dir.path())
+    }
+
+    #[test]
+    fn test_from_path_disable_permission() {
+        let dir = assert_fs::TempDir::new().unwrap();
+        let meta = Meta::from_path(dir.path(), false, true).unwrap();
+        assert!(meta.permissions.is_none());
+        assert!(meta.owner.is_none());
     }
 
     #[test]
@@ -336,7 +374,7 @@ mod tests {
 
         let path_a = tmp_dir.path().join("aaa.aa");
         File::create(&path_a).expect("failed to create file");
-        let meta_a = Meta::from_path(&path_a, false).expect("failed to get meta");
+        let meta_a = Meta::from_path(&path_a, false, false).expect("failed to get meta");
 
         let path_b = tmp_dir.path().join("bbb.bb");
         let path_c = tmp_dir.path().join("ccc.cc");
@@ -351,7 +389,7 @@ mod tests {
         std::os::windows::fs::symlink_file(&path_c, &path_b)
             .expect("failed to create broken symlink");
 
-        let meta_b = Meta::from_path(&path_b, true).expect("failed to get meta");
+        let meta_b = Meta::from_path(&path_b, true, false).expect("failed to get meta");
 
         assert!(
             meta_a.inode.is_some()

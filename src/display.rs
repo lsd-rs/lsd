@@ -355,11 +355,11 @@ fn get_output(
                 ]);
             }
             Block::User => block_vec.push(match &meta.owner {
-                Some(owner) => owner.render_user(colors),
+                Some(owner) => owner.render_user(colors, flags),
                 None => colorize_missing("?"),
             }),
             Block::Group => block_vec.push(match &meta.owner {
-                Some(owner) => owner.render_group(colors),
+                Some(owner) => owner.render_group(colors, flags),
                 None => colorize_missing("?"),
             }),
             Block::Context => block_vec.push(match &meta.access_control {
@@ -392,7 +392,7 @@ fn get_output(
                         icons,
                         display_option,
                         flags.hyperlink,
-                        flags.should_quote,
+                        flags.literal.0,
                     ),
                     meta.indicator.render(flags),
                 ]);
@@ -523,7 +523,7 @@ mod tests {
                     &Icons::new(false, IconOption::Never, FlagTheme::Fancy, " ".to_string()),
                     &DisplayOption::FileName,
                     HyperlinkOption::Never,
-                    true,
+                    false,
                 )
                 .to_string();
 
@@ -558,7 +558,7 @@ mod tests {
                     &Icons::new(false, IconOption::Always, FlagTheme::Fancy, " ".to_string()),
                     &DisplayOption::FileName,
                     HyperlinkOption::Never,
-                    true,
+                    false,
                 )
                 .to_string();
 
@@ -592,7 +592,7 @@ mod tests {
                     &Icons::new(false, IconOption::Never, FlagTheme::Fancy, " ".to_string()),
                     &DisplayOption::FileName,
                     HyperlinkOption::Never,
-                    true,
+                    false,
                 )
                 .to_string();
 
@@ -633,7 +633,7 @@ mod tests {
                     &Icons::new(false, IconOption::Never, FlagTheme::Fancy, " ".to_string()),
                     &DisplayOption::FileName,
                     HyperlinkOption::Never,
-                    true,
+                    false,
                 )
                 .to_string();
 
@@ -683,7 +683,7 @@ mod tests {
         dir.child("one.d").create_dir_all().unwrap();
         dir.child("one.d/two").touch().unwrap();
         dir.child("one.d/.hidden").touch().unwrap();
-        let mut metas = Meta::from_path(Path::new(dir.path()), false)
+        let mut metas = Meta::from_path(Path::new(dir.path()), false, false)
             .unwrap()
             .recurse_into(42, &flags, None)
             .unwrap()
@@ -716,7 +716,7 @@ mod tests {
         let dir = assert_fs::TempDir::new().unwrap();
         dir.child("dir").create_dir_all().unwrap();
         dir.child("dir/file").touch().unwrap();
-        let metas = Meta::from_path(Path::new(dir.path()), false)
+        let metas = Meta::from_path(Path::new(dir.path()), false, false)
             .unwrap()
             .recurse_into(42, &flags, None)
             .unwrap()
@@ -757,7 +757,7 @@ mod tests {
         let dir = assert_fs::TempDir::new().unwrap();
         dir.child("dir").create_dir_all().unwrap();
         dir.child("dir/file").touch().unwrap();
-        let metas = Meta::from_path(Path::new(dir.path()), false)
+        let metas = Meta::from_path(Path::new(dir.path()), false, false)
             .unwrap()
             .recurse_into(42, &flags, None)
             .unwrap()
@@ -797,7 +797,7 @@ mod tests {
         let dir = assert_fs::TempDir::new().unwrap();
         dir.child("one.d").create_dir_all().unwrap();
         dir.child("one.d/two").touch().unwrap();
-        let metas = Meta::from_path(Path::new(dir.path()), false)
+        let metas = Meta::from_path(Path::new(dir.path()), false, false)
             .unwrap()
             .recurse_into(42, &flags, None)
             .unwrap()
@@ -828,7 +828,7 @@ mod tests {
         let dir = assert_fs::TempDir::new().unwrap();
         dir.child("testdir").create_dir_all().unwrap();
         dir.child("test").touch().unwrap();
-        let metas = Meta::from_path(Path::new(dir.path()), false)
+        let metas = Meta::from_path(Path::new(dir.path()), false, false)
             .unwrap()
             .recurse_into(1, &flags, None)
             .unwrap()
@@ -862,7 +862,7 @@ mod tests {
 
         let dir = assert_fs::TempDir::new().unwrap();
         dir.child("testdir").create_dir_all().unwrap();
-        let metas = Meta::from_path(Path::new(dir.path()), false)
+        let metas = Meta::from_path(Path::new(dir.path()), false, false)
             .unwrap()
             .recurse_into(1, &flags, None)
             .unwrap()
@@ -892,11 +892,11 @@ mod tests {
 
         let file_path = tmp_dir.path().join("file");
         std::fs::File::create(&file_path).expect("failed to create the file");
-        let file = Meta::from_path(&file_path, false).unwrap();
+        let file = Meta::from_path(&file_path, false, false).unwrap();
 
         let dir_path = tmp_dir.path().join("dir");
         std::fs::create_dir(&dir_path).expect("failed to create the dir");
-        let dir = Meta::from_path(&dir_path, false).unwrap();
+        let dir = Meta::from_path(&dir_path, false, false).unwrap();
 
         assert_eq!(
             display_folder_path(&dir),
@@ -942,15 +942,15 @@ mod tests {
 
         let file_path = tmp_dir.path().join("file");
         std::fs::File::create(&file_path).expect("failed to create the file");
-        let file = Meta::from_path(&file_path, false).unwrap();
+        let file = Meta::from_path(&file_path, false, false).unwrap();
 
         let dir_path = tmp_dir.path().join("dir");
         std::fs::create_dir(&dir_path).expect("failed to create the dir");
-        let dir = Meta::from_path(&dir_path, false).unwrap();
+        let dir = Meta::from_path(&dir_path, false, false).unwrap();
 
         let link_path = tmp_dir.path().join("link");
         std::os::unix::fs::symlink("dir", &link_path).unwrap();
-        let link = Meta::from_path(&link_path, false).unwrap();
+        let link = Meta::from_path(&link_path, false, false).unwrap();
 
         let grid_flags = Flags {
             layout: Layout::Grid,

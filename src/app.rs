@@ -69,7 +69,7 @@ pub struct Cli {
     pub directory_only: bool,
 
     /// How to display permissions [default: rwx]
-    #[arg(long, value_name = "MODE", value_parser = ["rwx", "octal"])]
+    #[arg(long, value_name = "MODE", value_parser = ["rwx", "octal", "disable"])]
     pub permission: Option<String>,
 
     /// How to display size [default: default]
@@ -176,10 +176,22 @@ pub struct Cli {
     #[arg(long)]
     pub header: bool,
 
+    /// Truncate the user and group names if they exceed a certain number of characters
+    #[arg(long, value_name = "NUM")]
+    pub truncate_owner_after: Option<usize>,
+
+    /// Truncation marker appended to a truncated user or group name
+    #[arg(long, value_name = "STR")]
+    pub truncate_owner_marker: Option<String>,
+
     /// Includes files with the windows system protection flag set.
     /// This is the same as --all on other platforms
     #[arg(long, hide = !cfg!(windows))]
     pub system_protected: bool,
+
+    /// Print entry names without quoting
+    #[arg(short = 'N', long)]
+    pub literal: bool,
 
     /// Print help information
     #[arg(long, action = ArgAction::Help)]
