@@ -33,7 +33,7 @@ once_cell = "1.17.1"
 chrono = { version = "0.4.*", features = ["unstable-locales"] }
 chrono-humanize = "0.1.*"
 unicode-width = "0.1.*"
-lscolors = "0.9.0"
+lscolors = "0.14.0"
 wild = "2.0.*"
 globset = "0.4.*"
 xdg = "2.1.*"
