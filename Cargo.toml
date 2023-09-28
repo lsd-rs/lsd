@@ -22,7 +22,7 @@ version_check = "0.9.*"
 
 [dependencies]
 crossterm = { version = "0.27.0", features = ["serde"] }
-dirs = "5"
+dirs = "4"
 libc = "0.2.*"
 human-sort = "0.2.2"
 term_grid = "0.1.*"
