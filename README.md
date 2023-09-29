@@ -189,8 +189,8 @@ size: default
 
 # == Permission ==
 # Specify the format of the permission column
-# Possible value: rwx, octal
-permission: rwx
+# Possible value: rwx, octal, attributes (windows only), disabled
+# permission: rwx
 
 # == Sorting ==
 sorting:
