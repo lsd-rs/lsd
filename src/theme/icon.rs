@@ -765,7 +765,7 @@ filetype:
         // When a user sets to use 📦-icon for a cargo.toml file,
         let theme: IconTheme = Theme::with_yaml("name:\n  cargo.toml: 📦").unwrap();
         // the default icon  should be used for a cargo.lock file.
-        assert_eq!(theme.name.get("cargo.lock").unwrap(), "\u{e7a8}");
+        assert_eq!(theme.name.get("cargo.lock").unwrap(), "\u{e68b}");
     }
 
     #[test]
