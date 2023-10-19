@@ -63,7 +63,7 @@ assert_cmd = "2"
 assert_fs = "1"
 predicates = "1.0.1"
 tempfile = "3"
-serial_test = "0.5"
+serial_test = "2.0"
 
 [features]
 default = ["git2"]
