@@ -31,7 +31,7 @@ thiserror = "1.0"
 sys-locale = "0.2.4"
 once_cell = "1.17.1"
 chrono = { version = "0.4.*", features = ["unstable-locales"] }
-chrono-humanize = "0.1.*"
+chrono-humanize = "0.2"
 unicode-width = "0.1.*"
 lscolors = "0.15.0"
 wild = "2.0.*"
