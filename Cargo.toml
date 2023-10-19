@@ -61,7 +61,7 @@ version = "4.1"
 [dev-dependencies]
 assert_cmd = "2"
 assert_fs = "1"
-predicates = "1.0.1"
+predicates = "3"
 tempfile = "3"
 serial_test = "2.0"
 
