@@ -48,7 +48,7 @@ vsort = "0.2"
 git2 = { version = "0.18", optional = true, default-features = false }
 
 [target.'cfg(unix)'.dependencies]
-users = "0.11.*"
+users = { version = "0.11.3", package = "uzers" }
 xattr = "1"
 
 [target.'cfg(windows)'.dependencies]
