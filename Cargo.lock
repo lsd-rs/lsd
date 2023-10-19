@@ -1151,9 +1151,9 @@ checksum = "49874b5167b65d7193b8aba1567f5c7d93d001cafc34600cee003eda787e483f"
 
 [[package]]
 name = "vsort"
-version = "0.1.0"
+version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "84afa8e70fb599a53474f4d83c085bd9e8848d02b7a774c6f39ebcebbbfddd16"
+checksum = "11331a1b48f99ea6bb27faae41399d08783d055ddee131e1b1b70a854207ebf8"
 
 [[package]]
 name = "wait-timeout"
