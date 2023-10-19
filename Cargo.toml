@@ -45,7 +45,7 @@ vsort = "0.2"
 
 [target."cfg(not(all(windows, target_arch = \"x86\", target_env = \"gnu\")))".dependencies]
 # if ssl feature is enabled compilation will fail on arm-unknown-linux-gnueabihf and i686-pc-windows-gnu
-git2 = { version = "0.16", optional = true, default-features = false }
+git2 = { version = "0.18", optional = true, default-features = false }
 
 [target.'cfg(unix)'.dependencies]
 users = "0.11.*"
