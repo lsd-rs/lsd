@@ -59,7 +59,7 @@ features = ["derive", "wrap_help"]
 version = "4.1"
 
 [dev-dependencies]
-assert_cmd = "1"
+assert_cmd = "2"
 assert_fs = "1"
 predicates = "1.0.1"
 tempfile = "3"
