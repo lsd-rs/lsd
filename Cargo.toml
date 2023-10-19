@@ -34,13 +34,13 @@ chrono = { version = "0.4.*", features = ["unstable-locales"] }
 chrono-humanize = "0.2"
 unicode-width = "0.1.*"
 lscolors = "0.15.0"
-wild = "2.0.*"
+wild = "2.0"
 globset = "0.4.*"
-xdg = "2.1.*"
+xdg = "2.1"
 yaml-rust = "0.4.*"
 serde = { version = "1.0", features = ["derive"] }
 serde_yaml = "0.8"
-url = "2.1.*"
+url = "2.1"
 vsort = "0.2"
 
 [target."cfg(not(all(windows, target_arch = \"x86\", target_env = \"gnu\")))".dependencies]
