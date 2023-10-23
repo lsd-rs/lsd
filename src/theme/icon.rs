@@ -148,6 +148,7 @@ impl IconTheme {
             ("changelog", "\u{e609}"),          // ""
             (".clang-format", "\u{e615}"),      // ""
             ("composer.json", "\u{e608}"),      // ""
+            ("content", "\u{f0c7}"),            // ""
             ("conf.d", "\u{e5fc}"),             // ""
             ("config.ac", "\u{e615}"),          // ""
             ("config.el", "\u{e779}"),          // ""
