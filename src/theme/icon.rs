@@ -213,7 +213,6 @@ impl IconTheme {
             (".htaccess", "\u{e615}"),          // ""
             ("htoprc", "\u{e615}"),             // ""
             (".htpasswd", "\u{e615}"),          // ""
-            (".idlerc", "\u{e606}"),            // ""
             ("img", "\u{f1c5}"),                // ""
             ("include", "\u{e5fc}"),            // ""
             ("init.el", "\u{e779}"),            // ""
