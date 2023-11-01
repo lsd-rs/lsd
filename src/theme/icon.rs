@@ -319,6 +319,7 @@ impl IconTheme {
             ("share", "\u{f064}"),              // ""
             (".shellcheckrc", "\u{e615}"),      // ""
             ("shells", "\u{e615}"),             // ""
+            (".spacemacs", "\u{e632}"),         // ""
             (".sqlite_history", "\u{e7c4}"),    // ""
             ("src", "\u{f19fc}"),               // "󱧼"
             (".ssh", "\u{f08ac}"),              // "󰢬"
@@ -330,6 +331,7 @@ impl IconTheme {
             ("template", "\u{f32e}"),           // ""
             ("tests", "\u{f0668}"),             // "󰙨"
             ("tigrc", "\u{e615}"),              // ""
+            ("timezone", "\u{f43a}"),           // ""
             ("tox.ini", "\u{e615}"),            // ""
             (".trash", "\u{f1f8}"),             // ""
             ("ts", "\u{e628}"),                 // ""
@@ -445,6 +447,7 @@ impl IconTheme {
             ("dockerfile", "\u{f308}"),      // ""
             ("doc", "\u{f1c2}"),             // ""
             ("docx", "\u{f1c2}"),            // ""
+            ("download", "\u{f43a}"),        // ""
             ("ds_store", "\u{f179}"),        // ""
             ("dump", "\u{f1c0}"),            // ""
             ("ebook", "\u{e28b}"),           // ""
@@ -571,13 +574,14 @@ impl IconTheme {
             ("org", "\u{e633}"),             // ""
             ("otf", "\u{f031}"),             // ""
             ("o", "\u{eae8}"),               // ""
+            ("part", "\u{f43a}"),            // ""
+            ("patch", "\u{e728}"),           // ""
             ("pdb", "\u{f0aaa}"),            // "󰪪"
             ("pdf", "\u{f1c1}"),             // ""
             ("pem", "\u{f0306}"),            // "󰌆"
             ("phar", "\u{e608}"),            // ""
             ("php", "\u{e608}"),             // ""
             ("pkg", "\u{f187}"),             // ""
-            ("patch", "\u{e728}"),           // ""
             ("pl", "\u{e67e}"),              // ""
             ("plist", "\u{f302}"),           // ""
             ("pls", "\u{f0411}"),            // "󰐑"
@@ -606,16 +610,17 @@ impl IconTheme {
             ("rdoc", "\u{e609}"),            // ""
             ("rds", "\u{f07d4}"),            // "󰟔"
             ("readme", "\u{e609}"),          // ""
-            ("rlib", "\u{e7a8}"),            // ""
+            ("rlib", "\u{e68b}"),            // ""
             ("rl", "\u{f11c}"),              // ""
             ("rmd", "\u{e609}"),             // ""
+            ("rmeta", "\u{e68b}"),           // ""
             ("rpm", "\u{f187}"),             // ""
             ("rproj", "\u{f05c6}"),          // "󰗆"
             ("rspec_parallel", "\u{e21e}"),  // ""
             ("rspec_status", "\u{e21e}"),    // ""
             ("rspec", "\u{e21e}"),           // ""
             ("rss", "\u{f09e}"),             // ""
-            ("rs", "\u{e7a8}"),              // ""
+            ("rs", "\u{e68b}"),              // ""
             ("rtf", "\u{f15c}"),             // ""
             ("rubydoc", "\u{e73b}"),         // ""
             ("r", "\u{f07d4}"),              // "󰟔"
@@ -653,6 +658,7 @@ impl IconTheme {
             ("tex", "\u{e600}"),             // ""
             ("tgz", "\u{f410}"),             // ""
             ("tiff", "\u{f1c5}"),            // ""
+            ("timestamp", "\u{f43a}"),       // ""
             ("toml", "\u{e60b}"),            // ""
             ("torrent", "\u{f048d}"),        // "󰒍"
             ("trash", "\u{f1f8}"),           // ""
@@ -710,13 +716,13 @@ mod tests {
         r#"---
 name:
   .trash: 
-  .cargo: 
-  .emacs.d: 
+  .cargo: 
+  .emacs.d: 
   a.out: 
 extension:
   go: 
   hs: 
-  rs: 
+  rs: 
 filetype:
   dir: 
   file: 
