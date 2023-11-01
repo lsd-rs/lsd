@@ -16,8 +16,8 @@ include!("src/app.rs");
 
 fn main() {
     // rustc version too small or can't figure it out
-    if version_check::is_min_version("1.64.0") != Some(true) {
-        eprintln!("'lsd' requires rustc >= 1.64.0");
+    if version_check::is_min_version("1.69.0") != Some(true) {
+        eprintln!("'lsd' requires rustc >= 1.69.0");
         exit(1);
     }
 
