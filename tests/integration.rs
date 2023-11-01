@@ -303,7 +303,7 @@ fn test_dereference_link_broken_link_output() {
     // likely to fail because of permission issue
     // see https://doc.rust-lang.org/std/os/windows/fs/fn.symlink_file.html
     #[cfg(windows)]
-    std::os::windows::fs::symlink_file(&target, &link).expect("failed to create broken symlink");
+    std::os::windows::fs::symlink_file(target, &link).expect("failed to create broken symlink");
 
     cmd()
         .arg("-l")
