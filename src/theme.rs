@@ -89,3 +89,71 @@ impl Theme {
         serde_yaml::from_str::<D>(yaml)
     }
 }
+
+#[cfg(test)]
+mod tests {
+
+    use super::Error;
+    use super::Theme;
+
+    #[test]
+    fn test_can_deserialize_yaml() {
+        use std::collections::BTreeMap;
+        let mut map: BTreeMap<String, String> = BTreeMap::new();
+        map.insert("user".to_string(), "1".to_string());
+        map.insert("group".to_string(), "2".to_string());
+        assert_eq!(
+            map,
+            Theme::with_yaml(
+                r#"---
+                    user: 1
+                    group: 2
+                "#
+            )
+            .unwrap()
+        );
+    }
+
+    #[test]
+    fn test_ioerror() {
+        use super::ColorTheme;
+
+        let dir = assert_fs::TempDir::new().unwrap();
+        let theme = dir.path().join("does-not-exist.yaml");
+
+        let res = Theme::from_path::<ColorTheme>(theme.to_str().unwrap());
+        assert!(res.is_err());
+        let the_error = res.unwrap_err();
+        assert!(matches!(&the_error, Error::NotExisted(_)));
+        if let Error::NotExisted(some_err) = &the_error {
+            assert_eq!(some_err.kind(), std::io::ErrorKind::NotFound);
+        }
+
+        // There are many reasons why we could get an IoError, not just "file not found".
+        // Here we test that we actually get informations about the underlying io error.
+        assert_eq!(
+            "Cannot read theme file. No such file or directory (os error 2)".to_string(),
+            the_error.to_string()
+        );
+    }
+
+    #[test]
+    fn test_invalid_format() {
+        use super::ColorTheme;
+        use std::fs::File;
+        use std::io::Write;
+
+        let dir = assert_fs::TempDir::new().unwrap();
+        let theme = dir.path().join("does-not-exist.yaml");
+        let mut file = File::create(&theme).unwrap();
+        // Write a purposefully bogus file
+        writeln!(file, "{}", "bogus-field: 1").unwrap();
+
+        let res = Theme::from_path::<ColorTheme>(theme.to_str().unwrap());
+        assert!(res.is_err());
+        // Just check the first part of serde_yaml output so that we don't break the test just adding new fields.
+        assert!(res.unwrap_err().to_string().starts_with(
+            "Theme file format invalid. unknown field `bogus-field`, expected one of"
+        ));
+    }
+}
