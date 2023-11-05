@@ -27,11 +27,11 @@ pub struct Theme {
 
 #[derive(Error, Debug)]
 pub enum Error {
-    #[error("Theme file not existed")]
+    #[error("Cannot read theme file. {0}")]
     NotExisted(#[from] io::Error),
-    #[error("Theme file format invalid")]
+    #[error("Theme file format invalid. {0}")]
     InvalidFormat(#[from] serde_yaml::Error),
-    #[error("Theme file path invalid {0}")]
+    #[error("Theme file path invalid. {0}")]
     InvalidPath(String),
     #[error("Unknown Theme error")]
     Unknown(),
