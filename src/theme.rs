@@ -68,6 +68,7 @@ impl Theme {
                     Ok(t) => return Ok(t),
                     Err(e) => {
                         err = Error::from(e);
+                        break;
                     }
                 },
                 Err(e) => err = Error::from(e),
