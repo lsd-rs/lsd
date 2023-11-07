@@ -610,6 +610,7 @@ impl IconTheme {
             ("pptx", "\u{f1c4}"),            // ""
             ("procfile", "\u{e21e}"),        // ""
             ("properties", "\u{e60b}"),      // ""
+            ("prql", "\u{f1c0}"),            // ""
             ("ps1", "\u{f489}"),             // ""
             ("psd", "\u{e7b8}"),             // ""
             ("pub", "\u{f0306}"),            // "󰌆"
