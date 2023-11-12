@@ -228,6 +228,7 @@ jobs:
         # autocomplete
         cp 'target/${{ matrix.job.target }}/release/build/${{ env.PROJECT_NAME }}-'*/'out/${{ env.PROJECT_NAME }}.bash' '${{ steps.vars.outputs.STAGING }}/${{ steps.vars.outputs.PKG_BASENAME }}/autocomplete/${{ env.PROJECT_NAME }}.bash-completion'
         cp 'target/${{ matrix.job.target }}/release/build/${{ env.PROJECT_NAME }}-'*/'out/${{ env.PROJECT_NAME }}.fish' '${{ steps.vars.outputs.STAGING }}/${{ steps.vars.outputs.PKG_BASENAME }}/autocomplete/'
+        cp 'target/${{ matrix.job.target }}/release/build/${{ env.PROJECT_NAME }}-'*/'out/_${{ env.PROJECT_NAME }}.ps1' '${{ steps.vars.outputs.STAGING }}/${{ steps.vars.outputs.PKG_BASENAME }}/autocomplete/'
         cp 'target/${{ matrix.job.target }}/release/build/${{ env.PROJECT_NAME }}-'*/'out/_${{ env.PROJECT_NAME }}' '${{ steps.vars.outputs.STAGING }}/${{ steps.vars.outputs.PKG_BASENAME }}/autocomplete/'
         # base compressed package
         pushd '${{ steps.vars.outputs.STAGING }}/' >/dev/null
