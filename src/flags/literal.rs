@@ -14,12 +14,12 @@ impl Configurable<Self> for Literal {
     /// Get a potential `Literal` value from [Cli].
     ///
     /// If the "literal" argument is passed, this returns a `Literal` with value `true` in a
-    /// [Some]. Otherwise this returns `Literal` with value `false` in a [Some].
+    /// [Some]. Otherwise this returns [None].
     fn from_cli(cli: &Cli) -> Option<Self> {
         if cli.literal {
             Some(Self(true))
         } else {
-            Some(Self(false))
+            None
         }
     }
 
@@ -27,13 +27,9 @@ impl Configurable<Self> for Literal {
     ///
     /// If the `Config::indicators` has value,
     /// this returns its value as the value of the `Literal`, in a [Some].
-    /// Otherwise this returns `Literal` with value `false` in a [Some].
+    /// Otherwise this returns [None].
     fn from_config(config: &Config) -> Option<Self> {
-        if let Some(value) = config.literal {
-            Some(Self(value))
-        } else {
-            Some(Self(false))
-        }
+        config.literal.map(Self)
     }
 }
 
@@ -51,7 +47,7 @@ mod test {
     fn test_from_cli_none() {
         let argv = ["lsd"];
         let cli = Cli::try_parse_from(argv).unwrap();
-        assert_eq!(Some(Literal(false)), Literal::from_cli(&cli));
+        assert_eq!(None, Literal::from_cli(&cli));
     }
 
     #[test]
@@ -63,10 +59,7 @@ mod test {
 
     #[test]
     fn test_from_config_none() {
-        assert_eq!(
-            Some(Literal(false)),
-            Literal::from_config(&Config::with_none())
-        );
+        assert_eq!(None, Literal::from_config(&Config::with_none()));
     }
 
     #[test]
