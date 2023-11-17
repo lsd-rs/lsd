@@ -378,7 +378,7 @@ mod tests {
         // likely to fail because of permission issue
         // see https://doc.rust-lang.org/std/os/windows/fs/fn.symlink_file.html
         #[cfg(windows)]
-        std::os::windows::fs::symlink_file(&path_d, &path_c)
+        std::os::windows::fs::symlink_file(path_d, &path_c)
             .expect("failed to create broken symlink");
 
         let meta_c = Meta::from_path(&path_c, true, false).expect("failed to get meta");
