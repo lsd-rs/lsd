@@ -5,7 +5,7 @@ Summary:        The next gen ls command
 
 License:        MIT
 URL:            https://github.com/lsd-rs/lsd
-Source0:        https://github.com/lsd-rs/lsd/archive/refs/tags/%{version}.tar.gz
+Source0:        https://github.com/lsd-rs/lsd/archive/refs/tags/v%{version}.tar.gz
 
 BuildRequires: rust
 BuildRequires: cargo
