@@ -34,6 +34,12 @@
 This project is a rewrite of GNU `ls` with lots of added features like colors, icons, tree-view, more formatting options etc.
 The project is heavily inspired by the super [colorls](https://github.com/athityakumar/colorls) project.
 
+
+**IMPORTANT**: This is the development documents,
+please check the docs in Tags if you installed from the released ones.
+
+The current newest release is: [v1.0.0](https://github.com/lsd-rs/lsd/tree/v1.0.0)
+
 ## Installation
 
 <details>
