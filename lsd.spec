@@ -5,7 +5,10 @@ Summary:        The next gen ls command
 
 License:        MIT
 URL:            https://github.com/lsd-rs/lsd
-Source0:        %{name}-%{version}.tar.gz
+Source0:        https://github.com/lsd-rs/lsd/archive/refs/tags/%{version}.tar.gz
+
+BuildRequires: rust
+BuildRequires: cargo
 
 %description
 This project is a rewrite of GNU ls with lots of added features like colors, icons, tree-view, more formatting options etc. The project is heavily inspired by the super colorls project.
