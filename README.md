@@ -57,7 +57,7 @@ Install the patched fonts of powerline nerd-font and/or font-awesome. Have a loo
 | FreeBSD                         | `pkg install lsd`                                                    |
 | NetBSD or any `pkgsrc` platform | `pkgin install lsd` or `cd /usr/pkgsrc/sysutils/lsd && make install` |
 | OpenBSD                         | `pkg_add lsd`                                                        |
-| Windows                         | `scoop install lsd`                                                  |
+| Windows                         | `scoop install lsd` or `winget install --id lsd-rs.lsd`              |
 | Android (via Termux)            | `pkg install lsd`                                                    |
 | Debian sid and bookworm         | `apt install lsd`                                                    |
 | Ubuntu 23.04 (Lunar Lobster)    | `apt install lsd`                                                    |
