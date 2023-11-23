@@ -147,7 +147,7 @@ mod tests {
         let theme = dir.path().join("does-not-exist.yaml");
         let mut file = File::create(&theme).unwrap();
         // Write a purposefully bogus file
-        writeln!(file, "{}", "bogus-field: 1").unwrap();
+        writeln!(file, "bogus-field: 1").unwrap();
 
         let res = Theme::from_path::<ColorTheme>(theme.to_str().unwrap());
         assert!(res.is_err());
