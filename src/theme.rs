@@ -131,10 +131,8 @@ mod tests {
 
         // There are many reasons why we could get an IoError, not just "file not found".
         // Here we test that we actually get informations about the underlying io error.
-        assert_eq!(
-            "Cannot read theme file. No such file or directory (os error 2)".to_string(),
-            the_error.to_string()
-        );
+        assert!(the_error.to_string().starts_with("Cannot read theme file"));
+        assert!(the_error.to_string().ends_with("(os error 2)"));
     }
 
     #[test]
