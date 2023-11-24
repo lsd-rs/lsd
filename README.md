@@ -34,6 +34,12 @@
 This project is a rewrite of GNU `ls` with lots of added features like colors, icons, tree-view, more formatting options etc.
 The project is heavily inspired by the super [colorls](https://github.com/athityakumar/colorls) project.
 
+
+**IMPORTANT**: This is the development documents,
+please check the docs in Tags if you installed from the released ones.
+
+The current newest release is: [v1.0.0](https://github.com/lsd-rs/lsd/tree/v1.0.0)
+
 ## Installation
 
 <details>
@@ -57,7 +63,7 @@ Install the patched fonts of powerline nerd-font and/or font-awesome. Have a loo
 | FreeBSD                         | `pkg install lsd`                                                    |
 | NetBSD or any `pkgsrc` platform | `pkgin install lsd` or `cd /usr/pkgsrc/sysutils/lsd && make install` |
 | OpenBSD                         | `pkg_add lsd`                                                        |
-| Windows                         | `scoop install lsd`                                                  |
+| Windows                         | `scoop install lsd` or `winget install --id lsd-rs.lsd`              |
 | Android (via Termux)            | `pkg install lsd`                                                    |
 | Debian sid and bookworm         | `apt install lsd`                                                    |
 | Ubuntu 23.04 (Lunar Lobster)    | `apt install lsd`                                                    |
@@ -353,10 +359,6 @@ Please also notice that an empty theme is **NOT** supported due to
 [a bug in serde lib](https://github.com/dtolnay/serde-yaml/issues/86).
 
 ### Icon Theme
-
-> **NOTE:** This feature is not available in a release yet. You can
-> get this feature by [building from
-> `master`](https://github.com/lsd-rs/lsd#from-source).
 
 Icon theme can be configured in a fixed location, `$XDG_CONFIG_DIR/lsd/icons.yaml`,
 for example, `~/.config/lsd/icons.yaml` on macOS,
