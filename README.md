@@ -429,6 +429,9 @@ alias lt='ls --tree'
 
 ## F.A.Q
 
+### Custom Color Schemes for Windows
+For `lsd` currently, it reads a system environment variable called LS_COLORS. Please look at the marked solution in [this post](https://github.com/orgs/lsd-rs/discussions/958#discussioncomment-7659375), which contains a guide on how to set a color scheme.
+
 ### Icons not showing up
 
 For `lsd` to be able to display icons, the font has to include special font glyphs. This might not be the case for most fonts that you download. Thankfully, you can patch most fonts using [NerdFont](https://www.nerdfonts.com/) and add these icons. Or you can just download an already patched version of your favourite font from [NerdFont font download page](https://www.nerdfonts.com/font-downloads).
