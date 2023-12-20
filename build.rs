@@ -15,12 +15,6 @@ use std::process::exit;
 include!("src/app.rs");
 
 fn main() {
-    // rustc version too small or can't figure it out
-    if version_check::is_min_version("1.69.0") != Some(true) {
-        eprintln!("'lsd' requires rustc >= 1.69.0");
-        exit(1);
-    }
-
     let outdir = std::env::var_os("SHELL_COMPLETIONS_DIR")
         .or_else(|| std::env::var_os("OUT_DIR"))
         .unwrap_or_else(|| exit(0));
