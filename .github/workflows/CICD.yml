@@ -263,9 +263,9 @@ jobs:
           zstd -d < control.tar.zst | xz > control.tar.xz
           zstd -d < data.tar.zst | xz > data.tar.xz
           # Re-create the Debian package in /tmp/
-          legacy_deb="$(echo ${{ steps.vars.outputs.DPKG_NAME }} | sed 's/.deb/_legacy.deb/g')"
-          ar -m -c -a sdsd ${legacy_deb} debian-binary control.tar.xz data.tar.xz
-          mv ${legacy_deb} ${{ steps.vars.outputs.STAGING }}/
+          xz_deb="$(echo ${{ steps.vars.outputs.DPKG_NAME }} | sed 's/.deb/_xz.deb/g')"
+          ar -m -c -a sdsd ${xz_deb} debian-binary control.tar.xz data.tar.xz
+          mv ${xz_deb} ${{ steps.vars.outputs.STAGING }}/
           # Clean up
           rm debian-binary control.tar.xz data.tar.xz control.tar.zst data.tar.zst
         fi
