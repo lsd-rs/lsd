@@ -256,6 +256,18 @@ jobs:
           ## cat "${DPKG_DIR}/DEBIAN/control"
           # build dpkg
           fakeroot dpkg-deb --build "${DPKG_DIR}" "${{ steps.vars.outputs.STAGING }}/${{ steps.vars.outputs.DPKG_NAME }}"
+          # build a deb not using zst
+          # check https://github.com/lsd-rs/lsd/issues/891
+          ar x "${{ steps.vars.outputs.STAGING }}/${{ steps.vars.outputs.DPKG_NAME }}"
+          # Uncompress zstd files an re-compress them using xz
+          zstd -d < control.tar.zst | xz > control.tar.xz
+          zstd -d < data.tar.zst | xz > data.tar.xz
+          # Re-create the Debian package in /tmp/
+          xz_deb="$(echo ${{ steps.vars.outputs.DPKG_NAME }} | sed 's/.deb/_xz.deb/g')"
+          ar -m -c -a sdsd ${xz_deb} debian-binary control.tar.xz data.tar.xz
+          mv ${xz_deb} ${{ steps.vars.outputs.STAGING }}/
+          # Clean up
+          rm debian-binary control.tar.xz data.tar.xz control.tar.zst data.tar.zst
         fi
     - name: Publish
       uses: softprops/action-gh-release@v1
@@ -263,7 +275,7 @@ jobs:
       with:
         files: |
           ${{ steps.vars.outputs.STAGING }}/${{ steps.vars.outputs.PKG_NAME }}
-          ${{ steps.vars.outputs.STAGING }}/${{ steps.vars.outputs.DPKG_NAME }}
+          ${{ steps.vars.outputs.STAGING }}/*.deb
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

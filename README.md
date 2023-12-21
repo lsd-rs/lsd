@@ -430,6 +430,13 @@ alias lt='ls --tree'
 
 ## F.A.Q
 
+### Uses unknown compression for member 'control.tar.zst' when using deb
+
+Zst compression is supported starting from `Debian 12` and `Ubuntu 21.10`,
+Please use the `_xz.deb` released starting from `lsd v1.1.0`.
+
+Please check https://github.com/lsd-rs/lsd/issues/891 for details or manual fixes.
+
 ### Custom Color Schemes for Windows
 For `lsd` currently, it reads a system environment variable called LS_COLORS. Please look at the marked solution in [this post](https://github.com/orgs/lsd-rs/discussions/958#discussioncomment-7659375), which contains a guide on how to set a color scheme.
 
