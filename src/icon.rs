@@ -77,6 +77,7 @@ mod test {
     use super::{IconTheme, Icons};
     use crate::flags::{IconOption, IconTheme as FlagTheme, PermissionFlag};
     use crate::meta::Meta;
+    use crate::theme::icon::ByType;
     use std::fs::{create_dir_all, File};
     use tempfile::tempdir;
 
@@ -247,10 +248,9 @@ mod test {
             let icon = Icons::new(false, IconOption::Always, FlagTheme::Fancy, " ".to_string());
             let icon_str = icon.get(&meta.name);
 
-            assert_eq!(
-                icon_str,
-                format!("{}{}", "\u{f115}" /*  */, icon.icon_separator)
-            );
+            let by_type = ByType::default();
+
+            assert_eq!(icon_str, format!("{}{}", by_type.dir, icon.icon_separator));
         }
     }
 }
