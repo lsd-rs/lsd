@@ -45,6 +45,7 @@ impl Icons {
                     FileType::CharDevice => &t.filetype.device_char,
                     FileType::BlockDevice => &t.filetype.device_block,
                     FileType::Special => &t.filetype.special,
+                    FileType::Directory { .. } => &t.filetype.dir,
                     _ => {
                         if let Some(icon) = t.name.get(name.file_name().to_lowercase().as_str()) {
                             icon
@@ -55,7 +56,6 @@ impl Icons {
                             icon
                         } else {
                             match file_type {
-                                FileType::Directory { .. } => &t.filetype.dir,
                                 // If a file has no extension and is executable, show an icon.
                                 // Except for Windows, it marks everything as an executable.
                                 #[cfg(not(windows))]
