@@ -77,7 +77,7 @@ mod test {
     use super::{IconTheme, Icons};
     use crate::flags::{IconOption, IconTheme as FlagTheme, PermissionFlag};
     use crate::meta::Meta;
-    use std::fs::File;
+    use std::fs::{create_dir_all, File};
     use tempfile::tempdir;
 
     #[test]
@@ -232,6 +232,25 @@ mod test {
             let icon_str = icon.get(&meta.name);
 
             assert_eq!(icon_str, format!("{}{}", file_icon, icon.icon_separator));
+        }
+    }
+
+    #[test]
+    fn directory_icon_consistency() {
+        let tmp_dir = tempdir().expect("failed to create temp dir");
+
+        for (ext, _) in &IconTheme::get_default_icons_by_extension() {
+            let dir_path = tmp_dir.path().join(format!("folder.{ext}"));
+            create_dir_all(&dir_path).expect("failed to create file");
+            let meta = Meta::from_path(&dir_path, false, false).unwrap();
+
+            let icon = Icons::new(false, IconOption::Always, FlagTheme::Fancy, " ".to_string());
+            let icon_str = icon.get(&meta.name);
+
+            assert_eq!(
+                icon_str,
+                format!("{}{}", "\u{f115}" /*  */, icon.icon_separator)
+            );
         }
     }
 }
