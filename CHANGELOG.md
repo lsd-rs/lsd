@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   configuration fields) to truncate user and group names if they exceed a certain number
   of characters (disabled by default).
 - Add support for `--literal` from [PanGan21](https://github.com/PanGan21)
+- Add support for tilde (`~`) expansion on Windows from [Ofer Sadan](https://github.com/ofersadan85)
 
 ## [v1.0.0] - 2023-08-25
 

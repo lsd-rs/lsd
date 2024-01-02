@@ -18,6 +18,8 @@ use std::os::unix::io::AsRawFd;
 use crate::flags::blocks::Block;
 use crate::git_theme::GitTheme;
 #[cfg(target_os = "windows")]
+use crate::meta::windows_utils;
+#[cfg(target_os = "windows")]
 use terminal_size::terminal_size;
 
 pub struct Core {
@@ -103,6 +105,9 @@ impl Core {
             _ if self.flags.recursion.enabled => self.flags.recursion.depth,
             _ => 1,
         };
+
+        #[cfg(target_os = "windows")]
+        let paths: Vec<PathBuf> = paths.into_iter().map(windows_utils::expand_home).collect();
 
         for path in paths {
             let mut meta =
