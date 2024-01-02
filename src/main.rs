@@ -18,7 +18,6 @@ extern crate terminal_size;
 extern crate unicode_width;
 extern crate url;
 extern crate wild;
-extern crate xdg;
 extern crate yaml_rust;
 
 #[cfg(unix)]
