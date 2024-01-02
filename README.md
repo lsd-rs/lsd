@@ -102,16 +102,21 @@ Check [Config file content](#config-file-content) for details.
 
 On non-Windows systems `lsd` follows the
 [XDG Base Directory Specification](https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html)
-convention for the location of the configuration file. The configuration dir
-`lsd` uses is itself named `lsd`. In that directory it looks first for a file
-called `config.yaml`.
-For most people it should be enough to put their config file at
-`~/.config/lsd/config.yaml`.
+convention for the location of the configuration file. A `config.yaml` or `config.yml` file will be searched for in these locations, in order:
+
+- `$XDG_CONFIG_HOME/lsd`
+- `$HOME/.config/lsd`
+
+On most systems these are mapped to the same location, which is `~/.config/lsd/config.yaml`.
 
 ### Windows
 
-On Windows systems `lsd` only looks for the `config.yaml` files in one location:
-`%APPDATA%\lsd\`
+On Windows systems `lsd` searches for `config.yaml` or `config.yml` in the following locations, in order:
+
+- `%APPDATA%\lsd`
+- `%USERPROFILE%\.config\lsd`
+
+These are usually something like `C:\Users\username\AppData\Roaming\lsd\config.yaml` and `C:\Users\username\.config\lsd\config.yaml` respectively.
 
 ### Custom
 
