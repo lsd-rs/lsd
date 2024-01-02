@@ -38,9 +38,9 @@ pub enum Error {
 }
 
 impl Theme {
-    /// This read theme from file,
-    /// use the file path if it is absolute
-    /// prefix the config_file dir to it if it is not
+    /// Read theme from a file path
+    /// use the file path as-is if it is absolute
+    /// search the config paths folders for it if not
     pub fn from_path<D>(file: &str) -> Result<D, Error>
     where
         D: DeserializeOwned + Default,
@@ -54,9 +54,16 @@ impl Theme {
         let path = if Path::new(&real).is_absolute() {
             real
         } else {
-            match config_file::Config::config_file_path() {
-                Some(p) => p.join(real),
-                None => return Err(Error::InvalidPath("config home not existed".into())),
+            let path = config_file::Config::config_paths()
+                .map(|p| p.join(real.clone()))
+                .find(|p| p.is_file());
+            match path {
+                Some(p) => p,
+                None => {
+                    return Err(Error::InvalidPath(
+                        "Did not find theme file in config folders".into(),
+                    ))
+                }
             }
         };
 
