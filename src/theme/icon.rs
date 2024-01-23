@@ -581,6 +581,7 @@ impl IconTheme {
             ("mts", "\u{e628}"),             // ""
             ("mustache", "\u{e60f}"),        // ""
             ("nim", "\u{e677}"),             // ""
+            ("nimble", "\u{e677}"),          // ""
             ("nix", "\u{f313}"),             // ""
             ("npmignore", "\u{e71e}"),       // ""
             ("odp", "\u{f1c4}"),             // ""
