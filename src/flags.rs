@@ -28,7 +28,6 @@ pub use display::Display;
 pub use header::Header;
 pub use hyperlink::HyperlinkOption;
 pub use icons::IconOption;
-pub use icons::IconSeparator;
 pub use icons::IconTheme;
 pub use icons::Icons;
 pub use ignore_globs::IgnoreGlobs;

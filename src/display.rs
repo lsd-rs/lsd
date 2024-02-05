@@ -6,7 +6,7 @@ use crate::icon::Icons;
 use crate::meta::name::DisplayOption;
 use crate::meta::{FileType, Meta};
 use std::collections::HashMap;
-use term_grid::{Cell, Direction, Filling, Grid, GridOptions};
+use term_grid::{Alignment, Cell, Direction, Filling, Grid, GridOptions};
 use terminal_size::terminal_size;
 use unicode_width::UnicodeWidthStr;
 
@@ -130,6 +130,7 @@ fn inner_display_grid(
             cells.push(Cell {
                 width: get_visible_width(&block, flags.hyperlink == HyperlinkOption::Always),
                 contents: block,
+                alignment: Alignment::Left,
             });
         }
     }
@@ -216,6 +217,7 @@ fn add_header(flags: &Flags, cells: &[Cell], grid: &mut Grid) {
         grid.add(Cell {
             width: widths[idx],
             contents: underlined_header,
+            alignment: Alignment::Left,
         });
     }
 }
@@ -259,6 +261,7 @@ fn inner_display_tree(
             cells.push(Cell {
                 width: get_visible_width(&block, flags.hyperlink == HyperlinkOption::Always),
                 contents: block,
+                alignment: Alignment::Left,
             });
         }
 
