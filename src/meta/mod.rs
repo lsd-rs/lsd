@@ -27,7 +27,6 @@ pub use self::owner::Owner;
 pub use self::permissions::Permissions;
 pub use self::size::Size;
 pub use self::symlink::SymLink;
-pub use crate::icon::Icons;
 
 use crate::flags::{Display, Flags, Layout, PermissionFlag};
 use crate::{print_error, ExitCode};
