@@ -80,7 +80,7 @@ pub struct Cli {
     #[arg(long)]
     pub total_size: bool,
 
-    /// How to display date [default: date] [possible values: date, relative, +date-time-format]
+    /// How to display date [default: date] [possible values: date, locale, relative, +date-time-format]
     #[arg(long, value_parser = validate_date_argument)]
     pub date: Option<String>,
 
