@@ -13,7 +13,7 @@ mod size;
 mod symlink;
 
 #[cfg(windows)]
-mod windows_utils;
+pub mod windows_utils;
 
 pub use self::access_control::AccessControl;
 pub use self::date::Date;

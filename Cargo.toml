@@ -23,7 +23,7 @@ version_check = "0.9.*"
 
 [dependencies]
 crossterm = { version = "0.27.0", features = ["serde"] }
-dirs = "4"
+dirs = "5.0.1"
 libc = "0.2.*"
 human-sort = "0.2.2"
 term_grid = "0.1.*"
@@ -37,7 +37,6 @@ unicode-width = "0.1.*"
 lscolors = "0.15.0"
 wild = "2.0"
 globset = "0.4.*"
-xdg = "2.1"
 yaml-rust = "0.4.*"
 serde = { version = "1.0", features = ["derive"] }
 serde_yaml = "0.8"
