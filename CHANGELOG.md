@@ -15,6 +15,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   of characters (disabled by default).
 - Add support for `--literal` from [PanGan21](https://github.com/PanGan21)
 
+### Fixed
+- Respect glob patterns for `.` and `..` entries from `--all` [Jakub Kuczys](https://github.com/Jackenmen)
+
 ## [v1.0.0] - 2023-08-25
 
 ### Added
