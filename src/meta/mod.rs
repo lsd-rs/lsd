@@ -12,8 +12,9 @@ mod permissions;
 mod permissions_or_attributes;
 mod size;
 mod symlink;
-mod windows_attributes;
 
+#[cfg(windows)]
+mod windows_attributes;
 #[cfg(windows)]
 mod windows_utils;
 
