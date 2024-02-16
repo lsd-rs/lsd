@@ -205,9 +205,7 @@ impl Ord for Name {
 
 impl PartialOrd for Name {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        self.name
-            .to_lowercase()
-            .partial_cmp(&other.name.to_lowercase())
+        Some(self.cmp(other))
     }
 }
 

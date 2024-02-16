@@ -1,12 +1,10 @@
-#[cfg(windows)]
 use crate::{
     color::{ColoredString, Colors, Elem},
     flags::Flags,
 };
-#[cfg(windows)]
+
 use std::os::windows::fs::MetadataExt;
 
-#[cfg(windows)]
 #[derive(Debug, Clone)]
 pub struct WindowsAttributes {
     pub archive: bool,
@@ -15,7 +13,6 @@ pub struct WindowsAttributes {
     pub system: bool,
 }
 
-#[cfg(windows)]
 pub fn get_attributes(metadata: &std::fs::Metadata) -> WindowsAttributes {
     use windows::Win32::Storage::FileSystem::{
         FILE_ATTRIBUTE_ARCHIVE, FILE_ATTRIBUTE_HIDDEN, FILE_ATTRIBUTE_READONLY,
@@ -34,7 +31,6 @@ pub fn get_attributes(metadata: &std::fs::Metadata) -> WindowsAttributes {
     }
 }
 
-#[cfg(windows)]
 impl WindowsAttributes {
     pub fn render(&self, colors: &Colors, _flags: &Flags) -> ColoredString {
         let res = [
@@ -64,7 +60,6 @@ impl WindowsAttributes {
     }
 }
 
-#[cfg(windows)]
 #[cfg(test)]
 mod test {
     use std::fs;
