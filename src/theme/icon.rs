@@ -294,7 +294,7 @@ impl IconTheme {
             (".node_repl_history", "\u{e718}"), // ""
             ("npmignore", "\u{e71e}"),          // ""
             (".npm", "\u{e5fa}"),               // ""
-            ("nvim", "\u{e62b}"),               // ""
+            ("nvim", "\u{f36f}"),               // ""
             ("obj", "\u{e624}"),                // ""
             ("os-release", "\u{e615}"),         // ""
             ("package.json", "\u{e718}"),       // ""
