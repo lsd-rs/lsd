@@ -40,6 +40,9 @@ impl Configurable<Self> for SizeFlag {
     /// `SizeFlag` variant is returned in a [Some]. If neither of them is passed, this returns
     /// [None].
     fn from_cli(cli: &Cli) -> Option<Self> {
+        if cli.human_readable {
+            return Some(Self::Default);
+        }
         if cli.classic {
             Some(Self::Bytes)
         } else {
@@ -95,6 +98,20 @@ mod test {
         let argv = ["lsd", "--size", "short"];
         let cli = Cli::try_parse_from(argv).unwrap();
         assert_eq!(Some(SizeFlag::Short), SizeFlag::from_cli(&cli));
+    }
+
+    #[test]
+    fn test_from_cli_human_readable() {
+        let argv = ["lsd", "--human-readable"];
+        let cli = Cli::try_parse_from(argv).unwrap();
+        assert_eq!(Some(SizeFlag::Default), SizeFlag::from_cli(&cli));
+    }
+
+    #[test]
+    fn test_from_cli_minus_h() {
+        let argv = ["lsd", "-h"];
+        let cli = Cli::try_parse_from(argv).unwrap();
+        assert_eq!(Some(SizeFlag::Default), SizeFlag::from_cli(&cli));
     }
 
     #[test]

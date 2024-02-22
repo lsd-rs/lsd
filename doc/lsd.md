@@ -45,7 +45,7 @@ lsd is a ls command with a lot of pretty colours and some other stuff to enrich 
 : Prints help information
 
 `-h`, `--human-readable`
-: For ls compatibility purposes ONLY, currently set by default
+: Use the `default` display size to show sizes as e.g., 1.7 KB, 3.0 GB, etc.
 
 `--ignore-config`
 : Ignore the configuration file

@@ -52,9 +52,9 @@ pub struct Cli {
     #[arg(short = 'R', long, conflicts_with = "tree")]
     pub recursive: bool,
 
-    /// For ls compatibility purposes ONLY, currently set by default
+    /// This will take precedence over any --size=<mode> option
     #[arg(short, long)]
-    human_readable: bool,
+    pub human_readable: bool,
 
     /// Recurse into directories and present the result as a tree
     #[arg(long)]
