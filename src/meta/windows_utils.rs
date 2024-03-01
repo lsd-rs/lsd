@@ -2,7 +2,7 @@ use std::ffi::{OsStr, OsString};
 use std::io;
 use std::mem::MaybeUninit;
 use std::os::windows::ffi::{OsStrExt, OsStringExt};
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
 use windows::Win32::Foundation::PSID;
 use windows::Win32::Security::{self, Authorization::TRUSTEE_W, ACL};
@@ -341,18 +341,6 @@ pub fn is_path_system(path: &Path) -> bool {
         path,
         windows::Win32::Storage::FileSystem::FILE_ATTRIBUTE_SYSTEM,
     )
-}
-
-/// Expands the `~` in a path to the current user's home directory
-pub fn expand_home(path: PathBuf) -> PathBuf {
-    if path.starts_with("~") {
-        if let Some(home) = dirs::home_dir() {
-            let mut expanded = home.to_path_buf();
-            expanded.push(path.strip_prefix("~").unwrap());
-            return expanded;
-        }
-    }
-    path
 }
 
 #[cfg(test)]

@@ -79,6 +79,31 @@ pub struct TruncateOwner {
     pub marker: Option<String>,
 }
 
+/// This expand the `~` in path to HOME dir
+/// returns the origin one if no `~` found;
+/// returns None if error happened when getting home dir
+///
+/// Implementing this to reuse the `dirs` dependency, avoid adding new one
+pub fn expand_home<P: AsRef<Path>>(path: P) -> Option<PathBuf> {
+    let p = path.as_ref();
+    if !p.starts_with("~") {
+        return Some(p.to_path_buf());
+    }
+    if p == Path::new("~") {
+        return dirs::home_dir();
+    }
+    dirs::home_dir().map(|mut h| {
+        if h == Path::new("/") {
+            // Corner case: `h` root directory;
+            // don't prepend extra `/`, just drop the tilde.
+            p.strip_prefix("~").unwrap().to_path_buf()
+        } else {
+            h.push(p.strip_prefix("~/").unwrap());
+            h
+        }
+    })
+}
+
 impl Config {
     /// This constructs a Config struct with all None
     pub fn with_none() -> Self {
@@ -141,31 +166,6 @@ impl Config {
         serde_yaml::from_str::<Self>(yaml)
     }
 
-    /// This expand the `~` in path to HOME dir
-    /// returns the origin one if no `~` found;
-    /// returns None if error happened when getting home dir
-    ///
-    /// Implementing this to reuse the `dirs` dependency, avoid adding new one
-    pub fn expand_home<P: AsRef<Path>>(path: P) -> Option<PathBuf> {
-        let p = path.as_ref();
-        if !p.starts_with("~") {
-            return Some(p.to_path_buf());
-        }
-        if p == Path::new("~") {
-            return dirs::home_dir();
-        }
-        dirs::home_dir().map(|mut h| {
-            if h == Path::new("/") {
-                // Corner case: `h` root directory;
-                // don't prepend extra `/`, just drop the tilde.
-                p.strip_prefix("~").unwrap().to_path_buf()
-            } else {
-                h.push(p.strip_prefix("~/").unwrap());
-                h
-            }
-        })
-    }
-
     /// Config paths for non-Windows platforms will be read from
     /// `$XDG_CONFIG_HOME/lsd` or `$HOME/.config/lsd`
     /// (usually, those are the same) in that order.
@@ -173,9 +173,16 @@ impl Config {
     /// `%APPDATA%\lsd` or `%USERPROFILE%\.config\lsd` in that order.
     /// This will apply both to the config file and the theme file.
     pub fn config_paths() -> impl Iterator<Item = PathBuf> {
+        #[cfg(not(windows))]
+        use xdg::BaseDirectories;
+
         [
-            dirs::config_dir(),
             dirs::home_dir().map(|h| h.join(".config")),
+            dirs::config_dir(),
+            #[cfg(not(windows))]
+            BaseDirectories::with_prefix("")
+                .ok()
+                .map(|p| p.get_config_home()),
         ]
         .iter()
         .filter_map(|p| p.as_ref().map(|p| p.join("lsd")))
