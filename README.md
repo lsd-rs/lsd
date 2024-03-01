@@ -104,8 +104,8 @@ On non-Windows systems `lsd` follows the
 [XDG Base Directory Specification](https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html)
 convention for the location of the configuration file. A `config.yaml` or `config.yml` file will be searched for in these locations, in order:
 
-- `$XDG_CONFIG_HOME/lsd`
 - `$HOME/.config/lsd`
+- `$XDG_CONFIG_HOME/lsd`
 
 On most systems these are mapped to the same location, which is `~/.config/lsd/config.yaml`.
 
@@ -113,8 +113,8 @@ On most systems these are mapped to the same location, which is `~/.config/lsd/c
 
 On Windows systems `lsd` searches for `config.yaml` or `config.yml` in the following locations, in order:
 
-- `%APPDATA%\lsd`
 - `%USERPROFILE%\.config\lsd`
+- `%APPDATA%\lsd`
 
 These are usually something like `C:\Users\username\AppData\Roaming\lsd\config.yaml` and `C:\Users\username\.config\lsd\config.yaml` respectively.
 
