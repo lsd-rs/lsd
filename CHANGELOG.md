@@ -44,6 +44,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Avoid using Clap's deprecated structs and functions [sudame](https://github.com/sudame)
 - Icon theme with overrides from config [sudame](https://github.com/sudame)
 - Incorrect colorizing with `--size=bytes` [bells307](https://github.com/bells307)
+- Allow `--directory-only` together with `--depth` from [nim65s](https://github.com/nim65s)
 
 ### Changed
 - Color theme is now expected to be in `$XDG/lsd/colors.yaml` by default from [peppidesu](https://github.com/peppidesu)
