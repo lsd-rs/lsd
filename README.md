@@ -258,20 +258,6 @@ symlink-arrow: ⇒
 # Whether to display block headers.
 # Possible values: false, true
 header: false
-
-# == Literal ==
-# Whether to show quotes on filenames.
-# Possible values: false, true
-literal: false
-
-# == Truncate owner ==
-# How to truncate the username and group names for a file if they exceed a certain
-# number of characters.
-truncate-owner:
-  # Number of characters to keep. By default, no truncation is done (empty value).
-  after:
-  # String to be appended to a name if truncated.
-  marker: ""
 ```
 
 </details>
