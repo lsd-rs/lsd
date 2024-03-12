@@ -27,11 +27,11 @@ pub struct Theme {
 
 #[derive(Error, Debug)]
 pub enum Error {
-    #[error("Theme file not existed")]
+    #[error("Cannot read theme file. {0}")]
     NotExisted(#[from] io::Error),
-    #[error("Theme file format invalid")]
+    #[error("Theme file format invalid. {0}")]
     InvalidFormat(#[from] serde_yaml::Error),
-    #[error("Theme file path invalid {0}")]
+    #[error("Theme file path invalid. {0}")]
     InvalidPath(String),
     #[error("Unknown Theme error")]
     Unknown(),
@@ -68,6 +68,7 @@ impl Theme {
                     Ok(t) => return Ok(t),
                     Err(e) => {
                         err = Error::from(e);
+                        break;
                     }
                 },
                 Err(e) => err = Error::from(e),
@@ -86,5 +87,71 @@ impl Theme {
             return Ok(D::default());
         }
         serde_yaml::from_str::<D>(yaml)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+
+    use super::Error;
+    use super::Theme;
+
+    #[test]
+    fn test_can_deserialize_yaml() {
+        use std::collections::BTreeMap;
+        let mut map: BTreeMap<String, String> = BTreeMap::new();
+        map.insert("user".to_string(), "1".to_string());
+        map.insert("group".to_string(), "2".to_string());
+        assert_eq!(
+            map,
+            Theme::with_yaml(
+                r#"---
+                    user: 1
+                    group: 2
+                "#
+            )
+            .unwrap()
+        );
+    }
+
+    #[test]
+    fn test_ioerror() {
+        use super::ColorTheme;
+
+        let dir = assert_fs::TempDir::new().unwrap();
+        let theme = dir.path().join("does-not-exist.yaml");
+
+        let res = Theme::from_path::<ColorTheme>(theme.to_str().unwrap());
+        assert!(res.is_err());
+        let the_error = res.unwrap_err();
+        assert!(matches!(&the_error, Error::NotExisted(_)));
+        if let Error::NotExisted(some_err) = &the_error {
+            assert_eq!(some_err.kind(), std::io::ErrorKind::NotFound);
+        }
+
+        // There are many reasons why we could get an IoError, not just "file not found".
+        // Here we test that we actually get informations about the underlying io error.
+        assert!(the_error.to_string().starts_with("Cannot read theme file"));
+        assert!(the_error.to_string().ends_with("(os error 2)"));
+    }
+
+    #[test]
+    fn test_invalid_format() {
+        use super::ColorTheme;
+        use std::fs::File;
+        use std::io::Write;
+
+        let dir = assert_fs::TempDir::new().unwrap();
+        let theme = dir.path().join("does-not-exist.yaml");
+        let mut file = File::create(&theme).unwrap();
+        // Write a purposefully bogus file
+        writeln!(file, "bogus-field: 1").unwrap();
+
+        let res = Theme::from_path::<ColorTheme>(theme.to_str().unwrap());
+        assert!(res.is_err());
+        // Just check the first part of serde_yaml output so that we don't break the test just adding new fields.
+        assert!(res.unwrap_err().to_string().starts_with(
+            "Theme file format invalid. unknown field `bogus-field`, expected one of"
+        ));
     }
 }

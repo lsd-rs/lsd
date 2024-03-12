@@ -187,7 +187,10 @@ impl Colors {
             ThemeOption::Default | ThemeOption::NoLscolors => Some(Theme::default().color),
             ThemeOption::Custom => Some(
                 Theme::from_path::<ColorTheme>(Path::new("colors").to_str().unwrap())
-                    .unwrap_or_default(),
+                    .unwrap_or_else(|e| {
+                        print_output!("Warning: cannot load custom theme. {}.\n\n", e);
+                        ColorTheme::default()
+                    }),
             ),
             ThemeOption::CustomLegacy(ref file) => {
                 print_output!(
