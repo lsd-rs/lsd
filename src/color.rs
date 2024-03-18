@@ -38,6 +38,12 @@ pub enum Elem {
     Acl,
     Context,
 
+    /// Attributes
+    Archive,
+    AttributeRead,
+    Hidden,
+    System,
+
     /// Last Time Modified
     DayOld,
     HourOld,
@@ -111,6 +117,11 @@ impl Elem {
             Elem::Octal => theme.permission.octal,
             Elem::Acl => theme.permission.acl,
             Elem::Context => theme.permission.context,
+
+            Elem::Archive => theme.attributes.archive,
+            Elem::AttributeRead => theme.attributes.read,
+            Elem::Hidden => theme.attributes.hidden,
+            Elem::System => theme.attributes.system,
 
             Elem::DayOld => theme.date.day_old,
             Elem::HourOld => theme.date.hour_old,
@@ -398,6 +409,12 @@ mod elem {
                 octal: Color::AnsiValue(6),
                 acl: Color::DarkCyan,
                 context: Color::Cyan,
+            },
+            attributes: color::Attributes {
+                read: Color::Green,
+                archive: Color::Yellow,
+                hidden: Color::Red,
+                system: Color::Magenta,
             },
             file_type: color::FileType {
                 file: color::File {

@@ -99,7 +99,7 @@ lsd is a ls command with a lot of pretty colours and some other stuff to enrich 
 : When to use terminal colours [default: auto]  [possible values: always, auto, never]
 
 `--date <date>...`
-: How to display date [possible values: date, relative, +date-time-format] [default: date]
+: How to display date [possible values: date, locale, relative, +date-time-format] [default: date]
 
 `--depth <num>...`
 : Stop recursing into directories after reaching specified depth
@@ -123,7 +123,7 @@ lsd is a ls command with a lot of pretty colours and some other stuff to enrich 
 : Do not display files/directories with names matching the glob pattern(s). More than one can be specified by repeating the argument [default: ]
 
 `--permission <permission>...`
-: How to display permissions [default: rwx]  [possible values: rwx, octal]
+: How to display permissions [default: rwx for linux, attributes for windows]  [possible values: rwx, octal, attributes, disable]
 
 `--size <size>...`
 : How to display size [default: default]  [possible values: default, short, bytes]

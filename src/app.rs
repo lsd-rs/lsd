@@ -68,8 +68,8 @@ pub struct Cli {
     #[arg(short, long, conflicts_with_all = ["depth", "recursive"])]
     pub directory_only: bool,
 
-    /// How to display permissions [default: rwx]
-    #[arg(long, value_name = "MODE", value_parser = ["rwx", "octal", "disable"])]
+    /// How to display permissions [default: rwx for linux, attributes for windows]
+    #[arg(long, value_name = "MODE", value_parser = ["rwx", "octal", "attributes", "disable"])]
     pub permission: Option<String>,
 
     /// How to display size [default: default]
@@ -80,7 +80,7 @@ pub struct Cli {
     #[arg(long)]
     pub total_size: bool,
 
-    /// How to display date [default: date] [possible values: date, relative, +date-time-format]
+    /// How to display date [default: date] [possible values: date, locale, relative, +date-time-format]
     #[arg(long, value_parser = validate_date_argument)]
     pub date: Option<String>,
 

@@ -13,10 +13,13 @@ use serde::Deserialize;
 #[serde(rename_all = "kebab-case")]
 pub enum PermissionFlag {
     /// The variant to show file permissions in rwx format
-    #[default]
+    #[cfg_attr(not(target_os = "windows"), default)]
     Rwx,
     /// The variant to show file permissions in octal format
     Octal,
+    /// (windows only): Attributes from powershell's `Get-ChildItem`
+    #[cfg_attr(target_os = "windows", default)]
+    Attributes,
     /// Disable the display of owner and permissions, may be used to speed up in Windows
     Disable,
 }
@@ -26,6 +29,7 @@ impl PermissionFlag {
         match value {
             "rwx" => Self::Rwx,
             "octal" => Self::Octal,
+            "attributes" => Self::Attributes,
             "disable" => Self::Disable,
             // Invalid value should be handled by `clap` when building an `Cli`
             other => unreachable!("Invalid value '{other}' for 'permission'"),
@@ -75,7 +79,12 @@ mod test {
 
     #[test]
     fn test_default() {
-        assert_eq!(PermissionFlag::Rwx, PermissionFlag::default());
+        let expected = if cfg!(target_os = "windows") {
+            PermissionFlag::Attributes
+        } else {
+            PermissionFlag::Rwx
+        };
+        assert_eq!(expected, PermissionFlag::default());
     }
 
     #[test]
@@ -97,6 +106,16 @@ mod test {
         let argv = ["lsd", "--permission", "octal"];
         let cli = Cli::try_parse_from(argv).unwrap();
         assert_eq!(Some(PermissionFlag::Octal), PermissionFlag::from_cli(&cli));
+    }
+
+    #[test]
+    fn test_from_cli_attributes() {
+        let argv = ["lsd", "--permission", "attributes"];
+        let cli = Cli::try_parse_from(argv).unwrap();
+        assert_eq!(
+            Some(PermissionFlag::Attributes),
+            PermissionFlag::from_cli(&cli)
+        );
     }
 
     #[test]

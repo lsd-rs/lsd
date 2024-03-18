@@ -122,6 +122,8 @@ impl Permissions {
 
                 colors.colorize(octals, &Elem::Octal).to_string()
             }
+            // technically this should be an error, hmm
+            PermissionFlag::Attributes => colors.colorize('-', &Elem::NoAccess).to_string(),
             PermissionFlag::Disable => colors.colorize('-', &Elem::NoAccess).to_string(),
         };
 

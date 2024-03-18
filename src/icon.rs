@@ -75,7 +75,7 @@ fn icon_scheme<'icon>(
 #[cfg(test)]
 mod test {
     use super::{IconTheme, Icons};
-    use crate::flags::{IconOption, IconTheme as FlagTheme};
+    use crate::flags::{IconOption, IconTheme as FlagTheme, PermissionFlag};
     use crate::meta::Meta;
     use crate::theme::icon::ByType;
     use std::fs::{create_dir_all, File};
@@ -86,7 +86,7 @@ mod test {
         let tmp_dir = tempdir().expect("failed to create temp dir");
         let file_path = tmp_dir.path().join("file.txt");
         File::create(&file_path).expect("failed to create file");
-        let meta = Meta::from_path(&file_path, false, false).unwrap();
+        let meta = Meta::from_path(&file_path, false, PermissionFlag::Rwx).unwrap();
 
         let icons = Icons::new(true, IconOption::Never, FlagTheme::Fancy, " ".to_string());
         let icon = icons.get(&meta.name);
@@ -98,7 +98,7 @@ mod test {
         let tmp_dir = tempdir().expect("failed to create temp dir");
         let file_path = tmp_dir.path().join("file.txt");
         File::create(&file_path).expect("failed to create file");
-        let meta = Meta::from_path(&file_path, false, false).unwrap();
+        let meta = Meta::from_path(&file_path, false, PermissionFlag::Rwx).unwrap();
 
         let icons = Icons::new(false, IconOption::Never, FlagTheme::Fancy, " ".to_string());
         let icon = icons.get(&meta.name);
@@ -111,7 +111,7 @@ mod test {
         let tmp_dir = tempdir().expect("failed to create temp dir");
         let file_path = tmp_dir.path().join("file.txt");
         File::create(&file_path).expect("failed to create file");
-        let meta = Meta::from_path(&file_path, false, false).unwrap();
+        let meta = Meta::from_path(&file_path, false, PermissionFlag::Rwx).unwrap();
 
         let icons = Icons::new(false, IconOption::Auto, FlagTheme::Fancy, " ".to_string());
         let icon = icons.get(&meta.name);
@@ -123,7 +123,7 @@ mod test {
         let tmp_dir = tempdir().expect("failed to create temp dir");
         let file_path = tmp_dir.path().join("file.txt");
         File::create(&file_path).expect("failed to create file");
-        let meta = Meta::from_path(&file_path, false, false).unwrap();
+        let meta = Meta::from_path(&file_path, false, PermissionFlag::Rwx).unwrap();
 
         let icons = Icons::new(true, IconOption::Auto, FlagTheme::Fancy, " ".to_string());
         let icon = icons.get(&meta.name);
@@ -136,7 +136,7 @@ mod test {
         let tmp_dir = tempdir().expect("failed to create temp dir");
         let file_path = tmp_dir.path().join("file");
         File::create(&file_path).expect("failed to create file");
-        let meta = Meta::from_path(&file_path, false, false).unwrap();
+        let meta = Meta::from_path(&file_path, false, PermissionFlag::Rwx).unwrap();
 
         let icon = Icons::new(true, IconOption::Always, FlagTheme::Fancy, " ".to_string());
         let icon_str = icon.get(&meta.name);
@@ -149,7 +149,7 @@ mod test {
         let tmp_dir = tempdir().expect("failed to create temp dir");
         let file_path = tmp_dir.path().join("file");
         File::create(&file_path).expect("failed to create file");
-        let meta = Meta::from_path(&file_path, false, false).unwrap();
+        let meta = Meta::from_path(&file_path, false, PermissionFlag::Rwx).unwrap();
 
         let icon = Icons::new(false, IconOption::Always, FlagTheme::Fancy, " ".to_string());
         let icon_str = icon.get(&meta.name);
@@ -162,7 +162,7 @@ mod test {
         let tmp_dir = tempdir().expect("failed to create temp dir");
         let file_path = tmp_dir.path().join("file");
         File::create(&file_path).expect("failed to create file");
-        let meta = Meta::from_path(&file_path, false, false).unwrap();
+        let meta = Meta::from_path(&file_path, false, PermissionFlag::Rwx).unwrap();
 
         let icon = Icons::new(
             false,
@@ -179,7 +179,7 @@ mod test {
     fn get_icon_default_directory() {
         let tmp_dir = tempdir().expect("failed to create temp dir");
         let file_path = tmp_dir.path();
-        let meta = Meta::from_path(file_path, false, false).unwrap();
+        let meta = Meta::from_path(file_path, false, PermissionFlag::Rwx).unwrap();
 
         let icon = Icons::new(false, IconOption::Always, FlagTheme::Fancy, " ".to_string());
         let icon_str = icon.get(&meta.name);
@@ -191,7 +191,7 @@ mod test {
     fn get_icon_default_directory_unicode() {
         let tmp_dir = tempdir().expect("failed to create temp dir");
         let file_path = tmp_dir.path();
-        let meta = Meta::from_path(file_path, false, false).unwrap();
+        let meta = Meta::from_path(file_path, false, PermissionFlag::Rwx).unwrap();
 
         let icon = Icons::new(
             false,
@@ -211,7 +211,7 @@ mod test {
         for (file_name, file_icon) in &IconTheme::get_default_icons_by_name() {
             let file_path = tmp_dir.path().join(file_name);
             File::create(&file_path).expect("failed to create file");
-            let meta = Meta::from_path(&file_path, false, false).unwrap();
+            let meta = Meta::from_path(&file_path, false, PermissionFlag::Rwx).unwrap();
 
             let icon = Icons::new(false, IconOption::Always, FlagTheme::Fancy, " ".to_string());
             let icon_str = icon.get(&meta.name);
@@ -227,7 +227,7 @@ mod test {
         for (ext, file_icon) in &IconTheme::get_default_icons_by_extension() {
             let file_path = tmp_dir.path().join(format!("file.{ext}"));
             File::create(&file_path).expect("failed to create file");
-            let meta = Meta::from_path(&file_path, false, false).unwrap();
+            let meta = Meta::from_path(&file_path, false, PermissionFlag::Rwx).unwrap();
 
             let icon = Icons::new(false, IconOption::Always, FlagTheme::Fancy, " ".to_string());
             let icon_str = icon.get(&meta.name);
