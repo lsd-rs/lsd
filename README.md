@@ -197,6 +197,11 @@ icons:
 # Possible values: false, true
 indicators: false
 
+# == Indicator Style ==
+# Specifies which indicators style to use
+# Possible values: none, slash, file-type, classify
+indicator-style: classify
+
 # == Layout ==
 # Which layout to use. "oneline" might be a bit confusing here and should be
 # called "one-per-line". It might be changed in the future.

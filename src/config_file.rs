@@ -35,6 +35,7 @@ pub struct Config {
     pub icons: Option<Icons>,
     pub ignore_globs: Option<Vec<String>>,
     pub indicators: Option<bool>,
+    pub indicator_style: Option<String>,
     pub layout: Option<Layout>,
     pub recursion: Option<Recursion>,
     pub size: Option<SizeFlag>,
@@ -95,6 +96,7 @@ impl Config {
             icons: None,
             ignore_globs: None,
             indicators: None,
+            indicator_style: None,
             layout: None,
             recursion: None,
             size: None,
@@ -277,6 +279,11 @@ icons:
 # Possible values: false, true
 indicators: false
 
+# == Indicator Style ==
+# Specifies which indicators style to use
+# Possible values: none, slash, file-type, classify
+indicator-style: classify
+
 # == Layout ==
 # Which layout to use. "oneline" might be a bit confusing here and should be
 # called "one-per-line". It might be changed in the future.
@@ -395,6 +402,7 @@ mod tests {
                 }),
                 ignore_globs: None,
                 indicators: Some(false),
+                indicator_style: Some("classify".to_string()),
                 layout: Some(Layout::Grid),
                 recursion: Some(config_file::Recursion {
                     enabled: Some(false),

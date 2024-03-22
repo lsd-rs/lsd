@@ -1,5 +1,6 @@
 use crate::color::{ColoredString, Colors};
 use crate::flags::Flags;
+use crate::flags::IndicatorStyle;
 use crate::meta::FileType;
 
 #[derive(Clone, Debug)]
@@ -22,18 +23,24 @@ impl From<FileType> for Indicator {
 
 impl Indicator {
     pub fn render(&self, flags: &Flags) -> ColoredString {
-        if flags.display_indicators.0 {
-            ColoredString::new(Colors::default_style(), self.0.to_string())
+        let ind = if flags.display_indicators.0 {
+            match (flags.indicator_style, self.0) {
+                (IndicatorStyle::Classify, c) => c,
+                (IndicatorStyle::FileType, c) if c != "*" => c,
+                (IndicatorStyle::Slash, c) if c == "/" => c,
+                _ => "",
+            }
         } else {
-            ColoredString::new(Colors::default_style(), "".into())
-        }
+            ""
+        };
+        ColoredString::new(Colors::default_style(), ind.into())
     }
 }
 
 #[cfg(test)]
 mod test {
     use super::Indicator;
-    use crate::flags::{Flags, Indicators};
+    use crate::flags::{Flags, IndicatorStyle, Indicators};
     use crate::meta::FileType;
 
     #[test]
@@ -64,6 +71,22 @@ mod test {
     }
 
     #[test]
+    fn test_executable_file_indicator_slash() {
+        let flags = Flags {
+            display_indicators: Indicators(true),
+            indicator_style: IndicatorStyle::Slash,
+            ..Default::default()
+        };
+
+        let file_type = Indicator::from(FileType::File {
+            uid: false,
+            exec: true,
+        });
+
+        assert_eq!("", file_type.render(&flags).to_string());
+    }
+
+    #[test]
     fn test_socket_indicator() {
         let flags = Flags {
             display_indicators: Indicators(true),
@@ -73,6 +96,19 @@ mod test {
         let file_type = Indicator::from(FileType::Socket);
 
         assert_eq!("=", file_type.render(&flags).to_string());
+    }
+
+    #[test]
+    fn test_socket_indicator_slash() {
+        let flags = Flags {
+            display_indicators: Indicators(true),
+            indicator_style: IndicatorStyle::Slash,
+            ..Default::default()
+        };
+
+        let file_type = Indicator::from(FileType::Socket);
+
+        assert_eq!("", file_type.render(&flags).to_string());
     }
 
     #[test]
