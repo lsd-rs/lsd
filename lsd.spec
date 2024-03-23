@@ -1,5 +1,5 @@
 Name:           lsd
-Version:        1.0.0
+Version:        1.1.1
 Release:        1%{?dist}
 Summary:        The next gen ls command
 
@@ -13,7 +13,7 @@ BuildRequires: cargo
 %description
 This project is a rewrite of GNU ls with lots of added features like colors, icons, tree-view, more formatting options etc. The project is heavily inspired by the super colorls project.
 
-%global debug_package %{nil} 
+%global debug_package %{nil}
 
 %prep
 %setup -q
