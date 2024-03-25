@@ -200,7 +200,7 @@ jobs:
       with:
         use-cross: ${{ steps.vars.outputs.CARGO_USE_CROSS }}
         command: build
-        args: --release --target=${{ matrix.job.target }}
+        args: --release --target=${{ matrix.job.target }} --locked
     - name: Test
       if: matrix.job.target != 'aarch64-apple-darwin'
       uses: actions-rs/cargo@v1
