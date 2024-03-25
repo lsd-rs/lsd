@@ -735,7 +735,7 @@ dependencies = [
 
 [[package]]
 name = "lsd"
-version = "1.1.1"
+version = "1.1.2"
 dependencies = [
  "assert_cmd",
  "assert_fs",
