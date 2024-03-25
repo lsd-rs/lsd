@@ -26,7 +26,9 @@ crossterm = { version = "0.27.0", features = ["serde"] }
 dirs = "5"
 libc = "0.2.*"
 human-sort = "0.2.2"
-term_grid = "0.2"
+# should stick to 0.1, the 0.2 needs some adaptation
+# check https://github.com/lsd-rs/lsd/issues/1014
+term_grid = "0.1"
 terminal_size = "0.3"
 thiserror = "1.0"
 sys-locale = "0.3"
