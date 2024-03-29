@@ -10,7 +10,7 @@
 <br>
 <a href="https://www.warp.dev/?utm_source=github&utm_medium=referral&utm_campaign=lsd_20231001">
   <div>
-    <img src="https://user-images.githubusercontent.com/3764335/271887540-b782d11d-d122-484d-8cd3-7fdff3b4ac4d.png" width="230" alt="Warp">
+    <img src="https://github.com/lsd-rs/lsd/assets/3764335/40e5d173-603c-45c8-90fa-50ba6c48a813" width="230" alt="Warp">
   </div>
   <b>Warp is a blazingly fast, Rust-based terminal reimagined to work like a modern app.</b>
   <div>
