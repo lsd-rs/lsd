@@ -2,26 +2,35 @@ use crate::color::{ColoredString, Colors, Elem};
 use crate::Flags;
 #[cfg(unix)]
 use std::fs::Metadata;
+#[cfg(unix)]
+use users::{Groups, Users, UsersCache};
 
-#[derive(Clone, Debug)]
+#[derive(Default)]
+pub struct Cache {
+    #[cfg(unix)]
+    users: UsersCache,
+    #[cfg(unix)]
+    groups: UsersCache,
+}
+
+#[cfg(unix)]
+#[derive(Clone, Debug, Default)]
+pub struct Owner {
+    user: u32,
+    group: u32,
+}
+
+#[cfg(windows)]
+#[derive(Clone, Debug, Default)]
 pub struct Owner {
     user: String,
     group: String,
 }
 
 impl Owner {
-    #[cfg_attr(unix, allow(dead_code))]
+    #[cfg(windows)]
     pub fn new(user: String, group: String) -> Self {
         Self { user, group }
-    }
-}
-
-impl Default for Owner {
-    fn default() -> Owner {
-        Owner {
-            user: String::from("-"),
-            group: String::from("-"),
-        }
     }
 }
 
@@ -29,19 +38,11 @@ impl Default for Owner {
 impl From<&Metadata> for Owner {
     fn from(meta: &Metadata) -> Self {
         use std::os::unix::fs::MetadataExt;
-        use users::{get_group_by_gid, get_user_by_uid};
 
-        let user = match get_user_by_uid(meta.uid()) {
-            Some(res) => res.name().to_string_lossy().to_string(),
-            None => meta.uid().to_string(),
-        };
-
-        let group = match get_group_by_gid(meta.gid()) {
-            Some(res) => res.name().to_string_lossy().to_string(),
-            None => meta.gid().to_string(),
-        };
-
-        Self { user, group }
+        Self {
+            user: meta.uid(),
+            group: meta.gid(),
+        }
     }
 }
 
@@ -62,10 +63,20 @@ fn truncate(input: &str, after: Option<usize>, marker: Option<String>) -> String
 }
 
 impl Owner {
-    pub fn render_user(&self, colors: &Colors, flags: &Flags) -> ColoredString {
+    // allow unused variables because cache is used in unix, maybe we can cache for windows in the future
+    #[allow(unused_variables)]
+    pub fn render_user(&self, colors: &Colors, cache: &Cache, flags: &Flags) -> ColoredString {
+        #[cfg(unix)]
+        let user = &match cache.users.get_user_by_uid(self.user) {
+            Some(user) => user.name().to_string_lossy().to_string(),
+            None => self.user.to_string(),
+        };
+        #[cfg(windows)]
+        let user = &self.user;
+
         colors.colorize(
             truncate(
-                &self.user,
+                user,
                 flags.truncate_owner.after,
                 flags.truncate_owner.marker.clone(),
             ),
@@ -73,10 +84,20 @@ impl Owner {
         )
     }
 
-    pub fn render_group(&self, colors: &Colors, flags: &Flags) -> ColoredString {
+    // allow unused variables because cache is used in unix, maybe we can cache for windows in the future
+    #[allow(unused_variables)]
+    pub fn render_group(&self, colors: &Colors, cache: &Cache, flags: &Flags) -> ColoredString {
+        #[cfg(unix)]
+        let group = &match cache.groups.get_group_by_gid(self.group) {
+            Some(group) => group.name().to_string_lossy().to_string(),
+            None => self.group.to_string(),
+        };
+        #[cfg(windows)]
+        let group = &self.group;
+
         colors.colorize(
             truncate(
-                &self.group,
+                group,
                 flags.truncate_owner.after,
                 flags.truncate_owner.marker.clone(),
             ),

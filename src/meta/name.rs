@@ -686,7 +686,7 @@ mod test {
             )
         );
 
-        let file_path = tmp_dir.path().join("\\.txt");
+        let file_path = tmp_dir.path().join(PathBuf::from("\\.txt"));
         File::create(&file_path).expect("failed to create file");
         let meta = file_path.metadata().expect("failed to get metas");
 
