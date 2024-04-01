@@ -4,7 +4,7 @@ use crate::flags::{Display, Flags, HyperlinkOption, Layout};
 use crate::git_theme::GitTheme;
 use crate::icon::Icons;
 use crate::meta::name::DisplayOption;
-use crate::meta::{FileType, Meta};
+use crate::meta::{FileType, Meta, OwnerCache};
 use std::collections::HashMap;
 use term_grid::{Cell, Direction, Filling, Grid, GridOptions};
 use terminal_size::terminal_size;
@@ -23,10 +23,12 @@ pub fn grid(
     git_theme: &GitTheme,
 ) -> String {
     let term_width = terminal_size().map(|(w, _)| w.0 as usize);
+    let owner_cache = OwnerCache::default();
 
     inner_display_grid(
         &DisplayOption::None,
         metas,
+        &owner_cache,
         flags,
         colors,
         icons,
@@ -57,8 +59,11 @@ pub fn tree(
         }
     }
 
+    let owner_cache = OwnerCache::default();
+
     for cell in inner_display_tree(
         metas,
+        &owner_cache,
         flags,
         colors,
         icons,
@@ -77,6 +82,7 @@ pub fn tree(
 fn inner_display_grid(
     display_option: &DisplayOption,
     metas: &[Meta],
+    owner_cache: &OwnerCache,
     flags: &Flags,
     colors: &Colors,
     icons: &Icons,
@@ -117,6 +123,7 @@ fn inner_display_grid(
 
         let blocks = get_output(
             meta,
+            owner_cache,
             colors,
             icons,
             git_theme,
@@ -176,6 +183,7 @@ fn inner_display_grid(
             output += &inner_display_grid(
                 &display_option,
                 content,
+                owner_cache,
                 flags,
                 colors,
                 icons,
@@ -223,6 +231,7 @@ fn add_header(flags: &Flags, cells: &[Cell], grid: &mut Grid) {
 #[allow(clippy::too_many_arguments)]
 fn inner_display_tree(
     metas: &[Meta],
+    owner_cache: &OwnerCache,
     flags: &Flags,
     colors: &Colors,
     icons: &Icons,
@@ -248,6 +257,7 @@ fn inner_display_tree(
 
         for block in get_output(
             meta,
+            owner_cache,
             colors,
             icons,
             git_theme,
@@ -276,6 +286,7 @@ fn inner_display_tree(
 
             cells.extend(inner_display_tree(
                 content,
+                owner_cache,
                 flags,
                 colors,
                 icons,
@@ -314,6 +325,7 @@ fn display_folder_path(meta: &Meta) -> String {
 #[allow(clippy::too_many_arguments)]
 fn get_output(
     meta: &Meta,
+    owner_cache: &OwnerCache,
     colors: &Colors,
     icons: &Icons,
     git_theme: &GitTheme,
@@ -357,11 +369,11 @@ fn get_output(
                 ]);
             }
             Block::User => block_vec.push(match &meta.owner {
-                Some(owner) => owner.render_user(colors, flags),
+                Some(owner) => owner.render_user(colors, owner_cache, flags),
                 None => colorize_missing("?"),
             }),
             Block::Group => block_vec.push(match &meta.owner {
-                Some(owner) => owner.render_group(colors, flags),
+                Some(owner) => owner.render_group(colors, owner_cache, flags),
                 None => colorize_missing("?"),
             }),
             Block::Context => block_vec.push(match &meta.access_control {
