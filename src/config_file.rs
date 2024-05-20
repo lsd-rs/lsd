@@ -337,7 +337,7 @@ no-symlink: false
 total-size: false
 
 # == Hyperlink ==
-# Whether to display the total size of directories.
+# When to display hyperlink symbols.
 # Possible values: always, auto, never
 hyperlink: never
 
