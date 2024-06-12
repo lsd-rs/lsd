@@ -44,8 +44,6 @@ impl Core {
         #[cfg(target_os = "windows")]
         let console_color_ok = crossterm::ansi_support::supports_ansi();
 
-        let mut inner_flags = flags.clone();
-
         let color_theme = match (tty_available && console_color_ok, flags.color.when) {
             (_, ColorOption::Never) | (false, ColorOption::Auto) => ThemeOption::NoColor,
             _ => flags.color.theme.clone(),
@@ -71,7 +69,7 @@ impl Core {
             //
             // Most of the programs does not handle correctly the ansi colors
             // or require a raw output (like the `wc` command).
-            inner_flags.layout = Layout::OneLine;
+            flags.layout = Layout::OneLine;
 
             flags.literal = Literal(true);
         };
