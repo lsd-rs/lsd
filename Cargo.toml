@@ -35,7 +35,7 @@ sys-locale = "0.3"
 once_cell = "1.17.1"
 chrono = { version = "0.4.19", features = ["unstable-locales"] }
 chrono-humanize = "0.2"
-# unicode-width 0.1.13 has a breaking change so stick to 0.1.11
+# incompatible with v0.1.11
 unicode-width = "0.1.13"
 lscolors = "0.16.0"
 wild = "2.0"
