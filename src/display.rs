@@ -439,7 +439,8 @@ fn get_visible_width(input: &str, hyperlink: bool) -> usize {
 
         let m_pos = s.find('m');
         if let Some(len) = m_pos {
-            nb_invisible_char += len
+            // len points to the 'm' character, we must include 'm' to invisible characters
+            nb_invisible_char += len + 1;
         }
     }
 
@@ -449,7 +450,8 @@ fn get_visible_width(input: &str, hyperlink: bool) -> usize {
 
             let m_pos = s.find("\x1B\x5C");
             if let Some(len) = m_pos {
-                nb_invisible_char += len
+                // len points to the '\x1B' character, we must include both '\x1B' and '\x5C' to invisible characters
+                nb_invisible_char += len + 2
             }
         }
     }
