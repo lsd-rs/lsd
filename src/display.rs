@@ -457,6 +457,7 @@ fn get_visible_width(input: &str, hyperlink: bool) -> usize {
         }
     }
 
+    // `UnicodeWidthStr::width` counts all unicode characters including escape '\u{1b}' and hyperlink '\x1B'
     UnicodeWidthStr::width(input) - nb_invisible_char
 }
 
