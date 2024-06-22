@@ -7,6 +7,7 @@ use crate::url::Url;
 use std::cmp::{Ordering, PartialOrd};
 use std::ffi::OsStr;
 use std::path::{Component, Path, PathBuf};
+use unicode_width::UnicodeWidthStr;
 
 #[derive(Debug)]
 pub enum DisplayOption<'a> {
@@ -147,26 +148,37 @@ impl Name {
         display_option: &DisplayOption,
         hyperlink: HyperlinkOption,
         literal: bool,
+        val_alignment: Option<usize>,
     ) -> ColoredString {
+        let icon_content = icons.get(self);
+        let left_pad = if let Some(align) = val_alignment {
+            " ".repeat(align - UnicodeWidthStr::width(icon_content.as_str()))
+        } else {
+            "".to_string()
+        };
+
         let content = match display_option {
             DisplayOption::FileName => {
                 format!(
-                    "{}{}",
-                    icons.get(self),
+                    "{}{}{}",
+                    left_pad,
+                    icon_content,
                     self.hyperlink(self.escape(self.file_name(), literal), hyperlink)
                 )
             }
             DisplayOption::Relative { base_path } => format!(
-                "{}{}",
-                icons.get(self),
+                "{}{}{}",
+                left_pad,
+                icon_content,
                 self.hyperlink(
                     self.escape(&self.relative_path(base_path).to_string_lossy(), literal),
                     hyperlink
                 )
             ),
             DisplayOption::None => format!(
-                "{}{}",
-                icons.get(self),
+                "{}{}{}",
+                left_pad,
+                icon_content,
                 self.hyperlink(
                     self.escape(&self.path.to_string_lossy(), literal),
                     hyperlink
@@ -261,6 +273,7 @@ mod test {
                 &DisplayOption::FileName,
                 HyperlinkOption::Never,
                 true,
+                None,
             )
         );
     }
@@ -284,7 +297,8 @@ mod test {
                 icons,
                 &DisplayOption::FileName,
                 HyperlinkOption::Never,
-                true
+                true,
+                None,
             )
         );
     }
@@ -318,7 +332,8 @@ mod test {
                 icons,
                 &DisplayOption::FileName,
                 HyperlinkOption::Never,
-                true
+                true,
+                None,
             )
         );
     }
@@ -352,7 +367,8 @@ mod test {
                 &icons,
                 &DisplayOption::FileName,
                 HyperlinkOption::Never,
-                true
+                true,
+                None,
             )
         );
     }
@@ -384,7 +400,8 @@ mod test {
                 icons,
                 &DisplayOption::FileName,
                 HyperlinkOption::Never,
-                true
+                true,
+                None,
             )
         );
     }
@@ -409,7 +426,8 @@ mod test {
                     &icons,
                     &DisplayOption::FileName,
                     HyperlinkOption::Never,
-                    true
+                    true,
+                    None,
                 )
                 .to_string()
         );
@@ -442,7 +460,8 @@ mod test {
                     &icons,
                     &DisplayOption::FileName,
                     HyperlinkOption::Always,
-                    true
+                    true,
+                    None,
                 )
                 .to_string()
         );
@@ -664,6 +683,7 @@ mod test {
                 &DisplayOption::FileName,
                 HyperlinkOption::Never,
                 false,
+                None,
             )
         );
 
@@ -683,6 +703,7 @@ mod test {
                 &DisplayOption::FileName,
                 HyperlinkOption::Never,
                 false,
+                None,
             )
         );
 
@@ -702,6 +723,7 @@ mod test {
                 &DisplayOption::FileName,
                 HyperlinkOption::Never,
                 false,
+                None,
             )
         );
 
@@ -723,6 +745,7 @@ mod test {
                 &DisplayOption::FileName,
                 HyperlinkOption::Never,
                 false,
+                None,
             )
         );
 
@@ -744,6 +767,7 @@ mod test {
                 &DisplayOption::FileName,
                 HyperlinkOption::Never,
                 false,
+                None,
             )
         );
     }

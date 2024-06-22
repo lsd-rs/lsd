@@ -50,7 +50,11 @@ pub fn tree(
         direction: Direction::LeftToRight,
     });
 
-    let padding_rules = get_padding_rules(metas, flags);
+    // search for the longest string to align filesize
+    // icon will be locally searched inside 'inner_display_tree'
+    let mut padding_rules = HashMap::new();
+    padding_rules.insert(Block::SizeValue, detect_size_lengths(metas, flags, true));
+
     let mut index = 0;
     for (i, block) in flags.blocks.0.iter().enumerate() {
         if block == &Block::Name {
@@ -93,7 +97,11 @@ fn inner_display_grid(
     let mut output = String::new();
     let mut cells = Vec::new();
 
-    let padding_rules = get_padding_rules(metas, flags);
+    // search for the longest string to align filesize / icon
+    let mut padding_rules = HashMap::new();
+    padding_rules.insert(Block::SizeValue, detect_size_lengths(metas, flags, false));
+    padding_rules.insert(Block::Name, detect_name_icon_lengths(metas, icons, false));
+
     let mut grid = match flags.layout {
         Layout::OneLine => Grid::new(GridOptions {
             filling: Filling::Spaces(1),
@@ -243,6 +251,10 @@ fn inner_display_tree(
     let mut cells = Vec::new();
     let last_idx = metas.len();
 
+    let mut padding_rules = padding_rules.clone();
+    // search for the longest string to align icon
+    padding_rules.insert(Block::Name, detect_name_icon_lengths(metas, icons, false));
+
     for (idx, meta) in metas.iter().enumerate() {
         let current_prefix = if tree_depth_prefix.0 > 0 {
             if idx + 1 != last_idx {
@@ -263,7 +275,7 @@ fn inner_display_tree(
             git_theme,
             flags,
             &DisplayOption::FileName,
-            padding_rules,
+            &padding_rules,
             (tree_index, &current_prefix),
         ) {
             cells.push(Cell {
@@ -292,7 +304,7 @@ fn inner_display_tree(
                 icons,
                 git_theme,
                 (tree_depth_prefix.0 + 1, &new_prefix),
-                padding_rules,
+                &padding_rules,
                 tree_index,
             ));
         }
@@ -400,6 +412,7 @@ fn get_output(
                 None => colorize_missing("?"),
             }),
             Block::Name => {
+                let pad = Some(padding_rules[&Block::Name]);
                 block_vec.extend([
                     meta.name.render(
                         colors,
@@ -407,6 +420,7 @@ fn get_output(
                         display_option,
                         flags.hyperlink,
                         flags.literal.0,
+                        pad,
                     ),
                     meta.indicator.render(flags),
                 ]);
@@ -458,7 +472,7 @@ fn get_visible_width(input: &str, hyperlink: bool) -> usize {
     UnicodeWidthStr::width(input) - nb_invisible_char
 }
 
-fn detect_size_lengths(metas: &[Meta], flags: &Flags) -> usize {
+fn detect_size_lengths(metas: &[Meta], flags: &Flags, recursive: bool) -> usize {
     let mut max_value_length: usize = 0;
 
     for meta in metas {
@@ -471,9 +485,10 @@ fn detect_size_lengths(metas: &[Meta], flags: &Flags) -> usize {
             max_value_length = value_len;
         }
 
-        if Layout::Tree == flags.layout {
+        // search for every element recursively since 'size' is rendered globally aligned
+        if recursive {
             if let Some(subs) = &meta.content {
-                let sub_length = detect_size_lengths(subs, flags);
+                let sub_length = detect_size_lengths(subs, flags, true);
                 if sub_length > max_value_length {
                     max_value_length = sub_length;
                 }
@@ -484,16 +499,23 @@ fn detect_size_lengths(metas: &[Meta], flags: &Flags) -> usize {
     max_value_length
 }
 
-fn get_padding_rules(metas: &[Meta], flags: &Flags) -> HashMap<Block, usize> {
-    let mut padding_rules: HashMap<Block, usize> = HashMap::new();
+fn detect_name_icon_lengths(metas: &[Meta], icons: &Icons, recursive: bool) -> usize {
+    // max length of icon + separator
+    let mut max_icon_visible_width: usize = 0;
 
-    if flags.blocks.0.contains(&Block::Size) {
-        let size_val = detect_size_lengths(metas, flags);
+    for meta in metas {
+        let icon_visible_width = UnicodeWidthStr::width(icons.get(&meta.name).as_str());
+        max_icon_visible_width = max_icon_visible_width.max(icon_visible_width);
 
-        padding_rules.insert(Block::SizeValue, size_val);
+        if recursive {
+            if let Some(subs) = &meta.content {
+                let sub_length = detect_name_icon_lengths(subs, icons, true);
+                max_icon_visible_width = max_icon_visible_width.max(sub_length);
+            }
+        }
     }
 
-    padding_rules
+    max_icon_visible_width
 }
 
 #[cfg(test)]
@@ -538,6 +560,7 @@ mod tests {
                     &DisplayOption::FileName,
                     HyperlinkOption::Never,
                     false,
+                    None,
                 )
                 .to_string();
 
@@ -573,6 +596,7 @@ mod tests {
                     &DisplayOption::FileName,
                     HyperlinkOption::Never,
                     false,
+                    None,
                 )
                 .to_string();
 
@@ -607,6 +631,7 @@ mod tests {
                     &DisplayOption::FileName,
                     HyperlinkOption::Never,
                     false,
+                    None,
                 )
                 .to_string();
 
@@ -648,6 +673,7 @@ mod tests {
                     &DisplayOption::FileName,
                     HyperlinkOption::Never,
                     false,
+                    None,
                 )
                 .to_string();
 
