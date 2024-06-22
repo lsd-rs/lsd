@@ -100,7 +100,7 @@ fn inner_display_grid(
     // search for the longest string to align filesize / icon
     let mut padding_rules = HashMap::new();
     padding_rules.insert(Block::SizeValue, detect_size_lengths(metas, flags, false));
-    padding_rules.insert(Block::Name, detect_name_icon_lengths(metas, icons, false));
+    padding_rules.insert(Block::Name, detect_icon_lengths(metas, icons, false));
 
     let mut grid = match flags.layout {
         Layout::OneLine => Grid::new(GridOptions {
@@ -253,7 +253,7 @@ fn inner_display_tree(
 
     let mut padding_rules = padding_rules.clone();
     // search for the longest string to align icon
-    padding_rules.insert(Block::Name, detect_name_icon_lengths(metas, icons, false));
+    padding_rules.insert(Block::Name, detect_icon_lengths(metas, icons, false));
 
     for (idx, meta) in metas.iter().enumerate() {
         let current_prefix = if tree_depth_prefix.0 > 0 {
@@ -499,7 +499,7 @@ fn detect_size_lengths(metas: &[Meta], flags: &Flags, recursive: bool) -> usize 
     max_value_length
 }
 
-fn detect_name_icon_lengths(metas: &[Meta], icons: &Icons, recursive: bool) -> usize {
+fn detect_icon_lengths(metas: &[Meta], icons: &Icons, recursive: bool) -> usize {
     // max length of icon + separator
     let mut max_icon_visible_width: usize = 0;
 
@@ -509,7 +509,7 @@ fn detect_name_icon_lengths(metas: &[Meta], icons: &Icons, recursive: bool) -> u
 
         if recursive {
             if let Some(subs) = &meta.content {
-                let sub_length = detect_name_icon_lengths(subs, icons, true);
+                let sub_length = detect_icon_lengths(subs, icons, true);
                 max_icon_visible_width = max_icon_visible_width.max(sub_length);
             }
         }
