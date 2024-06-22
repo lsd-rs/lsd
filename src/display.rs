@@ -251,17 +251,30 @@ fn inner_display_tree(
     let mut cells = Vec::new();
     let last_idx = metas.len();
 
+    // get info about the parent icon alignment
+    // for prefix alignment
+    let parent_icon_length = if tree_depth_prefix.0 > 0 {
+        *padding_rules.get(&Block::Name).unwrap()
+    } else {
+        0
+    };
+    let left_pad = if parent_icon_length > icons.separator_length() {
+        " ".repeat(parent_icon_length - icons.separator_length() - 1)
+    } else {
+        "".to_string()
+    };
+
+    // search for the longest string to align icon locally
     let mut padding_rules = padding_rules.clone();
-    // search for the longest string to align icon
     padding_rules.insert(Block::Name, detect_icon_lengths(metas, icons, false));
 
     for (idx, meta) in metas.iter().enumerate() {
         let current_prefix = if tree_depth_prefix.0 > 0 {
             if idx + 1 != last_idx {
                 // is last folder elem
-                format!("{}{} ", tree_depth_prefix.1, EDGE)
+                format!("{}{}{} ", tree_depth_prefix.1, left_pad, EDGE)
             } else {
-                format!("{}{} ", tree_depth_prefix.1, CORNER)
+                format!("{}{}{} ", tree_depth_prefix.1, left_pad, CORNER)
             }
         } else {
             tree_depth_prefix.1.to_string()
@@ -288,9 +301,9 @@ fn inner_display_tree(
             let new_prefix = if tree_depth_prefix.0 > 0 {
                 if idx + 1 != last_idx {
                     // is last folder elem
-                    format!("{}{} ", tree_depth_prefix.1, LINE)
+                    format!("{}{}{} ", tree_depth_prefix.1, left_pad, LINE)
                 } else {
-                    format!("{}{} ", tree_depth_prefix.1, BLANK)
+                    format!("{}{}{} ", tree_depth_prefix.1, left_pad, BLANK)
                 }
             } else {
                 tree_depth_prefix.1.to_string()
