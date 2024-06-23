@@ -5,7 +5,7 @@ use crate::git_theme::GitTheme;
 use crate::icon::Icons;
 use crate::meta::name::DisplayOption;
 use crate::meta::{FileType, Meta, OwnerCache};
-use std::collections::HashMap;
+use crate::padding_rule::PaddingRule;
 use term_grid::{Cell, Direction, Filling, Grid, GridOptions};
 use terminal_size::terminal_size;
 use unicode_width::UnicodeWidthStr;
@@ -52,8 +52,8 @@ pub fn tree(
 
     // search for the longest string to align filesize
     // icon will be locally searched inside 'inner_display_tree'
-    let mut padding_rules = HashMap::new();
-    padding_rules.insert(Block::SizeValue, detect_size_lengths(metas, flags, true));
+    let mut padding_rules = PaddingRule::new();
+    padding_rules.set_size_lengths(metas, flags, true);
 
     let mut index = 0;
     for (i, block) in flags.blocks.0.iter().enumerate() {
@@ -98,9 +98,9 @@ fn inner_display_grid(
     let mut cells = Vec::new();
 
     // search for the longest string to align filesize / icon
-    let mut padding_rules = HashMap::new();
-    padding_rules.insert(Block::SizeValue, detect_size_lengths(metas, flags, false));
-    padding_rules.insert(Block::Name, detect_icon_lengths(metas, icons, false));
+    let mut padding_rules = PaddingRule::new();
+    padding_rules.set_size_lengths(metas, flags, false);
+    padding_rules.set_icon_lengths(metas, icons, false);
 
     let mut grid = match flags.layout {
         Layout::OneLine => Grid::new(GridOptions {
@@ -245,7 +245,7 @@ fn inner_display_tree(
     icons: &Icons,
     git_theme: &GitTheme,
     tree_depth_prefix: (usize, &str),
-    padding_rules: &mut HashMap<Block, usize>,
+    padding_rules: &mut PaddingRule,
     tree_index: usize,
 ) -> Vec<Cell> {
     let mut cells = Vec::new();
@@ -255,9 +255,8 @@ fn inner_display_tree(
     // fetch the old value to restore it later
     // old value is used to align the tree edges prefix
     let parent_icon_length = padding_rules
-        .insert(Block::Name, detect_icon_lengths(metas, icons, false))
-        .or(Some(0))
-        .unwrap();
+        .set_icon_lengths(metas, icons, false)
+        .unwrap_or(0);
 
     // this padding should be added to align edges of tree
     let left_pad = if parent_icon_length > icons.separator_length() {
@@ -322,7 +321,7 @@ fn inner_display_tree(
     }
 
     // restore parent icon alignment
-    padding_rules.insert(Block::Name, parent_icon_length);
+    padding_rules.icon = Some(parent_icon_length);
 
     cells
 }
@@ -357,7 +356,7 @@ fn get_output(
     git_theme: &GitTheme,
     flags: &Flags,
     display_option: &DisplayOption,
-    padding_rules: &HashMap<Block, usize>,
+    padding_rules: &PaddingRule,
     tree: (usize, &str),
 ) -> Vec<String> {
     let mut strings: Vec<String> = Vec::new();
@@ -410,7 +409,7 @@ fn get_output(
                 let pad = if Layout::Tree == flags.layout && 0 == tree.0 && 0 == i {
                     None
                 } else {
-                    Some(padding_rules[&Block::SizeValue])
+                    padding_rules.size
                 };
                 block_vec.push(match &meta.size {
                     Some(size) => size.render(colors, flags, pad),
@@ -426,7 +425,7 @@ fn get_output(
                 None => colorize_missing("?"),
             }),
             Block::Name => {
-                let pad = Some(padding_rules[&Block::Name]);
+                let pad = padding_rules.icon;
                 block_vec.extend([
                     meta.name.render(
                         colors,
@@ -484,52 +483,6 @@ fn get_visible_width(input: &str, hyperlink: bool) -> usize {
     }
 
     UnicodeWidthStr::width(input) - nb_invisible_char
-}
-
-fn detect_size_lengths(metas: &[Meta], flags: &Flags, recursive: bool) -> usize {
-    let mut max_value_length: usize = 0;
-
-    for meta in metas {
-        let value_len = match &meta.size {
-            Some(size) => size.value_string(flags).len(),
-            None => 0,
-        };
-
-        if value_len > max_value_length {
-            max_value_length = value_len;
-        }
-
-        // search for every element recursively since 'size' is rendered globally aligned
-        if recursive {
-            if let Some(subs) = &meta.content {
-                let sub_length = detect_size_lengths(subs, flags, true);
-                if sub_length > max_value_length {
-                    max_value_length = sub_length;
-                }
-            }
-        }
-    }
-
-    max_value_length
-}
-
-fn detect_icon_lengths(metas: &[Meta], icons: &Icons, recursive: bool) -> usize {
-    // max length of icon + separator
-    let mut max_icon_visible_width: usize = 0;
-
-    for meta in metas {
-        let icon_visible_width = UnicodeWidthStr::width(icons.get(&meta.name).as_str());
-        max_icon_visible_width = max_icon_visible_width.max(icon_visible_width);
-
-        if recursive {
-            if let Some(subs) = &meta.content {
-                let sub_length = detect_icon_lengths(subs, icons, true);
-                max_icon_visible_width = max_icon_visible_width.max(sub_length);
-            }
-        }
-    }
-
-    max_icon_visible_width
 }
 
 #[cfg(test)]

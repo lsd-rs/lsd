@@ -36,6 +36,7 @@ mod git;
 mod git_theme;
 mod icon;
 mod meta;
+mod padding_rule;
 mod sort;
 mod theme;
 
