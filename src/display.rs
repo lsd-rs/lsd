@@ -73,7 +73,7 @@ pub fn tree(
         icons,
         git_theme,
         (0, ""),
-        &padding_rules,
+        &mut padding_rules,
         index,
     ) {
         grid.add(cell);
@@ -245,28 +245,25 @@ fn inner_display_tree(
     icons: &Icons,
     git_theme: &GitTheme,
     tree_depth_prefix: (usize, &str),
-    padding_rules: &HashMap<Block, usize>,
+    padding_rules: &mut HashMap<Block, usize>,
     tree_index: usize,
 ) -> Vec<Cell> {
     let mut cells = Vec::new();
     let last_idx = metas.len();
 
-    // get info about the parent icon alignment
-    // for prefix alignment
-    let parent_icon_length = if tree_depth_prefix.0 > 0 {
-        *padding_rules.get(&Block::Name).unwrap()
-    } else {
-        0
-    };
+    // get info about the parent icon alignment for prefix alignment
+    // search for the longest string to align icon locally
+    let parent_icon_length = padding_rules
+        .insert(Block::Name, detect_icon_lengths(metas, icons, false))
+        .or(Some(0))
+        .unwrap();
+
+    // this padding should be added to align edges of tree
     let left_pad = if parent_icon_length > icons.separator_length() {
         " ".repeat(parent_icon_length - icons.separator_length() - 1)
     } else {
         "".to_string()
     };
-
-    // search for the longest string to align icon locally
-    let mut padding_rules = padding_rules.clone();
-    padding_rules.insert(Block::Name, detect_icon_lengths(metas, icons, false));
 
     for (idx, meta) in metas.iter().enumerate() {
         let current_prefix = if tree_depth_prefix.0 > 0 {
@@ -288,7 +285,7 @@ fn inner_display_tree(
             git_theme,
             flags,
             &DisplayOption::FileName,
-            &padding_rules,
+            padding_rules,
             (tree_index, &current_prefix),
         ) {
             cells.push(Cell {
@@ -317,11 +314,14 @@ fn inner_display_tree(
                 icons,
                 git_theme,
                 (tree_depth_prefix.0 + 1, &new_prefix),
-                &padding_rules,
+                padding_rules,
                 tree_index,
             ));
         }
     }
+
+    // restore parent icon alignment
+    padding_rules.insert(Block::Name, parent_icon_length);
 
     cells
 }
