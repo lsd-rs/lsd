@@ -585,7 +585,7 @@ mod tests {
     #[test]
     fn test_display_get_visible_width_with_icons() {
         for (s, l) in [
-            // Add 3 characters for the icons.
+            // Add 3 characters for the icons. ( 1 unicode char + 1 space for separator )
             ("Ｈｅｌｌｏ,ｗｏｒｌｄ!", 24),
             ("ASCII1234-_", 13),
             ("File with space", 19),
@@ -615,6 +615,19 @@ mod tests {
                 .to_string();
 
             assert_eq!(get_visible_width(&output, false), l);
+
+            // icon alignment
+            let output = name
+                .render(
+                    &Colors::new(color::ThemeOption::NoColor),
+                    &Icons::new(false, IconOption::Always, FlagTheme::Fancy, " ".to_string()),
+                    &DisplayOption::FileName,
+                    HyperlinkOption::Never,
+                    false,
+                    Some(3usize), // (icon + separator) should be 3
+                )
+                .to_string();
+            assert_eq!(get_visible_width(&output, false), l + 1);
         }
     }
 

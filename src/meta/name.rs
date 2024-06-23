@@ -148,11 +148,11 @@ impl Name {
         display_option: &DisplayOption,
         hyperlink: HyperlinkOption,
         literal: bool,
-        val_alignment: Option<usize>,
+        icon_alignment: Option<usize>, // width of icon + separator should fit in to this width
     ) -> ColoredString {
-        let icon_content = icons.get(self);
-        let left_pad = if let Some(align) = val_alignment {
-            " ".repeat(align - UnicodeWidthStr::width(icon_content.as_str()))
+        let icon_sep_content = icons.get(self);
+        let left_pad = if let Some(align) = icon_alignment {
+            " ".repeat(align - UnicodeWidthStr::width(icon_sep_content.as_str()))
         } else {
             "".to_string()
         };
@@ -162,14 +162,14 @@ impl Name {
                 format!(
                     "{}{}{}",
                     left_pad,
-                    icon_content,
+                    icon_sep_content,
                     self.hyperlink(self.escape(self.file_name(), literal), hyperlink)
                 )
             }
             DisplayOption::Relative { base_path } => format!(
                 "{}{}{}",
                 left_pad,
-                icon_content,
+                icon_sep_content,
                 self.hyperlink(
                     self.escape(&self.relative_path(base_path).to_string_lossy(), literal),
                     hyperlink
@@ -178,7 +178,7 @@ impl Name {
             DisplayOption::None => format!(
                 "{}{}{}",
                 left_pad,
-                icon_content,
+                icon_sep_content,
                 self.hyperlink(
                     self.escape(&self.path.to_string_lossy(), literal),
                     hyperlink
