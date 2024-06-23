@@ -251,8 +251,9 @@ fn inner_display_tree(
     let mut cells = Vec::new();
     let last_idx = metas.len();
 
-    // get info about the parent icon alignment for prefix alignment
-    // search for the longest string to align icon locally
+    // update longest icon length for this level entries
+    // fetch the old value to restore it later
+    // old value is used to align the tree edges prefix
     let parent_icon_length = padding_rules
         .insert(Block::Name, detect_icon_lengths(metas, icons, false))
         .or(Some(0))
