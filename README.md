@@ -365,9 +365,6 @@ git-status:
 When creating a theme for `lsd`, you can specify any part of the default theme,
 and then change its colors, the items missed would fall back to use the default colors.
 
-Please also notice that an empty theme is **NOT** supported due to
-[a bug in serde lib](https://github.com/dtolnay/serde-yaml/issues/86).
-
 ### Icon Theme
 
 Icon theme can be configured in a fixed location, `$XDG_CONFIG_DIR/lsd/icons.yaml`,
