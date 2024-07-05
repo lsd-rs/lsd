@@ -123,7 +123,9 @@ impl Core {
                     }
                 };
 
-            let cache = if self.flags.blocks.0.contains(&Block::GitStatus) {
+            let cache = if self.flags.blocks.0.contains(&Block::GitStatus)
+                || self.flags.gitignore.use_gitignore()
+            {
                 Some(GitCache::new(&path))
             } else {
                 None
