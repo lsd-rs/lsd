@@ -164,6 +164,14 @@ impl Meta {
                 }
             };
 
+            // skip files for --tree -d
+            if flags.layout == Layout::Tree
+                && flags.display == Display::DirectoryOnly
+                && !entry.file_type()?.is_dir()
+            {
+                continue;
+            }
+
             let is_directory = entry.file_type()?.is_dir();
             entry_meta.git_status =
                 cache.and_then(|cache| cache.get(&entry_meta.path, is_directory));
@@ -173,14 +181,6 @@ impl Meta {
                 && entry_meta
                     .git_status
                     .is_some_and(|git_status| git_status.is_ignored())
-            {
-                continue;
-            }
-
-            // skip files for --tree -d
-            if flags.layout == Layout::Tree
-                && flags.display == Display::DirectoryOnly
-                && !entry.file_type()?.is_dir()
             {
                 continue;
             }
