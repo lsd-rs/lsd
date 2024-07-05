@@ -66,6 +66,6 @@ impl GitFileStatus {
     }
 
     pub fn is_ignored(&self) -> bool {
-        self.index == GitStatus::Ignored || self.workdir == GitStatus::Ignored
+        self.workdir == GitStatus::Ignored
     }
 }
