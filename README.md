@@ -291,7 +291,7 @@ truncate-owner:
 
 ### Color Theme
 
-Color theme can be configured in the [configuration file](#configuration)(color.theme),
+Color theme can be configured in the [configuration file](#configuration)(color.theme).
 The valid theme configurations are:
 
 - `default`: the default color scheme shipped in `lsd`
