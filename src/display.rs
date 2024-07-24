@@ -5,7 +5,7 @@ use crate::git_theme::GitTheme;
 use crate::icon::Icons;
 use crate::meta::name::DisplayOption;
 use crate::meta::{FileType, Meta, OwnerCache};
-use std::collections::HashMap;
+use crate::padding_rule::PaddingRule;
 use term_grid::{Cell, Direction, Filling, Grid, GridOptions};
 use terminal_size::terminal_size;
 use unicode_width::UnicodeWidthStr;
@@ -50,7 +50,11 @@ pub fn tree(
         direction: Direction::LeftToRight,
     });
 
-    let padding_rules = get_padding_rules(metas, flags);
+    // search for the longest string to align filesize
+    // icon will be locally searched inside 'inner_display_tree'
+    let mut padding_rules = PaddingRule::new();
+    padding_rules.set_size_lengths(metas, flags, true);
+
     let mut index = 0;
     for (i, block) in flags.blocks.0.iter().enumerate() {
         if block == &Block::Name {
@@ -69,7 +73,7 @@ pub fn tree(
         icons,
         git_theme,
         (0, ""),
-        &padding_rules,
+        &mut padding_rules,
         index,
     ) {
         grid.add(cell);
@@ -93,7 +97,11 @@ fn inner_display_grid(
     let mut output = String::new();
     let mut cells = Vec::new();
 
-    let padding_rules = get_padding_rules(metas, flags);
+    // search for the longest string to align filesize / icon
+    let mut padding_rules = PaddingRule::new();
+    padding_rules.set_size_lengths(metas, flags, false);
+    padding_rules.set_icon_lengths(metas, icons, false);
+
     let mut grid = match flags.layout {
         Layout::OneLine => Grid::new(GridOptions {
             filling: Filling::Spaces(1),
@@ -237,19 +245,33 @@ fn inner_display_tree(
     icons: &Icons,
     git_theme: &GitTheme,
     tree_depth_prefix: (usize, &str),
-    padding_rules: &HashMap<Block, usize>,
+    padding_rules: &mut PaddingRule,
     tree_index: usize,
 ) -> Vec<Cell> {
     let mut cells = Vec::new();
     let last_idx = metas.len();
 
+    // update longest icon length for this level entries
+    // fetch the old value to restore it later
+    // old value is used to align the tree edges prefix
+    let parent_icon_length = padding_rules
+        .set_icon_lengths(metas, icons, false)
+        .unwrap_or(0);
+
+    // this padding should be added to align edges of tree
+    let left_pad = if parent_icon_length > icons.separator_length() {
+        " ".repeat(parent_icon_length - icons.separator_length() - 1)
+    } else {
+        "".to_string()
+    };
+
     for (idx, meta) in metas.iter().enumerate() {
         let current_prefix = if tree_depth_prefix.0 > 0 {
             if idx + 1 != last_idx {
                 // is last folder elem
-                format!("{}{} ", tree_depth_prefix.1, EDGE)
+                format!("{}{}{} ", tree_depth_prefix.1, left_pad, EDGE)
             } else {
-                format!("{}{} ", tree_depth_prefix.1, CORNER)
+                format!("{}{}{} ", tree_depth_prefix.1, left_pad, CORNER)
             }
         } else {
             tree_depth_prefix.1.to_string()
@@ -276,9 +298,9 @@ fn inner_display_tree(
             let new_prefix = if tree_depth_prefix.0 > 0 {
                 if idx + 1 != last_idx {
                     // is last folder elem
-                    format!("{}{} ", tree_depth_prefix.1, LINE)
+                    format!("{}{}{} ", tree_depth_prefix.1, left_pad, LINE)
                 } else {
-                    format!("{}{} ", tree_depth_prefix.1, BLANK)
+                    format!("{}{}{} ", tree_depth_prefix.1, left_pad, BLANK)
                 }
             } else {
                 tree_depth_prefix.1.to_string()
@@ -297,6 +319,9 @@ fn inner_display_tree(
             ));
         }
     }
+
+    // restore parent icon alignment
+    padding_rules.icon = Some(parent_icon_length);
 
     cells
 }
@@ -331,7 +356,7 @@ fn get_output(
     git_theme: &GitTheme,
     flags: &Flags,
     display_option: &DisplayOption,
-    padding_rules: &HashMap<Block, usize>,
+    padding_rules: &PaddingRule,
     tree: (usize, &str),
 ) -> Vec<String> {
     let mut strings: Vec<String> = Vec::new();
@@ -384,7 +409,7 @@ fn get_output(
                 let pad = if Layout::Tree == flags.layout && 0 == tree.0 && 0 == i {
                     None
                 } else {
-                    Some(padding_rules[&Block::SizeValue])
+                    padding_rules.size
                 };
                 block_vec.push(match &meta.size {
                     Some(size) => size.render(colors, flags, pad),
@@ -400,6 +425,7 @@ fn get_output(
                 None => colorize_missing("?"),
             }),
             Block::Name => {
+                let pad = padding_rules.icon;
                 block_vec.extend([
                     meta.name.render(
                         colors,
@@ -407,6 +433,7 @@ fn get_output(
                         display_option,
                         flags.hyperlink,
                         flags.literal.0,
+                        pad,
                     ),
                     meta.indicator.render(flags),
                 ]);
@@ -458,44 +485,6 @@ fn get_visible_width(input: &str, hyperlink: bool) -> usize {
     UnicodeWidthStr::width(input) - nb_invisible_char
 }
 
-fn detect_size_lengths(metas: &[Meta], flags: &Flags) -> usize {
-    let mut max_value_length: usize = 0;
-
-    for meta in metas {
-        let value_len = match &meta.size {
-            Some(size) => size.value_string(flags).len(),
-            None => 0,
-        };
-
-        if value_len > max_value_length {
-            max_value_length = value_len;
-        }
-
-        if Layout::Tree == flags.layout {
-            if let Some(subs) = &meta.content {
-                let sub_length = detect_size_lengths(subs, flags);
-                if sub_length > max_value_length {
-                    max_value_length = sub_length;
-                }
-            }
-        }
-    }
-
-    max_value_length
-}
-
-fn get_padding_rules(metas: &[Meta], flags: &Flags) -> HashMap<Block, usize> {
-    let mut padding_rules: HashMap<Block, usize> = HashMap::new();
-
-    if flags.blocks.0.contains(&Block::Size) {
-        let size_val = detect_size_lengths(metas, flags);
-
-        padding_rules.insert(Block::SizeValue, size_val);
-    }
-
-    padding_rules
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -538,6 +527,7 @@ mod tests {
                     &DisplayOption::FileName,
                     HyperlinkOption::Never,
                     false,
+                    None,
                 )
                 .to_string();
 
@@ -548,7 +538,7 @@ mod tests {
     #[test]
     fn test_display_get_visible_width_with_icons() {
         for (s, l) in [
-            // Add 3 characters for the icons.
+            // Add 3 characters for the icons. ( 1 unicode char + 1 space for separator )
             ("Ｈｅｌｌｏ,ｗｏｒｌｄ!", 24),
             ("ASCII1234-_", 13),
             ("File with space", 19),
@@ -573,10 +563,24 @@ mod tests {
                     &DisplayOption::FileName,
                     HyperlinkOption::Never,
                     false,
+                    None,
                 )
                 .to_string();
 
             assert_eq!(get_visible_width(&output, false), l);
+
+            // icon alignment
+            let output = name
+                .render(
+                    &Colors::new(color::ThemeOption::NoColor),
+                    &Icons::new(false, IconOption::Always, FlagTheme::Fancy, " ".to_string()),
+                    &DisplayOption::FileName,
+                    HyperlinkOption::Never,
+                    false,
+                    Some(3usize), // (icon + separator) should be 3
+                )
+                .to_string();
+            assert_eq!(get_visible_width(&output, false), l + 1);
         }
     }
 
@@ -607,6 +611,7 @@ mod tests {
                     &DisplayOption::FileName,
                     HyperlinkOption::Never,
                     false,
+                    None,
                 )
                 .to_string();
 
@@ -648,6 +653,7 @@ mod tests {
                     &DisplayOption::FileName,
                     HyperlinkOption::Never,
                     false,
+                    None,
                 )
                 .to_string();
 
