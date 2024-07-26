@@ -1,7 +1,7 @@
 use crate::color::Colors;
 use crate::display;
 use crate::flags::{
-    ColorOption, Display, Flags, HyperlinkOption, Layout, Literal, SortOrder, ThemeOption,
+    ColorOption, Display, Flags, Header, HyperlinkOption, Layout, Literal, SortOrder, ThemeOption,
 };
 use crate::git::GitCache;
 use crate::icon::Icons;
@@ -44,8 +44,6 @@ impl Core {
         #[cfg(target_os = "windows")]
         let console_color_ok = crossterm::ansi_support::supports_ansi();
 
-        let mut inner_flags = flags.clone();
-
         let color_theme = match (tty_available && console_color_ok, flags.color.when) {
             (_, ColorOption::Never) | (false, ColorOption::Auto) => ThemeOption::NoColor,
             _ => flags.color.theme.clone(),
@@ -71,9 +69,14 @@ impl Core {
             //
             // Most of the programs does not handle correctly the ansi colors
             // or require a raw output (like the `wc` command).
-            inner_flags.layout = Layout::OneLine;
-
+            flags.header = Header(false);
             flags.literal = Literal(true);
+
+            // GNU ls will set layout to OneLine when not a tty
+            // but lsd support `--tree`, and `--tree` should not be overwrite even piped
+            if flags.layout != Layout::Tree {
+                flags.layout = Layout::OneLine;
+            }
         };
 
         let sorters = sort::assemble_sorters(&flags);
