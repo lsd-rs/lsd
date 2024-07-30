@@ -1,8 +1,13 @@
+/// This is tests make sure lsd is compatible with the GNU ls
+/// The tests here MUST all pass in every changes
 extern crate assert_cmd;
 extern crate predicates;
 
 use assert_cmd::prelude::*;
 use assert_fs::prelude::*;
+use predicates::prelude::*;
+#[cfg(unix)]
+use std::os::unix::fs;
 use std::process::{Command, Stdio};
 
 fn cmd() -> Command {
@@ -51,4 +56,37 @@ fn test_pipe_should_use_line() {
     let output_ls = cat_ls.wait_with_output().expect("Failed to wait on cat ls");
 
     assert_eq!(output_ls.stdout, output_lsd.stdout);
+}
+
+#[cfg(unix)]
+#[test]
+fn test_show_folder_content_of_symlink_oneline() {
+    let dir = tempdir();
+    dir.child("target").child("inside").touch().unwrap();
+    let link = dir.path().join("link");
+    fs::symlink("target", &link).unwrap();
+
+    cmd()
+        .arg("--ignore-config")
+        .arg("--oneline")
+        .arg(link)
+        .assert()
+        .stdout(predicate::str::starts_with("link").not())
+        .stdout(predicate::str::starts_with("inside"));
+}
+
+#[cfg(unix)]
+#[test]
+fn test_show_folder_content_of_symlink() {
+    let dir = tempdir();
+    dir.child("target").child("inside").touch().unwrap();
+    let link = dir.path().join("link");
+    fs::symlink("target", &link).unwrap();
+
+    cmd()
+        .arg("--ignore-config")
+        .arg(link)
+        .assert()
+        .stdout(predicate::str::starts_with("link").not())
+        .stdout(predicate::str::starts_with("inside"));
 }
