@@ -275,7 +275,7 @@ jobs:
     if: ${{ needs.build.outputs.DEPLOY }}
     steps:
       - name: Publish to Winget
-        uses: vedantmgoyal2009/winget-releaser@v2
+        uses: vedantmgoyal9/winget-releaser@main
         with:
           identifier: lsd-rs.lsd
           installers-regex: 'pc-windows-msvc\.zip$'
