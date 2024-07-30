@@ -115,8 +115,7 @@ fn inner_display_grid(
         // Maybe skip showing the directory meta now; show its contents later.
         if skip_dirs
             && (matches!(meta.file_type, FileType::Directory { .. })
-                || (matches!(meta.file_type, FileType::SymLink { is_dir: true })
-                    && flags.layout != Layout::OneLine))
+                || (matches!(meta.file_type, FileType::SymLink { is_dir: true })))
         {
             continue;
         }
