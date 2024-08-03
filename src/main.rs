@@ -123,3 +123,14 @@ fn main() {
     let exit_code = core.run(cli.inputs);
     std::process::exit(exit_code as i32);
 }
+
+#[test]
+fn test_print_output() {
+    let path = std::path::Path::new(".");
+    std::process::Command::new("lsd")
+        .arg(path.as_os_str())
+        .spawn()
+        .expect("lsd command failed")
+        .wait()
+        .expect("wait failed");
+}
