@@ -308,7 +308,7 @@ impl Meta {
                 ),
                 Err(e) => {
                     eprintln!(
-                        "lsd: {}: {}(Hint: Consider using `--permission disabled`.)",
+                        "lsd: {}: {}(Hint: Consider using `--permission disable`.)",
                         path.to_str().unwrap_or(""),
                         e
                     );
