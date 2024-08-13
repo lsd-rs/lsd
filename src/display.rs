@@ -115,8 +115,7 @@ fn inner_display_grid(
         // Maybe skip showing the directory meta now; show its contents later.
         if skip_dirs
             && (matches!(meta.file_type, FileType::Directory { .. })
-                || (matches!(meta.file_type, FileType::SymLink { is_dir: true })
-                    && flags.layout != Layout::OneLine))
+                || (matches!(meta.file_type, FileType::SymLink { is_dir: true })))
         {
             continue;
         }
@@ -167,7 +166,7 @@ fn inner_display_grid(
         output += &grid.fit_into_columns(flags.blocks.0.len()).to_string();
     }
 
-    let should_display_folder_path = should_display_folder_path(depth, metas, flags);
+    let should_display_folder_path = should_display_folder_path(depth, metas);
 
     // print the folder content
     for meta in metas {
@@ -301,7 +300,7 @@ fn inner_display_tree(
     cells
 }
 
-fn should_display_folder_path(depth: usize, metas: &[Meta], flags: &Flags) -> bool {
+fn should_display_folder_path(depth: usize, metas: &[Meta]) -> bool {
     if depth > 0 {
         true
     } else {
@@ -309,8 +308,7 @@ fn should_display_folder_path(depth: usize, metas: &[Meta], flags: &Flags) -> bo
             .iter()
             .filter(|x| {
                 matches!(x.file_type, FileType::Directory { .. })
-                    || (matches!(x.file_type, FileType::SymLink { is_dir: true })
-                        && flags.layout != Layout::OneLine)
+                    || (matches!(x.file_type, FileType::SymLink { is_dir: true }))
             })
             .count();
 
@@ -925,23 +923,20 @@ mod tests {
         const NO: bool = false;
 
         assert_eq!(
-            should_display_folder_path(0, &[file.clone()], &Flags::default()),
+            should_display_folder_path(0, &[file.clone()]),
             YES // doesn't matter since there is no folder
         );
+        assert_eq!(should_display_folder_path(0, &[dir.clone()]), NO);
         assert_eq!(
-            should_display_folder_path(0, &[dir.clone()], &Flags::default()),
-            NO
-        );
-        assert_eq!(
-            should_display_folder_path(0, &[file.clone(), dir.clone()], &Flags::default()),
+            should_display_folder_path(0, &[file.clone(), dir.clone()]),
             YES
         );
         assert_eq!(
-            should_display_folder_path(0, &[dir.clone(), dir.clone()], &Flags::default()),
+            should_display_folder_path(0, &[dir.clone(), dir.clone()]),
             YES
         );
         assert_eq!(
-            should_display_folder_path(0, &[file.clone(), file.clone()], &Flags::default()),
+            should_display_folder_path(0, &[file.clone(), file.clone()]),
             YES // doesn't matter since there is no folder
         );
 
@@ -979,30 +974,19 @@ mod tests {
         const YES: bool = true;
         const NO: bool = false;
 
+        assert_eq!(should_display_folder_path(0, &[link.clone()]), NO);
         assert_eq!(
-            should_display_folder_path(0, &[link.clone()], &grid_flags),
-            NO
-        );
-        assert_eq!(
-            should_display_folder_path(0, &[link.clone()], &oneline_flags),
+            should_display_folder_path(0, &[link.clone()]),
             YES // doesn't matter since this link will be expanded as a directory
         );
 
         assert_eq!(
-            should_display_folder_path(0, &[file.clone(), link.clone()], &grid_flags),
+            should_display_folder_path(0, &[file.clone(), link.clone()]),
             YES
-        );
-        assert_eq!(
-            should_display_folder_path(0, &[file.clone(), link.clone()], &oneline_flags),
-            YES // doesn't matter since this link will be expanded as a directory
         );
 
         assert_eq!(
-            should_display_folder_path(0, &[dir.clone(), link.clone()], &grid_flags),
-            YES
-        );
-        assert_eq!(
-            should_display_folder_path(0, &[dir.clone(), link.clone()], &oneline_flags),
+            should_display_folder_path(0, &[dir.clone(), link.clone()]),
             YES
         );
 
