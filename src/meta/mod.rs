@@ -77,7 +77,7 @@ impl Meta {
         match self.file_type {
             FileType::Directory { .. } => (),
             FileType::SymLink { is_dir: true } => {
-                if flags.layout == Layout::OneLine {
+                if flags.layout == Layout::OneLine && depth != 1 {
                     return Ok((None, ExitCode::OK));
                 }
             }
