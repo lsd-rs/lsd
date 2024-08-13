@@ -322,6 +322,7 @@ fn test_dereference_link_broken_link_output() {
         .stdout(predicate::str::starts_with("l????????? ? ? ? ?"));
 }
 
+/// should work both tty available and not
 #[cfg(unix)]
 #[test]
 fn test_show_folder_content_of_symlink() {

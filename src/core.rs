@@ -64,12 +64,17 @@ impl Core {
 
         let icon_separator = flags.icons.separator.0.clone();
 
+        // The output is not a tty, this means the command is piped. e.g.
+        //
+        // lsd -l | less
+        //
+        // Most of the programs does not handle correctly the ansi colors
+        // or require a raw output (like the `wc` command).
         if !tty_available {
-            // The output is not a tty, this means the command is piped. (ex: lsd -l | less)
-            //
-            // Most of the programs does not handle correctly the ansi colors
-            // or require a raw output (like the `wc` command).
-            flags.layout = Layout::OneLine;
+            // we should not overwrite the tree layout
+            if flags.layout != Layout::Tree {
+                flags.layout = Layout::OneLine;
+            }
 
             flags.literal = Literal(true);
         };
