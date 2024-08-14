@@ -115,7 +115,8 @@ fn inner_display_grid(
         // Maybe skip showing the directory meta now; show its contents later.
         if skip_dirs
             && (matches!(meta.file_type, FileType::Directory { .. })
-                || (matches!(meta.file_type, FileType::SymLink { is_dir: true })))
+                || (matches!(meta.file_type, FileType::SymLink { is_dir: true }))
+                    && flags.blocks.0.len() == 1)
         {
             continue;
         }
@@ -961,24 +962,10 @@ mod tests {
         std::os::unix::fs::symlink("dir", &link_path).unwrap();
         let link = Meta::from_path(&link_path, false, PermissionFlag::Rwx).unwrap();
 
-        let grid_flags = Flags {
-            layout: Layout::Grid,
-            ..Flags::default()
-        };
-
-        let oneline_flags = Flags {
-            layout: Layout::OneLine,
-            ..Flags::default()
-        };
-
         const YES: bool = true;
         const NO: bool = false;
 
         assert_eq!(should_display_folder_path(0, &[link.clone()]), NO);
-        assert_eq!(
-            should_display_folder_path(0, &[link.clone()]),
-            YES // doesn't matter since this link will be expanded as a directory
-        );
 
         assert_eq!(
             should_display_folder_path(0, &[file.clone(), link.clone()]),
