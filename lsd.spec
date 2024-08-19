@@ -1,5 +1,5 @@
 Name:           lsd
-Version:        1.1.2
+Version:        1.1.3
 Release:        1%{?dist}
 Summary:        The next gen ls command
 
