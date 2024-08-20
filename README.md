@@ -27,7 +27,7 @@
 **IMPORTANT**: This is the development documents,
 please check the docs in [Tags](https://github.com/lsd-rs/lsd/tags) if you installed from the released ones.
 
-The current newest release is: [v1.1.3](https://github.com/lsd-rs/lsd/tree/v1.1.3)
+The current newest release is: [v1.1.5](https://github.com/lsd-rs/lsd/tree/v1.1.5)
 
 ---
 
