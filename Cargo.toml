@@ -8,7 +8,7 @@ license = "Apache-2.0"
 name = "lsd"
 readme = "./README.md"
 repository = "https://github.com/lsd-rs/lsd"
-version = "1.1.2"
+version = "1.1.5"
 edition = "2021"
 rust-version = "1.74"
 
@@ -35,7 +35,8 @@ sys-locale = "0.3"
 once_cell = "1.17.1"
 chrono = { version = "0.4.19", features = ["unstable-locales"] }
 chrono-humanize = "0.2"
-unicode-width = "0.1.*"
+# incompatible with v0.1.11
+unicode-width = "0.1.13"
 lscolors = "0.16.0"
 wild = "2.0"
 globset = "0.4.*"

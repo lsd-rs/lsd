@@ -84,7 +84,7 @@ impl Meta {
         match self.file_type {
             FileType::Directory { .. } => (),
             FileType::SymLink { is_dir: true } => {
-                if flags.layout == Layout::OneLine {
+                if flags.blocks.0.len() > 1 {
                     return Ok((None, ExitCode::OK));
                 }
             }
@@ -105,14 +105,14 @@ impl Meta {
             && flags.layout != Layout::Tree
         {
             let mut current_meta = self.clone();
-            current_meta.name.name = ".".to_owned();
+            ".".clone_into(&mut current_meta.name.name);
 
             let mut parent_meta = Self::from_path(
                 &self.path.join(Component::ParentDir),
                 flags.dereference.0,
                 flags.permission,
             )?;
-            parent_meta.name.name = "..".to_owned();
+            "..".clone_into(&mut parent_meta.name.name);
 
             current_meta.git_status = current_meta_git_status;
             parent_meta.git_status = cache.and_then(|cache| cache.get(&parent_meta.path, true));

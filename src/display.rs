@@ -115,8 +115,8 @@ fn inner_display_grid(
         // Maybe skip showing the directory meta now; show its contents later.
         if skip_dirs
             && (matches!(meta.file_type, FileType::Directory { .. })
-                || (matches!(meta.file_type, FileType::SymLink { is_dir: true })
-                    && flags.layout != Layout::OneLine))
+                || (matches!(meta.file_type, FileType::SymLink { is_dir: true }))
+                    && flags.blocks.0.len() == 1)
         {
             continue;
         }
@@ -167,7 +167,7 @@ fn inner_display_grid(
         output += &grid.fit_into_columns(flags.blocks.0.len()).to_string();
     }
 
-    let should_display_folder_path = should_display_folder_path(depth, metas, flags);
+    let should_display_folder_path = should_display_folder_path(depth, metas);
 
     // print the folder content
     for meta in metas {
@@ -301,7 +301,7 @@ fn inner_display_tree(
     cells
 }
 
-fn should_display_folder_path(depth: usize, metas: &[Meta], flags: &Flags) -> bool {
+fn should_display_folder_path(depth: usize, metas: &[Meta]) -> bool {
     if depth > 0 {
         true
     } else {
@@ -309,8 +309,7 @@ fn should_display_folder_path(depth: usize, metas: &[Meta], flags: &Flags) -> bo
             .iter()
             .filter(|x| {
                 matches!(x.file_type, FileType::Directory { .. })
-                    || (matches!(x.file_type, FileType::SymLink { is_dir: true })
-                        && flags.layout != Layout::OneLine)
+                    || (matches!(x.file_type, FileType::SymLink { is_dir: true }))
             })
             .count();
 
@@ -440,7 +439,8 @@ fn get_visible_width(input: &str, hyperlink: bool) -> usize {
 
         let m_pos = s.find('m');
         if let Some(len) = m_pos {
-            nb_invisible_char += len
+            // len points to the 'm' character, we must include 'm' to invisible characters
+            nb_invisible_char += len + 1;
         }
     }
 
@@ -450,11 +450,13 @@ fn get_visible_width(input: &str, hyperlink: bool) -> usize {
 
             let m_pos = s.find("\x1B\x5C");
             if let Some(len) = m_pos {
-                nb_invisible_char += len
+                // len points to the '\x1B' character, we must include both '\x1B' and '\x5C' to invisible characters
+                nb_invisible_char += len + 2
             }
         }
     }
 
+    // `UnicodeWidthStr::width` counts all unicode characters including escape '\u{1b}' and hyperlink '\x1B'
     UnicodeWidthStr::width(input) - nb_invisible_char
 }
 
@@ -925,23 +927,20 @@ mod tests {
         const NO: bool = false;
 
         assert_eq!(
-            should_display_folder_path(0, &[file.clone()], &Flags::default()),
+            should_display_folder_path(0, &[file.clone()]),
             YES // doesn't matter since there is no folder
         );
+        assert_eq!(should_display_folder_path(0, &[dir.clone()]), NO);
         assert_eq!(
-            should_display_folder_path(0, &[dir.clone()], &Flags::default()),
-            NO
-        );
-        assert_eq!(
-            should_display_folder_path(0, &[file.clone(), dir.clone()], &Flags::default()),
+            should_display_folder_path(0, &[file.clone(), dir.clone()]),
             YES
         );
         assert_eq!(
-            should_display_folder_path(0, &[dir.clone(), dir.clone()], &Flags::default()),
+            should_display_folder_path(0, &[dir.clone(), dir.clone()]),
             YES
         );
         assert_eq!(
-            should_display_folder_path(0, &[file.clone(), file.clone()], &Flags::default()),
+            should_display_folder_path(0, &[file.clone(), file.clone()]),
             YES // doesn't matter since there is no folder
         );
 
@@ -966,43 +965,18 @@ mod tests {
         std::os::unix::fs::symlink("dir", &link_path).unwrap();
         let link = Meta::from_path(&link_path, false, PermissionFlag::Rwx).unwrap();
 
-        let grid_flags = Flags {
-            layout: Layout::Grid,
-            ..Flags::default()
-        };
-
-        let oneline_flags = Flags {
-            layout: Layout::OneLine,
-            ..Flags::default()
-        };
-
         const YES: bool = true;
         const NO: bool = false;
 
+        assert_eq!(should_display_folder_path(0, &[link.clone()]), NO);
+
         assert_eq!(
-            should_display_folder_path(0, &[link.clone()], &grid_flags),
-            NO
-        );
-        assert_eq!(
-            should_display_folder_path(0, &[link.clone()], &oneline_flags),
-            YES // doesn't matter since this link will be expanded as a directory
+            should_display_folder_path(0, &[file.clone(), link.clone()]),
+            YES
         );
 
         assert_eq!(
-            should_display_folder_path(0, &[file.clone(), link.clone()], &grid_flags),
-            YES
-        );
-        assert_eq!(
-            should_display_folder_path(0, &[file.clone(), link.clone()], &oneline_flags),
-            YES // doesn't matter since this link will be expanded as a directory
-        );
-
-        assert_eq!(
-            should_display_folder_path(0, &[dir.clone(), link.clone()], &grid_flags),
-            YES
-        );
-        assert_eq!(
-            should_display_folder_path(0, &[dir.clone(), link.clone()], &oneline_flags),
+            should_display_folder_path(0, &[dir.clone(), link.clone()]),
             YES
         );
 
