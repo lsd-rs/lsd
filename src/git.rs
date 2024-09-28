@@ -181,7 +181,7 @@ mod tests {
     fn check_cache(root: &Path, statuses: &HashMap<&PathBuf, GitFileStatus>, msg: &str) {
         let cache = GitCache::new(root);
         for (&path, status) in statuses.iter() {
-            if let Ok(filename) = std::fs::canonicalize(&root.join(path)) {
+            if let Ok(filename) = std::fs::canonicalize(root.join(path)) {
                 let is_directory = filename.is_dir();
                 assert_eq!(
                     &cache.inner_get(&filename, is_directory),
