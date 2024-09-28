@@ -201,6 +201,11 @@ impl Meta {
                     None => 0,
                 };
                 for x in &mut metas.iter_mut() {
+                    // must not count the size of '.' and '..', or will be infinite loop
+                    if x.name.name == "." || x.name.name == ".." {
+                        continue;
+                    }
+
                     x.calculate_total_size();
                     size_accumulated += match &x.size {
                         Some(size) => size.get_bytes(),
