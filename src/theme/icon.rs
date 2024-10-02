@@ -98,7 +98,7 @@ impl ByType {
             file: "\u{1f4c4}".into(),
             pipe: "\u{1f4e9}".into(),
             socket: "\u{1f4ec}".into(),
-            executable: "\u{1f3d7}".into(),
+            executable: "\u{1f3d7} ".into(),
             symlink_dir: "\u{1f5c2}".into(),
             symlink_file: "\u{1f516}".into(),
             device_char: "\u{1f5a8}".into(),
