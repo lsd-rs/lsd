@@ -47,15 +47,15 @@ struct JsonMeta {
 }
 
 impl JsonMeta {
-    fn from_meta(value: &Meta, icons: &Icons, colors: &Colors) -> JsonMeta {
+    fn from_meta(value: &Meta, icons: &Icons, colors: &Colors, flags: &Flags) -> JsonMeta {
         let name = &value.name;
         let icon = icons.get(&name);
-        let display_link = make_clickable_link(value.path.to_str().unwrap().into(), format!("{} {}", icon, name.name));
+        let display = name.render(colors, icons, &DisplayOption::FileName, HyperlinkOption::Auto, false);
 
         JsonMeta {
-            content: value.content.as_ref().map(|content| content.iter().map(|meta| JsonMeta::from_meta(meta, icons, colors)).collect()),
+            content: value.content.as_ref().map(|content| content.iter().map(|meta| JsonMeta::from_meta(meta, icons, colors, flags)).collect()),
             name: name.name.clone(),
-            display: display_link,
+            display: display.to_string(),
             r#type: name.file_type().render(colors).to_string(),
             extension: name.extension().map(String::from),
             date: value.date.as_ref().and_then(|date| match date {
@@ -75,7 +75,7 @@ pub fn json(
     icons: &Icons,
     git_theme: &GitTheme,
 ) -> String {
-    serde_json::to_string(&metas.into_iter().map(|meta| JsonMeta::from_meta(meta, icons, colors)).collect::<Vec<JsonMeta>>()).unwrap()
+    serde_json::to_string(&metas.into_iter().map(|meta| JsonMeta::from_meta(meta, icons, colors, flags)).collect::<Vec<JsonMeta>>()).unwrap()
 }
 
 pub fn grid(
