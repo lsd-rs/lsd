@@ -1,19 +1,82 @@
-use crate::color::{Colors, Elem};
+use crate::color::{Colors, Elem, ThemeOption};
 use crate::flags::blocks::Block;
-use crate::flags::{Display, Flags, HyperlinkOption, Layout};
+use crate::flags::{Display, Flags, HyperlinkOption, IconOption, IconTheme, Layout};
 use crate::git_theme::GitTheme;
 use crate::icon::Icons;
 use crate::meta::name::DisplayOption;
-use crate::meta::{FileType, Meta, OwnerCache};
+use crate::meta::{Date, FileType, Meta, OwnerCache};
 use std::collections::HashMap;
+use chrono::{DateTime, Local};
+use serde::Serialize;
 use term_grid::{Cell, Direction, Filling, Grid, GridOptions};
 use terminal_size::terminal_size;
 use unicode_width::UnicodeWidthStr;
+use url::Url;
 
 const EDGE: &str = "\u{251c}\u{2500}\u{2500}"; // "├──"
 const LINE: &str = "\u{2502}  "; // "│  "
 const CORNER: &str = "\u{2514}\u{2500}\u{2500}"; // "└──"
 const BLANK: &str = "   ";
+
+fn make_clickable_link(
+    full_path: String,
+    link_name: String,
+) -> String {
+    // uri's based on this https://gist.github.com/egmontkob/eb114294efbcd5adb1944c9f3cb5feda
+
+    format!(
+        "\x1b]8;;{}\x1b\\{}\x1b]8;;\x1b\\",
+        match Url::from_file_path(full_path.clone()) {
+            Ok(url) => url.to_string(),
+            Err(_) => full_path.clone(),
+        },
+        link_name
+    )
+}
+
+#[derive(Serialize)]
+struct JsonMeta {
+    name: String,
+    display: String,
+    r#type: String,
+    extension: Option<String>,
+    dirlike: bool,
+    content: Option<Vec<JsonMeta>>,
+    date: Option<DateTime<Local>>,
+    icon: String
+}
+
+impl JsonMeta {
+    fn from_meta(value: &Meta, icons: &Icons, colors: &Colors) -> JsonMeta {
+        let name = &value.name;
+        let icon = icons.get(&name);
+        let display_link = make_clickable_link(value.path.to_str().unwrap().into(), format!("{} {}", icon, name.name));
+
+        JsonMeta {
+            content: value.content.as_ref().map(|content| content.iter().map(|meta| JsonMeta::from_meta(meta, icons, colors)).collect()),
+            name: name.name.clone(),
+            display: display_link,
+            r#type: name.file_type().render(colors).to_string(),
+            extension: name.extension().map(String::from),
+            date: value.date.as_ref().and_then(|date| match date {
+                &Date::Date(date) => Some(date.clone()),
+                &Date::Invalid => None,
+            }),
+            dirlike: value.file_type.is_dirlike(),
+            icon
+        }
+    }
+}
+
+pub fn json(
+    metas: &[Meta],
+    flags: &Flags,
+    colors: &Colors,
+    icons: &Icons,
+    git_theme: &GitTheme,
+) -> String {
+    serde_json::to_string(&metas.into_iter().map(|meta| JsonMeta::from_meta(meta, icons, colors)).collect::<Vec<JsonMeta>>()).unwrap()
+}
 
 pub fn grid(
     metas: &[Meta],

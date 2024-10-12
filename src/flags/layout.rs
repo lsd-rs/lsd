@@ -27,7 +27,6 @@ impl Configurable<Layout> for Layout {
     /// arguments is greater than 1, this also returns the [OneLine](Layout::OneLine) variant.
     /// Finally if neither of them is passed, this returns [None].
     fn from_cli(cli: &Cli) -> Option<Self> {
-        dbg!(cli.json);
         if cli.json {
             Some(Self::Json)
         } else if cli.tree {

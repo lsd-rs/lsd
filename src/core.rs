@@ -182,7 +182,7 @@ impl Core {
                             &self.icons,
                             &self.git_theme,
                         ),
-            Layout::Json => serde_json::to_string(metas).unwrap(),
+            Layout::Json => display::json(metas, &self.flags, &self.colors, &self.icons, &self.git_theme),
             _ => display::grid(
                             metas,
                             &self.flags,
@@ -191,9 +191,6 @@ impl Core {
                             &self.git_theme,
                         )
         };
-
-        dbg!(&self.flags);
-        dbg!(&output);
 
         print_output!("{}", output);
     }
