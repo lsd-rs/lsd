@@ -48,7 +48,8 @@ struct JsonMeta {
     permissions: String,
     size: Option<u64>,
     user: Option<String>,
-    group: Option<String>
+    group: Option<String>,
+    path: String
 }
 
 impl JsonMeta {
@@ -60,6 +61,7 @@ impl JsonMeta {
         let size = value.size.as_ref().map(|size| size.get_bytes());
         let user = value.owner.as_ref().map(|owner| owner.render_user(colors, &OwnerCache::default(), flags).to_string());
         let group = value.owner.as_ref().map(|owner| owner.render_group(colors, &OwnerCache::default(), flags).to_string());
+        let path = value.path.to_str().unwrap().to_string();
 
         JsonMeta {
             content: value.content.as_ref().map(|content| content.iter().map(|meta| JsonMeta::from_meta(meta, icons, colors, flags)).collect()),
@@ -76,7 +78,8 @@ impl JsonMeta {
             icon,
             size,
             user,
-            group
+            group,
+            path
         }
     }
 }
@@ -88,7 +91,11 @@ pub fn json(
     icons: &Icons,
     git_theme: &GitTheme,
 ) -> String {
-    serde_json::to_string(&metas.into_iter().map(|meta| JsonMeta::from_meta(meta, icons, colors, flags)).collect::<Vec<JsonMeta>>()).unwrap()
+    serde_json::to_string(&metas
+        .into_iter()
+        .map(|meta| JsonMeta::from_meta(meta, icons, colors, flags))
+        .collect::<Vec<JsonMeta>>()
+    ).unwrap()
 }
 
 pub fn grid(
