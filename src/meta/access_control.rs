@@ -1,7 +1,9 @@
+use serde::Serialize;
+
 use crate::color::{ColoredString, Colors, Elem};
 use std::path::Path;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize)]
 pub struct AccessControl {
     has_acl: bool,
     selinux_context: String,

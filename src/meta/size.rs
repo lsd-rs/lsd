@@ -1,3 +1,5 @@
+use serde::Serialize;
+
 use crate::color::{ColoredString, Colors, Elem};
 use crate::flags::{Flags, SizeFlag};
 use std::fs::Metadata;
@@ -16,7 +18,7 @@ pub enum Unit {
     Tera,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
 pub struct Size {
     bytes: u64,
 }

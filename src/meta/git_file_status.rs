@@ -1,8 +1,10 @@
+use serde::Serialize;
+
 use crate::color::{self, ColoredString, Colors};
 use crate::git::GitStatus;
 use crate::git_theme::GitTheme;
 
-#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash, PartialOrd, Ord)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, Serialize)]
 pub struct GitFileStatus {
     pub index: GitStatus,
     pub workdir: GitStatus,

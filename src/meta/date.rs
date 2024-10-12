@@ -3,11 +3,12 @@ use crate::color::{ColoredString, Colors, Elem};
 use crate::flags::{DateFlag, Flags};
 use chrono::{DateTime, Duration, Local};
 use chrono_humanize::HumanTime;
+use serde::Serialize;
 use std::fs::Metadata;
 use std::panic;
 use std::time::SystemTime;
 
-#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Serialize)]
 pub enum Date {
     Date(DateTime<Local>),
     Invalid,
