@@ -1,39 +1,21 @@
-use crate::color::{Colors, Elem, ThemeOption};
+use crate::color::{Colors, Elem};
 use crate::flags::blocks::Block;
-use crate::flags::{Display, Flags, HyperlinkOption, IconOption, IconTheme, Layout};
+use crate::flags::{Display, Flags, HyperlinkOption, Layout};
 use crate::git_theme::GitTheme;
 use crate::icon::Icons;
 use crate::meta::name::DisplayOption;
 use crate::meta::{Date, FileType, Meta, OwnerCache};
-use std::collections::HashMap;
 use chrono::{DateTime, Local};
 use serde::Serialize;
+use std::collections::HashMap;
 use term_grid::{Cell, Direction, Filling, Grid, GridOptions};
 use terminal_size::terminal_size;
 use unicode_width::UnicodeWidthStr;
-use url::Url;
-use users::UsersCache;
 
 const EDGE: &str = "\u{251c}\u{2500}\u{2500}"; // "├──"
 const LINE: &str = "\u{2502}  "; // "│  "
 const CORNER: &str = "\u{2514}\u{2500}\u{2500}"; // "└──"
 const BLANK: &str = "   ";
-
-fn make_clickable_link(
-    full_path: String,
-    link_name: String,
-) -> String {
-    // uri's based on this https://gist.github.com/egmontkob/eb114294efbcd5adb1944c9f3cb5feda
-
-    format!(
-        "\x1b]8;;{}\x1b\\{}\x1b]8;;\x1b\\",
-        match Url::from_file_path(full_path.clone()) {
-            Ok(url) => url.to_string(),
-            Err(_) => full_path.clone(),
-        },
-        link_name
-    )
-}
 
 #[derive(Serialize)]
 struct JsonMeta {
@@ -49,22 +31,46 @@ struct JsonMeta {
     size: Option<u64>,
     user: Option<String>,
     group: Option<String>,
-    path: String
+    path: String,
 }
 
 impl JsonMeta {
     fn from_meta(value: &Meta, icons: &Icons, colors: &Colors, flags: &Flags) -> JsonMeta {
         let name = &value.name;
         let icon = icons.get(&name);
-        let display = name.render(colors, icons, &DisplayOption::FileName, HyperlinkOption::Auto, false);
-        let permissions = value.permissions_or_attributes.as_ref().unwrap().render(colors, flags).to_string();
+        let display = name.render(
+            colors,
+            icons,
+            &DisplayOption::FileName,
+            HyperlinkOption::Auto,
+            false,
+        );
+        let permissions = value
+            .permissions_or_attributes
+            .as_ref()
+            .unwrap()
+            .render(colors, flags)
+            .to_string();
         let size = value.size.as_ref().map(|size| size.get_bytes());
-        let user = value.owner.as_ref().map(|owner| owner.render_user(colors, &OwnerCache::default(), flags).to_string());
-        let group = value.owner.as_ref().map(|owner| owner.render_group(colors, &OwnerCache::default(), flags).to_string());
+        let user = value.owner.as_ref().map(|owner| {
+            owner
+                .render_user(colors, &OwnerCache::default(), flags)
+                .to_string()
+        });
+        let group = value.owner.as_ref().map(|owner| {
+            owner
+                .render_group(colors, &OwnerCache::default(), flags)
+                .to_string()
+        });
         let path = value.path.to_str().unwrap().to_string();
 
         JsonMeta {
-            content: value.content.as_ref().map(|content| content.iter().map(|meta| JsonMeta::from_meta(meta, icons, colors, flags)).collect()),
+            content: value.content.as_ref().map(|content| {
+                content
+                    .iter()
+                    .map(|meta| JsonMeta::from_meta(meta, icons, colors, flags))
+                    .collect()
+            }),
             name: name.name.clone(),
             display: display.to_string(),
             r#type: name.file_type().render(colors).to_string(),
@@ -79,7 +85,7 @@ impl JsonMeta {
             size,
             user,
             group,
-            path
+            path,
         }
     }
 }
@@ -89,13 +95,15 @@ pub fn json(
     flags: &Flags,
     colors: &Colors,
     icons: &Icons,
-    git_theme: &GitTheme,
+    _git_theme: &GitTheme,
 ) -> String {
-    serde_json::to_string(&metas
-        .into_iter()
-        .map(|meta| JsonMeta::from_meta(meta, icons, colors, flags))
-        .collect::<Vec<JsonMeta>>()
-    ).unwrap()
+    serde_json::to_string(
+        &metas
+            .into_iter()
+            .map(|meta| JsonMeta::from_meta(meta, icons, colors, flags))
+            .collect::<Vec<JsonMeta>>(),
+    )
+    .unwrap()
 }
 
 pub fn grid(

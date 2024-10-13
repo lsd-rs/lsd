@@ -16,7 +16,7 @@ pub enum Layout {
     Grid,
     Tree,
     OneLine,
-    Json
+    Json,
 }
 
 impl Configurable<Layout> for Layout {

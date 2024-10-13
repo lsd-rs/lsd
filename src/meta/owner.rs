@@ -1,8 +1,8 @@
 use crate::color::{ColoredString, Colors, Elem};
 use crate::Flags;
+use serde::Serialize;
 #[cfg(unix)]
 use std::fs::Metadata;
-use serde::Serialize;
 #[cfg(unix)]
 use users::{Groups, Users, UsersCache};
 

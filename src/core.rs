@@ -176,20 +176,26 @@ impl Core {
     fn display(&self, metas: &[Meta]) {
         let output = match self.flags.layout {
             Layout::Tree => display::tree(
-                            metas,
-                            &self.flags,
-                            &self.colors,
-                            &self.icons,
-                            &self.git_theme,
-                        ),
-            Layout::Json => display::json(metas, &self.flags, &self.colors, &self.icons, &self.git_theme),
+                metas,
+                &self.flags,
+                &self.colors,
+                &self.icons,
+                &self.git_theme,
+            ),
+            Layout::Json => display::json(
+                metas,
+                &self.flags,
+                &self.colors,
+                &self.icons,
+                &self.git_theme,
+            ),
             _ => display::grid(
-                            metas,
-                            &self.flags,
-                            &self.colors,
-                            &self.icons,
-                            &self.git_theme,
-                        )
+                metas,
+                &self.flags,
+                &self.colors,
+                &self.icons,
+                &self.git_theme,
+            ),
         };
 
         print_output!("{}", output);

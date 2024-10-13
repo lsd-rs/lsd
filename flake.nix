@@ -29,6 +29,7 @@
           cargo
           rustc
           rust-analyzer
+          rustfmt
         ];
       };
       packages.default = lsd;
