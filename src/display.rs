@@ -42,7 +42,7 @@ impl JsonMeta {
             colors,
             icons,
             &DisplayOption::FileName,
-            HyperlinkOption::Auto,
+            flags.hyperlink,
             false,
         );
         let permissions = value
