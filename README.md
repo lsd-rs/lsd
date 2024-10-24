@@ -313,7 +313,7 @@ Check [Color Theme file content](#color-theme-file-content) for details.
 
 Theme file use the [crossterm](https://crates.io/crates/crossterm)
 to configure the colors, check [crossterm](https://docs.rs/crossterm/0.20.0/crossterm/style/enum.Color.html)
-for supported colors.
+for supported colors. `reset` value to use terminal's default color is also supported.
 
 Color table: https://upload.wikimedia.org/wikipedia/commons/1/15/Xterm_256color_chart.svg
 
