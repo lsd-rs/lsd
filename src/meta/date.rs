@@ -1,6 +1,6 @@
 use super::locale::current_locale;
 use crate::color::{ColoredString, Colors, Elem};
-use crate::flags::{DateFlag, Flags};
+use crate::flags::{DateFlag, FileTimeFlag, Flags};
 use chrono::{DateTime, Duration, Local};
 use chrono_humanize::HumanTime;
 use std::fs::Metadata;
@@ -23,15 +23,23 @@ impl From<SystemTime> for Date {
     }
 }
 
-impl From<&Metadata> for Date {
-    fn from(meta: &Metadata) -> Self {
-        meta.accessed()
-            .expect("failed to retrieve modified date")
-            .into()
-    }
-}
-
 impl Date {
+    pub fn from_metadata(meta: &Metadata, flags: &Flags) -> Self {
+        match flags.ftime {
+            FileTimeFlag::Birth => meta
+                .created()
+                .expect("failed to retrieve creation date")
+                .into(),
+            FileTimeFlag::Access => meta
+                .accessed()
+                .expect("failed to retrieve access date")
+                .into(),
+            FileTimeFlag::Modification => meta
+                .modified()
+                .expect("failed to retrieve modification date")
+                .into(),
+        }
+    }
     pub fn render(&self, colors: &Colors, flags: &Flags) -> ColoredString {
         let now = Local::now();
         #[allow(deprecated)]
@@ -130,7 +138,7 @@ mod test {
         assert!(success, "failed to exec touch");
 
         let colors = Colors::new(ThemeOption::Default);
-        let date = Date::from(&file_path.metadata().unwrap());
+        let date = Date::from_metadata(&file_path.metadata().unwrap(), &Flags::default());
         let flags = Flags::default();
 
         assert_eq!(
@@ -158,7 +166,7 @@ mod test {
         assert!(success, "failed to exec touch");
 
         let colors = Colors::new(ThemeOption::Default);
-        let date = Date::from(&file_path.metadata().unwrap());
+        let date = Date::from_metadata(&file_path.metadata().unwrap(), &Flags::default());
         let flags = Flags::default();
 
         assert_eq!(
@@ -186,7 +194,7 @@ mod test {
         assert!(success, "failed to exec touch");
 
         let colors = Colors::new(ThemeOption::Default);
-        let date = Date::from(&file_path.metadata().unwrap());
+        let date = Date::from_metadata(&file_path.metadata().unwrap(), &Flags::default());
         let flags = Flags::default();
 
         assert_eq!(
@@ -214,7 +222,7 @@ mod test {
         assert!(success, "failed to exec touch");
 
         let colors = Colors::new(ThemeOption::Default);
-        let date = Date::from(&file_path.metadata().unwrap());
+        let date = Date::from_metadata(&file_path.metadata().unwrap(), &Flags::default());
 
         let flags = Flags {
             date: DateFlag::Relative,
@@ -241,7 +249,7 @@ mod test {
         assert!(success, "failed to exec touch");
 
         let colors = Colors::new(ThemeOption::Default);
-        let date = Date::from(&file_path.metadata().unwrap());
+        let date = Date::from_metadata(&file_path.metadata().unwrap(), &Flags::default());
 
         let flags = Flags {
             date: DateFlag::Relative,
@@ -268,7 +276,7 @@ mod test {
         assert!(success, "failed to exec touch");
 
         let colors = Colors::new(ThemeOption::Default);
-        let date = Date::from(&file_path.metadata().unwrap());
+        let date = Date::from_metadata(&file_path.metadata().unwrap(), &Flags::default());
 
         let flags = Flags {
             date: DateFlag::Iso,
@@ -299,7 +307,7 @@ mod test {
         assert!(success, "failed to exec touch");
 
         let colors = Colors::new(ThemeOption::Default);
-        let date = Date::from(&file_path.metadata().unwrap());
+        let date = Date::from_metadata(&file_path.metadata().unwrap(), &Flags::default());
 
         let flags = Flags {
             date: DateFlag::Iso,
@@ -329,7 +337,7 @@ mod test {
         assert!(success, "failed to exec touch");
 
         let colors = Colors::new(ThemeOption::Default);
-        let date = Date::from(&file_path.metadata().unwrap());
+        let date = Date::from_metadata(&file_path.metadata().unwrap(), &Flags::default());
 
         let flags = Flags {
             date: DateFlag::Locale,

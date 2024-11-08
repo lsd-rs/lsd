@@ -103,7 +103,7 @@ impl Meta {
             let mut parent_meta = Self::from_path(
                 &self.path.join(Component::ParentDir),
                 flags.dereference.0,
-                flags.permission,
+                flags,
             )?;
             "..".clone_into(&mut parent_meta.name.name);
 
@@ -147,8 +147,7 @@ impl Meta {
                 _ => {}
             }
 
-            let mut entry_meta = match Self::from_path(&path, flags.dereference.0, flags.permission)
-            {
+            let mut entry_meta = match Self::from_path(&path, flags.dereference.0, flags) {
                 Ok(res) => res,
                 Err(err) => {
                     print_error!("{}: {}.", path.display(), err);
@@ -261,7 +260,8 @@ impl Meta {
     pub fn from_path(
         path: &Path,
         dereference: bool,
-        permission_flag: PermissionFlag,
+        // permission_flag: PermissionFlag,
+        flags: &Flags,
     ) -> io::Result<Self> {
         let mut metadata = path.symlink_metadata()?;
         let mut symlink_meta = None;
@@ -287,7 +287,7 @@ impl Meta {
         }
 
         #[cfg(unix)]
-        let (owner, permissions) = match permission_flag {
+        let (owner, permissions) = match flags.permission {
             PermissionFlag::Disable => (None, None),
             _ => (
                 Some(Owner::from(&metadata)),
@@ -341,7 +341,7 @@ impl Meta {
                     Some(INode::from(&metadata)),
                     Some(Links::from(&metadata)),
                     Some(Size::from(&metadata)),
-                    Some(Date::from(&metadata)),
+                    Some(Date::from_metadata(&metadata, flags)),
                     Some(owner),
                     Some(permissions_or_attributes),
                     Some(AccessControl::for_path(path)),
@@ -369,6 +369,7 @@ impl Meta {
 
 #[cfg(test)]
 mod tests {
+    use crate::flags::Flags;
     use crate::flags::PermissionFlag;
 
     use super::Meta;
@@ -379,14 +380,19 @@ mod tests {
     #[test]
     fn test_from_path_path() {
         let dir = assert_fs::TempDir::new().unwrap();
-        let meta = Meta::from_path(dir.path(), false, PermissionFlag::Rwx).unwrap();
+        let flags = Flags::default();
+        let meta = Meta::from_path(dir.path(), false, &flags).unwrap();
         assert_eq!(meta.path, dir.path())
     }
 
     #[test]
     fn test_from_path_disable_permission() {
         let dir = assert_fs::TempDir::new().unwrap();
-        let meta = Meta::from_path(dir.path(), false, PermissionFlag::Disable).unwrap();
+        let flags = Flags {
+            permission: PermissionFlag::Disable,
+            ..Flags::default()
+        };
+        let meta = Meta::from_path(dir.path(), false, &flags).unwrap();
         assert!(meta.permissions_or_attributes.is_none());
         assert!(meta.owner.is_none());
     }
@@ -397,8 +403,8 @@ mod tests {
 
         let path_a = tmp_dir.path().join("aaa.aa");
         File::create(&path_a).expect("failed to create file");
-        let meta_a =
-            Meta::from_path(&path_a, false, PermissionFlag::Rwx).expect("failed to get meta");
+        let flags = Flags::default();
+        let meta_a = Meta::from_path(&path_a, false, &flags).expect("failed to get meta");
 
         let path_b = tmp_dir.path().join("bbb.bb");
         let path_c = tmp_dir.path().join("ccc.cc");
@@ -413,8 +419,7 @@ mod tests {
         std::os::windows::fs::symlink_file(path_c, &path_b)
             .expect("failed to create broken symlink");
 
-        let meta_b =
-            Meta::from_path(&path_b, true, PermissionFlag::Rwx).expect("failed to get meta");
+        let meta_b = Meta::from_path(&path_b, true, &flags).expect("failed to get meta");
 
         assert!(
             meta_a.inode.is_some()
