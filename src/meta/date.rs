@@ -25,7 +25,7 @@ impl From<SystemTime> for Date {
 
 impl From<&Metadata> for Date {
     fn from(meta: &Metadata) -> Self {
-        meta.modified()
+        meta.accessed()
             .expect("failed to retrieve modified date")
             .into()
     }
