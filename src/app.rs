@@ -32,6 +32,10 @@ pub struct Cli {
     #[arg(short = 'F', long = "classify")]
     pub indicators: bool,
 
+    /// Append "/" at the end of the directories names
+    #[arg(short = 'p', long = "slash-indicator")]
+    pub slash_indicator: bool,
+
     /// Display extended file metadata as a table
     #[arg(short, long)]
     pub long: bool,

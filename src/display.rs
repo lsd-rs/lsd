@@ -408,6 +408,7 @@ fn get_output(
                         flags.literal.0,
                     ),
                     meta.indicator.render(flags),
+                    meta.slash_indicator.render(flags),
                 ]);
                 if !(flags.no_symlink.0 || flags.dereference.0 || flags.layout == Layout::Grid) {
                     block_vec.push(meta.symlink.render(colors, flags))
