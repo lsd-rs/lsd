@@ -3,6 +3,7 @@ pub mod color;
 pub mod date;
 pub mod dereference;
 pub mod display;
+pub mod gitignore;
 pub mod header;
 pub mod hyperlink;
 pub mod icons;
@@ -54,6 +55,8 @@ use clap::Error;
 #[cfg(doc)]
 use yaml_rust::Yaml;
 
+use self::gitignore::Gitignore;
+
 /// A struct to hold all set configuration flags for the application.
 #[derive(Clone, Debug, Default)]
 pub struct Flags {
@@ -63,6 +66,7 @@ pub struct Flags {
     pub dereference: Dereference,
     pub display: Display,
     pub display_indicators: Indicators,
+    pub gitignore: Gitignore,
     pub icons: Icons,
     pub ignore_globs: IgnoreGlobs,
     pub layout: Layout,
@@ -97,6 +101,7 @@ impl Flags {
             size: SizeFlag::configure_from(cli, config),
             permission: PermissionFlag::configure_from(cli, config),
             display_indicators: Indicators::configure_from(cli, config),
+            gitignore: Gitignore::configure_from(cli, config),
             icons: Icons::configure_from(cli, config),
             ignore_globs: IgnoreGlobs::configure_from(cli, config)?,
             no_symlink: NoSymlink::configure_from(cli, config),
