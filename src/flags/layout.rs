@@ -16,6 +16,7 @@ pub enum Layout {
     Grid,
     Tree,
     OneLine,
+    Json,
 }
 
 impl Configurable<Layout> for Layout {
@@ -26,7 +27,9 @@ impl Configurable<Layout> for Layout {
     /// arguments is greater than 1, this also returns the [OneLine](Layout::OneLine) variant.
     /// Finally if neither of them is passed, this returns [None].
     fn from_cli(cli: &Cli) -> Option<Self> {
-        if cli.tree {
+        if cli.json {
+            Some(Self::Json)
+        } else if cli.tree {
             Some(Self::Tree)
         } else if cli.long || cli.oneline || cli.inode || cli.context || cli.blocks.len() > 1
         // TODO: handle this differently
