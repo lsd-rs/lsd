@@ -2,6 +2,8 @@ use crate::flags::{IconOption, IconTheme as FlagTheme};
 use crate::meta::{FileType, Name};
 use crate::theme::{icon::IconTheme, Theme};
 
+use unicode_width::UnicodeWidthStr;
+
 pub struct Icons {
     icon_separator: String,
     theme: Option<IconTheme>,
@@ -69,6 +71,10 @@ impl Icons {
                 format!("{}{}", icon, self.icon_separator)
             }
         }
+    }
+
+    pub fn separator_length(&self) -> usize {
+        UnicodeWidthStr::width(self.icon_separator.as_str())
     }
 }
 
