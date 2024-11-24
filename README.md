@@ -11,14 +11,14 @@
 <a href="https://www.warp.dev/?utm_source=github&utm_medium=referral&utm_campaign=lsd_20231001">
 <div>
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://github.com/lsd-rs/lsd/assets/3764335/61c7471f-ade1-42ea-9829-ac381c92b28a">
-    <source media="(prefers-color-scheme: light)" srcset="https://github.com/lsd-rs/lsd/assets/3764335/40e5d173-603c-45c8-90fa-50ba6c48a813">
-    <img alt="Warp" width="230" src="https://github.com/lsd-rs/lsd/assets/3764335/40e5d173-603c-45c8-90fa-50ba6c48a813">
+    <img alt="Warp" width="300" src="https://github.com/user-attachments/assets/2bda420d-4211-4900-a37e-e3c7056d799c">
   </picture>
 </div>
-  <b>Warp is a blazingly fast, Rust-based terminal reimagined to work like a modern app.</b>
+  <b>Warp, the intelligent terminal</b>
   <div>
-    <sup>Get more done in the CLI with real text editing, block-based output, and AI command search.</sup>
+    <sup>Available for MacOS and Linux<br>
+Visit warp.dev to learn more
+    </sup>
   </div>
 </a>
 <hr>
