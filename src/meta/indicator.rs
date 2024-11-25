@@ -1,8 +1,10 @@
+use serde::Serialize;
+
 use crate::color::{ColoredString, Colors};
 use crate::flags::Flags;
 use crate::meta::FileType;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize)]
 pub struct Indicator(&'static str);
 
 impl From<FileType> for Indicator {
