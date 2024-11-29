@@ -193,6 +193,10 @@ pub struct Cli {
     #[arg(short = 'N', long)]
     pub literal: bool,
 
+    /// Displayed file time [default: mtime] [possible values: mtime (modification time), btime (birth time), atime (access time)]
+    #[arg(long, value_parser = validate_ftime_argument)]
+    pub ftime: Option<String>,
+
     /// Print help information
     #[arg(long, action = ArgAction::Help)]
     help: (),
@@ -205,6 +209,14 @@ fn validate_date_argument(arg: &str) -> Result<String, String> {
         Result::Ok(arg.to_owned())
     } else {
         Result::Err("possible values: date, locale, relative, +date-time-format".to_owned())
+    }
+}
+
+fn validate_ftime_argument(arg: &str) -> Result<String, String> {
+    if arg == "mtime" || arg == "atime" || arg == "btime" {
+        Result::Ok(arg.to_owned())
+    } else {
+        Result::Err("possible values: mtime, btime, atime".to_owned())
     }
 }
 

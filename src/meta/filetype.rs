@@ -109,8 +109,7 @@ impl FileType {
 mod test {
     use super::FileType;
     use crate::color::{Colors, ThemeOption};
-    #[cfg(unix)]
-    use crate::flags::PermissionFlag;
+    use crate::flags::Flags;
     #[cfg(unix)]
     use crate::meta::permissions_or_attributes::PermissionsOrAttributes;
     #[cfg(unix)]
@@ -148,7 +147,8 @@ mod test {
     fn test_dir_type() {
         let tmp_dir = tempdir().expect("failed to create temp dir");
         #[cfg(not(windows))]
-        let meta = crate::meta::Meta::from_path(tmp_dir.path(), false, PermissionFlag::Rwx)
+        let flags = Flags::default();
+        let meta = crate::meta::Meta::from_path(tmp_dir.path(), false, &flags)
             .expect("failed to get tempdir path");
         let metadata = tmp_dir.path().metadata().expect("failed to get metas");
 

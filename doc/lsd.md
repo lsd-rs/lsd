@@ -96,7 +96,7 @@ lsd is a ls command with a lot of pretty colours and some other stuff to enrich 
 : Specify the blocks that will be displayed and in what order [possible values: permission, user, group, size, date, name, inode, git]
 
 `--color <color>...`
-: When to use terminal colours [default: auto]  [possible values: always, auto, never]
+: When to use terminal colours [default: auto] [possible values: always, auto, never]
 
 `--date <date>...`
 : How to display date [possible values: date, locale, relative, +date-time-format] [default: date]
@@ -104,29 +104,32 @@ lsd is a ls command with a lot of pretty colours and some other stuff to enrich 
 `--depth <num>...`
 : Stop recursing into directories after reaching specified depth
 
+`--ftime <time>...`
+: Which file timestamp to display [possible values: mtime (modification time), btime (birth time), atime (access time)] [default: mtime]
+
 `--group-dirs <group-dirs>...`
-: Sort the directories then the files [default: none]  [possible values: none, first, last]
+: Sort the directories then the files [default: none] [possible values: none, first, last]
 
 `--group-directories-first`
 : Groups the directories at the top before the files. Same as `--group-dirs=first`
 
 `--hyperlink <hyperlink>...`
-: Attach hyperlink to filenames [default: never]  [possible values: always, auto, never]
+: Attach hyperlink to filenames [default: never] [possible values: always, auto, never]
 
 `--icon <icon>...`
-: When to print the icons [default: auto]  [possible values: always, auto, never]
+: When to print the icons [default: auto] [possible values: always, auto, never]
 
 `--icon-theme <icon-theme>...`
-: Whether to use fancy or unicode icons [default: fancy]  [possible values: fancy, unicode]
+: Whether to use fancy or unicode icons [default: fancy] [possible values: fancy, unicode]
 
 `-I, --ignore-glob <pattern>...`
 : Do not display files/directories with names matching the glob pattern(s). More than one can be specified by repeating the argument [default: ]
 
 `--permission <permission>...`
-: How to display permissions [default: rwx for linux, attributes for windows]  [possible values: rwx, octal, attributes, disable]
+: How to display permissions [default: rwx for linux, attributes for windows] [possible values: rwx, octal, attributes, disable]
 
 `--size <size>...`
-: How to display size [default: default]  [possible values: default, short, bytes]
+: How to display size [default: default] [possible values: default, short, bytes]
 
 `--sort <WORD>...`
 : Sort by WORD instead of name [possible values: size, time, version, extension, git]

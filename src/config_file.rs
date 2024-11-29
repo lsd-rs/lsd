@@ -44,6 +44,7 @@ pub struct Config {
     pub header: Option<bool>,
     pub literal: Option<bool>,
     pub truncate_owner: Option<TruncateOwner>,
+    pub ftime: Option<String>,
 }
 
 #[derive(Eq, PartialEq, Debug, Deserialize)]
@@ -129,6 +130,7 @@ impl Config {
             header: None,
             literal: None,
             truncate_owner: None,
+            ftime: None,
         }
     }
 
@@ -428,6 +430,7 @@ mod tests {
                     after: None,
                     marker: Some("".to_string()),
                 }),
+                ftime: None,
             },
             c
         );

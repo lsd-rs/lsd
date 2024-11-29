@@ -3,6 +3,7 @@ pub mod color;
 pub mod date;
 pub mod dereference;
 pub mod display;
+pub mod ftime;
 pub mod header;
 pub mod hyperlink;
 pub mod icons;
@@ -25,6 +26,7 @@ pub use color::{ColorOption, ThemeOption};
 pub use date::DateFlag;
 pub use dereference::Dereference;
 pub use display::Display;
+pub use ftime::FileTimeFlag;
 pub use header::Header;
 pub use hyperlink::HyperlinkOption;
 pub use icons::IconOption;
@@ -77,6 +79,7 @@ pub struct Flags {
     pub header: Header,
     pub literal: Literal,
     pub truncate_owner: TruncateOwner,
+    pub ftime: FileTimeFlag,
 }
 
 impl Flags {
@@ -108,6 +111,7 @@ impl Flags {
             header: Header::configure_from(cli, config),
             literal: Literal::configure_from(cli, config),
             truncate_owner: TruncateOwner::configure_from(cli, config),
+            ftime: FileTimeFlag::configure_from(cli, config),
         })
     }
 }

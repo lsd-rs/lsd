@@ -116,15 +116,14 @@ impl Core {
             .collect();
 
         for path in paths {
-            let mut meta =
-                match Meta::from_path(&path, self.flags.dereference.0, self.flags.permission) {
-                    Ok(meta) => meta,
-                    Err(err) => {
-                        print_error!("{}: {}.", path.display(), err);
-                        exit_code.set_if_greater(ExitCode::MajorIssue);
-                        continue;
-                    }
-                };
+            let mut meta = match Meta::from_path(&path, self.flags.dereference.0, &self.flags) {
+                Ok(meta) => meta,
+                Err(err) => {
+                    print_error!("{}: {}.", path.display(), err);
+                    exit_code.set_if_greater(ExitCode::MajorIssue);
+                    continue;
+                }
+            };
 
             let cache = if self.flags.blocks.0.contains(&Block::GitStatus) {
                 Some(GitCache::new(&path))
