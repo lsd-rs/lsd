@@ -52,10 +52,12 @@ xdg = "2.5"
 git2 = { version = "0.18", optional = true, default-features = false }
 
 [target.'cfg(unix)'.dependencies]
+num-format = { version = "0.4.4", features = ["with-system-locale"] }
 users = { version = "0.11.3", package = "uzers" }
 xattr = "1"
 
 [target.'cfg(windows)'.dependencies]
+num-format = "0.4.4"
 windows = { version = "0.43.0", features = ["Win32_Foundation", "Win32_Security_Authorization", "Win32_Storage_FileSystem", "Win32_System_Memory"] }
 
 [dependencies.clap]
