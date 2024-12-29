@@ -223,7 +223,7 @@ recursion:
 
 # == Size ==
 # Specifies the format of the size column.
-# Possible values: default, short, bytes
+# Possible values: default, short, bytes, bytes-with-separator
 size: default
 
 # == Permission ==
