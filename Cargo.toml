@@ -43,7 +43,7 @@ globset = "0.4.*"
 yaml-rust = "0.4.*"
 serde = { version = "1.0", features = ["derive"] }
 serde_yaml = "0.9"
-url = "2.1"
+url = "2.5.4"
 vsort = "0.2"
 xdg = "2.5"
 
