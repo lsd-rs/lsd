@@ -1,3 +1,5 @@
+use serde::Serialize;
+
 use crate::color::{ColoredString, Colors, Elem};
 use crate::flags::HyperlinkOption;
 use crate::icon::Icons;
@@ -15,7 +17,7 @@ pub enum DisplayOption<'a> {
     None,
 }
 
-#[derive(Clone, Debug, Eq)]
+#[derive(Clone, Debug, Eq, Serialize)]
 pub struct Name {
     pub name: String,
     path: PathBuf,
