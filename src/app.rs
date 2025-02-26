@@ -154,10 +154,14 @@ pub struct Cli {
     #[arg(short, long)]
     pub inode: bool,
 
-    /// Show git status on file and directory"
+    /// Show git status on file and directory
     /// Only when used with --long option
     #[arg(short, long)]
     pub git: bool,
+
+    /// Uses git .gitignore files for filtering files and directories
+    #[arg(long)]
+    pub gitignore: bool,
 
     /// When showing file information for a symbolic link,
     /// show information for the file the link references rather than for the link itself

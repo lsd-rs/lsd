@@ -41,6 +41,9 @@ lsd is a ls command with a lot of pretty colours and some other stuff to enrich 
 `--git`
 : Display git status. Directory git status is a reduction of included file statuses (recursively).
 
+`--gitignore`
+: Uses git .gitignore files for filtering files and directories
+
 `--help`
 : Prints help information
 
