@@ -496,5 +496,29 @@ mod elem {
             .get_color(&test_theme()),
             Color::AnsiValue(184),
         );
+        assert_eq!(
+            Elem::BrokenSymLink.get_color(&test_theme()),
+            Color::AnsiValue(124)
+        );
+        assert_eq!(
+            Elem::Dir { uid: true }.get_color(&test_theme()),
+            Color::AnsiValue(33)
+        );
+        assert_eq!(
+            Elem::Dir { uid: false }.get_color(&test_theme()),
+            Color::AnsiValue(33)
+        );
+        assert_eq!(
+            Elem::BlockDevice.get_color(&test_theme()),
+            Color::AnsiValue(44)
+        );
+        assert_eq!(
+            Elem::CharDevice.get_color(&test_theme()),
+            Color::AnsiValue(172)
+        );
+        assert_eq!(
+            Elem::Special.get_color(&test_theme()),
+            Color::AnsiValue(44)
+        );
     }
 }
