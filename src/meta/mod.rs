@@ -372,7 +372,7 @@ mod tests {
     use crate::flags::PermissionFlag;
 
     use super::Meta;
-    use std::fs::File;
+    use std::{fs::File, io::{BufWriter, Write}};
     use tempfile::tempdir;
 
     #[cfg(unix)]
@@ -436,4 +436,30 @@ mod tests {
                 && meta_b.access_control.is_none()
         );
     }
+
+    #[test]
+    fn test_calculate_total_file_size_empty() {
+        let dir = assert_fs::TempDir::new().unwrap();
+        let path_file = dir.path().join("100B-text.txt");
+        File::create(&path_file).expect("failed to create file");
+
+        assert!(Meta::calculate_total_file_size(path_file.as_path()) == 0);
+    }
+
+    #[test]
+    fn test_calculate_total_file_size_file_100b() {
+        let dir = assert_fs::TempDir::new().unwrap();
+        let path_file = dir.path().join("100B-text.txt");
+        let file = File::create(&path_file).expect("failed to create file");
+
+        let mut buff_writer = BufWriter::new(file);
+
+        let buffer = vec![0u8;100];
+
+        buff_writer.write_all(&buffer).expect("failed to write bytes to file");
+        buff_writer.flush().expect("failed to write all bytes to file");
+
+        assert!(Meta::calculate_total_file_size(path_file.as_path()) == 100);
+    }
+
 }
