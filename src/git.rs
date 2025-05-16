@@ -1,8 +1,10 @@
+use serde::Serialize;
+
 use crate::meta::git_file_status::GitFileStatus;
 use std::path::{Path, PathBuf};
 
 #[allow(dead_code)]
-#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, Default)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, Default, Serialize)]
 pub enum GitStatus {
     /// No status info
     #[default]

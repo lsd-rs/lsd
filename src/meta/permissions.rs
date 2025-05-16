@@ -1,8 +1,10 @@
+use serde::Serialize;
+
 use crate::color::{ColoredString, Colors, Elem};
 use crate::flags::{Flags, PermissionFlag};
 use std::fs::Metadata;
 
-#[derive(Default, Debug, PartialEq, Eq, Copy, Clone)]
+#[derive(Default, Debug, PartialEq, Eq, Copy, Clone, Serialize)]
 pub struct Permissions {
     pub user_read: bool,
     pub user_write: bool,

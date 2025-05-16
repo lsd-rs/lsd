@@ -18,6 +18,8 @@ mod windows_attributes;
 #[cfg(windows)]
 mod windows_utils;
 
+use serde::Serialize;
+
 pub use self::access_control::AccessControl;
 pub use self::date::Date;
 pub use self::filetype::FileType;
@@ -41,7 +43,7 @@ use std::path::{Component, Path, PathBuf};
 
 #[cfg(windows)]
 use self::windows_attributes::get_attributes;
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize)]
 pub struct Meta {
     pub name: Name,
     pub path: PathBuf,

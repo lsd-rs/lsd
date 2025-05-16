@@ -60,6 +60,10 @@ pub struct Cli {
     #[arg(long)]
     pub tree: bool,
 
+    /// Print the output as json
+    #[arg(long)]
+    pub json: bool,
+
     /// Stop recursing into directories after reaching specified depth
     #[arg(long, value_name = "NUM")]
     pub depth: Option<usize>,
