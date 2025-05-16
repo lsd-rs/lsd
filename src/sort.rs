@@ -80,7 +80,7 @@ fn by_git_status(a: &Meta, b: &Meta) -> Ordering {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::flags::{Flags, PermissionFlag};
+    use crate::flags::{FileTimeFlag, Flags};
     use std::fs::{create_dir, File};
     use std::io::prelude::*;
     use std::process::Command;
@@ -93,14 +93,13 @@ mod tests {
         // Create the file;
         let path_a = tmp_dir.path().join("zzz");
         File::create(&path_a).expect("failed to create file");
-        let meta_a =
-            Meta::from_path(&path_a, false, PermissionFlag::Rwx).expect("failed to get meta");
+        let flags = Flags::default();
+        let meta_a = Meta::from_path(&path_a, false, &flags).expect("failed to get meta");
 
         // Create a dir;
         let path_z = tmp_dir.path().join("aaa");
         create_dir(&path_z).expect("failed to create dir");
-        let meta_z =
-            Meta::from_path(&path_z, false, PermissionFlag::Rwx).expect("failed to get meta");
+        let meta_z = Meta::from_path(&path_z, false, &flags).expect("failed to get meta");
 
         let mut flags = Flags::default();
         flags.sorting.dir_grouping = DirGrouping::First;
@@ -123,14 +122,13 @@ mod tests {
         // Create the file;
         let path_a = tmp_dir.path().join("zzz");
         File::create(&path_a).expect("failed to create file");
-        let meta_a =
-            Meta::from_path(&path_a, false, PermissionFlag::Rwx).expect("failed to get meta");
+        let flags = Flags::default();
+        let meta_a = Meta::from_path(&path_a, false, &flags).expect("failed to get meta");
 
         // Create a dir;
         let path_z = tmp_dir.path().join("aaa");
         create_dir(&path_z).expect("failed to create dir");
-        let meta_z =
-            Meta::from_path(&path_z, false, PermissionFlag::Rwx).expect("failed to get meta");
+        let meta_z = Meta::from_path(&path_z, false, &flags).expect("failed to get meta");
 
         let mut flags = Flags::default();
         flags.sorting.dir_grouping = DirGrouping::Last;
@@ -151,14 +149,13 @@ mod tests {
         // Create the file;
         let path_a = tmp_dir.path().join("aaa");
         File::create(&path_a).expect("failed to create file");
-        let meta_a =
-            Meta::from_path(&path_a, false, PermissionFlag::Rwx).expect("failed to get meta");
+        let flags = Flags::default();
+        let meta_a = Meta::from_path(&path_a, false, &flags).expect("failed to get meta");
 
         // Create a dir;
         let path_z = tmp_dir.path().join("zzz");
         create_dir(&path_z).expect("failed to create dir");
-        let meta_z =
-            Meta::from_path(&path_z, false, PermissionFlag::Rwx).expect("failed to get meta");
+        let meta_z = Meta::from_path(&path_z, false, &flags).expect("failed to get meta");
 
         let mut flags = Flags::default();
         flags.sorting.dir_grouping = DirGrouping::None;
@@ -181,14 +178,13 @@ mod tests {
         // Create the file;
         let path_a = tmp_dir.path().join("zzz");
         File::create(&path_a).expect("failed to create file");
-        let meta_a =
-            Meta::from_path(&path_a, false, PermissionFlag::Rwx).expect("failed to get meta");
+        let flags = Flags::default();
+        let meta_a = Meta::from_path(&path_a, false, &flags).expect("failed to get meta");
 
         // Create a dir;
         let path_z = tmp_dir.path().join("aaa");
         create_dir(&path_z).expect("failed to create dir");
-        let meta_z =
-            Meta::from_path(&path_z, false, PermissionFlag::Rwx).expect("failed to get meta");
+        let meta_z = Meta::from_path(&path_z, false, &flags).expect("failed to get meta");
 
         let mut flags = Flags::default();
         flags.sorting.dir_grouping = DirGrouping::None;
@@ -211,10 +207,11 @@ mod tests {
         // Create the file;
         let path_a = tmp_dir.path().join("aaa");
         File::create(&path_a).expect("failed to create file");
-        let meta_a =
-            Meta::from_path(&path_a, false, PermissionFlag::Rwx).expect("failed to get meta");
+        let flags = Flags::default();
+        let meta_a = Meta::from_path(&path_a, false, &flags).expect("failed to get meta");
 
         // Create the file;
+        std::thread::sleep(std::time::Duration::from_secs(1));
         let path_z = tmp_dir.path().join("zzz");
         File::create(&path_z).expect("failed to create file");
 
@@ -238,8 +235,7 @@ mod tests {
             .success();
 
         assert!(success, "failed to change file timestamp");
-        let meta_z =
-            Meta::from_path(&path_z, false, PermissionFlag::Rwx).expect("failed to get meta");
+        let meta_z = Meta::from_path(&path_z, false, &flags).expect("failed to get meta");
 
         let mut flags = Flags::default();
         flags.sorting.column = SortColumn::Time;
@@ -252,6 +248,41 @@ mod tests {
         flags.sorting.order = SortOrder::Reverse;
         let sorter = assemble_sorters(&flags);
         assert_eq!(by_meta(&sorter, &meta_a, &meta_z), Ordering::Greater);
+
+        // Sort by birth time
+        flags.sorting.order = SortOrder::Default;
+        flags.ftime = FileTimeFlag::Birth;
+        let meta_a = Meta::from_path(&path_a, false, &flags).expect("failed to get meta");
+        let meta_z = Meta::from_path(&path_z, false, &flags).expect("failed to get meta");
+        let sorter = assemble_sorters(&flags);
+        assert_eq!(by_meta(&sorter, &meta_a, &meta_z), Ordering::Greater);
+
+        // Sort by modification time
+        flags.sorting.order = SortOrder::Default;
+        flags.ftime = FileTimeFlag::Modification;
+        let meta_a = Meta::from_path(&path_a, false, &flags).expect("failed to get meta");
+        let meta_z = Meta::from_path(&path_z, false, &flags).expect("failed to get meta");
+        let sorter = assemble_sorters(&flags);
+        assert_eq!(by_meta(&sorter, &meta_a, &meta_z), Ordering::Less);
+
+        // Sort by access time
+        flags.sorting.order = SortOrder::Default;
+        flags.ftime = FileTimeFlag::Access;
+        let meta_a = Meta::from_path(&path_a, false, &flags).expect("failed to get meta");
+        let meta_z = Meta::from_path(&path_z, false, &flags).expect("failed to get meta");
+        let sorter = assemble_sorters(&flags);
+        assert_eq!(by_meta(&sorter, &meta_a, &meta_z), Ordering::Less);
+
+        // Read the z file to change access time
+        let mut file_z = File::open(&path_z).expect("failed to open file");
+        let mut buf: Vec<u8> = Vec::new();
+        let _ = file_z.read_to_end(&mut buf).expect("failed to read file");
+
+        flags.ftime = FileTimeFlag::Access;
+        let meta_a = Meta::from_path(&path_a, false, &flags).expect("failed to get meta");
+        let meta_z = Meta::from_path(&path_z, false, &flags).expect("failed to get meta");
+        let sorter = assemble_sorters(&flags);
+        assert_eq!(by_meta(&sorter, &meta_a, &meta_z), Ordering::Greater);
     }
 
     #[test]
@@ -261,26 +292,23 @@ mod tests {
         // Create the file with rs extension;
         let path_a = tmp_dir.path().join("aaa.rs");
         File::create(&path_a).expect("failed to create file");
-        let meta_a =
-            Meta::from_path(&path_a, false, PermissionFlag::Rwx).expect("failed to get meta");
+        let flags = Flags::default();
+        let meta_a = Meta::from_path(&path_a, false, &flags).expect("failed to get meta");
 
         // Create the file with rs extension;
         let path_z = tmp_dir.path().join("zzz.rs");
         File::create(&path_z).expect("failed to create file");
-        let meta_z =
-            Meta::from_path(&path_z, false, PermissionFlag::Rwx).expect("failed to get meta");
+        let meta_z = Meta::from_path(&path_z, false, &flags).expect("failed to get meta");
 
         // Create the file with js extension;
         let path_j = tmp_dir.path().join("zzz.js");
         File::create(&path_j).expect("failed to create file");
-        let meta_j =
-            Meta::from_path(&path_j, false, PermissionFlag::Rwx).expect("failed to get meta");
+        let meta_j = Meta::from_path(&path_j, false, &flags).expect("failed to get meta");
 
         // Create the file with txt extension;
         let path_t = tmp_dir.path().join("zzz.txt");
         File::create(&path_t).expect("failed to create file");
-        let meta_t =
-            Meta::from_path(&path_t, false, PermissionFlag::Rwx).expect("failed to get meta");
+        let meta_t = Meta::from_path(&path_t, false, &flags).expect("failed to get meta");
 
         let mut flags = Flags::default();
         flags.sorting.column = SortColumn::Extension;
@@ -302,18 +330,16 @@ mod tests {
 
         let path_a = tmp_dir.path().join("2");
         File::create(&path_a).expect("failed to create file");
-        let meta_a =
-            Meta::from_path(&path_a, false, PermissionFlag::Rwx).expect("failed to get meta");
+        let flags = Flags::default();
+        let meta_a = Meta::from_path(&path_a, false, &flags).expect("failed to get meta");
 
         let path_b = tmp_dir.path().join("11");
         File::create(&path_b).expect("failed to create file");
-        let meta_b =
-            Meta::from_path(&path_b, false, PermissionFlag::Rwx).expect("failed to get meta");
+        let meta_b = Meta::from_path(&path_b, false, &flags).expect("failed to get meta");
 
         let path_c = tmp_dir.path().join("12");
         File::create(&path_c).expect("failed to create file");
-        let meta_c =
-            Meta::from_path(&path_c, false, PermissionFlag::Rwx).expect("failed to get meta");
+        let meta_c = Meta::from_path(&path_c, false, &flags).expect("failed to get meta");
 
         let mut flags = Flags::default();
         flags.sorting.column = SortColumn::Version;
@@ -331,23 +357,20 @@ mod tests {
 
         let path_a = tmp_dir.path().join("aaa.aa");
         File::create(&path_a).expect("failed to create file");
-        let meta_a =
-            Meta::from_path(&path_a, false, PermissionFlag::Rwx).expect("failed to get meta");
+        let flags = Flags::default();
+        let meta_a = Meta::from_path(&path_a, false, &flags).expect("failed to get meta");
 
         let path_b = tmp_dir.path().join("aaa");
         create_dir(&path_b).expect("failed to create dir");
-        let meta_b =
-            Meta::from_path(&path_b, false, PermissionFlag::Rwx).expect("failed to get meta");
+        let meta_b = Meta::from_path(&path_b, false, &flags).expect("failed to get meta");
 
         let path_c = tmp_dir.path().join("zzz.zz");
         File::create(&path_c).expect("failed to create file");
-        let meta_c =
-            Meta::from_path(&path_c, false, PermissionFlag::Rwx).expect("failed to get meta");
+        let meta_c = Meta::from_path(&path_c, false, &flags).expect("failed to get meta");
 
         let path_d = tmp_dir.path().join("zzz");
         create_dir(&path_d).expect("failed to create dir");
-        let meta_d =
-            Meta::from_path(&path_d, false, PermissionFlag::Rwx).expect("failed to get meta");
+        let meta_d = Meta::from_path(&path_d, false, &flags).expect("failed to get meta");
 
         let mut flags = Flags::default();
         flags.sorting.column = SortColumn::None;
@@ -380,16 +403,15 @@ mod tests {
             .expect("failed to create file")
             .write_all(b"1, 2, 3")
             .expect("failed to write to file");
-        let meta_a =
-            Meta::from_path(&path_a, false, PermissionFlag::Rwx).expect("failed to get meta");
+        let flags = Flags::default();
+        let meta_a = Meta::from_path(&path_a, false, &flags).expect("failed to get meta");
 
         let path_b = tmp_dir.path().join("bbb.bb");
         File::create(&path_b)
             .expect("failed to create file")
             .write_all(b"1, 2, 3, 4, 5, 6, 7, 8, 9, 10")
             .expect("failed to write file");
-        let meta_b =
-            Meta::from_path(&path_b, false, PermissionFlag::Rwx).expect("failed to get meta");
+        let meta_b = Meta::from_path(&path_b, false, &flags).expect("failed to get meta");
 
         let path_c = tmp_dir.path().join("ccc.cc");
         let path_d = tmp_dir.path().join("ddd.dd");
@@ -404,8 +426,7 @@ mod tests {
         std::os::windows::fs::symlink_file(path_d, &path_c)
             .expect("failed to create broken symlink");
 
-        let meta_c =
-            Meta::from_path(&path_c, true, PermissionFlag::Rwx).expect("failed to get meta");
+        let meta_c = Meta::from_path(&path_c, true, &flags).expect("failed to get meta");
 
         assert_eq!(by_size(&meta_a, &meta_a), Ordering::Equal);
         assert_eq!(by_size(&meta_a, &meta_b), Ordering::Greater);
