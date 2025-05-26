@@ -74,6 +74,9 @@ lsd is a ls command with a lot of pretty colours and some other stuff to enrich 
 `-r`, `--reverse`
 : Reverse the order of the sort
 
+`--namesort`
+: Sort by name
+
 `-S`, `--sizesort`
 : Sort by size
 
@@ -129,7 +132,7 @@ lsd is a ls command with a lot of pretty colours and some other stuff to enrich 
 : How to display size [default: default]  [possible values: default, short, bytes]
 
 `--sort <WORD>...`
-: Sort by WORD instead of name [possible values: size, time, version, extension, git]
+: Sort by WORD instead of the configured default (name, unless configured otherwise) [possible values: name, size, time, version, extension, git]
 
 `-U`, `--no-sort`
 : Do not sort. List entries in directory order
