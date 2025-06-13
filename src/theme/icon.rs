@@ -158,6 +158,7 @@ impl IconTheme {
             (".config", "\u{e5fc}"),            // ""
             ("config", "\u{e5fc}"),             // ""
             ("configure", "\u{f0ad}"),          // ""
+            ("containerfile", "\u{f4b7}"),      // ""
             ("content", "\u{f0c7}"),            // ""
             ("contributing", "\u{e60a}"),       // ""
             ("copyright", "\u{e60a}"),          // ""
