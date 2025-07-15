@@ -751,7 +751,7 @@ mod tests {
                 .lines()
                 .nth(i)
                 .unwrap()
-                .split(|c| c == 'K' || c == 'B')
+                .split(['K', 'B'])
                 .next()
                 .unwrap()
                 .len()

@@ -102,7 +102,7 @@ impl Core {
         let mut exit_code = ExitCode::OK;
         let mut meta_list = Vec::with_capacity(paths.len());
         let depth = match self.flags.layout {
-            Layout::Tree { .. } => self.flags.recursion.depth,
+            Layout::Tree => self.flags.recursion.depth,
             _ if self.flags.recursion.enabled => self.flags.recursion.depth,
             _ => 1,
         };
