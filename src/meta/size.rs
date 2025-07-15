@@ -267,7 +267,8 @@ mod test {
         assert_eq!(size.value_string(&flags).as_str(), "44040192");
         assert_eq!(size.unit_string(&flags).as_str(), "");
 
-        flags.size = SizeFlag::BytesWithSeparator;
+        flags.size = SizeFlag::Bytes;
+        flags.size_separator = Some(SizeSeparator::new(Some("en".to_string())));
         assert_eq!(
             size.value_string(&flags).as_str(),
             expected_separator_value_str
