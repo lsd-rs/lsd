@@ -19,8 +19,6 @@ pub enum SizeFlag {
     Short,
     /// The variant to show file size in bytes.
     Bytes,
-    /// The variant to show file size in bytes using a locale-specific separator.
-    BytesWithSeparator,
 }
 
 impl SizeFlag {
@@ -29,7 +27,6 @@ impl SizeFlag {
             "default" => Self::Default,
             "short" => Self::Short,
             "bytes" => Self::Bytes,
-            "bytes-with-separator" => Self::BytesWithSeparator,
             // Invalid value should be handled by `clap` when building an `Cli`
             other => unreachable!("Invalid value '{other}' for 'size'"),
         }
@@ -105,13 +102,6 @@ mod test {
         let argv = ["lsd", "--size", "bytes"];
         let cli = Cli::try_parse_from(argv).unwrap();
         assert_eq!(Some(SizeFlag::Bytes), SizeFlag::from_cli(&cli));
-    }
-
-    #[test]
-    fn test_from_cli_bytes_with_separator() {
-        let argv = ["lsd", "--size", "bytes-with-separator"];
-        let cli = Cli::try_parse_from(argv).unwrap();
-        assert_eq!(Some(SizeFlag::BytesWithSeparator), SizeFlag::from_cli(&cli));
     }
 
     #[test]

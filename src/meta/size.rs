@@ -1,6 +1,8 @@
 use crate::color::{ColoredString, Colors, Elem};
+use crate::flags::size_separator::SizeSeparator;
 use crate::flags::{Flags, SizeFlag};
-use num_format::{Locale, ToFormattedString as _};
+
+use num_format::ToFormattedString as _;
 use std::fs::Metadata;
 
 const KB: u64 = 1024;
@@ -37,36 +39,28 @@ impl Size {
         self.bytes
     }
 
-    #[cfg(windows)]
-    fn format_bytes_with_separator(&self) -> String {
-        self.bytes.to_formatted_string(&Locale::en)
-    }
-
-    #[cfg(not(windows))]
-    fn format_bytes_with_separator(&self) -> String {
-        use num_format::SystemLocale;
-
-        if let Ok(system_locale) = SystemLocale::default() {
-            self.bytes.to_formatted_string(&system_locale)
+    fn format_size(&self, number: f64, separator: SizeSeparator) -> String {
+        let formatted = if let Some(locale) = separator.get_locale() {
+            // Convert to integer for thousands separator formatting
+            let int_number = number as u64;
+            int_number.to_formatted_string(&locale)
         } else {
-            self.bytes.to_formatted_string(&Locale::en)
-        }
+            format!("{0:.1$}", number, if number < 10.0 { 1 } else { 0 })
+        };
+
+        formatted
     }
 
-    fn format_bytes(&self, flags: &Flags) -> String {
-        if flags.size == SizeFlag::BytesWithSeparator {
-            self.format_bytes_with_separator()
+    fn format_bytes(&self, separator: SizeSeparator) -> String {
+        if let Some(locale) = separator.get_locale() {
+            self.bytes.to_formatted_string(&locale)
         } else {
             self.bytes.to_string()
         }
     }
 
-    fn format_size(&self, number: f64) -> String {
-        format!("{0:.1$}", number, if number < 10.0 { 1 } else { 0 })
-    }
-
     fn get_unit(&self, flags: &Flags) -> Unit {
-        if matches!(flags.size, SizeFlag::Bytes | SizeFlag::BytesWithSeparator) {
+        if flags.size == SizeFlag::Bytes {
             return Unit::Byte;
         }
 
@@ -135,11 +129,29 @@ impl Size {
         let unit = self.get_unit(flags);
 
         match unit {
-            Unit::Byte => self.format_bytes(flags),
-            Unit::Kilo => self.format_size(((self.bytes as f64 / KB as f64) * 10.0).round() / 10.0),
-            Unit::Mega => self.format_size(((self.bytes as f64 / MB as f64) * 10.0).round() / 10.0),
-            Unit::Giga => self.format_size(((self.bytes as f64 / GB as f64) * 10.0).round() / 10.0),
-            Unit::Tera => self.format_size(((self.bytes as f64 / TB as f64) * 10.0).round() / 10.0),
+            Unit::Byte => {
+                if let Some(separator) = &flags.size_separator {
+                    self.format_bytes(separator.clone())
+                } else {
+                    self.format_bytes(SizeSeparator::default())
+                }
+            }
+            Unit::Kilo => self.format_size(
+                ((self.bytes as f64 / KB as f64) * 10.0).round() / 10.0,
+                SizeSeparator::default(),
+            ),
+            Unit::Mega => self.format_size(
+                ((self.bytes as f64 / MB as f64) * 10.0).round() / 10.0,
+                SizeSeparator::default(),
+            ),
+            Unit::Giga => self.format_size(
+                ((self.bytes as f64 / GB as f64) * 10.0).round() / 10.0,
+                SizeSeparator::default(),
+            ),
+            Unit::Tera => self.format_size(
+                ((self.bytes as f64 / TB as f64) * 10.0).round() / 10.0,
+                SizeSeparator::default(),
+            ),
         }
     }
 
@@ -167,7 +179,7 @@ impl Size {
                 Unit::Giga => String::from('G'),
                 Unit::Tera => String::from('T'),
             },
-            SizeFlag::Bytes | SizeFlag::BytesWithSeparator => String::from(""),
+            SizeFlag::Bytes => String::from(""),
         }
     }
 }
@@ -176,6 +188,7 @@ impl Size {
 mod test {
     use super::{Size, GB, KB, MB, TB};
     use crate::color::{Colors, ThemeOption};
+    use crate::flags::size_separator::SizeSeparator;
     use crate::flags::{Flags, SizeFlag};
 
     #[test]
@@ -204,7 +217,8 @@ mod test {
         assert_eq!(size.value_string(&flags).as_str(), "44040192");
         assert_eq!(size.unit_string(&flags).as_str(), "");
 
-        flags.size = SizeFlag::BytesWithSeparator;
+        flags.size = SizeFlag::Bytes;
+        flags.size_separator = Some(SizeSeparator::new(Some("en".to_string())));
         assert_eq!(size.value_string(&flags).as_str(), "44,040,192");
         assert_eq!(size.unit_string(&flags).as_str(), "");
     }
@@ -224,7 +238,8 @@ mod test {
         assert_eq!(size.value_string(&flags).as_str(), "44040192");
         assert_eq!(size.unit_string(&flags).as_str(), "");
 
-        flags.size = SizeFlag::BytesWithSeparator;
+        flags.size = SizeFlag::Bytes;
+        flags.size_separator = Some(SizeSeparator::new(Some("en".to_string())));
         assert_eq!(size.value_string(&flags).as_str(), "44,040,192");
         assert_eq!(size.unit_string(&flags).as_str(), "");
     }
