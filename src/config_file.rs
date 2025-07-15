@@ -5,6 +5,7 @@ use crate::flags::icons::{IconOption, IconTheme};
 use crate::flags::layout::Layout;
 use crate::flags::permission::PermissionFlag;
 use crate::flags::size::SizeFlag;
+
 use crate::flags::sorting::{DirGrouping, SortColumn};
 use crate::flags::HyperlinkOption;
 use crate::flags::{ColorOption, ThemeOption};
@@ -35,6 +36,7 @@ pub struct Config {
     pub layout: Option<Layout>,
     pub recursion: Option<Recursion>,
     pub size: Option<SizeFlag>,
+    pub size_separator: Option<String>,
     pub permission: Option<PermissionFlag>,
     pub sorting: Option<Sorting>,
     pub no_symlink: Option<bool>,
@@ -120,6 +122,7 @@ impl Config {
             layout: None,
             recursion: None,
             size: None,
+            size_separator: None,
             permission: None,
             sorting: None,
             no_symlink: None,
@@ -308,6 +311,13 @@ recursion:
 # Possible values: default, short, bytes
 size: default
 
+# == Size Separator ==
+# Specifies the number separator kind used for the size column.
+# use number format from https://docs.rs/num-format/latest/num_format/
+# Possible values: "en"
+#
+# size-separator: "en"
+
 # == Permission ==
 # Specify the format of the permission column.
 # Possible value: rwx, octal, attributes, disable
@@ -412,6 +422,7 @@ mod tests {
                     depth: None,
                 }),
                 size: Some(SizeFlag::Default),
+                size_separator: None,
                 permission: None,
                 sorting: Some(config_file::Sorting {
                     column: Some(SortColumn::Name),

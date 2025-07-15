@@ -76,6 +76,10 @@ pub struct Cli {
     #[arg(long, value_name = "MODE", value_parser = ["default", "short", "bytes"])]
     pub size: Option<String>,
 
+    /// Size separator kind [default: none]
+    #[arg(long, value_name = "KIND", value_parser = ["en"])]
+    pub size_separator: Option<String>,
+
     /// Display the total size of directories
     #[arg(long)]
     pub total_size: bool,

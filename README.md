@@ -226,6 +226,13 @@ recursion:
 # Possible values: default, short, bytes
 size: default
 
+# == Size Separator ==
+# Specifies the number separator kind used for the size column.
+# use number format from https://docs.rs/num-format/latest/num_format/
+# Possible values: "en", "fr"
+#
+# size-separator: "en"
+
 # == Permission ==
 # Specify the format of the permission column
 # Possible value: rwx, octal, attributes (windows only), disable

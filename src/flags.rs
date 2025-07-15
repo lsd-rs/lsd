@@ -13,6 +13,7 @@ pub mod literal;
 pub mod permission;
 pub mod recursion;
 pub mod size;
+pub mod size_separator;
 pub mod sorting;
 pub mod symlink_arrow;
 pub mod symlinks;
@@ -37,6 +38,7 @@ pub use literal::Literal;
 pub use permission::PermissionFlag;
 pub use recursion::Recursion;
 pub use size::SizeFlag;
+use size_separator::SizeSeparator;
 pub use sorting::DirGrouping;
 pub use sorting::SortColumn;
 pub use sorting::SortOrder;
@@ -69,6 +71,7 @@ pub struct Flags {
     pub no_symlink: NoSymlink,
     pub recursion: Recursion,
     pub size: SizeFlag,
+    pub size_separator: Option<SizeSeparator>,
     pub permission: PermissionFlag,
     pub sorting: Sorting,
     pub total_size: TotalSize,
@@ -95,6 +98,7 @@ impl Flags {
             display: Display::configure_from(cli, config),
             layout: Layout::configure_from(cli, config),
             size: SizeFlag::configure_from(cli, config),
+            size_separator: Some(SizeSeparator::configure_from(cli, config)),
             permission: PermissionFlag::configure_from(cli, config),
             display_indicators: Indicators::configure_from(cli, config),
             icons: Icons::configure_from(cli, config),

@@ -102,7 +102,7 @@ mod test {
 
     #[test]
     fn test_smack_only_indicator() {
-        let access_control = AccessControl::from_data(false, &[], &[b'a']);
+        let access_control = AccessControl::from_data(false, &[], b"a");
 
         assert_eq!(
             String::from(".").with(Color::Cyan),
@@ -112,7 +112,7 @@ mod test {
 
     #[test]
     fn test_acl_and_selinux_indicator() {
-        let access_control = AccessControl::from_data(true, &[b'a'], &[]);
+        let access_control = AccessControl::from_data(true, b"a", &[]);
 
         assert_eq!(
             String::from("+").with(Color::DarkCyan),
@@ -122,7 +122,7 @@ mod test {
 
     #[test]
     fn test_selinux_context() {
-        let access_control = AccessControl::from_data(false, &[b'a'], &[]);
+        let access_control = AccessControl::from_data(false, b"a", &[]);
 
         assert_eq!(
             String::from("a").with(Color::Cyan),
@@ -132,7 +132,7 @@ mod test {
 
     #[test]
     fn test_selinux_and_smack_context() {
-        let access_control = AccessControl::from_data(false, &[b'a'], &[b'b']);
+        let access_control = AccessControl::from_data(false, b"a", b"b");
 
         assert_eq!(
             String::from("a+b").with(Color::Cyan),

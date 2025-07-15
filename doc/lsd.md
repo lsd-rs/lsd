@@ -128,6 +128,9 @@ lsd is a ls command with a lot of pretty colours and some other stuff to enrich 
 `--size <size>...`
 : How to display size [default: default]  [possible values: default, short, bytes]
 
+`--size-separator <size-separator>...`
+: Separator kind to format file size [default: none]  [possible values: none, en]
+
 `--sort <WORD>...`
 : Sort by WORD instead of name [possible values: size, time, version, extension, git]
 
