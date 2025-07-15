@@ -1,3 +1,5 @@
+use serde::Serialize;
+
 #[cfg(windows)]
 use super::windows_attributes::WindowsAttributes;
 use crate::{
@@ -7,7 +9,7 @@ use crate::{
 
 use super::Permissions;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize)]
 pub enum PermissionsOrAttributes {
     Permissions(Permissions),
     #[cfg(windows)]

@@ -1,5 +1,6 @@
 use crate::color::{ColoredString, Colors, Elem};
 use crate::Flags;
+use serde::Serialize;
 #[cfg(unix)]
 use std::fs::Metadata;
 #[cfg(unix)]
@@ -14,7 +15,7 @@ pub struct Cache {
 }
 
 #[cfg(unix)]
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, Serialize)]
 pub struct Owner {
     user: u32,
     group: u32,

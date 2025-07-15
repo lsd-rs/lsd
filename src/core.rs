@@ -72,7 +72,7 @@ impl Core {
         // or require a raw output (like the `wc` command).
         if !tty_available {
             // we should not overwrite the tree layout
-            if flags.layout != Layout::Tree {
+            if flags.layout != Layout::Tree && flags.layout != Layout::Json {
                 flags.layout = Layout::OneLine;
             }
 
@@ -174,22 +174,28 @@ impl Core {
     }
 
     fn display(&self, metas: &[Meta]) {
-        let output = if self.flags.layout == Layout::Tree {
-            display::tree(
+        let output = match self.flags.layout {
+            Layout::Tree => display::tree(
                 metas,
                 &self.flags,
                 &self.colors,
                 &self.icons,
                 &self.git_theme,
-            )
-        } else {
-            display::grid(
+            ),
+            Layout::Json => display::json(
                 metas,
                 &self.flags,
                 &self.colors,
                 &self.icons,
                 &self.git_theme,
-            )
+            ),
+            _ => display::grid(
+                metas,
+                &self.flags,
+                &self.colors,
+                &self.icons,
+                &self.git_theme,
+            ),
         };
 
         print_output!("{}", output);

@@ -4,7 +4,9 @@ use crate::flags::{Display, Flags, HyperlinkOption, Layout};
 use crate::git_theme::GitTheme;
 use crate::icon::Icons;
 use crate::meta::name::DisplayOption;
-use crate::meta::{FileType, Meta, OwnerCache};
+use crate::meta::{Date, FileType, Meta, OwnerCache};
+use chrono::{DateTime, Local};
+use serde::Serialize;
 use std::collections::HashMap;
 use term_grid::{Cell, Direction, Filling, Grid, GridOptions};
 use terminal_size::terminal_size;
@@ -14,6 +16,95 @@ const EDGE: &str = "\u{251c}\u{2500}\u{2500}"; // "├──"
 const LINE: &str = "\u{2502}  "; // "│  "
 const CORNER: &str = "\u{2514}\u{2500}\u{2500}"; // "└──"
 const BLANK: &str = "   ";
+
+#[derive(Serialize)]
+struct JsonMeta {
+    name: String,
+    display: String,
+    r#type: String,
+    extension: Option<String>,
+    dirlike: bool,
+    content: Option<Vec<JsonMeta>>,
+    date: Option<DateTime<Local>>,
+    icon: String,
+    permissions: String,
+    size: Option<u64>,
+    user: Option<String>,
+    group: Option<String>,
+    path: String,
+}
+
+impl JsonMeta {
+    fn from_meta(value: &Meta, icons: &Icons, colors: &Colors, flags: &Flags) -> JsonMeta {
+        let name = &value.name;
+        let icon = icons.get(&name);
+        let display = name.render(
+            colors,
+            icons,
+            &DisplayOption::FileName,
+            flags.hyperlink,
+            false,
+        );
+        let permissions = value
+            .permissions_or_attributes
+            .as_ref()
+            .unwrap()
+            .render(colors, flags)
+            .to_string();
+        let size = value.size.as_ref().map(|size| size.get_bytes());
+        let user = value.owner.as_ref().map(|owner| {
+            owner
+                .render_user(colors, &OwnerCache::default(), flags)
+                .to_string()
+        });
+        let group = value.owner.as_ref().map(|owner| {
+            owner
+                .render_group(colors, &OwnerCache::default(), flags)
+                .to_string()
+        });
+        let path = value.path.to_str().unwrap().to_string();
+
+        JsonMeta {
+            content: value.content.as_ref().map(|content| {
+                content
+                    .iter()
+                    .map(|meta| JsonMeta::from_meta(meta, icons, colors, flags))
+                    .collect()
+            }),
+            name: name.name.clone(),
+            display: display.to_string(),
+            r#type: name.file_type().render(colors).to_string(),
+            extension: name.extension().map(String::from),
+            date: value.date.as_ref().and_then(|date| match date {
+                &Date::Date(date) => Some(date.clone()),
+                &Date::Invalid => None,
+            }),
+            dirlike: value.file_type.is_dirlike(),
+            permissions,
+            icon,
+            size,
+            user,
+            group,
+            path,
+        }
+    }
+}
+
+pub fn json(
+    metas: &[Meta],
+    flags: &Flags,
+    colors: &Colors,
+    icons: &Icons,
+    _git_theme: &GitTheme,
+) -> String {
+    serde_json::to_string(
+        &metas
+            .into_iter()
+            .map(|meta| JsonMeta::from_meta(meta, icons, colors, flags))
+            .collect::<Vec<JsonMeta>>(),
+    )
+    .unwrap()
+}
 
 pub fn grid(
     metas: &[Meta],
