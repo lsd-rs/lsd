@@ -234,7 +234,7 @@ size: default
 # == Sorting ==
 sorting:
   # Specify what to sort by.
-  # Possible values: extension, name, time, size, version
+  # Possible values: type, extension, name, time, size, version
   column: name
   # Whether to reverse the sorting.
   # Possible values: false, true

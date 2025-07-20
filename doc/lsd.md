@@ -77,6 +77,9 @@ lsd is a ls command with a lot of pretty colours and some other stuff to enrich 
 `-S`, `--sizesort`
 : Sort by size
 
+`-T`, `--typesort`
+: Sort by file type
+
 `-t`, `--timesort`
 : Sort by time modified
 

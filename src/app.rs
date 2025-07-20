@@ -92,6 +92,10 @@ pub struct Cli {
     #[arg(short = 'S', long)]
     pub sizesort: bool,
 
+    /// Sort by file type
+    #[arg(short = 'T', long)]
+    pub typesort: bool,
+
     /// Sort by file extension
     #[arg(short = 'X', long)]
     pub extensionsort: bool,
@@ -104,17 +108,17 @@ pub struct Cli {
     #[arg(short = 'v', long)]
     pub versionsort: bool,
 
-    /// Sort by TYPE instead of name
+    /// Sort by SORTTYPE instead of name
     #[arg(
         long,
-        value_name = "TYPE",
-        value_parser = ["size", "time", "version", "extension", "git", "none"],
-        overrides_with_all = ["timesort", "sizesort", "extensionsort", "versionsort", "gitsort", "no_sort"]
+        value_name = "SORTTYPE",
+        value_parser = ["size", "time", "version", "type", "extension", "git", "none"],
+        overrides_with_all = ["timesort", "sizesort", "typesort", "extensionsort", "versionsort", "gitsort", "no_sort"]
     )]
     pub sort: Option<String>,
 
     /// Do not sort. List entries in directory order
-    #[arg(short = 'U', long, overrides_with_all = ["timesort", "sizesort", "extensionsort", "versionsort", "gitsort", "sort"])]
+    #[arg(short = 'U', long, overrides_with_all = ["timesort", "sizesort", "typesort", "extensionsort", "versionsort", "gitsort", "sort"])]
     pub no_sort: bool,
 
     /// Reverse the order of the sort

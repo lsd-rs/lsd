@@ -1,7 +1,7 @@
 use crate::color::{ColoredString, Colors, Elem};
 use std::fs::Metadata;
 
-#[derive(Debug, PartialEq, Eq, Copy, Clone)]
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Copy, Clone)]
 #[cfg_attr(windows, allow(dead_code))]
 pub enum FileType {
     BlockDevice,

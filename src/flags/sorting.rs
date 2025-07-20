@@ -38,6 +38,7 @@ impl Sorting {
 #[serde(rename_all = "kebab-case")]
 pub enum SortColumn {
     None,
+    Type,
     Extension,
     #[default]
     Name,
@@ -65,6 +66,8 @@ impl Configurable<Self> for SortColumn {
             Some(Self::Version)
         } else if cli.gitsort || sort == Some("git") {
             Some(Self::GitStatus)
+        } else if cli.typesort || sort == Some("type") {
+            Some(Self::Type)
         } else if cli.no_sort || sort == Some("none") {
             Some(Self::None)
         } else {
@@ -199,6 +202,13 @@ mod test_sort_column {
         let argv = ["lsd", "--extensionsort"];
         let cli = Cli::try_parse_from(argv).unwrap();
         assert_eq!(Some(SortColumn::Extension), SortColumn::from_cli(&cli));
+    }
+
+    #[test]
+    fn test_from_cli_type() {
+        let argv = ["lsd", "--typesort"];
+        let cli = Cli::try_parse_from(argv).unwrap();
+        assert_eq!(Some(SortColumn::Type), SortColumn::from_cli(&cli));
     }
 
     #[test]

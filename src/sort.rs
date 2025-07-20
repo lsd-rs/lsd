@@ -21,6 +21,7 @@ pub fn assemble_sorters(flags: &Flags) -> Vec<(SortOrder, SortFn)> {
         SortColumn::Name => sorters.push((flags.sorting.order, by_name)),
         SortColumn::Size => sorters.push((flags.sorting.order, by_size)),
         SortColumn::Time => sorters.push((flags.sorting.order, by_date)),
+        SortColumn::Type => sorters.push((flags.sorting.order, by_type)),
         SortColumn::Version => sorters.push((flags.sorting.order, by_version)),
         SortColumn::Extension => sorters.push((flags.sorting.order, by_extension)),
         SortColumn::GitStatus => sorters.push((flags.sorting.order, by_git_status)),
@@ -63,6 +64,10 @@ fn by_name(a: &Meta, b: &Meta) -> Ordering {
 
 fn by_date(a: &Meta, b: &Meta) -> Ordering {
     b.date.cmp(&a.date).then(a.name.cmp(&b.name))
+}
+
+fn by_type(a: &Meta, b: &Meta) -> Ordering {
+    a.file_type.cmp(&b.file_type).then(a.name.cmp(&b.name))
 }
 
 fn by_version(a: &Meta, b: &Meta) -> Ordering {

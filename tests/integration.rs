@@ -434,6 +434,29 @@ fn test_version_sort() {
 }
 
 #[test]
+fn test_version_sort_overwrite_by_typesort() {
+    let dir = tempdir();
+    dir.child("0.3.7").touch().unwrap();
+    dir.child("0.11.5").touch().unwrap();
+    dir.child("11a").touch().unwrap();
+    dir.child("0.2").touch().unwrap();
+    dir.child("0.11").touch().unwrap();
+    dir.child("1").touch().unwrap();
+    dir.child("11").touch().unwrap();
+    dir.child("2").touch().unwrap();
+    dir.child("22").touch().unwrap();
+    cmd()
+        .arg("-v")
+        .arg("-T")
+        .arg("--ignore-config")
+        .arg(dir.path())
+        .assert()
+        .stdout(
+            predicate::str::is_match("0.2\n0.3.7\n0.11\n0.11.5\n1\n2\n11\n11a\n22\n$").unwrap(),
+        );
+}
+
+#[test]
 fn test_version_sort_overwrite_by_timesort() {
     let dir = tempdir();
     dir.child("2").touch().unwrap();
