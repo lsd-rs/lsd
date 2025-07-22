@@ -38,6 +38,8 @@ impl Date {
         let elem = match self {
             &Date::Date(modified) if modified > now - Duration::hours(1) => Elem::HourOld,
             &Date::Date(modified) if modified > now - Duration::days(1) => Elem::DayOld,
+            &Date::Date(modified) if modified > now - Duration::weeks(1) => Elem::WeekOld,
+            &Date::Date(modified) if modified > now - Duration::weeks(4) => Elem::MonthOld,
             &Date::Date(_) | Date::Invalid => Elem::Older,
         };
         colors.colorize(self.date_string(flags), &elem)
@@ -51,7 +53,25 @@ impl Date {
             match &flags.date {
                 DateFlag::Date => val.format("%c").to_string(),
                 DateFlag::Locale => val.format_localized("%c", locale).to_string(),
-                DateFlag::Relative => HumanTime::from(*val - Local::now()).to_string(),
+                DateFlag::Relative => {
+                    let mut rel = HumanTime::from(*val - Local::now()).to_string();
+                    rel = rel.replace("minutes", "mins")
+                            .replace("minute", "min")
+                            .replace("seconds", "secs")
+                            .replace("second", "sec")
+                            .replace("hours", "hrs")
+                            .replace("hour", "hr")
+                            .replace("weeks", "wks")
+                            .replace("week", "wk")
+                            .replace("months", "mons")
+                            .replace("month", "mon")
+                            .replace("years", "yrs")
+                            .replace("year", "yr")
+                            .replace("a ", "1 ")
+                            .replace("an ", "1 ");
+                    let parts: Vec<&str> = rel.split_whitespace().collect();
+                    format!("{:>3} {:<5}{}", parts[0], parts[1], parts[2])
+                }
                 DateFlag::Iso => {
                     // 365.2425 * 24 * 60 * 60 = 31556952 seconds per year
                     // 15778476 seconds are 6 months
