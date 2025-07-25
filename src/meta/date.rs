@@ -55,22 +55,20 @@ impl Date {
                 DateFlag::Locale => val.format_localized("%c", locale).to_string(),
                 DateFlag::Relative => {
                     let mut rel = HumanTime::from(*val - Local::now()).to_string();
-                    rel = rel.replace("minutes", "mins")
-                            .replace("minute", "min")
-                            .replace("seconds", "secs")
+                    rel = rel.replace("minute", "min")
                             .replace("second", "sec")
-                            .replace("hours", "hrs")
                             .replace("hour", "hr")
-                            .replace("weeks", "wks")
                             .replace("week", "wk")
-                            .replace("months", "mons")
                             .replace("month", "mon")
-                            .replace("years", "yrs")
                             .replace("year", "yr")
                             .replace("a ", "1 ")
                             .replace("an ", "1 ");
                     let parts: Vec<&str> = rel.split_whitespace().collect();
-                    format!("{:>3} {:<5}{}", parts[0], parts[1], parts[2])
+                    if parts.len() == 3 {
+                        format!("{:>3} {:<5}{}", parts[0], parts[1], parts[2])
+                    } else {
+                        format!("{:>7}", rel)
+                    } 
                 }
                 DateFlag::Iso => {
                     // 365.2425 * 24 * 60 * 60 = 31556952 seconds per year
