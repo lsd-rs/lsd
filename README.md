@@ -1,27 +1,14 @@
-<div align="center">
+<div align="center" markdown="1">
+   <sup>Special thanks to:</sup>
+   <br>
+   <br>
+   <a href="https://go.warp.dev/lsd">
+      <img alt="Warp sponsorship" width="400" src="https://raw.githubusercontent.com/warpdotdev/brand-assets/refs/heads/main/Github/Sponsor/Warp-Github-LG-02.png">
+   </a>
 
-<p>
-  <sup>
-    <a href="https://github.com/sponsors/zwpaper">LSD is supported by the community.</a>
-  </sup>
-</p>
-<sup>Special thanks to:</sup>
-<br>
-<br>
-<a href="https://www.warp.dev/?utm_source=github&utm_medium=referral&utm_campaign=lsd_20231001">
-<div>
-  <picture>
-    <img alt="Warp" width="300" src="https://github.com/user-attachments/assets/2bda420d-4211-4900-a37e-e3c7056d799c">
-  </picture>
-</div>
-  <b>Warp, the intelligent terminal</b>
-  <div>
-    <sup>Available for MacOS and Linux<br>
-Visit warp.dev to learn more
-    </sup>
-  </div>
-</a>
-<hr>
+### [Warp, built for coding with multiple AI agents](https://go.warp.dev/lsd)
+[Available for MacOS, Linux, & Windows](https://go.warp.dev/lsd)<br>
+
 </div>
 
 **IMPORTANT**: This is the development documents,
