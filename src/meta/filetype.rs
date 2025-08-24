@@ -112,9 +112,9 @@ mod test {
     #[cfg(unix)]
     use crate::flags::PermissionFlag;
     #[cfg(unix)]
-    use crate::meta::permissions_or_attributes::PermissionsOrAttributes;
-    #[cfg(unix)]
     use crate::meta::Permissions;
+    #[cfg(unix)]
+    use crate::meta::permissions_or_attributes::PermissionsOrAttributes;
     use crossterm::style::{Color, Stylize};
     use std::fs::File;
     #[cfg(unix)]

@@ -16,11 +16,7 @@ impl Configurable<Self> for Literal {
     /// If the "literal" argument is passed, this returns a `Literal` with value `true` in a
     /// [Some]. Otherwise this returns [None].
     fn from_cli(cli: &Cli) -> Option<Self> {
-        if cli.literal {
-            Some(Self(true))
-        } else {
-            None
-        }
+        if cli.literal { Some(Self(true)) } else { None }
     }
 
     /// Get a potential `Literal` value from a [Config].

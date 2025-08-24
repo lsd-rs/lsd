@@ -149,7 +149,7 @@ impl Size {
 
 #[cfg(test)]
 mod test {
-    use super::{Size, GB, KB, MB, TB};
+    use super::{GB, KB, MB, Size, TB};
     use crate::color::{Colors, ThemeOption};
     use crate::flags::{Flags, SizeFlag};
 

@@ -1,5 +1,5 @@
-use crate::color::{ColoredString, Colors, Elem};
 use crate::Flags;
+use crate::color::{ColoredString, Colors, Elem};
 #[cfg(unix)]
 use std::fs::Metadata;
 #[cfg(unix)]
