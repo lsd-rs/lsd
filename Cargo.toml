@@ -69,6 +69,7 @@ assert_fs = "1"
 predicates = "3"
 tempfile = "3"
 serial_test = "2.0"
+temp-env = "0.3.0"
 
 [features]
 default = ["git2"]

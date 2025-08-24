@@ -4,8 +4,8 @@
 use crate::app::Cli;
 use crate::config_file::Config;
 
-use clap::error::ErrorKind;
 use clap::Error;
+use clap::error::ErrorKind;
 use globset::{Glob, GlobSet, GlobSetBuilder};
 
 /// The struct holding a [GlobSet] and methods to build it.
