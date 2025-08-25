@@ -4,8 +4,7 @@ use std::mem::MaybeUninit;
 use std::os::windows::ffi::{OsStrExt, OsStringExt};
 use std::path::Path;
 
-use windows::Win32::Foundation::PSID;
-use windows::Win32::Security::{self, ACL, Authorization::TRUSTEE_W};
+use windows::Win32::Security::{self, ACL, Authorization::TRUSTEE_W, PSID};
 
 use super::{Owner, Permissions};
 
@@ -124,11 +123,11 @@ pub fn get_file_data(path: &Path) -> Result<(Owner, Permissions), io::Error> {
         )
     };
 
-    if result.ok().is_err() {
+    if result.is_err() {
         // Failed to create the SID
         // Assumptions: Same as the other identical calls
         unsafe {
-            windows::Win32::System::Memory::LocalFree(sd_ptr.0 as _);
+            windows::Win32::Foundation::LocalFree(sd_ptr.0 as _);
         }
 
         // Assumptions: None (GetLastError shouldn't ever fail)
@@ -155,9 +154,9 @@ pub fn get_file_data(path: &Path) -> Result<(Owner, Permissions), io::Error> {
 
     let permissions = {
         use windows::Win32::Storage::FileSystem::{
-            FILE_ACCESS_FLAGS, FILE_GENERIC_EXECUTE, FILE_GENERIC_READ, FILE_GENERIC_WRITE,
+            FILE_ACCESS_RIGHTS, FILE_GENERIC_EXECUTE, FILE_GENERIC_READ, FILE_GENERIC_WRITE,
         };
-        let has_bit = |field: u32, bit: FILE_ACCESS_FLAGS| field & bit.0 != 0;
+        let has_bit = |field: u32, bit: FILE_ACCESS_RIGHTS| field & bit.0 != 0;
         Permissions {
             user_read: has_bit(owner_access_mask, FILE_GENERIC_READ),
             user_write: has_bit(owner_access_mask, FILE_GENERIC_WRITE),
@@ -184,7 +183,7 @@ pub fn get_file_data(path: &Path) -> Result<(Owner, Permissions), io::Error> {
     //   options. It's not much memory, so leaking it on failure is
     //   *probably* fine)
     unsafe {
-        windows::Win32::System::Memory::LocalFree(sd_ptr.0 as _);
+        windows::Win32::Foundation::LocalFree(sd_ptr.0 as _);
     }
 
     Ok((owner, permissions))
@@ -205,8 +204,9 @@ unsafe fn get_acl_access_mask(
     // Assumptions:
     // - All function assumptions
     // - Result is not valid until return value is checked
-    let err_code =
-        Security::Authorization::GetEffectiveRightsFromAclW(acl_ptr, trustee_ptr, &mut access_mask);
+    let err_code = unsafe {
+        Security::Authorization::GetEffectiveRightsFromAclW(acl_ptr, trustee_ptr, &mut access_mask)
+    };
 
     if err_code.is_ok() {
         Ok(access_mask)
@@ -226,7 +226,7 @@ unsafe fn get_acl_access_mask(
 unsafe fn trustee_from_sid<P: Into<PSID>>(sid_ptr: P) -> TRUSTEE_W {
     let mut trustee = TRUSTEE_W::default();
 
-    Security::Authorization::BuildTrusteeWithSidW(&mut trustee, sid_ptr);
+    Security::Authorization::BuildTrusteeWithSidW(&mut trustee, sid_ptr.into());
 
     trustee
 }
@@ -256,14 +256,14 @@ unsafe fn lookup_account_sid(sid: PSID) -> Result<(Vec<u16>, Vec<u16>), std::io:
         let result = Security::LookupAccountSidW(
             None,
             sid,
-            windows::core::PWSTR(name.as_mut_ptr()),
+            Some(windows::core::PWSTR(name.as_mut_ptr())),
             &mut name_size,
-            windows::core::PWSTR(domain.as_mut_ptr()),
+            Some(windows::core::PWSTR(domain.as_mut_ptr())),
             &mut domain_size,
             sid_name_use.as_mut_ptr(),
         );
 
-        if result.ok().is_ok() {
+        if result.is_ok() {
             // Success!
             return Ok((name, domain));
         } else if name_size != old_name_size || domain_size != old_domain_size {
