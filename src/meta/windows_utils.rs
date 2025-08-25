@@ -4,6 +4,7 @@ use std::mem::MaybeUninit;
 use std::os::windows::ffi::{OsStrExt, OsStringExt};
 use std::path::Path;
 
+use windows::Win32::Foundation::HLOCAL;
 use windows::Win32::Security::{self, ACL, Authorization::TRUSTEE_W, PSID};
 
 use super::{Owner, Permissions};
@@ -117,8 +118,8 @@ pub fn get_file_data(path: &Path) -> Result<(Owner, Permissions), io::Error> {
     let result = unsafe {
         Security::CreateWellKnownSid(
             Security::WinWorldSid,
-            PSID::default(),
-            world_sid_ptr,
+            None,
+            Some(world_sid_ptr),
             &mut world_sid_len,
         )
     };
@@ -127,7 +128,7 @@ pub fn get_file_data(path: &Path) -> Result<(Owner, Permissions), io::Error> {
         // Failed to create the SID
         // Assumptions: Same as the other identical calls
         unsafe {
-            windows::Win32::Foundation::LocalFree(sd_ptr.0 as _);
+            windows::Win32::Foundation::LocalFree(Some(HLOCAL(sd_ptr.0 as isize)));
         }
 
         // Assumptions: None (GetLastError shouldn't ever fail)
@@ -183,7 +184,7 @@ pub fn get_file_data(path: &Path) -> Result<(Owner, Permissions), io::Error> {
     //   options. It's not much memory, so leaking it on failure is
     //   *probably* fine)
     unsafe {
-        windows::Win32::Foundation::LocalFree(sd_ptr.0 as _);
+        windows::Win32::Foundation::LocalFree(Some(HLOCAL(sd_ptr.0 as isize)));
     }
 
     Ok((owner, permissions))
@@ -226,7 +227,7 @@ unsafe fn get_acl_access_mask(
 unsafe fn trustee_from_sid<P: Into<PSID>>(sid_ptr: P) -> TRUSTEE_W {
     let mut trustee = TRUSTEE_W::default();
 
-    Security::Authorization::BuildTrusteeWithSidW(&mut trustee, sid_ptr.into());
+    Security::Authorization::BuildTrusteeWithSidW(&mut trustee, Some(sid_ptr.into()));
 
     trustee
 }
@@ -253,15 +254,17 @@ unsafe fn lookup_account_sid(sid: PSID) -> Result<(Vec<u16>, Vec<u16>), std::io:
         // Assumptions:
         // - sid is a valid pointer to a SID data structure
         // - name_size and domain_size accurately reflect the sizes
-        let result = Security::LookupAccountSidW(
-            None,
-            sid,
-            Some(windows::core::PWSTR(name.as_mut_ptr())),
-            &mut name_size,
-            Some(windows::core::PWSTR(domain.as_mut_ptr())),
-            &mut domain_size,
-            sid_name_use.as_mut_ptr(),
-        );
+        let result = unsafe {
+            Security::LookupAccountSidW(
+                None,
+                sid,
+                Some(windows::core::PWSTR(name.as_mut_ptr())),
+                &mut name_size,
+                Some(windows::core::PWSTR(domain.as_mut_ptr())),
+                &mut domain_size,
+                sid_name_use.as_mut_ptr(),
+            )
+        };
 
         if result.is_ok() {
             // Success!
@@ -274,9 +277,9 @@ unsafe fn lookup_account_sid(sid: PSID) -> Result<(Vec<u16>, Vec<u16>), std::io:
             // Unknown account and or system domain identification
             // Possibly foreign item originating from another machine
             // TODO: Calculate permissions since it has to be possible if Explorer knows.
-            return Err(io::Error::from_raw_os_error(
-                windows::Win32::Foundation::GetLastError().0 as i32,
-            ));
+            return Err(io::Error::from_raw_os_error(unsafe {
+                windows::Win32::Foundation::GetLastError().0 as i32
+            }));
         }
     }
 }
