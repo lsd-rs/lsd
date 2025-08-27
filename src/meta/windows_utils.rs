@@ -5,7 +5,7 @@ use std::os::windows::ffi::{OsStrExt, OsStringExt};
 use std::path::Path;
 
 use windows::Win32::Foundation::PSID;
-use windows::Win32::Security::{self, Authorization::TRUSTEE_W, ACL};
+use windows::Win32::Security::{self, ACL, Authorization::TRUSTEE_W};
 
 use super::{Owner, Permissions};
 

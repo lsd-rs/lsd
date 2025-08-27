@@ -16,11 +16,7 @@ impl Configurable<Self> for Header {
     /// If the "header" argument is passed, this returns a `Header` with value `true` in a
     /// [Some]. Otherwise this returns [None].
     fn from_cli(cli: &Cli) -> Option<Self> {
-        if cli.header {
-            Some(Self(true))
-        } else {
-            None
-        }
+        if cli.header { Some(Self(true)) } else { None }
     }
 
     /// Get a potential `Header` value from a [Config].

@@ -65,7 +65,7 @@ pub struct Cli {
     pub depth: Option<usize>,
 
     /// Display directories themselves, and not their contents (recursively when used with --tree)
-    #[arg(short, long, conflicts_with_all = ["depth", "recursive"])]
+    #[arg(short, long, conflicts_with = "recursive")]
     pub directory_only: bool,
 
     /// How to display permissions [default: rwx for linux, attributes for windows]

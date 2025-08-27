@@ -98,7 +98,7 @@ impl ByType {
             file: "\u{1f4c4}".into(),
             pipe: "\u{1f4e9}".into(),
             socket: "\u{1f4ec}".into(),
-            executable: "\u{1f3d7}".into(),
+            executable: "\u{1f3d7} ".into(),
             symlink_dir: "\u{1f5c2}".into(),
             symlink_file: "\u{1f516}".into(),
             device_char: "\u{1f5a8}".into(),
@@ -158,6 +158,7 @@ impl IconTheme {
             (".config", "\u{e5fc}"),            // ""
             ("config", "\u{e5fc}"),             // ""
             ("configure", "\u{f0ad}"),          // ""
+            ("containerfile", "\u{f4b7}"),      // ""
             ("content", "\u{f0c7}"),            // ""
             ("contributing", "\u{e60a}"),       // ""
             ("copyright", "\u{e60a}"),          // ""
@@ -246,6 +247,7 @@ impl IconTheme {
             (".java", "\u{e256}"),              // ""
             ("jenkinsfile", "\u{e66e}"),        // ""
             ("js", "\u{e74e}"),                 // ""
+            ("jule.mod", "\u{e80c}"),           // ""
             (".jupyter", "\u{e606}"),           // ""
             ("kbuild", "\u{e615}"),             // ""
             ("kconfig", "\u{e615}"),            // ""
@@ -444,6 +446,7 @@ impl IconTheme {
             ("clj", "\u{e768}"),             // ""
             ("cls", "\u{e600}"),             // ""
             ("cl", "\u{f0172}"),             // "󰅲"
+            ("cmd", "\u{f17a}"),             // ""
             ("coffee", "\u{f0f4}"),          // ""
             ("conf", "\u{e615}"),            // ""
             ("cpp", "\u{e61d}"),             // ""
@@ -545,6 +548,7 @@ impl IconTheme {
             ("json", "\u{e60b}"),            // ""
             ("js", "\u{e74e}"),              // ""
             ("jsx", "\u{e7ba}"),             // ""
+            ("jule", "\u{e80c}"),            // ""
             ("key", "\u{f0306}"),            // "󰌆"
             ("ksh", "\u{f489}"),             // ""
             ("kt", "\u{e634}"),              // ""
@@ -566,9 +570,12 @@ impl IconTheme {
             ("mgc", "\u{f0d0}"),             // ""
             ("m3u8", "\u{f0411}"),           // "󰐑"
             ("m3u", "\u{f0411}"),            // "󰐑"
+            ("m4", "\u{e615}"),              // ""
             ("m4a", "\u{f001}"),             // ""
             ("m4v", "\u{f008}"),             // ""
             ("magnet", "\u{f076}"),          // ""
+            ("make", "\u{e615}"),            // ""
+            ("makefile", "\u{e615}"),        // ""
             ("malloy", "\u{f1c0}"),          // ""
             ("man", "\u{f02d}"),             // ""
             ("markdown", "\u{e609}"),        // ""
@@ -627,6 +634,7 @@ impl IconTheme {
             ("ps1", "\u{f489}"),             // ""
             ("psd", "\u{e7b8}"),             // ""
             ("pub", "\u{f0306}"),            // "󰌆"
+            ("pug", "\u{e686}"),             // ""
             ("sbv", "\u{f015e}"),            // "󰅞"
             ("scc", "\u{f015e}"),            // "󰅞"
             ("slt", "\u{f0221}"),            // "󰈡"
@@ -731,6 +739,7 @@ impl IconTheme {
             ("yml", "\u{e60b}"),             // ""
             ("zip", "\u{f410}"),             // ""
             ("zig", "\u{e6a9}"),             // ""
+            ("zon", "\u{e60b}"),             // ""
             ("zshrc", "\u{f489}"),           // ""
             ("zsh-theme", "\u{f489}"),       // ""
             ("zsh", "\u{f489}"),             // ""

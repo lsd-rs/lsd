@@ -1,27 +1,14 @@
-<div align="center">
+<div align="center" markdown="1">
+   <sup>Special thanks to:</sup>
+   <br>
+   <br>
+   <a href="https://go.warp.dev/lsd">
+      <img alt="Warp sponsorship" width="400" src="https://raw.githubusercontent.com/warpdotdev/brand-assets/refs/heads/main/Github/Sponsor/Warp-Github-LG-02.png">
+   </a>
 
-<p>
-  <sup>
-    <a href="https://github.com/sponsors/zwpaper">LSD is supported by the community.</a>
-  </sup>
-</p>
-<sup>Special thanks to:</sup>
-<br>
-<br>
-<a href="https://www.warp.dev/?utm_source=github&utm_medium=referral&utm_campaign=lsd_20231001">
-<div>
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://github.com/lsd-rs/lsd/assets/3764335/61c7471f-ade1-42ea-9829-ac381c92b28a">
-    <source media="(prefers-color-scheme: light)" srcset="https://github.com/lsd-rs/lsd/assets/3764335/40e5d173-603c-45c8-90fa-50ba6c48a813">
-    <img alt="Warp" width="230" src="https://github.com/lsd-rs/lsd/assets/3764335/40e5d173-603c-45c8-90fa-50ba6c48a813">
-  </picture>
-</div>
-  <b>Warp is a blazingly fast, Rust-based terminal reimagined to work like a modern app.</b>
-  <div>
-    <sup>Get more done in the CLI with real text editing, block-based output, and AI command search.</sup>
-  </div>
-</a>
-<hr>
+### [Warp, built for coding with multiple AI agents](https://go.warp.dev/lsd)
+[Available for MacOS, Linux, & Windows](https://go.warp.dev/lsd)<br>
+
 </div>
 
 **IMPORTANT**: This is the development documents,
