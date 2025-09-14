@@ -33,7 +33,7 @@ pub use self::size::Size;
 pub use self::symlink::SymLink;
 
 use crate::flags::{Display, Flags, Layout, PermissionFlag};
-use crate::{print_error, ExitCode};
+use crate::{ExitCode, print_error};
 
 use crate::git::GitCache;
 use std::io::{self, Error, ErrorKind};

@@ -1,12 +1,12 @@
 //! This module provides methods to handle the program's config files and
 //! operations related to this.
+use crate::flags::HyperlinkOption;
 use crate::flags::display::Display;
 use crate::flags::icons::{IconOption, IconTheme};
 use crate::flags::layout::Layout;
 use crate::flags::permission::PermissionFlag;
 use crate::flags::size::SizeFlag;
 use crate::flags::sorting::{DirGrouping, SortColumn};
-use crate::flags::HyperlinkOption;
 use crate::flags::{ColorOption, ThemeOption};
 use crate::print_error;
 
@@ -371,12 +371,12 @@ impl Config {
 mod tests {
     use super::Config;
     use crate::config_file;
+    use crate::flags::HyperlinkOption;
     use crate::flags::color::{ColorOption, ThemeOption};
     use crate::flags::icons::{IconOption, IconTheme};
     use crate::flags::layout::Layout;
     use crate::flags::size::SizeFlag;
     use crate::flags::sorting::{DirGrouping, SortColumn};
-    use crate::flags::HyperlinkOption;
 
     #[test]
     fn test_read_default() {

@@ -51,11 +51,7 @@ impl Recursion {
     /// If the "recursive" argument is passed, this returns `true` in a [Some]. Otherwise this
     /// returns [None].
     fn enabled_from_cli(cli: &Cli) -> Option<bool> {
-        if cli.recursive {
-            Some(true)
-        } else {
-            None
-        }
+        if cli.recursive { Some(true) } else { None }
     }
 
     /// Get the "depth" integer from [Cli], a [Config] or the [Default] value. The first
@@ -96,8 +92,8 @@ impl Default for Recursion {
 
 #[cfg(test)]
 mod test {
-    use clap::error::ErrorKind;
     use clap::Parser;
+    use clap::error::ErrorKind;
 
     use super::Recursion;
 

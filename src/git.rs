@@ -127,8 +127,8 @@ impl GitCache {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use assert_fs::prelude::*;
     use assert_fs::TempDir;
+    use assert_fs::prelude::*;
     use git2::build::CheckoutBuilder;
     use git2::{CherrypickOptions, Index, Oid, Repository, RepositoryInitOptions};
     use std::collections::HashMap;

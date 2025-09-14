@@ -37,7 +37,7 @@ pub fn by_meta(sorters: &[(SortOrder, SortFn)], a: &Meta, b: &Meta) -> Ordering 
                 return match direction {
                     SortOrder::Reverse => ordering.reverse(),
                     SortOrder::Default => ordering,
-                }
+                };
             }
         }
     }
@@ -81,7 +81,7 @@ fn by_git_status(a: &Meta, b: &Meta) -> Ordering {
 mod tests {
     use super::*;
     use crate::flags::{Flags, PermissionFlag};
-    use std::fs::{create_dir, File};
+    use std::fs::{File, create_dir};
     use std::io::prelude::*;
     use std::process::Command;
     use tempfile::tempdir;

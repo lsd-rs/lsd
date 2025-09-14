@@ -7,7 +7,7 @@ use crate::git::GitCache;
 use crate::icon::Icons;
 
 use crate::meta::Meta;
-use crate::{print_error, print_output, sort, ExitCode};
+use crate::{ExitCode, print_error, print_output, sort};
 use std::path::PathBuf;
 
 #[cfg(not(target_os = "windows"))]
@@ -102,7 +102,7 @@ impl Core {
         let mut exit_code = ExitCode::OK;
         let mut meta_list = Vec::with_capacity(paths.len());
         let depth = match self.flags.layout {
-            Layout::Tree { .. } => self.flags.recursion.depth,
+            Layout::Tree => self.flags.recursion.depth,
             _ if self.flags.recursion.enabled => self.flags.recursion.depth,
             _ => 1,
         };

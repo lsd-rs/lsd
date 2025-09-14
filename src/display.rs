@@ -501,13 +501,13 @@ fn get_padding_rules(metas: &[Meta], flags: &Flags) -> HashMap<Block, usize> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::Config;
     use crate::app::Cli;
     use crate::color;
     use crate::color::Colors;
     use crate::flags::{HyperlinkOption, IconOption, IconTheme as FlagTheme, PermissionFlag};
     use crate::icon::Icons;
     use crate::meta::{FileType, Name};
-    use crate::Config;
     use crate::{flags, sort};
     use assert_fs::prelude::*;
     use clap::Parser;
@@ -751,7 +751,7 @@ mod tests {
                 .lines()
                 .nth(i)
                 .unwrap()
-                .split(|c| c == 'K' || c == 'B')
+                .split(['K', 'B'])
                 .next()
                 .unwrap()
                 .len()
