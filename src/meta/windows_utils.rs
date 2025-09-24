@@ -128,7 +128,7 @@ pub fn get_file_data(path: &Path) -> Result<(Owner, Permissions), io::Error> {
         // Failed to create the SID
         // Assumptions: Same as the other identical calls
         unsafe {
-            windows::Win32::Foundation::LocalFree(Some(HLOCAL(sd_ptr.0 as isize)));
+            windows::Win32::Foundation::LocalFree(Some(HLOCAL(sd_ptr.0)));
         }
 
         // Assumptions: None (GetLastError shouldn't ever fail)
@@ -184,7 +184,7 @@ pub fn get_file_data(path: &Path) -> Result<(Owner, Permissions), io::Error> {
     //   options. It's not much memory, so leaking it on failure is
     //   *probably* fine)
     unsafe {
-        windows::Win32::Foundation::LocalFree(Some(HLOCAL(sd_ptr.0 as isize)));
+        windows::Win32::Foundation::LocalFree(Some(HLOCAL(sd_ptr.0)));
     }
 
     Ok((owner, permissions))
@@ -227,7 +227,9 @@ unsafe fn get_acl_access_mask(
 unsafe fn trustee_from_sid<P: Into<PSID>>(sid_ptr: P) -> TRUSTEE_W {
     let mut trustee = TRUSTEE_W::default();
 
-    Security::Authorization::BuildTrusteeWithSidW(&mut trustee, Some(sid_ptr.into()));
+    unsafe {
+        Security::Authorization::BuildTrusteeWithSidW(&mut trustee, Some(sid_ptr.into()));
+    }
 
     trustee
 }
@@ -375,7 +377,7 @@ mod test {
             let mut vec: Vec<u16> = Vec::with_capacity(257);
 
             for msb in 0..=256u16 {
-                let val = msb << 8 | lsb;
+                let val = (msb << 8) | lsb;
 
                 if val != 0 {
                     vec.push(val)
