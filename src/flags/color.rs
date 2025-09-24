@@ -65,7 +65,7 @@ impl<'de> de::Deserialize<'de> for ThemeOption {
     {
         struct ThemeOptionVisitor;
 
-        impl<'de> Visitor<'de> for ThemeOptionVisitor {
+        impl Visitor<'_> for ThemeOptionVisitor {
             type Value = ThemeOption;
 
             fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {

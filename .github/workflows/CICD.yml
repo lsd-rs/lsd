@@ -188,7 +188,7 @@ jobs:
         sed -i.bk "s|date: <date>|date: $(date '+%Y-%m-%d')|" doc/lsd.md
         rm doc/lsd.md.bk
     - name: Setup pandoc
-      uses: r-lib/actions/setup-pandoc@v1
+      uses: r-lib/actions/setup-pandoc@v2
     - name: Generate Manpage
       run: pandoc --standalone --to man doc/lsd.md -o lsd.1
     - name: Install `rust` toolchain
