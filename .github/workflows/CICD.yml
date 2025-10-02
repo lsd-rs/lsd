@@ -306,8 +306,8 @@ jobs:
       run: |
         docker run --platform linux/${{ matrix.job.platform }} \
           -v `pwd`:/src \
-          kweizh/loongarch-rust:v0.1.0 \
-          build --release --target ${{ matrix.job.target }}
+          pkgforge/alpine-rust-stable:loongarch64 \
+          cargo build --release --target ${{ matrix.job.target }}
 
         # determine EXE suffix
         EXE_suffix="" ; case ${{ matrix.job.target }} in *-pc-windows-*) EXE_suffix=".exe" ;; esac;
