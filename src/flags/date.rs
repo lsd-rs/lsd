@@ -211,86 +211,94 @@ mod test {
     #[test]
     #[serial_test::serial]
     fn test_from_environment_none() {
-        std::env::set_var("TIME_STYLE", "");
-        assert_eq!(None, DateFlag::from_environment());
+        temp_env::with_var("TIME_STYLE", Some(""), || {
+            assert_eq!(None, DateFlag::from_environment());
+        });
     }
 
     #[test]
     #[serial_test::serial]
     fn test_from_environment_full_iso() {
-        std::env::set_var("TIME_STYLE", "full-iso");
-        assert_eq!(
-            Some(DateFlag::Formatted("%F %T.%f %z".into())),
-            DateFlag::from_environment()
-        );
+        temp_env::with_var("TIME_STYLE", Some("full-iso"), || {
+            assert_eq!(
+                Some(DateFlag::Formatted("%F %T.%f %z".into())),
+                DateFlag::from_environment()
+            );
+        });
     }
 
     #[test]
     #[serial_test::serial]
     fn test_from_environment_long_iso() {
-        std::env::set_var("TIME_STYLE", "long-iso");
-        assert_eq!(
-            Some(DateFlag::Formatted("%F %R".into())),
-            DateFlag::from_environment()
-        );
+        temp_env::with_var("TIME_STYLE", Some("long-iso"), || {
+            assert_eq!(
+                Some(DateFlag::Formatted("%F %R".into())),
+                DateFlag::from_environment()
+            );
+        });
     }
 
     #[test]
     #[serial_test::serial]
     fn test_from_environment_iso() {
-        std::env::set_var("TIME_STYLE", "iso");
-        assert_eq!(Some(DateFlag::Iso), DateFlag::from_environment());
+        temp_env::with_var("TIME_STYLE", Some("iso"), || {
+            assert_eq!(Some(DateFlag::Iso), DateFlag::from_environment());
+        });
     }
 
     #[test]
     #[serial_test::serial]
     fn test_from_environment_format() {
-        std::env::set_var("TIME_STYLE", "+%F");
-        assert_eq!(
-            Some(DateFlag::Formatted("%F".into())),
-            DateFlag::from_environment()
-        );
+        temp_env::with_var("TIME_STYLE", Some("+%F"), || {
+            assert_eq!(
+                Some(DateFlag::Formatted("%F".into())),
+                DateFlag::from_environment()
+            );
+        });
     }
 
     #[test]
     #[serial_test::serial]
     fn test_parsing_order_arg() {
-        std::env::set_var("TIME_STYLE", "+%R");
-        let argv = ["lsd", "--date", "+%F"];
-        let cli = Cli::try_parse_from(argv).unwrap();
-        let mut config = Config::with_none();
-        config.date = Some("+%c".into());
-        assert_eq!(
-            DateFlag::Formatted("%F".into()),
-            DateFlag::configure_from(&cli, &config)
-        );
+        temp_env::with_var("TIME_STYLE", Some("+%R"), || {
+            let argv = ["lsd", "--date", "+%F"];
+            let cli = Cli::try_parse_from(argv).unwrap();
+            let mut config = Config::with_none();
+            config.date = Some("+%c".into());
+            assert_eq!(
+                DateFlag::Formatted("%F".into()),
+                DateFlag::configure_from(&cli, &config)
+            );
+        });
     }
 
     #[test]
     #[serial_test::serial]
     fn test_parsing_order_env() {
-        std::env::set_var("TIME_STYLE", "+%R");
-        let argv = ["lsd"];
-        let cli = Cli::try_parse_from(argv).unwrap();
-        let mut config = Config::with_none();
-        config.date = Some("+%c".into());
-        assert_eq!(
-            DateFlag::Formatted("%R".into()),
-            DateFlag::configure_from(&cli, &config)
-        );
+        temp_env::with_var("TIME_STYLE", Some("+%R"), || {
+            let argv = ["lsd"];
+            let cli = Cli::try_parse_from(argv).unwrap();
+            let mut config = Config::with_none();
+            config.date = Some("+%c".into());
+            assert_eq!(
+                DateFlag::Formatted("%R".into()),
+                DateFlag::configure_from(&cli, &config)
+            );
+        });
     }
 
     #[test]
     #[serial_test::serial]
     fn test_parsing_order_config() {
-        std::env::set_var("TIME_STYLE", "");
-        let argv = ["lsd"];
-        let cli = Cli::try_parse_from(argv).unwrap();
-        let mut config = Config::with_none();
-        config.date = Some("+%c".into());
-        assert_eq!(
-            DateFlag::Formatted("%c".into()),
-            DateFlag::configure_from(&cli, &config)
-        );
+        temp_env::with_var("TIME_STYLE", Some(""), || {
+            let argv = ["lsd"];
+            let cli = Cli::try_parse_from(argv).unwrap();
+            let mut config = Config::with_none();
+            config.date = Some("+%c".into());
+            assert_eq!(
+                DateFlag::Formatted("%c".into()),
+                DateFlag::configure_from(&cli, &config)
+            );
+        });
     }
 }

@@ -6,7 +6,7 @@ use std::path::Path;
 pub use crate::flags::color::ThemeOption;
 use crate::git::GitStatus;
 use crate::print_output;
-use crate::theme::{color::ColorTheme, Theme};
+use crate::theme::{Theme, color::ColorTheme};
 
 #[allow(dead_code)]
 #[derive(Hash, Debug, Eq, PartialEq, Clone)]

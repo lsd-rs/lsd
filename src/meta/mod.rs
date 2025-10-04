@@ -7,7 +7,7 @@ mod inode;
 mod links;
 mod locale;
 pub mod name;
-mod owner;
+pub mod owner;
 mod permissions;
 mod permissions_or_attributes;
 mod size;
@@ -26,14 +26,14 @@ pub use self::indicator::Indicator;
 pub use self::inode::INode;
 pub use self::links::Links;
 pub use self::name::Name;
-pub use self::owner::Owner;
+pub use self::owner::{Cache as OwnerCache, Owner};
 pub use self::permissions::Permissions;
 use self::permissions_or_attributes::PermissionsOrAttributes;
 pub use self::size::Size;
 pub use self::symlink::SymLink;
 
 use crate::flags::{Display, Flags, Layout, PermissionFlag};
-use crate::{print_error, ExitCode};
+use crate::{ExitCode, print_error};
 
 use crate::git::GitCache;
 use std::io::{self, Error, ErrorKind};
@@ -77,7 +77,7 @@ impl Meta {
         match self.file_type {
             FileType::Directory { .. } => (),
             FileType::SymLink { is_dir: true } => {
-                if flags.layout == Layout::OneLine {
+                if flags.blocks.0.len() > 1 {
                     return Ok((None, ExitCode::OK));
                 }
             }
@@ -98,14 +98,14 @@ impl Meta {
             && flags.layout != Layout::Tree
         {
             let mut current_meta = self.clone();
-            current_meta.name.name = ".".to_owned();
+            ".".clone_into(&mut current_meta.name.name);
 
             let mut parent_meta = Self::from_path(
                 &self.path.join(Component::ParentDir),
                 flags.dereference.0,
                 flags.permission,
             )?;
-            parent_meta.name.name = "..".to_owned();
+            "..".clone_into(&mut parent_meta.name.name);
 
             current_meta.git_status = cache.and_then(|cache| cache.get(&current_meta.path, true));
             parent_meta.git_status = cache.and_then(|cache| cache.get(&parent_meta.path, true));
@@ -201,6 +201,11 @@ impl Meta {
                     None => 0,
                 };
                 for x in &mut metas.iter_mut() {
+                    // must not count the size of '.' and '..', or will be infinite loop
+                    if x.name.name == "." || x.name.name == ".." {
+                        continue;
+                    }
+
                     x.calculate_total_size();
                     size_accumulated += match &x.size {
                         Some(size) => size.get_bytes(),
@@ -308,7 +313,7 @@ impl Meta {
                 ),
                 Err(e) => {
                     eprintln!(
-                        "lsd: {}: {}(Hint: Consider using `--permission disabled`.)",
+                        "lsd: {}: {}(Hint: Consider using `--permission disable`.)",
                         path.to_str().unwrap_or(""),
                         e
                     );

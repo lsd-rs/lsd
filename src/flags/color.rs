@@ -6,8 +6,8 @@ use super::Configurable;
 use crate::app::Cli;
 use crate::config_file::Config;
 
-use serde::de::{self, Deserializer, Visitor};
 use serde::Deserialize;
+use serde::de::{self, Deserializer, Visitor};
 use std::env;
 use std::fmt;
 
@@ -65,7 +65,7 @@ impl<'de> de::Deserialize<'de> for ThemeOption {
     {
         struct ThemeOptionVisitor;
 
-        impl<'de> Visitor<'de> for ThemeOptionVisitor {
+        impl Visitor<'_> for ThemeOptionVisitor {
             type Value = ThemeOption;
 
             fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
@@ -156,8 +156,6 @@ mod test_color_option {
     use crate::config_file::{self, Config};
     use crate::flags::Configurable;
 
-    use std::env::set_var;
-
     #[test]
     fn test_from_cli_none() {
         let argv = ["lsd"];
@@ -188,8 +186,9 @@ mod test_color_option {
 
     #[test]
     fn test_from_env_no_color() {
-        set_var("NO_COLOR", "true");
-        assert_eq!(Some(ColorOption::Never), ColorOption::from_environment());
+        temp_env::with_var("NO_COLOR", Some("true"), || {
+            assert_eq!(Some(ColorOption::Never), ColorOption::from_environment());
+        });
     }
 
     #[test]

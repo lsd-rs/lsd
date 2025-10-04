@@ -1,29 +1,20 @@
-<div align="center">
+<div align="center" markdown="1">
+   <sup>Special thanks to:</sup>
+   <br>
+   <br>
+   <a href="https://go.warp.dev/lsd">
+      <img alt="Warp sponsorship" width="400" src="https://raw.githubusercontent.com/warpdotdev/brand-assets/refs/heads/main/Github/Sponsor/Warp-Github-LG-02.png">
+   </a>
 
-<p>
-  <sup>
-    <a href="https://github.com/sponsors/zwpaper">LSD is supported by the community.</a>
-  </sup>
-</p>
-<sup>Special thanks to:</sup>
-<br>
-<br>
-<a href="https://www.warp.dev/?utm_source=github&utm_medium=referral&utm_campaign=lsd_20231001">
-  <div>
-    <img src="https://user-images.githubusercontent.com/3764335/271887540-b782d11d-d122-484d-8cd3-7fdff3b4ac4d.png" width="230" alt="Warp">
-  </div>
-  <b>Warp is a blazingly fast, Rust-based terminal reimagined to work like a modern app.</b>
-  <div>
-    <sup>Get more done in the CLI with real text editing, block-based output, and AI command search.</sup>
-  </div>
-</a>
-<hr>
+### [Warp, built for coding with multiple AI agents](https://go.warp.dev/lsd)
+[Available for MacOS, Linux, & Windows](https://go.warp.dev/lsd)<br>
+
 </div>
 
 **IMPORTANT**: This is the development documents,
 please check the docs in [Tags](https://github.com/lsd-rs/lsd/tags) if you installed from the released ones.
 
-The current newest release is: [v1.1.2](https://github.com/lsd-rs/lsd/tree/v1.1.2)
+The current newest release is: [v1.1.5](https://github.com/lsd-rs/lsd/tree/v1.1.5)
 
 ---
 
@@ -55,23 +46,23 @@ The project is heavily inspired by the super [colorls](https://github.com/athity
 Install the patched fonts of powerline nerd-font and/or font-awesome. Have a look at the [Nerd Font README](https://github.com/ryanoasis/nerd-fonts/blob/master/readme.md) for more installation instructions. Don't forget to setup your terminal in order to use the correct font.
 
 | OS/Distro                       | Command                                                              |
-| ------------------------------- | -------------------------------------------------------------------- |
-| Archlinux                       | `pacman -S lsd`                                                      |
-| Fedora                          | `dnf install lsd`                                                    |
-| Gentoo                          | `sudo emerge sys-apps/lsd`                                           |
-| macOS                           | `brew install lsd` or `sudo port install lsd`                        |
-| NixOS                           | `nix-env -iA nixos.lsd`                                              |
-| FreeBSD                         | `pkg install lsd`                                                    |
-| NetBSD or any `pkgsrc` platform | `pkgin install lsd` or `cd /usr/pkgsrc/sysutils/lsd && make install` |
-| OpenBSD                         | `pkg_add lsd`                                                        |
-| Windows                         | `scoop install lsd` or `winget install --id lsd-rs.lsd`              |
-| Android (via Termux)            | `pkg install lsd`                                                    |
-| Debian sid and bookworm         | `apt install lsd`                                                    |
-| Ubuntu 23.04 (Lunar Lobster)    | `apt install lsd`                                                    |
-| Earlier Ubuntu/Debian versions  | **snap discontinued**, use [From Binaries](#from-binaries)           |
-| Solus                           | `eopkg it lsd`                                                       |
-| Void Linux                      | `sudo xbps-install lsd`                                              |
-| openSUSE                        | `sudo zypper install lsd`                                            |
+| ------------------------------- | -------------------------------------------------------------------------------|
+| Archlinux                       | `pacman -S lsd`                                                                |
+| Fedora                          | `dnf install lsd`                                                              |
+| Gentoo                          | `sudo emerge sys-apps/lsd`                                                     |
+| macOS                           | `brew install lsd` or `sudo port install lsd`                                  |
+| NixOS                           | `nix-env -iA nixos.lsd`                                                        |
+| FreeBSD                         | `pkg install lsd`                                                              |
+| NetBSD or any `pkgsrc` platform | `pkgin install lsd` or `cd /usr/pkgsrc/sysutils/lsd && make install`           |
+| OpenBSD                         | `pkg_add lsd`                                                                  |
+| Windows                         | `scoop install lsd` or `winget install --id lsd-rs.lsd` or `choco install lsd` |
+| Android (via Termux)            | `pkg install lsd`                                                              |
+| Debian sid and bookworm         | `apt install lsd`                                                              |
+| Ubuntu 23.04 (Lunar Lobster)    | `apt install lsd`                                                              |
+| Earlier Ubuntu/Debian versions  | **snap discontinued**, use [From Binaries](#from-binaries)                     |
+| Solus                           | `eopkg it lsd`                                                                 |
+| Void Linux                      | `sudo xbps-install lsd`                                                        |
+| openSUSE                        | `sudo zypper install lsd`                                                      |
 
 ### From source
 
@@ -287,7 +278,7 @@ truncate-owner:
 
 ### Color Theme
 
-Color theme can be configured in the [configuration file](#configuration)(color.theme),
+Color theme can be configured in the [configuration file](#configuration)(color.theme).
 The valid theme configurations are:
 
 - `default`: the default color scheme shipped in `lsd`
@@ -360,9 +351,6 @@ git-status:
 
 When creating a theme for `lsd`, you can specify any part of the default theme,
 and then change its colors, the items missed would fall back to use the default colors.
-
-Please also notice that an empty theme is **NOT** supported due to
-[a bug in serde lib](https://github.com/dtolnay/serde-yaml/issues/86).
 
 ### Icon Theme
 

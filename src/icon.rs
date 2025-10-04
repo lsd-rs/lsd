@@ -1,6 +1,6 @@
 use crate::flags::{IconOption, IconTheme as FlagTheme};
 use crate::meta::{FileType, Name};
-use crate::theme::{icon::IconTheme, Theme};
+use crate::theme::{Theme, icon::IconTheme};
 
 pub struct Icons {
     icon_separator: String,

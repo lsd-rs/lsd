@@ -7,7 +7,7 @@ use crate::git::GitCache;
 use crate::icon::Icons;
 
 use crate::meta::Meta;
-use crate::{print_error, print_output, sort, ExitCode};
+use crate::{ExitCode, print_error, print_output, sort};
 use std::path::PathBuf;
 
 #[cfg(not(target_os = "windows"))]
@@ -44,8 +44,6 @@ impl Core {
         #[cfg(target_os = "windows")]
         let console_color_ok = crossterm::ansi_support::supports_ansi();
 
-        let mut inner_flags = flags.clone();
-
         let color_theme = match (tty_available && console_color_ok, flags.color.when) {
             (_, ColorOption::Never) | (false, ColorOption::Auto) => ThemeOption::NoColor,
             _ => flags.color.theme.clone(),
@@ -66,12 +64,17 @@ impl Core {
 
         let icon_separator = flags.icons.separator.0.clone();
 
+        // The output is not a tty, this means the command is piped. e.g.
+        //
+        // lsd -l | less
+        //
+        // Most of the programs does not handle correctly the ansi colors
+        // or require a raw output (like the `wc` command).
         if !tty_available {
-            // The output is not a tty, this means the command is piped. (ex: lsd -l | less)
-            //
-            // Most of the programs does not handle correctly the ansi colors
-            // or require a raw output (like the `wc` command).
-            inner_flags.layout = Layout::OneLine;
+            // we should not overwrite the tree layout
+            if flags.layout != Layout::Tree {
+                flags.layout = Layout::OneLine;
+            }
 
             flags.literal = Literal(true);
         };
@@ -99,7 +102,7 @@ impl Core {
         let mut exit_code = ExitCode::OK;
         let mut meta_list = Vec::with_capacity(paths.len());
         let depth = match self.flags.layout {
-            Layout::Tree { .. } => self.flags.recursion.depth,
+            Layout::Tree => self.flags.recursion.depth,
             _ if self.flags.recursion.enabled => self.flags.recursion.depth,
             _ => 1,
         };

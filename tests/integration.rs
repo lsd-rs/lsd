@@ -213,11 +213,32 @@ fn test_list_broken_link_ok() {
         .assert()
         .stderr(predicate::str::contains(matched).not());
 }
+
+// ls link
+// should show dir content
 #[cfg(unix)]
 #[test]
 fn test_nosymlink_on_non_long() {
     let dir = tempdir();
-    dir.child("target").touch().unwrap();
+    dir.child("target").child("inside").touch().unwrap();
+    let link = dir.path().join("link");
+    let link_icon = "⇒";
+    fs::symlink("target", &link).unwrap();
+
+    cmd()
+        .arg("--ignore-config")
+        .arg(&link)
+        .assert()
+        .stdout(predicate::str::contains(link_icon).not());
+}
+
+// ls -l link
+// should show the link itself
+#[cfg(unix)]
+#[test]
+fn test_symlink_on_long() {
+    let dir = tempdir();
+    dir.child("target").child("inside").touch().unwrap();
     let link = dir.path().join("link");
     let link_icon = "⇒";
     fs::symlink("target", &link).unwrap();
@@ -228,12 +249,6 @@ fn test_nosymlink_on_non_long() {
         .arg(&link)
         .assert()
         .stdout(predicate::str::contains(link_icon));
-
-    cmd()
-        .arg("--ignore-config")
-        .arg(&link)
-        .assert()
-        .stdout(predicate::str::contains(link_icon).not());
 }
 
 #[cfg(unix)]
@@ -322,6 +337,7 @@ fn test_dereference_link_broken_link_output() {
         .stdout(predicate::str::starts_with("l????????? ? ? ? ?"));
 }
 
+/// should work both tty available and not
 #[cfg(unix)]
 #[test]
 fn test_show_folder_content_of_symlink() {
@@ -338,6 +354,8 @@ fn test_show_folder_content_of_symlink() {
         .stdout(predicate::str::starts_with("inside"));
 }
 
+/// ls -l link
+/// should show the link itself
 #[cfg(unix)]
 #[test]
 fn test_no_show_folder_content_of_symlink_for_long() {
@@ -353,6 +371,17 @@ fn test_no_show_folder_content_of_symlink_for_long() {
         .assert()
         .stdout(predicate::str::starts_with("lrw"))
         .stdout(predicate::str::contains("⇒"));
+}
+
+/// ls -l link/
+/// should show the dir content
+#[cfg(unix)]
+#[test]
+fn test_show_folder_content_of_symlink_for_long_tail_slash() {
+    let dir = tempdir();
+    dir.child("target").child("inside").touch().unwrap();
+    let link = dir.path().join("link");
+    fs::symlink("target", link).unwrap();
 
     cmd()
         .arg("-l")

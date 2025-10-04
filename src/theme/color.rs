@@ -1,7 +1,7 @@
 //! This module provides methods to create theme from files and operations related to
 //! this.
 use crossterm::style::Color;
-use serde::{de::IntoDeserializer, Deserialize};
+use serde::{Deserialize, de::IntoDeserializer};
 use std::fmt;
 
 // Custom color deserialize

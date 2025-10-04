@@ -127,8 +127,8 @@ impl GitCache {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use assert_fs::prelude::*;
     use assert_fs::TempDir;
+    use assert_fs::prelude::*;
     use git2::build::CheckoutBuilder;
     use git2::{CherrypickOptions, Index, Oid, Repository, RepositoryInitOptions};
     use std::collections::HashMap;
@@ -181,7 +181,7 @@ mod tests {
     fn check_cache(root: &Path, statuses: &HashMap<&PathBuf, GitFileStatus>, msg: &str) {
         let cache = GitCache::new(root);
         for (&path, status) in statuses.iter() {
-            if let Ok(filename) = std::fs::canonicalize(&root.join(path)) {
+            if let Ok(filename) = std::fs::canonicalize(root.join(path)) {
                 let is_directory = filename.is_dir();
                 assert_eq!(
                     &cache.inner_get(&filename, is_directory),

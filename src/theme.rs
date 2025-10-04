@@ -5,7 +5,7 @@ pub mod icon;
 use std::path::Path;
 use std::{fs, io};
 
-use serde::{de::DeserializeOwned, Deserialize};
+use serde::{Deserialize, de::DeserializeOwned};
 use thiserror::Error;
 
 use crate::config_file;
