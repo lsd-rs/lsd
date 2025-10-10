@@ -10,6 +10,11 @@ use term_grid::{Cell, Direction, Filling, Grid, GridOptions};
 use terminal_size::terminal_size;
 use unicode_width::UnicodeWidthStr;
 
+#[cfg(not(target_os = "windows"))]
+use std::io;
+#[cfg(not(target_os = "windows"))]
+use std::os::unix::io::AsRawFd;
+
 const EDGE: &str = "\u{251c}\u{2500}\u{2500}"; // "├──"
 const LINE: &str = "\u{2502}  "; // "│  "
 const CORNER: &str = "\u{2514}\u{2500}\u{2500}"; // "└──"
@@ -213,13 +218,22 @@ fn add_header(flags: &Flags, cells: &[Cell], grid: &mut Grid) {
         widths[index] = std::cmp::max(widths[index], cell.width);
     }
 
+    #[cfg(not(target_os = "windows"))]
+    let tty_available = unsafe { libc::isatty(io::stdout().as_raw_fd()) == 1 };
+
+    #[cfg(target_os = "windows")]
+    let tty_available = terminal_size().is_some();
+
     for (idx, block) in flags.blocks.0.iter().enumerate() {
-        // center and underline header
-        let underlined_header = crossterm::style::Stylize::attribute(
-            format!("{: ^1$}", block.get_header(), widths[idx]),
-            crossterm::style::Attribute::Underlined,
-        )
-        .to_string();
+        let underlined_header = if tty_available {
+            crossterm::style::Stylize::attribute(
+                format!("{: ^1$}", block.get_header(), widths[idx]),
+                crossterm::style::Attribute::Underlined,
+            )
+            .to_string()
+        } else {
+            format!("{: ^1$}", block.get_header(), widths[idx])
+        };
 
         grid.add(Cell {
             width: widths[idx],
