@@ -154,7 +154,7 @@ pub struct Cli {
     #[arg(short, long)]
     pub inode: bool,
 
-    /// Show git status on file and directory"
+    /// Show git status on file and directory
     /// Only when used with --long option
     #[arg(short, long)]
     pub git: bool,
