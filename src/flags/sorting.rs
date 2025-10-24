@@ -55,7 +55,9 @@ impl Configurable<Self> for SortColumn {
     fn from_cli(cli: &Cli) -> Option<Self> {
         let sort = cli.sort.as_deref();
 
-        if cli.timesort || sort == Some("time") {
+        if cli.namesort || sort == Some("name") {
+            Some(Self::Name)
+        } else if cli.timesort || sort == Some("time") {
             Some(Self::Time)
         } else if cli.sizesort || sort == Some("size") {
             Some(Self::Size)
@@ -230,6 +232,13 @@ mod test_sort_column {
     }
 
     #[test]
+    fn test_from_cli_name() {
+        let argv = ["lsd", "--namesort"];
+        let cli = Cli::try_parse_from(argv).unwrap();
+        assert_eq!(Some(SortColumn::Name), SortColumn::from_cli(&cli));
+    }
+
+    #[test]
     fn test_from_cli_no_sort() {
         let argv = ["lsd", "--no-sort"];
         let cli = Cli::try_parse_from(argv).unwrap();
@@ -238,6 +247,10 @@ mod test_sort_column {
 
     #[test]
     fn test_from_cli_sort() {
+        let argv = ["lsd", "--sort", "name"];
+        let cli = Cli::try_parse_from(argv).unwrap();
+        assert_eq!(Some(SortColumn::Name), SortColumn::from_cli(&cli));
+
         let argv = ["lsd", "--sort", "time"];
         let cli = Cli::try_parse_from(argv).unwrap();
         assert_eq!(Some(SortColumn::Time), SortColumn::from_cli(&cli));
