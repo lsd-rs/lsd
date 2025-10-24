@@ -49,6 +49,10 @@ impl Core {
             _ => flags.color.theme.clone(),
         };
 
+        // Ensure that --color=... option is respected by crossterm.
+        // ref https://github.com/lsd-rs/lsd/issues/1159
+        crossterm::style::force_color_output(color_theme != ThemeOption::NoColor);
+
         let icon_when = flags.icons.when;
         let icon_theme = flags.icons.theme.clone();
 

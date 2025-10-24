@@ -1,4 +1,4 @@
-<div align="center" markdown="1">
+<div align="center">
    <sup>Special thanks to:</sup>
    <br>
    <br>
@@ -9,12 +9,24 @@
 ### [Warp, built for coding with multiple AI agents](https://go.warp.dev/lsd)
 [Available for MacOS, Linux, & Windows](https://go.warp.dev/lsd)<br>
 
+&nbsp;&nbsp;&nbsp;&nbsp;
+
+   <sup>Maintained with ❤️ + 🤖 by Pochi</sup>
+   <br>
+   <br>
+   <a href="https://app.getpochi.com">
+      <img alt="Pochi AI Coding Assistant" width="160" src="https://github.com/TabbyML/pochi/blob/main/packages/vscode/assets/icons/logo128.png?raw=true">
+   </a>
+
+### [Pochi is an AI agent designed for software development.](https://app.getpochi.com)
+[It operates within your IDE, using a toolkit of commands to write and refactor code autonomously across your entire project.](https://app.getpochi.com)<br>
+
 </div>
 
 **IMPORTANT**: This is the development documents,
 please check the docs in [Tags](https://github.com/lsd-rs/lsd/tags) if you installed from the released ones.
 
-The current newest release is: [v1.1.5](https://github.com/lsd-rs/lsd/tree/v1.1.5)
+The current newest release is: [v1.2.0](https://github.com/lsd-rs/lsd/tree/v1.2.0)
 
 ---
 
