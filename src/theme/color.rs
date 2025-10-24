@@ -4,6 +4,13 @@ use crossterm::style::Color;
 use serde::{Deserialize, de::IntoDeserializer};
 use std::fmt;
 
+fn deserialize_option_color<'de, D>(deserializer: D) -> Result<Option<Color>, D::Error>
+where
+    D: serde::de::Deserializer<'de>,
+{
+    Option::<Color>::deserialize(deserializer)
+}
+
 // Custom color deserialize
 fn deserialize_color<'de, D>(deserializer: D) -> Result<Color, D::Error>
 where
@@ -202,14 +209,47 @@ pub struct Symlink {
 #[derive(Debug, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "kebab-case")]
 #[serde(deny_unknown_fields)]
+pub struct RelativeTimeColor {
+    pub threshold: String,
+    #[serde(deserialize_with = "deserialize_color")]
+    pub color: Color,
+}
+
+#[derive(Debug, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "kebab-case")]
+#[serde(deny_unknown_fields)]
+pub struct AbsoluteTimeColor {
+    pub threshold: String,
+    #[serde(deserialize_with = "deserialize_color")]
+    pub color: Color,
+}
+
+#[derive(Debug, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "kebab-case")]
+#[serde(deny_unknown_fields)]
+pub struct DateColorEntry {
+    pub threshold: String,
+    #[serde(deserialize_with = "deserialize_color")]
+    pub color: Color,
+}
+
+#[derive(Debug, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "kebab-case")]
+#[serde(deny_unknown_fields)]
 #[serde(default)]
 pub struct Date {
-    #[serde(deserialize_with = "deserialize_color")]
-    pub hour_old: Color,
-    #[serde(deserialize_with = "deserialize_color")]
-    pub day_old: Color,
+    // Legacy fields for backward compatibility
+    #[serde(deserialize_with = "deserialize_option_color")]
+    pub hour_old: Option<Color>,
+    #[serde(deserialize_with = "deserialize_option_color")]
+    pub day_old: Option<Color>,
+
     #[serde(deserialize_with = "deserialize_color")]
     pub older: Color,
+    #[serde(default)]
+    pub relative: Vec<RelativeTimeColor>,
+    #[serde(default)]
+    pub absolute: Vec<AbsoluteTimeColor>,
 }
 
 #[derive(Debug, Deserialize, PartialEq, Eq)]
@@ -344,9 +384,20 @@ impl Default for Symlink {
 impl Default for Date {
     fn default() -> Self {
         Date {
-            hour_old: Color::AnsiValue(40), // Green3
-            day_old: Color::AnsiValue(42),  // SpringGreen2
-            older: Color::AnsiValue(36),    // DarkCyan
+            hour_old: None,
+            day_old: None,
+            older: Color::AnsiValue(36), // DarkCyan
+            relative: vec![
+                RelativeTimeColor {
+                    threshold: "1h".into(),
+                    color: Color::AnsiValue(40), // Green3
+                },
+                RelativeTimeColor {
+                    threshold: "1d".into(),
+                    color: Color::AnsiValue(42), // SpringGreen2
+                },
+            ],
+            absolute: Vec::new(),
         }
     }
 }
