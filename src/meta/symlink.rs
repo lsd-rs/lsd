@@ -121,6 +121,9 @@ mod tests {
 
     #[test]
     fn test_symlink_render_default_invalid_target_withcolor() {
+        // crossterm implicitly colors if NO_COLOR is set.
+        crossterm::style::force_color_output(true);
+
         let link = SymLink {
             target: Some("/target".to_string()),
             valid: false,

@@ -584,6 +584,9 @@ mod tests {
 
     #[test]
     fn test_display_get_visible_width_with_colors() {
+        // crossterm implicitly colors if NO_COLOR is set.
+        crossterm::style::force_color_output(true);
+
         for (s, l) in [
             ("Ｈｅｌｌｏ,ｗｏｒｌｄ!", 22),
             ("ASCII1234-_", 11),
