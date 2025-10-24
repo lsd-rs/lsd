@@ -64,4 +64,8 @@ impl GitFileStatus {
         });
         ColoredString::new(Colors::default_style(), res)
     }
+
+    pub fn is_ignored(&self) -> bool {
+        self.workdir == GitStatus::Ignored
+    }
 }

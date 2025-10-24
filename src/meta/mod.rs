@@ -74,6 +74,13 @@ impl Meta {
             return Ok((None, ExitCode::OK));
         }
 
+        let current_meta_git_status = cache.and_then(|cache| cache.get(&self.path, true));
+        if flags.gitignore.use_gitignore()
+            && current_meta_git_status.is_some_and(|git_status| git_status.is_ignored())
+        {
+            return Ok((None, ExitCode::OK));
+        }
+
         match self.file_type {
             FileType::Directory { .. } => (),
             FileType::SymLink { is_dir: true } => {
@@ -107,7 +114,7 @@ impl Meta {
             )?;
             "..".clone_into(&mut parent_meta.name.name);
 
-            current_meta.git_status = cache.and_then(|cache| cache.get(&current_meta.path, true));
+            current_meta.git_status = current_meta_git_status;
             parent_meta.git_status = cache.and_then(|cache| cache.get(&parent_meta.path, true));
 
             content.push(current_meta);
@@ -165,6 +172,19 @@ impl Meta {
                 continue;
             }
 
+            let is_directory = entry.file_type()?.is_dir();
+            entry_meta.git_status =
+                cache.and_then(|cache| cache.get(&entry_meta.path, is_directory));
+
+            // skip .gitignored files if flags.gitignore is set
+            if flags.gitignore.use_gitignore()
+                && entry_meta
+                    .git_status
+                    .is_some_and(|git_status| git_status.is_ignored())
+            {
+                continue;
+            }
+
             // check dereferencing
             if flags.dereference.0 || !matches!(entry_meta.file_type, FileType::SymLink { .. }) {
                 match entry_meta.recurse_into(depth - 1, flags, cache) {
@@ -180,9 +200,6 @@ impl Meta {
                 };
             }
 
-            let is_directory = entry.file_type()?.is_dir();
-            entry_meta.git_status =
-                cache.and_then(|cache| cache.get(&entry_meta.path, is_directory));
             content.push(entry_meta);
         }
 
