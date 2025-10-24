@@ -7,6 +7,7 @@ pub use crate::flags::color::ThemeOption;
 use crate::git::GitStatus;
 use crate::print_output;
 use crate::theme::{Theme, color::ColorTheme};
+use jiff::{Span, SpanTotal, Timestamp, ToSpan, Unit};
 
 #[allow(dead_code)]
 #[derive(Hash, Debug, Eq, PartialEq, Clone)]
@@ -45,9 +46,8 @@ pub enum Elem {
     System,
 
     /// Last Time Modified
-    DayOld,
-    HourOld,
-    Older,
+    Date(i64),
+    InvalidDate,
 
     /// User / Group Name
     User,
@@ -123,10 +123,6 @@ impl Elem {
             Elem::Hidden => theme.attributes.hidden,
             Elem::System => theme.attributes.system,
 
-            Elem::DayOld => theme.date.day_old,
-            Elem::HourOld => theme.date.hour_old,
-            Elem::Older => theme.date.older,
-
             Elem::User => theme.user,
             Elem::Group => theme.group,
             Elem::NonFile => theme.size.none,
@@ -169,15 +165,30 @@ impl Elem {
             Elem::GitStatus {
                 status: GitStatus::Conflicted,
             } => theme.git_status.conflicted,
+            Elem::Date(_) | Elem::InvalidDate => {
+                // These are handled in style_default, not here
+                Color::Blue
+            }
         }
     }
 }
 
 pub type ColoredString = StyledContent<String>;
 
+/// Unified timestamp-based date color entry
+#[derive(Clone, Debug, PartialEq, Eq)]
+struct TimestampColorEntry {
+    timestamp: i64,
+    color: Color,
+}
+
 pub struct Colors {
     theme: Option<ColorTheme>,
     lscolors: Option<LsColors>,
+    default_date_color: Color,
+    /// Sorted timestamp table: all entries (legacy, relative, absolute) converted to timestamps
+    /// Sorted in ascending order (oldest first)
+    timestamp_colors: Vec<TimestampColorEntry>,
 }
 
 impl Colors {
@@ -209,7 +220,72 @@ impl Colors {
             _ => None,
         };
 
-        Self { theme, lscolors }
+        let (default_date_color, timestamp_colors) = if let Some(t) = &theme {
+            let now = Timestamp::now().as_second();
+            let mut timestamp_entries: Vec<TimestampColorEntry> = Vec::new();
+
+            // Convert legacy config to timestamp entries (relative to now)
+            // Always add hour_old (1 hour threshold)
+            if let Some(hour_old) = t.date.hour_old {
+                timestamp_entries.push(TimestampColorEntry {
+                    timestamp: now - 1.hours().total(Unit::Second).unwrap() as i64,
+                    color: hour_old,
+                });
+            }
+
+            // Always add day_old (1 day threshold)
+            if let Some(day_old) = t.date.day_old {
+                timestamp_entries.push(TimestampColorEntry {
+                    timestamp: now
+                        - 1.days()
+                            .total(SpanTotal::from(Unit::Second).days_are_24_hours())
+                            .unwrap() as i64,
+                    color: day_old,
+                });
+            }
+
+            timestamp_entries.push(TimestampColorEntry {
+                timestamp: i64::MAX,
+                color: t.date.older,
+            });
+
+            // Convert relative config to timestamp entries
+            for relative in &t.date.relative {
+                if let Ok(span) = relative.threshold.parse::<Span>() {
+                    if let Ok(total_seconds) = span.total(Unit::Second) {
+                        let timestamp = now - total_seconds as i64;
+                        timestamp_entries.push(TimestampColorEntry {
+                            timestamp,
+                            color: relative.color,
+                        });
+                    }
+                }
+            }
+
+            // Convert absolute config to timestamp entries
+            for absolute in &t.date.absolute {
+                if let Ok(threshold) = absolute.threshold.parse::<Timestamp>() {
+                    timestamp_entries.push(TimestampColorEntry {
+                        timestamp: threshold.as_second(),
+                        color: absolute.color,
+                    });
+                }
+            }
+
+            // Sort by timestamp (ascending order - oldest first)
+            timestamp_entries.sort_by_key(|e| e.timestamp);
+
+            (t.date.older, timestamp_entries)
+        } else {
+            (Color::Blue, Vec::new())
+        };
+
+        Self {
+            theme,
+            lscolors,
+            default_date_color,
+            timestamp_colors,
+        }
     }
 
     pub fn colorize<S: Into<String>>(&self, input: S, elem: &Elem) -> ColoredString {
@@ -250,7 +326,45 @@ impl Colors {
 
     fn style_default(&self, elem: &Elem) -> ContentStyle {
         if let Some(t) = &self.theme {
-            let style_fg = ContentStyle::default().with(elem.get_color(t));
+            let color = match elem {
+                Elem::Date(timestamp) => {
+                    // Iterate through sorted timestamp table (ascending order - oldest first)
+                    // Find the color for the most specific (highest) threshold that the file is older than
+                    // If file is older than all thresholds, use the first (oldest) threshold's color
+                    // If file is newer than all thresholds, use default color
+                    let mut color = self.default_date_color;
+                    let mut found_threshold = false;
+
+                    for entry in &self.timestamp_colors {
+                        if *timestamp >= entry.timestamp {
+                            // File is newer than or equal to this threshold, use its color
+                            color = entry.color;
+                            found_threshold = true;
+                        } else {
+                            // File is older than this threshold, stop searching
+                            break;
+                        }
+                    }
+
+                    // If no threshold was found (file is older than all thresholds),
+                    // use the oldest (first) threshold's color
+                    if !found_threshold && !self.timestamp_colors.is_empty() {
+                        color = self.timestamp_colors.first().unwrap().color;
+                    }
+
+                    color
+                }
+                Elem::InvalidDate => {
+                    // For invalid dates, use the oldest color if available, otherwise default
+                    self.timestamp_colors
+                        .first()
+                        .map(|e| e.color)
+                        .unwrap_or(self.default_date_color)
+                }
+                _ => elem.get_color(t),
+            };
+
+            let style_fg = ContentStyle::default().with(color);
             if elem.has_suid() {
                 style_fg.on(Color::AnsiValue(124)) // Red3
             } else {
@@ -439,9 +553,11 @@ mod elem {
                 special: Color::AnsiValue(44),      // DarkTurquoise
             },
             date: color::Date {
-                hour_old: Color::AnsiValue(40), // Green3
-                day_old: Color::AnsiValue(42),  // SpringGreen2
-                older: Color::AnsiValue(36),    // DarkCyan
+                hour_old: Some(Color::AnsiValue(40)), // Green3
+                day_old: Some(Color::AnsiValue(42)),  // SpringGreen2
+                older: Color::AnsiValue(36),          // DarkCyan
+                relative: Vec::new(),
+                absolute: Vec::new(),
             },
             size: color::Size {
                 none: Color::AnsiValue(245),   // Grey
