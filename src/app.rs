@@ -21,7 +21,7 @@ pub struct Cli {
     pub color: Option<String>,
 
     /// When to print the icons [default: auto]
-    #[arg(long, value_name = "MODE", value_parser = ["always", "auto", "never"])]
+    #[arg(long, value_name = "MODE", value_parser = ["always", "auto", "never"], require_equals=true, default_missing_value="always", num_args=0..=1)]
     pub icon: Option<String>,
 
     /// Whether to use fancy or unicode icons [default: fancy]
