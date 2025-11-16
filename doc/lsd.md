@@ -113,7 +113,7 @@ lsd is a ls command with a lot of pretty colours and some other stuff to enrich 
 `--hyperlink <hyperlink>...`
 : Attach hyperlink to filenames [default: never]  [possible values: always, auto, never]
 
-`--icon <icon>...`
+`--icon[=<icon>]...`
 : When to print the icons [default: auto]  [possible values: always, auto, never]
 
 `--icon-theme <icon-theme>...`
