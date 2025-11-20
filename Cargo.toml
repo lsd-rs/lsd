@@ -23,7 +23,7 @@ version_check = "0.9.*"
 
 [dependencies]
 crossterm = { version = "0.27.0", features = ["serde"] }
-dirs = "5"
+dirs = "6"
 libc = "0.2.*"
 human-sort = "0.2.2"
 # should stick to 0.1, the 0.2 needs some adaptation
