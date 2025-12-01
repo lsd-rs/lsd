@@ -6,5 +6,9 @@
 
 - [ ] Use `cargo fmt`
 - [ ] Add necessary tests
-- [ ] Update default config/theme in README (if applicable)
+- [ ] Update README (if applicable)
+- [ ] Update color references documentation (`doc/colors.md`) (if applicable)
+- [ ] Update config sample file in `doc/samples` (if applicable)
+- [ ] Update icon sample file in `doc/samples` (if applicable)
+- [ ] Update color sample file in `doc/samples` (if applicable)
 - [ ] Update man page at lsd/doc/lsd.md (if applicable)

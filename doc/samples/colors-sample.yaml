@@ -1,0 +1,39 @@
+---
+user: 230                       # Default = 230
+group: 187                      # Default = 187
+permission:
+  read: dark_green              # Default = dark_green
+  write: dark_yellow            # Default = dark_yellow
+  exec: dark_red                # Default = dark_red
+  exec-sticky: 5                # Default = 5
+  no-access: 245                # Default = 245
+  octal: 6                      # Default = 6
+  acl: dark_cyan                # Default = dark_cyan
+  context: cyan                 # Default = cyan
+date:
+  hour-old: 40                  # Default = 40
+  day-old: 42                   # Default = 42
+  older: 36                     # Default = 36
+size:
+  none: 245                     # Default = 245
+  small: 229                    # Default = 229
+  medium: 216                   # Default = 216
+  large: 172                    # Default = 172
+inode:
+  valid: 13                     # Default = 13
+  invalid: 245                  # Default = 245
+links:
+  valid: 13                     # Default = 13
+  invalid: 245                  # Default = 245
+tree-edge: 245                  # Default = 245
+git-status:
+  default: 245                  # Default = 245
+  unmodified: 245               # Default = 245
+  ignored: 245                  # Default = 245
+  new-in-index: dark_green      # Default = dark_green
+  new-in-workdir: dark_green    # Default = dark_green
+  typechange: dark_yellow       # Default = dark_yellow
+  deleted: dark_red             # Default = dark_red
+  renamed: dark_green           # Default = dark_green
+  modified: dark_yellow         # Default = dark_yellow
+  conflicted: dark_red          # Default = dark_red
