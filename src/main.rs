@@ -110,6 +110,12 @@ macro_rules! print_output {
 fn main() {
     let cli = Cli::parse_from(wild::args_os());
 
+    // Handle --generate-config flag
+    if cli.generate_config {
+        generate_default_config();
+        std::process::exit(0);
+    }
+
     let config = if cli.ignore_config {
         Config::with_none()
     } else if let Some(path) = &cli.config_file {
@@ -122,4 +128,12 @@ fn main() {
 
     let exit_code = core.run(cli.inputs);
     std::process::exit(exit_code as i32);
+}
+
+fn generate_default_config() {
+    use crate::config_file;
+
+    // Print the default config to stdout without the leading '---'
+    let config = config_file::DEFAULT_CONFIG.trim_start_matches("---\n");
+    println!("{}", config);
 }

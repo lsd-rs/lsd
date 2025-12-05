@@ -44,6 +44,10 @@ pub struct Cli {
     #[arg(long, value_name = "PATH")]
     pub config_file: Option<PathBuf>,
 
+    /// Generate default configuration file and print to stdout
+    #[arg(long)]
+    pub generate_config: bool,
+
     /// Display one entry per line
     #[arg(short = '1', long)]
     pub oneline: bool,
