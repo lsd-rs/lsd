@@ -87,7 +87,7 @@ cargo install lsd
 If you want to install the latest master branch commit:
 
 ```sh
-cargo install --git https://github.com/lsd-rs/lsd.git --branch master
+cargo install --git https://github.com/lsd-rs/lsd.git --branch main
 ```
 
 ### From Binaries
