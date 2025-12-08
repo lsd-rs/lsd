@@ -200,6 +200,12 @@ icons:
 # ignore-globs:
 #   - .git
 
+# == Use .gitignore ==
+# Whether to ignore files in git's .gitignore
+# Possible values: false, true
+# Do not specify this for the default behavior (false)
+# gitignore: false
+
 # == Indicators ==
 # Whether to add indicator characters to certain listed files.
 # Possible values: false, true

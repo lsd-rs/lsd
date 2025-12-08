@@ -29,6 +29,7 @@ pub struct Config {
     pub date: Option<String>,
     pub dereference: Option<bool>,
     pub display: Option<Display>,
+    pub gitignore: Option<bool>,
     pub icons: Option<Icons>,
     pub ignore_globs: Option<Vec<String>>,
     pub indicators: Option<bool>,
@@ -114,6 +115,7 @@ impl Config {
             date: None,
             dereference: None,
             display: None,
+            gitignore: None,
             icons: None,
             ignore_globs: None,
             indicators: None,
@@ -283,6 +285,12 @@ icons:
 # ignore-globs:
 #   - .git
 
+# == Use .gitignore ==
+# Whether to ignore files in git's .gitignore
+# Possible values: false, true
+# Do not specify this for the default behavior (false)
+# gitignore: false
+
 # == Indicators ==
 # Whether to add indicator characters to certain listed files.
 # Possible values: false, true
@@ -399,6 +407,7 @@ mod tests {
                 date: None,
                 dereference: Some(false),
                 display: None,
+                gitignore: None,
                 icons: Some(config_file::Icons {
                     when: Some(IconOption::Auto),
                     theme: Some(IconTheme::Fancy),
