@@ -392,8 +392,9 @@ mod tests {
 #[cfg(test)]
 mod elem {
     use super::Elem;
-    use crate::theme::{color, color::ColorTheme};
-    use crossterm::style::Color;
+    use crate::{color::to_content_style, theme::color::{self, ColorTheme}};
+    use crossterm::style::{Attribute, Color, ContentStyle};
+    use lscolors::FontStyle;
 
     #[cfg(test)]
     fn test_theme() -> ColorTheme {
@@ -495,6 +496,54 @@ mod elem {
             }
             .get_color(&test_theme()),
             Color::AnsiValue(184),
+        );
+        assert_eq!(
+            Elem::BrokenSymLink.get_color(&test_theme()),
+            Color::AnsiValue(124)
+        );
+        assert_eq!(
+            Elem::Dir { uid: true }.get_color(&test_theme()),
+            Color::AnsiValue(33)
+        );
+        assert_eq!(
+            Elem::Dir { uid: false }.get_color(&test_theme()),
+            Color::AnsiValue(33)
+        );
+        assert_eq!(
+            Elem::BlockDevice.get_color(&test_theme()),
+            Color::AnsiValue(44)
+        );
+        assert_eq!(
+            Elem::CharDevice.get_color(&test_theme()),
+            Color::AnsiValue(172)
+        );
+        assert_eq!(
+            Elem::Special.get_color(&test_theme()),
+            Color::AnsiValue(44)
+        );
+    }
+
+    #[test]
+    fn test_content_style() {
+        let mut custom_content_style = ContentStyle {
+                foreground_color: Some(Color::DarkRed),
+                background_color: Some(Color::AnsiValue(50)),
+                ..ContentStyle::default()
+            };
+        custom_content_style.attributes.set(Attribute::Bold);
+
+        assert_eq!(
+            to_content_style(&lscolors::Style::default()),
+            ContentStyle::default()
+        );
+        assert_eq!(
+            to_content_style(&lscolors::Style {
+                foreground: Some(lscolors::Color::Red),
+                background: Some(lscolors::Color::Fixed(50)),
+                font_style: FontStyle::bold(),
+                underline: Some(lscolors::Color::BrightBlue),
+            }),
+            custom_content_style
         );
     }
 }
