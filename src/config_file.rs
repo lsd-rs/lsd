@@ -213,7 +213,7 @@ impl Default for Config {
     }
 }
 
-const DEFAULT_CONFIG: &str = r#"---
+pub const DEFAULT_CONFIG: &str = r#"---
 # == Classic ==
 # This is a shorthand to override some of the options to be backwards compatible
 # with `ls`. It affects the "color"->"when", "sorting"->"dir-grouping", "date"
@@ -224,7 +224,7 @@ classic: false
 # == Blocks ==
 # This specifies the columns and their order when using the long and the tree
 # layout.
-# Possible values: permission, user, group, context, size, date, name, inode, git
+# Possible values: permission, user, group, context, size, date, name, inode, links, git
 blocks:
   - permission
   - user
@@ -242,18 +242,17 @@ color:
   when: auto
   # How to colorize the output.
   # When "classic" is set, this is set to "no-color".
-  # Possible values: default, no-color, no-lscolors, <theme-file-name>
-  # when specifying <theme-file-name>, lsd will look up theme file in
-  # XDG Base Directory if relative
-  # The file path if absolute
+  # Possible values: default, custom
+  # When "custom" is set, lsd will look in the config directory for `colors.yaml`.
   theme: default
 
 # == Date ==
 # This specifies the date format for the date column. The freeform format
-# accepts an strftime like string.
+# accepts a strftime like string.
 # When "classic" is set, this is set to "date".
-# Possible values: date, locale, relative, +<date_format>
-# date: date
+# Possible values: date, locale, relative, '+<date_format>'
+# `date_format` will be a `strftime` formatted value. e.g. `date: '+%d %b %y %X'` will give you a date like this: 17 Jun 21 20:14:55
+date: date
 
 # == Dereference ==
 # Whether to dereference symbolic links.
@@ -274,8 +273,8 @@ icons:
   # Which icon theme to use.
   # Possible values: fancy, unicode
   theme: fancy
-  # The string between the icons and the name.
-  # Possible values: any string (eg: " |")
+  # Separator between icon and the name
+  # Default to 1 space
   separator: " "
 
 # == Ignore Globs ==
@@ -309,8 +308,8 @@ recursion:
 size: default
 
 # == Permission ==
-# Specify the format of the permission column.
-# Possible value: rwx, octal, attributes, disable
+# Specify the format of the permission column
+# Possible value: rwx, octal, attributes (windows only), disable
 # permission: rwx
 
 # == Sorting ==
@@ -337,7 +336,7 @@ no-symlink: false
 total-size: false
 
 # == Hyperlink ==
-# Whether to display the total size of directories.
+# Attach hyperlink to filenames
 # Possible values: always, auto, never
 hyperlink: never
 
@@ -345,14 +344,19 @@ hyperlink: never
 # Specifies how the symlink arrow display, chars in both ascii and utf8
 symlink-arrow: ⇒
 
+# == Header ==
+# Whether to display block headers.
+# Possible values: false, true
+header: false
+
 # == Literal ==
-# Whether to print entry names without quoting
+# Whether to show quotes on filenames.
 # Possible values: false, true
 literal: false
 
 # == Truncate owner ==
-# How to truncate the username and group name for the file if they exceed a
-# certain number of characters.
+# How to truncate the username and group names for a file if they exceed a certain
+# number of characters.
 truncate-owner:
   # Number of characters to keep. By default, no truncation is done (empty value).
   after:
@@ -396,7 +400,7 @@ mod tests {
                     when: Some(ColorOption::Auto),
                     theme: Some(ThemeOption::Default)
                 }),
-                date: None,
+                date: Some("date".to_string()),
                 dereference: Some(false),
                 display: None,
                 icons: Some(config_file::Icons {
@@ -422,7 +426,7 @@ mod tests {
                 total_size: Some(false),
                 symlink_arrow: Some("⇒".into()),
                 hyperlink: Some(HyperlinkOption::Never),
-                header: None,
+                header: Some(false),
                 literal: Some(false),
                 truncate_owner: Some(config_file::TruncateOwner {
                     after: None,
