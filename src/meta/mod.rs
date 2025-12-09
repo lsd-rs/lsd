@@ -3,6 +3,7 @@ mod date;
 mod filetype;
 pub mod git_file_status;
 mod indicator;
+mod slash_indicator;
 mod inode;
 mod links;
 mod locale;
@@ -23,6 +24,7 @@ pub use self::date::Date;
 pub use self::filetype::FileType;
 pub use self::git_file_status::GitFileStatus;
 pub use self::indicator::Indicator;
+pub use self::slash_indicator::SlashIndicator;
 pub use self::inode::INode;
 pub use self::links::Links;
 pub use self::name::Name;
@@ -52,6 +54,7 @@ pub struct Meta {
     pub size: Option<Size>,
     pub symlink: SymLink,
     pub indicator: Indicator,
+    pub slash_indicator: SlashIndicator,
     pub inode: Option<INode>,
     pub links: Option<Links>,
     pub content: Option<Vec<Meta>>,
@@ -356,6 +359,7 @@ impl Meta {
             size,
             date,
             indicator: Indicator::from(file_type),
+            slash_indicator: SlashIndicator::from(file_type),
             owner: owner.unwrap_or_default(),
             permissions_or_attributes: permissions_or_attributes.unwrap_or_default(),
             name,
