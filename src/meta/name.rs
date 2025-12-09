@@ -275,7 +275,7 @@ mod test {
         fs::create_dir(&dir_path).expect("failed to create the dir");
         let meta = Meta::from_path(&dir_path, false, PermissionFlag::Rwx).unwrap();
 
-        let colors = Colors::new(color::ThemeOption::NoLscolors);
+        let colors = Colors::new(color::ThemeOption::Default);
 
         assert_eq!(
             " directory".to_string().with(Color::AnsiValue(33)),
