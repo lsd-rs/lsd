@@ -37,6 +37,7 @@ color:
 # When "classic" is set, this is set to "date".
 # Possible values: date, iso, locale, relative, '+<date_format>'
 # `date_format` will be a `strftime` formatted value. e.g. `date: '+%d %b %y %X'` will give you a date like this: 17 Jun 21 20:14:55
+# For dual-line date formats (recent vs old files), use a newline to separate formats. e.g. `date: '+%F\n%H:%M'` uses '%F' for old files and '%H:%M' for recent files.
 date: date
 
 # == Dereference ==

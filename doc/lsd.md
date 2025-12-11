@@ -103,6 +103,8 @@ lsd is a ls command with a lot of pretty colours and some other stuff to enrich 
 
   The `iso` format displays dates in ISO format (MM-DD HH:MM for recent files, YYYY-MM-DD for older files).
 
+  For custom formats using +date-time-format, you can specify dual-line formats by separating two format strings with a newline (e.g., '+%F\n%H:%M'). The first format is used for old files (>6 months), and the second for recent files.
+
 `--depth <num>...`
 : Stop recursing into directories after reaching specified depth
 
