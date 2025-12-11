@@ -99,7 +99,9 @@ lsd is a ls command with a lot of pretty colours and some other stuff to enrich 
 : When to use terminal colours [default: auto]  [possible values: always, auto, never]
 
 `--date <date>...`
-: How to display date [possible values: date, locale, relative, +date-time-format] [default: date]
+: How to display date [possible values: date, iso, locale, relative, +date-time-format] [default: date]
+
+  The `iso` format displays dates in ISO format (MM-DD HH:MM for recent files, YYYY-MM-DD for older files).
 
 `--depth <num>...`
 : Stop recursing into directories after reaching specified depth
