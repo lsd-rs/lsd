@@ -111,7 +111,7 @@ alias lt='lsd --tree'
 
 ## Customizing lsd (configuration and theming)
 > [!TIP]
-> In order to make the customization process easier for you we’ve supplied sample files. These files contain the entries for all the defaults that `lsd` comes with after installation. You can find the sample files in the [documentation folder](./doc)`.
+> In order to make the customization process easier for you we’ve supplied sample files. These files contain the entries for all the defaults that `lsd` comes with after installation. You can find the sample files in the [documentation folder](./doc).
 >
 > We've also supplied a [color reference](./doc/colors.md) where we’ve documented the default colors `lsd` uses in its output. You can also preview there.
 
