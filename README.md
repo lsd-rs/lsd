@@ -67,7 +67,7 @@ Please consult the table below for the installation command associated with your
 | Fedora                          | `dnf install lsd`                                                                                                    |
 | Gentoo                          | `sudo emerge sys-apps/lsd`                                                                                           |
 | macOS                           | `brew install lsd` or `sudo port install lsd`                                                                        |
-| Nix (non NixOS)                 | `nix-env -iA nixpkgs.lsd                                                                                             |
+| Nix (non NixOS)                 | `nix-env -iA nixpkgs.lsd`                                                                                            |
 | NixOS                           | Add `environment.systemPackages = [ [pkgs.lsd](https://search.nixos.org/packages?show=lsd) ];` to your system config |
 | FreeBSD                         | `pkg install lsd`                                                                                                    |
 | NetBSD or any `pkgsrc` platform | `pkgin install lsd` or `cd /usr/pkgsrc/sysutils/lsd && make install`                                                 |
