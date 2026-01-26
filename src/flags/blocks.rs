@@ -213,6 +213,10 @@ impl Block {
             Block::GitStatus => "Git",
         }
     }
+
+    pub fn is_numeric(&self) -> bool {
+        matches!(self, Block::INode | Block::Links | Block::Size | Block::SizeValue | Block::Date)
+    }
 }
 
 impl TryFrom<&str> for Block {
