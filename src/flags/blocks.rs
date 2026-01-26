@@ -215,7 +215,10 @@ impl Block {
     }
 
     pub fn is_numeric(&self) -> bool {
-        matches!(self, Block::INode | Block::Links | Block::Size | Block::SizeValue | Block::Date)
+        matches!(
+            self,
+            Block::INode | Block::Links | Block::Size | Block::SizeValue | Block::Date
+        )
     }
 }
 

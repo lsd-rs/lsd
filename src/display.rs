@@ -137,7 +137,7 @@ fn inner_display_grid(
             cells.push(Cell {
                 width: get_visible_width(&block, flags.hyperlink == HyperlinkOption::Always),
                 contents: block,
-                alignment: Alignment::Left
+                alignment: Alignment::Left,
             });
         }
     }
@@ -201,7 +201,8 @@ fn inner_display_grid(
 fn add_header(flags: &Flags, _cells: &[Cell], grid: &mut Grid) {
     for block in flags.blocks.0.iter() {
         let header_text = block.get_header();
-        let header_width = get_visible_width(header_text, flags.hyperlink == HyperlinkOption::Always);
+        let header_width =
+            get_visible_width(header_text, flags.hyperlink == HyperlinkOption::Always);
 
         // Underline ONLY the header text (no padding)
         let underlined_header = crossterm::style::Stylize::attribute(
@@ -267,7 +268,7 @@ fn inner_display_tree(
             cells.push(Cell {
                 width: get_visible_width(&block, flags.hyperlink == HyperlinkOption::Always),
                 contents: block,
-                alignment: Alignment::Left
+                alignment: Alignment::Left,
             });
         }
 
