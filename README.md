@@ -61,24 +61,25 @@ The project is heavily inspired by the super [colorls](https://github.com/athity
 
 Please consult the table below for the installation command associated with your package manager.
 
-| OS/Distro                       | Command                                                                                       |
-| ------------------------------- | ----------------------------------------------------------------------------------------------|
-| Archlinux                       | `pacman -S lsd`                                                                               |
-| Fedora                          | `dnf install lsd`                                                                             |
-| Gentoo                          | `sudo emerge sys-apps/lsd`                                                                    |
-| macOS                           | `brew install lsd` or `sudo port install lsd`                                                 |
-| NixOS                           | `nix-env -iA nixos.lsd`                                                                       |
-| FreeBSD                         | `pkg install lsd`                                                                             |
-| NetBSD or any `pkgsrc` platform | `pkgin install lsd` or `cd /usr/pkgsrc/sysutils/lsd && make install`                          |
-| OpenBSD                         | `pkg_add lsd`                                                                                 |
-| Windows                         | `scoop install lsd` or `winget install --id lsd-rs.lsd` or `choco install lsd`                |
-| Android (via Termux)            | `pkg install lsd`                                                                             |
-| Debian sid and bookworm         | `apt install lsd`                                                                             |
-| Ubuntu 23.04 (Lunar Lobster)    | `apt install lsd`                                                                             |
-| Earlier Ubuntu/Debian versions  | **snap discontinued**, use the method described [here](#installing-binaries-directly) instead |
-| Solus                           | `eopkg it lsd`                                                                                |
-| Void Linux                      | `sudo xbps-install lsd`                                                                       |
-| openSUSE                        | `sudo zypper install lsd`                                                                     |
+| OS/Distro                       | Command                                                                                                              |
+| ------------------------------- | ---------------------------------------------------------------------------------------------------------------------|
+| Archlinux                       | `pacman -S lsd`                                                                                                      |
+| Fedora                          | `dnf install lsd`                                                                                                    |
+| Gentoo                          | `sudo emerge sys-apps/lsd`                                                                                           |
+| macOS                           | `brew install lsd` or `sudo port install lsd`                                                                        |
+| Nix (non NixOS)                 | [`nix-env -iA nixpkgs.lsd`](https://search.nixos.org/packages?show=lsd)                                              |
+| NixOS                           | Add [`environment.systemPackages = [ pkgs.lsd ];`](https://search.nixos.org/packages?show=lsd) to your system config |
+| FreeBSD                         | `pkg install lsd`                                                                                                    |
+| NetBSD or any `pkgsrc` platform | `pkgin install lsd` or `cd /usr/pkgsrc/sysutils/lsd && make install`                                                 |
+| OpenBSD                         | `pkg_add lsd`                                                                                                        |
+| Windows                         | `scoop install lsd` or `winget install --id lsd-rs.lsd` or `choco install lsd`                                       |
+| Android (via Termux)            | `pkg install lsd`                                                                                                    |
+| Debian sid and bookworm         | `apt install lsd`                                                                                                    |
+| Ubuntu 23.04 (Lunar Lobster)    | `apt install lsd`                                                                                                    |
+| Earlier Ubuntu/Debian versions  | **snap discontinued**, use the method described [here](#installing-binaries-directly) instead                        |
+| Solus                           | `eopkg it lsd`                                                                                                       |
+| Void Linux                      | `sudo xbps-install lsd`                                                                                              |
+| openSUSE                        | `sudo zypper install lsd`                                                                                            |
 
 ### Installing from source
 With [Rust's package manager cargo](https://doc.rust-lang.org/stable/cargo/), you can install lsd via:
