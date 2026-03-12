@@ -1,16 +1,6 @@
 <div align="center">
    <sup>Special thanks to:</sup>
    <br>
-   <br>
-   <a href="https://go.warp.dev/lsd">
-      <img alt="Warp sponsorship" width="400" src="https://raw.githubusercontent.com/warpdotdev/brand-assets/refs/heads/main/Github/Sponsor/Warp-Github-LG-02.png">
-   </a>
-
-### [Warp, built for coding with multiple AI agents](https://go.warp.dev/lsd)
-[Available for MacOS, Linux, & Windows](https://go.warp.dev/lsd)<br>
-
-&nbsp;&nbsp;&nbsp;&nbsp;
-
    <sup>Maintained with ❤️ + 🤖 by Pochi</sup>
    <br>
    <br>
