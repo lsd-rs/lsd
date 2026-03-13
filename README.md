@@ -116,7 +116,7 @@ Note that it is _not_ required to have all three of the files present in order f
 
 ### Config file locations
 > [!TIP]
-> You can also instruct `lsd` to look for configuration files in a custom location of your choosing by using the following command: `lsd --config-file [YOUR_CUSTOM_PATH]`. This is particularly useful when testing a configuration changes before commiting to them.
+> You can also instruct `lsd` to look for configuration files in a custom location of your choosing by using the following command: `lsd --config-file [YOUR_CUSTOM_PATH]`. This is particularly useful when testing a configuration changes before committing to them.
 
 #### Unix (Linux, Mac, etc...)
 On non-Windows systems `lsd` follows the [XDG Base Directory Specification](https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html), thus `lsd` will look for configuration files any of the following locations:
