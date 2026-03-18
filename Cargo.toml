@@ -38,7 +38,7 @@ chrono = { version = "0.4", features = ["unstable-locales"] }
 chrono-humanize = "0.2"
 # incompatible with v0.1.11
 unicode-width = "0.2"
-lscolors = "0.20.0"
+lscolors = "0.21.0"
 wild = "2.2"
 globset = "0.4.*"
 yaml-rust = "0.4.*"
