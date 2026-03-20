@@ -225,7 +225,6 @@ impl Colors {
             let mut timestamp_entries: Vec<TimestampColorEntry> = Vec::new();
 
             // Convert legacy config to timestamp entries (relative to now)
-            // Always add hour_old (1 hour threshold)
             if let Some(hour_old) = t.date.hour_old {
                 timestamp_entries.push(TimestampColorEntry {
                     timestamp: now - 1.hours().total(Unit::Second).unwrap() as i64,
@@ -233,7 +232,6 @@ impl Colors {
                 });
             }
 
-            // Always add day_old (1 day threshold)
             if let Some(day_old) = t.date.day_old {
                 timestamp_entries.push(TimestampColorEntry {
                     timestamp: now
@@ -245,19 +243,21 @@ impl Colors {
             }
 
             timestamp_entries.push(TimestampColorEntry {
-                timestamp: i64::MAX,
+                timestamp: i64::MIN,
                 color: t.date.older,
             });
 
             // Convert relative config to timestamp entries
             for relative in &t.date.relative {
                 if let Ok(span) = relative.threshold.parse::<Span>() {
-                    if let Ok(total_seconds) = span.total(Unit::Second) {
+                    if let Ok(total_seconds) =
+                        span.total(SpanTotal::from(Unit::Second).days_are_24_hours())
+                    {
                         let timestamp = now - total_seconds as i64;
                         timestamp_entries.push(TimestampColorEntry {
                             timestamp,
                             color: relative.color,
-                        });
+                        })
                     }
                 }
             }
@@ -272,8 +272,8 @@ impl Colors {
                 }
             }
 
-            // Sort by timestamp (ascending order - oldest first)
-            timestamp_entries.sort_by_key(|e| e.timestamp);
+            // Sort by timestamp (descending order - newest first)
+            timestamp_entries.sort_by(|a, b| b.timestamp.cmp(&a.timestamp));
 
             (t.date.older, timestamp_entries)
         } else {
@@ -328,28 +328,13 @@ impl Colors {
         if let Some(t) = &self.theme {
             let color = match elem {
                 Elem::Date(timestamp) => {
-                    // Iterate through sorted timestamp table (ascending order - oldest first)
-                    // Find the color for the most specific (highest) threshold that the file is older than
-                    // If file is older than all thresholds, use the first (oldest) threshold's color
-                    // If file is newer than all thresholds, use default color
                     let mut color = self.default_date_color;
-                    let mut found_threshold = false;
 
                     for entry in &self.timestamp_colors {
                         if *timestamp >= entry.timestamp {
-                            // File is newer than or equal to this threshold, use its color
                             color = entry.color;
-                            found_threshold = true;
-                        } else {
-                            // File is older than this threshold, stop searching
                             break;
                         }
-                    }
-
-                    // If no threshold was found (file is older than all thresholds),
-                    // use the oldest (first) threshold's color
-                    if !found_threshold && !self.timestamp_colors.is_empty() {
-                        color = self.timestamp_colors.first().unwrap().color;
                     }
 
                     color
@@ -357,7 +342,7 @@ impl Colors {
                 Elem::InvalidDate => {
                     // For invalid dates, use the oldest color if available, otherwise default
                     self.timestamp_colors
-                        .first()
+                        .last()
                         .map(|e| e.color)
                         .unwrap_or(self.default_date_color)
                 }

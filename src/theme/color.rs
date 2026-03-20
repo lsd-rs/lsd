@@ -8,7 +8,10 @@ fn deserialize_option_color<'de, D>(deserializer: D) -> Result<Option<Color>, D:
 where
     D: serde::de::Deserializer<'de>,
 {
-    Option::<Color>::deserialize(deserializer)
+    #[derive(Deserialize)]
+    struct Wrapper(#[serde(deserialize_with = "deserialize_color")] Color);
+    let opt = Option::<Wrapper>::deserialize(deserializer)?;
+    Ok(opt.map(|w| w.0))
 }
 
 // Custom color deserialize
@@ -477,9 +480,12 @@ permission:
   exec-sticky: 5
   no-access: 245
 date:
-  hour-old: 40
-  day-old: 42
   older: 36
+  relative:
+    - threshold: 1h
+      color: 40
+    - threshold: 1d
+      color: 42
 size:
   none: 245
   small: 229
