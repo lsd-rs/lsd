@@ -227,15 +227,6 @@ pub struct AbsoluteTimeColor {
 #[derive(Debug, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "kebab-case")]
 #[serde(deny_unknown_fields)]
-pub struct DateColorEntry {
-    pub threshold: String,
-    #[serde(deserialize_with = "deserialize_color")]
-    pub color: Color,
-}
-
-#[derive(Debug, Deserialize, PartialEq, Eq)]
-#[serde(rename_all = "kebab-case")]
-#[serde(deny_unknown_fields)]
 #[serde(default)]
 pub struct Date {
     // Legacy fields for backward compatibility
