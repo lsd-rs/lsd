@@ -92,6 +92,7 @@ jobs:
         case ${{ matrix.job.target }} in
           arm-*-linux-*hf) sudo apt-get -y update ; sudo apt-get -y install binutils-arm-linux-gnueabihf ;;
           aarch64-*-linux-*) sudo apt-get -y update ; sudo apt-get -y install binutils-aarch64-linux-gnu ;;
+          riscv64gc-*-linux-*) sudo apt-get -y update ; sudo apt-get -y install binutils-riscv64-linux-gnu ;;
         esac
     - name: Initialize workflow variables
       id: vars
@@ -171,7 +172,7 @@ jobs:
         echo set-output name=CARGO_TEST_OPTIONS::${CARGO_TEST_OPTIONS}
         echo ::set-output name=CARGO_TEST_OPTIONS::${CARGO_TEST_OPTIONS}
         # * strip executable?
-        STRIP="strip" ; case ${{ matrix.job.target }} in arm-*-linux-*hf) STRIP="arm-linux-gnueabihf-strip" ;; aarch64-*-linux-*) STRIP="aarch64-linux-gnu-strip" ;; *-pc-windows-msvc) STRIP="" ;; esac;
+        STRIP="strip" ; case ${{ matrix.job.target }} in arm-*-linux-*hf) STRIP="arm-linux-gnueabihf-strip" ;; aarch64-*-linux-*) STRIP="aarch64-linux-gnu-strip" ;; riscv64gc-*-linux-*) STRIP="riscv64-linux-gnu-strip" ;; *-pc-windows-msvc) STRIP="" ;; esac;
         echo set-output name=STRIP::${STRIP}
         echo ::set-output name=STRIP::${STRIP}
     - name: Create all needed build/work directories
