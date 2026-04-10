@@ -6,7 +6,7 @@ use crate::icon::Icons;
 use crate::meta::name::DisplayOption;
 use crate::meta::{FileType, Meta, OwnerCache};
 use std::collections::HashMap;
-use term_grid::{Cell, Direction, Filling, Grid, GridOptions};
+use term_grid::{Alignment, Cell, Direction, Filling, Grid, GridOptions};
 use terminal_size::terminal_size;
 use unicode_width::UnicodeWidthStr;
 
@@ -137,6 +137,7 @@ fn inner_display_grid(
             cells.push(Cell {
                 width: get_visible_width(&block, flags.hyperlink == HyperlinkOption::Always),
                 contents: block,
+                alignment: Alignment::Left,
             });
         }
     }
@@ -197,33 +198,31 @@ fn inner_display_grid(
     output
 }
 
-fn add_header(flags: &Flags, cells: &[Cell], grid: &mut Grid) {
-    let num_columns: usize = flags.blocks.0.len();
+fn add_header(flags: &Flags, _cells: &[Cell], grid: &mut Grid) {
+    for block in flags.blocks.0.iter() {
+        let header_text = block.get_header();
+        let header_width =
+            get_visible_width(header_text, flags.hyperlink == HyperlinkOption::Always);
 
-    let mut widths = flags
-        .blocks
-        .0
-        .iter()
-        .map(|b| get_visible_width(b.get_header(), flags.hyperlink == HyperlinkOption::Always))
-        .collect::<Vec<usize>>();
-
-    // find max widths of each column
-    for (index, cell) in cells.iter().enumerate() {
-        let index = index % num_columns;
-        widths[index] = std::cmp::max(widths[index], cell.width);
-    }
-
-    for (idx, block) in flags.blocks.0.iter().enumerate() {
-        // center and underline header
+        // Underline ONLY the header text (no padding)
         let underlined_header = crossterm::style::Stylize::attribute(
-            format!("{: ^1$}", block.get_header(), widths[idx]),
+            header_text.to_string(),
             crossterm::style::Attribute::Underlined,
         )
         .to_string();
 
+        // Use term_grid's alignment to handle padding - this keeps underline only on text
+        // Right-align numeric columns (Size, Date, INode, Links), left-align text columns
+        let alignment = if block.is_numeric() {
+            Alignment::Right
+        } else {
+            Alignment::Left
+        };
+
         grid.add(Cell {
-            width: widths[idx],
+            width: header_width,
             contents: underlined_header,
+            alignment,
         });
     }
 }
@@ -269,6 +268,7 @@ fn inner_display_tree(
             cells.push(Cell {
                 width: get_visible_width(&block, flags.hyperlink == HyperlinkOption::Always),
                 contents: block,
+                alignment: Alignment::Left,
             });
         }
 
@@ -986,5 +986,90 @@ mod tests {
         drop(dir); // to avoid clippy complains about previous .clone()
         drop(file);
         drop(link);
+    }
+
+    /// Test for issue #1014: Grid layout should work correctly with colors
+    /// When files can fit on multiple columns, they should not be displayed vertically.
+    /// The fix is to use get_visible_width() for the Cell width field, which strips
+    /// ANSI escape codes from the width calculation.
+    #[test]
+    fn test_grid_layout_with_colors_issue_1014() {
+        // Force color output to ensure ANSI codes are present
+        crossterm::style::force_color_output(true);
+
+        let argv = ["lsd"]; // Default grid layout
+        let cli = Cli::try_parse_from(argv).unwrap();
+        let flags = Flags::configure_from(&cli, &Config::with_none()).unwrap();
+
+        // Create directory with multiple short-named files
+        let dir = assert_fs::TempDir::new().unwrap();
+        for i in 1..=10 {
+            dir.child(format!("f{}.txt", i)).touch().unwrap();
+        }
+
+        let metas = Meta::from_path(Path::new(dir.path()), false, PermissionFlag::Rwx)
+            .unwrap()
+            .recurse_into(1, &flags, None)
+            .unwrap()
+            .0
+            .unwrap();
+
+        // Use colors to ensure ANSI codes are in the output
+        let colors = Colors::new(color::ThemeOption::NoLscolors);
+        let icons = Icons::new(true, IconOption::Never, FlagTheme::Fancy, " ".to_string());
+        let git_theme = GitTheme::new();
+
+        // Build cells the same way inner_display_grid does
+        let padding_rules = get_padding_rules(&metas, &flags);
+        let mut test_cells = Vec::new();
+        let owner_cache = OwnerCache::default();
+
+        for meta in &metas {
+            let blocks = get_output(
+                meta,
+                &owner_cache,
+                &colors,
+                &icons,
+                &git_theme,
+                &flags,
+                &DisplayOption::FileName,
+                &padding_rules,
+                (0, ""),
+            );
+            for block in blocks {
+                test_cells.push(Cell {
+                    width: get_visible_width(&block, false),
+                    contents: block,
+                    alignment: Alignment::Left,
+                });
+            }
+        }
+
+        // Create grid with these cells
+        let mut grid = Grid::new(GridOptions {
+            filling: Filling::Spaces(2),
+            direction: Direction::TopToBottom,
+        });
+        for cell in &test_cells {
+            grid.add(cell.clone());
+        }
+
+        // With 200 columns and ~7 char filenames, fit_into_width should succeed
+        let result = grid.fit_into_width(200);
+        assert!(
+            result.is_some(),
+            "fit_into_width returned None - grid layout failed with ANSI colors"
+        );
+
+        // Verify multiple files fit per line
+        let output = result.unwrap().to_string();
+        let newline_count = output.matches('\n').count();
+        assert!(
+            newline_count < 10,
+            "Grid layout broken: {} newlines for 10 files (should fit multiple per line)",
+            newline_count
+        );
+
+        dir.close().unwrap();
     }
 }
