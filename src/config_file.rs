@@ -44,6 +44,8 @@ pub struct Config {
     pub header: Option<bool>,
     pub literal: Option<bool>,
     pub truncate_owner: Option<TruncateOwner>,
+    pub max_shown: Option<usize>,
+    pub tree_filter: Option<Vec<String>>,
 }
 
 #[derive(Eq, PartialEq, Debug, Deserialize)]
@@ -129,6 +131,8 @@ impl Config {
             header: None,
             literal: None,
             truncate_owner: None,
+            max_shown: None,
+            tree_filter: None,
         }
     }
 
@@ -362,6 +366,14 @@ truncate-owner:
   after:
   # String to be appended to a name if truncated.
   marker: ""
+# == Max Shown ==
+# max number of items to display per directory level in tree layout.
+# max-shown: 10
+
+# == Tree Filter ==
+# only show entries matching these globs in tree layout. dirs always shown.
+# tree-filter:
+#   - "*.rs"
 "#;
 
 #[cfg(test)]
@@ -432,6 +444,8 @@ mod tests {
                     after: None,
                     marker: Some("".to_string()),
                 }),
+                max_shown: None,
+                tree_filter: None,
             },
             c
         );
