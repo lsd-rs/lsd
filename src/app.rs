@@ -197,6 +197,14 @@ pub struct Cli {
     #[arg(short = 'N', long)]
     pub literal: bool,
 
+    /// only show entries matching glob in tree layout (repeatable, dirs always shown)
+    #[arg(long, value_name = "GLOB")]
+    pub tree_filter: Vec<String>,
+
+    /// max items to show per directory level in tree layout
+    #[arg(long, value_name = "NUM")]
+    pub max_shown: Option<usize>,
+
     /// Print help information
     #[arg(long, action = ArgAction::Help)]
     help: (),
