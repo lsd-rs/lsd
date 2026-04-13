@@ -14,6 +14,7 @@ const EDGE: &str = "\u{251c}\u{2500}\u{2500}"; // "├──"
 const LINE: &str = "\u{2502}  "; // "│  "
 const CORNER: &str = "\u{2514}\u{2500}\u{2500}"; // "└──"
 const BLANK: &str = "   ";
+const INDENT_STEP: usize = 2;
 
 pub fn grid(
     metas: &[Meta],
@@ -150,21 +151,45 @@ fn inner_display_grid(
         grid.add(cell);
     }
 
-    if flags.layout == Layout::Grid {
-        if let Some(tw) = term_width {
+    let grid_str = if flags.layout == Layout::Grid {
+        let effective_width = if depth > 0 {
+            let content_indent = (depth + 1) * INDENT_STEP;
+            term_width.map(|w| w.saturating_sub(content_indent))
+        } else {
+            term_width
+        };
+        if let Some(tw) = effective_width {
             if let Some(gridded_output) = grid.fit_into_width(tw) {
-                output += &gridded_output.to_string();
+                gridded_output.to_string()
             } else {
-                //does not fit into grid, usually because (some) filename(s)
-                //are longer or almost as long as term_width
-                //print line by line instead!
-                output += &grid.fit_into_columns(1).to_string();
+                grid.fit_into_columns(1).to_string()
             }
         } else {
-            output += &grid.fit_into_columns(1).to_string();
+            grid.fit_into_columns(1).to_string()
         }
     } else {
-        output += &grid.fit_into_columns(flags.blocks.0.len()).to_string();
+        grid.fit_into_columns(flags.blocks.0.len()).to_string()
+    };
+
+    if depth > 0 {
+        let content_prefix = " ".repeat((depth + 1) * INDENT_STEP);
+        let has_trailing_newline = grid_str.ends_with('\n');
+        let mut indented = String::with_capacity(grid_str.len() + grid_str.lines().count() * content_prefix.len());
+        for (i, line) in grid_str.lines().enumerate() {
+            if i > 0 {
+                indented.push('\n');
+            }
+            if !line.is_empty() {
+                indented.push_str(&content_prefix);
+            }
+            indented.push_str(line);
+        }
+        if has_trailing_newline {
+            indented.push('\n');
+        }
+        output += &indented;
+    } else {
+        output += &grid_str;
     }
 
     let should_display_folder_path = should_display_folder_path(depth, metas);
@@ -173,7 +198,9 @@ fn inner_display_grid(
     for meta in metas {
         if let Some(content) = &meta.content {
             if should_display_folder_path {
-                output += &display_folder_path(meta);
+                output.truncate(output.trim_end_matches('\n').len());
+                output.push('\n');
+                output += &display_folder_path(meta, depth);
             }
 
             let display_option = DisplayOption::Relative {
@@ -317,8 +344,9 @@ fn should_display_folder_path(depth: usize, metas: &[Meta]) -> bool {
     }
 }
 
-fn display_folder_path(meta: &Meta) -> String {
-    format!("\n{}:\n", meta.path.to_string_lossy())
+fn display_folder_path(meta: &Meta, depth: usize) -> String {
+    let indent = " ".repeat((depth + 1) * INDENT_STEP);
+    format!("{indent}{}:\n", meta.path.to_string_lossy())
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -918,9 +946,27 @@ mod tests {
         let dir = Meta::from_path(&dir_path, false, PermissionFlag::Rwx).unwrap();
 
         assert_eq!(
-            display_folder_path(&dir),
+            display_folder_path(&dir, 0),
             format!(
-                "\n{}{}dir:\n",
+                "  {}{}dir:\n",
+                tmp_dir.path().to_string_lossy(),
+                std::path::MAIN_SEPARATOR
+            )
+        );
+
+        assert_eq!(
+            display_folder_path(&dir, 1),
+            format!(
+                "    {}{}dir:\n",
+                tmp_dir.path().to_string_lossy(),
+                std::path::MAIN_SEPARATOR
+            )
+        );
+
+        assert_eq!(
+            display_folder_path(&dir, 2),
+            format!(
+                "      {}{}dir:\n",
                 tmp_dir.path().to_string_lossy(),
                 std::path::MAIN_SEPARATOR
             )
@@ -986,5 +1032,134 @@ mod tests {
         drop(dir); // to avoid clippy complains about previous .clone()
         drop(file);
         drop(link);
+    }
+
+    #[test]
+    fn test_recursion_indent_depth1() {
+        let argv = ["lsd", "--recursive"];
+        let cli = Cli::try_parse_from(argv).unwrap();
+        let flags = Flags::configure_from(&cli, &Config::with_none()).unwrap();
+
+        let dir = assert_fs::TempDir::new().unwrap();
+        dir.child("root_file").touch().unwrap();
+        dir.child("subdir").create_dir_all().unwrap();
+        dir.child("subdir/file.rs").touch().unwrap();
+
+        let mut metas = Meta::from_path(Path::new(dir.path()), false, PermissionFlag::Rwx)
+            .unwrap()
+            .recurse_into(42, &flags, None)
+            .unwrap()
+            .0
+            .unwrap();
+        sort(&mut metas, &sort::assemble_sorters(&flags));
+
+        let output = grid(
+            &metas,
+            &flags,
+            &Colors::new(color::ThemeOption::NoColor),
+            &Icons::new(false, IconOption::Never, FlagTheme::Fancy, " ".to_string()),
+            &GitTheme::new(),
+        );
+
+        // header for depth-1 subdir should be indented 2 spaces
+        let header_line = output
+            .lines()
+            .find(|l| l.contains("subdir") && l.ends_with(':'))
+            .expect("header line not found");
+        assert!(
+            header_line.starts_with("  "),
+            "depth-1 header should have 2-space indent, got: {header_line:?}"
+        );
+
+        // content under subdir should be indented 4 spaces
+        let content_line = output
+            .lines()
+            .find(|l| l.contains("file.rs"))
+            .expect("content line not found");
+        assert!(
+            content_line.starts_with("    "),
+            "depth-1 content should have 4-space indent, got: {content_line:?}"
+        );
+    }
+
+    #[test]
+    fn test_recursion_indent_depth2() {
+        let argv = ["lsd", "--recursive"];
+        let cli = Cli::try_parse_from(argv).unwrap();
+        let flags = Flags::configure_from(&cli, &Config::with_none()).unwrap();
+
+        let dir = assert_fs::TempDir::new().unwrap();
+        dir.child("subdir/nested").create_dir_all().unwrap();
+        dir.child("subdir/nested/deep.rs").touch().unwrap();
+
+        let mut metas = Meta::from_path(Path::new(dir.path()), false, PermissionFlag::Rwx)
+            .unwrap()
+            .recurse_into(42, &flags, None)
+            .unwrap()
+            .0
+            .unwrap();
+        sort(&mut metas, &sort::assemble_sorters(&flags));
+
+        let output = grid(
+            &metas,
+            &flags,
+            &Colors::new(color::ThemeOption::NoColor),
+            &Icons::new(false, IconOption::Never, FlagTheme::Fancy, " ".to_string()),
+            &GitTheme::new(),
+        );
+
+        // depth-2 header should be indented 4 spaces
+        let nested_header = output
+            .lines()
+            .find(|l| l.contains("nested") && l.ends_with(':'))
+            .expect("nested header not found");
+        assert!(
+            nested_header.starts_with("    "),
+            "depth-2 header should have 4-space indent, got: {nested_header:?}"
+        );
+
+        // content at depth 2 should be indented 6 spaces
+        let content_line = output
+            .lines()
+            .find(|l| l.contains("deep.rs"))
+            .expect("deep.rs content not found");
+        assert!(
+            content_line.starts_with("      "),
+            "depth-2 content should have 6-space indent, got: {content_line:?}"
+        );
+    }
+
+    #[test]
+    fn test_recursion_no_double_blank_lines() {
+        let argv = ["lsd", "--recursive"];
+        let cli = Cli::try_parse_from(argv).unwrap();
+        let flags = Flags::configure_from(&cli, &Config::with_none()).unwrap();
+
+        let dir = assert_fs::TempDir::new().unwrap();
+        dir.child("a_file").touch().unwrap();
+        dir.child("subdir").create_dir_all().unwrap();
+        dir.child("subdir/b_file").touch().unwrap();
+
+        let mut metas = Meta::from_path(Path::new(dir.path()), false, PermissionFlag::Rwx)
+            .unwrap()
+            .recurse_into(42, &flags, None)
+            .unwrap()
+            .0
+            .unwrap();
+        sort(&mut metas, &sort::assemble_sorters(&flags));
+
+        let output = grid(
+            &metas,
+            &flags,
+            &Colors::new(color::ThemeOption::NoColor),
+            &Icons::new(false, IconOption::Never, FlagTheme::Fancy, " ".to_string()),
+            &GitTheme::new(),
+        );
+
+        // no two consecutive empty lines anywhere in the output
+        assert!(
+            !output.contains("\n\n\n"),
+            "found double blank lines in output:\n{output}"
+        );
     }
 }
