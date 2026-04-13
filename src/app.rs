@@ -137,7 +137,7 @@ pub struct Cli {
     #[arg(
     long,
     value_delimiter = ',',
-    value_parser = ["permission", "user", "group", "context", "size", "date", "name", "inode", "links", "git"],
+    value_parser = ["permission", "user", "group", "context", "size", "date", "name", "inode", "links", "lines", "lines_value", "git"],
     )]
     pub blocks: Vec<String>,
 

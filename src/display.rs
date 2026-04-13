@@ -352,6 +352,31 @@ fn get_output(
                 Some(links) => links.render(colors),
                 None => colorize_missing("?"),
             }),
+            Block::Lines => {
+                let pad = if Layout::Tree == flags.layout && 0 == tree.0 && 0 == i {
+                    None
+                } else {
+                    Some(padding_rules.get(&Block::LinesValue).copied().unwrap_or(0))
+                };
+                block_vec.push(match &meta.lines {
+                    Some(lines) => {
+                        let value_str = lines.value_string();
+                        let rendered = lines.render(colors);
+                        if let Some(align) = pad {
+                            let left_pad = " ".repeat(align.saturating_sub(value_str.len()));
+                            let padded = format!("{}{}", left_pad, rendered);
+                            colors.colorize(padded, &Elem::FileSmall)
+                        } else {
+                            rendered
+                        }
+                    }
+                    None => colorize_missing("?"),
+                })
+            }
+            Block::LinesValue => block_vec.push(match &meta.lines {
+                Some(lines) => lines.render(colors),
+                None => colorize_missing("?"),
+            }),
             Block::Permission => {
                 block_vec.extend([
                     meta.file_type.render(colors),
@@ -486,6 +511,32 @@ fn detect_size_lengths(metas: &[Meta], flags: &Flags) -> usize {
     max_value_length
 }
 
+fn detect_lines_lengths(metas: &[Meta], flags: &Flags) -> usize {
+    let mut max_value_length: usize = 0;
+
+    for meta in metas {
+        let value_len = match &meta.lines {
+            Some(lines) => lines.value_string().len(),
+            None => 1, // "-" character
+        };
+
+        if value_len > max_value_length {
+            max_value_length = value_len;
+        }
+
+        if Layout::Tree == flags.layout {
+            if let Some(subs) = &meta.content {
+                let sub_length = detect_lines_lengths(subs, flags);
+                if sub_length > max_value_length {
+                    max_value_length = sub_length;
+                }
+            }
+        }
+    }
+
+    max_value_length
+}
+
 fn get_padding_rules(metas: &[Meta], flags: &Flags) -> HashMap<Block, usize> {
     let mut padding_rules: HashMap<Block, usize> = HashMap::new();
 
@@ -493,6 +544,12 @@ fn get_padding_rules(metas: &[Meta], flags: &Flags) -> HashMap<Block, usize> {
         let size_val = detect_size_lengths(metas, flags);
 
         padding_rules.insert(Block::SizeValue, size_val);
+    }
+
+    if flags.blocks.0.contains(&Block::Lines) {
+        let lines_val = detect_lines_lengths(metas, flags);
+
+        padding_rules.insert(Block::LinesValue, lines_val);
     }
 
     padding_rules

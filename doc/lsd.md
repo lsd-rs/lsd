@@ -93,7 +93,7 @@ lsd is a ls command with a lot of pretty colours and some other stuff to enrich 
 : Natural sort of (version) numbers within text
 
 `--blocks <blocks>...`
-: Specify the blocks that will be displayed and in what order [possible values: permission, user, group, size, date, name, inode, git]
+: Specify the blocks that will be displayed and in what order [possible values: permission, user, group, size, date, name, inode, links, lines, git]
 
 `--color <color>...`
 : When to use terminal colours [default: auto]  [possible values: always, auto, never]

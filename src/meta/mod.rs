@@ -4,6 +4,7 @@ mod filetype;
 pub mod git_file_status;
 mod indicator;
 mod inode;
+mod lines;
 mod links;
 mod locale;
 pub mod name;
@@ -24,6 +25,7 @@ pub use self::filetype::FileType;
 pub use self::git_file_status::GitFileStatus;
 pub use self::indicator::Indicator;
 pub use self::inode::INode;
+pub use self::lines::Lines;
 pub use self::links::Links;
 pub use self::name::Name;
 pub use self::owner::{Cache as OwnerCache, Owner};
@@ -54,6 +56,7 @@ pub struct Meta {
     pub indicator: Indicator,
     pub inode: Option<INode>,
     pub links: Option<Links>,
+    pub lines: Option<Lines>,
     pub content: Option<Vec<Meta>>,
     pub access_control: Option<AccessControl>,
     pub git_status: Option<GitFileStatus>,
@@ -258,6 +261,82 @@ impl Meta {
         }
     }
 
+    pub fn calculate_total_lines(&mut self) {
+        if self.lines.is_none() {
+            return;
+        }
+
+        if let FileType::Directory { .. } = self.file_type {
+            if let Some(metas) = &mut self.content {
+                let mut lines_accumulated = 0u64;
+                for x in &mut metas.iter_mut() {
+                    // must not count the lines of '.' and '..', or will be infinite loop
+                    if x.name.name == "." || x.name.name == ".." {
+                        continue;
+                    }
+
+                    x.calculate_total_lines();
+                    lines_accumulated += match &x.lines {
+                        Some(lines) => match lines.value_string().as_str() {
+                            "-" => 0, // Skip binary files and errors
+                            s => s.parse::<u64>().unwrap_or(0),
+                        },
+                        None => 0,
+                    };
+                }
+                self.lines = Some(Lines::from_total(lines_accumulated));
+            } else {
+                // possibility that 'depth' limited the recursion in 'recurse_into'
+                self.lines = Some(Lines::from_total(Meta::calculate_total_file_lines(
+                    &self.path,
+                )));
+            }
+        }
+    }
+
+    fn calculate_total_file_lines(path: &Path) -> u64 {
+        let metadata = path.symlink_metadata();
+        let metadata = match metadata {
+            Ok(meta) => meta,
+            Err(err) => {
+                print_error!("{}: {}.", path.display(), err);
+                return 0;
+            }
+        };
+        let file_type = metadata.file_type();
+        if file_type.is_file() {
+            // Count lines for this file
+            let lines = Lines::from_path(path, &metadata);
+            match lines.value_string().as_str() {
+                "-" => 0, // Binary files or errors
+                s => s.parse::<u64>().unwrap_or(0),
+            }
+        } else if file_type.is_dir() {
+            let mut lines = 0u64;
+
+            let entries = match path.read_dir() {
+                Ok(entries) => entries,
+                Err(err) => {
+                    print_error!("{}: {}.", path.display(), err);
+                    return lines;
+                }
+            };
+            for entry in entries {
+                let path = match entry {
+                    Ok(entry) => entry.path(),
+                    Err(err) => {
+                        print_error!("{}: {}.", path.display(), err);
+                        continue;
+                    }
+                };
+                lines += Meta::calculate_total_file_lines(&path);
+            }
+            lines
+        } else {
+            0
+        }
+    }
+
     pub fn from_path(
         path: &Path,
         dereference: bool,
@@ -334,12 +413,13 @@ impl Meta {
 
         let name = Name::new(path, file_type);
 
-        let (inode, links, size, date, owner, permissions_or_attributes, access_control) =
+        let (inode, links, lines, size, date, owner, permissions_or_attributes, access_control) =
             match broken_link {
-                true => (None, None, None, None, None, None, None),
+                true => (None, None, None, None, None, None, None, None),
                 false => (
                     Some(INode::from(&metadata)),
                     Some(Links::from(&metadata)),
+                    Some(Lines::from_path(path, &metadata)),
                     Some(Size::from(&metadata)),
                     Some(Date::from(&metadata)),
                     Some(owner),
@@ -351,6 +431,7 @@ impl Meta {
         Ok(Self {
             inode,
             links,
+            lines,
             path: path.to_path_buf(),
             symlink: SymLink::from(path),
             size,
