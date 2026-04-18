@@ -15,22 +15,12 @@ impl From<&Path> for SymLink {
             if target.is_absolute() || path.parent().is_none() {
                 return Self {
                     valid: target.exists(),
-                    target: Some(
-                        target
-                            .to_str()
-                            .expect("failed to convert symlink to str")
-                            .to_string(),
-                    ),
+                    target: Some(target.to_string_lossy().into_owned()),
                 };
             }
 
             return Self {
-                target: Some(
-                    target
-                        .to_str()
-                        .expect("failed to convert symlink to str")
-                        .to_string(),
-                ),
+                target: Some(target.to_string_lossy().into_owned()),
                 valid: path.parent().unwrap().join(target).exists(),
             };
         }

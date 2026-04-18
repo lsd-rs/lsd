@@ -50,8 +50,9 @@ fn truncate(input: &str, after: Option<usize>, marker: Option<String>) -> String
     let mut output = input.to_string();
 
     if let Some(after) = after {
-        if output.len() > after {
-            output.truncate(after);
+        // after is a char count, find the matching byte index
+        if let Some((byte_idx, _)) = output.char_indices().nth(after) {
+            output.truncate(byte_idx);
 
             if let Some(marker) = marker {
                 output.push_str(&marker);
@@ -133,5 +134,20 @@ mod test_truncate {
     #[test]
     fn test_truncated_with_marker() {
         assert_eq!("a…", truncate("ab", Some(1), Some("…".to_string())));
+    }
+
+    #[test]
+    fn test_truncated_at_multibyte_char_boundary() {
+        assert_eq!("é", truncate("éb", Some(1), None));
+    }
+
+    #[test]
+    fn test_truncated_multibyte_with_marker() {
+        assert_eq!("é…", truncate("éb", Some(1), Some("…".to_string())));
+    }
+
+    #[test]
+    fn test_no_truncation_when_shorter_multibyte() {
+        assert_eq!("é", truncate("é", Some(2), Some("…".to_string())));
     }
 }

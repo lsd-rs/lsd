@@ -60,8 +60,10 @@ impl GitCache {
             match repo.statuses(None) {
                 Ok(status_list) => {
                     for status_entry in status_list.iter() {
-                        // git2-rs provides / separated path even on Windows. We have to rebuild it
-                        let str_path = status_entry.path().unwrap();
+                        // git2 returns None for non-utf8 paths, skip them
+                        let Some(str_path) = status_entry.path() else {
+                            continue;
+                        };
                         let path: PathBuf =
                             str_path.split('/').collect::<Vec<_>>().iter().collect();
                         let path = workdir.join(path);
