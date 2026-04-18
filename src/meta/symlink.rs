@@ -57,7 +57,10 @@ impl SymLink {
 
             let strings: &[ColoredString] = &[
                 ColoredString::new(Colors::default_style(), format!(" {} ", flag.symlink_arrow)), // ⇒ \u{21d2}
-                colors.colorize(target_string, elem),
+                colors.colorize(
+                    crate::display_util::sanitize_for_terminal(&target_string).into_owned(),
+                    elem,
+                ),
             ];
 
             let res = strings
