@@ -180,9 +180,7 @@ impl Config {
             dirs::home_dir().map(|h| h.join(".config")),
             dirs::config_dir(),
             #[cfg(not(windows))]
-            BaseDirectories::with_prefix("")
-                .ok()
-                .map(|p| p.get_config_home()),
+            BaseDirectories::with_prefix("").get_config_home(),
         ]
         .iter()
         .filter_map(|p| p.as_ref().map(|p| p.join("lsd")))
