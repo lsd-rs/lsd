@@ -61,7 +61,10 @@ impl AccessControl {
         if context.is_empty() {
             context += "?";
         }
-        colors.colorize(context, &Elem::Context)
+        colors.colorize(
+            crate::display_util::sanitize_for_terminal(&context).into_owned(),
+            &Elem::Context,
+        )
     }
 }
 
