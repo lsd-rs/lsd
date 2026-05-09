@@ -14,6 +14,7 @@ pub struct Sorting {
     pub column: SortColumn,
     pub order: SortOrder,
     pub dir_grouping: DirGrouping,
+    pub respect_locale: bool,
 }
 
 impl Sorting {
@@ -25,11 +26,39 @@ impl Sorting {
         let column = SortColumn::configure_from(cli, config);
         let order = SortOrder::configure_from(cli, config);
         let dir_grouping = DirGrouping::configure_from(cli, config);
+        let respect_locale = Self::respect_locale_from(cli, config);
         Self {
             column,
             order,
             dir_grouping,
+            respect_locale,
         }
+    }
+
+    /// Get the "respect_locale" boolean from [Cli], a [Config] or the [Default] value. The first
+    /// value that is not [None] is used. The order of precedence for the value used is:
+    /// - [respect_locale_from_cli](Sorting::respect_locale_from_cli)
+    /// - [Config.sorting.respect_locale]
+    /// - [Default::default]
+    fn respect_locale_from(cli: &Cli, config: &Config) -> bool {
+        if let Some(value) = Self::respect_locale_from_cli(cli) {
+            return value;
+        }
+        if let Some(sorting) = &config.sorting {
+            if let Some(respect_locale) = sorting.respect_locale {
+                return respect_locale;
+            }
+        }
+
+        Default::default()
+    }
+
+    /// Get a potential "respect_locale" boolean from [Cli].
+    ///
+    /// If the "respect_locale" argument is passed, this returns `true` in a [Some]. Otherwise this
+    /// returns [None].
+    fn respect_locale_from_cli(cli: &Cli) -> Option<bool> {
+        if cli.respect_locale { Some(true) } else { None }
     }
 }
 
@@ -293,6 +322,7 @@ mod test_sort_column {
             column: None,
             reverse: None,
             dir_grouping: None,
+            respect_locale: None,
         });
 
         assert_eq!(None, SortColumn::from_config(&c));
@@ -305,6 +335,7 @@ mod test_sort_column {
             column: Some(SortColumn::Extension),
             reverse: None,
             dir_grouping: None,
+            respect_locale: None,
         });
         assert_eq!(Some(SortColumn::Extension), SortColumn::from_config(&c));
     }
@@ -316,6 +347,7 @@ mod test_sort_column {
             column: Some(SortColumn::Name),
             reverse: None,
             dir_grouping: None,
+            respect_locale: None,
         });
         assert_eq!(Some(SortColumn::Name), SortColumn::from_config(&c));
     }
@@ -327,6 +359,7 @@ mod test_sort_column {
             column: Some(SortColumn::Time),
             reverse: None,
             dir_grouping: None,
+            respect_locale: None,
         });
         assert_eq!(Some(SortColumn::Time), SortColumn::from_config(&c));
     }
@@ -338,6 +371,7 @@ mod test_sort_column {
             column: Some(SortColumn::Size),
             reverse: None,
             dir_grouping: None,
+            respect_locale: None,
         });
         assert_eq!(Some(SortColumn::Size), SortColumn::from_config(&c));
     }
@@ -349,6 +383,7 @@ mod test_sort_column {
             column: Some(SortColumn::Version),
             reverse: None,
             dir_grouping: None,
+            respect_locale: None,
         });
         assert_eq!(Some(SortColumn::Version), SortColumn::from_config(&c));
     }
@@ -360,6 +395,7 @@ mod test_sort_column {
             column: Some(SortColumn::GitStatus),
             reverse: None,
             dir_grouping: None,
+            respect_locale: None,
         });
         assert_eq!(Some(SortColumn::GitStatus), SortColumn::from_config(&c));
     }
@@ -409,6 +445,7 @@ mod test_sort_order {
             column: None,
             reverse: None,
             dir_grouping: None,
+            respect_locale: None,
         });
         assert_eq!(None, SortOrder::from_config(&c));
     }
@@ -420,6 +457,7 @@ mod test_sort_order {
             column: None,
             reverse: Some(true),
             dir_grouping: None,
+            respect_locale: None,
         });
         assert_eq!(Some(SortOrder::Reverse), SortOrder::from_config(&c));
     }
@@ -431,6 +469,7 @@ mod test_sort_order {
             column: None,
             reverse: Some(false),
             dir_grouping: None,
+            respect_locale: None,
         });
         assert_eq!(Some(SortOrder::Default), SortOrder::from_config(&c));
     }
@@ -513,6 +552,7 @@ mod test_dir_grouping {
             column: None,
             reverse: None,
             dir_grouping: Some(DirGrouping::First),
+            respect_locale: None,
         });
         assert_eq!(Some(DirGrouping::First), DirGrouping::from_config(&c));
     }
@@ -524,6 +564,7 @@ mod test_dir_grouping {
             column: None,
             reverse: None,
             dir_grouping: Some(DirGrouping::Last),
+            respect_locale: None,
         });
         assert_eq!(Some(DirGrouping::Last), DirGrouping::from_config(&c));
     }
@@ -535,6 +576,7 @@ mod test_dir_grouping {
             column: None,
             reverse: None,
             dir_grouping: None,
+            respect_locale: None,
         });
         assert_eq!(None, DirGrouping::from_config(&c));
     }
@@ -546,6 +588,7 @@ mod test_dir_grouping {
             column: None,
             reverse: None,
             dir_grouping: Some(DirGrouping::Last),
+            respect_locale: None,
         });
         c.classic = Some(true);
         assert_eq!(Some(DirGrouping::None), DirGrouping::from_config(&c));

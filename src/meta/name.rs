@@ -195,6 +195,26 @@ impl Name {
     pub fn file_type(&self) -> FileType {
         self.file_type
     }
+
+    // Locale-aware comparison using strcoll for matching the behavior of `ls`.
+    #[cfg(unix)]
+    pub fn cmp_locale(&self, other: &Self) -> Ordering {
+        use std::ffi::CString;
+        use std::sync::Once;
+        static LOCALE_INIT: Once = Once::new();
+        LOCALE_INIT.call_once(|| unsafe {
+            libc::setlocale(libc::LC_ALL, b"\0".as_ptr() as *const libc::c_char);
+        });
+        let a = CString::new(self.name.as_str()).unwrap_or_default();
+        let b = CString::new(other.name.as_str()).unwrap_or_default();
+        let result = unsafe { libc::strcoll(a.as_ptr(), b.as_ptr()) };
+        result.cmp(&0)
+    }
+
+    #[cfg(not(unix))]
+    pub fn cmp_locale(&self, other: &Self) -> Ordering {
+        self.cmp(other)
+    }
 }
 
 impl Ord for Name {
@@ -230,6 +250,8 @@ mod test {
     use crate::url::Url;
     use crossterm::style::{Color, Stylize};
     use std::cmp::Ordering;
+    #[cfg(unix)]
+    use std::ffi::CString;
     use std::fs::{self, File};
     #[cfg(unix)]
     use std::os::unix::fs::symlink;
@@ -591,6 +613,121 @@ mod test {
         );
 
         assert!(name_1 == name_2);
+    }
+
+    // Helper function for locale testing,
+    // triggers the Once inside cmp_locale then override locale for testing
+    #[cfg(unix)]
+    fn set_locale_for_cmp(locale: &str) {
+        // Trigger Once::call_once inside cmp_locale so it won't override later
+        let dummy = Name::new(
+            Path::new("x"),
+            FileType::File {
+                uid: false,
+                exec: false,
+            },
+        );
+        let _ = dummy.cmp_locale(&dummy);
+        let loc = CString::new(locale).unwrap();
+        unsafe {
+            libc::setlocale(libc::LC_ALL, loc.as_ptr());
+        }
+    }
+
+    #[test]
+    #[serial_test::serial]
+    #[cfg(unix)]
+    fn test_cmp_locale_c_name_struct() {
+        set_locale_for_cmp("C");
+
+        let name_upper = Name::new(
+            Path::new("B"),
+            FileType::File {
+                uid: false,
+                exec: false,
+            },
+        );
+        let name_lower = Name::new(
+            Path::new("a"),
+            FileType::File {
+                uid: false,
+                exec: false,
+            },
+        );
+        let name_dot_lower = Name::new(
+            Path::new(".a"),
+            FileType::File {
+                uid: false,
+                exec: false,
+            },
+        );
+        let name_dot_upper = Name::new(
+            Path::new(".A"),
+            FileType::File {
+                uid: false,
+                exec: false,
+            },
+        );
+
+        // In C locale: "B" (0x42) < "a" (0x61) by byte order
+        assert_eq!(name_upper.cmp_locale(&name_lower), Ordering::Less);
+        assert_eq!(name_lower.cmp_locale(&name_upper), Ordering::Greater);
+
+        // In C locale: dot (0x2E) < uppercase (0x41+) < lowercase (0x61+)
+        // ".a" < "a", ".a" < "A", ".A" < "a", ".A" < "A"
+        assert_eq!(name_dot_lower.cmp_locale(&name_lower), Ordering::Less);
+        assert_eq!(name_dot_lower.cmp_locale(&name_upper), Ordering::Less);
+        assert_eq!(name_dot_upper.cmp_locale(&name_lower), Ordering::Less);
+        assert_eq!(name_dot_upper.cmp_locale(&name_upper), Ordering::Less);
+    }
+
+    #[test]
+    #[serial_test::serial]
+    #[cfg(unix)]
+    fn test_cmp_locale_en_us_utf8_name_struct() {
+        set_locale_for_cmp("en_US.UTF-8");
+
+        let name_upper = Name::new(
+            Path::new("B"),
+            FileType::File {
+                uid: false,
+                exec: false,
+            },
+        );
+        let name_lower = Name::new(
+            Path::new("a"),
+            FileType::File {
+                uid: false,
+                exec: false,
+            },
+        );
+        let name_dot_lower = Name::new(
+            Path::new(".a"),
+            FileType::File {
+                uid: false,
+                exec: false,
+            },
+        );
+        let name_dot_upper = Name::new(
+            Path::new(".A"),
+            FileType::File {
+                uid: false,
+                exec: false,
+            },
+        );
+
+        // In en_US.UTF-8: "a" sorts before "B" (alphabetic order)
+        assert_eq!(name_lower.cmp_locale(&name_upper), Ordering::Less);
+        assert_eq!(name_upper.cmp_locale(&name_lower), Ordering::Greater);
+
+        // In en_US.UTF-8: dot is mostly ignored for primary sort key
+        // ".a" < "a", ".a" < "A" (dot as secondary tiebreaker)
+        assert_eq!(name_dot_lower.cmp_locale(&name_lower), Ordering::Less);
+        assert_eq!(name_dot_lower.cmp_locale(&name_upper), Ordering::Less);
+        // ".A" > "a" (primary key: A vs a, A comes after a in en_US)
+        assert_eq!(name_dot_upper.cmp_locale(&name_lower), Ordering::Greater);
+        // ".A" < "A" (same letter, dot version sorts first)
+        assert_eq!(name_dot_upper.cmp_locale(&name_upper), Ordering::Less);
     }
 
     #[test]

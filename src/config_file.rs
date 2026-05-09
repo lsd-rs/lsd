@@ -71,6 +71,7 @@ pub struct Sorting {
     pub column: Option<SortColumn>,
     pub reverse: Option<bool>,
     pub dir_grouping: Option<DirGrouping>,
+    pub respect_locale: Option<bool>,
 }
 
 #[derive(Eq, PartialEq, Debug, Deserialize)]
@@ -324,6 +325,9 @@ sorting:
   # When "classic" is set, this is set to "none".
   # Possible values: first, last, none
   dir-grouping: none
+  # Whether to respect locale when sorting by name.
+  # Possible values: false, true
+  respect-locale: false
 
 # == No Symlink ==
 # Whether to omit showing symlink targets
@@ -421,6 +425,7 @@ mod tests {
                     column: Some(SortColumn::Name),
                     reverse: Some(false),
                     dir_grouping: Some(DirGrouping::None),
+                    respect_locale: Some(false),
                 }),
                 no_symlink: Some(false),
                 total_size: Some(false),
