@@ -250,6 +250,8 @@ mod test {
     use crate::url::Url;
     use crossterm::style::{Color, Stylize};
     use std::cmp::Ordering;
+    #[cfg(unix)]
+    use std::ffi::CString;
     use std::fs::{self, File};
     #[cfg(unix)]
     use std::os::unix::fs::symlink;
@@ -257,8 +259,6 @@ mod test {
     #[cfg(unix)]
     use std::process::Command;
     use tempfile::tempdir;
-    #[cfg(unix)]
-    use std::ffi::CString;
 
     #[test]
     #[cfg(unix)] // Windows uses different default permissions
