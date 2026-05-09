@@ -257,6 +257,8 @@ mod test {
     #[cfg(unix)]
     use std::process::Command;
     use tempfile::tempdir;
+    #[cfg(unix)]
+    use std::ffi::CString;
 
     #[test]
     #[cfg(unix)] // Windows uses different default permissions
@@ -611,6 +613,121 @@ mod test {
         );
 
         assert!(name_1 == name_2);
+    }
+
+    // Helper function for locale testing,
+    // triggers the Once inside cmp_locale then override locale for testing
+    #[cfg(unix)]
+    fn set_locale_for_cmp(locale: &str) {
+        // Trigger Once::call_once inside cmp_locale so it won't override later
+        let dummy = Name::new(
+            Path::new("x"),
+            FileType::File {
+                uid: false,
+                exec: false,
+            },
+        );
+        let _ = dummy.cmp_locale(&dummy);
+        let loc = CString::new(locale).unwrap();
+        unsafe {
+            libc::setlocale(libc::LC_ALL, loc.as_ptr());
+        }
+    }
+
+    #[test]
+    #[serial_test::serial]
+    #[cfg(unix)]
+    fn test_cmp_locale_c_name_struct() {
+        set_locale_for_cmp("C");
+
+        let name_upper = Name::new(
+            Path::new("B"),
+            FileType::File {
+                uid: false,
+                exec: false,
+            },
+        );
+        let name_lower = Name::new(
+            Path::new("a"),
+            FileType::File {
+                uid: false,
+                exec: false,
+            },
+        );
+        let name_dot_lower = Name::new(
+            Path::new(".a"),
+            FileType::File {
+                uid: false,
+                exec: false,
+            },
+        );
+        let name_dot_upper = Name::new(
+            Path::new(".A"),
+            FileType::File {
+                uid: false,
+                exec: false,
+            },
+        );
+
+        // In C locale: "B" (0x42) < "a" (0x61) by byte order
+        assert_eq!(name_upper.cmp_locale(&name_lower), Ordering::Less);
+        assert_eq!(name_lower.cmp_locale(&name_upper), Ordering::Greater);
+
+        // In C locale: dot (0x2E) < uppercase (0x41+) < lowercase (0x61+)
+        // ".a" < "a", ".a" < "A", ".A" < "a", ".A" < "A"
+        assert_eq!(name_dot_lower.cmp_locale(&name_lower), Ordering::Less);
+        assert_eq!(name_dot_lower.cmp_locale(&name_upper), Ordering::Less);
+        assert_eq!(name_dot_upper.cmp_locale(&name_lower), Ordering::Less);
+        assert_eq!(name_dot_upper.cmp_locale(&name_upper), Ordering::Less);
+    }
+
+    #[test]
+    #[serial_test::serial]
+    #[cfg(unix)]
+    fn test_cmp_locale_en_us_utf8_name_struct() {
+        set_locale_for_cmp("en_US.UTF-8");
+
+        let name_upper = Name::new(
+            Path::new("B"),
+            FileType::File {
+                uid: false,
+                exec: false,
+            },
+        );
+        let name_lower = Name::new(
+            Path::new("a"),
+            FileType::File {
+                uid: false,
+                exec: false,
+            },
+        );
+        let name_dot_lower = Name::new(
+            Path::new(".a"),
+            FileType::File {
+                uid: false,
+                exec: false,
+            },
+        );
+        let name_dot_upper = Name::new(
+            Path::new(".A"),
+            FileType::File {
+                uid: false,
+                exec: false,
+            },
+        );
+
+        // In en_US.UTF-8: "a" sorts before "B" (alphabetic order)
+        assert_eq!(name_lower.cmp_locale(&name_upper), Ordering::Less);
+        assert_eq!(name_upper.cmp_locale(&name_lower), Ordering::Greater);
+
+        // In en_US.UTF-8: dot is mostly ignored for primary sort key
+        // ".a" < "a", ".a" < "A" (dot as secondary tiebreaker)
+        assert_eq!(name_dot_lower.cmp_locale(&name_lower), Ordering::Less);
+        assert_eq!(name_dot_lower.cmp_locale(&name_upper), Ordering::Less);
+        // ".A" > "a" (primary key: A vs a, A comes after a in en_US)
+        assert_eq!(name_dot_upper.cmp_locale(&name_lower), Ordering::Greater);
+        // ".A" < "A" (same letter, dot version sorts first)
+        assert_eq!(name_dot_upper.cmp_locale(&name_upper), Ordering::Less);
     }
 
     #[test]
