@@ -195,6 +195,26 @@ impl Name {
     pub fn file_type(&self) -> FileType {
         self.file_type
     }
+
+    // Locale-aware comparison using strcoll for matching the behavior of `ls`.
+    #[cfg(unix)]
+    pub fn cmp_locale(&self, other: &Self) -> Ordering {
+        use std::ffi::CString;
+        use std::sync::Once;
+        static LOCALE_INIT: Once = Once::new();
+        LOCALE_INIT.call_once(|| unsafe {
+            libc::setlocale(libc::LC_ALL, b"\0".as_ptr() as *const libc::c_char);
+        });
+        let a = CString::new(self.name.as_str()).unwrap_or_default();
+        let b = CString::new(other.name.as_str()).unwrap_or_default();
+        let result = unsafe { libc::strcoll(a.as_ptr(), b.as_ptr()) };
+        result.cmp(&0)
+    }
+
+    #[cfg(not(unix))]
+    pub fn cmp_locale(&self, other: &Self) -> Ordering {
+        self.cmp(other)
+    }
 }
 
 impl Ord for Name {
