@@ -90,25 +90,7 @@ impl Name {
                 name = format!("\'{}\'", &name);
             }
         }
-        let string = name;
-        if string
-            .chars()
-            .all(|c| c >= 0x20 as char && c != 0x7f as char)
-        {
-            string
-        } else {
-            let mut chars = String::new();
-            for c in string.chars() {
-                // The `escape_default` method on `char` is *almost* what we want here, but
-                // it still escapes non-ASCII UTF-8 characters, which are still printable.
-                if c >= 0x20 as char && c != 0x7f as char {
-                    chars.push(c);
-                } else {
-                    chars += &c.escape_default().collect::<String>();
-                }
-            }
-            chars
-        }
+        crate::display_util::sanitize_for_terminal(&name).into_owned()
     }
 
     fn hyperlink(&self, name: String, hyperlink: HyperlinkOption) -> String {
