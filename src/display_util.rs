@@ -4,8 +4,11 @@ use std::path::Path;
 
 #[inline]
 fn is_dangerous(c: char) -> bool {
-    (c as u32) < 0x20
-        || c == '\u{7f}'
+    let cp = c as u32;
+    cp < 0x20
+        || cp == 0x7f
+        // C1 controls (raw and UTF-8 form both decode here)
+        || (0x80..=0x9f).contains(&cp)
         || matches!(c, '\u{202a}'..='\u{202e}' | '\u{2066}'..='\u{2069}')
 }
 
@@ -103,5 +106,12 @@ mod tests {
     fn safe_path_clean_is_unchanged() {
         let p = PathBuf::from("/home/user/doc.txt");
         assert_eq!(format!("{}", SafePath(&p)), "/home/user/doc.txt");
+    }
+
+    #[test]
+    fn sanitize_escapes_c1_controls() {
+        let out = sanitize_for_terminal("a\u{9d}52;c;evil\u{9c}b");
+        assert!(!out.contains('\u{9d}'));
+        assert!(!out.contains('\u{9c}'));
     }
 }
