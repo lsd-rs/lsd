@@ -198,31 +198,35 @@ fn inner_display_grid(
     output
 }
 
-fn add_header(flags: &Flags, _cells: &[Cell], grid: &mut Grid) {
-    for block in flags.blocks.0.iter() {
-        let header_text = block.get_header();
-        let header_width =
-            get_visible_width(header_text, flags.hyperlink == HyperlinkOption::Always);
+fn add_header(flags: &Flags, cells: &[Cell], grid: &mut Grid) {
+    let num_columns: usize = flags.blocks.0.len();
 
-        // Underline ONLY the header text (no padding)
+    let mut widths = flags
+        .blocks
+        .0
+        .iter()
+        .map(|b| get_visible_width(b.get_header(), flags.hyperlink == HyperlinkOption::Always))
+        .collect::<Vec<usize>>();
+
+    // find max widths of each column
+    for (index, cell) in cells.iter().enumerate() {
+        let index = index % num_columns;
+        widths[index] = std::cmp::max(widths[index], cell.width);
+    }
+
+    for (idx, block) in flags.blocks.0.iter().enumerate() {
+        // center and underline header
         let underlined_header = crossterm::style::Stylize::attribute(
-            header_text.to_string(),
+            format!("{: ^1$}", block.get_header(), widths[idx]),
             crossterm::style::Attribute::Underlined,
         )
         .to_string();
 
-        // Use term_grid's alignment to handle padding - this keeps underline only on text
-        // Right-align numeric columns (Size, Date, INode, Links), left-align text columns
-        let alignment = if block.is_numeric() {
-            Alignment::Right
-        } else {
-            Alignment::Left
-        };
-
         grid.add(Cell {
-            width: header_width,
+            width: widths[idx],
             contents: underlined_header,
-            alignment,
+            // term_grid 0.2 only has Left/Right; centering is done above
+            alignment: Alignment::Left,
         });
     }
 }
