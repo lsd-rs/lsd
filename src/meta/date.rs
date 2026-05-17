@@ -33,16 +33,14 @@ impl From<&Metadata> for Date {
 
 impl Date {
     pub fn render(&self, colors: &Colors, flags: &Flags) -> ColoredString {
-        let now = Local::now();
-        #[allow(deprecated)]
+        let date_string = self.date_string(flags);
         let elem = match self {
-            &Date::Date(modified) if modified > now - Duration::hours(1) => Elem::HourOld,
-            &Date::Date(modified) if modified > now - Duration::days(1) => Elem::DayOld,
-            &Date::Date(_) | Date::Invalid => Elem::Older,
+            Self::Date(modified) => Elem::Date(modified.timestamp()),
+            Self::Invalid => Elem::InvalidDate,
         };
-        colors.colorize(self.date_string(flags), &elem)
-    }
 
+        colors.colorize(date_string, &elem)
+    }
     fn date_string(&self, flags: &Flags) -> String {
         let locale = current_locale();
 

@@ -1,16 +1,6 @@
 <div align="center">
    <sup>Special thanks to:</sup>
    <br>
-   <br>
-   <a href="https://go.warp.dev/lsd">
-      <img alt="Warp sponsorship" width="400" src="https://raw.githubusercontent.com/warpdotdev/brand-assets/refs/heads/main/Github/Sponsor/Warp-Github-LG-02.png">
-   </a>
-
-### [Warp, built for coding with multiple AI agents](https://go.warp.dev/lsd)
-[Available for MacOS, Linux, & Windows](https://go.warp.dev/lsd)<br>
-
-&nbsp;&nbsp;&nbsp;&nbsp;
-
    <sup>Maintained with ❤️ + 🤖 by Pochi</sup>
    <br>
    <br>
@@ -61,24 +51,25 @@ The project is heavily inspired by the super [colorls](https://github.com/athity
 
 Please consult the table below for the installation command associated with your package manager.
 
-| OS/Distro                       | Command                                                                                       |
-| ------------------------------- | ----------------------------------------------------------------------------------------------|
-| Archlinux                       | `pacman -S lsd`                                                                               |
-| Fedora                          | `dnf install lsd`                                                                             |
-| Gentoo                          | `sudo emerge sys-apps/lsd`                                                                    |
-| macOS                           | `brew install lsd` or `sudo port install lsd`                                                 |
-| NixOS                           | `nix-env -iA nixos.lsd`                                                                       |
-| FreeBSD                         | `pkg install lsd`                                                                             |
-| NetBSD or any `pkgsrc` platform | `pkgin install lsd` or `cd /usr/pkgsrc/sysutils/lsd && make install`                          |
-| OpenBSD                         | `pkg_add lsd`                                                                                 |
-| Windows                         | `scoop install lsd` or `winget install --id lsd-rs.lsd` or `choco install lsd`                |
-| Android (via Termux)            | `pkg install lsd`                                                                             |
-| Debian sid and bookworm         | `apt install lsd`                                                                             |
-| Ubuntu 23.04 (Lunar Lobster)    | `apt install lsd`                                                                             |
-| Earlier Ubuntu/Debian versions  | **snap discontinued**, use the method described [here](#installing-binaries-directly) instead |
-| Solus                           | `eopkg it lsd`                                                                                |
-| Void Linux                      | `sudo xbps-install lsd`                                                                       |
-| openSUSE                        | `sudo zypper install lsd`                                                                     |
+| OS/Distro                       | Command                                                                                                              |
+| ------------------------------- | ---------------------------------------------------------------------------------------------------------------------|
+| Archlinux                       | `pacman -S lsd`                                                                                                      |
+| Fedora                          | `dnf install lsd`                                                                                                    |
+| Gentoo                          | `sudo emerge sys-apps/lsd`                                                                                           |
+| macOS                           | `brew install lsd` or `sudo port install lsd`                                                                        |
+| Nix (non NixOS)                 | [`nix-env -iA nixpkgs.lsd`](https://search.nixos.org/packages?show=lsd)                                              |
+| NixOS                           | Add [`environment.systemPackages = [ pkgs.lsd ];`](https://search.nixos.org/packages?show=lsd) to your system config |
+| FreeBSD                         | `pkg install lsd`                                                                                                    |
+| NetBSD or any `pkgsrc` platform | `pkgin install lsd` or `cd /usr/pkgsrc/sysutils/lsd && make install`                                                 |
+| OpenBSD                         | `pkg_add lsd`                                                                                                        |
+| Windows                         | `scoop install lsd` or `winget install --id lsd-rs.lsd` or `choco install lsd`                                       |
+| Android (via Termux)            | `pkg install lsd`                                                                                                    |
+| Debian sid and bookworm         | `apt install lsd`                                                                                                    |
+| Ubuntu 23.04 (Lunar Lobster)    | `apt install lsd`                                                                                                    |
+| Earlier Ubuntu/Debian versions  | **snap discontinued**, use the method described [here](#installing-binaries-directly) instead                        |
+| Solus                           | `eopkg it lsd`                                                                                                       |
+| Void Linux                      | `sudo xbps-install lsd`                                                                                              |
+| openSUSE                        | `sudo zypper install lsd`                                                                                            |
 
 ### Installing from source
 With [Rust's package manager cargo](https://doc.rust-lang.org/stable/cargo/), you can install lsd via:
@@ -111,7 +102,7 @@ alias lt='lsd --tree'
 
 ## Customizing lsd (configuration and theming)
 > [!TIP]
-> In order to make the customization process easier for you we’ve supplied sample files. These files contain the entries for all the defaults that `lsd` comes with after installation. You can find the sample files in the [documentation folder](./doc)`.
+> In order to make the customization process easier for you we’ve supplied sample files. These files contain the entries for all the defaults that `lsd` comes with after installation. You can find the sample files in the [documentation folder](./doc).
 >
 > We've also supplied a [color reference](./doc/colors.md) where we’ve documented the default colors `lsd` uses in its output. You can also preview there.
 
@@ -121,11 +112,11 @@ In order to tailor `lsd` to your specific needs you can create any of the follow
 2. `colors.yaml` → [colors sample file here](./doc/samples/colors-sample.yaml)
 3. `icons.yaml` → [icons sample file here](./doc/samples/icons-sample.yaml)
 
-Note that it is _not_ required to have all three of the files present in order for your configuration to be applied. For example, if you [only want to customize the icons](#customization-example) then only [`icons.yaml`](./doc/icons-sample.yaml) needs to be present in the [configuration directory](#config-file-locations); [`config.yaml`](./doc/config-sample.yaml), and [`colors.yaml`](./doc/colors-sample.yaml) do not have to be present in order for your icon modifications to be applied.
+Note that it is _not_ required to have all three of the files present in order for your configuration to be applied. For example, if you [only want to customize the icons](#customization-example) then only [`icons.yaml`](./doc/samples/icons-sample.yaml) needs to be present in the [configuration directory](#config-file-locations); [`config.yaml`](./doc/samples/config-sample.yaml), and [`colors.yaml`](./doc/samples/colors-sample.yaml) do not have to be present in order for your icon modifications to be applied.
 
 ### Config file locations
 > [!TIP]
-> You can also instruct `lsd` to look for configuration files in a custom location of your choosing by using the following command: `lsd --config-file [YOUR_CUSTOM_PATH]`. This is particularly useful when testing a configuration changes before commiting to them.
+> You can also instruct `lsd` to look for configuration files in a custom location of your choosing by using the following command: `lsd --config-file [YOUR_CUSTOM_PATH]`. This is particularly useful when testing a configuration changes before committing to them.
 
 #### Unix (Linux, Mac, etc...)
 On non-Windows systems `lsd` follows the [XDG Base Directory Specification](https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html), thus `lsd` will look for configuration files any of the following locations:
