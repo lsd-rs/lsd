@@ -147,3 +147,14 @@ truncate-owner:
   after:
   # String to be appended to a name if truncated.
   marker: ""
+
+# == Max Shown ==
+# In tree layout, cap the number of entries shown at each depth level. Entries
+# past the cap roll up into a "... and N more" summary line.
+# max-shown: 10
+
+# == Tree Filter ==
+# In tree layout, only display files matching these globs. Directories are
+# always shown. Multiple globs may be listed.
+# tree-filter:
+#   - "*.rs"

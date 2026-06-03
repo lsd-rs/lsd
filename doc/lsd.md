@@ -122,6 +122,9 @@ lsd is a ls command with a lot of pretty colours and some other stuff to enrich 
 `-I, --ignore-glob <pattern>...`
 : Do not display files/directories with names matching the glob pattern(s). More than one can be specified by repeating the argument [default: ]
 
+`--max-shown <num>`
+: In tree layout, cap the number of entries shown at each depth level. Remaining entries are rolled up into a `... and N more` summary line
+
 `--permission <permission>...`
 : How to display permissions [default: rwx for linux, attributes for windows]  [possible values: rwx, octal, attributes, disable]
 
@@ -148,6 +151,9 @@ lsd is a ls command with a lot of pretty colours and some other stuff to enrich 
 
 `--truncate-owner-marker`
 : Truncation marker appended to a truncated user or group name
+
+`--tree-filter <pattern>...`
+: In tree layout, only display files matching the glob pattern(s). Directories are always shown. More than one can be specified by repeating the argument
 
 # ARGS
 

@@ -4,9 +4,9 @@
 use crate::app::Cli;
 use crate::config_file::Config;
 
+use super::glob_helpers::{create_glob, create_glob_set};
 use clap::Error;
-use clap::error::ErrorKind;
-use globset::{Glob, GlobSet, GlobSetBuilder};
+use globset::{GlobSet, GlobSetBuilder};
 
 /// The struct holding a [GlobSet] and methods to build it.
 #[derive(Clone, Debug)]
@@ -47,7 +47,7 @@ impl IgnoreGlobs {
         let mut glob_set_builder = GlobSetBuilder::new();
 
         for value in &cli.ignore_glob {
-            match Self::create_glob(value) {
+            match create_glob(value) {
                 Ok(glob) => {
                     glob_set_builder.add(glob);
                 }
@@ -55,7 +55,7 @@ impl IgnoreGlobs {
             }
         }
 
-        Some(Self::create_glob_set(&glob_set_builder).map(Self))
+        Some(create_glob_set(&glob_set_builder).map(Self))
     }
 
     /// Get a potential [IgnoreGlobs] from a [Config].
@@ -70,7 +70,7 @@ impl IgnoreGlobs {
         let mut glob_set_builder = GlobSetBuilder::new();
 
         for glob in globs {
-            match Self::create_glob(glob) {
+            match create_glob(glob) {
                 Ok(glob) => {
                     glob_set_builder.add(glob);
                 }
@@ -78,24 +78,9 @@ impl IgnoreGlobs {
             }
         }
 
-        Some(Self::create_glob_set(&glob_set_builder).map(Self))
+        Some(create_glob_set(&glob_set_builder).map(Self))
     }
 
-    /// Create a [Glob] from a provided pattern.
-    ///
-    /// This method is mainly a helper to wrap the handling of potential errors.
-    fn create_glob(pattern: &str) -> Result<Glob, Error> {
-        Glob::new(pattern).map_err(|err| Error::raw(ErrorKind::ValueValidation, err))
-    }
-
-    /// Create a [GlobSet] from a provided [GlobSetBuilder].
-    ///
-    /// This method is mainly a helper to wrap the handling of potential errors.
-    fn create_glob_set(builder: &GlobSetBuilder) -> Result<GlobSet, Error> {
-        builder
-            .build()
-            .map_err(|err| Error::raw(ErrorKind::ValueValidation, err))
-    }
 }
 
 /// The default value of `IgnoreGlobs` is the empty [GlobSet], returned by [GlobSet::empty()].
