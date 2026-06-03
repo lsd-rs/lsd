@@ -60,8 +60,14 @@ impl GitCache {
             match repo.statuses(None) {
                 Ok(status_list) => {
                     for status_entry in status_list.iter() {
+                        // git2-rs returns `None` from `.path()` when the filename
+                        // bytes from libgit2 are not valid UTF-8. Skip those rather
+                        // than panicking; the file still appears in the listing,
+                        // just without a Git status indicator.
+                        let Some(str_path) = status_entry.path() else {
+                            continue;
+                        };
                         // git2-rs provides / separated path even on Windows. We have to rebuild it
-                        let str_path = status_entry.path().unwrap();
                         let path: PathBuf =
                             str_path.split('/').collect::<Vec<_>>().iter().collect();
                         let path = workdir.join(path);
