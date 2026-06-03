@@ -88,6 +88,10 @@ pub struct Cli {
     #[arg(long, value_parser = validate_date_argument)]
     pub date: Option<String>,
 
+    /// Sort by name
+    #[arg(long)]
+    pub namesort: bool,
+
     /// Sort by time modified
     #[arg(short = 't', long)]
     pub timesort: bool,
@@ -108,17 +112,17 @@ pub struct Cli {
     #[arg(short = 'v', long)]
     pub versionsort: bool,
 
-    /// Sort by TYPE instead of name
+    /// Sort by TYPE instead of the configured default (name, unless configured otherwise)
     #[arg(
         long,
         value_name = "TYPE",
-        value_parser = ["size", "time", "version", "extension", "git", "none"],
-        overrides_with_all = ["timesort", "sizesort", "extensionsort", "versionsort", "gitsort", "no_sort"]
+        value_parser = ["name", "size", "time", "version", "extension", "git", "none"],
+        overrides_with_all = ["namesort", "timesort", "sizesort", "extensionsort", "versionsort", "gitsort", "no_sort"]
     )]
     pub sort: Option<String>,
 
     /// Do not sort. List entries in directory order
-    #[arg(short = 'U', long, overrides_with_all = ["timesort", "sizesort", "extensionsort", "versionsort", "gitsort", "sort"])]
+    #[arg(short = 'U', long, overrides_with_all = ["namesort", "timesort", "sizesort", "extensionsort", "versionsort", "gitsort", "sort"])]
     pub no_sort: bool,
 
     /// Reverse the order of the sort
