@@ -36,6 +36,7 @@ impl DateFlag {
             "date" => Some(Self::Date),
             "locale" => Some(Self::Locale),
             "relative" => Some(Self::Relative),
+            "iso" => Some(Self::Iso),
             _ if value.starts_with('+') => Self::from_format_string(value),
             _ => {
                 print_error!("Not a valid date value: {}.", value);
@@ -129,6 +130,13 @@ mod test {
         let argv = ["lsd", "--date", "relative"];
         let cli = Cli::try_parse_from(argv).unwrap();
         assert_eq!(Some(DateFlag::Relative), DateFlag::from_cli(&cli));
+    }
+
+    #[test]
+    fn test_from_cli_iso() {
+        let argv = ["lsd", "--date", "iso"];
+        let cli = Cli::try_parse_from(argv).unwrap();
+        assert_eq!(Some(DateFlag::Iso), DateFlag::from_cli(&cli));
     }
 
     #[test]

@@ -84,7 +84,7 @@ pub struct Cli {
     #[arg(long)]
     pub total_size: bool,
 
-    /// How to display date [default: date] [possible values: date, locale, relative, +date-time-format]
+    /// How to display date [default: date] [possible values: date, iso, locale, relative, +date-time-format]
     #[arg(long, value_parser = validate_date_argument)]
     pub date: Option<String>,
 
@@ -205,10 +205,10 @@ pub struct Cli {
 fn validate_date_argument(arg: &str) -> Result<String, String> {
     if arg.starts_with('+') {
         validate_time_format(arg)
-    } else if arg == "date" || arg == "relative" || arg == "locale" {
+    } else if arg == "date" || arg == "relative" || arg == "locale" || arg == "iso" {
         Result::Ok(arg.to_owned())
     } else {
-        Result::Err("possible values: date, locale, relative, +date-time-format".to_owned())
+        Result::Err("possible values: date, iso, locale, relative, +date-time-format".to_owned())
     }
 }
 
