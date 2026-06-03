@@ -50,6 +50,11 @@ impl Blocks {
         self.0.contains(&Block::Size)
     }
 
+    /// Checks whether `self` contains a [Block] of variant [Lines](Block::Lines).
+    pub fn displays_lines(&self) -> bool {
+        self.0.contains(&Block::Lines)
+    }
+
     /// Inserts a [Block] of variant [INode](Block::Context), if `self` does not already contain a
     /// [Block] of that variant. The positioning will be best-effort approximation of coreutils
     /// ls position for a security context
@@ -194,6 +199,8 @@ pub enum Block {
     Name,
     INode,
     Links,
+    Lines,
+    LinesValue,
     GitStatus,
 }
 
@@ -202,6 +209,8 @@ impl Block {
         match self {
             Block::INode => "INode",
             Block::Links => "Links",
+            Block::Lines => "Lines",
+            Block::LinesValue => "LinesValue",
             Block::Permission => "Permissions",
             Block::User => "User",
             Block::Group => "Group",
@@ -230,6 +239,8 @@ impl TryFrom<&str> for Block {
             "name" => Ok(Self::Name),
             "inode" => Ok(Self::INode),
             "links" => Ok(Self::Links),
+            "lines" => Ok(Self::Lines),
+            "lines_value" => Ok(Self::LinesValue),
             "git" => Ok(Self::GitStatus),
             _ => Err(format!("Not a valid block name: {string}")),
         }
@@ -583,9 +594,21 @@ mod test_block {
     }
 
     #[test]
+    fn test_lines() {
+        assert_eq!(Ok(Block::Lines), Block::try_from("lines"));
+    }
+
+    #[test]
+    fn test_lines_value() {
+        assert_eq!(Ok(Block::LinesValue), Block::try_from("lines_value"));
+    }
+
+    #[test]
     fn test_block_headers() {
         assert_eq!(Block::INode.get_header(), "INode");
         assert_eq!(Block::Links.get_header(), "Links");
+        assert_eq!(Block::Lines.get_header(), "Lines");
+        assert_eq!(Block::LinesValue.get_header(), "LinesValue");
         assert_eq!(Block::Permission.get_header(), "Permissions");
         assert_eq!(Block::User.get_header(), "User");
         assert_eq!(Block::Group.get_header(), "Group");

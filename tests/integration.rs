@@ -829,3 +829,93 @@ fn test_multiple_files() {
         .assert()
         .stdout(predicate::str::is_match(".").unwrap());
 }
+
+#[test]
+fn test_list_lines_with_text_files() {
+    let dir = tempdir();
+
+    let file1 = dir.child("short.txt");
+    file1.write_str("line1\nline2\n").unwrap();
+
+    let file2 = dir.child("empty.txt");
+    file2.touch().unwrap();
+
+    cmd()
+        .arg("--blocks")
+        .arg("lines,name")
+        .arg("--ignore-config")
+        .arg(dir.path())
+        .assert()
+        .success();
+}
+
+#[test]
+fn test_list_lines_value_block() {
+    let dir = tempdir();
+
+    dir.child("test.txt").write_str("a\nb\nc\n").unwrap();
+
+    cmd()
+        .arg("--blocks")
+        .arg("lines_value,name")
+        .arg("--ignore-config")
+        .arg(dir.path())
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("3"));
+}
+
+#[test]
+fn test_tree_with_lines() {
+    let dir = tempdir();
+
+    dir.child("dir").create_dir_all().unwrap();
+    dir.child("dir/file.txt")
+        .write_str("line1\nline2\n")
+        .unwrap();
+
+    cmd()
+        .arg("--tree")
+        .arg("--blocks")
+        .arg("lines,name")
+        .arg("--ignore-config")
+        .arg(dir.path())
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("2"));
+}
+
+#[test]
+fn test_lines_with_binary_file() {
+    let dir = tempdir();
+    let binary_file = dir.child("binary.dat");
+    binary_file.write_binary(&[0u8, 1u8, 2u8, 0u8]).unwrap();
+
+    cmd()
+        .arg("--blocks")
+        .arg("lines,name")
+        .arg("--ignore-config")
+        .arg(dir.path())
+        .assert()
+        .success();
+}
+
+#[test]
+fn test_lines_alignment_in_tree() {
+    let dir = tempdir();
+
+    dir.child("dir").create_dir_all().unwrap();
+    dir.child("short.txt").write_str("a\n").unwrap();
+    dir.child("dir/long.txt")
+        .write_str("1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n")
+        .unwrap();
+
+    cmd()
+        .arg("--tree")
+        .arg("--blocks")
+        .arg("lines,name")
+        .arg("--ignore-config")
+        .arg(dir.path())
+        .assert()
+        .success();
+}

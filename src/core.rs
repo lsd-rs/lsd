@@ -164,6 +164,13 @@ impl Core {
             }
         }
 
+        // Only calculate the total lines of a directory if it will be displayed
+        if self.flags.total_size.0 && self.flags.blocks.displays_lines() {
+            for meta in &mut meta_list.iter_mut() {
+                meta.calculate_total_lines();
+            }
+        }
+
         (meta_list, exit_code)
     }
 
