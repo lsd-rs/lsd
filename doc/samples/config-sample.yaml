@@ -109,6 +109,9 @@ sorting:
   # When "classic" is set, this is set to "none".
   # Possible values: first, last, none
   dir-grouping: none
+  # Whether to respect locale when sorting by name.
+  # Possible values: false, true
+  respect-locale: false
 
 # == No Symlink ==
 # Whether to omit showing symlink targets

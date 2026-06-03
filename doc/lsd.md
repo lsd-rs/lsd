@@ -131,6 +131,9 @@ lsd is a ls command with a lot of pretty colours and some other stuff to enrich 
 `--sort <WORD>...`
 : Sort by WORD instead of name [possible values: size, time, version, extension, git]
 
+`--respect-locale`
+: Respect locale when sorting by name.
+
 `-U`, `--no-sort`
 : Do not sort. List entries in directory order
 
