@@ -37,33 +37,20 @@ impl Icons {
             Some(t) => {
                 // Check file types
                 let file_type: FileType = name.file_type();
-                let icon = match file_type {
-                    FileType::SymLink { is_dir: true } => &t.filetype.symlink_dir,
-                    FileType::SymLink { is_dir: false } => &t.filetype.symlink_file,
-                    FileType::Socket => &t.filetype.socket,
-                    FileType::Pipe => &t.filetype.pipe,
-                    FileType::CharDevice => &t.filetype.device_char,
-                    FileType::BlockDevice => &t.filetype.device_block,
-                    FileType::Special => &t.filetype.special,
-                    _ => {
-                        if let Some(icon) = t.name.get(name.file_name().to_lowercase().as_str()) {
-                            icon
-                        } else if let Some(icon) = name
-                            .extension()
-                            .and_then(|ext| t.extension.get(ext.to_lowercase().as_str()))
-                        {
-                            icon
-                        } else {
-                            match file_type {
-                                FileType::Directory { .. } => &t.filetype.dir,
-                                // If a file has no extension and is executable, show an icon.
-                                // Except for Windows, it marks everything as an executable.
-                                #[cfg(not(windows))]
-                                FileType::File { exec: true, .. } => &t.filetype.executable,
-                                _ => &t.filetype.file,
-                            }
-                        }
-                    }
+                let icon = match icon_scheme(t, name, file_type) {
+                    #[cfg(not(windows))]
+                    (_, _, FileType::File { exec: true, .. }) => &t.filetype.executable,
+                    (_, _, FileType::BlockDevice) => &t.filetype.device_block,
+                    (_, _, FileType::CharDevice) => &t.filetype.device_char,
+                    (_, _, FileType::SymLink { is_dir: true }) => &t.filetype.symlink_dir,
+                    (_, _, FileType::SymLink { is_dir: false }) => &t.filetype.symlink_file,
+                    (_, _, FileType::Pipe) => &t.filetype.pipe,
+                    (_, _, FileType::Socket) => &t.filetype.socket,
+                    (_, _, FileType::Special) => &t.filetype.special,
+                    (None, _, FileType::Directory { .. }) => &t.filetype.dir,
+                    (Some(special_name_icon), _, _) => special_name_icon,
+                    (None, Some(ext_icon), FileType::File { .. }) => ext_icon,
+                    (None, None, FileType::File { .. }) => &t.filetype.file,
                 };
 
                 format!("{}{}", icon, self.icon_separator)
@@ -72,12 +59,26 @@ impl Icons {
     }
 }
 
+fn icon_scheme<'icon>(
+    t: &'icon IconTheme,
+    name: &'icon Name,
+    file_type: FileType,
+) -> (Option<&'icon String>, Option<&'icon String>, FileType) {
+    (
+        t.name.get(name.file_name().to_lowercase().as_str()),
+        name.extension()
+            .and_then(|ext| t.extension.get(ext.to_lowercase().as_str())),
+        file_type,
+    )
+}
+
 #[cfg(test)]
 mod test {
     use super::{IconTheme, Icons};
     use crate::flags::{IconOption, IconTheme as FlagTheme, PermissionFlag};
     use crate::meta::Meta;
-    use std::fs::File;
+    use crate::theme::icon::ByType;
+    use std::fs::{create_dir_all, File};
     use tempfile::tempdir;
 
     #[test]
@@ -204,7 +205,7 @@ mod test {
     }
 
     #[test]
-    fn get_icon_by_name() {
+    fn get_icon_by_name_files() {
         let tmp_dir = tempdir().expect("failed to create temp dir");
 
         for (file_name, file_icon) in &IconTheme::get_default_icons_by_name() {
@@ -220,7 +221,7 @@ mod test {
     }
 
     #[test]
-    fn get_icon_by_extension() {
+    fn get_icon_by_extension_files() {
         let tmp_dir = tempdir().expect("failed to create temp dir");
 
         for (ext, file_icon) in &IconTheme::get_default_icons_by_extension() {
@@ -232,6 +233,40 @@ mod test {
             let icon_str = icon.get(&meta.name);
 
             assert_eq!(icon_str, format!("{}{}", file_icon, icon.icon_separator));
+        }
+    }
+
+    #[test]
+    fn get_icon_by_extension_dir() {
+        let tmp_dir = tempdir().expect("failed to create temp dir");
+
+        for (ext, _) in &IconTheme::get_default_icons_by_extension() {
+            let dir_path = tmp_dir.path().join(format!("folder.{ext}"));
+            create_dir_all(&dir_path).expect("failed to create file");
+            let meta = Meta::from_path(&dir_path, false, false).unwrap();
+
+            let icon = Icons::new(false, IconOption::Always, FlagTheme::Fancy, " ".to_string());
+            let icon_str = icon.get(&meta.name);
+
+            let by_type = ByType::default();
+
+            assert_eq!(icon_str, format!("{}{}", by_type.dir, icon.icon_separator));
+        }
+    }
+
+    #[test]
+    fn get_icon_by_name_dir() {
+        let tmp_dir = tempdir().expect("failed to create temp dir");
+
+        for (dir_name, dir_icon) in &IconTheme::get_default_icons_by_name() {
+            let dir_path = tmp_dir.path().join(dir_name);
+            create_dir_all(&dir_path).expect("failed to create file");
+            let meta = Meta::from_path(&dir_path, false, false).unwrap();
+
+            let icon = Icons::new(false, IconOption::Always, FlagTheme::Fancy, " ".to_string());
+            let icon_str = icon.get(&meta.name);
+
+            assert_eq!(icon_str, format!("{}{}", dir_icon, icon.icon_separator));
         }
     }
 }
