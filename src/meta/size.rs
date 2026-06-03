@@ -73,7 +73,7 @@ impl Size {
             ColoredString::new(Colors::default_style(), left_pad),
             val_content,
         ];
-        if flags.size != SizeFlag::Short {
+        if flags.size == SizeFlag::Default {
             strings.push(ColoredString::new(Colors::default_style(), " ".into()));
         }
         strings.push(unit_content);
