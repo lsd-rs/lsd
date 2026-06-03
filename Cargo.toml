@@ -54,7 +54,7 @@ xdg = "2.5"
 git2 = { version = "0.20", optional = true, default-features = false }
 
 [target.'cfg(unix)'.dependencies]
-users = { version = "0.11.3", package = "uzers" }
+users = { version = "0.12", package = "uzers" }
 xattr = "1"
 
 [target.'cfg(windows)'.dependencies]
