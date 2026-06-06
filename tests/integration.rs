@@ -805,8 +805,8 @@ fn test_date_custom_format_supports_padding() {
 #[test]
 fn test_all_directory() {
     let dir = tempdir();
-    dir.child("one").touch().unwrap();
-    dir.child("two").touch().unwrap();
+    dir.child("subdir-one").touch().unwrap();
+    dir.child("subdir-two").touch().unwrap();
 
     cmd()
         .arg("-a")
@@ -814,7 +814,8 @@ fn test_all_directory() {
         .arg("--ignore-config")
         .arg(dir.path())
         .assert()
-        .stdout(predicate::str::is_match(".").unwrap());
+        .stdout(predicate::str::contains("subdir-one").not())
+        .stdout(predicate::str::contains("subdir-two").not());
 }
 
 #[test]
@@ -824,8 +825,10 @@ fn test_multiple_files() {
     dir.child("two").touch().unwrap();
 
     cmd()
+        .arg("--ignore-config")
         .arg(dir.path().join("one"))
         .arg(dir.path().join("two"))
         .assert()
-        .stdout(predicate::str::is_match(".").unwrap());
+        .stdout(predicate::str::is_match("one").unwrap().count(1))
+        .stdout(predicate::str::is_match("two").unwrap().count(1));
 }
