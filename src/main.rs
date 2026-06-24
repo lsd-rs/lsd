@@ -92,11 +92,11 @@ macro_rules! print_output {
     ($($arg:tt)*) => {
         use std::io::Write;
 
-        let stderr = std::io::stdout();
+        let stdout = std::io::stdout();
 
 
         {
-            let mut handle = stderr.lock();
+            let mut handle = stdout.lock();
             // We can write on stdout, so we simply ignore the error and don't print
             // and stop with success.
             let res = handle.write_all(std::format!($($arg)*).as_bytes());
