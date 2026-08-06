@@ -59,7 +59,9 @@ impl Date {
                         val.format("%F").to_string()
                     }
                 }
-                DateFlag::Formatted(format) => val.format_localized(format, locale).to_string(),
+                // Custom formats are explicit strftime strings; keep POSIX punctuation
+                // (e.g. '.' for %.Nf). format_localized would use ',' in many locales.
+                DateFlag::Formatted(format) => val.format(format).to_string(),
             }
         } else {
             String::from('-')
@@ -364,6 +366,27 @@ mod test {
         assert_eq!(
             "-".to_string().with(Color::AnsiValue(36)),
             date.render(&colors, &flags)
+        );
+    }
+
+    #[test]
+    fn test_custom_format_keeps_posix_fractional_separator() {
+        // Regression: PR #820 switched Formatted dates to format_localized(), which uses a
+        // locale decimal separator (',' in es_ES/de_DE/fr_FR). Custom --date/+TIME_STYLE
+        // formats are strftime strings and must keep a POSIX '.' for %.Nf (as asserted by
+        // tests/integration.rs::test_date_custom_format_supports_nanos_with_length).
+        let date = Date::Date(Local::now());
+        let colors = Colors::new(ThemeOption::NoColor);
+        let flags = Flags {
+            date: DateFlag::Formatted("%.3f".to_string()),
+            ..Default::default()
+        };
+
+        let rendered = date.render(&colors, &flags).to_string();
+        assert!(
+            rendered.starts_with('.')
+                && rendered.chars().skip(1).take(3).all(|c| c.is_ascii_digit()),
+            "expected POSIX fractional seconds like .NNN, got {rendered:?}"
         );
     }
 }
