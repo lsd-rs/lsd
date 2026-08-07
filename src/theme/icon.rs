@@ -1,22 +1,13 @@
 use serde::Deserialize;
 use std::collections::HashMap;
 
-enum ByFilename {
-    Name,
-    Extension,
-}
-
-fn deserialize_by_filename<'de, D>(
+fn deserialize_with_default<'de, D>(
     deserializer: D,
-    by: ByFilename,
+    default: HashMap<String, String>,
 ) -> Result<HashMap<String, String>, D::Error>
 where
     D: serde::de::Deserializer<'de>,
 {
-    let default = match by {
-        ByFilename::Name => IconTheme::get_default_icons_by_name(),
-        ByFilename::Extension => IconTheme::get_default_icons_by_extension(),
-    };
     HashMap::<_, _>::deserialize(deserializer)
         .map(|input| default.into_iter().chain(input).collect())
 }
@@ -25,14 +16,21 @@ fn deserialize_by_name<'de, D>(deserializer: D) -> Result<HashMap<String, String
 where
     D: serde::de::Deserializer<'de>,
 {
-    deserialize_by_filename(deserializer, ByFilename::Name)
+    deserialize_with_default(deserializer, IconTheme::get_default_icons_by_name())
 }
 
 fn deserialize_by_extension<'de, D>(deserializer: D) -> Result<HashMap<String, String>, D::Error>
 where
     D: serde::de::Deserializer<'de>,
 {
-    deserialize_by_filename(deserializer, ByFilename::Extension)
+    deserialize_with_default(deserializer, IconTheme::get_default_icons_by_extension())
+}
+
+fn deserialize_by_prefix<'de, D>(deserializer: D) -> Result<HashMap<String, String>, D::Error>
+where
+    D: serde::de::Deserializer<'de>,
+{
+    deserialize_with_default(deserializer, IconTheme::get_default_icons_by_prefix())
 }
 
 #[derive(Debug, Deserialize, PartialEq, Eq)]
@@ -44,6 +42,8 @@ pub struct IconTheme {
     pub name: HashMap<String, String>,
     #[serde(deserialize_with = "deserialize_by_extension")]
     pub extension: HashMap<String, String>,
+    #[serde(deserialize_with = "deserialize_by_prefix")]
+    pub prefix: HashMap<String, String>,
     pub filetype: ByType,
 }
 
@@ -69,6 +69,7 @@ impl Default for IconTheme {
         IconTheme {
             name: Self::get_default_icons_by_name(),
             extension: Self::get_default_icons_by_extension(),
+            prefix: Self::get_default_icons_by_prefix(),
             filetype: ByType::default(),
         }
     }
@@ -113,6 +114,7 @@ impl IconTheme {
         IconTheme {
             name: HashMap::new(),
             extension: HashMap::new(),
+            prefix: HashMap::new(),
             filetype: ByType::unicode(),
         }
     }
@@ -752,6 +754,31 @@ impl IconTheme {
         .map(|&s| (s.0.to_owned(), s.1.to_owned()))
         .collect::<HashMap<_, _>>()
     }
+
+    // pub only for testing in icons.rs
+    pub fn get_default_icons_by_prefix() -> HashMap<String, String> {
+        // Note: prefixes must be lower-case
+        [
+            ("log", "\u{f18d}"), // ""
+        ]
+        .iter()
+        .map(|&s| (s.0.to_owned(), s.1.to_owned()))
+        .collect::<HashMap<_, _>>()
+    }
+
+    /// Return the icon for the longest matching prefix of `name`.
+    ///
+    /// Prefix keys are expected to be lower-case. The file name is
+    /// lower-cased before matching. If several prefixes match, the longest
+    /// one wins; ties are broken lexicographically so the result is stable.
+    pub fn get_icon_by_prefix(&self, name: &str) -> Option<&String> {
+        let name = name.to_lowercase();
+        self.prefix
+            .iter()
+            .filter(|(prefix, _)| name.starts_with(prefix.as_str()))
+            .max_by(|(a, _), (b, _)| a.len().cmp(&b.len()).then_with(|| a.cmp(b)))
+            .map(|(_, icon)| icon)
+    }
 }
 
 #[cfg(test)]
@@ -770,6 +797,8 @@ extension:
   go: 
   hs: 
   rs: 
+prefix:
+  log: 
 filetype:
   dir: 
   file: 
@@ -864,5 +893,28 @@ filetype:
         let theme: IconTheme = Theme::with_yaml("extension:\n  rs: 🦀").unwrap();
         // the default icon  should be used for *.go files.
         assert_eq!(theme.extension.get("go").unwrap(), "\u{e627}");
+    }
+
+    #[test]
+    fn test_custom_icon_by_prefix() {
+        // When a user sets to use 📦-icon for files starting with `cargo`,
+        let theme: IconTheme = Theme::with_yaml("prefix:\n  cargo: 📦").unwrap();
+        // 📦-icon should be returned for files starting with `cargo`.
+        assert_eq!(theme.get_icon_by_prefix("cargo.lock").unwrap(), "📦");
+    }
+
+    #[test]
+    fn test_default_icon_by_prefix_with_custom_entry() {
+        // When a user sets to use 📦-icon for files starting with `cargo`,
+        let theme: IconTheme = Theme::with_yaml("prefix:\n  cargo: 📦").unwrap();
+        // the default icon  should still be used for files starting with `log`.
+        assert_eq!(theme.get_icon_by_prefix("log.lsd.0").unwrap(), "\u{f18d}");
+    }
+
+    #[test]
+    fn test_prefix_longest_match_wins() {
+        let theme: IconTheme = Theme::with_yaml("prefix:\n  cargo: 📦\n  cargo.lock: 🔒").unwrap();
+        assert_eq!(theme.get_icon_by_prefix("cargo.lock").unwrap(), "🔒");
+        assert_eq!(theme.get_icon_by_prefix("cargo.toml").unwrap(), "📦");
     }
 }

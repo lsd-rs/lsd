@@ -690,6 +690,22 @@ fn test_upper_case_ext_icon_match() {
 
 #[cfg(unix)]
 #[test]
+fn test_prefix_icon_match() {
+    let dir = tempdir();
+    dir.child("log.lsd.0").touch().unwrap();
+    let test_file = dir.path().join("log.lsd.0");
+
+    cmd()
+        .arg("--icon")
+        .arg("always")
+        .arg("--ignore-config")
+        .arg(test_file)
+        .assert()
+        .stdout(predicate::str::contains("\u{f18d}"));
+}
+
+#[cfg(unix)]
+#[test]
 fn test_truncate_owner() {
     let dir = tempdir();
     dir.child("foo").touch().unwrap();
