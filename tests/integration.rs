@@ -776,7 +776,12 @@ fn test_date_custom_format_supports_nanos_with_length() {
         .arg(dir.path())
         .assert()
         .stdout(
-            predicate::str::is_match("testDateFormat\\.[0-9]{3}")
+            // chrono's `format_localized` renders the `%.3f` fractional
+            // seconds using the active locale's decimal separator, which is
+            // `,` in locales such as es_ES/de_DE/fr_FR rather than `.`. Accept
+            // either so the test is locale-agnostic (the assertion only cares
+            // that three fractional digits follow a decimal separator).
+            predicate::str::is_match("testDateFormat[.,][0-9]{3}")
                 .unwrap()
                 .count(2),
         );
