@@ -121,6 +121,10 @@ pub struct Cli {
     #[arg(short = 'U', long, overrides_with_all = ["timesort", "sizesort", "extensionsort", "versionsort", "gitsort", "sort"])]
     pub no_sort: bool,
 
+    /// Do not sort and show hidden entries. Same as -a -U
+    #[arg(short = 'f', overrides_with_all = ["timesort", "sizesort", "extensionsort", "versionsort", "gitsort", "sort"])]
+    pub no_sort_all: bool,
+
     /// Reverse the order of the sort
     #[arg(short, long)]
     pub reverse: bool,

@@ -412,6 +412,21 @@ fn test_show_folder_of_symlink_for_long_multi() {
 }
 
 #[test]
+fn test_no_sort_all_shows_hidden_entries() {
+    let dir = tempdir();
+    dir.child(".hidden").touch().unwrap();
+    dir.child("visible").touch().unwrap();
+    cmd()
+        .arg("-f")
+        .arg("-1")
+        .arg("--ignore-config")
+        .arg(dir.path())
+        .assert()
+        .stdout(predicate::str::contains(".hidden"))
+        .stdout(predicate::str::contains("visible"));
+}
+
+#[test]
 fn test_version_sort() {
     let dir = tempdir();
     dir.child("0.3.7").touch().unwrap();
