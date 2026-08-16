@@ -168,6 +168,7 @@ jobs:
       with:
         toolchain: ${{ steps.vars.outputs.TOOLCHAIN }}
         target: ${{ matrix.job.target }}
+        cache-key: ${{ matrix.job.target }}
         rustflags: ""
     - name: Install `cross`
       if: steps.vars.outputs.CARGO_USE_CROSS
