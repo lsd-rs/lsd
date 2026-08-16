@@ -48,6 +48,8 @@ impl Icons {
                     _ => {
                         if let Some(icon) = t.name.get(name.file_name().to_lowercase().as_str()) {
                             icon
+                        } else if let Some(icon) = t.get_icon_by_prefix(name.file_name()) {
+                            icon
                         } else if let Some(icon) = name
                             .extension()
                             .and_then(|ext| t.extension.get(ext.to_lowercase().as_str()))
@@ -233,5 +235,34 @@ mod test {
 
             assert_eq!(icon_str, format!("{}{}", file_icon, icon.icon_separator));
         }
+    }
+
+    #[test]
+    fn get_icon_by_prefix() {
+        let tmp_dir = tempdir().expect("failed to create temp dir");
+
+        for (prefix, file_icon) in &IconTheme::get_default_icons_by_prefix() {
+            let file_path = tmp_dir.path().join(format!("{prefix}.lsd.0"));
+            File::create(&file_path).expect("failed to create file");
+            let meta = Meta::from_path(&file_path, false, PermissionFlag::Rwx).unwrap();
+
+            let icon = Icons::new(false, IconOption::Always, FlagTheme::Fancy, " ".to_string());
+            let icon_str = icon.get(&meta.name);
+
+            assert_eq!(icon_str, format!("{}{}", file_icon, icon.icon_separator));
+        }
+    }
+
+    #[test]
+    fn get_icon_by_prefix_overrides_extension() {
+        let tmp_dir = tempdir().expect("failed to create temp dir");
+        let file_path = tmp_dir.path().join("log.txt");
+        File::create(&file_path).expect("failed to create file");
+        let meta = Meta::from_path(&file_path, false, PermissionFlag::Rwx).unwrap();
+
+        let icon = Icons::new(false, IconOption::Always, FlagTheme::Fancy, " ".to_string());
+        let icon_str = icon.get(&meta.name);
+
+        assert_eq!(icon_str, format!("{}{}", "\u{f18d}", icon.icon_separator));
     }
 }
