@@ -19,46 +19,34 @@ jobs:
       matrix:
         job: [ { os: ubuntu-latest }, { os: macos-latest }, { os: windows-latest } ]
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v7
     - name: Install `rust` toolchain
-      uses: actions-rs/toolchain@v1
+      uses: actions-rust-lang/setup-rust-toolchain@v1
       with:
         toolchain: ${{ env.RUST_MIN_SRV }}
-        override: true
-        profile: minimal # minimal component installation (ie, no documentation)
         components: rustfmt, clippy
+        rustflags: ""
     - name: "`fmt` testing"
-      uses: actions-rs/cargo@v1
-      with:
-        command: fmt
-        args: --all -- --check
+      run: cargo fmt --all -- --check
     - name: "`clippy` testing"
       if: success() || failure() # run regardless of prior step ("`fmt` testing") success/failure
-      uses: actions-rs/cargo@v1
-      with:
-        command: clippy
-        args: --tests -- -D warnings
+      run: cargo clippy --tests -- -D warnings
     - name: "`clap` deprecated checks"
       if: success() || failure() # run regardless of prior step ("`fmt` testing") success/failure
-      uses: actions-rs/cargo@v1
-      with:
-        command: check
-        args: --features clap/deprecated
+      run: cargo check --features clap/deprecated
 
   min_version:
     name: MinSRV # Minimum supported rust version
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v7
     - name: Install `rust` toolchain (v${{ env.RUST_MIN_SRV }})
-      uses: actions-rs/toolchain@v1
+      uses: actions-rust-lang/setup-rust-toolchain@v1
       with:
         toolchain: ${{ env.RUST_MIN_SRV }}
-        profile: minimal # minimal component installation (ie, no documentation)
+        rustflags: ""
     - name: Test
-      uses: actions-rs/cargo@v1
-      with:
-        command: test
+      run: cargo test
 
   build:
     name: Build
@@ -75,7 +63,7 @@ jobs:
           - { os: ubuntu-latest  , target: riscv64gc-unknown-linux-gnu  , use-cross: use-cross }
           - { os: ubuntu-latest  , target: x86_64-unknown-linux-gnu    , use-cross: use-cross }
           - { os: ubuntu-latest  , target: x86_64-unknown-linux-musl   , use-cross: use-cross }
-          - { os: macos-latest   , target: x86_64-apple-darwin }
+          - { os: macos-15-intel , target: x86_64-apple-darwin }
           - { os: macos-latest   , target: aarch64-apple-darwin }
           - { os: windows-latest , target: i686-pc-windows-gnu }
           - { os: windows-latest , target: i686-pc-windows-msvc }
@@ -86,7 +74,7 @@ jobs:
       DEPLOY: ${{ steps.vars.outputs.DEPLOY }}
 
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v7
     - name: Install any prerequisites
       shell: bash
       run: |
@@ -105,77 +93,58 @@ jobs:
         case ${{ matrix.job.target }} in *-pc-windows-gnu) TOOLCHAIN="stable-${{ matrix.job.target }}" ;; esac;
         # * use requested TOOLCHAIN if specified
         if [ -n "${{ matrix.job.toolchain }}" ]; then TOOLCHAIN="${{ matrix.job.toolchain }}" ; fi
-        echo set-output name=TOOLCHAIN::${TOOLCHAIN}
-        echo ::set-output name=TOOLCHAIN::${TOOLCHAIN}
+        echo "TOOLCHAIN=${TOOLCHAIN}" >> "$GITHUB_OUTPUT"
         # staging directory
         STAGING='_staging'
-        echo set-output name=STAGING::${STAGING}
-        echo ::set-output name=STAGING::${STAGING}
+        echo "STAGING=${STAGING}" >> "$GITHUB_OUTPUT"
         # determine EXE suffix
         EXE_suffix="" ; case ${{ matrix.job.target }} in *-pc-windows-*) EXE_suffix=".exe" ;; esac;
-        echo set-output name=EXE_suffix::${EXE_suffix}
-        echo ::set-output name=EXE_suffix::${EXE_suffix}
+        echo "EXE_suffix=${EXE_suffix}" >> "$GITHUB_OUTPUT"
         # parse commit reference info
         REF_NAME=${GITHUB_REF#refs/*/}
         unset REF_BRANCH ; case ${GITHUB_REF} in refs/heads/*) REF_BRANCH=${GITHUB_REF#refs/heads/} ;; esac;
         unset REF_TAG ; case ${GITHUB_REF} in refs/tags/*) REF_TAG=${GITHUB_REF#refs/tags/} ;; esac;
         REF_SHAS=${GITHUB_SHA:0:8}
-        echo set-output name=REF_NAME::${REF_NAME}
-        echo set-output name=REF_BRANCH::${REF_BRANCH}
-        echo set-output name=REF_TAG::${REF_TAG}
-        echo set-output name=REF_SHAS::${REF_SHAS}
-        echo ::set-output name=REF_NAME::${REF_NAME}
-        echo ::set-output name=REF_BRANCH::${REF_BRANCH}
-        echo ::set-output name=REF_TAG::${REF_TAG}
-        echo ::set-output name=REF_SHAS::${REF_SHAS}
+        echo "REF_NAME=${REF_NAME}" >> "$GITHUB_OUTPUT"
+        echo "REF_BRANCH=${REF_BRANCH}" >> "$GITHUB_OUTPUT"
+        echo "REF_TAG=${REF_TAG}" >> "$GITHUB_OUTPUT"
+        echo "REF_SHAS=${REF_SHAS}" >> "$GITHUB_OUTPUT"
         # package name
         PKG_suffix=".tar.gz" ; case ${{ matrix.job.target }} in *-pc-windows-*) PKG_suffix=".zip" ;; esac;
         PKG_BASENAME=${PROJECT_NAME}-${REF_TAG:-$REF_SHAS}-${{ matrix.job.target }}
         PKG_NAME=${PKG_BASENAME}${PKG_suffix}
-        echo set-output name=PKG_suffix::${PKG_suffix}
-        echo set-output name=PKG_BASENAME::${PKG_BASENAME}
-        echo set-output name=PKG_NAME::${PKG_NAME}
-        echo ::set-output name=PKG_suffix::${PKG_suffix}
-        echo ::set-output name=PKG_BASENAME::${PKG_BASENAME}
-        echo ::set-output name=PKG_NAME::${PKG_NAME}
+        echo "PKG_suffix=${PKG_suffix}" >> "$GITHUB_OUTPUT"
+        echo "PKG_BASENAME=${PKG_BASENAME}" >> "$GITHUB_OUTPUT"
+        echo "PKG_NAME=${PKG_NAME}" >> "$GITHUB_OUTPUT"
         # deployable tag? (ie, leading "vM" or "M"; M == version number)
         unset DEPLOY ; if [[ $REF_TAG =~ ^[vV]?[0-9].* ]]; then DEPLOY='true' ; fi
-        echo set-output name=DEPLOY::${DEPLOY:-<empty>/false}
-        echo ::set-output name=DEPLOY::${DEPLOY}
+        echo "DEPLOY=${DEPLOY}" >> "$GITHUB_OUTPUT"
         # DPKG architecture?
         unset DPKG_ARCH ; case ${{ matrix.job.target }} in aarch64-*-linux-*) DPKG_ARCH=arm64 ;; i686-*-linux-*) DPKG_ARCH=i686 ;; x86_64-*-linux-*) DPKG_ARCH=amd64 ;; esac;
-        echo set-output name=DPKG_ARCH::${DPKG_ARCH}
-        echo ::set-output name=DPKG_ARCH::${DPKG_ARCH}
+        echo "DPKG_ARCH=${DPKG_ARCH}" >> "$GITHUB_OUTPUT"
         # DPKG version?
         unset DPKG_VERSION ; if [[ $REF_TAG =~ ^[vV]?[0-9].* ]]; then DPKG_VERSION=${REF_TAG/#[vV]/} ; fi
-        echo set-output name=DPKG_VERSION::${DPKG_VERSION}
-        echo ::set-output name=DPKG_VERSION::${DPKG_VERSION}
+        echo "DPKG_VERSION=${DPKG_VERSION}" >> "$GITHUB_OUTPUT"
         # DPKG base name/conflicts?
         DPKG_BASENAME=${PROJECT_NAME}
         DPKG_CONFLICTS=${PROJECT_NAME}-musl
         case ${{ matrix.job.target }} in *-musl) DPKG_BASENAME=${PROJECT_NAME}-musl ; DPKG_CONFLICTS=${PROJECT_NAME} ;; esac;
-        echo set-output name=DPKG_BASENAME::${DPKG_BASENAME}
-        echo set-output name=DPKG_CONFLICTS::${DPKG_CONFLICTS}
-        echo ::set-output name=DPKG_BASENAME::${DPKG_BASENAME}
-        echo ::set-output name=DPKG_CONFLICTS::${DPKG_CONFLICTS}
+        echo "DPKG_BASENAME=${DPKG_BASENAME}" >> "$GITHUB_OUTPUT"
+        echo "DPKG_CONFLICTS=${DPKG_CONFLICTS}" >> "$GITHUB_OUTPUT"
         # DPKG name
         unset DPKG_NAME;
         if [[ -n $DPKG_ARCH && -n $DPKG_VERSION ]]; then DPKG_NAME="${DPKG_BASENAME}_${DPKG_VERSION}_${DPKG_ARCH}.deb" ; fi
-        echo set-output name=DPKG_NAME::${DPKG_NAME}
-        echo ::set-output name=DPKG_NAME::${DPKG_NAME}
+        echo "DPKG_NAME=${DPKG_NAME}" >> "$GITHUB_OUTPUT"
         # target-specific options
         # * CARGO_USE_CROSS (truthy)
         CARGO_USE_CROSS='true' ; case '${{ matrix.job.use-cross }}' in ''|0|f|false|n|no) unset CARGO_USE_CROSS ;; esac;
-        echo set-output name=CARGO_USE_CROSS::${CARGO_USE_CROSS:-<empty>/false}
-        echo ::set-output name=CARGO_USE_CROSS::${CARGO_USE_CROSS}
+        echo "CARGO_USE_CROSS=${CARGO_USE_CROSS}" >> "$GITHUB_OUTPUT"
         # * test only binary for arm-type targets
         unset CARGO_TEST_OPTIONS ; case ${{ matrix.job.target }} in arm-* | aarch64-*-linux-*) CARGO_TEST_OPTIONS="--bin ${PROJECT_NAME}" ;; esac;
-        echo set-output name=CARGO_TEST_OPTIONS::${CARGO_TEST_OPTIONS}
-        echo ::set-output name=CARGO_TEST_OPTIONS::${CARGO_TEST_OPTIONS}
+        echo "CARGO_TEST_OPTIONS=${CARGO_TEST_OPTIONS}" >> "$GITHUB_OUTPUT"
         # * strip executable?
         STRIP="strip" ; case ${{ matrix.job.target }} in arm-*-linux-*hf) STRIP="arm-linux-gnueabihf-strip" ;; aarch64-*-linux-*) STRIP="aarch64-linux-gnu-strip" ;; riscv64gc-*-linux-*) STRIP="" ;; *-pc-windows-msvc) STRIP="" ;; esac;
-        echo set-output name=STRIP::${STRIP}
-        echo ::set-output name=STRIP::${STRIP}
+        echo "STRIP=${STRIP}" >> "$GITHUB_OUTPUT"
     - name: Create all needed build/work directories
       shell: bash
       run: |
@@ -195,27 +164,30 @@ jobs:
     - name: Generate Manpage
       run: pandoc --standalone --to man doc/lsd.md -o lsd.1
     - name: Install `rust` toolchain
-      uses: actions-rs/toolchain@v1
+      uses: actions-rust-lang/setup-rust-toolchain@v1
       with:
         toolchain: ${{ steps.vars.outputs.TOOLCHAIN }}
         target: ${{ matrix.job.target }}
-        override: true
-        profile: minimal # minimal component installation (ie, no documentation)
-    - name: Build
-      uses: actions-rs/cargo@v1
+        rustflags: ""
+    - name: Install `cross`
+      if: steps.vars.outputs.CARGO_USE_CROSS
+      uses: taiki-e/install-action@v2
       with:
-        use-cross: ${{ steps.vars.outputs.CARGO_USE_CROSS }}
-        command: build
-        args: --release --target=${{ matrix.job.target }} --locked
-    - name: Test
-      if: matrix.job.target != 'aarch64-apple-darwin'
-      uses: actions-rs/cargo@v1
-      with:
-        use-cross: ${{ steps.vars.outputs.CARGO_USE_CROSS }}
-        command: test
-        args: --target=${{ matrix.job.target }} ${{ steps.vars.outputs.CARGO_TEST_OPTIONS}}
+        tool: cross
+    - name: Build with Cargo
+      if: ${{ !steps.vars.outputs.CARGO_USE_CROSS }}
+      run: cargo build --release --target=${{ matrix.job.target }} --locked
+    - name: Build with cross
+      if: steps.vars.outputs.CARGO_USE_CROSS
+      run: cross build --release --target=${{ matrix.job.target }} --locked
+    - name: Test with Cargo
+      if: ${{ !steps.vars.outputs.CARGO_USE_CROSS }}
+      run: cargo test --target=${{ matrix.job.target }} ${{ steps.vars.outputs.CARGO_TEST_OPTIONS}}
+    - name: Test with cross
+      if: steps.vars.outputs.CARGO_USE_CROSS
+      run: cross test --target=${{ matrix.job.target }} ${{ steps.vars.outputs.CARGO_TEST_OPTIONS}}
     - name: Archive executable artifacts
-      uses: actions/upload-artifact@master
+      uses: actions/upload-artifact@v7
       with:
         name: ${{ env.PROJECT_NAME }}-${{ matrix.job.target }}
         path: target/${{ matrix.job.target }}/release/${{ env.PROJECT_NAME }}${{ steps.vars.outputs.EXE_suffix }}
@@ -276,7 +248,7 @@ jobs:
           rm debian-binary control.tar.xz data.tar.xz control.tar.zst data.tar.zst
         fi
     - name: Publish
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v3
       if: steps.vars.outputs.DEPLOY
       with:
         files: |
@@ -350,7 +322,7 @@ jobs:
         # job: [ { os: ubuntu-latest }, { os: macos-latest }, { os: windows-latest } ]
         job: [ { os: ubuntu-latest } ] ## cargo-tarpaulin is currently only available on linux
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v7
     # - name: Reattach HEAD ## may be needed for accurate code coverage info
     #   run: git checkout ${{ github.head_ref }}
     - name: Initialize workflow variables
@@ -359,13 +331,11 @@ jobs:
       run: |
         # staging directory
         STAGING='_staging'
-        echo set-output name=STAGING::${STAGING}
-        echo ::set-output name=STAGING::${STAGING}
+        echo "STAGING=${STAGING}" >> "$GITHUB_OUTPUT"
         # check for CODECOV_TOKEN availability (work-around for inaccessible 'secrets' object for 'if'; see <https://github.community/t5/GitHub-Actions/jobs-lt-job-id-gt-if-does-not-work-with-env-secrets/m-p/38549>)
         unset HAS_CODECOV_TOKEN
         if [ -n $CODECOV_TOKEN ]; then HAS_CODECOV_TOKEN='true' ; fi
-        echo set-output name=HAS_CODECOV_TOKEN::${HAS_CODECOV_TOKEN}
-        echo ::set-output name=HAS_CODECOV_TOKEN::${HAS_CODECOV_TOKEN}
+        echo "HAS_CODECOV_TOKEN=${HAS_CODECOV_TOKEN}" >> "$GITHUB_OUTPUT"
       env:
         CODECOV_TOKEN: "${{ secrets.CODECOV_TOKEN }}"
     - name: Create all needed build/work directories
