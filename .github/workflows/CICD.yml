@@ -30,10 +30,10 @@ jobs:
       run: cargo fmt --all -- --check
     - name: "`clippy` testing"
       if: success() || failure() # run regardless of prior step ("`fmt` testing") success/failure
-      run: cargo clippy --tests -- -D warnings
+      run: cargo clippy --locked --tests -- -D warnings
     - name: "`clap` deprecated checks"
       if: success() || failure() # run regardless of prior step ("`fmt` testing") success/failure
-      run: cargo check --features clap/deprecated
+      run: cargo check --locked --features clap/deprecated
 
   min_version:
     name: MinSRV # Minimum supported rust version
@@ -46,7 +46,7 @@ jobs:
         toolchain: ${{ env.RUST_MIN_SRV }}
         rustflags: ""
     - name: Test
-      run: cargo test
+      run: cargo test --locked
 
   build:
     name: Build
@@ -182,10 +182,10 @@ jobs:
       run: cross build --release --target=${{ matrix.job.target }} --locked
     - name: Test with Cargo
       if: ${{ !steps.vars.outputs.CARGO_USE_CROSS }}
-      run: cargo test --target=${{ matrix.job.target }} ${{ steps.vars.outputs.CARGO_TEST_OPTIONS}}
+      run: cargo test --locked --target=${{ matrix.job.target }} ${{ steps.vars.outputs.CARGO_TEST_OPTIONS}}
     - name: Test with cross
       if: steps.vars.outputs.CARGO_USE_CROSS
-      run: cross test --target=${{ matrix.job.target }} ${{ steps.vars.outputs.CARGO_TEST_OPTIONS}}
+      run: cross test --locked --target=${{ matrix.job.target }} ${{ steps.vars.outputs.CARGO_TEST_OPTIONS}}
     - name: Archive executable artifacts
       uses: actions/upload-artifact@v7
       with:
