@@ -82,6 +82,16 @@ And if you want to install the latest `main` branch commit you can do so via:
 cargo install --git https://github.com/lsd-rs/lsd.git --branch main
 ```
 
+### Shell completions
+`lsd` can generate shell completions for Bash, Fish, Zsh, and PowerShell at build time. To write them to a known directory, set `SHELL_COMPLETIONS_DIR` before building or installing from source:
+
+```sh
+mkdir -p completions
+SHELL_COMPLETIONS_DIR="$(pwd)/completions" cargo build --release
+```
+
+This creates `lsd.bash`, `lsd.fish`, `_lsd`, and `_lsd.ps1` in the completions directory. Install the file for your shell according to your shell's completion setup. If `SHELL_COMPLETIONS_DIR` is not set, Cargo's `OUT_DIR` is used during normal Cargo builds.
+
 ### Installing binaries directly
 The [release page](https://github.com/lsd-rs/lsd/releases) includes precompiled binaries for Linux, macOS, and Windows for every release. You can also get the latest binary of the `main` branch from the [GitHub action build artifacts](https://github.com/lsd-rs/lsd/actions?query=branch%3Amain+is%3Asuccess+event%3Apush) (choose the top action and then scroll down to the artifacts section).
 
