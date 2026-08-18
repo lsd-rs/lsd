@@ -52,6 +52,11 @@ pub struct Cli {
     #[arg(short = '1', long)]
     pub oneline: bool,
 
+    /// Assume the given terminal width to lay out the grid, forcing multi-column output even
+    /// when piped (0 means auto-detect from the terminal)
+    #[arg(short = 'w', long, value_name = "WIDTH")]
+    pub width: Option<usize>,
+
     /// Recurse into directories
     #[arg(short = 'R', long, conflicts_with = "tree")]
     pub recursive: bool,

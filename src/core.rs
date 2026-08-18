@@ -75,8 +75,10 @@ impl Core {
         // Most of the programs does not handle correctly the ansi colors
         // or require a raw output (like the `wc` command).
         if !tty_available {
-            // we should not overwrite the tree layout
-            if flags.layout != Layout::Tree {
+            // We should not overwrite the tree layout, and an explicit `--width` keeps the
+            // grid layout so that multi-column output can be forced even when piped.
+            let forced_width = flags.width.0.is_some_and(|w| w > 0);
+            if flags.layout != Layout::Tree && !forced_width {
                 flags.layout = Layout::OneLine;
             }
 

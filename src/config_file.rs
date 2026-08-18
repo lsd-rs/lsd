@@ -44,6 +44,7 @@ pub struct Config {
     pub header: Option<bool>,
     pub literal: Option<bool>,
     pub truncate_owner: Option<TruncateOwner>,
+    pub width: Option<usize>,
 }
 
 #[derive(Eq, PartialEq, Debug, Deserialize)]
@@ -129,6 +130,7 @@ impl Config {
             header: None,
             literal: None,
             truncate_owner: None,
+            width: None,
         }
     }
 
@@ -362,6 +364,12 @@ truncate-owner:
   after:
   # String to be appended to a name if truncated.
   marker: ""
+
+# == Width ==
+# Assume the given terminal width when laying out the grid. Setting this forces
+# multi-column (grid) output even when the output is piped, mirroring `ls -w`.
+# Leave it unspecified (or set 0) to auto-detect the width from the terminal.
+# width: 80
 "#;
 
 #[cfg(test)]
@@ -432,6 +440,7 @@ mod tests {
                     after: None,
                     marker: Some("".to_string()),
                 }),
+                width: None,
             },
             c
         );

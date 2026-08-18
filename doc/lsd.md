@@ -92,6 +92,9 @@ lsd is a ls command with a lot of pretty colours and some other stuff to enrich 
 `-v`, `--versionsort`
 : Natural sort of (version) numbers within text
 
+`-w`, `--width WIDTH`
+: Assume the given terminal width to lay out the grid, forcing multi-column output even when piped (0 means auto-detect from the terminal)
+
 `--blocks <blocks>...`
 : Specify the blocks that will be displayed and in what order [possible values: permission, user, group, size, date, name, inode, git]
 

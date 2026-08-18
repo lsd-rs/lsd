@@ -18,6 +18,7 @@ pub mod symlink_arrow;
 pub mod symlinks;
 pub mod total_size;
 pub mod truncate_owner;
+pub mod width;
 
 pub use blocks::Blocks;
 pub use color::Color;
@@ -45,6 +46,7 @@ pub use symlink_arrow::SymlinkArrow;
 pub use symlinks::NoSymlink;
 pub use total_size::TotalSize;
 pub use truncate_owner::TruncateOwner;
+pub use width::Width;
 
 use crate::app::Cli;
 use crate::config_file::Config;
@@ -77,6 +79,7 @@ pub struct Flags {
     pub header: Header,
     pub literal: Literal,
     pub truncate_owner: TruncateOwner,
+    pub width: Width,
 }
 
 impl Flags {
@@ -108,6 +111,7 @@ impl Flags {
             header: Header::configure_from(cli, config),
             literal: Literal::configure_from(cli, config),
             truncate_owner: TruncateOwner::configure_from(cli, config),
+            width: Width::configure_from(cli, config),
         })
     }
 }
