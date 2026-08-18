@@ -617,7 +617,7 @@ fn test_tree_dereference() {
 }
 
 fn cmd() -> Command {
-    Command::cargo_bin(env!("CARGO_PKG_NAME")).unwrap()
+    Command::new(assert_cmd::cargo_bin!())
 }
 
 fn tempdir() -> assert_fs::TempDir {
