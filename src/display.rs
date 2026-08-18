@@ -22,7 +22,13 @@ pub fn grid(
     icons: &Icons,
     git_theme: &GitTheme,
 ) -> String {
-    let term_width = terminal_size().map(|(w, _)| w.0 as usize);
+    // An explicit `--width` forces the assumed terminal width, producing a multi-column grid
+    // even when the output is not a terminal. A width of 0 falls back to auto-detection.
+    let term_width = flags
+        .width
+        .0
+        .filter(|&w| w > 0)
+        .or_else(|| terminal_size().map(|(w, _)| w.0 as usize));
     let owner_cache = OwnerCache::default();
 
     inner_display_grid(

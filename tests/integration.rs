@@ -74,6 +74,38 @@ fn test_list_populated_directory() {
 }
 
 #[test]
+fn test_width_forces_grid_when_piped() {
+    let dir = tempdir();
+    dir.child("one").touch().unwrap();
+    dir.child("two").touch().unwrap();
+
+    // Without an explicit width the piped output falls back to one entry per line.
+    cmd()
+        .arg("--ignore-config")
+        .arg(dir.path())
+        .assert()
+        .stdout(predicate::str::is_match("one\ntwo\n$").unwrap());
+
+    // Forcing a width lays the entries out in a grid on a single line.
+    cmd()
+        .arg("--ignore-config")
+        .arg("--width")
+        .arg("80")
+        .arg(dir.path())
+        .assert()
+        .stdout(predicate::str::is_match("one +two").unwrap());
+
+    // A width of 0 keeps the auto-detected behavior.
+    cmd()
+        .arg("--ignore-config")
+        .arg("-w")
+        .arg("0")
+        .arg(dir.path())
+        .assert()
+        .stdout(predicate::str::is_match("one\ntwo\n$").unwrap());
+}
+
+#[test]
 fn test_list_almost_all_populated_directory() {
     let dir = tempdir();
     dir.child("one").touch().unwrap();
