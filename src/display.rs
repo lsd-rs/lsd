@@ -92,6 +92,7 @@ fn inner_display_grid(
 ) -> String {
     let mut output = String::new();
     let mut cells = Vec::new();
+    let mut max_cell_width = 0usize;
 
     let padding_rules = get_padding_rules(metas, flags);
     let mut grid = match flags.layout {
@@ -134,8 +135,10 @@ fn inner_display_grid(
         );
 
         for block in blocks {
+            let w = get_visible_width(&block, flags.hyperlink == HyperlinkOption::Always);
+            max_cell_width = max_cell_width.max(w);
             cells.push(Cell {
-                width: get_visible_width(&block, flags.hyperlink == HyperlinkOption::Always),
+                width: w,
                 contents: block,
             });
         }
@@ -152,14 +155,17 @@ fn inner_display_grid(
 
     if flags.layout == Layout::Grid {
         if let Some(tw) = term_width {
-            if let Some(gridded_output) = grid.fit_into_width(tw) {
-                output += &gridded_output.to_string();
+            // Use uniform column widths (like GNU ls) so that no entry appears
+            // to be the last in a row while a later entry is hidden off-screen.
+            // Variable-width columns (fit_into_width) can place a short entry
+            // just before a wide column whose left edge is beyond the terminal.
+            let filling = 2; // matches Filling::Spaces(2) above
+            let num_cols = if max_cell_width == 0 {
+                1
             } else {
-                //does not fit into grid, usually because (some) filename(s)
-                //are longer or almost as long as term_width
-                //print line by line instead!
-                output += &grid.fit_into_columns(1).to_string();
-            }
+                ((tw + filling) / (max_cell_width + filling)).max(1)
+            };
+            output += &grid.fit_into_columns(num_cols).to_string();
         } else {
             output += &grid.fit_into_columns(1).to_string();
         }
@@ -831,6 +837,68 @@ mod tests {
         );
 
         assert!(output.ends_with("└── two\n"));
+    }
+
+    #[test]
+    fn test_grid_uniform_column_widths() {
+        // Regression test for https://github.com/lsd-rs/lsd/issues/594:
+        // When filenames have mixed lengths, grid must use uniform column widths
+        // (like GNU ls) so that short entries in a narrow column never appear to
+        // be the last entry on a row while a later entry sits in a hidden wide column.
+        let term_width = 91usize;
+        let filling = 2usize;
+
+        let dir = assert_fs::TempDir::new().unwrap();
+        // Two long names (~60 chars) matching the issue's reproduce case.
+        dir.child("file_00_abcdefghijklmnopqrstuvwxyz_abcdefghiklmnopqrstuvwxyz")
+            .touch()
+            .unwrap();
+        for i in 1..=14usize {
+            dir.child(format!("file_{i:02}")).touch().unwrap();
+        }
+        dir.child("file_15_abcdefghijklmnopqrstuvwxyz_abcdefghiklmnopqrstuvwxyz")
+            .touch()
+            .unwrap();
+        dir.child("file_16").touch().unwrap();
+
+        let argv = ["lsd"];
+        let cli = Cli::try_parse_from(argv).unwrap();
+        let flags = Flags::configure_from(&cli, &Config::with_none()).unwrap();
+        let metas = Meta::from_path(Path::new(dir.path()), false, PermissionFlag::Rwx)
+            .unwrap()
+            .recurse_into(1, &flags, None)
+            .unwrap()
+            .0
+            .unwrap();
+
+        let colors = Colors::new(color::ThemeOption::NoColor);
+        let icons = Icons::new(false, IconOption::Never, FlagTheme::Fancy, " ".to_string());
+        let owner_cache = OwnerCache::default();
+        let output = inner_display_grid(
+            &DisplayOption::FileName,
+            &metas,
+            &owner_cache,
+            &flags,
+            &colors,
+            &icons,
+            &GitTheme::new(),
+            0,
+            Some(term_width),
+        );
+
+        // Every rendered line must fit within the terminal width.
+        for line in output.lines() {
+            let visible: usize = line
+                .chars()
+                .map(|c| unicode_width::UnicodeWidthChar::width(c).unwrap_or(0))
+                .sum();
+            assert!(
+                visible <= term_width + filling, // last column needs no trailing fill
+                "line exceeds terminal width ({visible} > {term_width}): {line:?}",
+            );
+        }
+
+        dir.close().unwrap();
     }
 
     #[test]
