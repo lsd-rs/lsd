@@ -65,7 +65,7 @@ impl Configurable<Self> for SortColumn {
             Some(Self::Version)
         } else if cli.gitsort || sort == Some("git") {
             Some(Self::GitStatus)
-        } else if cli.no_sort || sort == Some("none") {
+        } else if cli.no_sort || cli.no_sort_all || sort == Some("none") {
             Some(Self::None)
         } else {
             None
@@ -232,6 +232,27 @@ mod test_sort_column {
     #[test]
     fn test_from_cli_no_sort() {
         let argv = ["lsd", "--no-sort"];
+        let cli = Cli::try_parse_from(argv).unwrap();
+        assert_eq!(Some(SortColumn::None), SortColumn::from_cli(&cli));
+    }
+
+    #[test]
+    fn test_from_cli_no_sort_all() {
+        let argv = ["lsd", "-f"];
+        let cli = Cli::try_parse_from(argv).unwrap();
+        assert_eq!(Some(SortColumn::None), SortColumn::from_cli(&cli));
+    }
+
+    #[test]
+    fn test_from_cli_no_sort_all_overridden_by_later_sort_flag() {
+        let argv = ["lsd", "-f", "-t"];
+        let cli = Cli::try_parse_from(argv).unwrap();
+        assert_eq!(Some(SortColumn::Time), SortColumn::from_cli(&cli));
+    }
+
+    #[test]
+    fn test_from_cli_no_sort_all_overrides_earlier_sort_flag() {
+        let argv = ["lsd", "-t", "-f"];
         let cli = Cli::try_parse_from(argv).unwrap();
         assert_eq!(Some(SortColumn::None), SortColumn::from_cli(&cli));
     }

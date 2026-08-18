@@ -32,7 +32,7 @@ impl Configurable<Self> for Display {
             Some(Self::DirectoryOnly)
         } else if cli.almost_all {
             Some(Self::AlmostAll)
-        } else if cli.all {
+        } else if cli.all || cli.no_sort_all {
             Some(Self::All)
         } else if cli.system_protected {
             #[cfg(windows)]
@@ -87,6 +87,13 @@ mod test {
     #[test]
     fn test_from_cli_all() {
         let argv = ["lsd", "--all"];
+        let cli = Cli::try_parse_from(argv).unwrap();
+        assert_eq!(Some(Display::All), Display::from_cli(&cli));
+    }
+
+    #[test]
+    fn test_from_cli_no_sort_all() {
+        let argv = ["lsd", "-f"];
         let cli = Cli::try_parse_from(argv).unwrap();
         assert_eq!(Some(Display::All), Display::from_cli(&cli));
     }

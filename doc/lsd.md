@@ -134,6 +134,9 @@ lsd is a ls command with a lot of pretty colours and some other stuff to enrich 
 `-U`, `--no-sort`
 : Do not sort. List entries in directory order
 
+`-f`
+: Do not sort and show hidden entries. Same as `-a -U`
+
 `-Z` `--context`
 : Display SELinux or SMACK security context
 
