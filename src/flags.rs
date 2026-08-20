@@ -3,6 +3,7 @@ pub mod color;
 pub mod date;
 pub mod dereference;
 pub mod display;
+mod glob_helpers;
 pub mod header;
 pub mod hyperlink;
 pub mod icons;
@@ -10,6 +11,7 @@ pub mod ignore_globs;
 pub mod indicators;
 pub mod layout;
 pub mod literal;
+pub mod max_shown;
 pub mod permission;
 pub mod recursion;
 pub mod size;
@@ -17,6 +19,7 @@ pub mod sorting;
 pub mod symlink_arrow;
 pub mod symlinks;
 pub mod total_size;
+pub mod tree_filter;
 pub mod truncate_owner;
 
 pub use blocks::Blocks;
@@ -34,6 +37,7 @@ pub use ignore_globs::IgnoreGlobs;
 pub use indicators::Indicators;
 pub use layout::Layout;
 pub use literal::Literal;
+pub use max_shown::MaxShown;
 pub use permission::PermissionFlag;
 pub use recursion::Recursion;
 pub use size::SizeFlag;
@@ -44,6 +48,7 @@ pub use sorting::Sorting;
 pub use symlink_arrow::SymlinkArrow;
 pub use symlinks::NoSymlink;
 pub use total_size::TotalSize;
+pub use tree_filter::TreeFilter;
 pub use truncate_owner::TruncateOwner;
 
 use crate::app::Cli;
@@ -77,6 +82,8 @@ pub struct Flags {
     pub header: Header,
     pub literal: Literal,
     pub truncate_owner: TruncateOwner,
+    pub max_shown: MaxShown,
+    pub tree_filter: TreeFilter,
 }
 
 impl Flags {
@@ -108,6 +115,8 @@ impl Flags {
             header: Header::configure_from(cli, config),
             literal: Literal::configure_from(cli, config),
             truncate_owner: TruncateOwner::configure_from(cli, config),
+            max_shown: MaxShown::configure_from(cli, config),
+            tree_filter: TreeFilter::configure_from(cli, config)?,
         })
     }
 }

@@ -241,12 +241,38 @@ fn inner_display_tree(
     tree_index: usize,
 ) -> Vec<Cell> {
     let mut cells = Vec::new();
-    let last_idx = metas.len();
 
-    for (idx, meta) in metas.iter().enumerate() {
+    // apply tree filter: dirs always shown, non-dirs must match a glob
+    let filtered: Vec<&Meta> = if !flags.tree_filter.0.is_empty() {
+        metas
+            .iter()
+            .filter(|m| {
+                matches!(m.file_type, FileType::Directory { .. })
+                    || matches!(m.file_type, FileType::SymLink { is_dir: true })
+                    || flags.tree_filter.0.is_match(m.name.file_name())
+            })
+            .collect()
+    } else {
+        metas.iter().collect()
+    };
+
+    // truncate to max_shown
+    let (display_metas, truncated) = if let Some(n) = flags.max_shown.0 {
+        if filtered.len() > n {
+            (&filtered[..n], filtered.len() - n)
+        } else {
+            (filtered.as_slice(), 0usize)
+        }
+    } else {
+        (filtered.as_slice(), 0usize)
+    };
+
+    let last_idx = display_metas.len();
+
+    for (idx, meta) in display_metas.iter().enumerate() {
+        let is_last = truncated == 0 && idx + 1 == last_idx;
         let current_prefix = if tree_depth_prefix.0 > 0 {
-            if idx + 1 != last_idx {
-                // is last folder elem
+            if !is_last {
                 format!("{}{} ", tree_depth_prefix.1, EDGE)
             } else {
                 format!("{}{} ", tree_depth_prefix.1, CORNER)
@@ -274,8 +300,7 @@ fn inner_display_tree(
 
         if let Some(content) = &meta.content {
             let new_prefix = if tree_depth_prefix.0 > 0 {
-                if idx + 1 != last_idx {
-                    // is last folder elem
+                if !is_last {
                     format!("{}{} ", tree_depth_prefix.1, LINE)
                 } else {
                     format!("{}{} ", tree_depth_prefix.1, BLANK)
@@ -295,6 +320,30 @@ fn inner_display_tree(
                 padding_rules,
                 tree_index,
             ));
+        }
+    }
+
+    if truncated > 0 {
+        let prefix = if tree_depth_prefix.0 > 0 {
+            format!("{}{} ", tree_depth_prefix.1, CORNER)
+        } else {
+            tree_depth_prefix.1.to_string()
+        };
+        let summary_text = format!("{}... and {} more", prefix, truncated);
+        let colored_summary = colors.colorize(&summary_text, &Elem::TreeEdge).to_string();
+
+        for i in 0..flags.blocks.0.len() {
+            if i == tree_index {
+                cells.push(Cell {
+                    width: get_visible_width(&colored_summary, flags.hyperlink == HyperlinkOption::Always),
+                    contents: colored_summary.clone(),
+                });
+            } else {
+                cells.push(Cell {
+                    width: 0,
+                    contents: String::new(),
+                });
+            }
         }
     }
 
@@ -986,5 +1035,103 @@ mod tests {
         drop(dir); // to avoid clippy complains about previous .clone()
         drop(file);
         drop(link);
+    }
+
+    #[test]
+    fn test_tree_with_max_shown_truncation() {
+        let argv = ["lsd", "--tree", "--max-shown", "2"];
+        let cli = Cli::try_parse_from(argv).unwrap();
+        let flags = Flags::configure_from(&cli, &Config::with_none()).unwrap();
+
+        let dir = assert_fs::TempDir::new().unwrap();
+        dir.child("a").touch().unwrap();
+        dir.child("b").touch().unwrap();
+        dir.child("c").touch().unwrap();
+        dir.child("d").touch().unwrap();
+
+        let mut metas = Meta::from_path(Path::new(dir.path()), false, PermissionFlag::Rwx)
+            .unwrap()
+            .recurse_into(42, &flags, None)
+            .unwrap()
+            .0
+            .unwrap();
+        sort(&mut metas, &sort::assemble_sorters(&flags));
+
+        let output = tree(
+            &metas,
+            &flags,
+            &Colors::new(color::ThemeOption::NoColor),
+            &Icons::new(false, IconOption::Never, FlagTheme::Fancy, " ".to_string()),
+            &GitTheme::new(),
+        );
+
+        // first 2 items shown, summary line for remaining 2
+        assert!(output.contains("... and 2 more"), "summary line missing");
+        let lines: Vec<&str> = output.lines().collect();
+        assert_eq!(lines.len(), 3, "expected 2 items + summary line");
+    }
+
+    #[test]
+    fn test_tree_with_tree_filter() {
+        let argv = ["lsd", "--tree", "--tree-filter", "*.rs"];
+        let cli = Cli::try_parse_from(argv).unwrap();
+        let flags = Flags::configure_from(&cli, &Config::with_none()).unwrap();
+
+        let dir = assert_fs::TempDir::new().unwrap();
+        dir.child("subdir").create_dir_all().unwrap();
+        dir.child("main.rs").touch().unwrap();
+        dir.child("readme.md").touch().unwrap();
+
+        let mut metas = Meta::from_path(Path::new(dir.path()), false, PermissionFlag::Rwx)
+            .unwrap()
+            .recurse_into(42, &flags, None)
+            .unwrap()
+            .0
+            .unwrap();
+        sort(&mut metas, &sort::assemble_sorters(&flags));
+
+        let output = tree(
+            &metas,
+            &flags,
+            &Colors::new(color::ThemeOption::NoColor),
+            &Icons::new(false, IconOption::Never, FlagTheme::Fancy, " ".to_string()),
+            &GitTheme::new(),
+        );
+
+        assert!(output.contains("main.rs"), "matching file should be shown");
+        assert!(output.contains("subdir"), "dirs should always be shown");
+        assert!(!output.contains("readme.md"), "non-matching file should be hidden");
+    }
+
+    #[test]
+    fn test_tree_with_filter_and_max_shown() {
+        let argv = ["lsd", "--tree", "--tree-filter", "*.rs", "--max-shown", "1"];
+        let cli = Cli::try_parse_from(argv).unwrap();
+        let flags = Flags::configure_from(&cli, &Config::with_none()).unwrap();
+
+        let dir = assert_fs::TempDir::new().unwrap();
+        dir.child("a.rs").touch().unwrap();
+        dir.child("b.rs").touch().unwrap();
+        dir.child("c.md").touch().unwrap();
+
+        let mut metas = Meta::from_path(Path::new(dir.path()), false, PermissionFlag::Rwx)
+            .unwrap()
+            .recurse_into(42, &flags, None)
+            .unwrap()
+            .0
+            .unwrap();
+        sort(&mut metas, &sort::assemble_sorters(&flags));
+
+        let output = tree(
+            &metas,
+            &flags,
+            &Colors::new(color::ThemeOption::NoColor),
+            &Icons::new(false, IconOption::Never, FlagTheme::Fancy, " ".to_string()),
+            &GitTheme::new(),
+        );
+
+        // c.md excluded by filter; a.rs shown; b.rs in "... and 1 more"
+        assert!(!output.contains("c.md"), "non-matching file should be hidden");
+        assert!(output.contains("... and 1 more"), "summary should reflect filtered count");
     }
 }
