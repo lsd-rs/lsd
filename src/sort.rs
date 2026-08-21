@@ -18,7 +18,13 @@ pub fn assemble_sorters(flags: &Flags) -> Vec<(SortOrder, SortFn)> {
     };
 
     match flags.sorting.column {
-        SortColumn::Name => sorters.push((flags.sorting.order, by_name)),
+        SortColumn::Name => {
+            if flags.sorting.respect_locale {
+                sorters.push((flags.sorting.order, by_name_locale));
+            } else {
+                sorters.push((flags.sorting.order, by_name));
+            }
+        }
         SortColumn::Size => sorters.push((flags.sorting.order, by_size)),
         SortColumn::Time => sorters.push((flags.sorting.order, by_date)),
         SortColumn::Version => sorters.push((flags.sorting.order, by_version)),
@@ -59,6 +65,10 @@ fn by_size(a: &Meta, b: &Meta) -> Ordering {
 
 fn by_name(a: &Meta, b: &Meta) -> Ordering {
     a.name.cmp(&b.name)
+}
+
+fn by_name_locale(a: &Meta, b: &Meta) -> Ordering {
+    a.name.cmp_locale(&b.name)
 }
 
 fn by_date(a: &Meta, b: &Meta) -> Ordering {

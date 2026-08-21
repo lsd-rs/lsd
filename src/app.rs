@@ -125,6 +125,10 @@ pub struct Cli {
     #[arg(short, long)]
     pub reverse: bool,
 
+    /// Use locale-aware sorting for names
+    #[arg(long)]
+    pub respect_locale: bool,
+
     /// Sort the directories then the files
     #[arg(long, value_name = "MODE", value_parser = ["none", "first", "last"])]
     pub group_dirs: Option<String>,
