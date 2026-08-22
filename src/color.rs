@@ -6,7 +6,10 @@ use std::path::Path;
 pub use crate::flags::color::ThemeOption;
 use crate::git::GitStatus;
 use crate::print_output;
-use crate::theme::{Theme, color::ColorTheme};
+use crate::theme::{
+    Theme,
+    color::{ColorTheme, is_dark_mode},
+};
 use jiff::{Span, SpanTotal, Timestamp, ToSpan, Unit};
 
 #[allow(dead_code)]
@@ -212,11 +215,22 @@ impl Colors {
                     .unwrap_or_default(),
                 )
             }
+            ThemeOption::DualCustom {
+                ref dark,
+                ref light,
+            } => {
+                let name = if is_dark_mode() { dark } else { light };
+                Some(match name {
+                    Some(n) => Theme::from_path::<ColorTheme>(n).unwrap_or_default(),
+                    None => ColorTheme::default(),
+                })
+            }
         };
         let lscolors = match t {
-            ThemeOption::Default | ThemeOption::Custom | ThemeOption::CustomLegacy(_) => {
-                Some(LsColors::from_env().unwrap_or_default())
-            }
+            ThemeOption::Default
+            | ThemeOption::Custom
+            | ThemeOption::CustomLegacy(_)
+            | ThemeOption::DualCustom { .. } => Some(LsColors::from_env().unwrap_or_default()),
             _ => None,
         };
 

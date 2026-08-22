@@ -42,6 +42,13 @@ pub enum ThemeOption {
     NoLscolors,
     CustomLegacy(String),
     Custom,
+    /// Load separate theme files depending on whether the terminal is in dark or light mode.
+    /// Each path follows the same resolution rules as `Custom` (relative to config dir).
+    /// A `None` value falls back to the built-in default for that mode.
+    DualCustom {
+        dark: Option<String>,
+        light: Option<String>,
+    },
 }
 
 impl ThemeOption {
@@ -65,11 +72,13 @@ impl<'de> de::Deserialize<'de> for ThemeOption {
     {
         struct ThemeOptionVisitor;
 
-        impl Visitor<'_> for ThemeOptionVisitor {
+        impl<'de> Visitor<'de> for ThemeOptionVisitor {
             type Value = ThemeOption;
 
             fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                formatter.write_str("`default` or <theme-file-path>")
+                formatter.write_str(
+                    "`default`, `custom`, or a map with `light` and/or `dark` theme paths",
+                )
             }
 
             fn visit_str<E>(self, value: &str) -> Result<ThemeOption, E>
@@ -82,9 +91,27 @@ impl<'de> de::Deserialize<'de> for ThemeOption {
                     str => Ok(ThemeOption::CustomLegacy(str.to_string())),
                 }
             }
+
+            fn visit_map<M>(self, mut map: M) -> Result<ThemeOption, M::Error>
+            where
+                M: de::MapAccess<'de>,
+            {
+                let mut dark = None;
+                let mut light = None;
+                while let Some(key) = map.next_key::<String>()? {
+                    match key.as_str() {
+                        "dark" => dark = Some(map.next_value::<String>()?),
+                        "light" => light = Some(map.next_value::<String>()?),
+                        other => {
+                            return Err(de::Error::unknown_field(other, &["dark", "light"]));
+                        }
+                    }
+                }
+                Ok(ThemeOption::DualCustom { dark, light })
+            }
         }
 
-        deserializer.deserialize_identifier(ThemeOptionVisitor)
+        deserializer.deserialize_any(ThemeOptionVisitor)
     }
 }
 
@@ -319,5 +346,60 @@ mod test_theme_option {
         });
         c.classic = Some(true);
         assert_eq!(ThemeOption::NoColor, ThemeOption::from_config(&c));
+    }
+
+    #[test]
+    fn test_deserialize_dual_custom_both() {
+        let yaml = "dark: my-dark\nlight: my-light\n";
+        let t: ThemeOption = serde_yaml::from_str(yaml).unwrap();
+        assert_eq!(
+            ThemeOption::DualCustom {
+                dark: Some("my-dark".to_string()),
+                light: Some("my-light".to_string()),
+            },
+            t
+        );
+    }
+
+    #[test]
+    fn test_deserialize_dual_custom_dark_only() {
+        let yaml = "dark: my-dark\n";
+        let t: ThemeOption = serde_yaml::from_str(yaml).unwrap();
+        assert_eq!(
+            ThemeOption::DualCustom {
+                dark: Some("my-dark".to_string()),
+                light: None,
+            },
+            t
+        );
+    }
+
+    #[test]
+    fn test_deserialize_dual_custom_light_only() {
+        let yaml = "light: my-light\n";
+        let t: ThemeOption = serde_yaml::from_str(yaml).unwrap();
+        assert_eq!(
+            ThemeOption::DualCustom {
+                dark: None,
+                light: Some("my-light".to_string()),
+            },
+            t
+        );
+    }
+
+    #[test]
+    fn test_deserialize_string_variants_still_work() {
+        assert_eq!(
+            ThemeOption::Default,
+            serde_yaml::from_str::<ThemeOption>("default").unwrap()
+        );
+        assert_eq!(
+            ThemeOption::Custom,
+            serde_yaml::from_str::<ThemeOption>("custom").unwrap()
+        );
+        assert_eq!(
+            ThemeOption::CustomLegacy("old-path".to_string()),
+            serde_yaml::from_str::<ThemeOption>("old-path").unwrap()
+        );
     }
 }

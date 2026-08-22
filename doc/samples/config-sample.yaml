@@ -27,8 +27,15 @@ color:
   when: auto
   # How to colorize the output.
   # When "classic" is set, this is set to "no-color".
-  # Possible values: default, custom
+  # Possible values: default, custom, or a dark/light map (see below).
   # When "custom" is set, lsd will look in the config directory for `colors.yaml`.
+  # To use different themes for dark and light terminals, specify a map:
+  #   theme:
+  #     dark: my-dark-colors   # resolves to <config-dir>/my-dark-colors.yaml
+  #     light: my-light-colors # resolves to <config-dir>/my-light-colors.yaml
+  # Either key may be omitted; omitting falls back to the built-in default for
+  # that mode. The active mode is read from the TERM_BACKGROUND env var
+  # ("light" → light mode; anything else or unset → dark mode).
   theme: default
 
 # == Date ==

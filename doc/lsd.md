@@ -175,3 +175,6 @@ lsd is a ls command with a lot of pretty colours and some other stuff to enrich 
 
 `SHELL_COMPLETIONS_DIR` or `OUT_DIR`
 : Used to specify the directory for generating a shell completions file. If neither are set, no completions file will be generated. The directory will be created if it does not exist.
+
+`TERM_BACKGROUND`
+: Controls which theme is loaded when `color.theme` is set to a dark/light map in the config file. Set to `light` to select the light theme; any other value or unset selects the dark theme.

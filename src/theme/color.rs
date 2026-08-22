@@ -439,10 +439,24 @@ impl Default for GitStatus {
     }
 }
 
+/// Returns `true` when the terminal background is dark.
+///
+/// Reads `TERM_BACKGROUND`: `"light"` (case-insensitive) → false, anything
+/// else or unset → true. Set `TERM_BACKGROUND=light` in your shell config to
+/// enable light-mode theme selection.
+pub(crate) fn is_dark_mode() -> bool {
+    std::env::var("TERM_BACKGROUND")
+        .map(|v| v.to_ascii_lowercase() != "light")
+        .unwrap_or(true)
+}
+
 impl Default for ColorTheme {
     fn default() -> Self {
-        // TODO(zwpaper): check terminal color and return light or dark
-        Self::default_dark()
+        if is_dark_mode() {
+            Self::default_dark()
+        } else {
+            Self::default_light()
+        }
     }
 }
 
@@ -460,6 +474,89 @@ impl ColorTheme {
             links: Links::default(),
             tree_edge: Color::AnsiValue(245), // Grey
             git_status: Default::default(),
+        }
+    }
+
+    pub fn default_light() -> Self {
+        ColorTheme {
+            user: Color::AnsiValue(26),  // DodgerBlue3
+            group: Color::AnsiValue(28), // Green4
+            permission: Permission {
+                read: Color::DarkGreen,
+                write: Color::DarkYellow,
+                exec: Color::DarkRed,
+                exec_sticky: Color::AnsiValue(5),
+                no_access: Color::AnsiValue(240), // DarkGrey
+                octal: Color::AnsiValue(6),
+                acl: Color::DarkCyan,
+                context: Color::Cyan,
+            },
+            attributes: Attributes::default(),
+            file_type: FileType {
+                file: File {
+                    exec_uid: Color::AnsiValue(28),        // Green4
+                    uid_no_exec: Color::AnsiValue(100),    // Yellow4
+                    exec_no_uid: Color::AnsiValue(28),     // Green4
+                    no_exec_no_uid: Color::AnsiValue(100), // Yellow4
+                },
+                dir: Dir {
+                    uid: Color::AnsiValue(20),    // Blue3
+                    no_uid: Color::AnsiValue(20), // Blue3
+                },
+                symlink: Symlink {
+                    default: Color::AnsiValue(30),         // Teal
+                    broken: Color::AnsiValue(124),         // Red3
+                    missing_target: Color::AnsiValue(124), // Red3
+                },
+                pipe: Color::AnsiValue(30),         // Teal
+                block_device: Color::AnsiValue(30), // Teal
+                char_device: Color::AnsiValue(130), // DarkOrange3
+                socket: Color::AnsiValue(30),       // Teal
+                special: Color::AnsiValue(30),      // Teal
+            },
+            date: Date {
+                hour_old: None,
+                day_old: None,
+                older: Color::AnsiValue(30), // Teal
+                relative: vec![
+                    RelativeTimeColor {
+                        threshold: "1h".into(),
+                        color: Color::AnsiValue(28), // Green4
+                    },
+                    RelativeTimeColor {
+                        threshold: "1d".into(),
+                        color: Color::AnsiValue(34), // Green3
+                    },
+                ],
+                absolute: Vec::new(),
+            },
+            size: Size {
+                none: Color::AnsiValue(240),   // DarkGrey
+                small: Color::AnsiValue(130),  // DarkOrange3
+                medium: Color::AnsiValue(166), // DarkOrange
+                large: Color::AnsiValue(124),  // Red3
+            },
+            inode: INode {
+                valid: Color::AnsiValue(90),    // DarkMagenta
+                invalid: Color::AnsiValue(240), // DarkGrey
+            },
+            links: Links {
+                valid: Color::AnsiValue(90),    // DarkMagenta
+                invalid: Color::AnsiValue(240), // DarkGrey
+            },
+            tree_edge: Color::AnsiValue(240), // DarkGrey
+            git_status: GitStatus {
+                default: Color::AnsiValue(240),    // DarkGrey
+                unmodified: Color::AnsiValue(240), // DarkGrey
+                ignored: Color::AnsiValue(240),    // DarkGrey
+                new_in_index: Color::DarkGreen,
+                new_in_workdir: Color::DarkGreen,
+                typechange: Color::DarkYellow,
+                deleted: Color::DarkRed,
+                renamed: Color::DarkGreen,
+                modified: Color::DarkYellow,
+                conflicted: Color::DarkRed,
+            },
         }
     }
 }
@@ -573,5 +670,38 @@ permission:
         use crossterm::style::Color;
         theme.permission.read = Color::AnsiValue(130);
         assert_eq!(empty_theme, theme);
+    }
+
+    #[test]
+    fn test_is_dark_mode_unset_defaults_dark() {
+        temp_env::with_var("TERM_BACKGROUND", None::<&str>, || {
+            assert!(super::is_dark_mode());
+        });
+    }
+
+    #[test]
+    fn test_is_dark_mode_term_background_light() {
+        temp_env::with_var("TERM_BACKGROUND", Some("light"), || {
+            assert!(!super::is_dark_mode());
+        });
+    }
+
+    #[test]
+    fn test_is_dark_mode_term_background_light_uppercase() {
+        temp_env::with_var("TERM_BACKGROUND", Some("Light"), || {
+            assert!(!super::is_dark_mode());
+        });
+    }
+
+    #[test]
+    fn test_is_dark_mode_term_background_dark() {
+        temp_env::with_var("TERM_BACKGROUND", Some("dark"), || {
+            assert!(super::is_dark_mode());
+        });
+    }
+
+    #[test]
+    fn test_default_light_is_distinct_from_default_dark() {
+        assert_ne!(ColorTheme::default_dark(), ColorTheme::default_light());
     }
 }
