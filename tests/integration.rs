@@ -763,6 +763,7 @@ fn test_cannot_access_subdir_exit_status() {
 }
 
 #[test]
+#[cfg(target_os = "linux")]
 fn test_date_custom_format_supports_nanos_with_length() {
     let dir = tempdir();
     dir.child("one").touch().unwrap();
