@@ -47,7 +47,7 @@ serde = { version = "1.0", features = ["derive"] }
 serde_yaml = "0.9"
 url = "2.5.4"
 vsort = "0.2"
-xdg = "2.5"
+xdg = "3"
 
 [target."cfg(not(all(windows, target_arch = \"x86\", target_env = \"gnu\")))".dependencies]
 # if ssl feature is enabled compilation will fail on arm-unknown-linux-gnueabihf and i686-pc-windows-gnu
