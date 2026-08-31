@@ -32,6 +32,7 @@ pub struct Config {
     pub icons: Option<Icons>,
     pub ignore_globs: Option<Vec<String>>,
     pub indicators: Option<bool>,
+    pub slash_indicator: Option<bool>,
     pub layout: Option<Layout>,
     pub recursion: Option<Recursion>,
     pub size: Option<SizeFlag>,
@@ -117,6 +118,7 @@ impl Config {
             icons: None,
             ignore_globs: None,
             indicators: None,
+            slash_indicator: None,
             layout: None,
             recursion: None,
             size: None,
@@ -287,6 +289,11 @@ icons:
 # Possible values: false, true
 indicators: false
 
+# == Slash Indicator ==
+# Whether to add indicator "/" to directories.
+# Possible values: false, true
+slash_indicator: false
+
 # == Layout ==
 # Which layout to use. "oneline" might be a bit confusing here and should be
 # called "one-per-line". It might be changed in the future.
@@ -410,6 +417,7 @@ mod tests {
                 }),
                 ignore_globs: None,
                 indicators: Some(false),
+                slash_indicator: Some(false),
                 layout: Some(Layout::Grid),
                 recursion: Some(config_file::Recursion {
                     enabled: Some(false),

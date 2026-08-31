@@ -8,6 +8,7 @@ pub mod hyperlink;
 pub mod icons;
 pub mod ignore_globs;
 pub mod indicators;
+pub mod slash_indicator;
 pub mod layout;
 pub mod literal;
 pub mod permission;
@@ -32,6 +33,7 @@ pub use icons::IconTheme;
 pub use icons::Icons;
 pub use ignore_globs::IgnoreGlobs;
 pub use indicators::Indicators;
+pub use slash_indicator::SlashIndicator;
 pub use layout::Layout;
 pub use literal::Literal;
 pub use permission::PermissionFlag;
@@ -63,6 +65,7 @@ pub struct Flags {
     pub dereference: Dereference,
     pub display: Display,
     pub display_indicators: Indicators,
+    pub slash_indicator: SlashIndicator,
     pub icons: Icons,
     pub ignore_globs: IgnoreGlobs,
     pub layout: Layout,
@@ -97,6 +100,7 @@ impl Flags {
             size: SizeFlag::configure_from(cli, config),
             permission: PermissionFlag::configure_from(cli, config),
             display_indicators: Indicators::configure_from(cli, config),
+            slash_indicator: SlashIndicator::configure_from(cli, config),
             icons: Icons::configure_from(cli, config),
             ignore_globs: IgnoreGlobs::configure_from(cli, config)?,
             no_symlink: NoSymlink::configure_from(cli, config),
