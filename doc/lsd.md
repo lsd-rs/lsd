@@ -27,7 +27,7 @@ lsd is a ls command with a lot of pretty colours and some other stuff to enrich 
 : Do not list implied **.** and **..**
 
 `--classic`
-: Enable classic mode (no colours or icons)
+: Enable classic mode (POSIX symlink arrows and no colours or icons)
 
 `-L`, `--dereference`
 : When showing file information for a symbolic link, show information for the file the link references rather than for the link itself

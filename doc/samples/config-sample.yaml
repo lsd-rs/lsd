@@ -2,7 +2,8 @@
 # == Classic ==
 # This is a shorthand to override some of the options to be backwards compatible
 # with `ls`. It affects the "color"->"when", "sorting"->"dir-grouping", "date"
-# and "icons"->"when" options.
+# and "icons"->"when" options. It will also use POSIX symlink arrows when the
+# symlink-arrow configuration is left unset.
 # Possible values: false, true
 classic: false
 

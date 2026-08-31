@@ -8,22 +8,35 @@ use crate::config_file::Config;
 pub struct SymlinkArrow(String);
 
 impl Configurable<Self> for SymlinkArrow {
-    /// `SymlinkArrow` can not be configured by [Cli]
+    /// `SymlinkArrow` can be indirectly configured by [Cli] when the classic option is used.
     ///
-    /// Return `None`
-    fn from_cli(_: &Cli) -> Option<Self> {
-        None
+    /// If classic is used, returns `->` in a [Some];
+    /// otherwise this returns [None].
+    fn from_cli(cli: &Cli) -> Option<Self> {
+        if cli.classic {
+            Some(SymlinkArrow("->".to_string()))
+        } else {
+            None
+        }
     }
+
     /// Get a potential `SymlinkArrow` value from a [Config].
     ///
-    /// If the `Config::symlink-arrow` has value,
+    /// If the `Config::symlink_arrow` has value,
     /// returns its value as the value of the `SymlinkArrow`, in a [Some].
-    /// Otherwise this returns [None].
+    /// If no arrow is configured and classic is enabled,
+    /// returns `->` in a [Some]; otherwise this returns [None].
     fn from_config(config: &Config) -> Option<Self> {
-        config
-            .symlink_arrow
-            .as_ref()
-            .map(|arrow| SymlinkArrow(arrow.to_string()))
+        match config.symlink_arrow.as_ref() {
+            Some(arrow) => Some(SymlinkArrow(arrow.to_string())),
+            None => {
+                if config.classic == Some(true) {
+                    Some(SymlinkArrow("->".to_string()))
+                } else {
+                    None
+                }
+            }
+        }
     }
 }
 
@@ -62,10 +75,42 @@ mod test {
     }
 
     #[test]
+    fn test_symlink_arrow_config_none_classic() {
+        let mut c = Config::with_none();
+        c.classic = Some(true);
+        assert_eq!(
+            Some(SymlinkArrow(String::from("->"))),
+            SymlinkArrow::from_config(&c)
+        );
+    }
+
+    #[test]
+    fn test_symlink_arrow_config_some_classic() {
+        let mut c = Config::with_none();
+        c.classic = Some(true);
+        c.symlink_arrow = Some("↹".into());
+        // the configured arrow gets precedence over the classic arrow
+        assert_eq!(
+            Some(SymlinkArrow(String::from("\u{21B9}"))),
+            SymlinkArrow::from_config(&c)
+        );
+    }
+
+    #[test]
     fn test_symlink_arrow_from_args_none() {
         let argv = ["lsd"];
         let cli = Cli::try_parse_from(argv).unwrap();
         assert_eq!(None, SymlinkArrow::from_cli(&cli));
+    }
+
+    #[test]
+    fn test_symlink_arrow_from_args_classic() {
+        let argv = ["lsd", "--classic"];
+        let cli = Cli::try_parse_from(argv).unwrap();
+        assert_eq!(
+            Some(SymlinkArrow("->".to_string())),
+            SymlinkArrow::from_cli(&cli)
+        );
     }
 
     #[test]
