@@ -70,7 +70,10 @@ fn by_version(a: &Meta, b: &Meta) -> Ordering {
 }
 
 fn by_extension(a: &Meta, b: &Meta) -> Ordering {
-    a.name.extension().cmp(&b.name.extension())
+    a.name
+        .extension()
+        .cmp(&b.name.extension())
+        .then(a.name.cmp(&b.name))
 }
 
 fn by_git_status(a: &Meta, b: &Meta) -> Ordering {
@@ -285,10 +288,15 @@ mod tests {
         let mut flags = Flags::default();
         flags.sorting.column = SortColumn::Extension;
 
-        // Sort by extension
+        // Sort by extension, then by name for matching extensions
         let sorter = assemble_sorters(&flags);
-        assert_eq!(by_meta(&sorter, &meta_a, &meta_z), Ordering::Equal);
+        assert_eq!(by_meta(&sorter, &meta_a, &meta_z), Ordering::Less);
 
+        flags.sorting.order = SortOrder::Reverse;
+        let sorter = assemble_sorters(&flags);
+        assert_eq!(by_meta(&sorter, &meta_a, &meta_z), Ordering::Greater);
+
+        flags.sorting.order = SortOrder::Default;
         let sorter = assemble_sorters(&flags);
         assert_eq!(by_meta(&sorter, &meta_a, &meta_j), Ordering::Greater);
 
