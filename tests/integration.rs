@@ -829,3 +829,50 @@ fn test_multiple_files() {
         .assert()
         .stdout(predicate::str::is_match(".").unwrap());
 }
+
+#[test]
+fn test_no_color_config_and_cli_precedence() {
+    let dir = tempdir();
+    let entry = dir.child("sample-dir");
+    entry.create_dir_all().unwrap();
+    let config = dir.child("config.yaml");
+
+    for (when, color_arg, colored) in [
+        ("always", None, true),
+        ("never", None, false),
+        ("auto", None, false),
+        ("always", Some("never"), false),
+        ("never", Some("always"), true),
+        ("auto", Some("always"), true),
+    ] {
+        config
+            .write_str(&format!(
+                "color:\n  when: {when}\nicons:\n  when: never\nhyperlink: never\n"
+            ))
+            .unwrap();
+        let mut command = cmd();
+        command
+            .env("NO_COLOR", "1")
+            .env_remove("LS_COLORS")
+            .env("HOME", dir.path())
+            .env("XDG_CONFIG_HOME", dir.path())
+            .env("USERPROFILE", dir.path())
+            .env("APPDATA", dir.path())
+            .arg("--config-file")
+            .arg(config.path())
+            .args(["--directory-only", "--oneline"])
+            .arg(entry.path());
+        if let Some(value) = color_arg {
+            command.args(["--color", value]);
+        }
+        let output = command
+            .assert()
+            .success()
+            .stderr(predicate::str::is_empty())
+            .get_output()
+            .stdout
+            .clone();
+        let has_color = output.windows(2).any(|bytes| bytes == b"\x1b[");
+        assert_eq!(colored, has_color, "config={when}, cli={color_arg:?}");
+    }
+}

@@ -111,6 +111,16 @@ impl ColorOption {
 }
 
 impl Configurable<Self> for ColorOption {
+    fn configure_from(cli: &Cli, config: &Config) -> Self {
+        let configured = Self::from_config(config);
+        // The built-in config uses auto, which must still honor NO_COLOR.
+        Self::from_cli(cli)
+            .or(configured.filter(|when| *when != Self::Auto))
+            .or_else(Self::from_environment)
+            .or(configured)
+            .unwrap_or_default()
+    }
+
     /// Get a potential `ColorOption` variant from [Cli].
     ///
     /// If the "classic" argument is passed, then this returns the [ColorOption::Never] variant in
@@ -138,11 +148,9 @@ impl Configurable<Self> for ColorOption {
     }
 
     fn from_environment() -> Option<Self> {
-        if env::var("NO_COLOR").is_ok() {
-            Some(Self::Never)
-        } else {
-            None
-        }
+        env::var_os("NO_COLOR")
+            .filter(|value| !value.is_empty())
+            .map(|_| Self::Never)
     }
 }
 
@@ -186,9 +194,95 @@ mod test_color_option {
 
     #[test]
     fn test_from_env_no_color() {
-        temp_env::with_var("NO_COLOR", Some("true"), || {
+        for (value, expected) in [
+            (None, None),
+            (Some(""), None),
+            (Some("true"), Some(ColorOption::Never)),
+            (Some("false"), Some(ColorOption::Never)),
+            (Some("0"), Some(ColorOption::Never)),
+            (Some(" "), Some(ColorOption::Never)),
+        ] {
+            temp_env::with_var("NO_COLOR", value, || {
+                assert_eq!(expected, ColorOption::from_environment(), "{value:?}");
+            });
+        }
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn test_from_env_no_color_non_unicode() {
+        use std::ffi::OsString;
+        use std::os::unix::ffi::OsStringExt;
+
+        temp_env::with_var("NO_COLOR", Some(OsString::from_vec(vec![0xff])), || {
             assert_eq!(Some(ColorOption::Never), ColorOption::from_environment());
         });
+    }
+
+    #[test]
+    fn test_configure_from_no_color_explicit_config() {
+        let cli = Cli::try_parse_from(["lsd"]).unwrap();
+        for (when, expected) in [
+            (Some(ColorOption::Always), ColorOption::Always),
+            (Some(ColorOption::Never), ColorOption::Never),
+            (Some(ColorOption::Auto), ColorOption::Never),
+            (None, ColorOption::Never),
+        ] {
+            let mut config = Config::with_none();
+            config.color = Some(config_file::Color { when, theme: None });
+            temp_env::with_var("NO_COLOR", Some("1"), || {
+                assert_eq!(
+                    expected,
+                    ColorOption::configure_from(&cli, &config),
+                    "{when:?}"
+                );
+            });
+        }
+    }
+
+    #[test]
+    fn test_configure_from_no_color_builtin_auto() {
+        let config: Config = serde_yaml::from_str(config_file::DEFAULT_CONFIG).unwrap();
+        let cli = Cli::try_parse_from(["lsd"]).unwrap();
+        for (value, expected) in [
+            (None, ColorOption::Auto),
+            (Some(""), ColorOption::Auto),
+            (Some("1"), ColorOption::Never),
+        ] {
+            temp_env::with_var("NO_COLOR", value, || {
+                assert_eq!(
+                    expected,
+                    ColorOption::configure_from(&cli, &config),
+                    "{value:?}"
+                );
+            });
+        }
+    }
+
+    #[test]
+    fn test_configure_from_no_color_cli_override() {
+        for when in [ColorOption::Always, ColorOption::Never, ColorOption::Auto] {
+            let mut config = Config::with_none();
+            config.color = Some(config_file::Color {
+                when: Some(when),
+                theme: None,
+            });
+            for (args, expected) in [
+                (vec!["lsd", "--color", "always"], ColorOption::Always),
+                (vec!["lsd", "--color", "never"], ColorOption::Never),
+                (vec!["lsd", "--color", "auto"], ColorOption::Auto),
+                (vec!["lsd", "--classic"], ColorOption::Never),
+            ] {
+                let cli = Cli::try_parse_from(&args).unwrap();
+                temp_env::with_var("NO_COLOR", Some("1"), || {
+                    assert_eq!(
+                        expected,
+                        ColorOption::configure_from(&cli, &config),
+                        "{when:?}, {args:?}"
+                    );
+                });
+            }
+        }
     }
 
     #[test]

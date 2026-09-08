@@ -167,6 +167,11 @@ lsd is a ls command with a lot of pretty colours and some other stuff to enrich 
 
 # ENVIRONMENT
 
+`NO_COLOR`
+: A non-empty value disables automatic color output; an empty value is ignored.
+  Explicit `--color` options and configuration values `color.when: always` or
+  `color.when: never` override this default. `color.when: auto` honors it.
+
 `LS_COLORS`
 : Used to determine color for displaying filenames. See **dir_colors**.
 

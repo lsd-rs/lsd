@@ -184,6 +184,13 @@ URxvt*font:    xft:Hack Nerd Font:style=Regular:size=11
 ### Why am I seeing `Uses unknown compression for member ‘control.tar.zst'` when using deb?
 Zst compression is only supported from `Debian 12`, `Ubuntu 21.10`, and upward. Starting from `lsd v1.1.0` please use the `_xz.deb` release instead. See [this issue](https://github.com/lsd-rs/lsd/issues/891) for additional details and manual fixes.
 
+### How does lsd handle NO_COLOR?
+
+A non-empty `NO_COLOR` environment variable disables automatic color output; an empty value is ignored.
+Explicit `--color` options take precedence. You can also set `color.when` to `always` or `never` in your
+configuration to override the environment. The default, `auto`, honors `NO_COLOR`.
+See the [NO_COLOR specification](https://no-color.org/) for details.
+
 ### How can I set custom color schemes for Windows?
 In order to display a custom color scheme `lsd` reads a system environment variable called `LS_COLORS`. If your custom color scheme is not working `LS_COLORS` is most likely missing. Please look at [the marked solution in this post](https://github.com/orgs/lsd-rs/discussions/958#discussioncomment-7659375), which contains instructions on how to set a custom color scheme on Windows for guidance.
 
