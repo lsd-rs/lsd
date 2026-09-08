@@ -24,6 +24,8 @@ color:
   # When to colorize the output.
   # When "classic" is set, this is set to "never".
   # Possible values: never, auto, always
+  # Auto honors a non-empty NO_COLOR environment variable; always and never override it.
+  # The --color command-line option takes precedence.
   when: auto
   # How to colorize the output.
   # When "classic" is set, this is set to "no-color".
