@@ -724,6 +724,37 @@ fn test_custom_config_file_parsing() {
 }
 
 #[test]
+fn test_missing_custom_config_file_fails_without_panic() {
+    let dir = tempdir();
+
+    cmd()
+        .arg("--config-file")
+        .arg(dir.path().join("does_not_exist.yaml"))
+        .arg(dir.path())
+        .assert()
+        .failure()
+        .stderr(predicate::str::starts_with("lsd: "))
+        .stderr(predicate::str::contains("panicked at").not());
+}
+
+#[test]
+fn test_malformed_custom_config_file_fails_without_panic() {
+    let dir = tempdir();
+    dir.child("config.yaml")
+        .write_str("display: bogus")
+        .unwrap();
+
+    cmd()
+        .arg("--config-file")
+        .arg(dir.path().join("config.yaml"))
+        .arg(dir.path())
+        .assert()
+        .failure()
+        .stderr(predicate::str::starts_with("lsd: "))
+        .stderr(predicate::str::contains("panicked at").not());
+}
+
+#[test]
 fn test_cannot_access_file_exit_status() {
     let dir = tempdir();
     let does_not_exist = dir.path().join("does_not_exist");

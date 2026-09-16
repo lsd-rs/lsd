@@ -119,7 +119,10 @@ fn main() {
     let config = if cli.ignore_config {
         Config::with_none()
     } else if let Some(path) = &cli.config_file {
-        Config::from_file(path).expect("Provided file path is invalid")
+        Config::from_file(path).unwrap_or_else(|| {
+            print_error!("Can not use config file {}.", path.to_string_lossy());
+            std::process::exit(ExitCode::MajorIssue as i32);
+        })
     } else {
         Config::default()
     };
