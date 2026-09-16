@@ -39,9 +39,14 @@ impl Configurable<Self> for SizeFlag {
     /// If any of the "default", "short" or "bytes" arguments is passed, the corresponding
     /// `SizeFlag` variant is returned in a [Some]. If neither of them is passed, this returns
     /// [None].
+    ///
+    /// The `--human-readable` flag is equivalent to `--size default`. It and `--size` override
+    /// each other, so whichever is passed last on the command line wins.
     fn from_cli(cli: &Cli) -> Option<Self> {
         if cli.classic {
             Some(Self::Bytes)
+        } else if cli.human_readable {
+            Some(Self::Default)
         } else {
             cli.size.as_deref().map(Self::from_arg_str)
         }
@@ -115,6 +120,34 @@ mod test {
         let argv = ["lsd", "--size", "bytes", "--size", "short"];
         let cli = Cli::try_parse_from(argv).unwrap();
         assert_eq!(Some(SizeFlag::Short), SizeFlag::from_cli(&cli));
+    }
+
+    #[test]
+    fn test_from_cli_human_readable() {
+        let argv = ["lsd", "--human-readable"];
+        let cli = Cli::try_parse_from(argv).unwrap();
+        assert_eq!(Some(SizeFlag::Default), SizeFlag::from_cli(&cli));
+    }
+
+    #[test]
+    fn test_from_cli_human_readable_overrides_size() {
+        let argv = ["lsd", "--size", "bytes", "-h"];
+        let cli = Cli::try_parse_from(argv).unwrap();
+        assert_eq!(Some(SizeFlag::Default), SizeFlag::from_cli(&cli));
+    }
+
+    #[test]
+    fn test_from_cli_size_overrides_human_readable() {
+        let argv = ["lsd", "-h", "--size", "bytes"];
+        let cli = Cli::try_parse_from(argv).unwrap();
+        assert_eq!(Some(SizeFlag::Bytes), SizeFlag::from_cli(&cli));
+    }
+
+    #[test]
+    fn test_from_cli_human_readable_classic() {
+        let argv = ["lsd", "-h", "--classic"];
+        let cli = Cli::try_parse_from(argv).unwrap();
+        assert_eq!(Some(SizeFlag::Bytes), SizeFlag::from_cli(&cli));
     }
 
     #[test]

@@ -56,9 +56,9 @@ pub struct Cli {
     #[arg(short = 'R', long, conflicts_with = "tree")]
     pub recursive: bool,
 
-    /// For ls compatibility purposes ONLY, currently set by default
-    #[arg(short, long)]
-    human_readable: bool,
+    /// Display size in a human readable format, equivalent to `--size default`
+    #[arg(short, long, overrides_with = "size")]
+    pub human_readable: bool,
 
     /// Recurse into directories and present the result as a tree
     #[arg(long)]
@@ -77,7 +77,7 @@ pub struct Cli {
     pub permission: Option<String>,
 
     /// How to display size [default: default]
-    #[arg(long, value_name = "MODE", value_parser = ["default", "short", "bytes"])]
+    #[arg(long, value_name = "MODE", value_parser = ["default", "short", "bytes"], overrides_with = "human_readable")]
     pub size: Option<String>,
 
     /// Display the total size of directories
@@ -199,7 +199,7 @@ pub struct Cli {
 
     /// Print help information
     #[arg(long, action = ArgAction::Help)]
-    help: (),
+    pub help: (),
 }
 
 fn validate_date_argument(arg: &str) -> Result<String, String> {
