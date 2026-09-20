@@ -38,7 +38,7 @@ lsd is a ls command with a lot of pretty colours and some other stuff to enrich 
 `-X`, `--extensionsort`
 : Sort by file extension
 
-`--git`
+`-g`, `--git`
 : Display git status. Directory git status is a reduction of included file statuses (recursively).
 
 `--help`
@@ -65,6 +65,9 @@ lsd is a ls command with a lot of pretty colours and some other stuff to enrich 
 `--no-symlink`
 : Do not display symlink target
 
+`--generate-config`
+: Generate default configuration file and print to stdout
+
 `-1`, `--oneline`
 : Display one entry per line
 
@@ -88,6 +91,9 @@ lsd is a ls command with a lot of pretty colours and some other stuff to enrich 
 
 `-V`, `--version`
 : Prints version information
+
+`-G`, `--gitsort`
+: Sort by git status
 
 `-v`, `--versionsort`
 : Natural sort of (version) numbers within text
@@ -148,6 +154,9 @@ lsd is a ls command with a lot of pretty colours and some other stuff to enrich 
 
 `--truncate-owner-marker`
 : Truncation marker appended to a truncated user or group name
+
+`--system-protected`
+: Includes files with the Windows system protection flag set. This is the same as `--all` on other platforms
 
 # ARGS
 
