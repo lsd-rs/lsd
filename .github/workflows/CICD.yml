@@ -120,7 +120,7 @@ jobs:
         unset DEPLOY ; if [[ $REF_TAG =~ ^[vV]?[0-9].* ]]; then DEPLOY='true' ; fi
         echo "DEPLOY=${DEPLOY}" >> "$GITHUB_OUTPUT"
         # DPKG architecture?
-        unset DPKG_ARCH ; case ${{ matrix.job.target }} in aarch64-*-linux-*) DPKG_ARCH=arm64 ;; i686-*-linux-*) DPKG_ARCH=i686 ;; x86_64-*-linux-*) DPKG_ARCH=amd64 ;; esac;
+        unset DPKG_ARCH ; case ${{ matrix.job.target }} in aarch64-*-linux-*) DPKG_ARCH=arm64 ;; i686-*-linux-*) DPKG_ARCH=i386 ;; x86_64-*-linux-*) DPKG_ARCH=amd64 ;; esac;
         echo "DPKG_ARCH=${DPKG_ARCH}" >> "$GITHUB_OUTPUT"
         # DPKG version?
         unset DPKG_VERSION ; if [[ $REF_TAG =~ ^[vV]?[0-9].* ]]; then DPKG_VERSION=${REF_TAG/#[vV]/} ; fi
