@@ -318,7 +318,7 @@ fn should_display_folder_path(depth: usize, metas: &[Meta]) -> bool {
 }
 
 fn display_folder_path(meta: &Meta) -> String {
-    format!("\n{}:\n", meta.path.to_string_lossy())
+    format!("\n{}:\n", crate::display_util::SafePath(&meta.path))
 }
 
 #[allow(clippy::too_many_arguments)]

@@ -124,7 +124,7 @@ impl Core {
                 match Meta::from_path(&path, self.flags.dereference.0, self.flags.permission) {
                     Ok(meta) => meta,
                     Err(err) => {
-                        print_error!("{}: {}.", path.display(), err);
+                        print_error!("{}: {}.", crate::display_util::SafePath(&path), err);
                         exit_code.set_if_greater(ExitCode::MajorIssue);
                         continue;
                     }
@@ -147,7 +147,7 @@ impl Core {
                         exit_code.set_if_greater(path_exit_code);
                     }
                     Err(err) => {
-                        print_error!("lsd: {}: {}\n", path.display(), err);
+                        print_error!("lsd: {}: {}\n", crate::display_util::SafePath(&path), err);
                         exit_code.set_if_greater(ExitCode::MinorIssue);
                         continue;
                     }
