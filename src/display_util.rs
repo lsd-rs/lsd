@@ -7,7 +7,7 @@ fn is_dangerous(c: char) -> bool {
     let cp = c as u32;
     cp < 0x20
         || cp == 0x7f
-        // C1 controls (raw and UTF-8 form both decode here)
+        // C1 controls
         || (0x80..=0x9f).contains(&cp)
         || matches!(c, '\u{202a}'..='\u{202e}' | '\u{2066}'..='\u{2069}')
 }
@@ -42,7 +42,10 @@ mod tests {
 
     #[test]
     fn sanitize_passes_through_clean_strings() {
-        assert!(matches!(sanitize_for_terminal("hello.txt"), Cow::Borrowed(_)));
+        assert!(matches!(
+            sanitize_for_terminal("hello.txt"),
+            Cow::Borrowed(_)
+        ));
         assert_eq!(sanitize_for_terminal("hello.txt"), "hello.txt");
     }
 
