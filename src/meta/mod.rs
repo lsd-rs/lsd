@@ -87,7 +87,7 @@ impl Meta {
         let entries = match self.path.read_dir() {
             Ok(entries) => entries,
             Err(err) => {
-                print_error!("{}: {}.", self.path.display(), err);
+                print_error!("{}: {}.", crate::display_util::SafePath(&self.path), err);
                 return Ok((None, ExitCode::MinorIssue));
             }
         };
@@ -151,7 +151,7 @@ impl Meta {
             {
                 Ok(res) => res,
                 Err(err) => {
-                    print_error!("{}: {}.", path.display(), err);
+                    print_error!("{}: {}.", crate::display_util::SafePath(&path), err);
                     exit_code.set_if_greater(ExitCode::MinorIssue);
                     continue;
                 }
@@ -173,7 +173,7 @@ impl Meta {
                         exit_code.set_if_greater(rec_exit_code);
                     }
                     Err(err) => {
-                        print_error!("{}: {}.", path.display(), err);
+                        print_error!("{}: {}.", crate::display_util::SafePath(&path), err);
                         exit_code.set_if_greater(ExitCode::MinorIssue);
                         continue;
                     }
@@ -225,7 +225,7 @@ impl Meta {
         let metadata = match metadata {
             Ok(meta) => meta,
             Err(err) => {
-                print_error!("{}: {}.", path.display(), err);
+                print_error!("{}: {}.", crate::display_util::SafePath(path), err);
                 return 0;
             }
         };
@@ -238,7 +238,7 @@ impl Meta {
             let entries = match path.read_dir() {
                 Ok(entries) => entries,
                 Err(err) => {
-                    print_error!("{}: {}.", path.display(), err);
+                    print_error!("{}: {}.", crate::display_util::SafePath(path), err);
                     return size;
                 }
             };
@@ -246,7 +246,7 @@ impl Meta {
                 let path = match entry {
                     Ok(entry) => entry.path(),
                     Err(err) => {
-                        print_error!("{}: {}.", path.display(), err);
+                        print_error!("{}: {}.", crate::display_util::SafePath(path), err);
                         continue;
                     }
                 };
@@ -280,7 +280,7 @@ impl Meta {
                     // path.symlink_metadata would have errored out
                     if dereference {
                         broken_link = true;
-                        eprintln!("lsd: {}: {}", path.to_str().unwrap_or(""), e);
+                        eprintln!("lsd: {}: {}", crate::display_util::SafePath(path), e);
                     }
                 }
             }
@@ -314,7 +314,7 @@ impl Meta {
                 Err(e) => {
                     eprintln!(
                         "lsd: {}: {}(Hint: Consider using `--permission disable`.)",
-                        path.to_str().unwrap_or(""),
+                        crate::display_util::SafePath(path),
                         e
                     );
                     (None, None)

@@ -31,6 +31,7 @@ mod color;
 mod config_file;
 mod core;
 mod display;
+mod display_util;
 mod flags;
 mod git;
 mod git_theme;

@@ -31,7 +31,10 @@ impl AccessControl {
     }
 
     fn from_data(has_acl: bool, selinux_context: &[u8], smack_context: &[u8]) -> Self {
-        let selinux_context = String::from_utf8_lossy(selinux_context).to_string();
+        // SELinux contexts end with a NUL byte
+        let selinux_context = String::from_utf8_lossy(selinux_context)
+            .trim_end_matches('\0')
+            .to_string();
         let smack_context = String::from_utf8_lossy(smack_context).to_string();
         Self {
             has_acl,
@@ -61,7 +64,10 @@ impl AccessControl {
         if context.is_empty() {
             context += "?";
         }
-        colors.colorize(context, &Elem::Context)
+        colors.colorize(
+            crate::display_util::sanitize_for_terminal(&context).into_owned(),
+            &Elem::Context,
+        )
     }
 }
 
@@ -146,6 +152,16 @@ mod test {
 
         assert_eq!(
             String::from("?").with(Color::Cyan),
+            access_control.render_context(&Colors::new(ThemeOption::Default))
+        );
+    }
+
+    #[test]
+    fn test_selinux_context_trailing_nul() {
+        let access_control = AccessControl::from_data(false, b"a\0", &[]);
+
+        assert_eq!(
+            String::from("a").with(Color::Cyan),
             access_control.render_context(&Colors::new(ThemeOption::Default))
         );
     }
