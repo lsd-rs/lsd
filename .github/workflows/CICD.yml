@@ -1,6 +1,6 @@
 name: CICD
 
-# spell-checker:ignore CICD CODECOV MSVC MacOS Peltoche SHAs buildable clippy dpkg esac fakeroot gnueabihf halium libssl mkdir musl popd printf pushd rustfmt softprops toolchain
+# spell-checker:ignore CLANGARM CICD CODECOV MSVC MacOS Peltoche SHAs buildable clippy dpkg esac fakeroot gnullvm gnueabihf halium libssl mkdir msys musl popd printf pushd rustfmt softprops toolchain
 
 env:
   PROJECT_NAME: lsd
@@ -70,11 +70,30 @@ jobs:
           - { os: windows-latest , target: x86_64-pc-windows-gnu }
           - { os: windows-latest , target: x86_64-pc-windows-msvc }
           - { os: windows-11-arm , target: aarch64-pc-windows-msvc }
+          - { os: windows-11-arm , target: aarch64-pc-windows-gnullvm }
     outputs:
       DEPLOY: ${{ steps.vars.outputs.DEPLOY }}
 
     steps:
     - uses: actions/checkout@v7
+    - name: Install Windows ARM64 GNU-family linker
+      if: matrix.job.target == 'aarch64-pc-windows-gnullvm'
+      id: msys2
+      uses: msys2/setup-msys2@v2
+      with:
+        msystem: CLANGARM64
+        update: true
+        install: mingw-w64-clang-aarch64-clang
+    - name: Expose Windows ARM64 GNU-family linker
+      if: matrix.job.target == 'aarch64-pc-windows-gnullvm'
+      shell: pwsh
+      env:
+        MSYS2_LOCATION: ${{ steps.msys2.outputs.msys2-location }}
+      run: |
+        echo "$env:MSYS2_LOCATION\clangarm64\bin" >> $env:GITHUB_PATH
+        echo "CARGO_TARGET_AARCH64_PC_WINDOWS_GNULLVM_LINKER=$env:MSYS2_LOCATION\clangarm64\bin\clang.exe" >> $env:GITHUB_ENV
+        # Link libunwind statically so the release does not need MSYS2's libunwind.dll.
+        echo "CARGO_TARGET_AARCH64_PC_WINDOWS_GNULLVM_RUSTFLAGS=-C target-feature=+crt-static" >> $env:GITHUB_ENV
     - name: Install any prerequisites
       shell: bash
       run: |
@@ -143,7 +162,7 @@ jobs:
         unset CARGO_TEST_OPTIONS ; case ${{ matrix.job.target }} in arm-* | aarch64-*-linux-*) CARGO_TEST_OPTIONS="--bin ${PROJECT_NAME}" ;; esac;
         echo "CARGO_TEST_OPTIONS=${CARGO_TEST_OPTIONS}" >> "$GITHUB_OUTPUT"
         # * strip executable?
-        STRIP="strip" ; case ${{ matrix.job.target }} in arm-*-linux-*hf) STRIP="arm-linux-gnueabihf-strip" ;; aarch64-*-linux-*) STRIP="aarch64-linux-gnu-strip" ;; riscv64gc-*-linux-*) STRIP="" ;; *-pc-windows-msvc) STRIP="" ;; esac;
+        STRIP="strip" ; case ${{ matrix.job.target }} in arm-*-linux-*hf) STRIP="arm-linux-gnueabihf-strip" ;; aarch64-*-linux-*) STRIP="aarch64-linux-gnu-strip" ;; riscv64gc-*-linux-*) STRIP="" ;; *-pc-windows-msvc|*-pc-windows-gnullvm) STRIP="" ;; esac;
         echo "STRIP=${STRIP}" >> "$GITHUB_OUTPUT"
     - name: Create all needed build/work directories
       shell: bash
