@@ -99,6 +99,28 @@ fn test_list_all_populated_directory() {
         .stdout(predicate::str::is_match("\\.\n\\.\\.\none\ntwo\n$").unwrap());
 }
 
+#[cfg(windows)]
+#[test]
+fn test_list_file_with_path_longer_than_max_path() {
+    let dir = tempdir();
+    let name = format!("{}.txt", "a".repeat(250));
+    dir.child(&name).touch().unwrap();
+    assert!(dir.path().join(&name).as_os_str().len() > 260);
+
+    cmd()
+        .arg("--ignore-config")
+        .arg(dir.path())
+        .assert()
+        .stdout(predicate::eq(format!("{name}\n")));
+
+    cmd()
+        .arg("--all")
+        .arg("--ignore-config")
+        .arg(dir.path())
+        .assert()
+        .stdout(predicate::str::ends_with(format!("\n{name}\n")));
+}
+
 #[test]
 fn test_almost_sort_with_folder() {
     let tmp = tempdir();

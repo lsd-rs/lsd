@@ -2,6 +2,7 @@ use std::ffi::{OsStr, OsString};
 use std::io;
 use std::mem::MaybeUninit;
 use std::os::windows::ffi::{OsStrExt, OsStringExt};
+use std::os::windows::fs::MetadataExt;
 use std::path::Path;
 
 use windows::Win32::Foundation::HLOCAL;
@@ -318,11 +319,20 @@ fn has_path_attribute(
     flags: windows::Win32::Storage::FileSystem::FILE_FLAGS_AND_ATTRIBUTES,
 ) -> bool {
     let windows_path = buf_from_os(path.as_os_str());
-    let file_attributes = unsafe {
+    let mut file_attributes = unsafe {
         windows::Win32::Storage::FileSystem::GetFileAttributesW(windows::core::PCWSTR(
             windows_path.as_ptr(),
         ))
     };
+    if file_attributes == windows::Win32::Storage::FileSystem::INVALID_FILE_ATTRIBUTES {
+        // GetFileAttributesW fails for paths longer than MAX_PATH. The standard
+        // library handles those, so ask it instead of reading the error value
+        // as "every attribute is set".
+        file_attributes = match path.symlink_metadata() {
+            Ok(metadata) => metadata.file_attributes(),
+            Err(_) => return false,
+        };
+    }
     file_attributes & flags.0 > 0
 }
 
