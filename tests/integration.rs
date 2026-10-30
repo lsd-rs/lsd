@@ -521,6 +521,41 @@ fn test_tree() {
 }
 
 #[test]
+fn test_tree_header() {
+    let tmp = tempdir();
+    tmp.child("parent").create_dir_all().unwrap();
+    tmp.child("parent/child").touch().unwrap();
+
+    let output = cmd()
+        .args([
+            "--tree",
+            "--header",
+            "--blocks",
+            "size,name",
+            "--color",
+            "never",
+            "--icon",
+            "never",
+            "--ignore-config",
+        ])
+        .arg(tmp.path())
+        .output()
+        .unwrap();
+    assert!(output.status.success());
+
+    let stdout = String::from_utf8(output.stdout).unwrap();
+    let lines: Vec<_> = stdout.lines().collect();
+    assert_eq!(lines.len(), 4, "{stdout}");
+    assert!(lines[0].contains("Size"));
+    assert!(lines[0].contains("Name"));
+    assert!(lines[2].contains("└── parent"));
+    assert!(lines[3].contains("└── child"));
+    let parent_branch = lines[2].chars().position(|c| c == '└').unwrap();
+    let child_branch = lines[3].chars().position(|c| c == '└').unwrap();
+    assert_eq!(child_branch, parent_branch + 4);
+}
+
+#[test]
 fn test_tree_all_not_show_self() {
     let tmp = tempdir();
     tmp.child("one").touch().unwrap();

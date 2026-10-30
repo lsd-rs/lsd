@@ -61,7 +61,7 @@ pub fn tree(
 
     let owner_cache = OwnerCache::default();
 
-    for cell in inner_display_tree(
+    let cells = inner_display_tree(
         metas,
         &owner_cache,
         flags,
@@ -71,7 +71,13 @@ pub fn tree(
         (0, ""),
         &padding_rules,
         index,
-    ) {
+    );
+
+    if flags.header.0 && !cells.is_empty() {
+        add_header(flags, &cells, &mut grid);
+    }
+
+    for cell in cells {
         grid.add(cell);
     }
 
