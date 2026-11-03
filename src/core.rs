@@ -18,7 +18,7 @@ use std::os::unix::io::AsRawFd;
 use crate::flags::blocks::Block;
 use crate::git_theme::GitTheme;
 #[cfg(target_os = "windows")]
-use terminal_size::terminal_size;
+use std::io::{self, IsTerminal};
 
 pub struct Core {
     flags: Flags,
@@ -39,7 +39,7 @@ impl Core {
         let console_color_ok = true;
 
         #[cfg(target_os = "windows")]
-        let tty_available = terminal_size().is_some(); // terminal_size allows us to know if the stdout is a tty or not.
+        let tty_available = io::stdout().is_terminal(); // terminal_size() would fall back to stderr/stdin, so a piped stdout looked like a tty.
 
         #[cfg(target_os = "windows")]
         let console_color_ok = crossterm::ansi_support::supports_ansi();
